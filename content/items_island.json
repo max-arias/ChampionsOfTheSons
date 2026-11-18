@@ -1,0 +1,1968 @@
+{
+  "items": [
+    {
+      "id": "item.hollow_congregant_cowl",
+      "name": "Hollow Congregant's Cowl",
+      "type": "helmet",
+      "rarity": 5,
+      "minLevel": 72,
+      "maxLevel": 102,
+      "statPools": [
+        [
+          "stat.intelligence",
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.energypersecond"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          null,
+          "stat.lesserintelligence"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.hollow_congregation",
+      "legacyIndex": 10000
+    },
+    {
+      "id": "item.vestment_of_the_quiet_choir",
+      "name": "Vestment of the Quiet Choir",
+      "type": "chest_armor",
+      "rarity": 5,
+      "minLevel": 76,
+      "maxLevel": 106,
+      "statPools": [
+        [
+          "stat.vitality",
+          "stat.maximumlife"
+        ],
+        [
+          "stat.intelligence"
+        ],
+        [
+          "stat.resistancetomagic",
+          "stat.armor"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.maximumlife"
+        ],
+        [
+          "stat.spelldamageincrease",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.hollow_congregation",
+      "legacyIndex": 10001
+    },
+    {
+      "id": "item.censer_gloves",
+      "name": "Censer Gloves",
+      "type": "glove",
+      "rarity": 5,
+      "minLevel": 80,
+      "maxLevel": 110,
+      "statPools": [
+        [
+          "stat.intelligence",
+          "stat.agility"
+        ],
+        [
+          "stat.firedamage",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.energyonhit",
+          "stat.energypersecond"
+        ],
+        [
+          "stat.spelldamageincrease",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.hollow_congregation",
+      "legacyIndex": 10002
+    },
+    {
+      "id": "item.sigil_ring_of_the_nameless_flock",
+      "name": "Sigil Ring of the Nameless Flock",
+      "type": "ring",
+      "rarity": 5,
+      "minLevel": 84,
+      "maxLevel": 114,
+      "statPools": [
+        [
+          "stat.intelligence"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.lesserintelligence"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.spelldamageincrease",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.hollow_congregation",
+      "legacyIndex": 10003
+    },
+    {
+      "id": "item.ash_rosary",
+      "name": "Ash Rosary",
+      "type": "amulet",
+      "rarity": 5,
+      "minLevel": 88,
+      "maxLevel": 118,
+      "statPools": [
+        [
+          "stat.intelligence",
+          "stat.vitality"
+        ],
+        [
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.liferegeneration",
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.resistancetomagic"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.hollow_congregation",
+      "legacyIndex": 10004
+    },
+    {
+      "id": "item.gps_locator_visor",
+      "name": "GPS Locator Visor",
+      "type": "helmet",
+      "rarity": 6,
+      "minLevel": 92,
+      "maxLevel": 122,
+      "statPools": [
+        [
+          "stat.agility"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.baserangeddamage"
+        ],
+        [
+          "stat.headshotdamage",
+          "stat.rangedarmorpiercing"
+        ],
+        [
+          "stat.criticalhitchance",
+          null
+        ],
+        [
+          "stat.attackspeed",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.bunker_protocol",
+      "legacyIndex": 10005
+    },
+    {
+      "id": "item.printed_polymer_chassis",
+      "name": "Printed Polymer Chassis",
+      "type": "chest_armor",
+      "rarity": 6,
+      "minLevel": 96,
+      "maxLevel": 126,
+      "statPools": [
+        [
+          "stat.vitality",
+          "stat.agility"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.damagereduction",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.bunker_protocol",
+      "legacyIndex": 10006
+    },
+    {
+      "id": "item.keycard_bracer",
+      "name": "Keycard Bracer",
+      "type": "bracer",
+      "rarity": 6,
+      "minLevel": 100,
+      "maxLevel": 130,
+      "statPools": [
+        [
+          "stat.agility",
+          "stat.intelligence"
+        ],
+        [
+          "stat.rangedarmorpiercing",
+          "stat.armorpiercing"
+        ],
+        [
+          "stat.projectilespeed",
+          "stat.projectilesize"
+        ],
+        [
+          "stat.criticalhitdamage",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.bunker_protocol",
+      "legacyIndex": 10007
+    },
+    {
+      "id": "item.printed_sole_runners",
+      "name": "Printed Sole Runners",
+      "type": "boot",
+      "rarity": 6,
+      "minLevel": 104,
+      "maxLevel": 134,
+      "statPools": [
+        [
+          "stat.agility"
+        ],
+        [
+          "stat.movementspeed",
+          "stat.jumppower"
+        ],
+        [
+          "stat.dodgechance",
+          "stat.staminapersecond"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.bunker_protocol",
+      "legacyIndex": 10008
+    },
+    {
+      "id": "item.riot_door_shield",
+      "name": "Riot Door Shield",
+      "type": "shield",
+      "rarity": 6,
+      "minLevel": 108,
+      "maxLevel": 138,
+      "statPools": [
+        [
+          "stat.vitality",
+          "stat.strength"
+        ],
+        [
+          "stat.armor",
+          "stat.block"
+        ],
+        [
+          "stat.damagereduction"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.resistancetomagic",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.bunker_protocol",
+      "legacyIndex": 10009
+    },
+    {
+      "id": "item.golden_visage",
+      "name": "Golden Visage",
+      "type": "helmet",
+      "rarity": 7,
+      "minLevel": 118,
+      "maxLevel": 148,
+      "statPools": [
+        [
+          "stat.vitality",
+          "stat.strength"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.damagereduction"
+        ],
+        [
+          "stat.resistancetomagic",
+          null
+        ],
+        [
+          "stat.allhealingpercent",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.golden_aegis",
+      "legacyIndex": 10010
+    },
+    {
+      "id": "item.golden_cuirass",
+      "name": "Golden Cuirass",
+      "type": "chest_armor",
+      "rarity": 7,
+      "minLevel": 126,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.vitality"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.percentmaximumlife",
+          "stat.maximumlife"
+        ],
+        [
+          "stat.damagereduction"
+        ],
+        [
+          "stat.liferegeneration",
+          null
+        ],
+        [
+          "stat.thorns",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.golden_aegis",
+      "legacyIndex": 10011
+    },
+    {
+      "id": "item.golden_pauldrons",
+      "name": "Golden Pauldrons",
+      "type": "shoulder_armor",
+      "rarity": 7,
+      "minLevel": 122,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.vitality",
+          "stat.strength"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.damagereduction"
+        ],
+        [
+          "stat.thorns",
+          "stat.block"
+        ],
+        [
+          "stat.resistancetomagic",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.golden_aegis",
+      "legacyIndex": 10012
+    },
+    {
+      "id": "item.golden_gauntlets",
+      "name": "Golden Gauntlets",
+      "type": "glove",
+      "rarity": 7,
+      "minLevel": 130,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.baserangeddamage"
+        ],
+        [
+          "stat.lifeonhit",
+          "stat.energyonhit"
+        ],
+        [
+          "stat.criticalhitdamage",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.golden_aegis",
+      "legacyIndex": 10013
+    },
+    {
+      "id": "item.golden_greaves",
+      "name": "Golden Greaves",
+      "type": "pants",
+      "rarity": 7,
+      "minLevel": 134,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.vitality",
+          "stat.agility"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.damagereduction",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.movementspeed",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.golden_aegis",
+      "legacyIndex": 10014
+    },
+    {
+      "id": "item.nine_iron_of_last_resort",
+      "name": "Nine Iron of Last Resort",
+      "type": "weapon",
+      "rarity": 4,
+      "minLevel": 34,
+      "maxLevel": 64,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.basemeleedamage",
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "stat.headshotdamage",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.back_nine",
+      "legacyIndex": 10015
+    },
+    {
+      "id": "item.plaid_trousers_of_quiet_rage",
+      "name": "Plaid Trousers of Quiet Rage",
+      "type": "pants",
+      "rarity": 4,
+      "minLevel": 38,
+      "maxLevel": 68,
+      "statPools": [
+        [
+          "stat.vitality",
+          "stat.agility"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.dodgechance",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.back_nine",
+      "legacyIndex": 10016
+    },
+    {
+      "id": "item.clubhouse_visor",
+      "name": "Clubhouse Visor",
+      "type": "helmet",
+      "rarity": 4,
+      "minLevel": 42,
+      "maxLevel": 72,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.headshotdamage",
+          "stat.armor"
+        ],
+        [
+          "stat.armor",
+          "stat.dodgechance"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.back_nine",
+      "legacyIndex": 10017
+    },
+    {
+      "id": "item.spiked_cleats",
+      "name": "Spiked Cleats",
+      "type": "boot",
+      "rarity": 4,
+      "minLevel": 46,
+      "maxLevel": 76,
+      "statPools": [
+        [
+          "stat.agility",
+          "stat.strength"
+        ],
+        [
+          "stat.armor",
+          "stat.dodgechance"
+        ],
+        [
+          "*",
+          "stat.jumppower"
+        ],
+        [
+          "stat.thorns",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.back_nine",
+      "legacyIndex": 10018
+    },
+    {
+      "id": "item.rippers_cleaver",
+      "name": "Ripper's Cleaver",
+      "type": "weapon",
+      "rarity": 5,
+      "minLevel": 60,
+      "maxLevel": 90,
+      "statPools": [
+        [
+          "stat.strength"
+        ],
+        [
+          "stat.basemeleedamage",
+          "stat.meleedamageincrease"
+        ],
+        [
+          "stat.chanceonhittobleed",
+          "stat.chanceonhittoweaken"
+        ],
+        [
+          "stat.meleearmorpiercing",
+          null
+        ],
+        [
+          "stat.armorpiercing",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.fingers_of_the_fallen",
+      "legacyIndex": 10019
+    },
+    {
+      "id": "item.twin_skull_pauldrons",
+      "name": "Twin-Skull Pauldrons",
+      "type": "shoulder_armor",
+      "rarity": 5,
+      "minLevel": 64,
+      "maxLevel": 94,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.vitality"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.thorns",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.maximumlife"
+        ],
+        [
+          "stat.lifeonhit",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.fingers_of_the_fallen",
+      "legacyIndex": 10020
+    },
+    {
+      "id": "item.knucklebone_choker",
+      "name": "Knucklebone Choker",
+      "type": "amulet",
+      "rarity": 5,
+      "minLevel": 68,
+      "maxLevel": 98,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.chanceonhittobleed",
+          "stat.chanceonhittoslow"
+        ],
+        [
+          "stat.meleedamageincrease"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.fingers_of_the_fallen",
+      "legacyIndex": 10021
+    },
+    {
+      "id": "item.hide_takers_gloves",
+      "name": "Hide-Taker's Gloves",
+      "type": "glove",
+      "rarity": 5,
+      "minLevel": 72,
+      "maxLevel": 102,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.lifeonhit",
+          "stat.energyonhit"
+        ],
+        [
+          "stat.attackcostreduction",
+          "stat.meleeweaponrange"
+        ],
+        [
+          "stat.chanceonhittoweaken",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "set": "set.fingers_of_the_fallen",
+      "legacyIndex": 10022
+    },
+    {
+      "id": "item.lantern_skull_helm",
+      "name": "Lantern-Skull Helm",
+      "type": "helmet",
+      "rarity": 5,
+      "minLevel": 62,
+      "maxLevel": 92,
+      "statPools": [
+        [
+          "stat.intelligence",
+          "stat.agility"
+        ],
+        [
+          "stat.armor",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.resistancetomagic",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "perk_flashlight_intensity",
+          "op": "add",
+          "value": 1.0
+        },
+        {
+          "stat": "perk_flashlight_battery_drain",
+          "op": "add",
+          "value": -0.4
+        },
+        {
+          "stat": "spell_flare_radius",
+          "op": "add",
+          "value": 3.0
+        }
+      ],
+      "legacyIndex": 10023
+    },
+    {
+      "id": "item.traders_puffer_jacket",
+      "name": "Trader's Puffer Jacket",
+      "type": "chest_armor",
+      "rarity": 2,
+      "minLevel": 9,
+      "maxLevel": 39,
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          null,
+          "stat.lesservitality"
+        ]
+      ],
+      "legacyIndex": 10024
+    },
+    {
+      "id": "item.rendered_fat_hauberk",
+      "name": "Rendered-Fat Hauberk",
+      "type": "chest_armor",
+      "rarity": 6,
+      "minLevel": 95,
+      "maxLevel": 125,
+      "statPools": [
+        [
+          "stat.vitality"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.percentmaximumlife",
+          "stat.maximumlife"
+        ],
+        [
+          "stat.liferegeneration",
+          "stat.allhealingpercent"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "max_health_mult",
+          "op": "add",
+          "value": 0.3
+        },
+        {
+          "stat": "movement_speed",
+          "op": "add",
+          "value": -0.1
+        }
+      ],
+      "legacyIndex": 10025
+    },
+    {
+      "id": "item.printed_kevlar_chaps",
+      "name": "Printed Kevlar Chaps",
+      "type": "pants",
+      "rarity": 4,
+      "minLevel": 48,
+      "maxLevel": 78,
+      "statPools": [
+        [
+          "stat.vitality",
+          "stat.agility"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.damagereduction",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.maximumlife",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "legacyIndex": 10026
+    },
+    {
+      "id": "item.sled_runner_boots",
+      "name": "Sled Runner Boots",
+      "type": "boot",
+      "rarity": 3,
+      "minLevel": 24,
+      "maxLevel": 54,
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "stat.staminapersecond",
+          "stat.armor"
+        ],
+        [
+          "*",
+          "stat.armor"
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
+      "legacyIndex": 10027
+    },
+    {
+      "id": "item.zipline_grippers",
+      "name": "Zipline Grippers",
+      "type": "boot",
+      "rarity": 5,
+      "minLevel": 58,
+      "maxLevel": 88,
+      "statPools": [
+        [
+          "stat.agility"
+        ],
+        [
+          "stat.jumppower",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.staminapersecond",
+          "stat.armor"
+        ],
+        [
+          "stat.maximumlife",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "jump_power",
+          "op": "add",
+          "value": 1.0
+        },
+        {
+          "stat": "perk_bunny_hop",
+          "op": "enable"
+        }
+      ],
+      "legacyIndex": 10028
+    },
+    {
+      "id": "item.cultists_bone_epaulets",
+      "name": "Cultist's Bone Epaulets",
+      "type": "shoulder_armor",
+      "rarity": 4,
+      "minLevel": 42,
+      "maxLevel": 72,
+      "statPools": [
+        [
+          "stat.intelligence",
+          "stat.vitality"
+        ],
+        [
+          "stat.armor",
+          "*"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.maximumlife"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "legacyIndex": 10029
+    },
+    {
+      "id": "item.gliderwing_mantle",
+      "name": "Gliderwing Mantle",
+      "type": "shoulder_armor",
+      "rarity": 6,
+      "minLevel": 100,
+      "maxLevel": 130,
+      "statPools": [
+        [
+          "stat.agility"
+        ],
+        [
+          "stat.jumppower",
+          "stat.movementspeed"
+        ],
+        [
+          "stat.dodgechance",
+          "stat.armor"
+        ],
+        [
+          "stat.maximumlife",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "jump_power",
+          "op": "add",
+          "value": 1.5
+        },
+        {
+          "stat": "movement_speed",
+          "op": "add",
+          "value": 0.15
+        },
+        {
+          "stat": "spell_blink_range",
+          "op": "add",
+          "value": 10.0
+        }
+      ],
+      "legacyIndex": 10030
+    },
+    {
+      "id": "item.welders_gloves",
+      "name": "Welder's Gloves",
+      "type": "glove",
+      "rarity": 2,
+      "minLevel": 8,
+      "maxLevel": 38,
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          null,
+          "stat.lesserstrength"
+        ]
+      ],
+      "legacyIndex": 10031
+    },
+    {
+      "id": "item.hand_of_the_cube",
+      "name": "Hand of the Cube",
+      "type": "glove",
+      "rarity": 7,
+      "minLevel": 140,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.intelligence",
+          "stat.agility"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.rangeddamageincrease"
+        ],
+        [
+          "stat.cooldownreduction"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.energyonhit"
+        ],
+        [
+          "stat.criticalhitdamage",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "cooldown_rate",
+          "op": "mult",
+          "value": 1.2
+        },
+        {
+          "stat": "spell_cost",
+          "op": "mult",
+          "value": 0.85
+        },
+        {
+          "stat": "max_health_mult",
+          "op": "add",
+          "value": -0.15
+        }
+      ],
+      "legacyIndex": 10032
+    },
+    {
+      "id": "item.weathered_dog_tags",
+      "name": "Weathered Dog Tags",
+      "type": "amulet",
+      "rarity": 3,
+      "minLevel": 20,
+      "maxLevel": 50,
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.staminapersecond"
+        ],
+        [
+          null,
+          "stat.lesservitality"
+        ]
+      ],
+      "legacyIndex": 10033
+    },
+    {
+      "id": "item.cube_fragment_pendant",
+      "name": "Cube Fragment Pendant",
+      "type": "amulet",
+      "rarity": 6,
+      "minLevel": 110,
+      "maxLevel": 140,
+      "statPools": [
+        [
+          "stat.intelligence"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.percentmaximumenergy"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.cooldownreduction"
+        ],
+        [
+          "stat.energypersecond",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "spell_blink_do_explosion",
+          "op": "enable"
+        },
+        {
+          "stat": "spell_blink_damage_scaling",
+          "op": "add",
+          "value": 2.0
+        }
+      ],
+      "legacyIndex": 10034
+    },
+    {
+      "id": "item.mothers_beating_pendant",
+      "name": "Mother's Beating Pendant",
+      "type": "amulet",
+      "rarity": 7,
+      "minLevel": 135,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.vitality"
+        ],
+        [
+          "stat.percentmaximumlife",
+          "stat.maximumlife"
+        ],
+        [
+          "stat.liferegeneration",
+          "stat.allhealingpercent"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.lifepersecond"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "max_health_mult",
+          "op": "add",
+          "value": 0.2
+        },
+        {
+          "stat": "health_recovery_per_second",
+          "op": "add",
+          "value": 4.0
+        },
+        {
+          "stat": "spell_healing_dome_duration",
+          "op": "add",
+          "value": 10.0
+        },
+        {
+          "stat": "spell_healing_dome_reg_energy",
+          "op": "enable"
+        }
+      ],
+      "legacyIndex": 10035
+    },
+    {
+      "id": "item.cursed_resort_key_ring",
+      "name": "Cursed Resort Key Ring",
+      "type": "ring",
+      "rarity": 5,
+      "minLevel": 68,
+      "maxLevel": 98,
+      "statPools": [
+        [
+          "stat.agility",
+          "stat.vitality"
+        ],
+        [
+          "stat.dodgechance",
+          "stat.armor"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "magic_find",
+          "op": "add",
+          "value": 0.25
+        },
+        {
+          "stat": "get_hit_chance",
+          "op": "mult",
+          "value": 1.1
+        }
+      ],
+      "legacyIndex": 10036
+    },
+    {
+      "id": "item.ring_of_seven_bites",
+      "name": "Ring of Seven Bites",
+      "type": "ring",
+      "rarity": 6,
+      "minLevel": 120,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.rangeddamageincrease"
+        ],
+        [
+          "stat.criticalhitchance",
+          "stat.attackspeed"
+        ],
+        [
+          "stat.lifeonhit",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "all_damage",
+          "op": "add",
+          "value": 0.12
+        },
+        {
+          "stat": "chance_to_bleed",
+          "op": "add",
+          "value": 0.2
+        },
+        {
+          "stat": "all_damage_taken",
+          "op": "mult",
+          "value": 1.1
+        }
+      ],
+      "legacyIndex": 10037
+    },
+    {
+      "id": "item.fire_hardened_spear",
+      "name": "Fire-Hardened Spear",
+      "type": "weapon",
+      "rarity": 2,
+      "minLevel": 3,
+      "maxLevel": 33,
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          null,
+          "stat.lesserstrength"
+        ]
+      ],
+      "legacyIndex": 10038
+    },
+    {
+      "id": "item.rebar_greatsword",
+      "name": "Rebar Greatsword",
+      "type": "weapon",
+      "rarity": 4,
+      "minLevel": 45,
+      "maxLevel": 75,
+      "statPools": [
+        [
+          "stat.strength"
+        ],
+        [
+          "stat.basemeleedamage",
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "legacyIndex": 10039
+    },
+    {
+      "id": "item.revving_fury",
+      "name": "Revving Fury",
+      "type": "weapon",
+      "rarity": 5,
+      "minLevel": 70,
+      "maxLevel": 100,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.basemeleedamage",
+          "stat.meleedamageincrease"
+        ],
+        [
+          "stat.chanceonhittobleed"
+        ],
+        [
+          "stat.armorpiercing",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "attack_speed",
+          "op": "add",
+          "value": 0.35
+        },
+        {
+          "stat": "attack_stamina_cost",
+          "op": "mult",
+          "value": 1.4
+        }
+      ],
+      "legacyIndex": 10040
+    },
+    {
+      "id": "item.sacrificial_kris",
+      "name": "Sacrificial Kris",
+      "type": "weapon",
+      "rarity": 6,
+      "minLevel": 98,
+      "maxLevel": 128,
+      "statPools": [
+        [
+          "stat.agility",
+          "stat.strength"
+        ],
+        [
+          "stat.basemeleedamage",
+          "stat.meleedamageincrease"
+        ],
+        [
+          "stat.criticalhitchance"
+        ],
+        [
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.lifeonhit",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "crit_chance",
+          "op": "add",
+          "value": 0.12
+        },
+        {
+          "stat": "crit_damage",
+          "op": "add",
+          "value": 0.8
+        },
+        {
+          "stat": "max_health_mult",
+          "op": "add",
+          "value": -0.1
+        }
+      ],
+      "legacyIndex": 10041
+    },
+    {
+      "id": "item.longbow_of_the_last_hunt",
+      "name": "Longbow of the Last Hunt",
+      "type": "weapon",
+      "rarity": 7,
+      "minLevel": 142,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.agility"
+        ],
+        [
+          "stat.baserangeddamage",
+          "stat.rangeddamageincrease"
+        ],
+        [
+          "stat.criticalhitchance",
+          "stat.headshotdamage"
+        ],
+        [
+          "stat.projectilespeed",
+          "stat.piercechance"
+        ],
+        [
+          "stat.rangedarmorpiercing"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "perk_bow_damage_mult",
+          "op": "mult",
+          "value": 1.6
+        },
+        {
+          "stat": "perk_true_aim",
+          "op": "enable"
+        },
+        {
+          "stat": "perk_projectile_no_consume_chance",
+          "op": "add",
+          "value": 0.3
+        }
+      ],
+      "legacyIndex": 10042
+    },
+    {
+      "id": "item.pot_lid_shield",
+      "name": "Pot Lid Shield",
+      "type": "shield",
+      "rarity": 2,
+      "minLevel": 4,
+      "maxLevel": 34,
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*",
+          "stat.block"
+        ],
+        [
+          null,
+          "stat.lesserarmor"
+        ]
+      ],
+      "legacyIndex": 10043
+    },
+    {
+      "id": "item.frozen_kite_shield",
+      "name": "Frozen Kite Shield",
+      "type": "shield",
+      "rarity": 5,
+      "minLevel": 72,
+      "maxLevel": 102,
+      "statPools": [
+        [
+          "stat.vitality"
+        ],
+        [
+          "stat.armor",
+          "stat.block"
+        ],
+        [
+          "stat.damagereduction"
+        ],
+        [
+          "stat.resistancetomagic",
+          "stat.maximumlife"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "perk_blizzard_slow_reduced",
+          "op": "enable"
+        },
+        {
+          "stat": "magic_damage_taken",
+          "op": "mult",
+          "value": 0.85
+        },
+        {
+          "stat": "spell_snap_freeze_duration",
+          "op": "add",
+          "value": 3.0
+        }
+      ],
+      "legacyIndex": 10044
+    },
+    {
+      "id": "item.shield_of_the_first_survivor",
+      "name": "Shield of the First Survivor",
+      "type": "shield",
+      "rarity": 7,
+      "minLevel": 138,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.vitality"
+        ],
+        [
+          "stat.armor",
+          "stat.block"
+        ],
+        [
+          "stat.damagereduction"
+        ],
+        [
+          "stat.percentmaximumlife",
+          "stat.resistancetomagic"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "perk_parry_anything",
+          "op": "enable"
+        },
+        {
+          "stat": "spell_chance_to_parry_on_hit",
+          "op": "enable"
+        },
+        {
+          "stat": "spell_parry_radius",
+          "op": "add",
+          "value": 3.0
+        }
+      ],
+      "legacyIndex": 10045
+    },
+    {
+      "id": "item.quiver_of_bottled_lightning",
+      "name": "Quiver of Bottled Lightning",
+      "type": "quiver",
+      "rarity": 6,
+      "minLevel": 105,
+      "maxLevel": 135,
+      "statPools": [
+        [
+          "stat.agility"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.baserangeddamage"
+        ],
+        [
+          "stat.projectilespeed",
+          "stat.projectilesize"
+        ],
+        [
+          "stat.piercechance",
+          "stat.criticalhitchance"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "projectile_pierce_chance",
+          "op": "add",
+          "value": 0.25
+        },
+        {
+          "stat": "perk_multishot_projectile_count",
+          "op": "add",
+          "value": 2.0
+        },
+        {
+          "stat": "perk_multishot_damage_pennalty",
+          "op": "mult",
+          "value": 0.9
+        }
+      ],
+      "legacyIndex": 10046
+    },
+    {
+      "id": "item.napkin_notes_on_fire",
+      "name": "Napkin Notes on Fire",
+      "type": "spell_scroll",
+      "rarity": 3,
+      "minLevel": 14,
+      "maxLevel": 44,
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.maximumenergy",
+          null
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "spell_firebolt_damage_scaling",
+          "op": "add",
+          "value": 0.3
+        }
+      ],
+      "legacyIndex": 10047
+    },
+    {
+      "id": "item.scroll_of_the_frozen_choir",
+      "name": "Scroll of the Frozen Choir",
+      "type": "spell_scroll",
+      "rarity": 5,
+      "minLevel": 66,
+      "maxLevel": 96,
+      "statPools": [
+        [
+          "stat.intelligence"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.energypersecond"
+        ],
+        [
+          "stat.resistancetomagic",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "spell_snowstorm_max_charge",
+          "op": "add",
+          "value": 5.0
+        },
+        {
+          "stat": "spell_snap_damage_scaling",
+          "op": "add",
+          "value": 1.5
+        }
+      ],
+      "legacyIndex": 10048
+    },
+    {
+      "id": "item.cult_ritual_liturgy",
+      "name": "Cult Ritual Liturgy",
+      "type": "spell_scroll",
+      "rarity": 6,
+      "minLevel": 96,
+      "maxLevel": 126,
+      "statPools": [
+        [
+          "stat.intelligence"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.cooldownreduction",
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.energypersecond",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "spell_blackhole_duration",
+          "op": "add",
+          "value": 4.0
+        },
+        {
+          "stat": "spell_blackhole_radius",
+          "op": "add",
+          "value": 5.0
+        },
+        {
+          "stat": "spell_blackhole_pullforce",
+          "op": "add",
+          "value": 10.0
+        }
+      ],
+      "legacyIndex": 10049
+    },
+    {
+      "id": "item.the_seventh_page",
+      "name": "The Seventh Page",
+      "type": "spell_scroll",
+      "rarity": 7,
+      "minLevel": 146,
+      "maxLevel": 150,
+      "statPools": [
+        [
+          "stat.intelligence"
+        ],
+        [
+          "stat.spelldamageincrease"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.cooldownreduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "uniqueEffects": [
+        {
+          "stat": "spell_cataclysm_arcane",
+          "op": "enable"
+        },
+        {
+          "stat": "spell_cataclysm_damage_scaling",
+          "op": "add",
+          "value": 10.0
+        },
+        {
+          "stat": "spell_cataclysm_duration",
+          "op": "add",
+          "value": 4.0
+        },
+        {
+          "stat": "cooldown",
+          "op": "mult",
+          "value": 1.25
+        }
+      ],
+      "legacyIndex": 10050
+    },
+    {
+      "id": "item.frostbound_wristguard",
+      "name": "Frostbound Wristguard",
+      "type": "bracer",
+      "rarity": 3,
+      "minLevel": 30,
+      "maxLevel": 60,
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.snapfreezeduration"
+        ],
+        [
+          null,
+          "*"
+        ]
+      ],
+      "legacyIndex": 10051
+    },
+    {
+      "id": "item.canned_pasta_ration",
+      "name": "Canned Pasta Ration",
+      "type": "other",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 31,
+      "statPools": [],
+      "consumable": true,
+      "legacyIndex": 10052
+    },
+    {
+      "id": "item.cult_sacrament_wafer",
+      "name": "Cult Sacrament Wafer",
+      "type": "other",
+      "rarity": 3,
+      "minLevel": 20,
+      "maxLevel": 50,
+      "statPools": [],
+      "consumable": true,
+      "legacyIndex": 10053
+    },
+    {
+      "id": "item.minibar_whiskey",
+      "name": "Minibar Whiskey",
+      "type": "other",
+      "rarity": 2,
+      "minLevel": 10,
+      "maxLevel": 40,
+      "statPools": [],
+      "consumable": true,
+      "legacyIndex": 10054
+    },
+    {
+      "id": "item.bottled_cave_water",
+      "name": "Bottled Cave Water",
+      "type": "other",
+      "rarity": 3,
+      "minLevel": 30,
+      "maxLevel": 60,
+      "statPools": [],
+      "consumable": true,
+      "legacyIndex": 10055
+    },
+    {
+      "id": "item.golden_tooth",
+      "name": "Golden Tooth",
+      "type": "material",
+      "rarity": 4,
+      "minLevel": 40,
+      "maxLevel": 70,
+      "statPools": [],
+      "legacyIndex": 10056
+    },
+    {
+      "id": "item.printer_filament_spool",
+      "name": "Printer Filament Spool",
+      "type": "material",
+      "rarity": 3,
+      "minLevel": 25,
+      "maxLevel": 55,
+      "statPools": [],
+      "legacyIndex": 10057
+    },
+    {
+      "id": "item.mutant_marrow",
+      "name": "Mutant Marrow",
+      "type": "material",
+      "rarity": 4,
+      "minLevel": 45,
+      "maxLevel": 75,
+      "statPools": [],
+      "legacyIndex": 10058
+    },
+    {
+      "id": "item.cube_shard",
+      "name": "Cube Shard",
+      "type": "material",
+      "rarity": 6,
+      "minLevel": 100,
+      "maxLevel": 130,
+      "statPools": [],
+      "legacyIndex": 10059
+    }
+  ]
+}

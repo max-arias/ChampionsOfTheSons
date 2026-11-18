@@ -1,0 +1,347 @@
+{
+  "sets": [
+    {
+      "id": "set.akagi",
+      "name": "Yuki-Onna's Regalia",
+      "bonuses": [
+        {
+          "pieces": 1,
+          "effects": [
+            {
+              "stat": "spell_snowstorm_damage_mult",
+              "op": "add",
+              "value": 0.5
+            }
+          ]
+        },
+        {
+          "pieces": 2,
+          "effects": [
+            {
+              "stat": "spell_snowstorm_pull_enemies_in",
+              "op": "enable"
+            }
+          ]
+        },
+        {
+          "pieces": 3,
+          "effects": [
+            {
+              "stat": "spell_snowstorm_max_charge",
+              "op": "add",
+              "value": 10.0
+            }
+          ]
+        },
+        {
+          "pieces": 4,
+          "effects": [
+            {
+              "stat": "spell_snowstorm_hit_delay",
+              "op": "mult",
+              "value": 0.5
+            },
+            {
+              "stat": "spell_snowstorm_damage_mult",
+              "op": "add",
+              "value": 3.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set.berserk",
+      "name": "Yorium's Vow",
+      "bonuses": [
+        {
+          "pieces": 1,
+          "effects": [
+            {
+              "stat": "weapon_range",
+              "op": "mult",
+              "value": 1.3
+            },
+            {
+              "stat": "attack_stamina_cost",
+              "op": "mult",
+              "value": 0.5
+            }
+          ]
+        },
+        {
+          "pieces": 3,
+          "effects": [
+            {
+              "stat": "spell_berserk_duration",
+              "op": "add",
+              "value": 15.0
+            }
+          ]
+        },
+        {
+          "pieces": 4,
+          "effects": [
+            {
+              "stat": "melee_increased_dmg",
+              "op": "add",
+              "value": 0.4
+            },
+            {
+              "stat": "attack_speed",
+              "op": "add",
+              "value": 0.2
+            }
+          ]
+        },
+        {
+          "pieces": 5,
+          "effects": [
+            {
+              "stat": "melee_increased_dmg",
+              "op": "add",
+              "value": 0.8
+            },
+            {
+              "stat": "attack_speed",
+              "op": "add",
+              "value": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set.hollow_congregation",
+      "name": "Hollow Congregation",
+      "bonuses": [
+        {
+          "pieces": 2,
+          "effects": [
+            {
+              "stat": "spell_increased_dmg",
+              "op": "add",
+              "value": 0.15
+            },
+            {
+              "stat": "spell_cost",
+              "op": "mult",
+              "value": 0.9
+            }
+          ]
+        },
+        {
+          "pieces": 3,
+          "effects": [
+            {
+              "stat": "cooldown_rate",
+              "op": "mult",
+              "value": 1.15
+            },
+            {
+              "stat": "spell_blackhole_duration",
+              "op": "add",
+              "value": 3.0
+            }
+          ]
+        },
+        {
+          "pieces": 5,
+          "effects": [
+            {
+              "stat": "spell_cataclysm_arcane",
+              "op": "enable"
+            },
+            {
+              "stat": "spell_cataclysm_radius",
+              "op": "add",
+              "value": 3.0
+            },
+            {
+              "stat": "spell_blackhole_radius",
+              "op": "add",
+              "value": 4.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set.bunker_protocol",
+      "name": "Bunker Protocol",
+      "bonuses": [
+        {
+          "pieces": 2,
+          "effects": [
+            {
+              "stat": "ranged_increased_dmg",
+              "op": "add",
+              "value": 0.2
+            },
+            {
+              "stat": "projectile_speed",
+              "op": "add",
+              "value": 0.3
+            }
+          ]
+        },
+        {
+          "pieces": 3,
+          "effects": [
+            {
+              "stat": "ranged_armor_piercing",
+              "op": "add",
+              "value": 0.15
+            },
+            {
+              "stat": "energy_recoveryper_second",
+              "op": "add",
+              "value": 2.0
+            }
+          ]
+        },
+        {
+          "pieces": 5,
+          "effects": [
+            {
+              "stat": "perk_true_aim",
+              "op": "enable"
+            },
+            {
+              "stat": "head_shot_damage",
+              "op": "add",
+              "value": 2.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set.golden_aegis",
+      "name": "Golden Aegis",
+      "bonuses": [
+        {
+          "pieces": 2,
+          "effects": [
+            {
+              "stat": "armor",
+              "op": "add",
+              "value": 40.0
+            },
+            {
+              "stat": "all_damage_taken",
+              "op": "mult",
+              "value": 0.92
+            }
+          ]
+        },
+        {
+          "pieces": 3,
+          "effects": [
+            {
+              "stat": "thorns",
+              "op": "add",
+              "value": 25.0
+            },
+            {
+              "stat": "debuff_resistance",
+              "op": "add",
+              "value": 0.25
+            }
+          ]
+        },
+        {
+          "pieces": 5,
+          "effects": [
+            {
+              "stat": "perk_golden_resolve",
+              "op": "enable"
+            },
+            {
+              "stat": "stun_immunity",
+              "op": "add",
+              "value": 1.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set.back_nine",
+      "name": "Back Nine",
+      "bonuses": [
+        {
+          "pieces": 2,
+          "effects": [
+            {
+              "stat": "melee_increased_dmg",
+              "op": "add",
+              "value": 0.15
+            },
+            {
+              "stat": "crit_chance",
+              "op": "add",
+              "value": 0.05
+            }
+          ]
+        },
+        {
+          "pieces": 4,
+          "effects": [
+            {
+              "stat": "crit_damage",
+              "op": "add",
+              "value": 0.5
+            },
+            {
+              "stat": "head_shot_damage",
+              "op": "add",
+              "value": 2.0
+            },
+            {
+              "stat": "movement_speed",
+              "op": "add",
+              "value": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "set.fingers_of_the_fallen",
+      "name": "Fingers of the Fallen",
+      "bonuses": [
+        {
+          "pieces": 2,
+          "effects": [
+            {
+              "stat": "chance_to_bleed",
+              "op": "add",
+              "value": 0.2
+            },
+            {
+              "stat": "health_on_hit",
+              "op": "add",
+              "value": 5.0
+            }
+          ]
+        },
+        {
+          "pieces": 4,
+          "effects": [
+            {
+              "stat": "chance_to_weaken",
+              "op": "add",
+              "value": 0.25
+            },
+            {
+              "stat": "heavy_attack_dmg",
+              "op": "add",
+              "value": 0.4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

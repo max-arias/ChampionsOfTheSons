@@ -1,0 +1,223 @@
+{
+  "spells": [
+    {
+      "id": "spell.black_hole",
+      "legacyId": 1,
+      "name": "Black Hole",
+      "levelReq": 20,
+      "energyCost": 350.0,
+      "cooldown": 140.0
+    },
+    {
+      "id": "spell.healing_dome",
+      "legacyId": 2,
+      "name": "Healing Dome",
+      "levelReq": 6,
+      "energyCost": 80.0,
+      "cooldown": 70.0
+    },
+    {
+      "id": "spell.blink",
+      "legacyId": 3,
+      "name": "Blink",
+      "levelReq": 3,
+      "energyCost": 25.0,
+      "cooldown": 14.0
+    },
+    {
+      "id": "spell.sun_flare",
+      "legacyId": 4,
+      "name": "Sun Flare",
+      "levelReq": 10,
+      "energyCost": 100.0,
+      "cooldown": 70.0
+    },
+    {
+      "id": "spell.sustain_shield",
+      "legacyId": 5,
+      "name": "Sustain Shield",
+      "levelReq": 8,
+      "energyCost": 50.0,
+      "cooldown": 0.0,
+      "channeled": true
+    },
+    {
+      "id": "spell.wide_reach",
+      "legacyId": 6,
+      "name": "Wide Reach",
+      "levelReq": 2,
+      "energyCost": 10.0,
+      "cooldown": 0.4
+    },
+    {
+      "id": "spell.black_flame",
+      "legacyId": 7,
+      "name": "Black Flame",
+      "levelReq": 21,
+      "energyCost": 25.0,
+      "cooldown": 2.5,
+      "toggle": true
+    },
+    {
+      "id": "spell.war_cry",
+      "legacyId": 8,
+      "name": "War Cry",
+      "levelReq": 14,
+      "energyCost": 85.0,
+      "cooldown": 180.0
+    },
+    {
+      "id": "spell.portal",
+      "legacyId": 9,
+      "name": "Portal",
+      "levelReq": 12,
+      "energyCost": 90.0,
+      "cooldown": 60.0
+    },
+    {
+      "id": "spell.magic_arrow",
+      "legacyId": 10,
+      "name": "Magic Arrow",
+      "levelReq": 27,
+      "energyCost": 100.0,
+      "cooldown": 20.0
+    },
+    {
+      "id": "spell.multishot",
+      "legacyId": 11,
+      "name": "Multishot",
+      "levelReq": 40,
+      "energyCost": 30.0,
+      "cooldown": 12.0,
+      "toggle": true
+    },
+    {
+      "id": "spell.golden_skin",
+      "legacyId": 12,
+      "name": "Golden Skin",
+      "levelReq": 35,
+      "energyCost": 65.0,
+      "cooldown": 160.0
+    },
+    {
+      "id": "spell.purge",
+      "legacyId": 13,
+      "name": "Purge",
+      "levelReq": 7,
+      "energyCost": 40.0,
+      "cooldown": 16.0
+    },
+    {
+      "id": "spell.snap_freeze",
+      "legacyId": 14,
+      "name": "Snap Freeze",
+      "levelReq": 20,
+      "energyCost": 220.0,
+      "cooldown": 40.0
+    },
+    {
+      "id": "spell.berserk",
+      "legacyId": 15,
+      "name": "Berserk",
+      "levelReq": 25,
+      "energyCost": 10.0,
+      "cooldown": 200.0
+    },
+    {
+      "id": "spell.ball_lightning",
+      "legacyId": 16,
+      "name": "Ball Lightning",
+      "levelReq": 44,
+      "energyCost": 350.0,
+      "cooldown": 100.0
+    },
+    {
+      "id": "spell.bash",
+      "legacyId": 17,
+      "name": "Bash",
+      "levelReq": 17,
+      "energyCost": 25.0,
+      "cooldown": 25.0
+    },
+    {
+      "id": "spell.frenzy",
+      "legacyId": 18,
+      "name": "Frenzy",
+      "levelReq": 1,
+      "energyCost": 0.0,
+      "cooldown": 40.0
+    },
+    {
+      "id": "spell.seeking_arrow",
+      "legacyId": 19,
+      "name": "Seeking Arrow",
+      "levelReq": 27,
+      "energyCost": 50.0,
+      "cooldown": 5.0
+    },
+    {
+      "id": "spell.focus",
+      "legacyId": 20,
+      "name": "Focus",
+      "levelReq": 4,
+      "energyCost": 40.0,
+      "cooldown": 20.0
+    },
+    {
+      "id": "spell.parry",
+      "legacyId": 21,
+      "name": "Parry",
+      "levelReq": 8,
+      "energyCost": 35.0,
+      "cooldown": 60.0
+    },
+    {
+      "id": "spell.cataclysm",
+      "legacyId": 22,
+      "name": "Cataclysm",
+      "levelReq": 50,
+      "energyCost": 500.0,
+      "cooldown": 300.0
+    },
+    {
+      "id": "spell.blood_infused_arrow",
+      "legacyId": 23,
+      "name": "Blood Infused Arrow",
+      "levelReq": 11,
+      "energyCost": 75.0,
+      "cooldown": 8.0
+    },
+    {
+      "id": "spell.roaring_cheeks",
+      "legacyId": 24,
+      "name": "Roaring Cheeks",
+      "levelReq": 55,
+      "energyCost": 400.0,
+      "cooldown": 360.0
+    },
+    {
+      "id": "spell.taunt",
+      "legacyId": 25,
+      "name": "Taunt",
+      "levelReq": 9,
+      "energyCost": 40.0,
+      "cooldown": 45.0
+    },
+    {
+      "id": "spell.firebolt",
+      "legacyId": 26,
+      "name": "Firebolt",
+      "levelReq": 6,
+      "energyCost": 45.0,
+      "cooldown": 20.0
+    },
+    {
+      "id": "spell.snow_storm",
+      "legacyId": 27,
+      "name": "Snow Storm",
+      "levelReq": 9,
+      "energyCost": 120.0,
+      "cooldown": 20.0
+    }
+  ]
+}

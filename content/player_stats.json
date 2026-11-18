@@ -1,0 +1,1780 @@
+{
+  "playerStats": [
+    {
+      "id": "strength",
+      "legacyName": "strength",
+      "kind": "add",
+      "default": 1.0,
+      "integer": true
+    },
+    {
+      "id": "intelligence",
+      "legacyName": "intelligence",
+      "kind": "add",
+      "default": 1.0,
+      "integer": true
+    },
+    {
+      "id": "agility",
+      "legacyName": "agility",
+      "kind": "add",
+      "default": 1.0,
+      "integer": true
+    },
+    {
+      "id": "vitality",
+      "legacyName": "vitality",
+      "kind": "add",
+      "default": 1.0,
+      "integer": true
+    },
+    {
+      "id": "max_energy_mult",
+      "legacyName": "maxEnergyMult",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "max_energy",
+      "legacyName": "maxEnergy",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "max_health_mult",
+      "legacyName": "maxHealthMult",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "max_health",
+      "legacyName": "maxHealth",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "melee_dmg_from_str",
+      "legacyName": "meleeDmgFromStr",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "spell_dmg_from_int",
+      "legacyName": "spellDmgFromInt",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "ranged_dmg_from_agi",
+      "legacyName": "rangedDmgFromAgi",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "energy_recovery_from_int",
+      "legacyName": "energyRecoveryFromInt",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "max_energy_from_agi",
+      "legacyName": "maxEnergyFromAgi",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "max_health_from_vit",
+      "legacyName": "maxHealthFromVit",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "fire_damage",
+      "legacyName": "fireDamage",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "health_per_sec_rate",
+      "legacyName": "healthPerSecRate",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "stamina_per_sec_rate",
+      "legacyName": "staminaPerSecRate",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "cooldown",
+      "legacyName": "cooldown",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "cooldown_rate",
+      "legacyName": "cooldownRate",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "all_damage",
+      "legacyName": "allDamage",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "attack_speed",
+      "legacyName": "attackSpeed",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "movement_speed",
+      "legacyName": "movementSpeed",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "crit_chance",
+      "legacyName": "critChance",
+      "kind": "add",
+      "default": 0.05,
+      "percent": true
+    },
+    {
+      "id": "crit_damage",
+      "legacyName": "critDamage",
+      "kind": "add",
+      "default": 0.5,
+      "percent": true
+    },
+    {
+      "id": "ranged_flat_dmg",
+      "legacyName": "rangedFlatDmg",
+      "kind": "multi",
+      "default": 0.0,
+      "defaultMult": 1.0
+    },
+    {
+      "id": "melee_flat_dmg",
+      "legacyName": "meleeFlatDmg",
+      "kind": "multi",
+      "default": 0.0,
+      "defaultMult": 1.0
+    },
+    {
+      "id": "spell_flat_dmg",
+      "legacyName": "spellFlatDmg",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "ranged_increased_dmg",
+      "legacyName": "rangedIncreasedDmg",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "melee_increased_dmg",
+      "legacyName": "meleeIncreasedDmg",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "spell_increased_dmg",
+      "legacyName": "spellIncreasedDmg",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "melee_armor_piercing",
+      "legacyName": "meleeArmorPiercing",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "ranged_armor_piercing",
+      "legacyName": "rangedArmorPiercing",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "thorns_armor_piercing",
+      "legacyName": "thornsArmorPiercing",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "all_armor_piercing",
+      "legacyName": "allArmorPiercing",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "chance_to_slow",
+      "legacyName": "chanceToSlow",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "chance_to_bleed",
+      "legacyName": "chanceToBleed",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "chance_to_weaken",
+      "legacyName": "chanceToWeaken",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "area_damage_chance",
+      "legacyName": "areaDamageChance",
+      "kind": "add",
+      "default": 0.1,
+      "percent": true
+    },
+    {
+      "id": "area_damage",
+      "legacyName": "areaDamage",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "area_damage_radius",
+      "legacyName": "areaDamageRadius",
+      "kind": "add",
+      "default": 4.0,
+      "percent": true
+    },
+    {
+      "id": "projectile_speed",
+      "legacyName": "projectileSpeed",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "projectile_size",
+      "legacyName": "projectileSize",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "projectile_pierce_chance",
+      "legacyName": "projectilePierceChance",
+      "kind": "multi",
+      "default": 0.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "heavy_attack_dmg",
+      "legacyName": "heavyAttackDmg",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "weapon_range",
+      "legacyName": "weaponRange",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "head_shot_damage",
+      "legacyName": "headShotDamage",
+      "kind": "add",
+      "default": 6.0,
+      "percent": true
+    },
+    {
+      "id": "projectile_damage_per_distance",
+      "legacyName": "projectile_DamagePerDistance",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "all_recovery_mult",
+      "legacyName": "allRecoveryMult",
+      "kind": "multi",
+      "default": 1.0,
+      "defaultMult": 1.0,
+      "percent": true
+    },
+    {
+      "id": "health_on_hit",
+      "legacyName": "healthOnHit",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "stamina_on_hit",
+      "legacyName": "staminaOnHit",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "energy_on_hit",
+      "legacyName": "energyOnHit",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "health_recovery_per_second",
+      "legacyName": "healthRecoveryPerSecond",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "stamina_recoveryper_second",
+      "legacyName": "staminaRecoveryperSecond",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "energy_recoveryper_second",
+      "legacyName": "energyRecoveryperSecond",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "all_damage_taken",
+      "legacyName": "allDamageTaken",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "magic_damage_taken",
+      "legacyName": "magicDamageTaken",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "fire_damage_taken",
+      "legacyName": "fireDamageTaken",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "get_hit_chance",
+      "legacyName": "getHitChance",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "armor",
+      "legacyName": "armor",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "thorns_dmg_mult",
+      "legacyName": "thornsDmgMult",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "thorns",
+      "legacyName": "thorns",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "thorns_per_strenght",
+      "legacyName": "thornsPerStrenght",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "thorns_per_vit",
+      "legacyName": "thornsPerVit",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "stun_immunity",
+      "legacyName": "stunImmunity",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "root_immunity",
+      "legacyName": "rootImmunity",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "debuff_immunity",
+      "legacyName": "debuffImmunity",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "debuff_resistance",
+      "legacyName": "debuffResistance",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "jump_power",
+      "legacyName": "jumpPower",
+      "kind": "add",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "spell_cost_energy_cost",
+      "legacyName": "spellCostEnergyCost",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "spell_cost",
+      "legacyName": "spellCost",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "attack_stamina_cost",
+      "legacyName": "attackStaminaCost",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "block",
+      "legacyName": "block",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "exp_gain",
+      "legacyName": "expGain",
+      "kind": "add",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "max_massacre_time",
+      "legacyName": "maxMassacreTime",
+      "kind": "add",
+      "default": 15.0,
+      "percent": true
+    },
+    {
+      "id": "time_bonus_per_kill",
+      "legacyName": "timeBonusPerKill",
+      "kind": "add",
+      "default": 7.5,
+      "percent": true
+    },
+    {
+      "id": "max_logs",
+      "legacyName": "MaxLogs",
+      "kind": "add",
+      "default": 2.0,
+      "integer": true
+    },
+    {
+      "id": "silenced",
+      "legacyName": "silenced",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "rooted",
+      "legacyName": "rooted",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "stunned",
+      "legacyName": "stunned",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "magic_find",
+      "legacyName": "magicFind",
+      "kind": "add",
+      "default": 1.0,
+      "percent": true,
+      "synced": true
+    },
+    {
+      "id": "explosion_damage",
+      "legacyName": "explosionDamage",
+      "kind": "add",
+      "default": 0.0,
+      "synced": true
+    },
+    {
+      "id": "fire_tick_rate",
+      "legacyName": "fireTickRate",
+      "kind": "add",
+      "default": 0.0,
+      "synced": true
+    },
+    {
+      "id": "fire_duration",
+      "legacyName": "fireDuration",
+      "kind": "add",
+      "default": 0.0,
+      "synced": true
+    },
+    {
+      "id": "spell_firebolt_energy_cost",
+      "legacyName": "spell_fireboltEnergyCost",
+      "kind": "add",
+      "default": 5.0
+    },
+    {
+      "id": "spell_firebolt_damage_scaling",
+      "legacyName": "spell_fireboltDamageScaling",
+      "kind": "add",
+      "default": 1.2,
+      "percent": true
+    },
+    {
+      "id": "spell_blink_range",
+      "legacyName": "spell_blinkRange",
+      "kind": "add",
+      "default": 15.0
+    },
+    {
+      "id": "spell_blink_damage_scaling",
+      "legacyName": "spell_blinkDamageScaling",
+      "kind": "add",
+      "default": 3.0,
+      "percent": true
+    },
+    {
+      "id": "spell_blink_damage",
+      "legacyName": "spell_blinkDamage",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "spell_blink_do_explosion",
+      "legacyName": "spell_blinkDoExplosion",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_parry",
+      "legacyName": "spell_parry",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_parry_damage",
+      "legacyName": "spell_parryDamage",
+      "kind": "add",
+      "default": 40.0
+    },
+    {
+      "id": "spell_parry_damage_scaling",
+      "legacyName": "spell_parryDamageScaling",
+      "kind": "add",
+      "default": 3.0,
+      "percent": true
+    },
+    {
+      "id": "spell_parry_attack_speed",
+      "legacyName": "spell_parryAttackSpeed",
+      "kind": "add",
+      "default": 1.0
+    },
+    {
+      "id": "spell_parry_radius",
+      "legacyName": "spell_parryRadius",
+      "kind": "add",
+      "default": 3.5
+    },
+    {
+      "id": "spell_parry_buff_duration",
+      "legacyName": "spell_parryBuffDuration",
+      "kind": "add",
+      "default": 10.0
+    },
+    {
+      "id": "spell_parry_heal",
+      "legacyName": "spell_parryHeal",
+      "kind": "add",
+      "default": 10.0
+    },
+    {
+      "id": "spell_parry_energy",
+      "legacyName": "spell_parryEnergy",
+      "kind": "add",
+      "default": 10.0
+    },
+    {
+      "id": "spell_chance_to_parry_on_hit",
+      "legacyName": "spell_chanceToParryOnHit",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_parry_ignites",
+      "legacyName": "spell_parryIgnites",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_parry_dmg_bonus",
+      "legacyName": "spell_parryDmgBonus",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "spell_parry_buff_damage",
+      "legacyName": "spell_parryBuffDamage",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "spell_healing_dome_gives_immunity",
+      "legacyName": "spell_healingDomeGivesImmunity",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_healing_dome_reg_energy",
+      "legacyName": "spell_healingDomeRegEnergy",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_healing_dome_duration",
+      "legacyName": "spell_healingDomeDuration",
+      "kind": "add",
+      "default": 10.0
+    },
+    {
+      "id": "spell_healing_dome_cooldown_rate",
+      "legacyName": "spell_healingDomeCooldownRate",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "spell_healing_dome_spell_cost_reduction",
+      "legacyName": "spell_healingDomeSpellCostReduction",
+      "kind": "add",
+      "default": 1.0
+    },
+    {
+      "id": "spell_healing_dome_damage_increase",
+      "legacyName": "spell_healingDomeDamageIncrease",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "spell_healing_dome_damage_resistance",
+      "legacyName": "spell_healingDomeDamageResistance",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "spell_flare_damage",
+      "legacyName": "spell_flareDamage",
+      "kind": "add",
+      "default": 40.0
+    },
+    {
+      "id": "spell_flare_damage_scaling",
+      "legacyName": "spell_flareDamageScaling",
+      "kind": "add",
+      "default": 1.5,
+      "percent": true
+    },
+    {
+      "id": "spell_flare_slow",
+      "legacyName": "spell_flareSlow",
+      "kind": "add",
+      "default": 0.4,
+      "percent": true
+    },
+    {
+      "id": "spell_flare_boost",
+      "legacyName": "spell_flareBoost",
+      "kind": "add",
+      "default": 1.35
+    },
+    {
+      "id": "spell_flare_heal",
+      "legacyName": "spell_flareHeal",
+      "kind": "add",
+      "default": 11.0
+    },
+    {
+      "id": "spell_flare_radius",
+      "legacyName": "spell_flareRadius",
+      "kind": "add",
+      "default": 8.5
+    },
+    {
+      "id": "spell_flare_duration",
+      "legacyName": "spell_flareDuration",
+      "kind": "add",
+      "default": 20.0
+    },
+    {
+      "id": "spell_blackhole_damage",
+      "legacyName": "spell_blackhole_damage",
+      "kind": "add",
+      "default": 40.0
+    },
+    {
+      "id": "spell_blackhole_damage_scaling",
+      "legacyName": "spell_blackhole_damageScaling",
+      "kind": "add",
+      "default": 3.25,
+      "percent": true
+    },
+    {
+      "id": "spell_blackhole_duration",
+      "legacyName": "spell_blackhole_duration",
+      "kind": "add",
+      "default": 9.0
+    },
+    {
+      "id": "spell_blackhole_radius",
+      "legacyName": "spell_blackhole_radius",
+      "kind": "add",
+      "default": 15.0
+    },
+    {
+      "id": "spell_blackhole_pullforce",
+      "legacyName": "spell_blackhole_pullforce",
+      "kind": "add",
+      "default": 25.0
+    },
+    {
+      "id": "spell_shield_per_second",
+      "legacyName": "spell_shieldPerSecond",
+      "kind": "add",
+      "default": 3.0
+    },
+    {
+      "id": "spell_shield_max",
+      "legacyName": "spell_shieldMax",
+      "kind": "add",
+      "default": 15.0
+    },
+    {
+      "id": "spell_shield_persistance_lifetime",
+      "legacyName": "spell_shieldPersistanceLifetime",
+      "kind": "add",
+      "default": 20.0
+    },
+    {
+      "id": "spell_portal_duration",
+      "legacyName": "spell_portalDuration",
+      "kind": "add",
+      "default": 30.0
+    },
+    {
+      "id": "spell_war_cry_radius",
+      "legacyName": "spell_warCryRadius",
+      "kind": "add",
+      "default": 50.0
+    },
+    {
+      "id": "spell_war_cry_atk_speed",
+      "legacyName": "spell_warCryAtkSpeed",
+      "kind": "add",
+      "default": 1.2,
+      "percent": true
+    },
+    {
+      "id": "spell_war_cry_damage",
+      "legacyName": "spell_warCryDamage",
+      "kind": "add",
+      "default": 1.2,
+      "percent": true
+    },
+    {
+      "id": "spell_war_cry_give_damage",
+      "legacyName": "spell_warCryGiveDamage",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_war_cry_give_armor",
+      "legacyName": "spell_warCryGiveArmor",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_war_cry_give_damage_resistance",
+      "legacyName": "spell_warCryGiveDamageResistance",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_magic_arrow_dmg_debuff",
+      "legacyName": "spell_magicArrowDmgDebuff",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_magic_arrow_crit",
+      "legacyName": "spell_magicArrowCrit",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_magic_arrow_double_slow",
+      "legacyName": "spell_magicArrowDoubleSlow",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_magic_arrow_volley_count",
+      "legacyName": "spell_magicArrowVolleyCount",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "spell_magic_arrow_duration",
+      "legacyName": "spell_magicArrowDuration",
+      "kind": "add",
+      "default": 10.0
+    },
+    {
+      "id": "spell_magic_arrow_damage_scaling",
+      "legacyName": "spell_magicArrowDamageScaling",
+      "kind": "add",
+      "default": 4.2,
+      "percent": true
+    },
+    {
+      "id": "spell_black_flame_damage_scaling",
+      "legacyName": "spell_blackFlameDamageScaling",
+      "kind": "add",
+      "default": 0.4,
+      "percent": true
+    },
+    {
+      "id": "spell_purge_radius",
+      "legacyName": "spell_purgeRadius",
+      "kind": "add",
+      "default": 30.0
+    },
+    {
+      "id": "spell_purge_heal",
+      "legacyName": "spell_purgeHeal",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_purge_damage_bonus",
+      "legacyName": "spell_purgeDamageBonus",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_snap_freeze_dist",
+      "legacyName": "spell_snapFreezeDist",
+      "kind": "add",
+      "default": 12.0
+    },
+    {
+      "id": "spell_snap_float_amount",
+      "legacyName": "spell_snapFloatAmount",
+      "kind": "add",
+      "default": 0.2,
+      "percent": true
+    },
+    {
+      "id": "spell_snap_damage_scaling",
+      "legacyName": "spell_snapDamageScaling",
+      "kind": "add",
+      "default": 6.5,
+      "percent": true
+    },
+    {
+      "id": "spell_snap_freeze_duration",
+      "legacyName": "spell_snapFreezeDuration",
+      "kind": "add",
+      "default": 7.0
+    },
+    {
+      "id": "spell_ball_lightning_damage",
+      "legacyName": "spell_ballLightning_Damage",
+      "kind": "add",
+      "default": 1220.0
+    },
+    {
+      "id": "spell_ball_lightning_damage_scaling",
+      "legacyName": "spell_ballLightning_DamageScaling",
+      "kind": "add",
+      "default": 75.0,
+      "percent": true
+    },
+    {
+      "id": "spell_ball_lightning_crit",
+      "legacyName": "spell_ballLightning_Crit",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_bash_damage_debuff_amount",
+      "legacyName": "spell_bashDamageDebuffAmount",
+      "kind": "add",
+      "default": 1.3,
+      "percent": true
+    },
+    {
+      "id": "spell_bash_damage_buff",
+      "legacyName": "spell_bashDamageBuff",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "spell_bash_slow_amount",
+      "legacyName": "spell_bashSlowAmount",
+      "kind": "add",
+      "default": 0.4,
+      "percent": true
+    },
+    {
+      "id": "spell_bash_lifesteal",
+      "legacyName": "spell_bashLifesteal",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "spell_bash_enabled",
+      "legacyName": "spell_bashEnabled",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_bash_bleed_chance",
+      "legacyName": "spell_bashBleedChance",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "spell_bash_bleed_dmg",
+      "legacyName": "spell_bashBleedDmg",
+      "kind": "add",
+      "default": 0.3,
+      "percent": true
+    },
+    {
+      "id": "spell_bash_duration",
+      "legacyName": "spell_bashDuration",
+      "kind": "add",
+      "default": 2.0
+    },
+    {
+      "id": "spell_frenzy_max_stacks",
+      "legacyName": "spell_frenzyMaxStacks",
+      "kind": "add",
+      "default": 5.0,
+      "integer": true
+    },
+    {
+      "id": "spell_frenzy_stacks",
+      "legacyName": "spell_frenzyStacks",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "spell_frenzy_atk_speed",
+      "legacyName": "spell_frenzyAtkSpeed",
+      "kind": "add",
+      "default": 0.02,
+      "percent": true
+    },
+    {
+      "id": "spell_frenzy_dmg",
+      "legacyName": "spell_frenzyDmg",
+      "kind": "add",
+      "default": 0.075,
+      "percent": true
+    },
+    {
+      "id": "spell_frenzy_active_crit_chance",
+      "legacyName": "spell_frenzy_active_critChance",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "spell_frenzy",
+      "legacyName": "spell_frenzy",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_frenzy_ms",
+      "legacyName": "spell_frenzyMS",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_fury_swipes",
+      "legacyName": "spell_furySwipes",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_focus_bonus_dmg",
+      "legacyName": "spell_focusBonusDmg",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "spell_focus_on_hs",
+      "legacyName": "spell_focusOnHS",
+      "kind": "add",
+      "default": 0.5,
+      "percent": true
+    },
+    {
+      "id": "spell_focus_on_bs",
+      "legacyName": "spell_focusOnBS",
+      "kind": "add",
+      "default": 0.15,
+      "percent": true
+    },
+    {
+      "id": "spell_focus_on_atk_speed",
+      "legacyName": "spell_focusOnAtkSpeed",
+      "kind": "add",
+      "default": 1.3,
+      "percent": true
+    },
+    {
+      "id": "spell_focus_on_atk_speed_duration",
+      "legacyName": "spell_focusOnAtkSpeedDuration",
+      "kind": "add",
+      "default": 4.0
+    },
+    {
+      "id": "spell_focus_slow_amount",
+      "legacyName": "spell_focusSlowAmount",
+      "kind": "add",
+      "default": 0.8,
+      "percent": true
+    },
+    {
+      "id": "spell_focus_slow_duration",
+      "legacyName": "spell_focusSlowDuration",
+      "kind": "add",
+      "default": 4.0
+    },
+    {
+      "id": "spell_focus",
+      "legacyName": "spell_focus",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_seeking_arrow_head_damage",
+      "legacyName": "spell_seekingArrow_HeadDamage",
+      "kind": "add",
+      "default": 0.5,
+      "percent": true
+    },
+    {
+      "id": "spell_seeking_arrow_damage_bonus",
+      "legacyName": "spell_seekingArrow_DamageBonus",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "spell_seeking_arrow_slow_duration",
+      "legacyName": "spell_seekingArrow_SlowDuration",
+      "kind": "add",
+      "default": 4.0
+    },
+    {
+      "id": "spell_seeking_arrow_slow_amount",
+      "legacyName": "spell_seekingArrow_SlowAmount",
+      "kind": "add",
+      "default": 0.9,
+      "percent": true
+    },
+    {
+      "id": "spell_seeking_arrow_duration",
+      "legacyName": "spell_seekingArrowDuration",
+      "kind": "add",
+      "default": 10.0
+    },
+    {
+      "id": "spell_seeking_arrow",
+      "legacyName": "spell_seekingArrow",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_cataclysm_damage",
+      "legacyName": "spell_cataclysmDamage",
+      "kind": "add",
+      "default": 40.0,
+      "percent": true
+    },
+    {
+      "id": "spell_cataclysm_damage_scaling",
+      "legacyName": "spell_cataclysmDamageScaling",
+      "kind": "add",
+      "default": 25.0,
+      "percent": true
+    },
+    {
+      "id": "spell_cataclysm_duration",
+      "legacyName": "spell_cataclysmDuration",
+      "kind": "add",
+      "default": 12.0
+    },
+    {
+      "id": "spell_cataclysm_radius",
+      "legacyName": "spell_cataclysmRadius",
+      "kind": "add",
+      "default": 5.0
+    },
+    {
+      "id": "spell_cataclysm_arcane",
+      "legacyName": "spell_cataclysmArcane",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_bia_spell_dm_mult",
+      "legacyName": "spell_bia_SpellDmMult",
+      "kind": "add",
+      "default": 0.1,
+      "percent": true
+    },
+    {
+      "id": "spell_bia_health_dm_mult",
+      "legacyName": "spell_bia_HealthDmMult",
+      "kind": "add",
+      "default": 5.0
+    },
+    {
+      "id": "spell_bia_health_taken",
+      "legacyName": "spell_bia_HealthTaken",
+      "kind": "add",
+      "default": 0.65,
+      "percent": true
+    },
+    {
+      "id": "spell_bia_accumulated_damage",
+      "legacyName": "spell_bia_AccumulatedDamage",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "spell_bia_triple_dmg",
+      "legacyName": "spell_bia_TripleDmg",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_bia_stun",
+      "legacyName": "spell_bia_Stun",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_bia_crit",
+      "legacyName": "spell_bia_Crit",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_fart_radius",
+      "legacyName": "spell_fartRadius",
+      "kind": "add",
+      "default": 30.0
+    },
+    {
+      "id": "spell_fart_knockback",
+      "legacyName": "spell_fartKnockback",
+      "kind": "add",
+      "default": 2.0
+    },
+    {
+      "id": "spell_fart_slow",
+      "legacyName": "spell_fartSlow",
+      "kind": "add",
+      "default": 0.8,
+      "percent": true
+    },
+    {
+      "id": "spell_fart_debuff_duration",
+      "legacyName": "spell_fartDebuffDuration",
+      "kind": "add",
+      "default": 30.0
+    },
+    {
+      "id": "spell_fart_base_dmg",
+      "legacyName": "spell_fartBaseDmg",
+      "kind": "add",
+      "default": 50.0
+    },
+    {
+      "id": "spell_fart_damage_scaling",
+      "legacyName": "spell_fartDamageScaling",
+      "kind": "add",
+      "default": 5.0
+    },
+    {
+      "id": "spell_taunt_speed_change",
+      "legacyName": "spell_taunt_speedChange",
+      "kind": "mult",
+      "default": 2.0,
+      "percent": true
+    },
+    {
+      "id": "spell_taunt_pull_enemies_in",
+      "legacyName": "spell_taunt_pullEnemiesIn",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_snowstorm_max_charge",
+      "legacyName": "spell_snowstormMaxCharge",
+      "kind": "add",
+      "default": 10.0
+    },
+    {
+      "id": "spell_snowstorm_dmg_scaling",
+      "legacyName": "spell_snowstormDmgScaling",
+      "kind": "add",
+      "default": 0.4
+    },
+    {
+      "id": "spell_snowstorm_damage_mult",
+      "legacyName": "spell_snowstormDamageMult",
+      "kind": "add",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "spell_snowstorm_hit_delay",
+      "legacyName": "spell_snowstormHitDelay",
+      "kind": "mult",
+      "default": 0.5
+    },
+    {
+      "id": "spell_snowstorm_pull_enemies_in",
+      "legacyName": "spell_snowstormPullEnemiesIn",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "spell_berserk_duration",
+      "legacyName": "spell_berserkDuration",
+      "kind": "add",
+      "default": 30.0
+    },
+    {
+      "id": "spell_berserk_damage",
+      "legacyName": "spell_berserkDamage",
+      "kind": "add",
+      "default": 1.3
+    },
+    {
+      "id": "spell_berserk_movement_speed",
+      "legacyName": "spell_berserkMovementSpeed",
+      "kind": "add",
+      "default": 1.35
+    },
+    {
+      "id": "spell_berserk_attack_speed",
+      "legacyName": "spell_berserkAttackSpeed",
+      "kind": "add",
+      "default": 1.25
+    },
+    {
+      "id": "spell_berserk_max_hp",
+      "legacyName": "spell_berserkMaxHP",
+      "kind": "add",
+      "default": 1.0
+    },
+    {
+      "id": "perk_fire_dmg_increase_on_hit",
+      "legacyName": "perk_fireDmgIncreaseOnHit",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_parry_counter_strike_damage",
+      "legacyName": "perk_parryCounterStrikeDamage",
+      "kind": "add",
+      "default": 0.0
+    },
+    {
+      "id": "perk_turbo_raft_owners",
+      "legacyName": "perk_turboRaftOwners",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true,
+      "synced": true
+    },
+    {
+      "id": "perk_raft_speed_multipier",
+      "legacyName": "perk_RaftSpeedMultipier",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true,
+      "synced": true
+    },
+    {
+      "id": "perk_thirst_rate",
+      "legacyName": "perk_thirstRate",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_meteor_damage_taken",
+      "legacyName": "perk_meteorDamageTaken",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_hunger_rate",
+      "legacyName": "perk_hungerRate",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_projectile_no_consume_chance",
+      "legacyName": "perk_projectileNoConsumeChance",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "perk_thrown_spear_damage_mult",
+      "legacyName": "perk_thrownSpearDamageMult",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_thrown_spear_extra_armor_reduction",
+      "legacyName": "perk_thrownSpearExtraArmorReduction",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_thrown_spear_crit_chance",
+      "legacyName": "perk_thrownSpearCritChance",
+      "kind": "add",
+      "default": 0.05,
+      "percent": true
+    },
+    {
+      "id": "perk_thrown_spearhell_chance",
+      "legacyName": "perk_thrownSpearhellChance",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
+      "id": "perk_bullet_crit_chance",
+      "legacyName": "perk_bulletCritChance",
+      "kind": "add",
+      "default": 0.1,
+      "percent": true
+    },
+    {
+      "id": "perk_bullet_damage_mult",
+      "legacyName": "perk_bulletDamageMult",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_crossbow_damage_mult",
+      "legacyName": "perk_crossbowDamageMult",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_bow_damage_mult",
+      "legacyName": "perk_bowDamageMult",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_multishot_projectile_count",
+      "legacyName": "perk_multishotProjectileCount",
+      "kind": "add",
+      "default": 1.0,
+      "integer": true
+    },
+    {
+      "id": "perk_multishot_damage_pennalty",
+      "legacyName": "perk_multishotDamagePennalty",
+      "kind": "mult",
+      "default": 0.75
+    },
+    {
+      "id": "perk_near_death_experience_triggered",
+      "legacyName": "perk_nearDeathExperienceTriggered",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_near_death_experience_unlocked",
+      "legacyName": "perk_nearDeathExperienceUnlocked",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_crafting_reroll",
+      "legacyName": "perk_craftingReroll",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_crafting_reforge",
+      "legacyName": "perk_craftingReforge",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_crafting_polishing",
+      "legacyName": "perk_craftingPolishing",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_crafting_empowering",
+      "legacyName": "perk_craftingEmpowering",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_crafting_rerolling_single_stat",
+      "legacyName": "perk_craftingRerollingSingleStat",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_is_shield_autocast",
+      "legacyName": "perk_isShieldAutocast",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_parry_anything",
+      "legacyName": "perk_parryAnything",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_blackhole_pull_immune",
+      "legacyName": "perk_blackholePullImmune",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_blizzard_slow_reduced",
+      "legacyName": "perk_blizzardSlowReduced",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_true_aim",
+      "legacyName": "perk_trueAim",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_true_aim_upgrade",
+      "legacyName": "perk_trueAimUpgrade",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_golden_resolve",
+      "legacyName": "perk_goldenResolve",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_projectile_damage_increased_by_size",
+      "legacyName": "perk_projectileDamageIncreasedBySize",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_projectile_damage_increased_by_speed",
+      "legacyName": "perk_projectileDamageIncreasedBySpeed",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_infinity_magic",
+      "legacyName": "perk_infinityMagic",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_flashlight_intensity",
+      "legacyName": "perk_flashlightIntensity",
+      "kind": "add",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_flashlight_battery_drain",
+      "legacyName": "perk_flashlightBatteryDrain",
+      "kind": "add",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "perk_bunny_hop",
+      "legacyName": "perk_bunnyHop",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_bunny_hop_upgrade",
+      "legacyName": "perk_bunnyHopUpgrade",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_dance_of_firegod",
+      "legacyName": "perk_danceOfFiregod",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_dance_of_firegod_atk_cap",
+      "legacyName": "perk_danceOfFiregodAtkCap",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_double_stick_harvesting",
+      "legacyName": "perk_doubleStickHarvesting",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "perk_charged_atk_knockback",
+      "legacyName": "perk_chargedAtkKnockback",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_great_bow_ignites",
+      "legacyName": "i_greatBowIgnites",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_smokey_crossbow_quiver",
+      "legacyName": "i_SmokeyCrossbowQuiver",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_crossfire_quiver",
+      "legacyName": "i_CrossfireQuiver",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_hazard_crown",
+      "legacyName": "i_HazardCrown",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_hazard_crown_bonus",
+      "legacyName": "i_HazardCrownBonus",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "i_hammer_stun",
+      "legacyName": "i_HammerStun",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_hammer_stun_duration",
+      "legacyName": "i_HammerStunDuration",
+      "kind": "mult",
+      "default": 0.4
+    },
+    {
+      "id": "i_hammer_stun_amount",
+      "legacyName": "i_HammerStunAmount",
+      "kind": "mult",
+      "default": 0.25,
+      "percent": true
+    },
+    {
+      "id": "smash_damage",
+      "legacyName": "smashDamage",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
+    },
+    {
+      "id": "i_hexed_pants_of_mr_m_enabled",
+      "legacyName": "i_HexedPantsOfMrM_Enabled",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_death_pact_enabled",
+      "legacyName": "i_DeathPact_Enabled",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_eruption_bow",
+      "legacyName": "i_EruptionBow",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_archangel_bow",
+      "legacyName": "i_ArchangelBow",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_is_greed",
+      "legacyName": "i_isGreed",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_king_qruies_sword",
+      "legacyName": "i_KingQruiesSword",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_sora_bracers",
+      "legacyName": "i_SoraBracers",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_is_wind_armor",
+      "legacyName": "i_isWindArmor",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_spark_of_light_after_dark",
+      "legacyName": "i_sparkOfLightAfterDark",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_infinity_loop",
+      "legacyName": "i_infinityLoop",
+      "kind": "bool",
+      "default": 0.0
+    },
+    {
+      "id": "i_setcount_akagis_set",
+      "legacyName": "i_setcount_AkagisSet",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "i_setcount_berserk_set",
+      "legacyName": "i_setcount_BerserkSet",
+      "kind": "add",
+      "default": 0.0,
+      "integer": true
+    },
+    {
+      "id": "perk_block_non_physical",
+      "legacyName": "perk_blockNonPhysical",
+      "kind": "bool",
+      "default": 0.0
+    }
+  ]
+}

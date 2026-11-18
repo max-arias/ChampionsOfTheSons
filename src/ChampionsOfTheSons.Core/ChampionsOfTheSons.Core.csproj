@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Pure rules, content, save model and net protocol. No Unity, Il2Cpp or game references:
+       everything here is testable with `dotnet test`. The mod compiles these same sources in. -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>ChampionsOfTheSons.Core</RootNamespace>
+  </PropertyGroup>
+</Project>

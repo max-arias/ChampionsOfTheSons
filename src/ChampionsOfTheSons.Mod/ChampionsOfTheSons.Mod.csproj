@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The RedLoader mod. Needs RedLoader installed in $(GameDir) and the game launched once,
+       so that _RedLoader\Game holds the generated interop assemblies. Not part of the .slnx:
+       build it with `./build.ps1 mod`. -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>ChampionsOfTheSons</AssemblyName>
+    <RootNamespace>ChampionsOfTheSons.Mod</RootNamespace>
+    <!-- Interop assemblies trigger many nullable/obsolete warnings that are not ours. -->
+    <NoWarn>$(NoWarn);CS8618;CS0618</NoWarn>
+    <RedLoaderDir>$(GameDir)\_RedLoader</RedLoaderDir>
+  </PropertyGroup>
+
+  <!-- Core sources are compiled into the mod so the mod ships as one DLL. -->
+  <ItemGroup>
+    <Compile Include="..\ChampionsOfTheSons.Core\**\*.cs" Exclude="..\ChampionsOfTheSons.Core\obj\**;..\ChampionsOfTheSons.Core\bin\**" LinkBase="Core" />
+    <EmbeddedResource Include="..\..\content\**\*.json" LinkBase="content" LogicalName="content/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(RedLoaderDir)\net6\RedLoader.dll" Private="false" />
+    <Reference Include="$(RedLoaderDir)\net6\SonsSdk.dll" Private="false" />
+    <Reference Include="$(RedLoaderDir)\net6\0Harmony.dll" Private="false" />
+    <Reference Include="$(RedLoaderDir)\net6\Il2CppInterop.Common.dll" Private="false" />
+    <Reference Include="$(RedLoaderDir)\net6\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(RedLoaderDir)\Game\*.dll" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="manifest.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <Target Name="CheckRedLoader" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(RedLoaderDir)\Game')" Text="No interop assemblies in '$(RedLoaderDir)\Game'. Install RedLoader 0.8.6 into the game and launch it once (see CLAUDE.md)." />
+  </Target>
+
+  <!-- Same layout as the RedLoader template: Mods\<Assembly>.dll and Mods\<Assembly>\manifest.json -->
+  <Target Name="CopyToGame" AfterTargets="Build" Condition="'$(DeployToGame)' != 'false' And Exists('$(GameDir)\Mods')">
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(GameDir)\Mods" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(GameDir)\Mods" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
+    <Copy SourceFiles="$(OutputPath)manifest.json" DestinationFolder="$(GameDir)\Mods\$(AssemblyName)" />
+    <Message Importance="high" Text="Deployed $(AssemblyName) to $(GameDir)\Mods" />
+  </Target>
+</Project>

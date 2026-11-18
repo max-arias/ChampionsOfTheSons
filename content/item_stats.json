@@ -1,0 +1,1920 @@
+{
+  "itemStats": [
+    {
+      "id": "stat.strength",
+      "legacyId": 1,
+      "name": "Strength",
+      "min": 1.5,
+      "max": 2.2,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "strength",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.agility",
+      "legacyId": 2,
+      "name": "Agility",
+      "min": 1.5,
+      "max": 2.2,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "agility",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.vitality",
+      "legacyId": 3,
+      "name": "Vitality",
+      "min": 1.5,
+      "max": 2.2,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "vitality",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.intelligence",
+      "legacyId": 4,
+      "name": "Intelligence",
+      "min": 1.5,
+      "max": 2.2,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "intelligence",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.maximumlife",
+      "legacyId": 5,
+      "name": "Maximum Life",
+      "min": 3.75,
+      "max": 5.65,
+      "levelPow": 1.21,
+      "combine": "sum",
+      "rarity": 3,
+      "effects": [
+        {
+          "stat": "max_health",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.maximumenergy",
+      "legacyId": 6,
+      "name": "Maximum Energy",
+      "min": 1.0,
+      "max": 1.3,
+      "levelPow": 1.21,
+      "combine": "sum",
+      "rarity": 3,
+      "effects": [
+        {
+          "stat": "max_energy",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.lifepersecond",
+      "legacyId": 7,
+      "name": "Life Per Second",
+      "min": 0.013,
+      "max": 0.0225,
+      "levelPow": 1.05,
+      "combine": "sum",
+      "rarity": 3,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "health_recovery_per_second",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.staminapersecond",
+      "legacyId": 8,
+      "name": "Stamina Per Second",
+      "min": 0.025,
+      "max": 0.031,
+      "levelPow": 1.23,
+      "combine": "sum",
+      "rarity": 2,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "stamina_recoveryper_second",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.staminaregeneration",
+      "legacyId": 9,
+      "name": "Energy Regeneration",
+      "min": 0.02,
+      "max": 0.03,
+      "levelPow": 0.45,
+      "combine": "sum",
+      "rarity": 5,
+      "percent": true,
+      "rounding": 1,
+      "cap": 2.0,
+      "effects": [
+        {
+          "stat": "stamina_per_sec_rate",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.liferegeneration",
+      "legacyId": 10,
+      "name": "Life Regeneration",
+      "min": 0.02,
+      "max": 0.03,
+      "levelPow": 0.45,
+      "combine": "sum",
+      "rarity": 5,
+      "percent": true,
+      "rounding": 1,
+      "cap": 1.5,
+      "effects": [
+        {
+          "stat": "health_per_sec_rate",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.damagereduction",
+      "legacyId": 11,
+      "name": "Damage Reduction",
+      "min": 0.005,
+      "max": 0.0075,
+      "levelPow": 0.5,
+      "combine": "one_minus_product",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 1,
+      "cap": 0.4,
+      "effects": [
+        {
+          "stat": "all_damage_taken",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.criticalhitchance",
+      "legacyId": 12,
+      "name": "Critical Hit Chance",
+      "min": 0.008,
+      "max": 0.0125,
+      "levelPow": 0.25,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "cap": 0.5,
+      "effects": [
+        {
+          "stat": "crit_chance",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.criticalhitdamage",
+      "legacyId": 13,
+      "name": "Criticalhitdamage",
+      "min": 0.03,
+      "max": 0.06,
+      "levelPow": 0.4,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "cap": 10.0,
+      "effects": [
+        {
+          "stat": "crit_damage",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.lifeonhit",
+      "legacyId": 14,
+      "name": "Life on hit",
+      "min": 0.07,
+      "max": 0.13,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 4,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "health_on_hit",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.dodgechance",
+      "legacyId": 15,
+      "name": "Dodge chance",
+      "min": 0.003,
+      "max": 0.008,
+      "levelPow": 0.38,
+      "combine": "one_minus_product",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 1,
+      "cap": 0.35,
+      "effects": [
+        {
+          "stat": "get_hit_chance",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.armor",
+      "legacyId": 16,
+      "name": "Armor",
+      "min": 5.0,
+      "max": 9.0,
+      "levelPow": 1.4,
+      "combine": "sum",
+      "rarity": 3,
+      "effects": [
+        {
+          "stat": "armor",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.resistancetomagic",
+      "legacyId": 17,
+      "name": "Resistance to magic",
+      "min": 0.004,
+      "max": 0.018,
+      "levelPow": 0.5,
+      "combine": "one_minus_product",
+      "rarity": 5,
+      "percent": true,
+      "rounding": 1,
+      "cap": 0.5,
+      "effects": [
+        {
+          "stat": "magic_damage_taken",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.attackspeed",
+      "legacyId": 18,
+      "name": "Attack speed",
+      "min": 0.004,
+      "max": 0.005,
+      "levelPow": 0.2,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.expgain",
+      "legacyId": 19,
+      "name": "Experience gain",
+      "min": 0.015,
+      "max": 0.025,
+      "levelPow": 0.25,
+      "combine": "product",
+      "rarity": 7,
+      "percent": true,
+      "rounding": 1,
+      "cap": 1.0,
+      "effects": [
+        {
+          "stat": "exp_gain",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.massacreduration",
+      "legacyId": 20,
+      "name": "Massacre Duration",
+      "min": 1.5,
+      "max": 2.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 7,
+      "effects": [
+        {
+          "stat": "max_massacre_time",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.spelldamageincrease",
+      "legacyId": 21,
+      "name": "Spell Damage Increase",
+      "min": 0.014,
+      "max": 0.018,
+      "levelPow": 0.4,
+      "combine": "sum",
+      "rarity": 5,
+      "effects": [
+        {
+          "stat": "spell_increased_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.meleedamageincrease",
+      "legacyId": 22,
+      "name": "Melee Damage Increase",
+      "min": 0.014,
+      "max": 0.018,
+      "levelPow": 0.4,
+      "combine": "sum",
+      "rarity": 5,
+      "percent": true,
+      "rounding": 1,
+      "cap": 2.0,
+      "effects": [
+        {
+          "stat": "melee_increased_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.rangeddamageincrease",
+      "legacyId": 23,
+      "name": "Ranged Damage Increase",
+      "min": 0.014,
+      "max": 0.018,
+      "levelPow": 0.4,
+      "combine": "sum",
+      "rarity": 5,
+      "percent": true,
+      "rounding": 1,
+      "cap": 2.0,
+      "effects": [
+        {
+          "stat": "ranged_increased_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.basespelldamage",
+      "legacyId": 24,
+      "name": "Base Spell Damage",
+      "min": 0.5,
+      "max": 1.1,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "spell_flat_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.basemeleedamage",
+      "legacyId": 25,
+      "name": "Base Melee Damage",
+      "min": 0.5,
+      "max": 1.1,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "melee_flat_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.baserangeddamage",
+      "legacyId": 26,
+      "name": "Base Ranged Damage",
+      "min": 0.5,
+      "max": 1.1,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "ranged_flat_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.maxenergyfromagi",
+      "legacyId": 27,
+      "name": "Energy Per Agility",
+      "min": 0.011,
+      "max": 0.025,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 7,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "max_energy_from_agi",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.maxhealthfromvit",
+      "legacyId": 28,
+      "name": "Health Per Vitality",
+      "min": 0.07,
+      "max": 0.25,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 7,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "max_health_from_vit",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.spelldmgfromint",
+      "legacyId": 29,
+      "name": "Spell Damage Per Int",
+      "min": 0.001,
+      "max": 0.0018,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 7,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "spell_dmg_from_int",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.meleedmgfromstr",
+      "legacyId": 30,
+      "name": "Melee Damage Per Strength",
+      "min": 0.001,
+      "max": 0.0018,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 7,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "melee_dmg_from_str",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.allhealingpercent",
+      "legacyId": 31,
+      "name": "All Recovery",
+      "min": 0.0015,
+      "max": 0.007,
+      "levelPow": 0.6,
+      "combine": "product_plus_one",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "all_recovery_mult",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.permanentperkpoints",
+      "legacyId": 32,
+      "name": "PERMANENT PERK POINTS",
+      "min": 0.25,
+      "max": 0.25,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 6,
+      "effects": [],
+      "consumeAction": "manual"
+    },
+    {
+      "id": "stat.experience",
+      "legacyId": 33,
+      "name": "EXPERIENCE",
+      "min": 30.0,
+      "max": 30.0,
+      "levelPow": 3.0,
+      "combine": "sum",
+      "rarity": 5,
+      "effects": [],
+      "consumeAction": "manual"
+    },
+    {
+      "id": "stat.movementspeed",
+      "legacyId": 34,
+      "name": "Movement Speed",
+      "min": 0.01,
+      "max": 0.02,
+      "levelPow": 0.2,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 2,
+      "cap": 0.5,
+      "effects": [
+        {
+          "stat": "movement_speed",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.meleeweaponrange",
+      "legacyId": 35,
+      "name": "Weapon Size",
+      "min": 0.01,
+      "max": 0.03,
+      "levelPow": 0.35,
+      "combine": "product_plus_one",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 2,
+      "cap": 0.4,
+      "effects": [
+        {
+          "stat": "weapon_range",
+          "op": "mult",
+          "transform": "one_plus"
+        }
+      ]
+    },
+    {
+      "id": "stat.attackcostreduction",
+      "legacyId": 36,
+      "name": "Attack Cost Reduction",
+      "min": 0.02,
+      "max": 0.038,
+      "levelPow": 0.4,
+      "combine": "one_minus_product",
+      "rarity": 3,
+      "percent": true,
+      "rounding": 2,
+      "cap": 0.75,
+      "effects": [
+        {
+          "stat": "attack_stamina_cost",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.spellcostreduction",
+      "legacyId": 37,
+      "name": "Spell Cost Reduction",
+      "min": 0.005,
+      "max": 0.01,
+      "levelPow": 0.3,
+      "combine": "one_minus_product",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 2,
+      "cap": 0.5,
+      "effects": [
+        {
+          "stat": "spell_cost",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ],
+      "consumeAction": "manual"
+    },
+    {
+      "id": "stat.spellcosttostamina",
+      "legacyId": 38,
+      "name": "Spell Cost to Stamina",
+      "min": 0.0075,
+      "max": 0.01,
+      "levelPow": 0.34,
+      "combine": "one_minus_product",
+      "rarity": 2,
+      "percent": true,
+      "rounding": 2,
+      "cap": 0.55,
+      "effects": [
+        {
+          "stat": "spell_cost_energy_cost",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.lesserstrength",
+      "legacyId": 39,
+      "name": "Strength",
+      "min": 0.6,
+      "max": 1.0,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 2,
+      "effects": [
+        {
+          "stat": "strength",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.lesseragility",
+      "legacyId": 40,
+      "name": "Agility",
+      "min": 0.6,
+      "max": 1.0,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 2,
+      "effects": [
+        {
+          "stat": "agility",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.lesservitality",
+      "legacyId": 41,
+      "name": "Vitality",
+      "min": 0.6,
+      "max": 1.0,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 2,
+      "effects": [
+        {
+          "stat": "vitality",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.lesserintelligence",
+      "legacyId": 42,
+      "name": "Intelligence",
+      "min": 0.6,
+      "max": 1.0,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 2,
+      "effects": [
+        {
+          "stat": "intelligence",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.lesserarmor",
+      "legacyId": 43,
+      "name": "Armor",
+      "min": 1.0,
+      "max": 1.75,
+      "levelPow": 1.35,
+      "combine": "sum",
+      "rarity": 2,
+      "effects": [
+        {
+          "stat": "armor",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.energypersecond",
+      "legacyId": 44,
+      "name": "Energy Per Second",
+      "min": 0.0075,
+      "max": 0.01,
+      "levelPow": 0.833,
+      "combine": "sum",
+      "rarity": 5,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "energy_recoveryper_second",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.percentmaximumlife",
+      "legacyId": 45,
+      "name": "Maximum Life",
+      "min": 0.006,
+      "max": 0.009,
+      "levelPow": 0.35,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "max_health_mult",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.percentmaximumenergy",
+      "legacyId": 46,
+      "name": "Maximum Energy",
+      "min": 0.006,
+      "max": 0.009,
+      "levelPow": 0.35,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "max_energy_mult",
+          "op": "add",
+          "transform": "x"
+        }
+      ],
+      "consumeAction": "manual"
+    },
+    {
+      "id": "stat.cooldownreduction",
+      "legacyId": 47,
+      "name": "Cooldown Reduction",
+      "min": 0.004,
+      "max": 0.00675,
+      "levelPow": 0.35,
+      "combine": "one_minus_product",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 2,
+      "cap": 0.5,
+      "effects": [
+        {
+          "stat": "cooldown",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.rangeddmgfromagi",
+      "legacyId": 48,
+      "name": "Ranged Damage Per Agi",
+      "min": 0.001,
+      "max": 0.0018,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 7,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "ranged_dmg_from_agi",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.energyonhit",
+      "legacyId": 49,
+      "name": "Energy on hit",
+      "min": 0.02,
+      "max": 0.04,
+      "levelPow": 0.67,
+      "combine": "sum",
+      "rarity": 4,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "energy_on_hit",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.block",
+      "legacyId": 50,
+      "name": "Block",
+      "min": 0.95,
+      "max": 1.65,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 1,
+      "effects": [
+        {
+          "stat": "block",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.projectilespeed",
+      "legacyId": 51,
+      "name": "Projectile speed",
+      "min": 0.01,
+      "max": 0.02,
+      "levelPow": 0.3,
+      "combine": "sum",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "projectile_speed",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.projectilesize",
+      "legacyId": 52,
+      "name": "Projectile size",
+      "min": 0.02,
+      "max": 0.03,
+      "levelPow": 0.34,
+      "combine": "sum",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "projectile_size",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.meleearmorpiercing",
+      "legacyId": 53,
+      "name": "Melee armor piercing",
+      "min": 1.5,
+      "max": 2.25,
+      "levelPow": 1.21,
+      "combine": "sum",
+      "rarity": 5,
+      "effects": [
+        {
+          "stat": "melee_armor_piercing",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.rangedarmorpiercing",
+      "legacyId": 54,
+      "name": "Ranged armor piercing",
+      "min": 0.95,
+      "max": 1.25,
+      "levelPow": 1.2,
+      "combine": "sum",
+      "rarity": 5,
+      "effects": [
+        {
+          "stat": "ranged_armor_piercing",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.armorpiercing",
+      "legacyId": 55,
+      "name": "Armor piercing",
+      "min": 0.75,
+      "max": 1.0,
+      "levelPow": 1.2,
+      "combine": "sum",
+      "rarity": 5,
+      "effects": [
+        {
+          "stat": "all_armor_piercing",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.magicfind",
+      "legacyId": 56,
+      "name": "Magic Find",
+      "min": 0.01,
+      "max": 0.02,
+      "levelPow": 0.15,
+      "combine": "product_plus_one",
+      "rarity": 7,
+      "percent": true,
+      "rounding": 1,
+      "cap": 0.25,
+      "effects": [
+        {
+          "stat": "magic_find",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.allattributes",
+      "legacyId": 57,
+      "name": "All attributes",
+      "min": 0.5,
+      "max": 0.8,
+      "levelPow": 0.8,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "strength",
+          "op": "add",
+          "transform": "round"
+        },
+        {
+          "stat": "vitality",
+          "op": "add",
+          "transform": "round"
+        },
+        {
+          "stat": "agility",
+          "op": "add",
+          "transform": "round"
+        },
+        {
+          "stat": "intelligence",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.refundpoints",
+      "legacyId": 58,
+      "name": "Refund points",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 7,
+      "effects": [],
+      "manual": true
+    },
+    {
+      "id": "stat.jumppower",
+      "legacyId": 59,
+      "name": "Jump Power",
+      "min": 0.02,
+      "max": 0.033,
+      "levelPow": 0.24,
+      "combine": "sum",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "jump_power",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.headshotdamage",
+      "legacyId": 60,
+      "name": "Headshot Damage",
+      "min": 0.052,
+      "max": 0.13,
+      "levelPow": 0.35,
+      "combine": "product_plus_one",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "head_shot_damage",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.firedamage",
+      "legacyId": 61,
+      "name": "Fire Damage",
+      "min": 0.015,
+      "max": 0.042,
+      "levelPow": 0.34,
+      "combine": "sum",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "fire_damage",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.chanceonhittoslow",
+      "legacyId": 62,
+      "name": "Chance on hit to slow",
+      "min": 0.008,
+      "max": 0.015,
+      "levelPow": 0.25,
+      "combine": "sum",
+      "rarity": 3,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "chance_to_slow",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.chanceonhittobleed",
+      "legacyId": 63,
+      "name": "Chance on hit to bleed",
+      "min": 0.006,
+      "max": 0.01,
+      "levelPow": 0.25,
+      "combine": "sum",
+      "rarity": 3,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "chance_to_bleed",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.chanceonhittoweaken",
+      "legacyId": 64,
+      "name": "Chance on hit to weaken",
+      "min": 0.008,
+      "max": 0.015,
+      "levelPow": 0.25,
+      "combine": "sum",
+      "rarity": 3,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "chance_to_weaken",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.thorns",
+      "legacyId": 65,
+      "name": "Thorns",
+      "min": 1.1,
+      "max": 1.8,
+      "levelPow": 1.2,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [
+        {
+          "stat": "thorns",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.piercechance",
+      "legacyId": 66,
+      "name": "Projectile pierce chance",
+      "min": 0.035,
+      "max": 0.145,
+      "levelPow": 0.1,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "projectile_pierce_chance",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.explosiondamage",
+      "legacyId": 67,
+      "name": "Explosive damage",
+      "min": 0.04,
+      "max": 0.11,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "explosion_damage",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.speardamage",
+      "legacyId": 68,
+      "name": "Thrown spear damage",
+      "min": 0.17,
+      "max": 0.55,
+      "levelPow": 0.3,
+      "combine": "sum",
+      "rarity": 6,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "perk_thrown_spear_damage_mult",
+          "op": "mult",
+          "transform": "one_plus"
+        }
+      ]
+    },
+    {
+      "id": "stat.extracarriedsticks",
+      "legacyId": 1000,
+      "name": "Extra Carried Sticks",
+      "min": 9.0,
+      "max": 18.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [],
+      "manual": true
+    },
+    {
+      "id": "stat.extracarriedrocks",
+      "legacyId": 1001,
+      "name": "Extra Carried Rocks",
+      "min": 7.0,
+      "max": 18.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [],
+      "manual": true
+    },
+    {
+      "id": "stat.extracarriedropes",
+      "legacyId": 1002,
+      "name": "Extra Carried Ropes",
+      "min": 6.0,
+      "max": 18.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [],
+      "manual": true
+    },
+    {
+      "id": "stat.extracarrieddrinks",
+      "legacyId": 1003,
+      "name": "Extra Carried Drinks",
+      "min": 15.0,
+      "max": 25.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [],
+      "manual": true
+    },
+    {
+      "id": "stat.extracarriedfood",
+      "legacyId": 1004,
+      "name": "Extra Carried Food",
+      "min": 7.0,
+      "max": 20.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 4,
+      "effects": [],
+      "manual": true
+    },
+    {
+      "id": "stat.blackholesize",
+      "legacyId": 2000,
+      "name": "Black Hole Size",
+      "min": 3.0,
+      "max": 6.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 6,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "spell_blackhole_radius",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.blackholelifetime",
+      "legacyId": 2001,
+      "name": "Black Hole Lifetime",
+      "min": 2.0,
+      "max": 3.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 6,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "spell_blackhole_duration",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.blackholegravitationalforce",
+      "legacyId": 2002,
+      "name": "Black Hole Gravitational Force",
+      "min": 5.0,
+      "max": 7.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 6,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "spell_blackhole_pullforce",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.blackholedamage",
+      "legacyId": 2003,
+      "name": "Black Hole damage",
+      "min": 0.2,
+      "max": 0.3,
+      "levelPow": 0.9,
+      "combine": "sum",
+      "rarity": 6,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "spell_blackhole_damage",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.stunonhit",
+      "legacyId": 2004,
+      "name": "Stun on hit",
+      "min": 1.0,
+      "max": 1.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 1,
+      "effects": [
+        {
+          "stat": "i_hammer_stun",
+          "op": "enable"
+        }
+      ]
+    },
+    {
+      "id": "stat.snapfreezeduration",
+      "legacyId": 2005,
+      "name": "Snap Freeze Duration",
+      "min": 3.0,
+      "max": 5.0,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 3,
+      "effects": [
+        {
+          "stat": "spell_snap_freeze_duration",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.raftspeed",
+      "legacyId": 2006,
+      "name": "Raft Speed",
+      "min": 1.0,
+      "max": 1.15,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 4,
+      "percent": true,
+      "rounding": 2,
+      "effects": [
+        {
+          "stat": "perk_raft_speed_multipier",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.emptysocket",
+      "legacyId": 3000,
+      "name": "Empty Socket",
+      "min": 1.0,
+      "max": 3.5,
+      "levelPow": 0.0,
+      "combine": "sum",
+      "rarity": 0,
+      "multiplier": 0.0,
+      "effects": []
+    },
+    {
+      "id": "stat.socket_crit_chance",
+      "legacyId": 3001,
+      "name": "Socket: Crit Chance",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "effects": [
+        {
+          "stat": "crit_chance",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_agility",
+      "legacyId": 3002,
+      "name": "Socket: Agility",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "effects": [
+        {
+          "stat": "agility",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_movement_speed",
+      "legacyId": 3003,
+      "name": "Socket: Movement Speed",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "movement_speed",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_ranged_damage",
+      "legacyId": 3004,
+      "name": "Socket: Ranged Damage",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "ranged_increased_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_ranged_armor_piercing",
+      "legacyId": 3005,
+      "name": "Socket: Ranged Armor Piercing",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 0,
+      "effects": [
+        {
+          "stat": "ranged_armor_piercing",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.socketed_shark_tooth_attack_speed",
+      "legacyId": 3006,
+      "name": "Socketed Shark Tooth: Attack Speed",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socketed_shark_tooth_strength",
+      "legacyId": 3007,
+      "name": "Socketed Shark Tooth: Strength",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 0,
+      "effects": [
+        {
+          "stat": "strength",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.socketed_shark_tooth_damage_reduction",
+      "legacyId": 3008,
+      "name": "Socketed Shark Tooth: Damage Reduction",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "one_minus_product",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "all_damage_taken",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.socketed_shark_tooth_melee_damage",
+      "legacyId": 3009,
+      "name": "Socketed Shark Tooth: Melee Damage",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "melee_increased_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socketed_shark_tooth_melee_armor_piercing",
+      "legacyId": 3010,
+      "name": "Socketed Shark Tooth: Melee Armor Piercing",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 0,
+      "effects": [
+        {
+          "stat": "melee_armor_piercing",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_cooldown_reduction",
+      "legacyId": 3011,
+      "name": "Socket: Cooldown Reduction",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "one_minus_product",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "cooldown",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_intelligence",
+      "legacyId": 3012,
+      "name": "Socket: Intelligence",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 0,
+      "effects": [
+        {
+          "stat": "intelligence",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_spell_cost_reduction",
+      "legacyId": 3013,
+      "name": "Socket: Spell Cost Reduction",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "one_minus_product",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "spell_cost",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_spell_damage",
+      "legacyId": 3014,
+      "name": "Socket: Spell Damage",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "spell_increased_dmg",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_energy_on_hit",
+      "legacyId": 3015,
+      "name": "Socket: Energy On Hit",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 2,
+      "multiplier": 0.02,
+      "effects": [
+        {
+          "stat": "energy_on_hit",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_experience_gain",
+      "legacyId": 3016,
+      "name": "Socket: Experience Gain",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "product_plus_one",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "exp_gain",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_vitality",
+      "legacyId": 3017,
+      "name": "Socket: Vitality",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 0,
+      "effects": [
+        {
+          "stat": "vitality",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_magic_find",
+      "legacyId": 3018,
+      "name": "Socket: Magic Find",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "magic_find",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_all_healing",
+      "legacyId": 3019,
+      "name": "Socket: All Healing",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "product_plus_one",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "multiplier": 1.25,
+      "effects": [
+        {
+          "stat": "all_recovery_mult",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_life_per_second",
+      "legacyId": 3020,
+      "name": "Socket: Life Per Second",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 1,
+      "multiplier": 0.04,
+      "effects": [
+        {
+          "stat": "health_recovery_per_second",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_maximum_health",
+      "legacyId": 3021,
+      "name": "Socket: Maximum Health",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "product_plus_one",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "max_health_mult",
+          "op": "mult",
+          "transform": "one_plus"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_armor",
+      "legacyId": 3022,
+      "name": "Socket: Armor",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 0,
+      "multiplier": 10.0,
+      "effects": [
+        {
+          "stat": "armor",
+          "op": "add",
+          "transform": "round"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_resistance_to_magic",
+      "legacyId": 3023,
+      "name": "Socket: Resistance To Magic",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "one_minus_product",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "effects": [
+        {
+          "stat": "magic_damage_taken",
+          "op": "mult",
+          "transform": "one_minus"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_crit_damage",
+      "legacyId": 3024,
+      "name": "Socket: Crit Damage",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "product_plus_one",
+      "rarity": 0,
+      "percent": true,
+      "rounding": 1,
+      "multiplier": 5.0,
+      "effects": [
+        {
+          "stat": "crit_damage",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    },
+    {
+      "id": "stat.socket_thorns",
+      "legacyId": 3025,
+      "name": "Socket: Thorns",
+      "min": 0.0,
+      "max": 0.0,
+      "levelPow": 1.0,
+      "combine": "sum",
+      "rarity": 0,
+      "rounding": 0,
+      "multiplier": 5.0,
+      "effects": [
+        {
+          "stat": "thorns",
+          "op": "add",
+          "transform": "x"
+        }
+      ]
+    }
+  ]
+}

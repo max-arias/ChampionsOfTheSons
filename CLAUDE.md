@@ -1,0 +1,25 @@
+# Champions of the Sons
+
+RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, Unity 2022.2.16f1). A rebuild of the mechanics of Champions of the Forest (The Forest) — new code, same rules. Spec and plan: Obsidian ticket COS-1.
+
+## Layout
+- `src/ChampionsOfTheSons.Core` — pure .NET 6 library: rules (`Rules/`), content definitions and loading (`Content/`), save model (`Saving/`), net protocol (`Networking/`), seeded RNG. No Unity, Il2Cpp or game references, ever. Everything game-agnostic goes here.
+- `src/ChampionsOfTheSons.Mod` — the RedLoader mod: game bridge (Harmony patches), UI (SUI), spells and effects. Compiles the Core sources in, so the mod ships as one DLL. Content JSON is embedded.
+- `content/` — item, stat, perk, spell, affix, buff and difficulty definitions (JSON, stable string IDs). Embedded in the mod, copied next to the tests.
+- `tests/ChampionsOfTheSons.Core.Tests` — xUnit tests for the rules core, save model and net protocol only.
+- `docs/mechanics.md` — the rules and formulas we implement (taken from the original mod's behavior).
+
+## Build
+- `./build.ps1` builds and tests the core. `./build.ps1 mod` builds the mod and copies it to `<game>\Mods`. Needs a .NET 10 SDK (PATH, or a local one at `D:\dev\deps\dotnet`).
+- The mod build needs RedLoader 0.8.6 installed in the game folder and the game launched once, so `_RedLoader\Game` holds the interop assemblies. Game folder: `C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest` (override with `-p:GameDir=`).
+- Fast in-game checks: launch options `--sdk.loadintomain` (straight into a world) or `--savegame <id>`; RedLoader log in `_RedLoader\Latest.log`.
+
+## Rules
+- Core code must not reference Unity or game types; the bridge converts.
+- Content IDs are stable strings; never derive IDs from order. Saves must keep loading: bump the save version and add a migration for any format change.
+- Host is authoritative for enemies, drops and difficulty. A client computes its own outgoing hits; the host applies defense.
+- Do not copy code or lore/description text from the original Champions of the Forest repo (it has no license). Mechanics and numbers are fine.
+- Tests: rules, save migrations and codec round-trips. No tests that restate content values.
+
+## Task tracking
+Tasks live in the Obsidian vault, project folder `champions-of-the-sons`, prefix `COS` (`C:\Users\max\Documents\Obsidian Vault\champions-of-the-sons`). See `Ticket System.md` in the vault root for everything else. GitHub Issues and TODO files are not used.

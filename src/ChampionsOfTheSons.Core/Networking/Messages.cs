@@ -1,0 +1,149 @@
+namespace ChampionsOfTheSons.Core.Networking;
+
+/// <summary>
+/// Every message the mod sends. Authority: the host owns enemies, drops, pickups and difficulty;
+/// a client owns its own stat sheet, hits and spell casts. <see cref="MessageCodec"/> turns these into
+/// bytes; the mod sends the bytes through one SonsSdk NetEvent.
+/// </summary>
+public enum MessageType : byte
+{
+    Hello = 1,
+    HelloReject = 2,
+    WorldSettings = 3,
+    EnemyProfileRequest = 10,
+    EnemySync = 11,
+    EnemyHealth = 12,
+    Hit = 13,
+    XpGranted = 14,
+    DropSpawned = 20,
+    PickupRequest = 21,
+    PickupGranted = 22,
+    DropRemoved = 23,
+    SpellCast = 30,
+    Ping = 40,
+}
+
+public interface IMessage
+{
+    MessageType Type { get; }
+}
+
+public readonly record struct Vec3(float X, float Y, float Z);
+
+/// <summary>Client → host on join. The host answers with <see cref="HelloReject"/> on a mismatch.</summary>
+public sealed record Hello(int ProtocolVersion, string ModVersion) : IMessage
+{
+    public MessageType Type => MessageType.Hello;
+}
+
+public sealed record HelloReject(string Reason) : IMessage
+{
+    public MessageType Type => MessageType.HelloReject;
+}
+
+/// <summary>Host → clients: world settings that the host owns.</summary>
+public sealed record WorldSettings(string DifficultyId, bool FriendlyFire) : IMessage
+{
+    public MessageType Type => MessageType.WorldSettings;
+}
+
+/// <summary>Client → host: send me this enemy's profile. <paramref name="EnemyNetId"/> is the packed Bolt network ID.</summary>
+public sealed record EnemyProfileRequest(ulong EnemyNetId) : IMessage
+{
+    public MessageType Type => MessageType.EnemyProfileRequest;
+}
+
+/// <summary>Host → clients: the rolled profile of one enemy.</summary>
+public sealed record EnemySync(
+    ulong EnemyNetId,
+    string KindId,
+    int Level,
+    byte Tier,
+    float MaxHealth,
+    float Health,
+    float Armor,
+    IReadOnlyList<string> AffixIds,
+    long Bounty) : IMessage
+{
+    public MessageType Type => MessageType.EnemySync;
+
+    public bool Equals(EnemySync? other) =>
+        other is not null && EnemyNetId == other.EnemyNetId && KindId == other.KindId && Level == other.Level &&
+        Tier == other.Tier && MaxHealth.Equals(other.MaxHealth) && Health.Equals(other.Health) &&
+        Armor.Equals(other.Armor) && Bounty == other.Bounty && AffixIds.SequenceEqual(other.AffixIds);
+
+    public override int GetHashCode() => HashCode.Combine(EnemyNetId, KindId, Level, Tier);
+}
+
+/// <summary>Host → clients: health/armor changed.</summary>
+public sealed record EnemyHealth(ulong EnemyNetId, float Health, float Armor) : IMessage
+{
+    public MessageType Type => MessageType.EnemyHealth;
+}
+
+[Flags]
+public enum HitFlags : byte
+{
+    None = 0,
+    Crit = 1,
+    Magic = 2,
+    Pure = 4,
+    Melee = 8,
+    Ranged = 16,
+    Thrown = 32,
+}
+
+/// <summary>Client → host: an outgoing hit computed from the attacker's own stat sheet. The host applies defense.</summary>
+public sealed record Hit(ulong EnemyNetId, float Amount, HitFlags Flags, float ArmorPierce) : IMessage
+{
+    public MessageType Type => MessageType.Hit;
+}
+
+/// <summary>Host → one client: XP earned (kill share, bounty, massacre payout).</summary>
+public sealed record XpGranted(long Amount) : IMessage
+{
+    public MessageType Type => MessageType.XpGranted;
+}
+
+/// <summary>Host → clients: an item dropped in the world.</summary>
+public sealed record DropSpawned(uint DropId, ItemInstance Item, Vec3 Position) : IMessage
+{
+    public MessageType Type => MessageType.DropSpawned;
+}
+
+/// <summary>Client → host: I want to pick this drop up.</summary>
+public sealed record PickupRequest(uint DropId) : IMessage
+{
+    public MessageType Type => MessageType.PickupRequest;
+}
+
+/// <summary>Host → the requesting client: the drop is yours.</summary>
+public sealed record PickupGranted(uint DropId, ItemInstance Item) : IMessage
+{
+    public MessageType Type => MessageType.PickupGranted;
+}
+
+/// <summary>Host → clients: remove this drop from the world.</summary>
+public sealed record DropRemoved(uint DropId) : IMessage
+{
+    public MessageType Type => MessageType.DropRemoved;
+}
+
+/// <summary>Caster → everyone: play this spell's visuals. <paramref name="Seed"/> keeps random visuals identical.</summary>
+public sealed record SpellCast(uint PlayerId, string SpellId, Vec3 Origin, Vec3 Direction, ulong Seed) : IMessage
+{
+    public MessageType Type => MessageType.SpellCast;
+}
+
+public enum PingKind : byte
+{
+    Location = 0,
+    Enemy = 1,
+    Item = 2,
+}
+
+/// <summary>Player → everyone: a ping marker. <paramref name="TargetId"/> is the enemy net ID or drop ID, 0 for locations.</summary>
+public sealed record Ping(uint PlayerId, PingKind Kind, Vec3 Position, ulong TargetId) : IMessage
+{
+    public MessageType Type => MessageType.Ping;
+}

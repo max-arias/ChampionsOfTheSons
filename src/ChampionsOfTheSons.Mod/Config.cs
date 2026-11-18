@@ -1,0 +1,28 @@
+using RedLoader;
+using SonsSdk;
+
+namespace ChampionsOfTheSons.Mod;
+
+public static class Config
+{
+    public static ConfigCategory Category { get; private set; } = null!;
+
+    public static KeybindConfigEntry InventoryKey { get; private set; } = null!;
+    public static KeybindConfigEntry PerksKey { get; private set; } = null!;
+    public static ConfigEntry<bool> ShowNameplates { get; private set; } = null!;
+    public static ConfigEntry<bool> ShowDamageNumbers { get; private set; } = null!;
+
+    public static void Init()
+    {
+        Category = ConfigSystem.CreateFileCategory("ChampionsOfTheSons", "Champions of the Sons", "ChampionsOfTheSons.cfg");
+
+        InventoryKey = Category.CreateKeybindEntry("inventory_key", "i", "Inventory", "Open the Champions inventory.");
+        InventoryKey.SetScope(needsPlayerControllable: true);
+
+        PerksKey = Category.CreateKeybindEntry("perks_key", "p", "Perks", "Open the perk tree.");
+        PerksKey.SetScope(needsPlayerControllable: true);
+
+        ShowNameplates = Category.CreateEntry("show_nameplates", true, "Enemy nameplates", "Show level and health above enemies.");
+        ShowDamageNumbers = Category.CreateEntry("show_damage_numbers", true, "Damage numbers", "Show floating damage numbers.");
+    }
+}

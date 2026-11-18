@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Loads content/*.json with the same loader the mod uses and prints every problem. Exit code 1 on errors. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ChampionsOfTheSons.Core\ChampionsOfTheSons.Core.csproj" />
+  </ItemGroup>
+</Project>
