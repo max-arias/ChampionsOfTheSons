@@ -58,14 +58,20 @@ public sealed class PerkTree
         return result;
     }
 
-    public BuyResult UnlockSpell(string spellId, Progress progress)
+    public BuyResult CanUnlockSpell(string spellId, Progress progress)
     {
         if (!_content.Spells.TryGetValue(spellId, out var spell)) return BuyResult.UnknownPerk;
         if (_spells.Contains(spellId)) return BuyResult.AlreadyBought;
         if (progress.Level < spell.LevelReq) return BuyResult.LevelTooLow;
         if (AvailablePoints(progress) < SpellUnlockCost) return BuyResult.NotEnoughPoints;
-        _spells.Add(spellId);
         return BuyResult.Ok;
+    }
+
+    public BuyResult UnlockSpell(string spellId, Progress progress)
+    {
+        var result = CanUnlockSpell(spellId, progress);
+        if (result == BuyResult.Ok) _spells.Add(spellId);
+        return result;
     }
 
     /// <summary>Respec: unbuy every perk and spell.</summary>
