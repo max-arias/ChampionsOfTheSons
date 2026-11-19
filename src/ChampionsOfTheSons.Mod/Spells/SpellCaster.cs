@@ -13,7 +13,12 @@ public enum SpellCastOutcome
     NotEnoughEnergy,
     NotImplemented,
     NotInWorld,
+    /// <summary>A channeled or toggle spell that was running has been switched off.</summary>
+    Stopped,
 }
+
+/// <summary>A cast, as a clear event a later co-op sync can send: which spell, from where, along what direction, at what aim point.</summary>
+public readonly record struct SpellCastInfo(string SpellId, Vector3 Origin, Vector3 Direction, Vector3 Aim);
 
 /// <summary>
 /// Casting: costs, cooldown (<see cref="SpellBook.TryCast"/>) and the in-game effect per spell id.
@@ -24,10 +29,13 @@ internal static class SpellCaster
 {
     public const float BlinkRange = 15f;
 
-    private static readonly Dictionary<string, Func<bool>> Effects = new()
+    private static readonly Dictionary<string, Func<bool>> Effects = new(SpellEffects.Table)
     {
         ["spell.blink"] = Blink,
     };
+
+    /// <summary>Raised after every successful cast (or switch-on of a channeled/toggle spell), with where and how it was cast.</summary>
+    public static event Action<SpellCastInfo>? Casted;
 
     public static string LastMessage { get; private set; } = "";
 
@@ -47,7 +55,7 @@ internal static class SpellCaster
 
     public static double MaxEnergy => Derived.MaxEnergy(PlayerState.Character.Stats);
 
-    private static void Spend(double amount)
+    internal static void Spend(double amount)
     {
         var s = LocalPlayer.Vitals?.Stamina;
         if (s == null || amount <= 0) return;
@@ -73,6 +81,9 @@ internal static class SpellCaster
             case CastResult.EmptySlot: return SpellCastOutcome.EmptySlot;
             case CastResult.OnCooldown: return SpellCastOutcome.OnCooldown;
             case CastResult.NotEnoughEnergy: LastMessage = "not enough energy"; return SpellCastOutcome.NotEnoughEnergy;
+            case CastResult.Stopped:
+                SpellEffects.Stopped(slot);
+                return SpellCastOutcome.Stopped;
         }
 
         Spend(cost.Energy + cost.Stamina);
@@ -83,6 +94,15 @@ internal static class SpellCaster
         catch (Exception e)
         {
             RLog.Error($"Champions of the Sons: spell {id} failed: {e}");
+        }
+        try
+        {
+            var eye = SpellWorld.Eye;
+            Casted?.Invoke(new SpellCastInfo(id, eye.position, eye.forward, SpellWorld.AimPoint(50)));
+        }
+        catch (Exception e)
+        {
+            RLog.Error($"Champions of the Sons: spell cast listener failed: {e}");
         }
         return SpellCastOutcome.Cast;
     }
@@ -126,12 +146,19 @@ internal static class SpellCaster
         var eye = cam.position;
         var feet = BlinkTarget(eye, cam.forward, BlinkRange, eye.y - player.position.y);
 
+        TeleportPlayer(feet);
+        return true;
+    }
+
+    /// <summary>Moves the player's feet to a point without the character controller fighting it.</summary>
+    public static void TeleportPlayer(Vector3 feet)
+    {
+        var player = LocalPlayer.Transform;
         var cc = player.GetComponent<CharacterController>();
         if (cc != null) cc.enabled = false;
         player.position = feet;
         if (cc != null) cc.enabled = true;
         var rb = player.GetComponent<Rigidbody>();
         if (rb != null) rb.velocity = Vector3.zero;
-        return true;
     }
 }

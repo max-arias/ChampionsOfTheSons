@@ -44,15 +44,27 @@ internal sealed class SpellsFeature : IModFeature
     {
         SpellKeys.Init();
         new SpellBar().Build();
+        Bridge.EnemyPatches.EnemyHit += (_, enemy, damage, _) =>
+        {
+            if (damage > 0) SpellEffects.OnPlayerHit(enemy);
+        };
     }
+
+    public void OnGameStart() => SpellWorld.Reset();
 
     public void Update(float dt, bool inWorld)
     {
+        if (inWorld) SpellWorld.Step(dt);
         var bar = SpellBar.Instance;
         if (bar == null) return;
         bar.SetVisible(inWorld);
         if (inWorld) bar.Refresh();
     }
 
-    public void RegisterSelfTests() => SpellsSelfTest.Register();
+    public void RegisterSelfTests()
+    {
+        SpellsSelfTest.Register();
+        Spells2SelfTest.Register();
+        SelfTest.PhaseReset += SpellWorld.Reset;
+    }
 }

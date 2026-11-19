@@ -91,9 +91,7 @@ internal static class SpellsSelfTest
         stamina.SetCurrentValue(1);
         SelfTest.Check("spells: no energy refuses the cast", SpellCaster.Cast(0) == SpellCastOutcome.NotEnoughEnergy && Pc.Spells.IsReady(0));
         SelfTest.Check("spells: empty slot", SpellCaster.Cast(4) == SpellCastOutcome.EmptySlot);
-        Pc.Perks.UnlockSpell("spell.war_cry", new Progress(20, 0, 0));
-        Pc.Spells.Equip(2, "spell.war_cry");
-        SelfTest.Check("spells: unimplemented spell is refused without cost", SpellCaster.Cast(2) == SpellCastOutcome.NotImplemented);
+        SelfTest.Check("spells: every spell has an effect", ModContent.Db.Spells.Keys.All(SpellCaster.IsImplemented));
         stamina.SetCurrentValue(stamina.GetMax());
     }
 

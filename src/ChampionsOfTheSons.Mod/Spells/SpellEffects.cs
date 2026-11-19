@@ -1,0 +1,497 @@
+using ChampionsOfTheSons.Core;
+using ChampionsOfTheSons.Core.Content;
+using ChampionsOfTheSons.Core.Rules;
+using ChampionsOfTheSons.Mod.Bridge;
+using TheForest.Utils;
+using UnityEngine;
+using static ChampionsOfTheSons.Mod.Spells.SpellWorld;
+
+namespace ChampionsOfTheSons.Mod.Spells;
+
+/// <summary>
+/// What each of the 26 spells besides Blink does when cast. Numbers come from <see cref="SpellTuning"/> and the character's
+/// <c>spell_*</c> stats, so perks that edit a spell change it here. Visuals are placeholders (<see cref="SpellFx"/>).
+/// Enemy damage goes through <see cref="SpellWorld.Strike"/>, the bridge's forced-hit path, so armor, shields and caps apply.
+/// </summary>
+internal static class SpellEffects
+{
+    public static readonly Dictionary<string, Func<bool>> Table = new()
+    {
+        ["spell.war_cry"] = WarCry,
+        ["spell.berserk"] = Berserk,
+        ["spell.golden_skin"] = GoldenSkin,
+        ["spell.focus"] = Focus,
+        ["spell.frenzy"] = FrenzyCast,
+        ["spell.taunt"] = Taunt,
+        ["spell.healing_dome"] = HealingDome,
+        ["spell.sun_flare"] = SunFlare,
+        ["spell.black_hole"] = BlackHole,
+        ["spell.sustain_shield"] = StartShield,
+        ["spell.wide_reach"] = WideReach,
+        ["spell.black_flame"] = StartBlackFlame,
+        ["spell.portal"] = Portal,
+        ["spell.magic_arrow"] = MagicArrow,
+        ["spell.multishot"] = StartMultishot,
+        ["spell.purge"] = Purge,
+        ["spell.snap_freeze"] = SnapFreeze,
+        ["spell.ball_lightning"] = BallLightning,
+        ["spell.bash"] = Bash,
+        ["spell.seeking_arrow"] = SeekingArrow,
+        ["spell.cataclysm"] = Cataclysm,
+        ["spell.blood_infused_arrow"] = BloodInfusedArrow,
+        ["spell.roaring_cheeks"] = RoaringCheeks,
+        ["spell.firebolt"] = Firebolt,
+        ["spell.snow_storm"] = SnowStorm,
+        ["spell.parry"] = ParryCast,
+    };
+
+    private static GameObject? _shieldFx, _flameFx;
+    private static float _flameTimer, _multishotTimer;
+
+    public static void ResetState()
+    {
+        _shieldFx = _flameFx = null;
+        _flameTimer = _multishotTimer = 0;
+    }
+
+    // ---------------------------------------------------------------- player buffs
+
+    private static bool WarCry()
+    {
+        Buffs.Apply("war_cry", SpellTuning.WarCryDuration, SpellTuning.WarCry(Stats));
+        SpellFx.Disc(Feet(), 3f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
+        return true;
+    }
+
+    private static bool Berserk()
+    {
+        Buffs.Apply("berserk", S("spell_berserk_duration"), SpellTuning.Berserk(Stats));
+        SpellFx.Disc(Feet(), 2.2f, SpellFx.Blood, 1.2f, LocalPlayer.Transform);
+        return true;
+    }
+
+    private static bool GoldenSkin()
+    {
+        Buffs.Apply("golden_skin", SpellTuning.GoldenSkinDuration, SpellTuning.GoldenSkin());
+        SpellFx.Disc(Feet(), 2.2f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
+        return true;
+    }
+
+    private static bool Focus()
+    {
+        Buffs.Apply("focus", S("spell_focus_on_atk_speed_duration") > 0 ? S("spell_focus_on_atk_speed_duration") : SpellTuning.FocusDuration, SpellTuning.Focus(Stats));
+        SpellFx.Disc(Feet(), 1.6f, SpellFx.Steel, 1f, LocalPlayer.Transform);
+        return true;
+    }
+
+    private static bool FrenzyCast()
+    {
+        Frenzy.Cast();
+        Buffs.Apply("frenzy", SpellTuning.FrenzyDuration, SpellTuning.Frenzy(Stats, Frenzy.Stacks));
+        SpellFx.Disc(Feet(), 1.8f, SpellFx.Fire, 1f, LocalPlayer.Transform);
+        return true;
+    }
+
+    private static bool Taunt()
+    {
+        Buffs.Apply("taunt", SpellTuning.TauntDuration, SpellTuning.Taunt());
+        float speed = S("spell_taunt_speed_change");
+        foreach (var e in EnemiesWithin(PlayerPos, 30))
+            e.Combat.ApplySlow("spell.taunt", speed > 0 ? speed : 2, SpellTuning.TauntDuration); // above 1: they rush the taunter
+        SpellFx.Disc(Feet(), 30f, SpellFx.Blood, 0.6f);
+        return true;
+    }
+
+    private static bool ParryCast()
+    {
+        Parry.Cast();
+        SpellFx.Sphere(PlayerPos + Vector3.up * 1.2f, 1.1f, SpellFx.Steel, (float)SpellTuning.ParryWindow, LocalPlayer.Transform);
+        return true;
+    }
+
+    /// <summary>An incoming hit was parried: strike back around the player, heal and refund energy, buff attack speed.</summary>
+    public static void Riposte()
+    {
+        float radius = S("spell_parry_radius");
+        foreach (var e in EnemiesWithin(PlayerPos, radius))
+        {
+            Strike(e, Hit(S("spell_parry_damage"), S("spell_parry_damage_scaling")));
+            if (Stats.IsOn("spell_parry_ignites")) e.Combat.ApplyDot("player.parry", DotKind.Fire, S("spell_parry_damage") * 0.25, 4);
+        }
+        PlayerEffects.Heal(S("spell_parry_heal"));
+        PlayerEffects.AddEnergy(S("spell_parry_energy"));
+        Buffs.Apply("parry", S("spell_parry_buff_duration"), new[]
+        {
+            new StatModifier(StatIds.AttackSpeed, EffectOp.Mult, Math.Max(1, S("spell_parry_attack_speed"))),
+            new StatModifier(StatIds.AllDamage, EffectOp.Mult, 1 + S("spell_parry_buff_damage")),
+        });
+        SpellFx.Disc(Feet(), Math.Max(1, radius), SpellFx.Steel, 0.6f, LocalPlayer.Transform);
+    }
+
+    private static bool Purge()
+    {
+        PlayerEffects.ClearDebuffs();
+        if (Stats.IsOn("spell_purge_heal")) PlayerEffects.Heal(LocalPlayer.Vitals.Health.GetMax() * SpellTuning.PurgeHealFraction);
+        SpellFx.Disc(Feet(), 3f, SpellFx.Heal, 1f, LocalPlayer.Transform);
+        return true;
+    }
+
+    // ---------------------------------------------------------------- zones
+
+    private static bool HealingDome()
+    {
+        var at = Feet();
+        float radius = (float)SpellTuning.HealingDomeRadius;
+        float interval = 0.5f;
+        AddZone(new SpellZone
+        {
+            Id = "healing_dome", Center = at, Radius = radius, Left = S("spell_healing_dome_duration"), Interval = interval,
+            Visual = SpellFx.Disc(at, radius, SpellFx.Heal, 1e6f),
+            Pulse = z =>
+            {
+                if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
+                PlayerEffects.Heal(SpellTuning.HealingDomeHeal(LocalPlayer.Vitals.Health.GetMax(), Stats) * z.Interval);
+            },
+        });
+        return true;
+    }
+
+    private static bool SunFlare()
+    {
+        var at = AimGround(30);
+        float radius = S("spell_flare_radius");
+        foreach (var e in EnemiesWithin(at, radius)) Strike(e, Hit(S("spell_flare_damage"), S("spell_flare_damage_scaling")));
+        AddZone(new SpellZone
+        {
+            Id = "sun_flare", Center = at, Radius = radius, Left = S("spell_flare_duration"), Interval = (float)SpellTuning.SunFlareTick,
+            Visual = SpellFx.Disc(at, radius, SpellFx.Holy, 1e6f),
+            Pulse = z =>
+            {
+                foreach (var e in EnemiesWithin(z.Center, z.Radius)) e.Combat.ApplySlow("spell.flare", S("spell_flare_slow"), 2);
+                if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
+                PlayerEffects.Heal(S("spell_flare_heal"));
+                Buffs.Apply("flare_boost", 2, SpellTuning.Speed(Math.Max(1, S("spell_flare_boost"))));
+            },
+        });
+        SpellFx.Sphere(at + Vector3.up * 3, 1.2f, SpellFx.Holy, 1f);
+        return true;
+    }
+
+    private static bool BlackHole()
+    {
+        var at = AimGround(40) + Vector3.up * 1.5f;
+        float radius = S("spell_blackhole_radius"), pull = S("spell_blackhole_pullforce") / (float)SpellTuning.BlackHolePullDivisor;
+        var core = SpellFx.Sphere(at, 1.5f, SpellFx.Dark, 1e6f);
+        AddZone(new SpellZone
+        {
+            Id = "black_hole", Center = at, Radius = radius, Left = S("spell_blackhole_duration"), Interval = (float)SpellTuning.BlackHoleTick,
+            Visual = core,
+            Frame = (z, dt) =>
+            {
+                foreach (var e in EnemiesWithin(z.Center, z.Radius))
+                {
+                    var to = z.Center - Center(e);
+                    float d = to.magnitude;
+                    if (d < 2f) continue;
+                    Push(e, to / d * Mathf.Min(pull * dt, d - 2f));
+                }
+            },
+            Pulse = z =>
+            {
+                foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")));
+            },
+        });
+        SpellFx.Disc(at - Vector3.up * 1.4f, radius, SpellFx.Dark, 0.6f);
+        return true;
+    }
+
+    private static bool Cataclysm()
+    {
+        var at = AimGround(50);
+        float radius = S("spell_cataclysm_radius");
+        var color = Stats.IsOn("spell_cataclysm_arcane") ? SpellFx.Arcane : SpellFx.Fire;
+        AddZone(new SpellZone
+        {
+            Id = "cataclysm", Center = at, Radius = radius, Left = S("spell_cataclysm_duration"), Interval = (float)SpellTuning.CataclysmTick,
+            Visual = SpellFx.Column(at, radius, 14f, color, 1e6f),
+            Pulse = z =>
+            {
+                foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, Hit(S("spell_cataclysm_damage"), S("spell_cataclysm_damage_scaling")));
+            },
+        });
+        return true;
+    }
+
+    private static bool SnowStorm()
+    {
+        var at = AimGround(30);
+        float radius = (float)SpellTuning.SnowStormRadius;
+        float interval = Math.Max(0.1f, S("spell_snowstorm_hit_delay"));
+        AddZone(new SpellZone
+        {
+            Id = "snow_storm", Center = at, Radius = radius, Left = (float)SpellTuning.SnowStormSeconds, Interval = interval,
+            Visual = SpellFx.Disc(at, radius, SpellFx.Ice, 1e6f),
+            Pulse = z =>
+            {
+                foreach (var e in EnemiesWithin(z.Center, z.Radius))
+                {
+                    var hit = Hit(SpellTuning.SnowStormDamage, S("spell_snowstorm_dmg_scaling"));
+                    Strike(e, hit with { Amount = hit.Amount * S("spell_snowstorm_damage_mult") });
+                    e.Combat.ApplySlow("spell.snow_storm", SpellTuning.SnowStormSlow, 1.5);
+                    if (Stats.IsOn("spell_snowstorm_pull_enemies_in")) Push(e, (z.Center - Center(e)).normalized * 0.4f);
+                }
+            },
+        });
+        return true;
+    }
+
+    private static bool BallLightning()
+    {
+        var dir = Eye.forward;
+        dir.y = 0;
+        dir.Normalize();
+        var start = PlayerPos + Vector3.up * 1.5f + dir * 2f;
+        var ball = SpellFx.Sphere(start, 0.8f, SpellFx.Storm, 1e6f);
+        AddZone(new SpellZone
+        {
+            Id = "ball_lightning", Center = start, Radius = (float)SpellTuning.BallLightningRadius, Left = (float)SpellTuning.BallLightningSeconds,
+            Interval = (float)SpellTuning.BallLightningTick, Visual = ball,
+            Frame = (z, dt) =>
+            {
+                z.Center += dir * (float)SpellTuning.BallLightningSpeed * dt;
+                if (z.Visual != null) z.Visual.transform.position = z.Center;
+            },
+            Pulse = z =>
+            {
+                foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, SpellTuning.BallLightningZap(Stats, Rng.FromTime()));
+            },
+        });
+        return true;
+    }
+
+    // ---------------------------------------------------------------- bursts and melee
+
+    private static bool WideReach()
+    {
+        var eye = Eye;
+        foreach (var e in InCone(eye.position, eye.forward, (float)SpellTuning.WideReachRange, (float)SpellTuning.WideReachAngle))
+            Strike(e, Hit(SpellTuning.WideReachDamage, SpellTuning.WideReachScaling));
+        SpellFx.Sphere(eye.position + eye.forward * 3f, 1.4f, SpellFx.Steel, 0.2f);
+        return true;
+    }
+
+    private static bool Bash()
+    {
+        var eye = Eye;
+        var flat = new Vector3(eye.forward.x, 0, eye.forward.z).normalized;
+        foreach (var e in InCone(PlayerPos + Vector3.up, flat, (float)SpellTuning.BashRange, (float)SpellTuning.BashAngle / 2))
+        {
+            Strike(e, Hit(SpellTuning.BashDamage, SpellTuning.BashScaling));
+            if (!e.IsActive) continue;
+            e.Combat.ApplyWeaken("spell.bash", S("spell_bash_damage_debuff_amount"), S("spell_bash_duration"));
+            e.Combat.ApplySlow("spell.bash", S("spell_bash_slow_amount"), S("spell_bash_duration"));
+            var away = Center(e) - PlayerPos;
+            away.y = 0;
+            Push(e, away.normalized * (float)SpellTuning.BashKnockback);
+        }
+        SpellFx.Sphere(PlayerPos + flat * 2.2f + Vector3.up, 1.2f, SpellFx.Steel, 0.2f);
+        return true;
+    }
+
+    private static bool SnapFreeze()
+    {
+        float dist = S("spell_snap_freeze_dist");
+        foreach (var e in EnemiesWithin(PlayerPos, dist))
+        {
+            Strike(e, Hit(SpellTuning.SnapFreezeDamage, S("spell_snap_damage_scaling")));
+            if (e.IsActive) e.Combat.ApplySlow("spell.snap_freeze", S("spell_snap_float_amount"), S("spell_snap_freeze_duration"));
+        }
+        SpellFx.Disc(Feet(), dist, SpellFx.Ice, 1.2f);
+        return true;
+    }
+
+    private static bool RoaringCheeks()
+    {
+        float radius = S("spell_fart_radius");
+        foreach (var e in EnemiesWithin(PlayerPos, radius))
+        {
+            Strike(e, Hit(S("spell_fart_base_dmg"), S("spell_fart_damage_scaling")));
+            if (!e.IsActive) continue;
+            e.Combat.ApplySlow("spell.roaring_cheeks", S("spell_fart_slow"), S("spell_fart_debuff_duration"));
+            var away = Center(e) - PlayerPos;
+            away.y = 0;
+            Push(e, away.normalized * S("spell_fart_knockback") * (float)SpellTuning.RoarKnockbackScale);
+        }
+        SpellFx.Disc(Feet(), radius, SpellFx.Dark, 1f);
+        return true;
+    }
+
+    private static bool Portal()
+    {
+        SpellPortals.Open(S("spell_portal_duration"));
+        return true;
+    }
+
+    // ---------------------------------------------------------------- projectiles
+
+    private static bool Firebolt()
+    {
+        var eye = Eye;
+        AddBolt(new SpellBolt
+        {
+            Id = "firebolt", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.ProjectileSpeed, Range = 60, Radius = 1f,
+            Visual = SpellFx.Sphere(eye.position + eye.forward, 0.3f, SpellFx.Fire, 1e6f),
+            OnHit = (b, e) =>
+            {
+                var hit = Hit(SpellTuning.FireboltDamage, S("spell_firebolt_damage_scaling"));
+                Strike(e, hit);
+                if (e.IsActive) e.Combat.ApplyDot("player.firebolt", DotKind.Fire, hit.Amount * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds);
+                SpellFx.Sphere(b.Pos, 0.9f, SpellFx.Fire, 0.3f);
+            },
+        });
+        return true;
+    }
+
+    private static bool MagicArrow()
+    {
+        var eye = Eye;
+        int volley = 1 + Mathf.Max(0, Mathf.RoundToInt(S("spell_magic_arrow_volley_count")));
+        for (int i = 0; i < volley; i++)
+        {
+            float yaw = volley == 1 ? 0 : (i - (volley - 1) / 2f) * 6f;
+            var dir = Quaternion.AngleAxis(yaw, Vector3.up) * eye.forward;
+            AddBolt(new SpellBolt
+            {
+                Id = "magic_arrow", Pos = eye.position + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f,
+                Visual = SpellFx.Sphere(eye.position + dir, 0.25f, SpellFx.Arcane, 1e6f),
+                OnHit = (b, e) =>
+                {
+                    Strike(e, Hit(SpellTuning.MagicArrowDamage, S("spell_magic_arrow_damage_scaling"), Stats.IsOn("spell_magic_arrow_crit")));
+                    if (!e.IsActive) return;
+                    if (Stats.IsOn("spell_magic_arrow_dmg_debuff")) e.Combat.ApplyWeaken("spell.magic_arrow", 1.25, S("spell_magic_arrow_duration"));
+                    if (Stats.IsOn("spell_magic_arrow_double_slow")) e.Combat.ApplySlow("spell.magic_arrow", 0.5, S("spell_magic_arrow_duration"));
+                    SpellFx.Sphere(b.Pos, 0.8f, SpellFx.Arcane, 0.3f);
+                },
+            });
+        }
+        return true;
+    }
+
+    private static bool SeekingArrow()
+    {
+        var eye = Eye;
+        var target = Nearest(eye.position, (float)SpellTuning.SeekingArrowRange, e => Vector3.Angle(eye.forward, Center(e) - eye.position) < 60);
+        AddBolt(new SpellBolt
+        {
+            Id = "seeking_arrow", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.SeekingArrowSpeed,
+            Range = 1000, Life = S("spell_seeking_arrow_duration"), Homing = true, Target = target, Radius = 1f,
+            Visual = SpellFx.Sphere(eye.position + eye.forward, 0.25f, SpellFx.Steel, 1e6f),
+            OnHit = (b, e) =>
+            {
+                var hit = Hit(SpellTuning.SeekingArrowDamage, SpellTuning.SeekingArrowScaling);
+                Strike(e, hit with { Amount = hit.Amount * (1 + S("spell_seeking_arrow_damage_bonus")) });
+                if (e.IsActive) e.Combat.ApplySlow("spell.seeking_arrow", S("spell_seeking_arrow_slow_amount"), S("spell_seeking_arrow_slow_duration"));
+                SpellFx.Sphere(b.Pos, 0.7f, SpellFx.Steel, 0.3f);
+            },
+        });
+        return true;
+    }
+
+    private static bool BloodInfusedArrow()
+    {
+        var health = LocalPlayer.Vitals.Health;
+        var (cost, hit) = SpellTuning.BloodArrow(Stats, health._currentValue, Rng.FromTime());
+        health.SetCurrentValue(Mathf.Max(1, health._currentValue - (float)cost));
+        var eye = Eye;
+        AddBolt(new SpellBolt
+        {
+            Id = "blood_arrow", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.BloodArrowSpeed, Range = (float)SpellTuning.BloodArrowRange, Radius = 1f,
+            Visual = SpellFx.Sphere(eye.position + eye.forward, 0.3f, SpellFx.Blood, 1e6f),
+            OnHit = (b, e) =>
+            {
+                Strike(e, hit);
+                if (e.IsActive && Stats.IsOn("spell_bia_stun")) e.Combat.ApplyStun(2);
+                SpellFx.Sphere(b.Pos, 0.9f, SpellFx.Blood, 0.3f);
+            },
+        });
+        return true;
+    }
+
+    // ---------------------------------------------------------------- channeled and toggle spells
+
+    private static bool StartShield()
+    {
+        Shield.Channeling = true;
+        _shieldFx = SpellFx.Sphere(PlayerPos + Vector3.up * 1.1f, 1.3f, SpellFx.Steel, 1e6f, LocalPlayer.Transform);
+        return true;
+    }
+
+    private static bool StartBlackFlame()
+    {
+        _flameTimer = 0;
+        _flameFx = SpellFx.Disc(Feet(), (float)SpellTuning.BlackFlameRadius, SpellFx.Dark, 1e6f, LocalPlayer.Transform);
+        return true;
+    }
+
+    private static bool StartMultishot()
+    {
+        _multishotTimer = 0;
+        return true;
+    }
+
+    /// <summary>A channeled or toggle spell in <paramref name="slot"/> was switched off or ran out of energy.</summary>
+    public static void Stopped(int slot)
+    {
+        switch (Pc.Spells.Loadout[slot])
+        {
+            case "spell.sustain_shield":
+                Shield.Channeling = false;
+                SpellFx.Remove(_shieldFx);
+                _shieldFx = null;
+                break;
+            case "spell.black_flame":
+                SpellFx.Remove(_flameFx);
+                _flameFx = null;
+                break;
+        }
+    }
+
+    /// <summary>Per-frame work of a running channeled or toggle spell.</summary>
+    public static void Sustained(string id, float dt)
+    {
+        switch (id)
+        {
+            case "spell.black_flame":
+                _flameTimer += dt;
+                while (_flameTimer >= SpellTuning.BlackFlameTick)
+                {
+                    _flameTimer -= (float)SpellTuning.BlackFlameTick;
+                    foreach (var e in EnemiesWithin(PlayerPos, (float)SpellTuning.BlackFlameRadius))
+                        Strike(e, Hit(SpellTuning.BlackFlameDamage, S("spell_black_flame_damage_scaling")));
+                }
+                break;
+            case "spell.multishot":
+                _multishotTimer += dt;
+                while (_multishotTimer >= SpellTuning.MultishotInterval)
+                {
+                    _multishotTimer -= (float)SpellTuning.MultishotInterval;
+                    var target = Nearest(PlayerPos, (float)SpellTuning.MultishotRange);
+                    if (target == null) break;
+                    Strike(target, Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling));
+                    SpellFx.Sphere(Center(target), 0.5f, SpellFx.Steel, 0.2f);
+                }
+                break;
+        }
+    }
+
+    /// <summary>A player hit landed on an enemy (not one of our own spell hits): Frenzy stacks up, Focus slows the target.</summary>
+    public static void OnPlayerHit(EnemyRuntime enemy)
+    {
+        if (Striking) return;
+        if (Frenzy.OnHit(Stats)) Buffs.Apply("frenzy", SpellTuning.FrenzyDuration, SpellTuning.Frenzy(Stats, Frenzy.Stacks));
+        if (Buffs.Has("focus") && enemy.IsActive)
+            enemy.Combat.ApplySlow("spell.focus", S("spell_focus_slow_amount"), S("spell_focus_slow_duration"));
+    }
+
+    private static Vector3 Feet() => PlayerPos + Vector3.up * 0.1f;
+}

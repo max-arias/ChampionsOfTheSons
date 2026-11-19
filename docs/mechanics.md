@@ -97,6 +97,26 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Cost: energy part `cost × spellCostEnergyCost × spellCost`, stamina part `cost × (1 − spellCostEnergyCost) × spellCost`; channeled per second.
 - 27 spells (level / energy / cooldown s): Black Hole 20/350/140, Healing Dome 6/80/70, Blink 3/25/14, Sun Flare 10/100/70, Sustain Shield 8/50 per s, Wide Reach 2/10/0.4, Black Flame 21/25/2.5, War Cry 14/85/180, Portal 12/90/60, Magic Arrow 27/100/20, Multishot 40/30/12, Golden Skin 35/65/160, Purge 7/40/16, Snap Freeze 20/220/40, Berserk 25/10/200, Ball Lightning 44/350/100, Bash 17/25/25, Frenzy 1/0/40, Seeking Arrow 27/50/5, Focus 4/40/20, Parry 8/35/60, Cataclysm 50/500/300, Blood Infused Arrow 11/75/8, Roaring Cheeks 55/400/360, Taunt 9/40/45, Firebolt 6/45/20, Snow Storm 9/120/20. Damage formulas per spell are in COS-25/COS-26.
 
+### Spell effects (COS-26)
+Numbers marked *stat* are the original `spell_*` player stats (content/player_stats.json), so perks that change them change the spell. Numbers marked *own* are this mod's (the original text is not available) and live in `SpellTuning` (Core/Rules/SpellRules.cs). Spell hit = `(base + spellFlatDmg × scaling) × Spell` magic damage through the enemy hit path (armor, shields, caps, Undead); it credits the player but does not trigger on-hit procs.
+- Channeled and toggle spells: a cast switches them on if the energy covers one second of upkeep (and they are ready); they then cost their energy cost every second and switch off when the energy runs out or when cast again. Switching off starts the cooldown. (Holding a key is not detected: a second press is the release.)
+- Buffs are stat-sheet sources `spell.<id>`; re-casting refreshes the time.
+- War Cry: 20 s *own*, all damage ×1.2 and attack speed ×1.2 *stat*. Berserk: 30 s *stat*, damage ×1.3, movement ×1.35, attack speed ×1.25, max health ×1.0 *stat*. Golden Skin: 20 s, +250 armor, damage taken ×0.75 *own*. Focus: attack speed ×1.3 for 4 s *stat*, +15% crit chance, headshot ×1.5 *stat*; enemies the player hits meanwhile are slowed ×0.8 for 4 s *stat*. Frenzy: 20 s *own*, each hit adds a stack up to 5, +7.5% damage and +2% attack speed per stack *stat*. Taunt: 8 s *own*, enemies within 30 m move ×2 *stat* (they rush the caster), player +100 armor *own*. Purge: ends stun and poison on the player; with the perk also heals 20% max health *own*.
+- Parry (35 energy): for 1.5 s *own* the next hit on the player does 0 damage; it strikes enemies within 3.5 m for 40 + 3 × spell flat, heals 10, gives 10 energy and a 10 s attack-speed buff *stat*.
+- Sustain Shield (channeled): shield fills 3% of max health per second up to 15% *stat*; incoming damage drains it first (after armor, dodge and block); after release the rest lasts 20 s *stat*.
+- Healing Dome: 10 s *stat*, radius 8 m *own*, heals the player inside 5% max health per second *own*.
+- Sun Flare: aimed within 30 m; at once 40 + 1.5 × flat in 8.5 m *stat*; for 20 s *stat* enemies inside move ×0.4 *stat* and the player inside heals 11 per second and moves ×1.35 *stat*.
+- Black Hole: aimed within 40 m, 9 s, radius 15 m *stat*; every second 40 + 3.25 × flat *stat* to enemies inside; they are pulled in at pull force 25 / 5 = 5 m/s *own*.
+- Cataclysm: aimed within 50 m, 12 s, radius 5 m *stat*; every 0.5 s *own* 40 + 25 × flat *stat* to enemies inside.
+- Snow Storm: aimed within 30 m, 8 s, radius 10 m *own*; every 0.5 s *stat* 8 *own* + 0.4 × flat *stat* (× damage mult *stat*), enemies inside move ×0.6 *own*.
+- Ball Lightning: a ball rolls forward at 6 m/s for 10 s *own*; every second enemies within 7 m take a tenth of (1220 + 75 × flat) *stat/own*.
+- Portal: a gate 3 m ahead and a linked gate where the view ray lands (up to 40 m); walking into one leaves from the other; 30 s *stat*, 1.5 s re-entry lock *own*.
+- Wide Reach: 20 + 1 × flat to every enemy within 5.5 m in a 140° cone *own*.
+- Bash: 30 + 1 × flat to enemies within 4.5 m in an 80° cone, knocked back 3 m, damage taken ×1.3 and speed ×0.4 for 2 s *stat*. Snap Freeze: 40 + 6.5 × flat to enemies within 12 m, speed ×0.2 for 7 s *stat*. Roaring Cheeks: 50 + 5 × flat to enemies within 30 m, speed ×0.8 for 30 s, knocked back 2 × 1.5 m *stat/own*.
+- Projectiles (fly in a line, stop at the first enemy): Firebolt 30 + 1.2 × flat then a burn of 25% of the hit per second for 4 s *own*; Magic Arrow 60 + 4.2 × flat, +1 arrow per volley-count perk *own/stat*; Seeking Arrow 30 + 1 × flat, homes on the nearest enemy for 10 s, slows ×0.9 for 4 s *stat*; Blood Infused Arrow spends 65% of current health (never the last point) and deals spent health × 5 + 0.1 × flat *stat*.
+- Black Flame (toggle): every second enemies within 6 m take 8 + 0.4 × flat *own/stat*. Multishot (toggle): a stand-in for extra arrows: every 0.75 s the nearest enemy within 30 m takes 15 + 1 × flat *own*.
+- Deviations from the original are deliberate placeholders for spells whose original behaviour needed bow/AI hooks: Multishot auto-fires instead of multiplying bow shots; Taunt speeds enemies up instead of redirecting aggro; Portal is a linked pair instead of recall.
+
 ## Crafting
 Ingredients: exactly N items, each of rarity ≥ the target's; one of each consumed. Each mode is unlocked by a perk.
 - Reroll (N=2): new stat types, values and sockets.
