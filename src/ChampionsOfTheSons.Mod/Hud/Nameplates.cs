@@ -25,6 +25,14 @@ internal sealed class Nameplates
     private const float PlateW = 260;
     private const float OcclusionInterval = 0.2f;
 
+    /// <summary>At most this many plates are drawn; the rest of a crowd shows none (COS-54).</summary>
+    internal const int MaxPlates = 8;
+    /// <summary>Only the highest-priority plates show their affix line.</summary>
+    internal const int MaxAffixLines = 3;
+    /// <summary>Seconds a hit keeps an enemy at the front of the queue.</summary>
+    private const float HitPriorityTime = 6f;
+    private const float StackGap = 4f;
+
     private sealed class Entry
     {
         public WorldSimActor Sim = null!;
@@ -37,7 +45,25 @@ internal sealed class Nameplates
         public float NextOcclusion;
         public float NextProfileCheck;
         public string Why = "new";
+        public float LastHit = -100f;
     }
+
+    /// <summary>A plate that could be drawn this frame. Filled into a reused array: no per-frame allocations.</summary>
+    private struct Candidate
+    {
+        public Entry Entry;
+        public Vector2 Pos;
+        public float Dist, Range, Priority;
+    }
+
+    private sealed class ByPriority : IComparer<Candidate>
+    {
+        public int Compare(Candidate a, Candidate b) => b.Priority.CompareTo(a.Priority);
+    }
+
+    private static readonly ByPriority PriorityOrder = new();
+    private Candidate[] _candidates = new Candidate[64];
+    private readonly Rect[] _placed = new Rect[MaxPlates];
 
     private sealed class Plate
     {
@@ -52,6 +78,8 @@ internal sealed class Nameplates
         public float Fraction = -1;
         public float Scale = 1;
         public bool Bound;
+        public bool AffixShown;
+        public Rect Last;
     }
 
     private readonly List<Entry> _entries = new();
@@ -126,7 +154,9 @@ internal sealed class Nameplates
     public void OnHit(VailActor actor)
     {
         var sim = actor.GetWorldSimActor();
-        if (sim != null) Add(sim);
+        if (sim == null) return;
+        Add(sim);
+        if (_bySim.TryGetValue(sim.Pointer, out var e)) e.LastHit = _time;
     }
 
     private static bool Resolve(Entry e)
@@ -176,6 +206,7 @@ internal sealed class Nameplates
         float k = HudKit.CanvasPerPixel;
         Vector3 camPos = cam != null ? cam.transform.position : Vector3.zero;
         float screenW = Screen.width, screenH = Screen.height;
+        int n = 0;
 
         for (int i = _entries.Count - 1; i >= 0; i--)
         {
@@ -209,17 +240,40 @@ internal sealed class Nameplates
             if (e.Occluded) { e.Why = "occluded"; Release(e); continue; }
             e.Why = "ok";
 
+            if (n == _candidates.Length) Array.Resize(ref _candidates, n * 2); // grows once to the crowd size, then reused
+            float dist = Mathf.Sqrt(sqr);
+            float tierWeight = profile.Tier switch { EnemyTier.Boss => 3000, EnemyTier.Miniboss => 2000, EnemyTier.Elite => 1000, _ => 0 };
+            _candidates[n++] = new Candidate
+            {
+                Entry = e,
+                Pos = new Vector2(sp.x * k, sp.y * k),
+                Dist = dist,
+                Range = range,
+                Priority = tierWeight + (_time - e.LastHit < HitPriorityTime ? 5000 : 0) - dist,
+            };
+        }
+
+        // Highest priority first: recently hit, then bosses and elites, then the nearest.
+        Array.Sort(_candidates, 0, n, PriorityOrder);
+        int placed = 0;
+        for (int i = 0; i < n; i++)
+        {
+            var c = _candidates[i];
+            var e = c.Entry;
+            _candidates[i].Entry = null!;
+            if (placed >= MaxPlates) { e.Why = "crowd"; Release(e); continue; }
+
+            var profile = e.Runtime!.Profile;
             var plate = e.Plate;
             if (plate == null)
             {
-                if (_free.Count == 0) continue;
+                if (_free.Count == 0) { e.Why = "pool"; continue; }
                 plate = _free[_free.Count - 1];
                 _free.RemoveAt(_free.Count - 1);
                 e.Plate = plate;
                 Bind(plate, profile);
             }
 
-            float dist = Mathf.Sqrt(sqr);
             e.Health ??= EnemyRegistry.Health(e.Stats!);
             float frac = e.Health == null ? 1f : Mathf.Clamp01(e.Health._currentValue / (float)profile.MaxHealth);
             if (!Mathf.Approximately(frac, plate.Fraction))
@@ -227,10 +281,61 @@ internal sealed class Nameplates
                 plate.Fraction = frac;
                 HudKit.SetFill(plate.Fill, frac);
             }
-            plate.Group.alpha = Mathf.Clamp01((range - dist) / (range * 0.3f));
-            float s = Mathf.Clamp(16f / Mathf.Max(dist, 1f), 0.65f, 1f) * plate.Scale;
+            SetAffixShown(plate, placed < MaxAffixLines);
+            plate.Group.alpha = Mathf.Clamp01((c.Range - c.Dist) / (c.Range * 0.3f));
+            float s = Mathf.Clamp(16f / Mathf.Max(c.Dist, 1f), 0.65f, 1f) * plate.Scale;
             plate.Rt.localScale = new Vector3(s, s, 1);
-            plate.Rt.anchoredPosition = new Vector2(sp.x * k, sp.y * k);
+
+            // Stack upwards past every plate already placed that this one would cover.
+            float w = PlateW * s, h = plate.Rt.sizeDelta.y * s;
+            var rect = new Rect(c.Pos.x - w / 2, c.Pos.y, w, h);
+            for (int guard = 0; guard < MaxPlates; guard++)
+            {
+                bool moved = false;
+                for (int j = 0; j < placed; j++)
+                {
+                    if (!rect.Overlaps(_placed[j])) continue;
+                    rect.y = _placed[j].yMax + StackGap;
+                    moved = true;
+                }
+                if (!moved) break;
+            }
+            _placed[placed++] = rect;
+            plate.Last = rect;
+            plate.Rt.anchoredPosition = new Vector2(rect.x + w / 2, rect.y);
+        }
+    }
+
+    private static void SetAffixShown(Plate p, bool allowed)
+    {
+        bool show = allowed && p.AffixText.Length > 0;
+        if (show == p.AffixShown) return;
+        p.AffixShown = show;
+        p.Affix.Active(show);
+        p.Rt.sizeDelta = new Vector2(PlateW, show ? 74 : 54);
+    }
+
+    /// <summary>Number of pairs of drawn plates whose screen rectangles overlap (self-test, COS-54).</summary>
+    public int OverlappingPairs()
+    {
+        int pairs = 0;
+        for (int i = 0; i < _all.Count; i++)
+        {
+            if (!_all[i].Bound) continue;
+            for (int j = i + 1; j < _all.Count; j++)
+                if (_all[j].Bound && _all[i].Last.Overlaps(_all[j].Last)) pairs++;
+        }
+        return pairs;
+    }
+
+    /// <summary>Drawn plates that show an affix line.</summary>
+    public int AffixLinesShown
+    {
+        get
+        {
+            int n = 0;
+            foreach (var p in _all) if (p.Bound && p.AffixShown) n++;
+            return n;
         }
     }
 
@@ -262,8 +367,8 @@ internal sealed class Nameplates
         p.Name.Text(p.NameText).FontColor(HudKit.TierHex(profile.Tier));
         p.AffixText = HudText.Affixes(profile.Abilities);
         p.Affix.Text(p.AffixText);
-        p.Affix.Active(p.AffixText.Length > 0);
-        p.Rt.sizeDelta = new Vector2(PlateW, p.AffixText.Length > 0 ? 74 : 54);
+        p.AffixShown = !(p.AffixText.Length > 0); // force SetAffixShown to apply
+        SetAffixShown(p, true);
         p.FillImage.color = HudKit.C(HudKit.TierBarHex(profile.Tier));
         p.Scale = profile.Tier == EnemyTier.Boss ? 1.3f : profile.Tier == EnemyTier.Miniboss ? 1.15f : 1f;
         p.Fraction = -1;

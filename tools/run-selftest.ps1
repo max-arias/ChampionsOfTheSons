@@ -3,7 +3,7 @@
 #   ./tools/run-selftest.ps1                 # windowed 640x360
 #   ./tools/run-selftest.ps1 -Headless -NoGraphics   # -nographics crashes in UnityPlayer.dll after world activation (2026-11-18)
 #   -NoBuild                                  # run whatever is deployed already
-#   -Only GamepadFeature                      # run just that feature's checks (type name of its IModFeature): ~2 min instead of ~9
+#   -Only GamepadFeature                      # run just that feature's checks (type name of its IModFeature; comma list, plus "ui" and "bridge"): ~2 min
 # One game folder is shared by every checkout/worktree, so build+deploy+run happen under a machine-wide lock:
 # never deploy any other way (build with -p:DeployToGame=false otherwise).
 # The test save is a copy of a real save in its own slot (1999999999) so real saves are never touched.

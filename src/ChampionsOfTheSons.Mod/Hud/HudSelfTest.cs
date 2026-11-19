@@ -44,6 +44,48 @@ internal static class HudSelfTest
             UI.CotsUi.Inventory.ReleaseSimulatedHover();
             UI.CotsUi.Inventory.Close();
         });
+        SelfTest.Add(T0 + 15f, "hud: spawn a cluster of 10", SpawnCluster);
+        SelfTest.Add(T0 + 18f, "hud: clustered plates readable", ClusterPlates);
+        SelfTest.Add(T0 + 18.1f, "hud: shot cluster", () => TestKit.Screenshot("hud-05-cluster"));
+        SelfTest.Add(T0 + 19f, "hud: cluster cleanup", () =>
+        {
+            foreach (var v in Cluster)
+                if (v != null && !v.IsDead()) TestKit.Kill(v);
+            Cluster.Clear();
+            Pc.Massacre.Reset();
+        });
+    }
+
+    private static readonly List<VailActor> Cluster = new();
+
+    /// <summary>Ten cannibals within a few metres: seven plain (no elites) and three Hell elites limited to passive affixes,
+    /// so the affix line limit is exercised without active abilities firing at the player.</summary>
+    private static void SpawnCluster()
+    {
+        var passive = new[] { EnemyAbility.Steadfast, EnemyAbility.EliteSteadfast, EnemyAbility.BossSteadfast, EnemyAbility.ExtraHealth,
+            EnemyAbility.ExtraDamage, EnemyAbility.Juggernaut, EnemyAbility.Undead, EnemyAbility.RainEmpowerment };
+        var plain = WorldState.Rules with { AllowElites = false };
+        var elites = WorldState.Rules with
+        {
+            Difficulty = Difficulties.Hell,
+            DisabledAbilities = Enum.GetValues<EnemyAbility>().Where(a => !passive.Contains(a)).ToArray(),
+        };
+        for (int i = 0; i < 10; i++)
+        {
+            float d = 8 + (i % 3) * 1.2f, side = (i - 4.5f) * 0.9f;
+            var v = TestKit.Spawn(VailActorTypeId.Carl, d, side, i < 3 ? elites : plain);
+            if (v != null) Cluster.Add(v);
+        }
+        SelfTest.Check("hud: cluster spawned", Cluster.Count == 10, Cluster.Count.ToString());
+    }
+
+    private static void ClusterPlates()
+    {
+        int shown = Hud.Plates.Visible, overlaps = Hud.Plates.OverlappingPairs(), affixes = Hud.Plates.AffixLinesShown;
+        SelfTest.Log($"hud: cluster plates shown {shown}, overlapping pairs {overlaps}, affix lines {affixes}");
+        SelfTest.Check("hud: cluster shows plates, at most the cap (COS-54)", shown > 0 && shown <= Nameplates.MaxPlates, shown.ToString());
+        SelfTest.Check("hud: no two cluster plates overlap (COS-54)", overlaps == 0, overlaps.ToString());
+        SelfTest.Check("hud: affix lines only on the top plates (COS-54)", affixes <= Nameplates.MaxAffixLines, affixes.ToString());
     }
 
     private static void Spawn()

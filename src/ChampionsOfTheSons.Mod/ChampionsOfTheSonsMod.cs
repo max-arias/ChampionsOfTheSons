@@ -73,18 +73,22 @@ public class ChampionsOfTheSonsMod : SonsMod
                 foreach (var enemy in Bridge.EnemyRegistry.Snapshot()) enemy.TestActive = false;
             };
             SelfTest.RegisterDefaultSteps();
-            // --cots-selftest-only=<FeatureTypeName>: run just that feature's checks (quick loop while developing it).
-            var only = Environment.GetCommandLineArgs().FirstOrDefault(a => a.StartsWith("--cots-selftest-only=", StringComparison.Ordinal))?.Split('=', 2)[1];
-            if (only == null)
+            // --cots-selftest-only=<names>: run just those checks, comma-separated feature type names plus "bridge" and "ui".
+            var onlyArg = Environment.GetCommandLineArgs().FirstOrDefault(a => a.StartsWith("--cots-selftest-only=", StringComparison.Ordinal))?.Split('=', 2)[1];
+            var only = onlyArg?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+            if (only == null || only.Contains("bridge"))
             {
                 SelfTest.BeginPhase("bridge");
                 Bridge.BridgeSelfTest.Register();
+            }
+            if (only == null || only.Contains("ui"))
+            {
                 SelfTest.BeginPhase("ui");
                 UI.UiSelfTest.Register();
             }
             foreach (var f in Features.Loaded)
             {
-                if (only != null && f.GetType().Name != only) continue;
+                if (only != null && !only.Contains(f.GetType().Name)) continue;
                 SelfTest.BeginPhase(f.GetType().Name);
                 Features.Each("RegisterSelfTests", x => { if (ReferenceEquals(x, f)) x.RegisterSelfTests(); });
             }

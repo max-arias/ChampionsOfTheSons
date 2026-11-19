@@ -62,8 +62,9 @@ internal sealed class SpellsFeature : IModFeature
         }
         var bar = SpellBar.Instance;
         if (bar == null) return;
-        bar.SetVisible(inWorld);
-        if (inWorld) bar.Refresh();
+        bool show = inWorld && !UI.CotsUi.AnyPanelOpen;
+        bar.SetVisible(show);
+        if (show) bar.Refresh();
     }
 
     public void RegisterSelfTests()

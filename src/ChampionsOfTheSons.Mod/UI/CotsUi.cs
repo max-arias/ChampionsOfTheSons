@@ -12,6 +12,10 @@ internal static class CotsUi
 
     public static InventoryPanel Inventory { get; private set; } = null!;
 
+    /// <summary>True while any of the mod's full panels (inventory, perks, crafting, host settings, difficulty picker) is open.
+    /// HUD bars hide meanwhile so they never draw over a panel (COS-58).</summary>
+    public static bool AnyPanelOpen => (Inventory?.IsOpen ?? false) || ChampionsOfTheSons.Mod.Pad.GamepadFeature.OpenPanel != null;
+
     public static void Init()
     {
         if (_initialized) return;

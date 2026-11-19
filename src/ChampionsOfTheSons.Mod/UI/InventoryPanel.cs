@@ -472,15 +472,17 @@ internal sealed partial class InventoryPanel
         _xpLabel.Text($"{Math.Floor(sum.Xp).ToString("N0", inv)} / {sum.Goal.ToString("N0", inv)} XP  ({(sum.Fraction * 100).ToString("0", inv)}%)");
 
         _sheetData = SheetData.Build(pc);
-        float y = 104;
+        if (_rowH == 0) FitSheetRows(_sheetData);
+        float y = SheetRowsTop;
         foreach (var row in _sheetData)
         {
             if (!_sheetRows.TryGetValue(row.Id, out var widgets))
             {
-                float h = row.Header ? 30 : 25;
-                var name = Label("", row.Header ? 16 : 18, row.Header ? UiTheme.Gold : UiTheme.TextDim, TextAlignmentOptions.BottomLeft)
+                float h = row.Header ? _headerH : _rowH;
+                int font = (int)Math.Round(Math.Min(18, _rowH * 0.72f));
+                var name = Label("", row.Header ? font - 2 : font, row.Header ? UiTheme.Gold : UiTheme.TextDim, TextAlignmentOptions.BottomLeft)
                     .TopLeft(18, y).Size(SheetW - 36, h);
-                var value = Label("", 18, UiTheme.Text, TextAlignmentOptions.BottomRight).TopLeft(18, y).Size(SheetW - 36, h);
+                var value = Label("", font, UiTheme.Text, TextAlignmentOptions.BottomRight).TopLeft(18, y).Size(SheetW - 36, h);
                 if (row.Header) name.UpperCase();
                 _sheetPanel.Add(name);
                 _sheetPanel.Add(value);
@@ -489,9 +491,25 @@ internal sealed partial class InventoryPanel
             }
             widgets.Name.Text(row.Label);
             widgets.Value.Text(row.Value);
-            y += row.Header ? 30 : 25;
+            y += row.Header ? _headerH : _rowH;
         }
     }
+
+    private const float SheetRowsTop = 104, SheetRowsBottomPad = 10;
+    private float _rowH, _headerH;
+
+    /// <summary>Row heights that fit every sheet row inside the panel (25/30 when there is room, shrinking down to 18/22).</summary>
+    private void FitSheetRows(List<SheetRow> rows)
+    {
+        int headers = rows.Count(r => r.Header);
+        float room = PanelH - SheetRowsTop - SheetRowsBottomPad;
+        _rowH = Math.Clamp(room / (rows.Count - headers + headers * 1.2f), 18f, 25f);
+        _headerH = _rowH * 1.2f;
+    }
+
+    /// <summary>Bottom of the last sheet row, in the sheet panel's coordinates, and the panel's height (self-test, COS-58).</summary>
+    public (float RowsBottom, float PanelHeight) SheetFit =>
+        (SheetRowsTop + _sheetData.Sum(r => r.Header ? _headerH : _rowH), PanelH);
 
     private void RefreshSets()
     {

@@ -19,6 +19,9 @@ public sealed class HudFeature : IModFeature
     internal DamageNumbers Numbers { get; } = new();
     internal ProgressHud Progress { get; } = new();
 
+    /// <summary>Whether the HUD layer (nameplates, XP bar, banners) is drawn this frame.</summary>
+    internal bool Shown => _built && _root.Root.activeSelf;
+
     public void Init()
     {
         Instance = this;
@@ -43,7 +46,7 @@ public sealed class HudFeature : IModFeature
     {
         if (!_built) return;
         dt = Time.unscaledDeltaTime; // fades keep running while the game is paused
-        bool show = inWorld && !UI.CotsUi.Inventory.IsOpen;
+        bool show = inWorld && !UI.CotsUi.AnyPanelOpen;
         if (_root.Root.activeSelf != show) _root.Active(show);
         if (!show) return;
         Plates.Update(dt, Config.ShowNameplates.Value);
