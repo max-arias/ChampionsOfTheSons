@@ -102,6 +102,23 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Equippable items only. Gives `max(1, rarity − 1) + level / 40` of one random material (type "material") of rarity `clamp(item rarity, 3, 7)`, level 1, in one stack. A full bag drops what does not fit at the player's feet.
 - The crafting panel shows a preview per mode (what will change, ranges for Polish, the player level for Empower, "random" for Reroll/Reforge) and a before/after list once crafted.
 
+## Active enemy abilities (COS-20; this mod's numbers except where noted)
+Host only; each runs only while the enemy is alive and active and is removed the moment it dies, goes dormant or despawns. Rules are in `Core/Rules/ActiveAbilities.cs`; damage is magic (the player's `magic_damage_taken` applies), times the enemy's damage multipliers (rain, Avenger, Sacrifice) and the host's enemy-damage rule. First cast 2-6 s after the enemy becomes active; the cooldown restarts when a cast ends. A cast needs the nearest player inside the range band. `D` = mean of the difficulty's Meteor damage.
+| Ability | Cooldown | Range | Telegraph | Effect |
+|---|---|---|---|---|
+| Meteor | 14 s | 0-45 m | 2 s ring (r 4 m) on the player's spot | Impact damage = difficulty Meteor roll (table above); `perk_meteor_damage_taken` applies |
+| Laser | 10 s | 3-35 m | 1.5 s thin line tracking the player | 1 s beam locked on where the player was, half-width 0.8 m, hits every 0.5 s for the difficulty Laser roll |
+| Black Hole | 28 s | 5-35 m | 1 s marker | 6 s well (r 12 m) on the player's spot; pull 2 m/s at the rim to 9 m/s at the centre; core (r 3 m) deals 0.05·D per s |
+| Blizzard | always | aura r 15 m | none | player speed ×0.55 inside, 0.02·D per s |
+| Radiance | always | aura r 10 m | none | 0.04·D per s |
+| Flare | 20 s | 5-40 m | 1.5 s rising flare | burst 10 m over the player: 3 s of light, 0.25·D to anyone within 7 m (horizontal) |
+| Fire Cataclysm | 40 s | 0-40 m | 1 s growing | vortex r 8 m follows the enemy 10 s, 0.15·D per s |
+| Arcane Cataclysm | 40 s | 0-40 m | 1 s growing | same, 0.1·D per s and player speed ×0.5 inside |
+| Warp | 12 s | 15-60 m | 0.75 s | the enemy appears 5 m from the player on its own side |
+| Chains | 15 s | 4-25 m | 1 s tether | roots the player 2.5 s (refused by `stun_immunity`) |
+| Trapper | 18 s | 4-28 m | 1.5 s | 3 snares (r 2.5 m; one under the player, two within 6 m) wait 20 s (max 9 live); stepping on one roots 3 s and deals 0.2·D |
+Not synced yet: the host applies effects to its own player; track E decides how remote players are targeted (`AbilityTargets.Positions`) and receive pull/root.
+
 ## Perks
 - Fields: id, name, category (MeleeOffense, RangedOffense, MagicOffense, Defense, Support, Utility), unlock path (any one of), requirements (all of), cost, level requirement, stackable (no max), tree position, effects.
 - Buy: points ≥ cost, path and requirements met, level met, not bought unless stackable. Each purchase applies the effects again. No single refund; respec unbuys all perks and spells and sets points = level + permanent bonus.
