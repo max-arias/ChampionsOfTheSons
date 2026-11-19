@@ -28,13 +28,19 @@ internal static class PadFocus
         var canvasRt = SUI.SUI.SUIViewport.GetComponent<RectTransform>();
         float scale = SUI.SUI.SUIViewport.scaleFactor;
         var canvasRect = canvasRt.rect;
-        var corners = new Vector3[4];
-        rt.GetWorldCorners(corners);
-        var lo = canvasRt.InverseTransformPoint(corners[0]);
-        var hi = canvasRt.InverseTransformPoint(corners[2]);
+        CanvasCorners(rt, canvasRt, out var lo, out var hi);
         centerPx = new Vector2(((lo.x + hi.x) / 2 - canvasRect.xMin) * scale, ((lo.y + hi.y) / 2 - canvasRect.yMin) * scale);
         sizePx = new Vector2(Mathf.Abs(hi.x - lo.x) * scale, Mathf.Abs(hi.y - lo.y) * scale);
         return true;
+    }
+
+    /// <summary>Bottom-left and top-right corners of <paramref name="rt"/> in the SUI canvas's local units. Uses TransformPoint on the
+    /// rect corners: GetWorldCorners fills a managed array that IL2CPP interop does not copy back, so it reads as all zeros.</summary>
+    private static void CanvasCorners(RectTransform rt, RectTransform canvasRt, out Vector3 lo, out Vector3 hi)
+    {
+        var r = rt.rect;
+        lo = canvasRt.InverseTransformPoint(rt.TransformPoint(new Vector3(r.xMin, r.yMin, 0)));
+        hi = canvasRt.InverseTransformPoint(rt.TransformPoint(new Vector3(r.xMax, r.yMax, 0)));
     }
 
     private static List<Item> Collect(GameObject root)
@@ -50,25 +56,6 @@ internal static class PadFocus
             items.Add(new Item(b, new FocusRect(c.x - size.x / 2, screenH - (c.y + size.y / 2), size.x, size.y), c, size));
         }
         return items;
-    }
-
-    /// <summary>Logs why controls are or are not found under a root (self-test diagnostics).</summary>
-    public static void Diagnose(GameObject root)
-    {
-        var canvasRt = SUI.SUI.SUIViewport.GetComponent<RectTransform>();
-        SelfTest.Log($"pad: diag screen {Screen.width}x{Screen.height} canvasRect {canvasRt.rect} scale {SUI.SUI.SUIViewport.scaleFactor} lossy {canvasRt.lossyScale} mode {SUI.SUI.SUIViewport.renderMode}");
-        var all = root.GetComponentsInChildren<Button>(false);
-        SelfTest.Log($"pad: diag {all.Length} active buttons under root, {Count(root)} focusable");
-        int n = 0;
-        foreach (var b in all)
-        {
-            if (n++ >= 3) break;
-            var rt = b.GetComponent<RectTransform>();
-            var c = new Vector3[4];
-            rt.GetWorldCorners(c);
-            ScreenRectOf(rt, out var cp, out var sp);
-            SelfTest.Log($"pad: diag button interactable={b.interactable} world {c[0]}..{c[2]} -> px center {cp} size {sp}; rect {rt.rect} localPos {rt.localPosition} anchored {rt.anchoredPosition} anchors {rt.anchorMin}-{rt.anchorMax} lossy {rt.lossyScale}");
-        }
     }
 
     /// <summary>The number of focusable controls under <paramref name="root"/> right now.</summary>
@@ -188,10 +175,7 @@ internal static class PadFocus
         if (_frame == null) return;
         var rt = (RectTransform)_frame.transform;
         var canvasRt = SUI.SUI.SUIViewport.GetComponent<RectTransform>();
-        var corners = new Vector3[4];
-        target.GetComponent<RectTransform>().GetWorldCorners(corners);
-        var lo = canvasRt.InverseTransformPoint(corners[0]);
-        var hi = canvasRt.InverseTransformPoint(corners[2]);
+        CanvasCorners(target.GetComponent<RectTransform>(), canvasRt, out var lo, out var hi);
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.localScale = Vector3.one;

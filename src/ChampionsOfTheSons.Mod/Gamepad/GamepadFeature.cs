@@ -91,8 +91,6 @@ internal sealed class GamepadFeature : IModFeature
     {
         PadInput.Poll(dt);
         PadPointer.Tick();
-        if (SelfTest.Enabled && Enum.GetValues<PadButton>().Any(PadInput.Pressed))
-            SelfTest.Log($"pad: pressed {string.Join("+", Enum.GetValues<PadButton>().Where(PadInput.Held))}; open={OpenPanel?.Name ?? "-"}; inWorld={inWorld}; controllable={WorldRulesFeature.PlayerControllable}");
         if (_panels.Count == 0) return;
 
         var open = OpenPanel;

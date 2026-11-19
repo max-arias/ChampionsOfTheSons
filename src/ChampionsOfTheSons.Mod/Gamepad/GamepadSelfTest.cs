@@ -31,7 +31,6 @@ internal static class GamepadSelfTest
         SelfTest.Add(t += 0.5f, "pad: inventory open and focused", () =>
         {
             SelfTest.Check("pad: inventory opened by LeftShoulder+DpadUp", Inv.IsOpen);
-            PadFocus.Diagnose(Inv.PadRoot!);
             SelfTest.Check("pad: a control has focus", PadFocus.Current != null);
             _before = PadFocus.Current;
             PadInput.Inject(PadButton.DpadRight);

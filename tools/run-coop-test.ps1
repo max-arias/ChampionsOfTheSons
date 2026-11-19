@@ -5,6 +5,7 @@
 # Takes the same machine-wide lock as run-selftest.ps1, because the client uses the shared game folder.
 param(
     [switch]$NoBuild,
+    [switch]$Windowed,   # client in a 640x360 window instead of -batchmode (the title-screen join UI may need it)
     [int]$TimeoutSeconds = 420,
     [string]$ServerDir = 'D:\dev\sotf-server',
     [string]$JoinAddress = '127.0.0.1:27016',
@@ -58,7 +59,8 @@ try {
     $clientStart = Get-Date
     # The game joins a dedicated server from "+connect_ds ip:port", but only reads it from Steam's launch command line,
     # which Steam fills for steam://run URLs (not for steam.exe -applaunch).
-    $launchArgs = "--cots-join $JoinAddress +connect_ds $GameAddress --cots-expect-difficulty $ServerDifficulty -batchmode"
+    $launchArgs = "--cots-join $JoinAddress +connect_ds $GameAddress --cots-expect-difficulty $ServerDifficulty"
+    $launchArgs += if ($Windowed) { ' -screen-fullscreen 0 -screen-width 640 -screen-height 360' } else { ' -batchmode' }
     Start-Process ("steam://run/1326470//" + [uri]::EscapeDataString($launchArgs) + "/")
     $done = $false
     while (((Get-Date) - $clientStart).TotalSeconds -lt $TimeoutSeconds) {
