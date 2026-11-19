@@ -25,7 +25,7 @@ public static class SelfTest
     private const float SettleTime = 8f;
 
     /// <summary>Hard limit so a stuck run never keeps the game open.</summary>
-    private const float Timeout = 240f;
+    private const float Timeout = 900f;
 
     private static readonly float LaunchTime = Time.realtimeSinceStartup;
 
@@ -38,7 +38,29 @@ public static class SelfTest
     }
 
     /// <summary>Registers a step to run <paramref name="delay"/> seconds after the world is ready.</summary>
-    public static void Add(float delay, string name, Action step) => Steps.Add((delay, name, step));
+    public static void Add(float delay, string name, Action step) => Steps.Add((_phaseStart + delay, name, step));
+
+    private static float _phaseStart;
+
+    /// <summary>Raised at the start of every phase so features can close panels and clear their own state.</summary>
+    public static event Action? PhaseReset;
+
+    /// <summary>
+    /// Starts a new phase: its steps run after every step registered so far (plus a gap), on a fresh character,
+    /// so features' checks never interleave on shared state (one feature's respec emptying another's spell bar).
+    /// </summary>
+    public static void BeginPhase(string name)
+    {
+        float end = Steps.Count == 0 ? 0 : Steps.Max(s => s.At);
+        _phaseStart = Steps.Count == 0 ? 0 : end + 3;
+        Steps.Add((_phaseStart, "phase " + name, () =>
+        {
+            Log($"--- phase {name} ---");
+            PhaseReset?.Invoke();
+            PlayerState.FromSave(new Core.Saving.PlayerSave());
+        }));
+        _phaseStart += 1;
+    }
 
     public static void RegisterDefaultSteps()
     {

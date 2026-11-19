@@ -52,10 +52,23 @@ public class ChampionsOfTheSonsMod : SonsMod
         RLog.Msg($"Champions of the Sons {Manifest.Version} loaded: {ModContent.Db.Summary()}");
         if (SelfTest.Enabled)
         {
+            SelfTest.PhaseReset += () =>
+            {
+                UI.CotsUi.Inventory?.Close();
+                Perks.PerksFeature.Panel?.Close();
+                Crafting.CraftingFeature.Panel?.Close();
+                HostRules.WorldRulesFeature.Settings?.Close();
+            };
             SelfTest.RegisterDefaultSteps();
+            SelfTest.BeginPhase("bridge");
             Bridge.BridgeSelfTest.Register();
+            SelfTest.BeginPhase("ui");
             UI.UiSelfTest.Register();
-            Features.Each("RegisterSelfTests", f => f.RegisterSelfTests());
+            foreach (var f in Features.Loaded)
+            {
+                SelfTest.BeginPhase(f.GetType().Name);
+                Features.Each("RegisterSelfTests", x => { if (ReferenceEquals(x, f)) x.RegisterSelfTests(); });
+            }
             SelfTest.Log("enabled");
         }
     }
