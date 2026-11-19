@@ -70,7 +70,8 @@ internal sealed class Banner
 /// <summary>The XP bar along the bottom edge, the level-up banner and the massacre counter and payout banner.</summary>
 internal sealed class ProgressHud
 {
-    private const float BarW = 640;
+    // Same width as the spell bar's slot row and energy bar, centered under it; the level label sits to the left of the bar.
+    private const float BarW = Spells.SpellBar.Width;
 
     private static PlayerCharacter Pc => PlayerState.Character;
 
@@ -117,9 +118,9 @@ internal sealed class ProgressHud
 
     private void BuildXpBar(SContainerOptions layer)
     {
-        _xpRoot = SContainer.TopLeft(0, 0).Size(BarW + 110, 34);
-        _xpLevel = HudKit.Label("", 24, UiTheme.Gold, TextAlignmentOptions.MidlineRight).TopLeft(0, 0).Size(96, 34);
-        var back = SContainer.TopLeft(106, 8).Size(BarW, 18).Background(HudKit.C("#0A0D12D0"), EBackground.Round10);
+        _xpRoot = SContainer.TopLeft(0, 0).Size(BarW, 34);
+        _xpLevel = HudKit.Label("", 24, UiTheme.Gold, TextAlignmentOptions.MidlineRight).TopLeft(-106, 0).Size(96, 34);
+        var back = SContainer.TopLeft(0, 8).Size(BarW, 18).Background(HudKit.C("#0A0D12D0"), EBackground.Round10);
         _xpFill = SContainer.Background(HudKit.C("#E3B341"), EBackground.None);
         back.Add(_xpFill);
         _xpText = HudKit.Label("", 13, "#FFFFFF", TextAlignmentOptions.Center).Anchor(AnchorType.Fill);

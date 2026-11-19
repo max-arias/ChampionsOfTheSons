@@ -15,6 +15,10 @@ internal sealed class SpellBar
     public const string PanelId = "cots-spellbar";
     private const float Cell = 68, Gap = 8;
     private const float BarW = SpellBook.Slots * Cell + (SpellBook.Slots - 1) * Gap;
+    /// <summary>Width of the slot row and energy bar; the XP bar below uses the same width so the two line up.</summary>
+    public const float Width = BarW;
+    /// <summary>Bottom edge of the spell bar above the screen bottom: just over the XP bar (see ProgressHud).</summary>
+    public const float Bottom = 44;
 
     private sealed class Slot
     {
@@ -43,7 +47,7 @@ internal sealed class SpellBar
     {
         Instance = this;
         _root = RegisterNewPanel(PanelId, enableInput: false);
-        var bar = SContainer.Anchor(AnchorType.BottomCenter).Pivot(0.5f, 0f).Size(BarW + 24, Cell + 54).Position(0, 110);
+        var bar = SContainer.Anchor(AnchorType.BottomCenter).Pivot(0.5f, 0f).Size(BarW + 24, Cell + 54).Position(0, Bottom);
         _root.Add(bar);
 
         for (int i = 0; i < SpellBook.Slots; i++)

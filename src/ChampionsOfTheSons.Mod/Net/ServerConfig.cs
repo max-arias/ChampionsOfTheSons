@@ -27,6 +27,11 @@ public sealed class ServerConfig : IModFeature
         }
     }
 
+    /// <summary>True in the dedicated server's process (SonsOfTheForestDS), known from the start and cheap: for per-frame player patches,
+    /// which must not run there (no local player stats, content may not be loaded yet).</summary>
+    public static readonly bool OnDedicatedServer =
+        System.Diagnostics.Process.GetCurrentProcess().ProcessName.StartsWith("SonsOfTheForestDS", StringComparison.OrdinalIgnoreCase);
+
     public void Init()
     {
         var category = ConfigSystem.CreateFileCategory("ChampionsOfTheSonsServer", "Champions of the Sons (dedicated server)", "ChampionsOfTheSonsServer.cfg");

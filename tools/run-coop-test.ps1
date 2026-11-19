@@ -8,12 +8,19 @@ param(
     [switch]$Windowed,   # client in a 640x360 window instead of -batchmode (the title-screen join UI may need it)
     [int]$TimeoutSeconds = 420,
     [string]$ServerDir = 'D:\dev\sotf-server',
-    [string]$JoinAddress = '127.0.0.1:27016',
-    [string]$GameAddress = '127.0.0.1:8766',
+    # The client must name the server by this PC's LAN address and the GAME port: the game's join-by-ip looks the server up
+    # on the LAN and rejects 127.0.0.1 or the query port ("Couldn't find server by ip/port"). Empty = detect the LAN IPv4.
+    [string]$JoinAddress = '',
+    [string]$GameAddress = '',
     [string]$ServerDifficulty = 'difficulty.veteran',
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
 $ErrorActionPreference = 'Stop'
+if (-not $JoinAddress -or -not $GameAddress) {
+    $lan = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.PrefixOrigin -in 'Dhcp', 'Manual' -and $_.IPAddress -notlike '169.*' } | Select-Object -First 1).IPAddress
+    if (-not $JoinAddress) { $JoinAddress = "${lan}:8766" }
+    if (-not $GameAddress) { $GameAddress = "${lan}:8766" }
+}
 $repo = Split-Path $PSScriptRoot -Parent
 $clientLog = Join-Path $GameDir '_Redloader\Latest.log'
 $serverLog = Join-Path $ServerDir '_Redloader\Latest.log'

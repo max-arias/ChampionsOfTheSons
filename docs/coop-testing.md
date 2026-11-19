@@ -15,7 +15,7 @@ It takes the same machine-wide lock as `tools/run-selftest.ps1` (the client uses
    (the server generates its own interop assemblies on its first start, about 2 minutes). `Mods\` is filled by the test script.
 4. **Start the server once** so it writes its config and `steam_appid.txt`, then edit
    `%USERPROFILE%\AppData\LocalLow\Endnight\SonsOfTheForestDS\dedicatedserver.cfg`:
-   `"LanOnly": true`, `"SkipNetworkAccessibilityTest": true`, `"SaveMode": "New"`. (The first start prints "Please restart the server".)
+   `"LanOnly": false`, `"SkipNetworkAccessibilityTest": true`, `"SaveMode": "New"`. (The first start prints "Please restart the server".)
 5. The mod manifest must say `"platform": "Universal"`, otherwise RedLoader refuses to load it on a dedicated server ("is a client mod and cannot be loaded on a dedicated server").
 
 ## Run
@@ -25,6 +25,9 @@ It takes the same machine-wide lock as `tools/run-selftest.ps1` (the client uses
 ./tools/run-coop-test.ps1 -NoBuild
 ```
 
-The client is started through Steam with `--cots-join 127.0.0.1:27016` (the server's query port): on the title screen the mod asks Steam for the
-server at that address and calls the game's own `DedicatedServerBrowser.Connect`, so no one has to click through the menu.
+The client is started through Steam with `--cots-join <LAN IP>:8766`. On the title screen the mod opens the game's own join-by-ip dialog
+(`CoopSteamManager.ShowDedicatedServerJoinByIpDialog`) and accepts it, so no one has to click through the menu. The address must be this PC's
+LAN IPv4 and the **game** port: the game finds the server through the LAN list and rejects `127.0.0.1` or the query port
+("Couldn't find server by ip/port" in the client's `Player.log`). The script detects the LAN address; override with `-JoinAddress`.
+With `"LanOnly": true` the lookup also fails. `-Windowed` runs the client in a 640x360 window instead of `-batchmode`.
 Logs: server `D:\dev\sotf-server\_Redloader\Latest.log` (+ `unity.log`), client `_Redloader\Latest.log` in the game folder.

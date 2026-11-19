@@ -25,6 +25,8 @@ public sealed class CoopTestJoin : IModFeature
     private float _started = -1;
 
     private float _dialogCheck;
+    private bool _argsLogged;
+    private bool _dialogShown;
 
     /// <summary>The game asks "join this server?" in a dialog when started with +connect_ds; nobody is there to click it.</summary>
     private void AcceptJoinDialog()
@@ -64,7 +66,18 @@ public sealed class CoopTestJoin : IModFeature
         _next += 10f;
         try
         {
-            RLog.Msg($"{Tag} join: scene '{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}', dialogs: {Resources.FindObjectsOfTypeAll<DedicatedGameInviteDialogController>().Length}");
+            var dialogs = Resources.FindObjectsOfTypeAll<DedicatedGameInviteDialogController>();
+            RLog.Msg($"{Tag} join: scene '{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}', dialogs: {string.Join(", ", dialogs.Select(d => $"{d.gameObject.name} active={d.gameObject.activeInHierarchy} scene='{d.gameObject.scene.name}'"))}");
+            if (!_argsLogged) { _argsLogged = true; RLog.Msg($"{Tag} join: args {string.Join(" ", Environment.GetCommandLineArgs().Skip(1))}"); }
+            if (!_dialogShown)
+            {
+                // The game's own route (what +connect_ds leads to): the "join this server" dialog; AcceptJoinDialog clicks it,
+                // which sets the auto-join server and loads the multiplayer menu, whose DedicatedServerBrowser connects.
+                _dialogShown = true;
+                RLog.Msg($"{Tag} join: showing the game's join-by-ip dialog for {Target}");
+                CoopSteamManager.ShowDedicatedServerJoinByIpDialog(Target);
+                return;
+            }
             var browser = Resources.FindObjectsOfTypeAll<DedicatedServerBrowser>().FirstOrDefault();
             if (browser == null)
             {

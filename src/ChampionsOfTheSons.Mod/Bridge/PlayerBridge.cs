@@ -104,6 +104,7 @@ public static class PlayerBridge
     [HarmonyPostfix]
     private static void AfterTargetVelocity(ref Vector3 __result)
     {
+        if (Net.ServerConfig.OnDedicatedServer) return;
         if (PlayerEffects.Stunned)
         {
             __result = new Vector3(0, __result.y, 0);
@@ -118,6 +119,7 @@ public static class PlayerBridge
     [HarmonyPostfix]
     private static void AfterJumpSpeed(ref float __result)
     {
+        if (Net.ServerConfig.OnDedicatedServer) return;
         float m = (float)PlayerState.Character.Stats.Get(StatIds.JumpPower);
         if (m > 0) __result *= m;
         if (PlayerEffects.Stunned) __result = 0;
