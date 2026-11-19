@@ -52,13 +52,21 @@ public sealed class EnemySyncFeature : IModFeature
         try
         {
             var entity = BoltNetwork.FindEntity(new NetworkId(netId));
-            return entity == null ? null : entity.GetComponentInChildren<VailActor>(true);
+            if (entity == null) return null;
+            // GetComponentInChildren<T>(true) throws through IL2CPP interop here; the actor sits on the entity or below it.
+            var actor = entity.GetComponent<VailActor>();
+            if (actor != null) return actor;
+            var below = entity.GetComponentsInChildren<VailActor>(true);
+            return below.Length > 0 ? below[0] : null;
         }
-        catch
+        catch (Exception e)
         {
+            if (!_lookupWarned) { _lookupWarned = true; RLog.Warning($"{CoopTestJoin.Tag} enemy lookup by net id failed: {e.Message}"); }
             return null;
         }
     }
+
+    private static bool _lookupWarned;
 
     public void Init() => CotsNetEvent.Received += OnNet;
 

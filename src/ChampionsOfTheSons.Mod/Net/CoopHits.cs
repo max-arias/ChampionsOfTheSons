@@ -38,6 +38,9 @@ public sealed class CoopHits : IModFeature
     // ---------------------------------------------------------------- client: outgoing hits
 
     /// <summary>The hit the local player's stat sheet makes from a weapon swing of <paramref name="rawAmount"/>.</summary>
+    /// <summary>Kill XP the host has granted this client (co-op test checks).</summary>
+    public static long XpReceived { get; private set; }
+
     public static OutgoingHit LocalHit(ImpactType impactType, float rawAmount, bool head)
     {
         var sheet = PlayerState.Character.Stats;
@@ -107,6 +110,7 @@ public sealed class CoopHits : IModFeature
                     ApplyRemoteHit(CoopSession.IdOf(from), hit, from);
                     break;
                 case XpGranted xp when CoopSession.IsClient:
+                    XpReceived += xp.Amount;
                     PlayerState.Character.OnKill(xp.Amount);
                     RLog.Msg($"{CoopTestJoin.Tag} client: granted {xp.Amount} XP by the host");
                     CoopTest.Check("xp: client received its kill XP", true, $"{xp.Amount}");

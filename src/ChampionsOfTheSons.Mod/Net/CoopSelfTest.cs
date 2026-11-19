@@ -182,9 +182,10 @@ public sealed class CoopSelfTest : IModFeature
             _enemyId = id;
             var actor = EnemySyncFeature.ActorOf(id);
             var mirrored = EnemyRegistry.Get(actor);
-            CoopTest.Check("enemy sync: client sees the host's profile", mirrored != null && mirrored.Profile.Level == sync.Level && sync.Level >= 1,
-                $"host level {sync.Level} tier {sync.Tier} hp {sync.Health:F0}/{sync.MaxHealth:F0}; client nameplate level {mirrored?.Profile.Level}");
-            return mirrored != null;
+            if (mirrored == null) return false; // not mirrored yet: keep polling (the step's timeout reports a failure)
+            CoopTest.Check("enemy sync: client sees the host's profile", mirrored.Profile.Level == sync.Level && sync.Level >= 1,
+                $"host level {sync.Level} tier {sync.Tier} hp {sync.Health:F0}/{sync.MaxHealth:F0}; client nameplate level {mirrored.Profile.Level}");
+            return true;
         }, 40);
 
         CoopTest.Add("client hit: gear changes the damage", () =>
@@ -194,6 +195,8 @@ public sealed class CoopSelfTest : IModFeature
                 case 0:
                     _h0 = Health(_enemyId);
                     PlayerState.Character.Stats.Clear();
+                    // No crits: a crit on one of the two hits would hide the gear difference (the crit multiplier is already in the amount).
+                    PlayerState.Character.Stats.SetSource("coop.test_nocrit", new[] { new StatModifier(StatIds.CritChance, EffectOp.Mult, 0) });
                     CoopHits.SendHit(_enemyId, CoopHits.LocalHit(ImpactType.Melee, 200, false) with { Crit = false }, HitFlags.Melee);
                     _wait = Time.realtimeSinceStartup;
                     _hitState = 1;
@@ -210,6 +213,7 @@ public sealed class CoopSelfTest : IModFeature
                     if (Time.realtimeSinceStartup - _wait < 1.5f) return false;
                     float h2 = Health(_enemyId);
                     PlayerState.Character.Stats.RemoveSource("coop.test_gear");
+                    PlayerState.Character.Stats.RemoveSource("coop.test_nocrit");
                     double first = _h0 - _h1, boosted = _h1 - h2;
                     CoopTest.Check("client hit: lands on the host-owned enemy", first > 0, $"first hit removed {first:F0} health");
                     CoopTest.Check("client hit: gear changes the damage", boosted > first && first > 0, $"first hit removed {first:F0}, with +50 flat gear {boosted:F0}");
@@ -220,6 +224,8 @@ public sealed class CoopSelfTest : IModFeature
         CoopTest.Add("kill: client finishes the enemy and gets XP", () =>
         {
             float hp = Health(_enemyId);
+            // The host's XP grant for the kill counts too: it can arrive before the last health update does.
+            if (CoopHits.XpReceived > 0) { CoopTest.Check("kill: host reports the enemy dead to the client", true, $"XP {CoopHits.XpReceived}"); return true; }
             if (hp > 0 && !float.IsNaN(hp))
             {
                 if (Time.realtimeSinceStartup - _wait > 0.5f)
