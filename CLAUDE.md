@@ -13,6 +13,7 @@ RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, 
 - `./build.ps1` builds and tests the core. Needs a .NET 10 SDK (PATH, or the local one at `D:\dev\deps\dotnet`; set `DOTNET_ROOT` to it).
 - Build the mod with `-p:DeployToGame=false`. Deploy and test in-game only through `tools/run-selftest.ps1 -Headless`: it builds this checkout, deploys, loads test save 1999999999 headless, runs the mod's `--cots-selftest` steps and prints PASS/FAIL, all under a machine-wide lock, because every worktree shares one game folder. Add in-game checks with `SelfTest.Add(...)`.
 - `dotnet run --project tools/ContentCheck -- content` validates all content JSON with the mod's own loader.
+- `dotnet run --project tools/PacingSim -c Release -- content` prints the XP pacing and kill-time tables (COS-60); its game-side assumptions are at the top of `Program.cs`.
 - The mod build needs RedLoader 0.8.6 installed in the game folder and the game launched once, so `_RedLoader\Game` holds the interop assemblies. Game folder: `C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest` (override with `-p:GameDir=`).
 - Fast in-game checks: launch options `--sdk.loadintomain` (straight into a world) or `--savegame <id>`; RedLoader log in `_RedLoader\Latest.log`.
 

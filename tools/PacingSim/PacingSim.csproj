@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Headless XP pacing and kill-time simulation over the real Core rules (COS-60). Prints tables; no pass/fail. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ChampionsOfTheSons.Core\ChampionsOfTheSons.Core.csproj" />
+  </ItemGroup>
+</Project>
