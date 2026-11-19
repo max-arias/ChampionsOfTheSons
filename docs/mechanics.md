@@ -6,7 +6,7 @@ The rules Champions of the Sons implements. Numbers and formulas come from readi
 - XP to next level: `goal(L) = round(0.8L⁴ + L³ + 2L² + 20L + 4e^(L/3.3) + 1.36^(L−5))`; from L 138 the goal is 5e18 (practical cap).
 - Gaining XP: `xp += amount × expGain`; while `xp ≥ goal(L)`: `xp −= goal`, level up.
 - Level up: +1 mutation (perk) point; STR/AGI/VIT/INT base = `1 + A(L)` with `A(1)=1, A(x)=A(x−1)+round(√x)`.
-- Reward items: every 10th level a Heart of Purity (respec); levels 25, 45, 65… a Greater Mutated Heart (+1 permanent perk point).
+- Reward items: every 10th level a Untainted Heart (respec); levels 25, 45, 65… a Greater Mutated Heart (+1 permanent perk point).
 - Death: current-level XP resets to 0, pending massacre XP is lost; no level loss.
 
 ## Massacre (kill streak)
@@ -83,7 +83,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Gargantuan/Tiny set the actor's scale; speed is the profile speed times every slow/stun/rain factor, applied to the actor's animator.
 - Player on-hit stats: life/energy on hit (× all recovery), chance to slow (×0.5 speed, 8 s), bleed (hit/20 per s, 10 s) and weaken (×1.2 damage taken, 8 s), hammer stun (`i_hammer_stun_amount` chance, `i_hammer_stun_duration` s). DoTs are pure damage (no armor) but meet steadfast caps and shields. Thorns = `(thorns + per-STR·STR + per-VIT·VIT) × thornsDmgMult` back at the enemy that hit you, ignoring `thorns_armor_piercing` of its armor. Fire damage multiplies hits on burning enemies by `1 + fireDamage`. Explosion damage multiplies thrown/explosive hits by `1 + explosionDamage`.
 - Energy is the game's stamina bar for now: max = vanilla × `MaxEnergy/100`; regeneration adds `staminaPerSecond + energyPerSecond` plus the game's own rate × (energy recovery multiplier / 2 − 1). Attack speed and attack cost scale the held melee weapon's data (and ranged fire delay); projectile speed, size and pierce scale the held ranged weapon's bullet data (pierce raises bullet weight up to ×4).
-- Unique items (new rules): Vampiric Band 3% leech; Vampire Ring 6% leech and 5% max health per kill; Lama Mega's Blood Bag 1% max health per second below half health; Undying Promise: a lethal hit leaves 30% health, once per 300 s; Heart of Purity: use to respec.
+- Unique items (new rules): Biting Band 3% leech; Gorged Ring 6% leech and 5% max health per kill; Healer's Blood Bag 1% max health per second below half health; Undying Promise: a lethal hit leaves 30% health, once per 300 s; Untainted Heart: use to respec.
 - Dropped for now: rafts and spell numbers (read by the spell system). Unique flags and `weapon_range`: see "Unique item flags" below (COS-42).
 
 ## Unique item flags (COS-42, this mod's own numbers; the item text is the spec)

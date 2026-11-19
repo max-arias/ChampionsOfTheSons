@@ -29,7 +29,7 @@ public class ProgressionTests
         double total = Enumerable.Range(1, 25).Sum(XpCurve.Goal);
         var r = p.AddXp(total);
         Assert.Equal(26, p.Level);
-        // levels 10 and 20: Heart of Purity; level 25: Greater Mutated Heart
+        // levels 10 and 20: Untainted Heart; level 25: Greater Mutated Heart
         Assert.Equal(new[] { Progress.HeartOfPurity, Progress.HeartOfPurity, Progress.GreaterMutatedHeart }, r.RewardItemIds);
     }
 

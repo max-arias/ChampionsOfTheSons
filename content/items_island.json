@@ -2,7 +2,7 @@
   "items": [
     {
       "id": "item.hollow_congregant_cowl",
-      "name": "Hollow Congregant's Cowl",
+      "name": "Hushed Cowl",
       "type": "helmet",
       "rarity": 5,
       "minLevel": 72,
@@ -33,7 +33,7 @@
     },
     {
       "id": "item.vestment_of_the_quiet_choir",
-      "name": "Vestment of the Quiet Choir",
+      "name": "Hushed Smock",
       "type": "chest_armor",
       "rarity": 5,
       "minLevel": 76,
@@ -67,7 +67,7 @@
     },
     {
       "id": "item.censer_gloves",
-      "name": "Censer Gloves",
+      "name": "Smudge-Pot Gloves",
       "type": "glove",
       "rarity": 5,
       "minLevel": 80,
@@ -98,7 +98,7 @@
     },
     {
       "id": "item.sigil_ring_of_the_nameless_flock",
-      "name": "Sigil Ring of the Nameless Flock",
+      "name": "Nameless Signet",
       "type": "ring",
       "rarity": 5,
       "minLevel": 84,
@@ -128,7 +128,7 @@
     },
     {
       "id": "item.ash_rosary",
-      "name": "Ash Rosary",
+      "name": "Ash Bead Cord",
       "type": "amulet",
       "rarity": 5,
       "minLevel": 88,
@@ -1414,7 +1414,7 @@
     },
     {
       "id": "item.sacrificial_kris",
-      "name": "Sacrificial Kris",
+      "name": "Cult Ritual Knife",
       "type": "weapon",
       "rarity": 6,
       "minLevel": 98,
@@ -1539,7 +1539,7 @@
     },
     {
       "id": "item.frozen_kite_shield",
-      "name": "Frozen Kite Shield",
+      "name": "Ice-Caked Shield",
       "type": "shield",
       "rarity": 5,
       "minLevel": 72,
@@ -1712,7 +1712,7 @@
     },
     {
       "id": "item.scroll_of_the_frozen_choir",
-      "name": "Scroll of the Frozen Choir",
+      "name": "Frozen Voices Transcript",
       "type": "spell_scroll",
       "rarity": 5,
       "minLevel": 66,
@@ -1753,7 +1753,7 @@
     },
     {
       "id": "item.cult_ritual_liturgy",
-      "name": "Cult Ritual Liturgy",
+      "name": "Cult Ritual Chant",
       "type": "spell_scroll",
       "rarity": 6,
       "minLevel": 96,
@@ -1893,7 +1893,7 @@
     },
     {
       "id": "item.cult_sacrament_wafer",
-      "name": "Cult Sacrament Wafer",
+      "name": "Cult Ration Wafer",
       "type": "other",
       "rarity": 3,
       "minLevel": 20,

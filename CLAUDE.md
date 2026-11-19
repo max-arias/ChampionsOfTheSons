@@ -4,7 +4,7 @@ RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, 
 
 ## Layout
 - `src/ChampionsOfTheSons.Core` — pure .NET 6 library: rules (`Rules/`), content definitions and loading (`Content/`), save model (`Saving/`), net protocol (`Networking/`), seeded RNG. No Unity, Il2Cpp or game references, ever. Everything game-agnostic goes here.
-- `src/ChampionsOfTheSons.Mod` — the RedLoader mod: game bridge (Harmony patches), UI (SUI), spells and effects. Compiles the Core sources in, so the mod ships as one DLL. Content JSON is embedded.
+- `src/ChampionsOfTheSons.Mod` — the RedLoader mod: game bridge (Harmony patches), UI (SUI), gamepad layer (`Gamepad/`), spells and effects. Compiles the Core sources in, so the mod ships as one DLL. Content JSON is embedded.
 - `content/` — item, stat, perk, spell, affix, buff and difficulty definitions (JSON, stable string IDs). Embedded in the mod, copied next to the tests.
 - `tests/ChampionsOfTheSons.Core.Tests` — xUnit tests for the rules core, save model and net protocol only.
 - `docs/mechanics.md` — the rules and formulas we implement (taken from the original mod's behavior).
@@ -19,6 +19,7 @@ RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, 
 ## Parallel work conventions
 - New features implement `IModFeature` (`src/ChampionsOfTheSons.Mod/Features.cs`) in their own folder; they are discovered automatically. Don't edit `ChampionsOfTheSonsMod.cs` for wiring.
 - New English strings go in a fragment `content/text/en.<feature>.json` (keys prefixed `ui.<feature>.`), not in `en.json`; fragments merge into English at load. Don't touch other languages' files.
+- Translations: `docs/translations.md` has the workflow (`tools/text_merge_fragments.py`, `text_todo.py`, `text_apply.py`, `check_translations.py`, stale detection). `build.ps1` runs the checker leniently; the branch that adds English text also translates it.
 - Self-tests: `SelfTest.Add(delay, name, step)` from `RegisterSelfTests()`, using `TestKit` (spawn, hit, kill, give items, screenshots to `%TEMP%\cots-ui\`).
 
 ## Rules

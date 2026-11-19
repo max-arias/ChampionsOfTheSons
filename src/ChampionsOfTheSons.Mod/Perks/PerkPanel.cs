@@ -22,7 +22,7 @@ public enum PerkState
 /// <summary>
 /// The perk window: one tab per perk category laid out by the perks' own x/y with unlock-path lines, plus a spell book tab.
 /// A detail pane on the right follows the hovered node (or the clicked one) and holds the Buy button.
-/// Respec consumes a Heart of Purity from the bag.
+/// Respec consumes a Untainted Heart from the bag.
 /// </summary>
 internal sealed class PerkPanel
 {
@@ -94,6 +94,7 @@ internal sealed class PerkPanel
     private string _lastMessage = "";
 
     public bool IsOpen => _root != null && _root.Root.activeSelf;
+    public GameObject? PadRoot => _root?.Root;
     public string CurrentTab => _tab;
     public string? Selected => _selected;
     public IReadOnlyCollection<string> NodeIds => _nodes.Keys;
@@ -305,7 +306,7 @@ internal sealed class PerkPanel
             _timer = 0;
             Refresh();
         }
-        string? hovered = _useSimulatedHover ? _simulatedHover : RaycastKey(_hoverIds, Input.mousePosition);
+        string? hovered = _useSimulatedHover ? _simulatedHover : RaycastKey(_hoverIds, Pad.PadPointer.Position);
         if (hovered != _hover)
         {
             _hover = hovered;
@@ -379,8 +380,8 @@ internal sealed class PerkPanel
         bool spent = pc.Perks.SpentPoints > 0;
         _respec.Color(C(hearts > 0 && spent ? "#4A3036" : "#232A33"), C("#6A3A42"));
         _respecNote.Text(hearts > 0
-            ? $"{UiText.T("ui.perks.heart_have", "Heart of Purity")} ×{hearts}"
-            : UiText.T("ui.perks.heart_need", "Respec needs a Heart of Purity"));
+            ? $"{UiText.T("ui.perks.heart_have", "Untainted Heart")} ×{hearts}"
+            : UiText.T("ui.perks.heart_need", "Respec needs a Untainted Heart"));
 
         if (_tab == SpellTab) RefreshSpells();
         else RefreshTree(_tab);
@@ -541,14 +542,14 @@ internal sealed class PerkPanel
         return ok;
     }
 
-    /// <summary>Respec: consumes one Heart of Purity and refunds every perk and spell. False when there is no heart or nothing to refund.</summary>
+    /// <summary>Respec: consumes one Untainted Heart and refunds every perk and spell. False when there is no heart or nothing to refund.</summary>
     public bool TryRespec()
     {
         var pc = Pc;
         if (pc.Perks.SpentPoints == 0) return false;
         if (!ConsumeOne(pc.Inventory, HeartOfPurity))
         {
-            _lastMessage = $"<color={UiTheme.Bad}>{UiText.T("ui.perks.heart_need", "Respec needs a Heart of Purity")}</color>";
+            _lastMessage = $"<color={UiTheme.Bad}>{UiText.T("ui.perks.heart_need", "Respec needs a Untainted Heart")}</color>";
             RefreshDetail();
             return false;
         }

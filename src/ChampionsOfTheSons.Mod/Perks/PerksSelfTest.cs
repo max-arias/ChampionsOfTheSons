@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Perks;
 
-/// <summary>Perk panel checks: level up for points, buy perks, stats change, hit-test, tabs, spell book, respec with a Heart of Purity.</summary>
+/// <summary>Perk panel checks: level up for points, buy perks, stats change, hit-test, tabs, spell book, respec with a Untainted Heart.</summary>
 internal static class PerksSelfTest
 {
     private static PerkPanel Panel => PerksFeature.Panel;
@@ -31,7 +31,7 @@ internal static class PerksSelfTest
             SelfTest.Check("perks: spell row hit-test", hit == "spell.blink", hit ?? "null");
         });
         SelfTest.Add(28.5f, "perks: shot spell book", () => TestKit.Screenshot("13-perks-spellbook"));
-        SelfTest.Add(29f, "perks: respec with Heart of Purity", Respec);
+        SelfTest.Add(29f, "perks: respec with Untainted Heart", Respec);
         SelfTest.Add(30f, "perks: close", () => Panel.Close());
     }
 

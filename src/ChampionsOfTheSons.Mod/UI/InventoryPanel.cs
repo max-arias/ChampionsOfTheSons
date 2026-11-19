@@ -92,6 +92,9 @@ internal sealed partial class InventoryPanel
 
     public bool IsOpen => _root != null && _root.Root.activeSelf;
 
+    /// <summary>The panel's root object, for gamepad focus (COS-30).</summary>
+    public GameObject? PadRoot => _root?.Root;
+
     /// <summary>What the tooltip currently shows, or null when hidden.</summary>
     public ItemDescription? TooltipShown { get; private set; }
 
@@ -381,7 +384,7 @@ internal sealed partial class InventoryPanel
         if (hovered == null) HideTooltip(); else ShowTooltip(hovered);
     }
 
-    private string? RaycastSlot() => RaycastSlotAt(Input.mousePosition);
+    private string? RaycastSlot() => RaycastSlotAt(Pad.PadPointer.Position);
 
     /// <summary>The slot under a screen point (pixels, origin bottom-left), found the way a real pointer would: a UI raycast.</summary>
     public string? RaycastSlotAt(Vector2 screenPoint)

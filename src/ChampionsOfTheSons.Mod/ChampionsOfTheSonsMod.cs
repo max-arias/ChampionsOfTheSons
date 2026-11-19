@@ -71,12 +71,18 @@ public class ChampionsOfTheSonsMod : SonsMod
                 HostRules.WorldRulesFeature.Settings?.Close();
             };
             SelfTest.RegisterDefaultSteps();
-            SelfTest.BeginPhase("bridge");
-            Bridge.BridgeSelfTest.Register();
-            SelfTest.BeginPhase("ui");
-            UI.UiSelfTest.Register();
+            // --cots-selftest-only=<FeatureTypeName>: run just that feature's checks (quick loop while developing it).
+            var only = Environment.GetCommandLineArgs().FirstOrDefault(a => a.StartsWith("--cots-selftest-only=", StringComparison.Ordinal))?.Split('=', 2)[1];
+            if (only == null)
+            {
+                SelfTest.BeginPhase("bridge");
+                Bridge.BridgeSelfTest.Register();
+                SelfTest.BeginPhase("ui");
+                UI.UiSelfTest.Register();
+            }
             foreach (var f in Features.Loaded)
             {
+                if (only != null && f.GetType().Name != only) continue;
                 SelfTest.BeginPhase(f.GetType().Name);
                 Features.Each("RegisterSelfTests", x => { if (ReferenceEquals(x, f)) x.RegisterSelfTests(); });
             }

@@ -241,7 +241,7 @@ internal static class StatSelfTest
             LocalPlayer.Vitals.SetFullHealth();
         });
 
-        SelfTest.Add(T0 + 19, "unique: Heart of Purity respecs", () =>
+        SelfTest.Add(T0 + 19, "unique: Untainted Heart respecs", () =>
         {
             Clean();
             var save = new Core.Saving.PlayerSave { Level = 6 };

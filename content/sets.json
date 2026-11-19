@@ -2,7 +2,7 @@
   "sets": [
     {
       "id": "set.akagi",
-      "name": "Yuki-Onna's Regalia",
+      "name": "Whiteout Regalia",
       "bonuses": [
         {
           "pieces": 1,
@@ -52,7 +52,7 @@
     },
     {
       "id": "set.berserk",
-      "name": "Yorium's Vow",
+      "name": "Blood Oath",
       "bonuses": [
         {
           "pieces": 1,
@@ -113,7 +113,7 @@
     },
     {
       "id": "set.hollow_congregation",
-      "name": "Hollow Congregation",
+      "name": "The Hushed",
       "bonuses": [
         {
           "pieces": 2,
@@ -218,7 +218,7 @@
     },
     {
       "id": "set.golden_aegis",
-      "name": "Golden Aegis",
+      "name": "Buried Gold",
       "bonuses": [
         {
           "pieces": 2,

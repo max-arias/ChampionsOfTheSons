@@ -23,8 +23,13 @@ internal static class SheetData
 
         void Header(string id, string label) => rows.Add(new SheetRow(id, UiText.T("ui.sheet." + id, label), "", true));
         // Tooltip text: ui.sheet.tip.<id> (English fallback below, with the live numbers appended where useful).
-        void Row(string id, string label, string value, string tip, string live = "") =>
-            rows.Add(new SheetRow(id, UiText.T("ui.sheet." + id, label), value, false, UiText.T("ui.sheet.tip." + id, tip) + live));
+        // A tip with "{0}" gets tipArg filled in.
+        void Row(string id, string label, string value, string tip, string live = "", string? tipArg = null)
+        {
+            string text = UiText.T("ui.sheet.tip." + id, tip);
+            if (tipArg != null) text = string.Format(CultureInfo.InvariantCulture, text, tipArg);
+            rows.Add(new SheetRow(id, UiText.T("ui.sheet." + id, label), value, false, text + live));
+        }
 
         Header("attributes", "Attributes");
         Row("strength", "Strength", Int(s.Get(StatIds.Strength)),
@@ -58,7 +63,7 @@ internal static class SheetData
         Row("attack_speed", "Attack speed", Pct(s.Get(StatIds.AttackSpeed) - 1, 0, signed: true),
             "Change in how fast you swing and shoot.");
         Row("armor_piercing", "Armor piercing", Int(Derived.MeleeArmorPierce(s)),
-            "Flat armor your melee hits ignore on the target (ranged hits: " + Int(Derived.RangedArmorPierce(s)) + ").");
+            "Flat armor your melee hits ignore on the target (ranged hits: {0}).", tipArg: Int(Derived.RangedArmorPierce(s)));
         Row("health_on_hit", "Health on hit", Num(s.Get(StatIds.HealthOnHit), 1),
             "Health you recover every time one of your hits lands.");
 
@@ -87,7 +92,8 @@ internal static class SheetData
         Row("move_speed", "Movement speed", Pct(s.Get(StatIds.MovementSpeed) - 1, 0, signed: true),
             "Change in how fast you walk and run.");
         Row("massacre_time", "Massacre duration", Num(s.Get(StatIds.MaxMassacreTime), 0) + "s",
-            "How long a kill streak lasts after a kill (longest wait). Each kill adds " + Num(s.Get(StatIds.TimeBonusPerKill), 1) + "s; the banked XP pays out when it runs out.");
+            "How long a kill streak lasts after a kill (longest wait). Each kill adds {0}s; the banked XP pays out when it runs out.",
+            tipArg: Num(s.Get(StatIds.TimeBonusPerKill), 1));
         return rows;
     }
 

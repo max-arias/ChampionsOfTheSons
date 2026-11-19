@@ -17,7 +17,16 @@ function Find-Dotnet {
 }
 $dotnet = Find-Dotnet
 
+# Translation tables: structural problems fail the build; missing or stale translations only warn (docs/translations.md).
+function Test-Translations {
+    $py = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $py) { Write-Warning 'python not found: skipping tools/check_translations.py'; return }
+    & $py.Source -I tools/check_translations.py --lenient
+    if ($LASTEXITCODE) { exit $LASTEXITCODE }
+}
+
 if ($Target -in 'test', 'all') {
+    Test-Translations
     & $dotnet test ChampionsOfTheSons.slnx -c Debug
     if ($LASTEXITCODE) { exit $LASTEXITCODE }
 }
