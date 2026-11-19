@@ -152,6 +152,7 @@ public sealed class EnemyAbilityFeature : IModFeature
             ApplySpeed(enemy);
             foreach (var h in EnemyAbilities.For(enemy)) h.OnTick(enemy, dt);
         }
+        Abilities.ActiveAbilitySystem.Sweep(dt);
     }
 
     /// <summary>Movement and animation speed: the profile's speed times every slow, stun and rain bonus.</summary>
