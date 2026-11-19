@@ -226,6 +226,7 @@ internal sealed class Nameplates
             }
             else if (EnemyRegistry.Get(e.Stats) == null) { Remove(i); continue; } // died or despawned
             if (!show) { e.Why = cam == null ? "no camera" : "disabled"; Release(e); continue; }
+            if (e.Runtime.TestActive == false) { e.Why = "test-inactive"; Release(e); continue; } // switched off between self-test phases
             var pos = e.Sim._position;
 
             var profile = e.Runtime.Profile;
@@ -248,18 +249,19 @@ internal sealed class Nameplates
 
             if (n == _candidates.Length) Array.Resize(ref _candidates, n * 2); // grows once to the crowd size, then reused
             float dist = Mathf.Sqrt(sqr);
-            float tierWeight = profile.Tier switch { EnemyTier.Boss => 3000, EnemyTier.Miniboss => 2000, EnemyTier.Elite => 1000, _ => 0 };
+            // Tiers count as metres closer, so a far elite never hides the plate of a normal enemy next to the player.
+            float tierBonus = profile.Tier switch { EnemyTier.Boss => 25, EnemyTier.Miniboss => 18, EnemyTier.Elite => 10, _ => 0 };
             _candidates[n++] = new Candidate
             {
                 Entry = e,
                 Pos = new Vector2(sp.x * k, sp.y * k),
                 Dist = dist,
                 Range = range,
-                Priority = tierWeight + (_time - e.LastHit < HitPriorityTime ? 5000 : 0) - dist,
+                Priority = tierBonus + (_time - e.LastHit < HitPriorityTime ? 1000 : 0) - dist,
             };
         }
 
-        // Highest priority first: recently hit, then bosses and elites, then the nearest.
+        // Highest priority first: recently hit, then the nearest (elites, minibosses and bosses count as 10/18/25 m closer).
         Array.Sort(_candidates, 0, n, PriorityOrder);
         int placed = 0;
         for (int i = 0; i < n; i++)
