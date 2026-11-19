@@ -41,6 +41,13 @@ public static class PlayerEffects
         Poisons.Add(new Poison { PerSecond = perSecond, TicksLeft = (int)Math.Ceiling(seconds) });
     }
 
+    /// <summary>Purge: ends stun and poison on the player.</summary>
+    public static void ClearDebuffs()
+    {
+        _stunLeft = 0;
+        Poisons.Clear();
+    }
+
     public static void Heal(double amount)
     {
         var health = LocalPlayer.Vitals?.Health;
