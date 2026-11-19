@@ -127,10 +127,25 @@ public class CraftingTests
     }
 
     [Fact]
-    public void Reforge_needs_another_base_of_the_same_type_and_rarity()
+    public void Reforge_needs_another_base_of_the_same_type()
     {
         var result = Crafting.Craft(CraftMode.Reforge, Ring(), new[] { Ring(), Ring(), Ring() }, new Rng(4));
         Assert.Equal(CraftError.NoAlternativeBase, result.Error); // test content has only one ring
+    }
+
+    [Fact]
+    public void Reforge_falls_back_to_the_nearest_rarity_of_the_same_type()
+    {
+        const string extra =
+            "{ \"id\": \"item.far_ring\", \"name\": \"Far Ring\", \"type\": \"ring\", \"rarity\": 7, \"minLevel\": 1, \"maxLevel\": 50, \"statPools\": [ [\"stat.max_life\"] ] },\n" +
+            "{ \"id\": \"item.near_ring\", \"name\": \"Near Ring\", \"type\": \"ring\", \"rarity\": 3, \"minLevel\": 1, \"maxLevel\": 50, \"statPools\": [ [\"stat.max_life\"] ] },\n";
+        var items = TestContent.Items.Replace("{ \"id\": \"item.boots\",", extra + "{ \"id\": \"item.boots\",");
+        var db = TestContent.Create(new() { ["items.json"] = items });
+        var crafting = new Crafting(db, new LootRoller(db));
+        var ring = new LootRoller(db).RollItem(db.Items["item.ring"], 30, new Rng(20)) with { Rarity = Rarity.Magic };
+        var result = crafting.Craft(CraftMode.Reforge, ring, new[] { ring, ring, ring }, new Rng(5));
+        Assert.True(result.Ok);
+        Assert.Equal("item.near_ring", result.Item!.BaseId);
     }
 
     [Fact]

@@ -62,9 +62,14 @@ public sealed class Crafting
 
             case CraftMode.Reforge:
             {
-                var other = _loot.PickBase(baseDef.Rarity, target.Level, rng,
-                    d => d.Id != baseDef.Id && d.Rarity == baseDef.Rarity && d.Type == baseDef.Type);
-                if (other == null) return Fail(CraftError.NoAlternativeBase);
+                // Same type, same rarity first; with fewer items per rarity, fall back to the nearest rarity of the same type.
+                var candidates = _content.Items.Values
+                    .Where(d => d.Id != baseDef.Id && d.Type == baseDef.Type && d.MinLevel <= Math.Max(1, target.Level))
+                    .ToList();
+                if (candidates.Count == 0) return Fail(CraftError.NoAlternativeBase);
+                int nearest = candidates.Min(d => Math.Abs(d.Rarity - baseDef.Rarity));
+                var pool = candidates.Where(d => Math.Abs(d.Rarity - baseDef.Rarity) == nearest).OrderBy(d => d.Id, StringComparer.Ordinal).ToList();
+                var other = rng.Pick(pool);
                 return Done(_loot.RollItem(other, target.Level, rng));
             }
 
