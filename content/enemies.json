@@ -1,0 +1,247 @@
+{
+  "enemies": [
+    {
+      "id": "enemy.cannibal",
+      "actorType": "Carl",
+      "name": "Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.cannibal",
+      "actorType": "Andy",
+      "name": "Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.cannibal",
+      "actorType": "Danny",
+      "name": "Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.cannibal",
+      "actorType": "Billy",
+      "name": "Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.cannibal",
+      "actorType": "Brandy",
+      "name": "Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.cannibal",
+      "actorType": "Crystal",
+      "name": "Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.cannibal",
+      "actorType": "Destiny",
+      "name": "Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.cannibal",
+      "actorType": "Angel",
+      "name": "Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.muddy_cannibal",
+      "actorType": "MuddyMale",
+      "name": "Muddy Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.muddy_cannibal",
+      "actorType": "MuddyFemale",
+      "name": "Muddy Cannibal",
+      "levelExtra": 1
+    },
+    {
+      "id": "enemy.heavy_cannibal",
+      "actorType": "HeavyMale",
+      "name": "Heavy Cannibal",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.heavy_cannibal",
+      "actorType": "FatMale",
+      "name": "Heavy Cannibal",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.heavy_cannibal",
+      "actorType": "FatFemale",
+      "name": "Heavy Cannibal",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.faceless_cannibal",
+      "actorType": "FacelessMale",
+      "name": "Faceless Cannibal",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.painted_cannibal",
+      "actorType": "PaintedMale",
+      "name": "Painted Cannibal",
+      "levelExtra": 3
+    },
+    {
+      "id": "enemy.painted_cannibal",
+      "actorType": "PaintedFemale",
+      "name": "Painted Cannibal",
+      "levelExtra": 3
+    },
+    {
+      "id": "enemy.gold_mask",
+      "actorType": "GoldMask",
+      "name": "Gold Mask",
+      "levelExtra": 4
+    },
+    {
+      "id": "enemy.tribe_veteran",
+      "actorType": "Frank",
+      "name": "Tribe Veteran",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.tribe_veteran",
+      "actorType": "Eddy",
+      "name": "Tribe Veteran",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.tribe_veteran",
+      "actorType": "Greg",
+      "name": "Tribe Veteran",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.tribe_veteran",
+      "actorType": "Henry",
+      "name": "Tribe Veteran",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.tribe_veteran",
+      "actorType": "Igor",
+      "name": "Tribe Veteran",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.tribe_veteran",
+      "actorType": "Elise",
+      "name": "Tribe Veteran",
+      "levelExtra": 2
+    },
+    {
+      "id": "enemy.fingers",
+      "actorType": "Fingers",
+      "name": "Fingers",
+      "levelExtra": 2,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.twins",
+      "actorType": "Twins",
+      "name": "Twins",
+      "levelExtra": 2,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.puffy",
+      "actorType": "MrPuffy",
+      "name": "Puffy",
+      "levelExtra": 2,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.puffy",
+      "actorType": "MissPuffy",
+      "name": "Puffy",
+      "levelExtra": 2,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.john",
+      "actorType": "John2",
+      "name": "John",
+      "levelExtra": 2,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.armsy",
+      "actorType": "Armsy",
+      "name": "Armsy",
+      "levelExtra": 3,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.legsy",
+      "actorType": "Legsy",
+      "name": "Legsy",
+      "levelExtra": 3,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.holey",
+      "actorType": "Holey",
+      "name": "Holey",
+      "levelExtra": 3,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.creepy_virginia",
+      "actorType": "CreepyVirginia",
+      "name": "Twisted Virginia",
+      "levelExtra": 3,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.demon",
+      "actorType": "Demon",
+      "name": "Demon",
+      "levelExtra": 3,
+      "canBeUndead": true
+    },
+    {
+      "id": "enemy.baby",
+      "actorType": "Baby",
+      "name": "Baby",
+      "levelExtra": 0,
+      "canBeElite": false
+    },
+    {
+      "id": "enemy.demon_boss",
+      "actorType": "DemonBoss",
+      "name": "Demon Boss",
+      "levelExtra": 6,
+      "bossType": true
+    },
+    {
+      "id": "enemy.puffy_boss",
+      "actorType": "PuffyBossMale",
+      "name": "Puffy Matriarch",
+      "levelExtra": 6,
+      "bossType": true
+    },
+    {
+      "id": "enemy.puffy_boss",
+      "actorType": "PuffyBossFemale",
+      "name": "Puffy Matriarch",
+      "levelExtra": 6,
+      "bossType": true
+    },
+    {
+      "id": "enemy.boss_mutant",
+      "actorType": "BossMutant",
+      "name": "The Abomination",
+      "levelExtra": 6,
+      "bossType": true
+    }
+  ]
+}

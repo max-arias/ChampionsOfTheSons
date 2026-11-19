@@ -15,7 +15,18 @@ public class ChampionsOfTheSonsMod : SonsMod
     {
         Instance = this;
         HarmonyPatchAll = true;
-        if (SelfTest.Enabled) OnUpdateCallback = SelfTest.Update;
+        OnUpdateCallback = OnUpdate;
+    }
+
+    private static void OnUpdate()
+    {
+        float dt = UnityEngine.Time.deltaTime;
+        if (TheForest.Utils.LocalPlayer.IsInWorld)
+        {
+            Bridge.PlayerBridge.Update(dt);
+            PlayerState.Character.Tick(dt);
+        }
+        SelfTest.Update();
     }
 
     protected override void OnInitializeMod()
@@ -31,17 +42,20 @@ public class ChampionsOfTheSonsMod : SonsMod
         SonsSaveTools.Register(new WorldSettingsSaveable());
 
         Packets.Register(CotsNetEvent.Instance);
+        Bridge.EnemyRegistry.Init();
 
         RLog.Msg($"Champions of the Sons {Manifest.Version} loaded: {ModContent.Db.Summary()}");
         if (SelfTest.Enabled)
         {
             SelfTest.RegisterDefaultSteps();
+            Bridge.BridgeSelfTest.Register();
             SelfTest.Log("enabled");
         }
     }
 
     protected override void OnGameStart()
     {
-        RLog.Msg("Champions of the Sons: game started");
+        Bridge.PlayerBridge.Reset();
+        RLog.Msg($"Champions of the Sons: game started (difficulty {WorldState.Rules.Difficulty.Name}, level {PlayerState.Character.Progress.Level})");
     }
 }

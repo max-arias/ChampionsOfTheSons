@@ -57,6 +57,9 @@ public static class WorldState
         DifficultyChosen = true;
     }
 
+    /// <summary>Self-tests only: swap rules without marking the difficulty as chosen.</summary>
+    public static void SetRulesForTest(WorldRules rules) => Rules = rules;
+
     public static WorldSave ToSave() => new()
     {
         Difficulty = DifficultyChosen ? Rules.Difficulty.Id : null,

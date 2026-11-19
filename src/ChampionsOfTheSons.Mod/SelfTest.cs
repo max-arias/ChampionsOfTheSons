@@ -17,6 +17,7 @@ public static class SelfTest
     private static float _start = -1;
     private static int _next;
     private static int _failures;
+    private static bool _sorted;
 
     public static bool Enabled { get; } = Environment.GetCommandLineArgs().Any(a => a == "--cots-selftest");
 
@@ -64,6 +65,13 @@ public static class SelfTest
         {
             _start = Time.realtimeSinceStartup + SettleTime;
             Log("player in world, starting steps soon");
+        }
+        if (!_sorted)
+        {
+            _sorted = true;
+            var ordered = Steps.Select((s, i) => (s, i)).OrderBy(x => x.s.At).ThenBy(x => x.i).Select(x => x.s).ToList();
+            Steps.Clear();
+            Steps.AddRange(ordered);
         }
         float t = Time.realtimeSinceStartup - _start;
         while (_next < Steps.Count && t >= Steps[_next].At)

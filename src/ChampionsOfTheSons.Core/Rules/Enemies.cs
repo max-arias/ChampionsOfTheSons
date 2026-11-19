@@ -46,6 +46,8 @@ public sealed record EnemyKind
 {
     public string Id { get; init; } = "";
     public string Name { get; init; } = "";
+    /// <summary>The game's actor type name (SotF VailActorTypeId, e.g. "Carl", "Fingers").</summary>
+    public string ActorType { get; init; } = "";
     /// <summary>Levels added on top of the difficulty's base level (COTF: normal 1, leader 2, painted 3...).</summary>
     public int LevelExtra { get; init; } = 1;
     /// <summary>Always elite with 10 abilities (COTF's Megan; in SotF the story bosses).</summary>
@@ -98,8 +100,10 @@ public static class EnemyScaler
     public static double DamageMultiplier(int level) =>
         level < 65 ? Math.Exp(level / 6) + level : Math.Pow(level - 60, 2.6) * 600;
 
+    /// <remarks>COTF's curve; vanilla health is a floor (SotF enemies would otherwise be ~5× weaker than vanilla below level 5).</remarks>
     public static double MaxHealth(int level, double vanillaHealth, double healthMul) =>
-        (Math.Sqrt(Math.Max(0, vanillaHealth)) + 45) * Math.Pow(level, 2.38) * 0.2 * Math.Pow(2, (level - 50) / 32.0) * healthMul;
+        Math.Max(Math.Max(0, vanillaHealth),
+            (Math.Sqrt(Math.Max(0, vanillaHealth)) + 45) * Math.Pow(level, 2.38) * 0.2 * Math.Pow(2, (level - 50) / 32.0)) * healthMul;
 
     public static double RollArmor(int level, DifficultyTier d, double armorMul, Rng rng)
     {
@@ -222,6 +226,8 @@ public static class EnemyScaler
         playersInRange <= 0 ? 0 : bounty * (1 + 0.2 * (playersInRange - 1)) / playersInRange;
 
     /// <summary>Damage an enemy deals to the player before the player's defenses.</summary>
+    /// <remarks>COTF: damageMult + vanilla − 20, tuned for The Forest's numbers. SotF weapons hit for less, so
+    /// the vanilla damage is a floor: low levels feel like the base game and scaling only ever adds.</remarks>
     public static double DamageToPlayer(EnemyProfile enemy, double vanillaDamage, double debuffDamageMult = 1) =>
-        Math.Max(0, enemy.DamageMult * debuffDamageMult + vanillaDamage - 20);
+        Math.Max(vanillaDamage, enemy.DamageMult * debuffDamageMult + vanillaDamage - 20);
 }

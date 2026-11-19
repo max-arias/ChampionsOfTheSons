@@ -12,9 +12,18 @@ public class EnemyScalerTests
     {
         for (int l = 1; l < 400; l++)
         {
-            Assert.True(EnemyScaler.MaxHealth(l + 1, 100, 1) > EnemyScaler.MaxHealth(l, 100, 1));
+            Assert.True(EnemyScaler.MaxHealth(l + 1, 100, 1) >= EnemyScaler.MaxHealth(l, 100, 1));
             Assert.True(EnemyScaler.DamageMultiplier(l + 1) >= EnemyScaler.DamageMultiplier(l), $"damage drops at {l}");
         }
+    }
+
+    [Fact]
+    public void Low_level_enemies_never_drop_below_vanilla_health_or_damage()
+    {
+        for (int l = 1; l <= 10; l++)
+            Assert.True(EnemyScaler.MaxHealth(l, 100, 1) >= 100);
+        var weak = new EnemyProfile { Level = 1, DamageMult = EnemyScaler.DamageMultiplier(1) };
+        Assert.Equal(30, EnemyScaler.DamageToPlayer(weak, 30), 6);
     }
 
     [Fact]

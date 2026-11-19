@@ -25,6 +25,7 @@ public sealed class ContentDb
     private readonly Dictionary<string, PerkDef> _perks = new();
     private readonly Dictionary<string, SpellDef> _spells = new();
     private readonly Dictionary<string, SetDef> _sets = new();
+    private readonly Dictionary<string, Rules.EnemyKind> _enemies = new();
     private readonly List<string> _errors = new();
 
     public IReadOnlyDictionary<string, PlayerStatDef> PlayerStats => _playerStats;
@@ -33,6 +34,8 @@ public sealed class ContentDb
     public IReadOnlyDictionary<string, PerkDef> Perks => _perks;
     public IReadOnlyDictionary<string, SpellDef> Spells => _spells;
     public IReadOnlyDictionary<string, SetDef> Sets => _sets;
+    /// <summary>Enemy kinds keyed by the game's actor type name ("Carl", "Fingers").</summary>
+    public IReadOnlyDictionary<string, Rules.EnemyKind> Enemies => _enemies;
     public IReadOnlyList<string> Errors => _errors;
 
     /// <summary>Loads content from file name → JSON text (e.g. "items.json" → its text). Missing files are errors.</summary>
@@ -48,6 +51,7 @@ public sealed class ContentDb
         db.Add(files, "perks.json", "perks", db._perks, p => p.Id, optional: true);
         db.Add(files, "spells.json", "spells", db._spells, s => s.Id, optional: true);
         db.Add(files, "sets.json", "sets", db._sets, s => s.Id, optional: true);
+        db.Add(files, "enemies.json", "enemies", db._enemies, e => e.ActorType, optional: true);
         db.Validate();
         return db;
     }
@@ -57,7 +61,7 @@ public sealed class ContentDb
         Load(Directory.GetFiles(folder, "*.json").ToDictionary(f => Path.GetFileName(f), File.ReadAllText));
 
     public string Summary() =>
-        $"{_items.Count} items, {_itemStats.Count} item stats, {_playerStats.Count} player stats, {_perks.Count} perks, {_spells.Count} spells, {_sets.Count} sets, {_errors.Count} content errors";
+        $"{_items.Count} items, {_itemStats.Count} item stats, {_playerStats.Count} player stats, {_perks.Count} perks, {_spells.Count} spells, {_sets.Count} sets, {_enemies.Count} enemy kinds, {_errors.Count} content errors";
 
     private void Add<T>(IReadOnlyDictionary<string, string> files, string file, string key, Dictionary<string, T> into, Func<T, string> id, bool optional = false)
     {

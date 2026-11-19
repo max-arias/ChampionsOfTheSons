@@ -99,6 +99,7 @@ Ingredients: exactly N items, each of rarity ≥ the target's; one of each consu
 Keyed by source; re-adding a source refreshes duration; amount overwrites, accumulates or takes the max per buff kind. Negative buffs can be blocked by resist (dispel ≤ 1) or immunity (dispel ≤ 2).
 
 ## Deviations from COTF (deliberate)
+- Vanilla floors: enemy max health is at least the game's own value, and enemy damage to the player is at least the game's own hit. COTF's curves were tuned for The Forest's numbers; in Sons of the Forest they made low-level enemies far weaker than vanilla (seen in the 2026-11-18 self-test: a level-2 cannibal had 20 HP vs 100 vanilla).
 - Boss tier: COTF requires n > 6 abilities, which only its Megan could reach, and gives Bosses ×2 HP (less than Miniboss ×10). Here Boss needs n ≥ 6 and has ×20 HP.
 - Incoming damage: COTF computed armor/DR/block for the player but applied the vanilla damage. Here the computed value is applied.
 - Pierce chance: COTF pierced when `U > chance` (inverted). Here `U < chance`.

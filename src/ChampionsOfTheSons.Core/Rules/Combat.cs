@@ -67,6 +67,28 @@ public static class PlayerAttack
     }
 }
 
+/// <summary>Enemy defenses as a pure function, for when the game owns the health value.</summary>
+public static class EnemyDefense
+{
+    /// <summary>Damage after armor (physical/magic), damage-taken multiplier and the steadfast cap,
+    /// plus the enemy's new armor reduction after this hit's armor pierce.</summary>
+    public static (double Damage, double ArmorReduction) Apply(EnemyProfile profile, double armorReduction, OutgoingHit hit, double damageTakenMult = 1)
+    {
+        double effectiveArmor = Math.Max(0, profile.Armor - armorReduction);
+        double dmg = hit.Amount * damageTakenMult;
+        dmg *= hit.Kind switch
+        {
+            DamageKind.Physical => 1 - ArmorMath.Reduction(effectiveArmor),
+            DamageKind.Magic => 1 - ArmorMath.Reduction(effectiveArmor) / 1.5,
+            _ => 1,
+        };
+        double cap = profile.HitCap < 1 ? Math.Max(profile.HitCap * profile.MaxHealth, 1) : double.MaxValue;
+        dmg = Math.Max(0, Math.Min(dmg, cap));
+        double reduction = Math.Min(profile.Armor, armorReduction + Math.Max(0, hit.ArmorPierce));
+        return (dmg, reduction);
+    }
+}
+
 /// <summary>Host-side enemy defense state for one enemy: health, armor pierce taken, damage-taken debuffs.</summary>
 public sealed class EnemyHealthState
 {
@@ -92,16 +114,8 @@ public sealed class EnemyHealthState
     public double TakeHit(OutgoingHit hit)
     {
         if (Dead || Immune) return 0;
-        double dmg = hit.Amount * DamageTakenMult;
-        dmg *= hit.Kind switch
-        {
-            DamageKind.Physical => 1 - ArmorMath.Reduction(EffectiveArmor),
-            DamageKind.Magic => 1 - ArmorMath.Reduction(EffectiveArmor) / 1.5,
-            _ => 1,
-        };
-        double cap = Profile.HitCap < 1 ? Math.Max(Profile.HitCap * Profile.MaxHealth, 1) : double.MaxValue;
-        dmg = Math.Max(0, Math.Min(dmg, cap));
-        ArmorReduction = Math.Min(Profile.Armor, ArmorReduction + Math.Max(0, hit.ArmorPierce));
+        var (dmg, reduction) = EnemyDefense.Apply(Profile, ArmorReduction, hit, DamageTakenMult);
+        ArmorReduction = reduction;
         Health -= dmg;
         if (Health <= 0 && Profile.Has(EnemyAbility.Undead) && !UndeadUsed)
         {
