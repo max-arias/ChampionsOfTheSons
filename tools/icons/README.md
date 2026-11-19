@@ -11,6 +11,7 @@ AI generation (local ComfyUI, Z-Image Turbo) was dropped. Icons are recolored **
 (keep it with the icons; the mod must show "Icons made by ... from game-icons.net" somewhere, e.g. a credits screen).
 
 - `mapping.json`: entry id -> `author/icon` (generated, committed).
+- Distinctness: `uniquify()` gives every entry of one type a different visual: first an unused glyph from `POOLS`, then a small theme emblem (`THEME`, chosen from words in the name) in the lower right corner (`base+emblem` mapping values).
 - `placeholders.md`: entries using the magenta "missing art" icon (none right now) and the weakest matches.
 - `overrides.json`: hand picks (`id -> icon slug`), win over the automatic match. Edit this to fix a bad icon.
 - Matching: keywords from the entry name and type (e.g. a weapon must match a weapon icon), synonyms, a penalty for reusing

@@ -117,6 +117,82 @@ def h32(s):
     return zlib.crc32(s.encode())
 
 
+# Same-type alternatives: when two items of a type map to one glyph, the later one gets an unused glyph from its pool.
+POOLS = {
+    "ring": "ring diamond-ring skull-ring big-diamond-ring power-ring globe-ring fire-ring skull-signet frozen-ring".split(),
+    "amulet": "necklace pearl-necklace double-necklace heart-necklace gem-necklace emerald-necklace feather-necklace intricate-necklace primitive-necklace necklace-display tribal-pendant gem-pendant pendant-key".split(),
+    "glove": "gloves gauntlet winter-gloves cooking-glove mailed-fist hand-bandage metal-hand".split(),
+    "shoulder_armor": "shoulder-armor spiked-shoulder-armor shoulder-scales".split(),
+    "bracer": "bracer bracers arm-bandage hand-bandage".split(),
+    "pants": "trousers shorts underwear-shorts skirt leg-armor greaves armored-pants metal-skirt leg armor-cuisses".split(),
+    "boot": "boots leather-boot steeltoe-boots metal-boot rubber-boot fur-boot chelsea-boot cowboy-boot walking-boot ski-boot tabi-boot sticky-boot".split(),
+    "chest_armor": "chest-armor leather-armor armor-vest kevlar-vest leather-vest breastplate scale-mail mail-shirt trench-body-armor abdominal-armor spiked-armor heart-armor".split(),
+    "shield": "shield bordered-shield checked-shield cracked-shield crenulated-shield dice-shield dragon-shield edged-shield eye-shield fire-shield griffin-shield heart-shield ice-shield bolt-shield riot-shield round-shield skull-shield spiked-shield roman-shield attached-shield bell-shield acid-shield winged-shield broken-shield slashed-shield tribal-shield viking-shield".split(),
+}
+# Name word -> small emblem glyph for 'base+emblem' variants (used when the pool has no unused glyph left).
+THEME = {
+    "iron": "anvil", "steel": "anvil", "titanium": "anvil", "forged": "anvil", "plate": "anvil", "chromium": "anvil", "tungsten": "anvil", "lead": "anvil",
+    "gold": "gold-bar", "golden": "gold-bar", "gilt": "gold-bar", "gilded": "gold-bar", "greed": "gold-bar",
+    "silver": "moon", "moon": "moon", "moonstone": "moon", "midnight": "moon", "emerald": "emerald", "diamond": "diamond",
+    "frost": "snowflake-2", "ice": "snowflake-2", "whiteout": "snowflake-2", "glacier": "snowflake-2", "frozen": "snowflake-2", "snow": "snowflake-2", "frostbound": "snowflake-2", "frostbitten": "snowflake-2",
+    "fire": "flame", "flame": "flame", "ember": "flame", "scorched": "flame", "scorch": "flame", "cinder": "flame", "soot": "flame", "burned": "flame", "burn": "flame", "pyromancy": "flame", "heat": "flame",
+    "blood": "blood", "vampire": "blood", "vampiric": "blood", "gorged": "blood", "biting": "fangs", "crimson": "blood", "red": "blood", "oath": "blood", "debt": "blood",
+    "skull": "skull", "bone": "bone-gnawer", "knucklebone": "skull", "tribal": "tribal-pendant", "tribe": "tribal-pendant", "twin": "skull", "cultist": "candle-flame", "cult": "candle-flame", "hushed": "candle-flame", "ritual": "candle-flame",
+    "cube": "cube", "cubestruck": "cube", "seamless": "cube", "humming": "cube", "cubeglass": "cube", "wormhole": "cube",
+    "leather": "animal-hide", "hide": "animal-hide", "fur": "animal-hide", "rabbit": "rabbit", "bear": "animal-hide", "boar": "animal-hide",
+    "spiked": "spikes", "nail": "spikes", "nails": "spikes", "barbed": "spikes", "thorn": "spikes", "jagged": "spikes", "razor": "spikes",
+    "golf": "golf-tee", "fairway": "golf-tee", "clubhouse": "golf-tee", "nine": "golf-tee", "bunker": "cog", "printed": "cog", "polymer": "cog", "keycard": "cog", "gps": "cog", "locator": "cog", "factory": "cog", "gears": "gears",
+    "poison": "poison-bottle", "toxic": "poison-bottle", "acid": "poison-bottle", "explosive": "dynamite", "gunpowder": "dynamite", "demolition": "dynamite", "volatile": "dynamite", "powder": "dynamite",
+    "brawler": "sword-clash", "survivor": "heart", "sprinter": "running-ninja", "tinker": "gears", "heart": "heart", "life": "heart", "vitality": "heart", "medic": "heart", "healer": "heart",
+    "shark": "shark-fin", "whale": "shark-fin", "megalodon": "shark-fin", "feather": "feather", "crow": "feather", "water": "drop", "tiger": "tiger-head", "rusty": "broken-bone", "broken": "broken-bone", "damaged": "broken-bone",
+    "old": "anchor", "worn": "anchor", "ancient": "anchor", "light": "sun", "sun": "sun", "sunscorched": "sun", "travel": "compass", "tracker": "compass", "hunter": "compass", "duelist": "sword-clash", "initiate": "key", "keepsake": "key", "key": "key",
+    "lantern": "lantern", "wired": "gears", "precise": "compass", "long": "arrow-cluster",
+}
+NEUTRAL = "leaf feather key anchor sun compass drop gears moon tooth".split()
+
+
+def uniquify(ents, res, by_slug, locked=()):
+    """No two entries of one kind+type share a visual: first try an unused pool glyph, then add a small theme emblem."""
+    def key_of(slug):
+        return by_slug.get(slug, slug)
+
+    pools = {t: [key_of(x) for x in v if x in by_slug and x not in BANNED] for t, v in POOLS.items()}
+    emblem_theme = {w: key_of(v) for w, v in THEME.items() if v in by_slug}
+    neutral = [key_of(x) for x in NEUTRAL if x in by_slug]
+    groups = collections.defaultdict(list)
+    for e in ents:
+        groups[(e["kind"], e["type"])].append(e)
+    for (kind, typ), g in groups.items():
+        g.sort(key=lambda e: (e["id"] not in locked, -e["rarity"], e["id"]))
+        used_full, used_base = set(), set()
+        for e in g:
+            cur = res[e["id"]]
+            if cur == PLACEHOLDER:
+                continue
+            base = cur.split("+")[0]
+            if base in used_base:
+                alts = [] if e["id"] in locked else [x for x in pools.get(typ, []) if x not in used_base]
+                if alts:
+                    nb = alts[h32(e["id"]) % len(alts)]
+                    cur = nb + ("+" + cur.split("+")[1] if "+" in cur else "")
+                    base = nb
+            if cur in used_full or (base in used_base and False):
+                pass
+            if base in used_base:
+                emb = None
+                cands = [emblem_theme[w] for w in words(e["name"]) if w in emblem_theme] + neutral
+                for c in cands:
+                    if c != base and base + "+" + c not in used_full:
+                        emb = c
+                        break
+                assert emb, "no emblem for " + e["id"]
+                cur = base + "+" + emb
+            res[e["id"]] = cur
+            used_full.add(cur)
+            used_base.add(base)
+    return res
+
+
 def match(ents, overrides):
     idx = index_icons()
     by_slug = {k.split("/")[1]: k for k, _, _ in idx}
@@ -156,7 +232,7 @@ def match(ents, overrides):
         best = best or "lorc/magic-swirl"
         res[e["id"]] = best
         used[best] += 1
-    return res
+    return uniquify(ents, res, by_slug, set(overrides))
 
 
 RARITY = ["#b9b9b9", "#5fd05f", "#4aa3ff", "#ecd84a", "#b266ff", "#ff8c2e", "#ff3d3d", "#ff55dd"]
@@ -200,24 +276,43 @@ def render_placeholder():
     return out
 
 
+def glyph_mask(key, size):
+    """White-on-black SVG -> L mask at size x size (luminance: some icons have black cut-outs)."""
+    import resvg_py
+    from PIL import Image
+    svg = (SRC / (key + ".svg")).read_text(encoding="utf8")
+    png = bytes(resvg_py.svg_to_bytes(svg_string=svg, width=size, height=size))
+    return Image.open(io.BytesIO(png)).convert("L")
+
+
 def render_one(e, key):
+    """key is a glyph ('author/slug'), PLACEHOLDER, or 'base+emblem' (small emblem glyph in the lower right corner)."""
     if key == PLACEHOLDER:
         return render_placeholder()
-    import numpy as np, resvg_py
+    import numpy as np
     from PIL import Image, ImageFilter
-    svg = (SRC / (key + ".svg")).read_text(encoding="utf8")
     big = 4 * SIZE
-    png = bytes(resvg_py.svg_to_bytes(svg_string=svg, width=big, height=big))
-    # icons are white shapes (some with black cut-outs) on a black square: luminance is the mask
-    a = Image.open(io.BytesIO(png)).convert("L")
+    parts = key.split("+")
+    combo = len(parts) == 2
+    content = 0.70 if combo else 0.76
+    cs = int(big * content)
+    a = glyph_mask(parts[0], cs)
+    c = Image.new("L", (big, big), 0)
+    off = int(big * (0.06 if combo else 0.12))
+    c.paste(a, (off, off))
+    a = c
+    em = None
+    if combo:
+        es = int(big * 0.42)
+        em = Image.new("L", (big, big), 0)
+        em.paste(glyph_mask(parts[1], es), (big - es - int(big * 0.05), big - es - int(big * 0.05)))
+    union = a if em is None else Image.fromarray(np.maximum(np.asarray(a), np.asarray(em)))
+    an = np.asarray(a, np.float32) / 255
+    if em is not None:
+        gap = np.asarray(em.filter(ImageFilter.MaxFilter(2 * (big // 40) + 1)), np.float32) / 255
+        an = an * (1 - gap)
     base = np.array(hex2rgb(tint(e)), np.float32)
     r = min(7, e["rarity"]) if e["kind"] == "item" else 3
-    pad = int(big * 0.12)
-    a = a.resize((big - 2 * pad,) * 2, Image.LANCZOS)
-    c = Image.new("L", (big, big), 0)
-    c.paste(a, (pad, pad))
-    a = c
-    an = np.asarray(a, np.float32) / 255
     h, w = an.shape
     yy = np.linspace(0, 1, h)[:, None, None]
     light = np.minimum(255, base + 70)
@@ -227,7 +322,7 @@ def render_one(e, key):
     out = np.zeros((h, w, 4), np.float32)
     glow_r = ([0, 0, 3, 5, 7, 9, 11, 13][r] * 4) if e["kind"] == "item" else 32
     if glow_r:
-        ga = np.asarray(a.filter(ImageFilter.GaussianBlur(glow_r)), np.float32) / 255 * (0.45 + 0.07 * r)
+        ga = np.asarray(union.filter(ImageFilter.GaussianBlur(glow_r)), np.float32) / 255 * (0.45 + 0.07 * r)
         out[..., :3] = base
         out[..., 3] = np.clip(ga * 1.6, 0, 1)
     if e["kind"] != "item":
@@ -238,7 +333,8 @@ def render_one(e, key):
         bg[..., :3] = base * 0.18 + 8
         bg[..., 3] = disc
         out = over(bg, out)
-    ola = np.asarray(a.filter(ImageFilter.MaxFilter(2 * (big // 64) + 1)), np.float32) / 255
+    k = 2 * (big // 64) + 1
+    ola = np.asarray(a.filter(ImageFilter.MaxFilter(k)), np.float32) / 255
     outline = np.zeros_like(out)
     outline[..., :3] = (10, 8, 12)
     outline[..., 3] = ola
@@ -246,7 +342,20 @@ def render_one(e, key):
     glyph = np.zeros_like(out)
     glyph[..., :3] = col
     glyph[..., 3] = an
-    return over(glyph, out)
+    out = over(glyph, out)
+    if em is not None:
+        ema = np.asarray(em, np.float32) / 255
+        eol = np.asarray(em.filter(ImageFilter.MaxFilter(k)), np.float32) / 255
+        o2 = np.zeros_like(out)
+        o2[..., :3] = (10, 8, 12)
+        o2[..., 3] = eol
+        out = over(o2, out)
+        e2 = np.zeros_like(out)
+        pale = np.minimum(255, base * 0.35 + 190)
+        e2[..., :3] = pale
+        e2[..., 3] = ema
+        out = over(e2, out)
+    return out
 
 
 def save(arr, path):
