@@ -104,6 +104,9 @@ public sealed class PlayerCharacter
     public StatSheet Stats { get; }
     public Massacre Massacre { get; } = new();
 
+    /// <summary>Raised by <see cref="AddXp"/> when it leveled the character up (HUD notice).</summary>
+    public event Action<LevelUpResult>? LeveledUp;
+
     public PlayerCharacter(ContentDb content)
     {
         Content = content;
@@ -122,7 +125,11 @@ public sealed class PlayerCharacter
     public LevelUpResult AddXp(double xp)
     {
         var result = Progress.AddXp(xp, Stats.Get(StatIds.ExpGain));
-        if (result.LeveledUp) RebuildLevel();
+        if (result.LeveledUp)
+        {
+            RebuildLevel();
+            LeveledUp?.Invoke(result);
+        }
         return result;
     }
 

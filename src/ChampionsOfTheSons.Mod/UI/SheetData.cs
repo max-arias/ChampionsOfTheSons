@@ -3,9 +3,9 @@ using ChampionsOfTheSons.Core.Rules;
 
 namespace ChampionsOfTheSons.Mod.UI;
 
-internal readonly record struct SheetRow(string Id, string Label, string Value, bool Header = false);
+internal readonly record struct SheetRow(string Id, string Label, string Value, bool Header = false, string Tip = "");
 
-internal readonly record struct SheetSummary(int Level, double Xp, double Goal)
+internal readonly record struct SheetSummary(int Level, double Xp, double Goal, int PerkPoints)
 {
     public double Fraction => Goal <= 0 ? 0 : Math.Clamp(Xp / Goal, 0, 1);
 }
@@ -14,7 +14,7 @@ internal readonly record struct SheetSummary(int Level, double Xp, double Goal)
 internal static class SheetData
 {
     public static SheetSummary Summary(PlayerCharacter pc) =>
-        new(pc.Progress.Level, pc.Progress.Xp, XpCurve.Goal(pc.Progress.Level));
+        new(pc.Progress.Level, pc.Progress.Xp, XpCurve.Goal(pc.Progress.Level), pc.Perks.AvailablePoints(pc.Progress));
 
     public static List<SheetRow> Build(PlayerCharacter pc)
     {
@@ -22,40 +22,72 @@ internal static class SheetData
         var rows = new List<SheetRow>();
 
         void Header(string id, string label) => rows.Add(new SheetRow(id, UiText.T("ui.sheet." + id, label), "", true));
-        void Row(string id, string label, string value) => rows.Add(new SheetRow(id, UiText.T("ui.sheet." + id, label), value));
+        // Tooltip text: ui.sheet.tip.<id> (English fallback below, with the live numbers appended where useful).
+        void Row(string id, string label, string value, string tip, string live = "") =>
+            rows.Add(new SheetRow(id, UiText.T("ui.sheet." + id, label), value, false, UiText.T("ui.sheet.tip." + id, tip) + live));
 
         Header("attributes", "Attributes");
-        Row("strength", "Strength", Int(s.Get(StatIds.Strength)));
-        Row("agility", "Agility", Int(s.Get(StatIds.Agility)));
-        Row("vitality", "Vitality", Int(s.Get(StatIds.Vitality)));
-        Row("intelligence", "Intelligence", Int(s.Get(StatIds.Intelligence)));
+        Row("strength", "Strength", Int(s.Get(StatIds.Strength)),
+            "Raises melee damage (1 + Strength × the melee bonus per point). Each level also adds attribute points.");
+        Row("agility", "Agility", Int(s.Get(StatIds.Agility)),
+            "Raises ranged damage and max energy.");
+        Row("vitality", "Vitality", Int(s.Get(StatIds.Vitality)),
+            "Raises max health (base 100 + Vitality × health per point, then the max health multiplier).");
+        Row("intelligence", "Intelligence", Int(s.Get(StatIds.Intelligence)),
+            "Raises spell damage and energy recovery.");
 
         Header("vitals", "Vitals");
-        Row("max_health", "Max health", Int(Derived.MaxHealth(s)));
-        Row("max_energy", "Max energy", Int(Derived.MaxEnergy(s)));
-        Row("health_regen", "Health regen", Num(Derived.HealthRegenPerSecond(s, 0), 1) + "/s");
+        Row("max_health", "Max health", Int(Derived.MaxHealth(s)),
+            "(100 + Vitality × health per point + flat bonuses) × max health multiplier.");
+        Row("max_energy", "Max energy", Int(Derived.MaxEnergy(s)),
+            "(100 + Agility × energy per point + flat bonuses) × max energy multiplier. Spells spend it.");
+        Row("health_regen", "Health regen", Num(Derived.HealthRegenPerSecond(s, 0), 1) + "/s",
+            "(0.25% of max health + flat regen) × regen rate × recovery multiplier, on top of the game's own regeneration.");
 
         Header("offense", "Offense");
-        Row("melee_damage", "Melee damage", Mult(Derived.MeleeMultiplier(s)));
-        Row("ranged_damage", "Ranged damage", Mult(Derived.RangedMultiplier(s)));
-        Row("spell_damage", "Spell damage", Mult(Derived.SpellMultiplier(s)));
-        Row("crit_chance", "Crit chance", Pct(s.Get(StatIds.CritChance), 1));
-        Row("crit_damage", "Crit damage", Pct(s.Get(StatIds.CritDamage), 0, signed: true));
-        Row("attack_speed", "Attack speed", Pct(s.Get(StatIds.AttackSpeed) - 1, 0, signed: true));
+        Row("melee_damage", "Melee damage", Mult(Derived.MeleeMultiplier(s)),
+            "All-damage × melee bonus × (1 + Strength × melee damage per Strength). Multiplies the weapon's base damage.");
+        Row("ranged_damage", "Ranged damage", Mult(Derived.RangedMultiplier(s)),
+            "All-damage × ranged bonus × (1 + Agility × ranged damage per Agility). Bows, guns and thrown weapons.");
+        Row("spell_damage", "Spell damage", Mult(Derived.SpellMultiplier(s)),
+            "All-damage × spell bonus × (1 + Intelligence × spell damage per Intelligence).");
+        Row("crit_chance", "Crit chance", Pct(s.Get(StatIds.CritChance), 1),
+            "Chance that a hit is a critical hit.");
+        Row("crit_damage", "Crit damage", Pct(s.Get(StatIds.CritDamage), 0, signed: true),
+            "Extra damage a critical hit deals on top of the normal hit.");
+        Row("attack_speed", "Attack speed", Pct(s.Get(StatIds.AttackSpeed) - 1, 0, signed: true),
+            "Change in how fast you swing and shoot.");
+        Row("armor_piercing", "Armor piercing", Int(Derived.MeleeArmorPierce(s)),
+            "Flat armor your melee hits ignore on the target (ranged hits: " + Int(Derived.RangedArmorPierce(s)) + ").");
+        Row("health_on_hit", "Health on hit", Num(s.Get(StatIds.HealthOnHit), 1),
+            "Health you recover every time one of your hits lands.");
 
         Header("defense", "Defense");
         double armor = s.Get(StatIds.Armor);
         double taken = s.Get(StatIds.AllDamageTaken);
-        Row("armor", "Armor", Int(armor));
-        Row("physical_reduction", "Physical reduction", Pct(1 - taken * (1 - ArmorMath.Reduction(armor)), 1));
-        Row("magic_reduction", "Magic reduction", Pct(1 - taken * s.Get(StatIds.MagicDamageTaken), 1));
-        Row("dodge", "Dodge", Pct(1 - s.Get(StatIds.GetHitChance), 1));
-        Row("block", "Block", Num(s.Get(StatIds.Block), 1));
+        Row("armor", "Armor", Int(armor),
+            "Physical damage reduction from armor = (armor ÷ (armor + 500))², so each point is worth less than the last.",
+            "\n" + Pct(ArmorMath.Reduction(armor), 1) + " from armor alone.");
+        Row("physical_reduction", "Physical reduction", Pct(1 - taken * (1 - ArmorMath.Reduction(armor)), 1),
+            "1 − damage taken multiplier × (1 − armor reduction). What you do not take from physical hits.");
+        Row("magic_reduction", "Magic reduction", Pct(1 - taken * s.Get(StatIds.MagicDamageTaken), 1),
+            "1 − damage taken multiplier × magic damage taken multiplier. Armor does not apply to magic.");
+        Row("dodge", "Dodge", Pct(1 - s.Get(StatIds.GetHitChance), 1),
+            "Chance that an incoming hit misses you completely.");
+        Row("block", "Block", Num(s.Get(StatIds.Block), 1),
+            "Flat damage removed from every hit you take (after armor).");
+        Row("thorns", "Thorns", Num(s.Get(StatIds.Thorns), 1),
+            "Damage reflected to the enemy that hits you in melee.");
 
         Header("utility", "Utility");
-        Row("magic_find", "Magic find", Pct(s.Get(StatIds.MagicFind) - 1, 0, signed: true));
-        Row("xp_gain", "XP gain", Pct(s.Get(StatIds.ExpGain) - 1, 0, signed: true));
-        Row("move_speed", "Movement speed", Pct(s.Get(StatIds.MovementSpeed) - 1, 0, signed: true));
+        Row("magic_find", "Magic find", Pct(s.Get(StatIds.MagicFind) - 1, 0, signed: true),
+            "Raises the rarity of items that drop.");
+        Row("xp_gain", "XP gain", Pct(s.Get(StatIds.ExpGain) - 1, 0, signed: true),
+            "Multiplies all XP you receive.");
+        Row("move_speed", "Movement speed", Pct(s.Get(StatIds.MovementSpeed) - 1, 0, signed: true),
+            "Change in how fast you walk and run.");
+        Row("massacre_time", "Massacre duration", Num(s.Get(StatIds.MaxMassacreTime), 0) + "s",
+            "How long a kill streak lasts after a kill (longest wait). Each kill adds " + Num(s.Get(StatIds.TimeBonusPerKill), 1) + "s; the banked XP pays out when it runs out.");
         return rows;
     }
 
