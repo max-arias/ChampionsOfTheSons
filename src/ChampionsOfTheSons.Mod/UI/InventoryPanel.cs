@@ -455,6 +455,7 @@ internal sealed partial class InventoryPanel
         _levelLabel.Text($"{UiText.T("ui.sheet.level", "Level")} {sum.Level}");
         SetFill(sum.Fraction);
         var inv = CultureInfo.InvariantCulture;
+        UpdatePerkLabel(sum);
         _xpLabel.Text($"{Math.Floor(sum.Xp).ToString("N0", inv)} / {sum.Goal.ToString("N0", inv)} XP  ({(sum.Fraction * 100).ToString("0", inv)}%)");
 
         _sheetData = SheetData.Build(pc);
@@ -471,6 +472,7 @@ internal sealed partial class InventoryPanel
                 _sheetPanel.Add(name);
                 _sheetPanel.Add(value);
                 _sheetRows[row.Id] = widgets = (name, value);
+                AddRowHit(row, y, h);
             }
             widgets.Name.Text(row.Label);
             widgets.Value.Text(row.Value);
@@ -503,6 +505,11 @@ internal sealed partial class InventoryPanel
 
     public void ShowTooltip(string slotKey)
     {
+        if (slotKey.StartsWith(RowPrefix, StringComparison.Ordinal))
+        {
+            ShowRowTooltip(slotKey);
+            return;
+        }
         var item = Character.Inventory.Get(slotKey);
         if (item == null || !_slotByKey.TryGetValue(slotKey, out var w))
         {
@@ -517,6 +524,8 @@ internal sealed partial class InventoryPanel
         _tip.Root.GetComponent<Image>().color = C(d.RarityHex);
         _tipTitle.RichText(d.Title);
         _tipSub.RichText(d.Subtitle);
+        _tipSub.Active(true);
+        RowTipShown = null;
         _tipBody.RichText(d.Body);
         _tipBody.Active(d.Body.Length > 0);
         _tipCompare.RichText(d.Compare ?? "");
@@ -546,6 +555,7 @@ internal sealed partial class InventoryPanel
     {
         TooltipShown = null;
         TooltipSlot = null;
+        RowTipShown = null;
         if (_tip != null) _tip.Active(false);
     }
 }
