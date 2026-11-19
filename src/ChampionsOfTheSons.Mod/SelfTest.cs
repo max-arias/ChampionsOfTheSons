@@ -82,7 +82,8 @@ public static class SelfTest
             Finish();
             return;
         }
-        if (!LocalPlayer.IsInWorld) return;
+        // Wait for the world once; after that keep going (holding the guide book clears IsInWorld, COS-62).
+        if (_start < 0 && !LocalPlayer.IsInWorld) return;
         if (_start < 0)
         {
             _start = Time.realtimeSinceStartup + SettleTime;
