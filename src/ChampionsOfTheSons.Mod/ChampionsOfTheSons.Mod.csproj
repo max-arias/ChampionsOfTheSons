@@ -15,6 +15,8 @@
   <ItemGroup>
     <Compile Include="..\ChampionsOfTheSons.Core\**\*.cs" Exclude="..\ChampionsOfTheSons.Core\obj\**;..\ChampionsOfTheSons.Core\bin\**" LinkBase="Core" />
     <EmbeddedResource Include="..\..\content\**\*.json" LinkBase="content" LogicalName="content/%(RecursiveDir)%(Filename)%(Extension)" />
+    <!-- HDRP asset bundle built by tools/build-bundles.ps1 (COS-5, docs/asset-bundles.md); optional. -->
+    <EmbeddedResource Include="..\..\content\bundles\cots" Condition="Exists('..\..\content\bundles\cots')" LogicalName="bundles/cots" />
   </ItemGroup>
 
   <ItemGroup>

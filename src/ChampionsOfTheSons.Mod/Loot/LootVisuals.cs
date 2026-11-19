@@ -35,11 +35,32 @@ internal static class LootVisuals
         var root = new GameObject("cots-drop-" + drop.Id);
         root.transform.position = pos;
 
-        var gem = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        Prepare(gem, root.transform, color);
-        gem.transform.localPosition = new Vector3(0, 0.4f, 0);
-        gem.transform.localScale = Vector3.one * (0.22f + 0.03f * rarity);
-        gem.transform.localRotation = Quaternion.Euler(35, 45, 0);
+        // The bundled marker mesh and sparkle effect when the asset bundle is present (COS-5), else a primitive gem.
+        var gem = Bundles.CotsBundle.Spawn(Bundles.CotsBundle.LootMarker, root.transform);
+        if (gem != null)
+        {
+            Tint(gem, color);
+            gem.transform.localPosition = new Vector3(0, 0.4f, 0);
+            gem.transform.localScale = Vector3.one * (1f + 0.1f * rarity);
+        }
+        else
+        {
+            gem = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Prepare(gem, root.transform, color);
+            gem.transform.localPosition = new Vector3(0, 0.4f, 0);
+            gem.transform.localScale = Vector3.one * (0.22f + 0.03f * rarity);
+            gem.transform.localRotation = Quaternion.Euler(35, 45, 0);
+        }
+        var sparkle = Bundles.CotsBundle.Spawn(Bundles.CotsBundle.LootSparkle, root.transform);
+        if (sparkle != null)
+        {
+            sparkle.transform.localPosition = new Vector3(0, 0.4f, 0);
+            foreach (var ps in sparkle.GetComponentsInChildren<ParticleSystem>())
+            {
+                var main = ps.main;
+                main.startColor = new ParticleSystem.MinMaxGradient(color);
+            }
+        }
 
         float length = 3f + 0.6f * rarity;
         var beam = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -69,6 +90,19 @@ internal static class LootVisuals
     {
         foreach (var v in ById.Values)
             if (v.Gem != null) v.Gem.Rotate(0, 90 * dt, 0, Space.World);
+    }
+
+    /// <summary>Rarity color on a bundled mesh (HDRP/Lit "_BaseColor", other shaders "_Color").</summary>
+    private static void Tint(GameObject go, Color color)
+    {
+        foreach (var r in go.GetComponentsInChildren<Renderer>())
+        {
+            var m = r.material;
+            if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", color);
+            else m.color = color;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
+        foreach (var c in go.GetComponentsInChildren<Collider>()) UnityEngine.Object.Destroy(c);
     }
 
     private static void Prepare(GameObject go, Transform parent, Color color)
