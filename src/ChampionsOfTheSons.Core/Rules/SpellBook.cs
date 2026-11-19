@@ -30,6 +30,9 @@ public sealed class SpellBook
 
     public IReadOnlyList<string?> Loadout => _loadout;
 
+    /// <summary>Flat seconds off a spell's base cooldown (perks like Quick Silver), applied before the cooldown multiplier.</summary>
+    public Func<string, double>? CooldownReduction { get; set; }
+
     /// <summary>Puts a spell in a slot. Equipping starts its full cooldown, as in the original.</summary>
     public bool Equip(int slot, string? spellId)
     {
@@ -64,9 +67,20 @@ public sealed class SpellBook
         for (int i = 0; i < Slots; i++)
         {
             if (_loadout[i] is not string id || _ready[i] >= 1) continue;
-            double cd = _content.Spells[id].Cooldown * mult;
+            double cd = Math.Max(0.5, _content.Spells[id].Cooldown - (CooldownReduction?.Invoke(id) ?? 0)) * mult;
             _ready[i] = cd <= 0 ? 1 : Math.Min(1, _ready[i] + dt * rate / cd);
         }
+    }
+
+    /// <summary>Takes <paramref name="seconds"/> off the remaining cooldown of one random spell that is cooling down (Infinity Loop). False if none is.</summary>
+    public bool ReduceRandomCooldown(double seconds, StatSheet stats, Rng rng)
+    {
+        var cooling = Enumerable.Range(0, Slots).Where(i => _loadout[i] != null && _ready[i] < 1).ToList();
+        if (cooling.Count == 0) return false;
+        int slot = rng.Pick(cooling);
+        double cd = Math.Max(0.5, _content.Spells[_loadout[slot]!].Cooldown - (CooldownReduction?.Invoke(_loadout[slot]!) ?? 0)) * stats.Get(StatIds.Cooldown);
+        _ready[slot] = cd <= 0 ? 1 : Math.Min(1, _ready[slot] + seconds / cd);
+        return true;
     }
 
     /// <summary>Energy/stamina split: energy part = cost × spellCostEnergyCost × spellCost, the rest goes to stamina.</summary>

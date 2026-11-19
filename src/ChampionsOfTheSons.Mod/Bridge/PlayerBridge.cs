@@ -20,6 +20,9 @@ public static class PlayerBridge
     /// <summary>Last incoming hit (vanilla, after our defenses, dodged), for self-tests and UI.</summary>
     public static (double Before, double After, bool Dodged)? LastIncoming { get; private set; }
 
+    /// <summary>Raised for every incoming hit after our defenses: (damage taken, dodged, kind). Damage numbers over the player.</summary>
+    public static event Action<double, bool, DamageKind>? PlayerHurt;
+
     /// <summary>Called every frame while the player is in the world.</summary>
     public static void Update(float dt)
     {
@@ -58,6 +61,8 @@ public static class PlayerBridge
             var character = PlayerState.Character;
             var result = PlayerDefense.Incoming(character.Stats, damage, kind, Rng);
             double final = result.Damage;
+            if (result.Dodged) Followups.FollowupsFeature.OnDodge();
+            else final = Followups.FollowupsFeature.OnIncoming(final, kind);
             if (!result.Dodged && final > 0)
             {
                 OnEnemyHitPlayer(character, final);
@@ -71,6 +76,7 @@ public static class PlayerBridge
             }
             LastIncoming = (damage, final, result.Dodged);
             damage = (float)final;
+            PlayerHurt?.Invoke(final, result.Dodged, kind);
         }
         catch (Exception e)
         {

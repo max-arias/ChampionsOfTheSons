@@ -34,6 +34,7 @@ public sealed class HudFeature : IModFeature
         SonsSdk.SdkEvents.OnWorldSimActorAdded.Subscribe(sim => Safe(() => Plates.Add(sim)));
         SonsSdk.SdkEvents.OnWorldSimActorRemoved.Subscribe(sim => Safe(() => Plates.OnSimRemoved(sim)));
         EnemyPatches.EnemyHit += OnEnemyHit;
+        PlayerBridge.PlayerHurt += OnPlayerHurt;
         PlayerState.Character.LeveledUp += Progress.OnLeveledUp;
         PlayerState.Character.Massacre.Paid += Progress.OnPaid;
     }
@@ -67,11 +68,31 @@ public sealed class HudFeature : IModFeature
             if (sim == null) return;
             var pos = sim._position;
             float h = 1.7f * Mathf.Max(0.5f, (float)runtime.Profile.Scale);
-            Numbers.Spawn(pos + new Vector3(0, h, 0), damage, crit);
+            Numbers.Spawn(pos + new Vector3(0, h, 0), damage, crit, EnemyPatches.LastHitKind);
         }
         catch (Exception e)
         {
             RLog.Error($"Champions of the Sons: HUD hit handler failed: {e}");
+        }
+    }
+
+    /// <summary>Damage the local player took (red) or a dodge, floating just ahead of the camera.</summary>
+    internal void OnPlayerHurt(double damage, bool dodged, Core.Rules.DamageKind kind)
+    {
+        try
+        {
+            if (!_built || !Config.ShowDamageNumbers.Value) return;
+            if (!dodged && damage < 0.5) return;
+            var cam = HudKit.PlayerCamera();
+            if (cam == null) return;
+            var t = cam.transform;
+            var pos = t.position + t.forward * 3f - t.up * 0.6f + t.right * (UnityEngine.Random.value - 0.5f) * 1.2f;
+            if (dodged) Numbers.Spawn(pos, UI.UiText.T("ui.followups.dodge", "Dodge"), DamageNumbers.DodgeColor, false);
+            else Numbers.Spawn(pos, HudKit.Compact(damage), kind == Core.Rules.DamageKind.Physical ? DamageNumbers.HurtColor : DamageNumbers.ColorOf(kind), false);
+        }
+        catch (Exception e)
+        {
+            RLog.Error($"Champions of the Sons: HUD hurt handler failed: {e}");
         }
     }
 

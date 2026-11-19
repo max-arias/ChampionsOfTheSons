@@ -25,6 +25,9 @@ public static class EnemyPatches
     /// <summary>Last hit, for damage numbers and self-tests.</summary>
     public static (double Before, double After, bool Crit)? LastHit { get; private set; }
 
+    /// <summary>Damage kind of the hit being reported by <see cref="EnemyHit"/> (damage numbers color).</summary>
+    public static DamageKind LastHitKind { get; private set; }
+
     public static event Action<VailActor, EnemyRuntime, double, bool>? EnemyHit;
     public static event Action<EnemyRuntime, double>? EnemyKilled;
 
@@ -97,6 +100,7 @@ public static class EnemyPatches
 
         LastHit = (rawAmount, damage, hit.Crit);
         if (damage > 0 && local && !forced) OnPlayerHit(runtime, damage);
+        LastHitKind = hit.Kind;
         if (runtime.Actor != null) EnemyHit?.Invoke(runtime.Actor, runtime, damage, hit.Crit);
         return damage;
     }
@@ -129,6 +133,7 @@ public static class EnemyPatches
                 if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + sheet.Get(CombatStatIds.ExplosionDamage)) * sheet.Get(CombatStatIds.ThrownSpearDamage) };
                 double fire = sheet.Get(StatIds.FireDamage);
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };
+                hit = Followups.FollowupsFeature.OnLocalHit(hit, weapon);
             }
             else
             {

@@ -118,7 +118,7 @@ public sealed class PlayerCharacter
     {
         Content = content;
         Perks = new PerkTree(content);
-        Spells = new SpellBook(content);
+        Spells = new SpellBook(content) { CooldownReduction = id => PerkTuning.CooldownReduction(Perks, id) };
         Stats = new StatSheet(content);
         Inventory.Changed += RebuildEquipment;
         RebuildAll();

@@ -27,7 +27,7 @@ internal sealed class CraftingPanel
 
     public static readonly CraftMode[] Modes =
     {
-        CraftMode.Reroll, CraftMode.Reforge, CraftMode.Polish, CraftMode.Empower, CraftMode.IndividualReroll,
+        CraftMode.Reroll, CraftMode.Reforge, CraftMode.Polish, CraftMode.Empower, CraftMode.IndividualReroll, CraftMode.Scrap,
     };
 
     private sealed class Cellw
@@ -105,10 +105,10 @@ internal sealed class CraftingPanel
         foreach (var mode in Modes)
         {
             var m = mode;
-            var btn = Button(ModeName(mode), bx, 14, 128, 44, () => SetMode(m), 11, 16);
+            var btn = Button(ModeName(mode), bx, 14, 106, 44, () => SetMode(m), 10, 16);
             left.Add(btn);
             _modeButtons[mode] = btn;
-            bx += 134;
+            bx += 112;
         }
         left.Add(Label(UiText.T("ui.bag.title", "Bag"), 18, UiTheme.Gold, TextAlignmentOptions.MidlineLeft).UpperCase().TopLeft(18, 66).Size(300, 26));
         float gx = (LeftW - (Cols * Cell + (Cols - 1) * CellGap)) / 2;
@@ -159,21 +159,23 @@ internal sealed class CraftingPanel
         SetMode(_mode);
     }
 
-    public static string ModeName(CraftMode m) => UiText.T("ui.crafting.mode." + m.ToString().ToLowerInvariant(), m switch
+    public static string ModeName(CraftMode m) => UiText.T(m == CraftMode.Scrap ? "ui.followups.mode.scrap" : "ui.crafting.mode." + m.ToString().ToLowerInvariant(), m switch
     {
         CraftMode.Reroll => "Reroll",
         CraftMode.Reforge => "Reforge",
         CraftMode.Polish => "Polish",
         CraftMode.Empower => "Empower",
+        CraftMode.Scrap => "Scrap",
         _ => "Reroll one stat",
     });
 
-    private static string ModeDescription(CraftMode m) => UiText.T("ui.crafting.desc." + m.ToString().ToLowerInvariant(), m switch
+    private static string ModeDescription(CraftMode m) => UiText.T(m == CraftMode.Scrap ? "ui.followups.desc.scrap" : "ui.crafting.desc." + m.ToString().ToLowerInvariant(), m switch
     {
         CraftMode.Reroll => "Rerolls every stat of the item at its own level. Needs 2 ingredients of the same rarity or better. They are consumed.",
         CraftMode.Reforge => "Turns the item into a different item of the same type and rarity, with new stats. Needs 3 ingredients of the same rarity or better.",
         CraftMode.Polish => "Rerolls the value of one stat (or clears one socket). Needs 1 ingredient of the same rarity or better.",
         CraftMode.Empower => "Raises the item to your level and rerolls its values. Needs 9 ingredients of the same rarity or better.",
+        CraftMode.Scrap => "Destroys the item and gives crafting materials. Needs no ingredients.",
         _ => "Replaces one stat with a different stat from the same pool. Needs 1 ingredient of the same rarity or better.",
     });
 
@@ -265,6 +267,7 @@ internal sealed class CraftingPanel
         _picked.Clear();
         _statIndex = -1;
         _messageText = "";
+        _beforeAfter = "";
         Refresh();
     }
 
@@ -338,6 +341,7 @@ internal sealed class CraftingPanel
         }
         var inv = Pc.Inventory;
         var target = inv.Get(_target!)!;
+        if (_mode == CraftMode.Scrap) return DoScrap(target);
         var ingredients = _picked.Select(k => inv.Get(k)!).ToList();
         var result = _crafting.Craft(_mode, target, ingredients, Rng, _statIndex, Pc.Progress.Level);
         if (!result.Ok)
@@ -353,12 +357,109 @@ internal sealed class CraftingPanel
         inv.Restore(slots);
         LastResult = result.Item;
         LastStatIndex = _statIndex;
+        _beforeAfter = BeforeAfterText(target, result.Item!);
         _picked.Clear();
         _statIndex = -1;
         _messageText = $"<color={UiTheme.Good}>{UiText.T("ui.crafting.done", "Crafted!")}</color>";
         _dirty = false;
         Refresh();
         return result;
+    }
+
+    /// <summary>Scrap: the item goes, the materials come into the bag (what does not fit drops at the player's feet).</summary>
+    private CraftResult? DoScrap(ItemInstance target)
+    {
+        var scrap = _crafting.Scrap(target, Rng);
+        if (!scrap.Ok)
+        {
+            _messageText = $"<color={UiTheme.Bad}>{ErrorText(scrap.Error)}</color>";
+            RefreshMessage();
+            return new CraftResult(null, scrap.Error);
+        }
+        var inv = Pc.Inventory;
+        inv.Remove(_target!);
+        LastScrap = scrap.Material;
+        int stack = ModContent.Db.Items.TryGetValue(scrap.Material!.BaseId, out var def) ? def.StackSize : 1;
+        Loot.LootFeature.GiveOrDrop(scrap.Material, stack);
+        _beforeAfter = string.Format(UiText.T("ui.followups.scrap_done", "Scrapped {0}: got {1} x {2}."),
+            UiText.ItemName(target), scrap.Material.Amount, UiText.ItemName(scrap.Material));
+        _target = null;
+        _picked.Clear();
+        _statIndex = -1;
+        _messageText = $"<color={UiTheme.Good}>{UiText.T("ui.followups.scrapped", "Scrapped!")}</color>";
+        _dirty = false;
+        Refresh();
+        return new CraftResult(target, CraftError.None);
+    }
+
+    /// <summary>The last scrap's material stack (self-tests).</summary>
+    public ItemInstance? LastScrap { get; private set; }
+
+    private string _beforeAfter = "";
+
+    /// <summary>The before/after text shown after the last craft or scrap (self-tests).</summary>
+    public string BeforeAfter => _beforeAfter;
+
+    /// <summary>Stat lines of both items, changed lines marked.</summary>
+    private static string BeforeAfterText(ItemInstance before, ItemInstance after)
+    {
+        var sb = new StringBuilder();
+        sb.Append($"<color={UiTheme.Gold}>{UiText.T("ui.followups.before_after", "Before -> after")}</color>");
+        if (before.Level != after.Level || before.BaseId != after.BaseId)
+            sb.Append($"\n{UiText.ItemName(before)} {UiText.T("ui.item.level", "Level")} {before.Level} -> {UiText.ItemName(after)} {UiText.T("ui.item.level", "Level")} {after.Level}");
+        int n = Math.Max(before.Stats.Count, after.Stats.Count);
+        for (int i = 0; i < n; i++)
+        {
+            string a = i < before.Stats.Count ? StatLine(before.Stats[i]) : "-";
+            string b = i < after.Stats.Count ? StatLine(after.Stats[i]) : "-";
+            sb.Append(a == b ? $"\n<color={UiTheme.TextDim}>{a}</color>" : $"\n{a}  ->  <color={UiTheme.Good}>{b}</color>");
+        }
+        return sb.ToString();
+    }
+
+    private static string StatLine(RolledStat st) =>
+        st.StatId == LootRoller.EmptySocketStat || st.StatId.StartsWith("stat.socket", StringComparison.Ordinal)
+            ? UiText.StatName(st.StatId)
+            : $"{UiText.StatName(st.StatId)} {UiText.StatValue(st.StatId, st.Value)}";
+
+    /// <summary>What the craft will do to the picked item in the current mode (null when no item is picked).</summary>
+    public string? PreviewText()
+    {
+        var target = _target != null ? Pc.Inventory.Get(_target) : null;
+        if (target == null) return null;
+        var db = ModContent.Db;
+        string name = UiText.ItemName(target);
+        switch (_mode)
+        {
+            case CraftMode.Reroll:
+                return string.Format(UiText.T("ui.followups.preview.reroll", "{0}: every stat is rerolled at level {1}. The result is random: new stat types, values and sockets."), name, target.Level);
+            case CraftMode.Reforge:
+                return string.Format(UiText.T("ui.followups.preview.reforge", "{0} becomes another {1} of the same rarity, level {2}, with new random stats."),
+                    name, db.Items.TryGetValue(target.BaseId, out var bd) ? UiText.TypeName(bd.Type) : "item", target.Level);
+            case CraftMode.Polish:
+            {
+                if (_statIndex < 0 || _statIndex >= target.Stats.Count) return UiText.T("ui.followups.preview.polish_pick", "Pick the stat to polish. Only its value is rerolled, within its range.");
+                var st = target.Stats[_statIndex];
+                if (st.StatId == LootRoller.EmptySocketStat || st.StatId.StartsWith("stat.socket", StringComparison.Ordinal))
+                    return UiText.T("ui.followups.preview.polish_socket", "The filled socket is emptied.");
+                if (!db.ItemStats.TryGetValue(st.StatId, out var def)) return null;
+                var (lo, hi) = LootRoller.ValueRange(def, target.Level, (int)target.Rarity);
+                return string.Format(UiText.T("ui.followups.preview.polish", "{0} is now {1}. New value is random between {2} and {3}."),
+                    UiText.StatName(st.StatId), UiText.StatValue(st.StatId, st.Value, false), UiText.StatValue(st.StatId, lo, false), UiText.StatValue(st.StatId, hi, false));
+            }
+            case CraftMode.Empower:
+                return string.Format(UiText.T("ui.followups.preview.empower", "{0}: level {1} -> {2} (your level). Every stat value is rerolled at the new level, so values are random but higher on average."),
+                    name, target.Level, Pc.Progress.Level);
+            case CraftMode.IndividualReroll:
+                if (_statIndex < 0 || _statIndex >= target.Stats.Count) return UiText.T("ui.followups.preview.single_pick", "Pick the stat to replace. It becomes a different stat from the same pool.");
+                return string.Format(UiText.T("ui.followups.preview.single", "{0} will be replaced by a different random stat from the same pool."), UiText.StatName(target.Stats[_statIndex].StatId));
+            default:
+            {
+                int rarity = Core.Rules.Crafting.ScrapMaterialRarity(target.Rarity);
+                int count = Core.Rules.Crafting.ScrapYield(target.Rarity, target.Level);
+                return string.Format(UiText.T("ui.followups.preview.scrap", "{0} is destroyed. You get {1} of one random {2} material."), name, count, UiText.RarityName((Rarity)rarity));
+            }
+        }
     }
 
     private static string ErrorText(CraftError e) => e switch
@@ -368,6 +469,7 @@ internal sealed class CraftingPanel
         CraftError.NotEquippable => UiText.T("ui.crafting.not_equippable", "Only equipment can be crafted."),
         CraftError.BadStatIndex => UiText.T("ui.crafting.need_stat", "Pick a stat."),
         CraftError.NothingToReroll => UiText.T("ui.crafting.err.nothing", "This stat can't be rerolled."),
+        CraftError.NoMaterial => UiText.T("ui.followups.err.no_material", "There is no material for this item."),
         CraftError.NoAlternativeBase => UiText.T("ui.crafting.err.no_alt", "There is no other item of this type and rarity."),
         _ => e.ToString(),
     };
@@ -449,12 +551,18 @@ internal sealed class CraftingPanel
         var item = key != null ? inv.Get(key) : null;
         if (item == null)
         {
-            _itemTitle.Text(""); _itemSub.Text(""); _itemBody.Text("");
+            _itemTitle.Text(""); _itemSub.Text(""); _itemBody.Text(_beforeAfter);
             return;
         }
         var d = ItemDescriber.Describe(item, Pc, null);
         _itemTitle.Text(d.Title);
         _itemSub.Text(d.Subtitle);
-        _itemBody.Text(d.Body);
+        string body = d.Body;
+        if (key == _target)
+        {
+            var preview = PreviewText();
+            if (preview != null) body = $"<color={UiTheme.Gold}>{preview}</color>\n\n{body}";
+        }
+        _itemBody.Text(body);
     }
 }

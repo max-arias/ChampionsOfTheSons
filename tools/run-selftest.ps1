@@ -54,6 +54,8 @@ try {
     Start-Sleep -Seconds 3
     Get-Process SonsOfTheForest -ErrorAction SilentlyContinue | Stop-Process -Force
 
+    # Keep the whole log: the next run (any checkout) overwrites it, and the summary below shows only the last lines.
+    if (Test-Path $log) { Copy-Item $log (Join-Path $env:TEMP 'cots-selftest-last.log') -Force }
     "elapsed: {0:N0}s, finished: {1}" -f ((Get-Date) - $started).TotalSeconds, $done
     if (Test-Path $log) {
         Select-String -Path $log -Pattern '\[COTS-SELFTEST\]|Champions of the Sons|ERROR|Exception|plugins to load' |

@@ -361,8 +361,13 @@
         "perk.stronger_spells"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": [
+        {
+          "stat": "spell_cost",
+          "op": "mult",
+          "value": 0.91
+        }
+      ]
     },
     {
       "id": "perk.indestructable",
@@ -1051,8 +1056,7 @@
         "perk.more_stamina"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.demolition",
@@ -1068,8 +1072,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.pockets_for_explosives",
@@ -1085,8 +1088,7 @@
         "perk.demolition"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.demolition_expert",
@@ -1102,8 +1104,7 @@
         "perk.pockets_for_explosives"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.meds",
@@ -1119,8 +1120,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.fuel",
@@ -1153,8 +1153,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.more_booze",
@@ -1170,8 +1169,7 @@
         "perk.booze"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.more_meds",
@@ -1187,8 +1185,7 @@
         "perk.meds"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.endless_quiver",
@@ -1248,8 +1245,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.more_snacks",
@@ -1265,8 +1261,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.more_bolts",
@@ -1282,8 +1277,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.corpse_collecting",
@@ -1299,8 +1293,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.more_limbs",
@@ -1316,8 +1309,7 @@
         "perk.corpse_collecting"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.more_building_resources",
@@ -1333,8 +1325,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.more_miscellaneous_items",
@@ -1350,8 +1341,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.more_ammo",
@@ -1367,8 +1357,7 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.spear_specialization",
@@ -3847,8 +3836,7 @@
         "perk.nuke_conjuration"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.wrath_of_the_sun",
@@ -4924,8 +4912,7 @@
         "perk.dodge"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.critical_infusion",
@@ -4984,8 +4971,7 @@
         "perk.dodge"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.deployable_shield_2",
@@ -5001,8 +4987,7 @@
         "perk.dodge"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.pound_of_flesh",
@@ -5111,8 +5096,7 @@
         "perk.target_practise"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.adrenaline_rush_ii",
@@ -5128,8 +5112,7 @@
         "perk.golden_cooldown"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.meteorite_resistance",
