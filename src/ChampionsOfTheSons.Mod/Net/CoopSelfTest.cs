@@ -54,7 +54,27 @@ public sealed class CoopSelfTest : IModFeature
 
     // ================================================================= server half
 
-    private static float _diagAt;
+    private static float _diagAt, _peerInWorldAt = -1;
+    private static bool _saved;
+
+    /// <summary>Saves the server's world once the test client has been in it for a while, so the next run continues
+    /// (SaveMode Continue) with the client's player already past the arrival and intro instead of a fresh start.</summary>
+    private static void SaveOnce()
+    {
+        if (_saved) return;
+        if (_peerInWorldAt < 0) _peerInWorldAt = Time.realtimeSinceStartup;
+        if (Time.realtimeSinceStartup - _peerInWorldAt < 20) return;
+        _saved = true;
+        try
+        {
+            Sons.Gameplay.DedicatedServerAutosave.QueueAutosave();
+            RLog.Msg($"{CoopTestJoin.Tag} server: queued a save with the client in the world");
+        }
+        catch (Exception e)
+        {
+            RLog.Warning($"{CoopTestJoin.Tag} server: save failed: {e.Message}");
+        }
+    }
 
     public void Update(float dt, bool inWorld)
     {
@@ -70,6 +90,7 @@ public sealed class CoopSelfTest : IModFeature
             return;
         }
         CoopSession.TryPosition(conn, out var pos);
+        SaveOnce();
         var at = CoopSession.ToUnity(pos);
         float now = Time.realtimeSinceStartup;
         if (_stageAt == 0) _stageAt = now;
@@ -252,7 +273,8 @@ public sealed class CoopSelfTest : IModFeature
         CoopTest.Add("aura: buff arrives and ends", () =>
         {
             bool on = CoopExtras.IsBuffed("buff.coop_test");
-            if (on) _auraSeen = true;
+            // The host may finish pulsing before this step starts: a pulse applied at any time counts as seen.
+            if (on || CoopExtras.PulsesApplied > 0) _auraSeen = true;
             if (!_auraSeen) return false;
             if (on) return false;
             CoopTest.Check("aura: teammate's buff applied then ended after the pulses stopped", true);

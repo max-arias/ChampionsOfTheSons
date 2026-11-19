@@ -96,6 +96,8 @@ internal static class SpellEffects
     {
         Buffs.Apply("taunt", SpellTuning.TauntDuration, SpellTuning.Taunt());
         float speed = S("spell_taunt_speed_change");
+        // Falter (perk): the taunted slow down instead of rushing the taunter.
+        if (Has(PerkEffectIds.Falter)) speed = (float)PerkTuning.FalterSpeed;
         foreach (var e in EnemiesWithin(PlayerPos, 30))
             e.Combat.ApplySlow("spell.taunt", speed > 0 ? speed : 2, SpellTuning.TauntDuration); // above 1: they rush the taunter
         SpellFx.Disc(Feet(), 30f, SpellFx.Blood, 0.6f);
@@ -426,9 +428,14 @@ internal static class SpellEffects
         return true;
     }
 
+    private static bool Has(string perkId) => Pc.Perks.TimesBought(perkId) > 0;
+
     private static bool StartBlackFlame()
     {
         _flameTimer = 0;
+        // Enchant Weapon (perk): all damage x1.33 for as long as the flame burns.
+        if (Has(PerkEffectIds.EnchantWeapon))
+            Buffs.Apply("enchant_weapon", 1e6, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, PerkTuning.EnchantWeaponDamage) });
         _flameFx = SpellFx.Disc(Feet(), (float)SpellTuning.BlackFlameRadius, SpellFx.Dark, 1e6f, LocalPlayer.Transform);
         return true;
     }
@@ -452,6 +459,7 @@ internal static class SpellEffects
             case "spell.black_flame":
                 SpellFx.Remove(_flameFx);
                 _flameFx = null;
+                Buffs.Remove("enchant_weapon");
                 break;
         }
     }
@@ -466,8 +474,14 @@ internal static class SpellEffects
                 while (_flameTimer >= SpellTuning.BlackFlameTick)
                 {
                     _flameTimer -= (float)SpellTuning.BlackFlameTick;
+                    double flame = SpellTuning.BlackFlameDamage * (Has(PerkEffectIds.Netherflame) ? PerkTuning.NetherflameDamage : 1);
+                    bool afterburn = Has(PerkEffectIds.Afterburn);
                     foreach (var e in EnemiesWithin(PlayerPos, (float)SpellTuning.BlackFlameRadius))
-                        Strike(e, Hit(SpellTuning.BlackFlameDamage, S("spell_black_flame_damage_scaling")));
+                    {
+                        Strike(e, Hit(flame, S("spell_black_flame_damage_scaling")));
+                        if (afterburn && UnityEngine.Random.value < PerkTuning.AfterburnChance)
+                            e.Combat.ApplyWeaken(PerkEffectIds.Afterburn, PerkTuning.AfterburnDamageTaken, PerkTuning.AfterburnSeconds);
+                    }
                 }
                 break;
             case "spell.multishot":

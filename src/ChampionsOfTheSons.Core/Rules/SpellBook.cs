@@ -33,6 +33,14 @@ public sealed class SpellBook
     /// <summary>Flat seconds off a spell's base cooldown (perks like Quick Silver), applied before the cooldown multiplier.</summary>
     public Func<string, double>? CooldownReduction { get; set; }
 
+    /// <summary>Factor on a spell's base cooldown after the flat reduction (perks like Time of Need), before the cooldown multiplier.</summary>
+    public Func<string, double>? CooldownScale { get; set; }
+
+    /// <summary>A spell's cooldown in seconds before the cooldown rate: (base - flat perks) x perk scale, at least 0.5 s, x the cooldown stat.</summary>
+    public double CooldownOf(string spellId, StatSheet stats) =>
+        Math.Max(0.5, (_content.Spells[spellId].Cooldown - (CooldownReduction?.Invoke(spellId) ?? 0)) * (CooldownScale?.Invoke(spellId) ?? 1))
+        * stats.Get(StatIds.Cooldown);
+
     /// <summary>Puts a spell in a slot. Equipping starts its full cooldown, as in the original.</summary>
     public bool Equip(int slot, string? spellId)
     {
@@ -63,11 +71,10 @@ public sealed class SpellBook
     public void Tick(double dt, StatSheet stats)
     {
         double rate = stats.Get(StatIds.CooldownRate);
-        double mult = stats.Get(StatIds.Cooldown);
         for (int i = 0; i < Slots; i++)
         {
             if (_loadout[i] is not string id || _ready[i] >= 1) continue;
-            double cd = Math.Max(0.5, _content.Spells[id].Cooldown - (CooldownReduction?.Invoke(id) ?? 0)) * mult;
+            double cd = CooldownOf(id, stats);
             _ready[i] = cd <= 0 ? 1 : Math.Min(1, _ready[i] + dt * rate / cd);
         }
     }
@@ -78,7 +85,7 @@ public sealed class SpellBook
         var cooling = Enumerable.Range(0, Slots).Where(i => _loadout[i] != null && _ready[i] < 1).ToList();
         if (cooling.Count == 0) return false;
         int slot = rng.Pick(cooling);
-        double cd = Math.Max(0.5, _content.Spells[_loadout[slot]!].Cooldown - (CooldownReduction?.Invoke(_loadout[slot]!) ?? 0)) * stats.Get(StatIds.Cooldown);
+        double cd = CooldownOf(_loadout[slot]!, stats);
         _ready[slot] = cd <= 0 ? 1 : Math.Min(1, _ready[slot] + seconds / cd);
         return true;
     }

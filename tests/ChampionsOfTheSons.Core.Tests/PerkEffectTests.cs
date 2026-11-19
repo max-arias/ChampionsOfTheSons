@@ -13,13 +13,18 @@ public class PerkEffectTests
       { "id": "perk.adrenaline_rush_ii", "name": "A2", "category": "ranged_offense", "cost": 0, "levelReq": 1, "stackable": false, "effects": [] },
       { "id": "perk.quick_silver", "name": "Q", "category": "magic_offense", "cost": 0, "levelReq": 1, "stackable": false, "effects": [] },
       { "id": "perk.more_meds", "name": "M", "category": "utility", "cost": 0, "levelReq": 1, "stackable": true, "effects": [] },
-      { "id": "perk.meds", "name": "D", "category": "utility", "cost": 0, "levelReq": 1, "stackable": true, "effects": [] }
+      { "id": "perk.meds", "name": "D", "category": "utility", "cost": 0, "levelReq": 1, "stackable": true, "effects": [] },
+      { "id": "perk.storm_season", "name": "SS", "category": "magic_offense", "cost": 0, "levelReq": 1, "stackable": false, "effects": [] },
+      { "id": "perk.endless_storm", "name": "ES", "category": "magic_offense", "cost": 0, "levelReq": 1, "stackable": false, "effects": [] },
+      { "id": "perk.time_of_need", "name": "TN", "category": "magic_offense", "cost": 0, "levelReq": 1, "stackable": false, "effects": [] }
     ] }
     """;
 
     private const string Spells = """
     { "spells": [ { "id": "spell.blink", "name": "Blink", "levelReq": 1, "energyCost": 25, "cooldown": 14 },
-                  { "id": "spell.other", "name": "Other", "levelReq": 1, "energyCost": 25, "cooldown": 14 } ] }
+                  { "id": "spell.other", "name": "Other", "levelReq": 1, "energyCost": 25, "cooldown": 14 },
+                  { "id": "spell.ball_lightning", "name": "Ball", "levelReq": 1, "energyCost": 25, "cooldown": 100 },
+                  { "id": "spell.healing_dome", "name": "Dome", "levelReq": 1, "energyCost": 25, "cooldown": 60 } ] }
     """;
 
     private static readonly string PlayerStats = TestContent.PlayerStats.Replace("{ \"playerStats\": [",
@@ -93,6 +98,23 @@ public class PerkEffectTests
             Assert.Equal(bought, book.IsReady(0));
             Assert.False(book.IsReady(1));
         }
+    }
+
+    [Fact]
+    public void Spell_cooldown_perks_stack_flat_cuts_then_scale_only_their_spells()
+    {
+        var db = Db(true);
+        var stats = new StatSheet(db);
+        var tree = Tree("perk.storm_season", "perk.endless_storm", "perk.time_of_need");
+        var book = new SpellBook(db)
+        {
+            CooldownReduction = id => PerkTuning.CooldownReduction(tree, id),
+            CooldownScale = id => PerkTuning.CooldownScale(tree, id),
+        };
+        Assert.Equal(100 - 40 - 25, book.CooldownOf("spell.ball_lightning", stats), 6);
+        Assert.Equal(60 * 0.5, book.CooldownOf("spell.healing_dome", stats), 6);
+        Assert.Equal(14, book.CooldownOf("spell.other", stats), 6);
+        Assert.Equal(100, new SpellBook(db).CooldownOf("spell.ball_lightning", stats), 6);
     }
 
     [Fact]

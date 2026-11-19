@@ -1,3 +1,4 @@
+using RedLoader;
 using Bolt;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
@@ -90,6 +91,9 @@ public sealed class EnemySyncFeature : IModFeature
         _timer -= dt;
         if (_timer > 0 || CoopFeature.Verified.Count == 0) return;
         _timer = Interval;
+        // The Bridge features that normally re-resolve actors do not run on a dedicated server: without this the registry keeps
+        // the actor SetMaxHealthStat saw, which is not the networked one (net id 0), and nothing is announced.
+        EnemyRegistry.ResolveActors();
         int sent = 0;
         var live = new HashSet<ulong>();
         foreach (var r in EnemyRegistry.Snapshot())
@@ -104,6 +108,7 @@ public sealed class EnemySyncFeature : IModFeature
             if (!Announced.TryGetValue(id, out var last))
             {
                 CoopSession.SendToPeers(Describe(r, id));
+                if (CoopTest.Enabled || Net.CoopSelfTest.ServerDriver) RLog.Msg($"{CoopTestJoin.Tag} host: announced enemy {id} ({r.Kind.Id}, level {r.Profile.Level}) to {CoopFeature.Verified.Count} peer(s)");
                 Announced[id] = (hp, armor);
                 sent++;
             }
@@ -183,6 +188,7 @@ public sealed class EnemySyncFeature : IModFeature
                 if (runtime != null) CotsNetEvent.Instance.SendTo(Describe(runtime, req.EnemyNetId), from);
                 break;
             case EnemySync s when !CoopSession.IsHost:
+                if (!ReceivedProfiles.ContainsKey(s.EnemyNetId)) RLog.Msg($"{CoopTestJoin.Tag} client: got enemy {s.EnemyNetId} ({s.KindId}, level {s.Level})");
                 ReceivedProfiles[s.EnemyNetId] = s;
                 if (!TryApply(s)) Pending[s.EnemyNetId] = s;
                 break;

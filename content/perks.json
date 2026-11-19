@@ -1482,8 +1482,7 @@
         "perk.spell_power"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.empowered_war_cry",
@@ -2165,8 +2164,7 @@
         "perk.enchant_weapon"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.netherflame",
@@ -2182,8 +2180,7 @@
         "perk.afterburn"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.frenzy_haste",
@@ -3600,8 +3597,7 @@
         "perk.magic_binding"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.parry_mastery",
@@ -3802,8 +3798,7 @@
         "perk.magic_arrow_devastation"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.endless_storm",
@@ -3819,8 +3814,7 @@
         "perk.spikes"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.quick_silver",
@@ -3852,8 +3846,7 @@
         "perk.greater_cooldown_reduction_2"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.full_counter",
@@ -3912,8 +3905,7 @@
         "perk.greater_cooldown_reduction_4"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.safe_heaven",
@@ -3951,8 +3943,7 @@
         "perk.more_health_regen"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.breathing_tehniques",
@@ -4624,8 +4615,7 @@
         "perk.transmutation"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "perk.line_up",
@@ -5079,8 +5069,13 @@
         "perk.greater_cooldown_reduction_4"
       ],
       "requires": [],
-      "effects": [],
-      "manual": true
+      "effects": [
+        {
+          "stat": "cooldown",
+          "op": "mult",
+          "value": 0.85
+        }
+      ]
     },
     {
       "id": "perk.adrenaline_rush",

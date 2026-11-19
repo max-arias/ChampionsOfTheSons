@@ -141,7 +141,7 @@ internal sealed class SpellBar
             }
             else
             {
-                double cd = ModContent.Db.Spells[id].Cooldown * pc.Stats.Get(StatIds.Cooldown);
+                double cd = pc.Spells.CooldownOf(id, pc.Stats);
                 double rate = Math.Max(0.0001, pc.Stats.Get(StatIds.CooldownRate));
                 s.Remaining.Text(Math.Ceiling((1 - progress) * cd / rate).ToString("0"));
             }

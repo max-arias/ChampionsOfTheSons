@@ -16,6 +16,11 @@ public static class PerkEffectIds
     public const string AdrenalineRush2 = "perk.adrenaline_rush_ii";
     public const string QuickSilver = "perk.quick_silver";
     public const string BlinkSpell = "spell.blink";
+    public const string TimeOfNeed = "perk.time_of_need";
+    public const string Falter = "perk.falter";
+    public const string EnchantWeapon = "perk.enchant_weapon";
+    public const string Afterburn = "perk.afterburn";
+    public const string Netherflame = "perk.netherflame";
 }
 
 /// <summary>Numbers for the event perks.</summary>
@@ -41,9 +46,37 @@ public static class PerkTuning
             ? 0
             : maxHealth * (ShieldFraction + (perks.TimesBought(PerkEffectIds.DeployableShield2) > 0 ? ShieldFraction2 : 0));
 
+    /// <summary>Spell perks that cut a spell's base cooldown by flat seconds (numbers from the perk texts).</summary>
+    public static readonly IReadOnlyList<(string Perk, string Spell, double Seconds)> CooldownCuts = new[]
+    {
+        (PerkEffectIds.QuickSilver, PerkEffectIds.BlinkSpell, QuickSilverBlink),
+        ("perk.endless_stream", "spell.magic_arrow", 15.0),
+        ("perk.storm_season", "spell.ball_lightning", 40.0),
+        ("perk.endless_storm", "spell.ball_lightning", 25.0),
+        ("perk.wrath_of_the_sun", "spell.sun_flare", 20.0),
+        ("perk.sudden_rampage", "spell.berserk", 90.0),
+    };
+
+    /// <summary>Time of Need: Healing Dome and Purge cooldowns x0.5.</summary>
+    public const double TimeOfNeedScale = 0.5;
+
+    /// <summary>Falter: Taunt slows enemies to this speed factor (60% slower) instead of speeding them up.</summary>
+    public const double FalterSpeed = 0.4;
+
+    /// <summary>Enchant Weapon: all damage x1.33 while Black Flame is on. Netherflame: Black Flame damage x2.</summary>
+    public const double EnchantWeaponDamage = 1.33, NetherflameDamage = 2;
+
+    /// <summary>Afterburn (this mod's numbers; the text says "a chance", "a few seconds"): chance per Black Flame hit to weaken
+    /// the enemy so it takes x1.2 damage for 4 s.</summary>
+    public const double AfterburnChance = 0.25, AfterburnDamageTaken = 1.2, AfterburnSeconds = 4;
+
     /// <summary>Flat cooldown reduction in seconds a spell gets from perks.</summary>
     public static double CooldownReduction(PerkTree perks, string spellId) =>
-        spellId == PerkEffectIds.BlinkSpell && perks.TimesBought(PerkEffectIds.QuickSilver) > 0 ? QuickSilverBlink : 0;
+        CooldownCuts.Where(c => c.Spell == spellId && perks.TimesBought(c.Perk) > 0).Sum(c => c.Seconds);
+
+    /// <summary>Factor on a spell's cooldown from perks (after the flat cuts).</summary>
+    public static double CooldownScale(PerkTree perks, string spellId) =>
+        perks.TimesBought(PerkEffectIds.TimeOfNeed) > 0 && spellId is "spell.healing_dome" or "spell.purge" ? TimeOfNeedScale : 1;
 }
 
 /// <summary>A shield on the player that soaks damage until it is used up or fades.</summary>
