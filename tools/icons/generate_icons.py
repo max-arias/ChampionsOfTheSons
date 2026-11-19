@@ -106,7 +106,7 @@ def words(name):
 
 BANNED = {"hammer-sickle", "cultist", "executioner-hood", "all-seeing-eye", "cross", "iron-cross", "celtic-cross", "cross-shield",
           "pentagram-rose", "pentacle", "heptagram", "ankh", "eye-of-horus", "sheikah-eye", "spiked-halo", "prayer-beads", "templar-shield",
-          "templar-eye", "templar-heart", "american-shield", "magic-shield", "hood", "warlock-hood", "ribbon", "fist", "crown-of-thorns", "boxing-ring", "bow-tie-ribbon", "ribbon-medal", "ribbon-shield", "broken-ribbon", "sausages-ribbon", "spinning-ribbons", "nazi", "swastika"}  # real-world political/religious symbols
+          "templar-eye", "templar-heart", "american-shield", "magic-shield", "hasty-grave", "bank", "tombstone-style", "hood", "warlock-hood", "ribbon", "fist", "crown-of-thorns", "boxing-ring", "bow-tie-ribbon", "ribbon-medal", "ribbon-shield", "broken-ribbon", "sausages-ribbon", "spinning-ribbons", "nazi", "swastika"}  # real-world political/religious symbols
 
 
 def index_icons():
