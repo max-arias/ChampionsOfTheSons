@@ -166,8 +166,8 @@ public sealed record AuraPulse(uint PlayerId, string BuffId, Vec3 Origin, float 
     public MessageType Type => MessageType.AuraPulse;
 }
 
-/// <summary>Client → host, about once a second: where I am (the host decides who is in range of a kill and a pickup).</summary>
-public sealed record PlayerPos(Vec3 Position) : IMessage
+/// <summary>Client → host, about once a second: where I am and my level (the host decides who is in range of a kill and a pickup).</summary>
+public sealed record PlayerPos(Vec3 Position, int Level) : IMessage
 {
     public MessageType Type => MessageType.PlayerPos;
 }

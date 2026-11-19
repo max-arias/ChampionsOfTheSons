@@ -101,6 +101,19 @@ public static class EnemyRegistry
         return runtime;
     }
 
+    /// <summary>Client side of co-op: registers the host's profile for an enemy so nameplates and hit code see it like a local roll.</summary>
+    public static EnemyRuntime Mirror(StatsManager stats, EnemyKind kind, EnemyProfile profile, VailActor? actor)
+    {
+        if (ByStats.TryGetValue(stats.Pointer, out var existing)) return existing;
+        var runtime = new EnemyRuntime(kind, profile, profile.MaxHealth, actor, new EnemyCombatState(profile, WorldState.Rules.Difficulty))
+        {
+            Stats = stats,
+            ScaleApplied = true,
+        };
+        ByStats[stats.Pointer] = runtime;
+        return runtime;
+    }
+
     public static void Remove(StatsManager? stats)
     {
         if (stats != null) ByStats.Remove(stats.Pointer);

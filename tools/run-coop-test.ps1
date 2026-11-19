@@ -9,6 +9,7 @@ param(
     [string]$ServerDir = 'D:\dev\sotf-server',
     [string]$JoinAddress = '127.0.0.1:27016',
     [string]$GameAddress = '127.0.0.1:8766',
+    [string]$ServerDifficulty = 'difficulty.veteran',
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
 $ErrorActionPreference = 'Stop'
@@ -36,12 +37,15 @@ try {
 
     Get-Process SonsOfTheForest, SonsOfTheForestDS -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 2
+    # The server takes its difficulty from this file (COS-15); the client test checks it arrives.
+    New-Item -ItemType Directory -Force "$ServerDir\UserData" | Out-Null
+    Set-Content "$ServerDir\UserData\ChampionsOfTheSonsServer.cfg" ("[ChampionsOfTheSonsServer]", "difficulty = `"$ServerDifficulty`"", "friendly_fire = false")
     Remove-Item $serverLog -ErrorAction SilentlyContinue
     Remove-Item "$ServerDir\unity.log" -ErrorAction SilentlyContinue
     $started = Get-Date
 
     # Server first; wait until it idles, ready for players.
-    $server = Start-Process (Join-Path $ServerDir 'SonsOfTheForestDS.exe') -WorkingDirectory $ServerDir -ArgumentList '-batchmode', '-logFile', $unityServerLog -PassThru -WindowStyle Hidden
+    $server = Start-Process (Join-Path $ServerDir 'SonsOfTheForestDS.exe') -WorkingDirectory $ServerDir -ArgumentList '-batchmode', '-logFile', $unityServerLog, '--cots-coop-test' -PassThru -WindowStyle Hidden
     $ready = $false
     while (((Get-Date) - $started).TotalSeconds -lt 240) {
         Start-Sleep -Seconds 3
@@ -52,7 +56,7 @@ try {
     "server ready after {0:N0}s" -f ((Get-Date) - $started).TotalSeconds
 
     $clientStart = Get-Date
-    & $steam -applaunch 1326470 --cots-join $JoinAddress +connect_ds $GameAddress -logFile $unityClientLog -batchmode
+    & $steam -applaunch 1326470 --cots-join $JoinAddress +connect_ds $GameAddress --cots-expect-difficulty $ServerDifficulty -logFile $unityClientLog -batchmode
     $done = $false
     while (((Get-Date) - $clientStart).TotalSeconds -lt $TimeoutSeconds) {
         Start-Sleep -Seconds 5

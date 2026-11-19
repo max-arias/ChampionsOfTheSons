@@ -14,6 +14,22 @@ public static class KillCredit
             .Select(p => p.Id).ToList();
     }
 
+    /// <summary>
+    /// Level a kill's loot is rolled at, by the host's loot-level policy, from the levels of the players near the kill.
+    /// <paramref name="hostLevel"/> is the host's own level (a dedicated server has none: pass the highest player level then).
+    /// </summary>
+    public static int LootLevel(LootLevelPolicy policy, IReadOnlyList<(int Level, float Distance)> nearby, int hostLevel)
+    {
+        if (policy == LootLevelPolicy.Host || nearby.Count == 0) return Math.Max(1, hostLevel);
+        return Math.Max(1, policy switch
+        {
+            LootLevelPolicy.Lowest => nearby.Min(p => p.Level),
+            LootLevelPolicy.Average => (int)Math.Round(nearby.Average(p => p.Level)),
+            LootLevelPolicy.Closest => nearby.OrderBy(p => p.Distance).First().Level,
+            _ => nearby.Max(p => p.Level),
+        });
+    }
+
     /// <summary>XP each recipient gets (all recipients get the same amount).</summary>
     public static double ShareFor(double bounty, int recipients) => EnemyScaler.KillXpShare(bounty, recipients);
 

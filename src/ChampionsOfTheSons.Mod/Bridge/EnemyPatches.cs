@@ -132,7 +132,8 @@ public static class EnemyPatches
             }
             else
             {
-                // A remote player's client already applied their own stats (COS-13); traps/environment: raw.
+                // A remote player's hit arrives as a Hit message with their own stats (COS-13): the vanilla one is dropped.
+                if (fromPlayer && Net.CoopHits.ReplacesVanillaRemoteHits) { amount = 0; return; }
                 local = false;
                 hit = new OutgoingHit(amount, DamageKind.Physical, false, 0);
             }
@@ -173,10 +174,10 @@ public static class EnemyPatches
             EnemyRegistry.Remove(stats);
             EnemyAbilityFeature.OnEnemyDied(runtime);
             // The game's flag misses some player kills (e.g. deaths finished by its own state machine); our hook saw the last hit.
-            if (!killedByPlayer && !runtime.LastHitByLocalPlayer) return;
+            if (!killedByPlayer && !runtime.LastHitByLocalPlayer && !Net.CoopHits.HitByRemote(runtime)) return;
 
-            double xp = EnemyScaler.KillXpShare(runtime.Profile.Bounty, 1); // co-op split: COS-13
-            PlayerState.Character.OnKill(xp);
+            double xp = Net.CoopHits.DistributeKillXp(runtime); // co-op: players in range share it (COS-13)
+            if (xp > 0 || !(Net.CoopSession.IsHost && Net.CoopFeature.Verified.Count > 0)) PlayerState.Character.OnKill(xp);
             double killHeal = UniqueItems.KillHealFraction(PlayerState.Character.Inventory);
             if (killHeal > 0 && LocalPlayer.Vitals?.Health != null) PlayerEffects.Heal(killHeal * LocalPlayer.Vitals.Health.GetMax());
             EnemyKilled?.Invoke(runtime, xp);

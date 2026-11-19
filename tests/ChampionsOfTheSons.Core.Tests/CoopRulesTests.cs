@@ -24,6 +24,18 @@ public class CoopRulesTests
     }
 
     [Fact]
+    public void Loot_level_follows_the_policy()
+    {
+        var near = new[] { (10, 30f), (50, 5f), (30, 12f) };
+        Assert.Equal(50, KillCredit.LootLevel(LootLevelPolicy.Highest, near, 1));
+        Assert.Equal(10, KillCredit.LootLevel(LootLevelPolicy.Lowest, near, 1));
+        Assert.Equal(30, KillCredit.LootLevel(LootLevelPolicy.Average, near, 1));
+        Assert.Equal(50, KillCredit.LootLevel(LootLevelPolicy.Closest, near, 1));
+        Assert.Equal(7, KillCredit.LootLevel(LootLevelPolicy.Host, near, 7));
+        Assert.Equal(7, KillCredit.LootLevel(LootLevelPolicy.Highest, Array.Empty<(int, float)>(), 7));
+    }
+
+    [Fact]
     public void Aura_buff_applies_in_range_and_ends_when_pulses_stop()
     {
         var board = new AuraBoard();

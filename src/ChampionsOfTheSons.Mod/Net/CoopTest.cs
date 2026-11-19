@@ -33,7 +33,6 @@ public static class CoopTest
     public static void Update()
     {
         if (!Enabled || _finished || !CoopFeature.Accepted) return;
-        if (CoopFeature.RejectReason != null) { Finish(); return; }
         if (_next >= Steps.Count) { Finish(); return; }
         if (_stepStart < 0) _stepStart = Time.realtimeSinceStartup;
         var step = Steps[_next];
@@ -46,7 +45,6 @@ public static class CoopTest
         {
             Check(step.Name, false, e.GetType().Name + ": " + e.Message);
             done = true;
-            _failures += 0;
             _next++;
             _stepStart = -1;
             return;

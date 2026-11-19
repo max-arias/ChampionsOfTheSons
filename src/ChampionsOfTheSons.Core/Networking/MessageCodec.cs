@@ -28,7 +28,7 @@ public static class MessageCodec
             case EnemyHealth m: w.UInt64(m.EnemyNetId).Float(m.Health).Float(m.Armor); break;
             case Hit m: w.UInt64(m.EnemyNetId).Float(m.Amount).Byte((byte)m.Flags).Float(m.ArmorPierce); break;
             case XpGranted m: WriteLong(w, m.Amount); break;
-            case PlayerPos m: WriteVec(w, m.Position); break;
+            case PlayerPos m: WriteVec(w, m.Position); w.VarInt(m.Level); break;
             case DamageShown m: w.VarUInt(m.PlayerId).UInt64(m.EnemyNetId); WriteVec(w, m.Position); w.Float(m.Amount).Byte((byte)m.Flags); break;
             case AuraPulse m: w.VarUInt(m.PlayerId).String(m.BuffId); WriteVec(w, m.Origin); w.Float(m.Radius).Float(m.Seconds); break;
             case DropSpawned m: w.VarUInt(m.DropId); WriteItem(w, m.Item); WriteVec(w, m.Position); break;
@@ -62,7 +62,7 @@ public static class MessageCodec
             MessageType.EnemyHealth => new EnemyHealth(r.UInt64(), r.Float(), r.Float()),
             MessageType.Hit => new Hit(r.UInt64(), r.Float(), (HitFlags)r.Byte(), r.Float()),
             MessageType.XpGranted => new XpGranted(ReadLong(r)),
-            MessageType.PlayerPos => new PlayerPos(ReadVec(r)),
+            MessageType.PlayerPos => new PlayerPos(ReadVec(r), r.VarInt()),
             MessageType.DamageShown => new DamageShown(r.VarUInt(), r.UInt64(), ReadVec(r), r.Float(), (HitFlags)r.Byte()),
             MessageType.AuraPulse => new AuraPulse(r.VarUInt(), r.String() ?? "", ReadVec(r), r.Float(), r.Float()),
             MessageType.DropSpawned => new DropSpawned(r.VarUInt(), ReadItem(r), ReadVec(r)),

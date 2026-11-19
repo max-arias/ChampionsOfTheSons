@@ -63,6 +63,17 @@ public sealed class CoopFeature : IModFeature
         }
     }
 
+    /// <summary>Host: forget clients that left.</summary>
+    private static void PruneGone()
+    {
+        var alive = new HashSet<BoltConnection>();
+        var it = BoltNetwork.clients.GetEnumerator();
+        var nonGeneric = it.Cast<Il2CppSystem.Collections.IEnumerator>();
+        while (nonGeneric.MoveNext()) alive.Add(it.Current);
+        foreach (var c in Verified.ToList())
+            if (!alive.Contains(c)) CoopSession.Forget(c);
+    }
+
     private static void OnNet(IMessage message, BoltConnection from)
     {
         switch (message)
