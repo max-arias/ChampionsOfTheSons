@@ -9,3 +9,4 @@ ReleaseBuild/
 artifacts/
 tools/icons/cache/
 __pycache__/
+dist/
