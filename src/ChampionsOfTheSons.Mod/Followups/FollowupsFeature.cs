@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
@@ -146,15 +145,14 @@ public sealed class FollowupsFeature : IModFeature
 
     // ---------------------------------------------------------------- utility perks
 
-    /// <summary>The game's items whose name has <paramref name="keyword"/> as a whole word (plural allowed).</summary>
-    public static IEnumerable<ItemData> ItemsFor(string keyword)
+    /// <summary>The game's items with exactly this name (case-insensitive).</summary>
+    public static IEnumerable<ItemData> ItemsFor(string name)
     {
-        var re = new Regex(@"\b" + Regex.Escape(keyword) + @"(e?s)?\b", RegexOptions.IgnoreCase);
         var list = ItemDatabaseManager.Items;
         for (int i = 0; i < list.Count; i++)
         {
             var d = list[i];
-            if (d != null && !string.IsNullOrEmpty(d.Name) && re.IsMatch(d.Name)) yield return d;
+            if (d != null && string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase)) yield return d;
         }
     }
 

@@ -1136,7 +1136,8 @@
         "perk.alternative_cloth_sources"
       ],
       "requires": [],
-      "effects": []
+      "effects": [],
+      "manual": true
     },
     {
       "id": "perk.booze",

@@ -138,6 +138,7 @@ internal static class PerksSelfTest
         Panel.ReleaseSimulatedHover();
         Panel.ShowTab(PerkCategory.MeleeOffense.ToString());
         int spent = Pc.Perks.SpentPoints;
+        Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>()); // leveling now puts the reward hearts (COS-43) in the bag
         SelfTest.Check("perks: respec refused without a heart", !Panel.TryRespec() && Pc.Perks.SpentPoints == spent);
         TestKit.Give(PerkPanel.HeartOfPurity, 4, 1);
         SelfTest.Check("perks: heart in bag", PanelKit.Count(Pc.Inventory, PerkPanel.HeartOfPurity) == 1);

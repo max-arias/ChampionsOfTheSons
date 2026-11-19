@@ -132,8 +132,8 @@ public sealed class AdrenalineRush
 }
 
 /// <summary>
-/// Utility perks: more of an item per day, or a higher carry limit. Items are named by a case-insensitive keyword of the
-/// game's own item name; the mod resolves the keywords against the game's item list.
+/// Utility perks: more of an item per day, or a higher carry limit. Items are named by the game's own item name (as in its item
+/// list, e.g. "TimeBomb", "Pills"), compared case-insensitively.
 /// </summary>
 public enum UtilityKind
 {
@@ -149,38 +149,38 @@ public static class UtilityPerks
 {
     public static readonly IReadOnlyList<UtilityEffect> All = new UtilityEffect[]
     {
-        new("perk.alternative_cloth_sources", UtilityKind.DailyGrant, "cloth", 10),
-        new("perk.demolition", UtilityKind.DailyGrant, "bomb", 2),
-        new("perk.demolition_expert", UtilityKind.DailyGrant, "dynamite", 5),
-        new("perk.meds", UtilityKind.DailyGrant, "medicine", 3),
-        new("perk.fuel", UtilityKind.DailyGrant, "fuel", 3),
-        new("perk.booze", UtilityKind.DailyGrant, "booze", 5),
+        new("perk.alternative_cloth_sources", UtilityKind.DailyGrant, "Cloth", 10),
+        new("perk.demolition", UtilityKind.DailyGrant, "TimeBomb", 2),
+        new("perk.demolition_expert", UtilityKind.DailyGrant, "C4Brick", 5),
+        new("perk.meds", UtilityKind.DailyGrant, "Pills", 3),
+        new("perk.booze", UtilityKind.DailyGrant, "VodkaBottle", 5),
 
-        new("perk.pockets_for_explosives", UtilityKind.Capacity, "bomb", 15),
-        new("perk.pockets_for_explosives", UtilityKind.Capacity, "dynamite", 15),
-        new("perk.more_booze", UtilityKind.Capacity, "booze", 15),
-        new("perk.more_meds", UtilityKind.Capacity, "medicine", 20),
-        new("perk.more_meat", UtilityKind.Capacity, "meat", 5),
-        new("perk.more_snacks", UtilityKind.Capacity, "candy", 20),
-        new("perk.more_snacks", UtilityKind.Capacity, "soda", 20),
-        new("perk.more_bolts", UtilityKind.Capacity, "bolt", 20),
-        new("perk.corpse_collecting", UtilityKind.Capacity, "bone", 100),
-        new("perk.corpse_collecting", UtilityKind.Capacity, "skull", 20),
-        new("perk.more_limbs", UtilityKind.Capacity, "arm", 10),
-        new("perk.more_limbs", UtilityKind.Capacity, "leg", 10),
-        new("perk.more_limbs", UtilityKind.Capacity, "head", 10),
-        new("perk.more_building_resources", UtilityKind.Capacity, "stick", 6),
-        new("perk.more_building_resources", UtilityKind.Capacity, "rock", 4),
-        new("perk.more_building_resources", UtilityKind.Capacity, "rope", 2),
-        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "pot", 5),
-        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "shell", 5),
-        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "watch", 5),
-        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "circuit", 5),
-        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "air canister", 5),
-        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "flare", 5),
-        new("perk.more_ammo", UtilityKind.Capacity, "spear", 5),
-        new("perk.more_ammo", UtilityKind.Capacity, "molotov", 5),
-        new("perk.more_ammo", UtilityKind.Capacity, "small rock", 50),
+        new("perk.pockets_for_explosives", UtilityKind.Capacity, "TimeBomb", 15),
+        new("perk.pockets_for_explosives", UtilityKind.Capacity, "C4Brick", 15),
+        new("perk.more_booze", UtilityKind.Capacity, "VodkaBottle", 15),
+        new("perk.more_meds", UtilityKind.Capacity, "Pills", 20),
+        new("perk.more_meat", UtilityKind.Capacity, "Meat", 5),
+        new("perk.more_meat", UtilityKind.Capacity, "Fish", 5),
+        new("perk.more_snacks", UtilityKind.Capacity, "EnergyBar", 20),
+        new("perk.more_snacks", UtilityKind.Capacity, "EnergyDrink", 20),
+        new("perk.more_bolts", UtilityKind.Capacity, "CrossbowAmmoBolt", 20),
+        new("perk.corpse_collecting", UtilityKind.Capacity, "Bone", 100),
+        new("perk.corpse_collecting", UtilityKind.Capacity, "Skull", 20),
+        new("perk.more_limbs", UtilityKind.Capacity, "SeveredArm", 10),
+        new("perk.more_limbs", UtilityKind.Capacity, "SeveredLeg", 10),
+        new("perk.more_limbs", UtilityKind.Capacity, "SeveredHead", 10),
+        new("perk.more_building_resources", UtilityKind.Capacity, "Stick", 6),
+        new("perk.more_building_resources", UtilityKind.Capacity, "Rock", 4),
+        new("perk.more_building_resources", UtilityKind.Capacity, "Rope", 2),
+        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "CookingPot", 5),
+        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "TurtleShell", 5),
+        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "Wristwatch", 5),
+        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "CircuitBoard", 5),
+        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "AirCanister", 5),
+        new("perk.more_miscellaneous_items", UtilityKind.Capacity, "Flare", 5),
+        new("perk.more_ammo", UtilityKind.Capacity, "CraftedSpear", 5),
+        new("perk.more_ammo", UtilityKind.Capacity, "Molotov", 5),
+        new("perk.more_ammo", UtilityKind.Capacity, "SmallRock", 50),
     };
 
     /// <summary>The total change per item keyword for a kind, summed over every bought stack.</summary>

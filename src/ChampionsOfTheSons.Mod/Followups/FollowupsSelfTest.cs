@@ -64,7 +64,7 @@ internal static class FollowupsSelfTest
             var onK = new List<string>();
             for (int i = 0; i < enabled.Count; i++)
                 foreach (var b in enabled[i].bindings)
-                    if (b.effectivePath != null && b.effectivePath.ToLowerInvariant().EndsWith("/k")) onK.Add(enabled[i].name + " " + b.effectivePath);
+                    if (enabled[i].name != "crafting_key" && b.effectivePath != null && b.effectivePath.ToLowerInvariant().EndsWith("/k")) onK.Add(enabled[i].name + " " + b.effectivePath);
             SelfTest.Log($"followups: {enabled.Count} enabled input actions, bound to K: [{string.Join(", ", onK)}]");
             SelfTest.Check("followups: crafting key K is free in the game's bindings", onK.Count == 0, string.Join(", ", onK));
         }
@@ -161,7 +161,7 @@ internal static class FollowupsSelfTest
         foreach (var mode in CraftingPanel.Modes)
         {
             panel.SetMode(mode);
-            panel.ClickBag(key);
+            if (panel.Target == null) panel.ClickBag(key);
             if (mode is CraftMode.Polish or CraftMode.IndividualReroll) panel.PickStat(0);
             texts[mode] = panel.PreviewText();
             SelfTest.Check($"followups: preview text for {mode}", !string.IsNullOrWhiteSpace(texts[mode]), texts[mode] ?? "null");
@@ -171,7 +171,7 @@ internal static class FollowupsSelfTest
 
         // Before/after after a real craft.
         panel.SetMode(CraftMode.Polish);
-        panel.ClickBag(key);
+        if (panel.Target == null) panel.ClickBag(key);
         var current = Pc.Inventory.Get(key)!;
         for (int i = 0; i < current.Stats.Count && panel.BeforeAfter.Length == 0; i++)
         {
@@ -251,7 +251,7 @@ internal static class FollowupsSelfTest
         var missingDaily = UtilityPerks.All.Where(e => e.Kind == UtilityKind.DailyGrant).Select(e => e.ItemKeyword).Where(k => !FollowupsFeature.ItemsFor(k).Any()).ToList();
         SelfTest.Check("followups: every daily-grant keyword matches a game item", missingDaily.Count == 0, string.Join(", ", missingDaily));
 
-        var medKeyword = "medicine";
+        var medKeyword = "Pills";
         var item = FollowupsFeature.ItemsFor(medKeyword).FirstOrDefault();
         if (item == null) return;
         int baseMax = item.MaxAmount;
@@ -265,7 +265,7 @@ internal static class FollowupsSelfTest
 
     private static void Daily()
     {
-        var item = FollowupsFeature.ItemsFor("medicine").FirstOrDefault();
+        var item = FollowupsFeature.ItemsFor("Pills").FirstOrDefault();
         if (item == null) return;
         var inv = LocalPlayer.Inventory;
         SetPerks("perk.meds");

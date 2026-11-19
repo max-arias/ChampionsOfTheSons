@@ -112,8 +112,8 @@ public class PerkEffectTests
     public void Utility_totals_sum_stacks_per_keyword()
     {
         var tree = Tree("perk.more_meds", "perk.more_meds", "perk.meds");
-        Assert.Equal(40, UtilityPerks.Totals(tree, UtilityKind.Capacity)["medicine"]);
-        Assert.Equal(3, UtilityPerks.Totals(tree, UtilityKind.DailyGrant)["medicine"]);
+        Assert.Equal(40, UtilityPerks.Totals(tree, UtilityKind.Capacity)["Pills"]);
+        Assert.Equal(3, UtilityPerks.Totals(tree, UtilityKind.DailyGrant)["Pills"]);
         Assert.Empty(UtilityPerks.Totals(Tree(), UtilityKind.Capacity));
     }
 
