@@ -7,6 +7,6 @@ Currently none. (The five scarves were renamed to Bandana, Poncho, Cape, Collar 
 
 Weakest matches, to replace when better art exists:
 
-- Bracers and wristguards: the set's `bracer`/`bracers` glyph is an abstract arm guard; variants differ only by a small emblem.
-- Quivers share one `quiver` glyph plus an emblem.
+- Bracers and wristguards: the set's `bracer`/`bracers` glyph is an abstract arm guard.
+- Quivers share one `quiver` glyph.
 - Banned as real-world symbols: ribbon, fist, crown-of-thorns, cross, pentagram, all-seeing eye, halo, templar shield, pointed hoods, hammer-sickle.
