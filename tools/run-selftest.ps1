@@ -13,7 +13,7 @@ param(
     [switch]$NoGraphics,
     [switch]$NoBuild,
     [string]$Only = '',
-    [int]$TimeoutSeconds = 600,
+    [int]$TimeoutSeconds = 1200,   # the full suite takes ~11 min since Wave 2
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
 $ErrorActionPreference = 'Stop'
