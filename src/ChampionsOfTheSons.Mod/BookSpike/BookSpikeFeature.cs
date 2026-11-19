@@ -33,11 +33,22 @@ public sealed class BookSpikeFeature : IModFeature
     private static int _uAxis, _vAxis, _nAxis;
     private static float _uSign = 1, _vSign = 1;
     private static int _clicks;
+    /// <summary>Our own cursor in screen pixels; the game's book controller is switched off while our page shows.</summary>
+    private static Vector2 _cursor;
+    private static bool _ownCursor;
+    private static Quaternion _camAtStart;
 
     public void Update(float dt, bool inWorld)
     {
         if (_rt == null || _pageMat == null) return;
         _pageMat.SetTexture(TexProp, _rt); // the book re-applies its own page art on flips
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (_ownCursor && mouse != null)
+        {
+            _cursor += mouse.delta.ReadValue();
+            _cursor.x = Mathf.Clamp(_cursor.x, 0, Screen.width);
+            _cursor.y = Mathf.Clamp(_cursor.y, 0, Screen.height);
+        }
         if (CursorOnPage(out var p))
         {
             if (_dot != null)
@@ -45,7 +56,7 @@ public sealed class BookSpikeFeature : IModFeature
                 _dot.gameObject.SetActive(true);
                 _dot.anchorMin = _dot.anchorMax = p;
             }
-            if (Input.GetMouseButtonDown(0)) Click(p);
+            if (mouse != null && mouse.leftButton.wasPressedThisFrame) Click(p);
         }
         else if (_dot != null) _dot.gameObject.SetActive(false);
     }
@@ -69,6 +80,16 @@ public sealed class BookSpikeFeature : IModFeature
         SelfTest.Add(6f, "book: mod page", ModPage);
         SelfTest.Add(6.5f, "book: our tab", CloneTab);
         SelfTest.Add(7f, "book: page axes", PageAxes);
+        SelfTest.Add(7.2f, "book: controller off", () =>
+        {
+            if (_book == null) return;
+            BookBlockPatches.ModPageActive = true; // keep the controller running; skip only its page actions
+            var cam = Camera.main;
+            _cursor = cam != null && _pageRenderer != null ? (Vector2)cam.WorldToScreenPoint(_pageRenderer.bounds.center) : new Vector2(Screen.width / 2f, Screen.height / 2f);
+            _ownCursor = false; // the game's virtual cursor keeps working
+            _camAtStart = cam != null ? cam.transform.rotation : Quaternion.identity;
+            SelfTest.Log($"book: page actions blocked, cursor at {_cursor}, held item still the book: {LocalPlayer.Inventory?.HeldOnlyItemController != null}");
+        });
         SelfTest.Add(8f, "book: shot mod page", () => TestKit.Screenshot("book-02-mod-page"));
         SelfTest.Add(8.5f, "book: cursor mapping", () =>
         {
@@ -78,7 +99,10 @@ public sealed class BookSpikeFeature : IModFeature
         SelfTest.Add(OpenSeconds - 1, "book: shot after use", () => TestKit.Screenshot("book-03-after-use"));
         SelfTest.Add(OpenSeconds, "book: close", () =>
         {
-            SelfTest.Log($"book: {_clicks} clicks on the mod page");
+            var cam = Camera.main;
+            SelfTest.Log($"book: {_clicks} clicks on the mod page; camera turned {(cam != null ? Quaternion.Angle(_camAtStart, cam.transform.rotation) : -1):0.0} deg while the book was open; book still held: {UnityEngine.Object.FindObjectOfType<BlueprintBookController>() != null}");
+            SelfTest.Log($"book: {BookBlockPatches.Blocked} game page actions blocked");
+            BookBlockPatches.ModPageActive = false;
             _rt = null;
             if (_ourTab != null) UnityEngine.Object.Destroy(_ourTab);
             foreach (var go in Hidden) if (go != null) go.SetActive(true);
@@ -235,7 +259,7 @@ public sealed class BookSpikeFeature : IModFeature
         var t = _pageRenderer.transform;
         var normal = t.TransformDirection(_nAxis == 0 ? Vector3.right : _nAxis == 1 ? Vector3.up : Vector3.forward);
         var plane = new Plane(normal, t.TransformPoint(_pageLocal.center));
-        var ray = cam.ScreenPointToRay(_book._mouseScreenPosition);
+        var ray = cam.ScreenPointToRay(_ownCursor ? (Vector3)_cursor : (Vector3)_book._mouseScreenPosition);
         if (!plane.Raycast(ray, out float d)) return false;
         var local = t.InverseTransformPoint(ray.GetPoint(d));
         float u = (local[_uAxis] - _pageLocal.min[_uAxis]) / _pageLocal.size[_uAxis];
