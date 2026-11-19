@@ -67,6 +67,7 @@ public sealed class EnemySyncFeature : IModFeature
     }
 
     private static bool _lookupWarned;
+    private static readonly HashSet<ulong> _missLogged = new();
 
     public void Init() => CotsNetEvent.Received += OnNet;
 
@@ -142,7 +143,10 @@ public sealed class EnemySyncFeature : IModFeature
         _clientTimer = 0.5f;
         foreach (var (id, sync) in Pending.ToList())
         {
-            if (TryApply(sync)) Pending.Remove(id);
+            bool ok;
+            try { ok = TryApply(sync); }
+            catch (Exception e) { RLog.Error($"{CoopTestJoin.Tag} client: mirroring enemy {id} failed: {e.Message}"); ok = false; }
+            if (ok) Pending.Remove(id);
         }
     }
 
@@ -150,7 +154,12 @@ public sealed class EnemySyncFeature : IModFeature
     {
         var actor = ActorOf(sync.EnemyNetId);
         var stats = actor?.GetStatsManager()?.GetStatsManager();
-        if (actor == null || stats == null) return false;
+        if (actor == null || stats == null)
+        {
+            if (_missLogged.Add(sync.EnemyNetId))
+                RLog.Msg($"{CoopTestJoin.Tag} client: enemy {sync.EnemyNetId} not mirrored yet: entity {(BoltNetwork.FindEntity(new NetworkId(sync.EnemyNetId)) != null)}, actor {actor != null}, stats {stats != null}");
+            return false;
+        }
         if (!ModContent.Db.Enemies.TryGetValue(sync.KindId, out var kind)) return true; // unknown kind: nothing to mirror
         var abilities = sync.AffixIds.Select(a => Enum.TryParse<EnemyAbility>(a, out var v) ? (EnemyAbility?)v : null)
             .Where(a => a != null).Select(a => a!.Value).ToList();
@@ -198,7 +207,10 @@ public sealed class EnemySyncFeature : IModFeature
             case EnemySync s when !CoopSession.IsHost:
                 if (!ReceivedProfiles.ContainsKey(s.EnemyNetId)) RLog.Msg($"{CoopTestJoin.Tag} client: got enemy {s.EnemyNetId} ({s.KindId}, level {s.Level})");
                 ReceivedProfiles[s.EnemyNetId] = s;
-                if (!TryApply(s)) Pending[s.EnemyNetId] = s;
+                bool applied;
+                try { applied = TryApply(s); }
+                catch (Exception e) { RLog.Error($"{CoopTestJoin.Tag} client: mirroring enemy {s.EnemyNetId} failed: {e}"); applied = false; }
+                if (!applied) Pending[s.EnemyNetId] = s;
                 break;
             case EnemyHealth h when !CoopSession.IsHost:
                 if (ReceivedProfiles.TryGetValue(h.EnemyNetId, out var known))

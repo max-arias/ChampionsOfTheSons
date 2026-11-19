@@ -122,6 +122,7 @@ public sealed class PlayerCharacter
         {
             CooldownReduction = id => PerkTuning.CooldownReduction(Perks, id),
             CooldownScale = id => PerkTuning.CooldownScale(Perks, id),
+            CostScale = (id, stats) => id == "spell.multishot" && stats.IsOn(UniqueFlagIds.Sora) ? UniqueTuning.SoraCostScale : 1,
         };
         Stats = new StatSheet(content);
         Inventory.Changed += RebuildEquipment;

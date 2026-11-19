@@ -36,6 +36,17 @@ public sealed class SpellBook
     /// <summary>Factor on a spell's base cooldown after the flat reduction (perks like Time of Need), before the cooldown multiplier.</summary>
     public Func<string, double>? CooldownScale { get; set; }
 
+    /// <summary>Factor on a spell's energy cost and upkeep from items (Grip of Sora on Multishot).</summary>
+    public Func<string, StatSheet, double>? CostScale { get; set; }
+
+    /// <summary>What casting or one second of upkeep of a spell costs, after <see cref="CostScale"/>.</summary>
+    public SpellCost CostOf(string spellId, StatSheet stats)
+    {
+        var c = Cost(_content.Spells[spellId], stats);
+        double k = CostScale?.Invoke(spellId, stats) ?? 1;
+        return new SpellCost(c.Energy * k, c.Stamina * k);
+    }
+
     /// <summary>A spell's cooldown in seconds before the cooldown rate: (base - flat perks) x perk scale, at least 0.5 s, x the cooldown stat.</summary>
     public double CooldownOf(string spellId, StatSheet stats) =>
         Math.Max(0.5, (_content.Spells[spellId].Cooldown - (CooldownReduction?.Invoke(spellId) ?? 0)) * (CooldownScale?.Invoke(spellId) ?? 1))
@@ -116,12 +127,12 @@ public sealed class SpellBook
                 return CastResult.Stopped;
             }
             if (!IsReady(slot)) return CastResult.OnCooldown;
-            if (energy < Cost(_content.Spells[id], stats).Energy) return CastResult.NotEnoughEnergy;
+            if (energy < CostOf(id, stats).Energy) return CastResult.NotEnoughEnergy;
             _active[slot] = true;
             return CastResult.Ok;
         }
         if (!IsReady(slot)) return CastResult.OnCooldown;
-        cost = Cost(_content.Spells[id], stats);
+        cost = CostOf(id, stats);
         if (energy < cost.Energy) return CastResult.NotEnoughEnergy;
         _ready[slot] = 0;
         return CastResult.Ok;
@@ -147,7 +158,7 @@ public sealed class SpellBook
         for (int i = 0; i < Slots; i++)
         {
             if (!_active[i] || _loadout[i] is not string id) continue;
-            var c = Cost(_content.Spells[id], stats);
+            var c = CostOf(id, stats);
             double due = (c.Energy + c.Stamina) * dt;
             if (energy - spent < due)
             {

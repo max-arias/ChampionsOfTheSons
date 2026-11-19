@@ -328,6 +328,51 @@ internal static class FollowupsSelfTest
         SelfTest.Check("followups: Wind Armor: +2000 armor and 5% heal after a dodge", Pc.Stats.Get(StatIds.Armor) - armor >= 1999 && Health - a0 >= MaxHealth * 0.045f, $"armor +{Pc.Stats.Get(StatIds.Armor) - armor:0}, health {a0:0} -> {Health:0}");
         FollowupsFeature.Frame(6f);
         SelfTest.Check("followups: Wind Armor ends", Math.Abs(Pc.Stats.Get(StatIds.Armor) - armor) < 1);
+
+        SpellItems();
+    }
+
+    /// <summary>The unique items that drive spells (they waited on the spells, COS-26).</summary>
+    private static void SpellItems()
+    {
+        Flags(UniqueFlagIds.Greed);
+        int greed = Spells.SpellEffects.GreedCasts;
+        Spells.SpellEffects.ItemTick(0.6f);
+        Spells.SpellEffects.ItemTick(0.6f);
+        SelfTest.Check("followups: Greed casts Wide Reach once a second", Spells.SpellEffects.GreedCasts == greed + 1, $"{Spells.SpellEffects.GreedCasts - greed}");
+
+        Flags(UniqueFlagIds.WitheredCrown);
+        int arrows = Spells.SpellEffects.BloodArrowsFired;
+        Pc.Spells.Equip(0, "spell.blood_infused_arrow");
+        Pc.Spells.Tick(1e6, Pc.Stats);
+        LocalPlayer.Vitals.Stamina.SetCurrentValue(LocalPlayer.Vitals.Stamina.GetMax());
+        FullHealth();
+        var outcome = Spells.SpellCaster.Cast(0);
+        SelfTest.Check("followups: Withered Crown: one Blood Infused Arrow cast fires 5 arrows", Spells.SpellEffects.BloodArrowsFired - arrows == 1 + UniqueTuning.CrownExtraArrows,
+            $"{outcome}, {Spells.SpellEffects.BloodArrowsFired - arrows} arrows");
+        Pc.Spells.Equip(0, null);
+        FullHealth();
+
+        Flags(UniqueFlagIds.Sora);
+        double withSora = Pc.Spells.CostOf("spell.multishot", Pc.Stats).Energy;
+        Flags();
+        double without = Pc.Spells.CostOf("spell.multishot", Pc.Stats).Energy;
+        SelfTest.Check("followups: Grip of Sora: Multishot costs 20% less", without > 0 && Math.Abs(withSora / without - UniqueTuning.SoraCostScale) < 0.001, $"{without:0.##} -> {withSora:0.##}");
+
+        Flags(UniqueFlagIds.Crossfire);
+        var target = TestKit.Spawn(distance: 8, rules: new WorldRules { Difficulty = Difficulties.Easy, AllowElites = false });
+        var rt = TestKit.Profile(target);
+        int fired = Spells.SpellEffects.CrossfireArrows;
+        if (rt != null)
+        {
+            Spells.SpellEffects.OnWeaponHit(rt, WeaponClass.Ranged);
+            Spells.SpellEffects.OnWeaponHit(rt, WeaponClass.Ranged);
+            Spells.SpellEffects.OnWeaponHit(rt, WeaponClass.Melee);
+        }
+        SelfTest.Check("followups: Crossfire: a projectile hit fires one free Magic Arrow, then waits", rt != null && Spells.SpellEffects.CrossfireArrows - fired == 1,
+            $"{Spells.SpellEffects.CrossfireArrows - fired} arrows");
+        if (target != null) TestKit.Kill(target);
+        Flags();
     }
 
     private static void Cleanup()

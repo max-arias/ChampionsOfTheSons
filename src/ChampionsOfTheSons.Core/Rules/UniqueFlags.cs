@@ -15,6 +15,11 @@ public static class UniqueFlagIds
     public const string WindArmor = "i_is_wind_armor";
     public const string InfinityLoop = "i_infinity_loop";
     public const string Eruption = "i_eruption_bow";
+    public const string Crossfire = "i_crossfire_quiver";
+    public const string Sora = "i_sora_bracers";
+    public const string WitheredCrown = "i_hazard_crown";
+    public const string Greed = "i_is_greed";
+    public const string Spark = "i_spark_of_light_after_dark";
 }
 
 public static class UniqueTuning
@@ -33,6 +38,25 @@ public static class UniqueTuning
 
     /// <summary>Eruption: a headshot splashes this fraction of its damage on other enemies within the radius (m).</summary>
     public const double EruptionFraction = 0.5, EruptionRadius = 4;
+
+    /// <summary>Crossfire: a projectile hit fires a free Magic Arrow at the target, at most once per this many seconds (x the cooldown stat).</summary>
+    public const double CrossfireGap = 2;
+
+    /// <summary>Grip of Sora: Multishot energy cost x0.8 and this many extra projectiles per volley.</summary>
+    public const double SoraCostScale = 0.8;
+    public const int SoraExtraProjectiles = 4;
+
+    /// <summary>Withered Crown: extra Blood Infused Arrows per cast (one health cost).</summary>
+    public const int CrownExtraArrows = 4;
+
+    /// <summary>Greed: Wide Reach casts itself once per this many seconds.</summary>
+    public const double GreedInterval = 1;
+
+    /// <summary>Last Engineer's Note: a Black Hole that hits at least this many different enemies releases a Ball Lightning when it ends.</summary>
+    public const int SparkEnemies = 5;
+
+    /// <summary>Crossfire's gap after cooldown reduction.</summary>
+    public static double CrossfireGapFor(StatSheet stats) => CrossfireGap * stats.Get(StatIds.Cooldown);
 }
 
 /// <summary>State and numbers of the time-based unique flags. The mod feeds it events; it hands back stat modifiers and amounts.</summary>

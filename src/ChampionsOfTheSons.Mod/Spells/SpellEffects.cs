@@ -184,6 +184,7 @@ internal static class SpellEffects
         var at = AimGround(40) + Vector3.up * 1.5f;
         float radius = S("spell_blackhole_radius"), pull = S("spell_blackhole_pullforce") / (float)SpellTuning.BlackHolePullDivisor;
         var core = SpellFx.Sphere(at, 1.5f, SpellFx.Dark, 1e6f);
+        var caught = new HashSet<EnemyRuntime>();
         AddZone(new SpellZone
         {
             Id = "black_hole", Center = at, Radius = radius, Left = S("spell_blackhole_duration"), Interval = (float)SpellTuning.BlackHoleTick,
@@ -200,7 +201,20 @@ internal static class SpellEffects
             },
             Pulse = z =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")));
+                foreach (var e in EnemiesWithin(z.Center, z.Radius))
+                {
+                    Strike(e, Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")));
+                    caught.Add(e);
+                }
+            },
+            // Last Engineer's Note: a black hole that caught enough enemies releases a Ball Lightning where it was.
+            End = z =>
+            {
+                if (!Stats.IsOn(UniqueFlagIds.Spark) || caught.Count < UniqueTuning.SparkEnemies) return;
+                var dir = Eye.forward;
+                dir.y = 0;
+                LaunchBallLightning(z.Center, dir.normalized);
+                SparkBalls++;
             },
         });
         SpellFx.Disc(at - Vector3.up * 1.4f, radius, SpellFx.Dark, 0.6f);
@@ -252,7 +266,15 @@ internal static class SpellEffects
         var dir = Eye.forward;
         dir.y = 0;
         dir.Normalize();
-        var start = PlayerPos + Vector3.up * 1.5f + dir * 2f;
+        LaunchBallLightning(PlayerPos + Vector3.up * 1.5f + dir * 2f, dir);
+        return true;
+    }
+
+    /// <summary>Ball Lightnings released by Last Engineer's Note (self-test).</summary>
+    public static int SparkBalls { get; private set; }
+
+    private static void LaunchBallLightning(Vector3 start, Vector3 dir)
+    {
         var ball = SpellFx.Sphere(start, 0.8f, SpellFx.Storm, 1e6f);
         AddZone(new SpellZone
         {
@@ -268,7 +290,6 @@ internal static class SpellEffects
                 foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, SpellTuning.BallLightningZap(Stats, Rng.FromTime()));
             },
         });
-        return true;
     }
 
     // ---------------------------------------------------------------- bursts and melee
@@ -361,11 +382,18 @@ internal static class SpellEffects
         for (int i = 0; i < volley; i++)
         {
             float yaw = volley == 1 ? 0 : (i - (volley - 1) / 2f) * 6f;
-            var dir = Quaternion.AngleAxis(yaw, Vector3.up) * eye.forward;
+            FireMagicArrow(eye.position, Quaternion.AngleAxis(yaw, Vector3.up) * eye.forward);
+        }
+        return true;
+    }
+
+    private static void FireMagicArrow(Vector3 from, Vector3 dir)
+    {
+        {
             AddBolt(new SpellBolt
             {
-                Id = "magic_arrow", Pos = eye.position + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f,
-                Visual = SpellFx.Sphere(eye.position + dir, 0.25f, SpellFx.Arcane, 1e6f),
+                Id = "magic_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f,
+                Visual = SpellFx.Sphere(from + dir, 0.25f, SpellFx.Arcane, 1e6f),
                 OnHit = (b, e) =>
                 {
                     Strike(e, Hit(SpellTuning.MagicArrowDamage, S("spell_magic_arrow_damage_scaling"), Stats.IsOn("spell_magic_arrow_crit")));
@@ -376,7 +404,35 @@ internal static class SpellEffects
                 },
             });
         }
-        return true;
+    }
+
+    // ---------------------------------------------------------------- unique items that drive spells (COS-42)
+
+    private static float _crossfireReadyAt, _greedTimer;
+
+    /// <summary>Free Magic Arrows Crossfire has fired, Wide Reach casts Greed has made (self-test).</summary>
+    public static int CrossfireArrows { get; private set; }
+    public static int GreedCasts { get; private set; }
+
+    /// <summary>Crossfire: a projectile hit fires a free Magic Arrow at the target, at most once per gap.</summary>
+    public static void OnWeaponHit(EnemyRuntime enemy, WeaponClass weapon)
+    {
+        if (weapon != WeaponClass.Ranged || !Stats.IsOn(UniqueFlagIds.Crossfire) || Time.time < _crossfireReadyAt) return;
+        _crossfireReadyAt = Time.time + (float)UniqueTuning.CrossfireGapFor(Stats);
+        var from = Eye.position;
+        FireMagicArrow(from, (Center(enemy) - from).normalized);
+        CrossfireArrows++;
+    }
+
+    /// <summary>Per-frame item effects: Greed casts Wide Reach once a second.</summary>
+    public static void ItemTick(float dt)
+    {
+        if (!Stats.IsOn(UniqueFlagIds.Greed)) { _greedTimer = 0; return; }
+        _greedTimer += dt;
+        if (_greedTimer < UniqueTuning.GreedInterval) return;
+        _greedTimer = 0;
+        WideReach();
+        GreedCasts++;
     }
 
     private static bool SeekingArrow()
@@ -405,10 +461,26 @@ internal static class SpellEffects
         var (cost, hit) = SpellTuning.BloodArrow(Stats, health._currentValue, Rng.FromTime());
         health.SetCurrentValue(Mathf.Max(1, health._currentValue - (float)cost));
         var eye = Eye;
+        // Withered Crown: the one cast (one health cost) fires extra arrows in a fan.
+        int arrows = 1 + (Stats.IsOn(UniqueFlagIds.WitheredCrown) ? UniqueTuning.CrownExtraArrows : 0);
+        for (int i = 0; i < arrows; i++)
+        {
+            float yaw = arrows == 1 ? 0 : (i - (arrows - 1) / 2f) * 5f;
+            FireBloodArrow(eye.position, Quaternion.AngleAxis(yaw, Vector3.up) * eye.forward, hit);
+        }
+        BloodArrowsFired += arrows;
+        return true;
+    }
+
+    /// <summary>Blood Infused Arrows fired (self-test: Withered Crown).</summary>
+    public static int BloodArrowsFired { get; private set; }
+
+    private static void FireBloodArrow(Vector3 from, Vector3 dir, OutgoingHit hit)
+    {
         AddBolt(new SpellBolt
         {
-            Id = "blood_arrow", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.BloodArrowSpeed, Range = (float)SpellTuning.BloodArrowRange, Radius = 1f,
-            Visual = SpellFx.Sphere(eye.position + eye.forward, 0.3f, SpellFx.Blood, 1e6f),
+            Id = "blood_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.BloodArrowSpeed, Range = (float)SpellTuning.BloodArrowRange, Radius = 1f,
+            Visual = SpellFx.Sphere(from + dir, 0.3f, SpellFx.Blood, 1e6f),
             OnHit = (b, e) =>
             {
                 Strike(e, hit);
@@ -416,7 +488,6 @@ internal static class SpellEffects
                 SpellFx.Sphere(b.Pos, 0.9f, SpellFx.Blood, 0.3f);
             },
         });
-        return true;
     }
 
     // ---------------------------------------------------------------- channeled and toggle spells
@@ -439,6 +510,9 @@ internal static class SpellEffects
         _flameFx = SpellFx.Disc(Feet(), (float)SpellTuning.BlackFlameRadius, SpellFx.Dark, 1e6f, LocalPlayer.Transform);
         return true;
     }
+
+    /// <summary>Extra Multishot projectiles fired by Grip of Sora (self-test).</summary>
+    public static int SoraExtras { get; private set; }
 
     private static bool StartMultishot()
     {
@@ -493,6 +567,15 @@ internal static class SpellEffects
                     if (target == null) break;
                     Strike(target, Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling));
                     SpellFx.Sphere(Center(target), 0.5f, SpellFx.Steel, 0.2f);
+                    // Grip of Sora: extra projectiles go to the next nearest enemies, the rest to the main target.
+                    if (Stats.IsOn(UniqueFlagIds.Sora))
+                    {
+                        var others = EnemiesWithin(PlayerPos, (float)SpellTuning.MultishotRange).Where(e => e != target)
+                            .OrderBy(e => (Center(e) - PlayerPos).sqrMagnitude).Take(UniqueTuning.SoraExtraProjectiles).ToList();
+                        for (int k = 0; k < UniqueTuning.SoraExtraProjectiles; k++)
+                            Strike(k < others.Count ? others[k] : target, Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling));
+                        SoraExtras += UniqueTuning.SoraExtraProjectiles;
+                    }
                 }
                 break;
         }

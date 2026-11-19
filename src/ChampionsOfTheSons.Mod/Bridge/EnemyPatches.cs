@@ -30,6 +30,8 @@ public static class EnemyPatches
 
     public static event Action<VailActor, EnemyRuntime, double, bool>? EnemyHit;
     public static event Action<EnemyRuntime, double>? EnemyKilled;
+    /// <summary>The local player's weapon hit an enemy (before damage is applied): item effects that react to hits by weapon class.</summary>
+    public static event Action<EnemyRuntime, WeaponClass>? LocalWeaponHit;
 
     [HarmonyPatch(typeof(VailActor), nameof(VailActor.SetMaxHealthStat))]
     [HarmonyPostfix]
@@ -134,6 +136,7 @@ public static class EnemyPatches
                 double fire = sheet.Get(StatIds.FireDamage);
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };
                 hit = Followups.FollowupsFeature.OnLocalHit(hit, weapon);
+                LocalWeaponHit?.Invoke(runtime, weapon);
             }
             else
             {
