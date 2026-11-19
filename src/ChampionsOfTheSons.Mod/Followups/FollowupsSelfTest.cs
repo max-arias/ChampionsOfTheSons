@@ -177,8 +177,10 @@ internal static class FollowupsSelfTest
         {
             panel.Clear();
             panel.ClickBag(key);
-            TestKit.Give(null, (int)current.Rarity, current.Level); // ingredients must be at least the target's rarity
-            panel.ClickBag(Inventory.Bag(1));
+            var ingredient = TestKit.Give(null, (int)current.Rarity, current.Level); // ingredients must be at least the target's rarity
+            // The bag may hold earlier materials: click the slot the ingredient actually went to.
+            var slot = Enumerable.Range(0, LootRoller.BagSlots).Select(Inventory.Bag).FirstOrDefault(k => ReferenceEquals(Pc.Inventory.Get(k), ingredient));
+            if (slot != null) panel.ClickBag(slot);
             panel.PickStat(i);
             panel.DoCraft();
         }

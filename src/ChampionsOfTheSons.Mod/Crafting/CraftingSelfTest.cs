@@ -95,7 +95,7 @@ internal static class CraftingSelfTest
             case CraftMode.Reforge:
             {
                 // Same type; same rarity when another item of it exists, otherwise the nearest rarity (Crafting.cs, Reforge).
-                var others = ModContent.Db.Items.Values.Where(d => d.Id != before.BaseId && d.Type == _baseType).ToList();
+                var others = ModContent.Db.Items.Values.Where(d => d.Id != before.BaseId && d.Type == _baseType && d.MinLevel <= Math.Max(1, before.Level)).ToList();
                 int nearest = others.Count == 0 ? 0 : others.Min(d => Math.Abs(d.Rarity - (int)before.Rarity));
                 var got = ModContent.Db.Items[after.BaseId];
                 SelfTest.Check("craft Reforge: different item, same type, nearest rarity",
