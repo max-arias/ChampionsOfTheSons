@@ -1,0 +1,6 @@
+{
+ "ui.spells.energy": "energy",
+ "ui.spells.need_level": "Needs level {0}",
+ "ui.spells.need_points": "Not enough points",
+ "ui.spells.unlock": "Unlock ({0} points)"
+}
