@@ -39,6 +39,10 @@
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(GameDir)\Mods" />
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(GameDir)\Mods" Condition="Exists('$(OutputPath)$(AssemblyName).pdb')" />
     <Copy SourceFiles="$(OutputPath)manifest.json" DestinationFolder="$(GameDir)\Mods\$(AssemblyName)" />
+    <ItemGroup>
+      <IconFiles Include="$(MSBuildThisFileDirectory)..\..\content\icons\**\*.png" />
+    </ItemGroup>
+    <Copy SourceFiles="@(IconFiles)" DestinationFolder="$(GameDir)\Mods\$(AssemblyName)\icons" SkipUnchangedFiles="true" />
     <Message Importance="high" Text="Deployed $(AssemblyName) to $(GameDir)\Mods" />
   </Target>
 </Project>

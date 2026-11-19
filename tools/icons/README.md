@@ -1,0 +1,39 @@
+# Icons
+
+`content/icons/<id>.png` (128x128 RGBA, transparent) for every item, perk, spell and set: 662 files, about 5 MB.
+They ship to `Mods\ChampionsOfTheSons\icons\` (CopyToGame target in the mod csproj) and load through `Icons/IconCache.cs`
+(`GetTexture(id)` / `GetSprite(id)`, null when missing).
+
+## Source
+
+AI generation (local ComfyUI, Z-Image Turbo) was dropped. Icons are recolored **game-icons.net** vectors
+(CC BY 3.0, 4,200+ single-color SVGs, https://github.com/game-icons/icons). Credits: `content/icons/CREDITS.md`
+(keep it with the icons; the mod must show "Icons made by ... from game-icons.net" somewhere, e.g. a credits screen).
+
+- `mapping.json`: entry id -> `author/icon` (generated, committed).
+- `overrides.json`: hand picks (`id -> icon slug`), win over the automatic match. Edit this to fix a bad icon.
+- Matching: keywords from the entry name and type (e.g. a weapon must match a weapon icon), synonyms, a penalty for reusing
+  an icon, deterministic tie-break. Items must match their type. A few icons are banned (`BANNED`).
+- Look: white glyph -> vertical gradient in the rarity color (0..7: grey, green, blue, yellow, purple, orange, red, magenta),
+  dark outline, glow growing with rarity. Perks/spells/sets get a category color and a dark disc.
+  Rendered at 512 px, downscaled to 128, palette-quantized (256 colors) to keep the files small.
+
+## Commands
+
+Needs Python 3 with `pillow`, `numpy`, `resvg-py` (`pip install pillow numpy resvg-py`); run with `python -I`.
+
+```powershell
+python -I tools/icons/generate_icons.py fetch                       # once: SVG set into tools/icons/cache/ (git-ignored)
+python -I tools/icons/generate_icons.py match                       # rebuild mapping.json after content or overrides change
+python -I tools/icons/generate_icons.py render                      # new icons only (resumable)
+python -I tools/icons/generate_icons.py render --force --only item.broken_flip_flops   # one icon
+python -I tools/icons/generate_icons.py render --force              # all (about a minute)
+python -I tools/icons/contact_sheet.py "$env:TEMP\cots-icons-sheets"   # per-category sheets with name + source icon
+```
+
+New content entries: run `match` then `render`. Replace one icon: add `"<id>": "<icon-slug>"` to `overrides.json`, then `match` and `render --force --only <id>`.
+
+## Licenses
+
+game-icons.net icons: CC BY 3.0 (a few contributors CC0); attribution required, changes allowed (recoloring is noted in the credits).
+Tools used: Pillow (HPND), NumPy (BSD-3), resvg-py / resvg (MPL-2.0 / MIT-Apache).
