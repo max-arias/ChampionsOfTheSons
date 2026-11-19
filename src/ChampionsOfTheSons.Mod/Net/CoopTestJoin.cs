@@ -1,4 +1,5 @@
 using RedLoader;
+using Sons.Gui;
 using Sons.Multiplayer;
 using Sons.Multiplayer.Dedicated;
 using Steamworks;
@@ -23,6 +24,30 @@ public sealed class CoopTestJoin : IModFeature
     private bool _connected;
     private float _started = -1;
 
+    private float _dialogCheck;
+
+    /// <summary>The game asks "join this server?" in a dialog when started with +connect_ds; nobody is there to click it.</summary>
+    private void AcceptJoinDialog()
+    {
+        if (Time.realtimeSinceStartup < _dialogCheck) return;
+        _dialogCheck = Time.realtimeSinceStartup + 2f;
+        try
+        {
+            foreach (var d in Resources.FindObjectsOfTypeAll<DedicatedGameInviteDialogController>())
+            {
+                if (d == null || !d.gameObject.activeInHierarchy) continue;
+                RLog.Msg($"{Tag} join: accepting the game's join dialog");
+                d.OnOption1();
+                _connected = true;
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+            RLog.Warning($"{Tag} join dialog check failed: {e.Message}");
+        }
+    }
+
     private static string? ReadTarget()
     {
         var args = Environment.GetCommandLineArgs();
@@ -34,10 +59,12 @@ public sealed class CoopTestJoin : IModFeature
     {
         if (Target == null || inWorld || _connected) return;
         if (_started < 0) _started = Time.realtimeSinceStartup;
+        AcceptJoinDialog();
         if (Time.realtimeSinceStartup - _started < _next) return;
         _next += 10f;
         try
         {
+            RLog.Msg($"{Tag} join: scene '{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}', dialogs: {Resources.FindObjectsOfTypeAll<DedicatedGameInviteDialogController>().Length}");
             var browser = Resources.FindObjectsOfTypeAll<DedicatedServerBrowser>().FirstOrDefault();
             if (browser == null)
             {

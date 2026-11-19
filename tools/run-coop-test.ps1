@@ -17,7 +17,7 @@ $repo = Split-Path $PSScriptRoot -Parent
 $clientLog = Join-Path $GameDir '_Redloader\Latest.log'
 $serverLog = Join-Path $ServerDir '_Redloader\Latest.log'
 $steam = 'C:\Program Files (x86)\Steam\steam.exe'
-$unityClientLog = Join-Path $env:TEMP 'cots-coop-client-unity.log'
+$unityClientLog = Join-Path $env:USERPROFILE 'AppDataocallowndnightSonsOfTheForestPlayer.log'
 $unityServerLog = Join-Path $ServerDir 'unity.log'
 
 $mutex = New-Object System.Threading.Mutex($false, 'Global\ChampionsOfTheSonsGameRun')

@@ -76,7 +76,7 @@ public static class EnemyRegistry
     public static bool IsAuthority => !BoltNetwork.isRunning || BoltNetwork.isServer;
 
     public static EnemyKind? KindFor(VailActorTypeId type) =>
-        ModContent.Db.Enemies.TryGetValue(type.ToString(), out var k) ? k : null;
+        ModContent.Db != null && ModContent.Db.Enemies.TryGetValue(type.ToString(), out var k) ? k : null;
 
     public static EnemyRuntime? Get(StatsManager? stats) =>
         stats != null && ByStats.TryGetValue(stats.Pointer, out var r) ? r : null;
