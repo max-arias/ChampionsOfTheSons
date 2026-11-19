@@ -8,6 +8,8 @@ RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, 
 - `content/` — item, stat, perk, spell, affix, buff and difficulty definitions (JSON, stable string IDs). Embedded in the mod, copied next to the tests.
 - `tests/ChampionsOfTheSons.Core.Tests` — xUnit tests for the rules core, save model and net protocol only.
 - `docs/mechanics.md` — the rules and formulas we implement (taken from the original mod's behavior).
+- `unity/CotsBundles` — Unity 2022.2.16f1 HDRP project for the mod's asset bundle (`tools/build-bundles.ps1`, docs/asset-bundles.md).
+- `docs/release.md` — packaging for sotf-mods.com (`tools/package-release.ps1` writes `dist/`).
 
 ## Build
 - `./build.ps1` builds and tests the core. Needs a .NET 10 SDK (PATH, or the local one at `D:\dev\deps\dotnet`; set `DOTNET_ROOT` to it).
