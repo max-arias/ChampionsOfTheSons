@@ -37,7 +37,13 @@ public static class TestKit
     /// (calling ReceivedDamage directly skips the caller that normally starts it).</summary>
     public static void Kill(VailActor actor)
     {
-        for (int i = 0; i < 200 && actor.GetHealth() > 0; i++) Hit(actor, 1e9f); // Hell elites have ~1e10 health
+        // Hell elites have ~1e10 health, steadfast caps a hit at a few percent, Shielding eats a hit and Undead revives:
+        // drop health to 1 before each hit.
+        for (int i = 0; i < 6 && actor.GetHealth() > 0; i++)
+        {
+            EnemyRegistry.HealthOf(actor)?.SetCurrentValue(1);
+            Hit(actor, 1e9f);
+        }
         if (!actor.IsDead() && actor.GetHealth() <= 0) actor.OnDeath();
     }
 
