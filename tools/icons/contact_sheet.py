@@ -39,7 +39,7 @@ def main():
                     ic = Image.open(p).convert("RGBA")
                     im.paste(ic, (x + 11, y + 4), ic)
                 d.text((x + 4, y + 134), e["name"][:24], fill=(235, 235, 235), font=font)
-                d.text((x + 4, y + 147), mapping[e["id"]].split("/")[1][:24], fill=(130, 150, 170), font=font)
+                d.text((x + 4, y + 147), mapping[e["id"]].split("/")[-1][:24], fill=(130, 150, 170), font=font)
                 if e["kind"] == "item":
                     d.text((x + 4, y + 160), f"r{e['rarity']}", fill=(180, 180, 90), font=font)
             f = out / f"{g}_{page // per + 1}.png"

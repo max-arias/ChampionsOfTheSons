@@ -20,10 +20,12 @@ CONTENT = ROOT / "content"
 OUT = CONTENT / "icons"
 ZIP_URL = "https://github.com/game-icons/icons/archive/refs/heads/master.zip"
 SIZE = 128
+PLACEHOLDER = "placeholder"  # deliberate eye-catching "missing art" icon, listed in placeholders.md
 
 
 def load_entries():
     ents = []
+    text = json.load(open(CONTENT / "text" / "en.json", encoding="utf8"))
     for f in ("items", "items_island"):
         for i in json.load(open(CONTENT / f"{f}.json", encoding="utf8"))["items"]:
             ents.append(dict(id=i["id"], kind="item", type=i["type"], name=i["name"], rarity=i.get("rarity", 0)))
@@ -33,6 +35,9 @@ def load_entries():
         ents.append(dict(id=i["id"], kind="spell", type="spell", name=i["name"], rarity=0))
     for i in json.load(open(CONTENT / "sets.json", encoding="utf8"))["sets"]:
         ents.append(dict(id=i["id"], kind="set", type="set", name=i["name"], rarity=0))
+    for e in ents:  # current display names (the content name may be stale after naming passes)
+        e["name"] = text.get(e["id"] + ".name", e["name"])
+        e["desc"] = text.get(e["id"] + ".description", text.get(e["id"] + ".flavor", ""))
     return ents
 
 
@@ -99,7 +104,9 @@ def words(name):
     return [w for w in n.split() if w not in STOP]
 
 
-BANNED = {"hammer-sickle", "cultist", "executioner-hood"}  # avoid unfortunate symbolism
+BANNED = {"hammer-sickle", "cultist", "executioner-hood", "all-seeing-eye", "cross", "iron-cross", "celtic-cross", "cross-shield",
+          "pentagram-rose", "pentacle", "heptagram", "ankh", "eye-of-horus", "sheikah-eye", "spiked-halo", "prayer-beads", "templar-shield",
+          "templar-eye", "templar-heart", "american-shield", "magic-shield", "nazi", "swastika"}  # real-world political/religious symbols
 
 
 def index_icons():
@@ -115,6 +122,8 @@ def match(ents, overrides):
     by_slug = {k.split("/")[1]: k for k, _, _ in idx}
     overrides = {i: by_slug.get(v, v) for i, v in overrides.items()}
     for v in overrides.values():
+        if v == PLACEHOLDER:
+            continue
         assert (SRC / (v + ".svg")).exists(), "unknown icon " + v
     used = collections.Counter()
     res = {}
@@ -171,7 +180,29 @@ def over(top, bot):
     return np.concatenate([rgb, oa], -1)
 
 
+def render_placeholder():
+    import numpy as np
+    n = 16
+    yy, xx = np.mgrid[0:n * 8, 0:n * 8]
+    chk = ((yy // 16 + xx // 16) % 2).astype(np.float32)
+    out = np.zeros((n * 8, n * 8, 4), np.float32)
+    out[..., 0] = 255
+    out[..., 1] = chk * 40
+    out[..., 2] = 255 * (1 - chk * 0.0)
+    out[..., 3] = 1
+    d = np.abs(yy - xx) < 6
+    d |= np.abs(yy + xx - (n * 8 - 1)) < 6
+    out[d, :3] = 20
+    # rounded-ish margin: fade the border to transparent
+    m = 6
+    out[:m] = out[-m:] = 0
+    out[:, :m] = out[:, -m:] = 0
+    return out
+
+
 def render_one(e, key):
+    if key == PLACEHOLDER:
+        return render_placeholder()
     import numpy as np, resvg_py
     from PIL import Image, ImageFilter
     svg = (SRC / (key + ".svg")).read_text(encoding="utf8")
