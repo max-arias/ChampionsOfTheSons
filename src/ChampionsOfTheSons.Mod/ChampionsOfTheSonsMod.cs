@@ -43,12 +43,14 @@ public class ChampionsOfTheSonsMod : SonsMod
 
         Packets.Register(CotsNetEvent.Instance);
         Bridge.EnemyRegistry.Init();
+        UI.CotsUi.Init();
 
         RLog.Msg($"Champions of the Sons {Manifest.Version} loaded: {ModContent.Db.Summary()}");
         if (SelfTest.Enabled)
         {
             SelfTest.RegisterDefaultSteps();
             Bridge.BridgeSelfTest.Register();
+            UI.UiSelfTest.Register();
             SelfTest.Log("enabled");
         }
     }
