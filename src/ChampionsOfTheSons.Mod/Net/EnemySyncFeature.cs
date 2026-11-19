@@ -85,7 +85,8 @@ public sealed class EnemySyncFeature : IModFeature
     {
         var health = r.Stats == null ? null : EnemyRegistry.Health(r.Stats);
         float hp = health?._currentValue ?? (float)r.Profile.MaxHealth;
-        return new EnemySync(netId, r.Kind.Id, r.Profile.Level, (byte)r.Profile.Tier, (float)r.Profile.MaxHealth, hp,
+        // KindId carries the actor type: content keys enemy kinds by it (several actor types share one kind id).
+        return new EnemySync(netId, r.Kind.ActorType.ToString(), r.Profile.Level, (byte)r.Profile.Tier, (float)r.Profile.MaxHealth, hp,
             (float)r.Profile.Armor, r.Profile.Abilities.Select(a => a.ToString()).ToList(), (long)r.Profile.Bounty);
     }
 
@@ -160,7 +161,11 @@ public sealed class EnemySyncFeature : IModFeature
                 RLog.Msg($"{CoopTestJoin.Tag} client: enemy {sync.EnemyNetId} not mirrored yet: entity {(BoltNetwork.FindEntity(new NetworkId(sync.EnemyNetId)) != null)}, actor {actor != null}, stats {stats != null}");
             return false;
         }
-        if (!ModContent.Db.Enemies.TryGetValue(sync.KindId, out var kind)) return true; // unknown kind: nothing to mirror
+        if (!ModContent.Db.Enemies.TryGetValue(sync.KindId, out var kind))
+        {
+            RLog.Warning($"{CoopTestJoin.Tag} client: enemy {sync.EnemyNetId} has an unknown kind '{sync.KindId}': not mirrored");
+            return true;
+        }
         var abilities = sync.AffixIds.Select(a => Enum.TryParse<EnemyAbility>(a, out var v) ? (EnemyAbility?)v : null)
             .Where(a => a != null).Select(a => a!.Value).ToList();
         var profile = new EnemyProfile

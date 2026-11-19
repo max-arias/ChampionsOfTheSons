@@ -80,6 +80,10 @@ internal static class GamepadSelfTest
             SelfTest.Check("pad: perk tree opened", panel.IsOpen);
             SelfTest.Check("pad: perk tree has focusable controls", panel.PadRoot != null && PadFocus.Count(panel.PadRoot) > 10, panel.PadRoot == null ? "no root" : PadFocus.Count(panel.PadRoot).ToString());
             _tab = panel.CurrentTab;
+            // Start from the current tab's button (the first focus goes to whatever is nearest the pointer, often a perk node),
+            // then the d-pad moves along the tab row to the next tab.
+            var tabButton = panel.TabButton(_tab);
+            SelfTest.Check("pad: current tab is focusable", tabButton != null && panel.PadRoot != null && PadFocus.FocusOn(panel.PadRoot, tabButton));
             PadInput.Inject(PadButton.DpadRight);
         });
         SelfTest.Add(t += 0.5f, "pad: focus a tab and confirm", () =>

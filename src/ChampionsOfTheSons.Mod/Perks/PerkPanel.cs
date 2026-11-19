@@ -96,6 +96,8 @@ internal sealed class PerkPanel
     public bool IsOpen => _root != null && _root.Root.activeSelf;
     public GameObject? PadRoot => _root?.Root;
     public string CurrentTab => _tab;
+    /// <summary>The tab button of a category or the spell book (gamepad self-test).</summary>
+    public GameObject? TabButton(string id) => _tabButtons.TryGetValue(id, out var b) ? b.Root : null;
     public string? Selected => _selected;
     public IReadOnlyCollection<string> NodeIds => _nodes.Keys;
     public string DetailName => _dName.TextObject.text;

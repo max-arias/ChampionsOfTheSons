@@ -160,6 +160,7 @@ public sealed class CoopSelfTest : IModFeature
     // ================================================================= client half
 
     private static ulong _enemyId;
+    private static int _dropId;
     private static float _wait;
 
     private static float Health(ulong id) => EnemySyncFeature.Received.TryGetValue(id, out var s) ? s.Health : float.NaN;
@@ -242,7 +243,10 @@ public sealed class CoopSelfTest : IModFeature
         CoopTest.Add("loot: the drop shows on the client", () =>
         {
             if (CoopLoot.MirroredCount == 0) return false;
-            var d = LootFeature.Ground.All.First();
+            // The host drops it at the client; a continued save may have other drops lying around, so take the nearest.
+            var me = LocalPlayer.Transform.position;
+            var d = LootFeature.Ground.All.OrderBy(g => (new Vector3(g.X, g.Y, g.Z) - me).sqrMagnitude).First();
+            _dropId = d.Id;
             CoopTest.Check("loot: the drop shows on the client", true, $"drop {d.Id} at {d.X:F1},{d.Y:F1},{d.Z:F1}");
             // Walk onto it: the client asks the host, which grants it once.
             LocalPlayer.Transform.position = new Vector3(d.X, d.Y + 1f, d.Z);
@@ -253,8 +257,8 @@ public sealed class CoopSelfTest : IModFeature
         CoopTest.Add("loot: only the host's grant puts it in the bag", () =>
         {
             if (CoopLoot.LastGranted == null && Time.realtimeSinceStartup - _wait < 15) return false;
-            CoopTest.Check("loot: pickup granted once", CoopLoot.LastGranted != null && LootFeature.Ground.Count == 0,
-                $"granted {CoopLoot.LastGranted?.BaseId}, drops left {LootFeature.Ground.Count}");
+            CoopTest.Check("loot: pickup granted once", CoopLoot.LastGranted != null && LootFeature.Ground.Get(_dropId) == null,
+                $"granted {CoopLoot.LastGranted?.BaseId}, drop {_dropId} still on the ground: {LootFeature.Ground.Get(_dropId) != null}");
             return true;
         }, 20);
 
