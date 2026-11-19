@@ -2,6 +2,7 @@ using System.Globalization;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
+using ChampionsOfTheSons.Mod.Icons;
 using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.UI;
@@ -93,6 +94,10 @@ internal static class UiSelfTest
 
         int shown = Panel.Slots.Count(w => w.Shown != null);
         SelfTest.Check("ui: slots show items", shown == Pc.Inventory.Slots.Count, $"{shown}/{Pc.Inventory.Slots.Count}");
+        var withIcon = Panel.Slots.Where(w => w.Shown != null && IconCache.GetTexture(w.Shown.BaseId) != null).ToList();
+        SelfTest.Check("ui: icon sprite loads", IconCache.GetSprite("item.broken_flip_flops") != null && withIcon.Count > 0, $"{withIcon.Count} slots have an icon file");
+        SelfTest.Check("ui: slots with an icon file show the image", withIcon.All(w => IconView.IsShown(w.Icon)),
+            string.Join(",", withIcon.Where(w => !IconView.IsShown(w.Icon)).Select(w => w.Key)));
         SelfTest.Check("ui: sheet rows", Panel.SheetRows.Count >= 20, $"{Panel.SheetRows.Count} rows");
     }
 

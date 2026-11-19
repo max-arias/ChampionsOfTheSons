@@ -1,6 +1,7 @@
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
+using ChampionsOfTheSons.Mod.Icons;
 using ChampionsOfTheSons.Mod.UI;
 using SUI;
 using TMPro;
@@ -45,6 +46,7 @@ internal sealed class PerkPanel
     {
         public PerkDef Def = null!;
         public SBgButtonOptions Button = null!;
+        public SImageOptions? Icon;
         public SLabelOptions Count = null!;
         public float X, Y, Size; // window coordinates, top-left origin
         public PerkState? Shown;
@@ -62,6 +64,7 @@ internal sealed class PerkPanel
     {
         public SpellDef Def = null!;
         public SContainerOptions Row = null!;
+        public SImageOptions Icon = null!;
         public SLabelOptions Name = null!, Info = null!;
         public SBgButtonOptions Unlock = null!;
         public SBgButtonOptions[] Slots = new SBgButtonOptions[SpellBook.Slots];
@@ -72,6 +75,7 @@ internal sealed class PerkPanel
 
     private SPanelOptions _root = null!;
     private SContainerOptions _window = null!;
+    private SImageOptions _dIcon = null!;
     private SLabelOptions _points = null!;
     private SBgButtonOptions _respec = null!;
     private SLabelOptions _respecNote = null!;
@@ -202,12 +206,16 @@ internal sealed class PerkPanel
             var btn = Button(ShortName(p), c.x - size / 2, c.y - size / 2, size, size, () => Select(id), 7, 12);
             InnerPlate(btn);
             btn.TextObject.margin = new Vector4(2, 2, 2, 2);
+            var icon = IconView.Create().Anchor(AnchorType.Fill).Margin(3f);
+            btn.Add(icon);
+            if (IconView.Show(icon, p.Id)) btn.Text("");
+            else icon = null;
             var count = Label("", 12, UiTheme.Gold, TextAlignmentOptions.BottomRight).Anchor(AnchorType.Fill);
             count.TextObject.margin = new Vector4(2, 2, 4, 1);
             btn.Add(count);
             area.Add(btn);
             _hoverIds[btn.Root.GetInstanceID()] = id;
-            _nodes[id] = new Node { Def = p, Button = btn, Count = count, X = TreeX + c.x - size / 2, Y = BodyTop + c.y - size / 2, Size = size };
+            _nodes[id] = new Node { Def = p, Button = btn, Icon = icon, Count = count, X = TreeX + c.x - size / 2, Y = BodyTop + c.y - size / 2, Size = size };
         }
         area.Active(false);
     }
@@ -230,8 +238,11 @@ internal sealed class PerkPanel
             area.Add(row.Row);
             row.Row.Root.GetComponent<Image>().raycastTarget = true;
             _hoverIds[row.Row.Root.GetInstanceID()] = spell.Id;
-            row.Name = Label("", 19, UiTheme.Text, TextAlignmentOptions.MidlineLeft).TopLeft(12, 3).Size(300, 26);
-            row.Info = Label("", 14, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft).TopLeft(12, 27).Size(310, 22);
+            row.Icon = IconView.Create().TopLeft(6, 6).Size(40, 40);
+            IconView.Show(row.Icon, spell.Id);
+            row.Row.Add(row.Icon);
+            row.Name = Label("", 19, UiTheme.Text, TextAlignmentOptions.MidlineLeft).TopLeft(54, 3).Size(278, 26);
+            row.Info = Label("", 14, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft).TopLeft(54, 27).Size(278, 22);
             row.Row.Add(row.Name);
             row.Row.Add(row.Info);
             string spellId = spell.Id;
@@ -252,13 +263,14 @@ internal sealed class PerkPanel
     {
         var p = SContainer.TopLeft(DetailX, BodyTop).Size(DetailW, BodyH).Background(C(UiTheme.Panel), EBackground.Round10);
         _window.Add(p);
+        _dIcon = IconView.Create().TopLeft(16, 14).Size(64, 64);
         _dName = Label("", 24, UiTheme.Gold, TextAlignmentOptions.TopLeft, wrap: true).TopLeft(16, 14).Size(DetailW - 32, 64);
         _dMeta = Label("", 15, UiTheme.TextDim, TextAlignmentOptions.TopLeft, wrap: true).TopLeft(16, 80).Size(DetailW - 32, 44);
         _dFlavor = Label("", 16, UiTheme.Description, TextAlignmentOptions.TopLeft, wrap: true).TopLeft(16, 130).Size(DetailW - 32, 90);
         _dEffect = Label("", 18, UiTheme.Text, TextAlignmentOptions.TopLeft, wrap: true).TopLeft(16, 226).Size(DetailW - 32, 260);
         _dStatus = Label("", 16, UiTheme.Bad, TextAlignmentOptions.BottomLeft, wrap: true).TopLeft(16, BodyH - 150).Size(DetailW - 32, 80);
         _buy = Button("", 16, BodyH - 62, DetailW - 32, 46, BuySelected, 12, 20);
-        p.Add(_dName).Add(_dMeta).Add(_dFlavor).Add(_dEffect).Add(_dStatus).Add(_buy);
+        p.Add(_dIcon).Add(_dName).Add(_dMeta).Add(_dFlavor).Add(_dEffect).Add(_dStatus).Add(_buy);
     }
 
     // ------------------------------------------------------------------ show / hide
@@ -401,6 +413,7 @@ internal sealed class PerkPanel
             var frame = C(StateColor(state));
             node.Button.Color(frame, Color.Lerp(frame, Color.white, 0.35f));
             node.Button.TextObject.color = C(state == PerkState.Locked ? UiTheme.TextFaint : UiTheme.Text);
+            if (node.Icon != null) node.Icon.ImageObject.color = state == PerkState.Locked ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
             node.Count.Text(times > 1 || (times == 1 && node.Def.Stackable) ? "×" + times : "");
         }
         foreach (var e in _edges)
@@ -451,6 +464,8 @@ internal sealed class PerkPanel
     {
         string? id = _hover ?? _selected;
         _buy.Active(false);
+        bool hasIcon = IconView.Show(_dIcon, id);
+        _dName.TopLeft(hasIcon ? 88 : 16, 14).Size(hasIcon ? DetailW - 104 : DetailW - 32, 64);
         if (id == null)
         {
             _dName.Text(UiText.T("ui.perks.hint", "Hover or click a perk"));
