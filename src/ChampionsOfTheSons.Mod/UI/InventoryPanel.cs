@@ -43,6 +43,12 @@ internal sealed partial class InventoryPanel
     private const float WinW = 1640, WinH = 900;
     private const float BodyTop = 72, PanelH = WinH - BodyTop - 20;
 
+    /// <summary>The window sits this far above center so the game's own bottom menu bar (shown while a panel is open) does not cover its last rows (COS-58).</summary>
+    private const float LiftY = 50;
+
+    /// <summary>Top of the window in canvas units, origin at the top-left corner.</summary>
+    private static float WinTop(float canvasHeight) => (canvasHeight - WinH) / 2 - LiftY;
+
     private const float SheetX = 20, SheetW = 400;
     private const float EquipX = 436, EquipW = 330;
     private const float BagX = 782, BagW = 838;
@@ -117,7 +123,7 @@ internal sealed partial class InventoryPanel
     {
         var w = _slotByKey[slotKey];
         var c = CanvasSize;
-        return new Rect((c.x - WinW) / 2 + w.X, (c.y - WinH) / 2 + w.Y, w.Size, w.Size);
+        return new Rect((c.x - WinW) / 2 + w.X, WinTop(c.y) + w.Y, w.Size, w.Size);
     }
 
     public IReadOnlyList<SlotWidget> Slots => _slots;
@@ -139,6 +145,7 @@ internal sealed partial class InventoryPanel
 
         _window = SContainer.Anchor(AnchorType.MiddleCenter).Pivot(0.5f, 0.5f).Size(WinW, WinH)
             .Background(C(UiTheme.Window), EBackground.Round10);
+        _window.RectTransform.anchoredPosition = new Vector2(0, LiftY);
         _root.Add(_window);
 
         _window.Add(Label(UiText.T("ui.inventory.title", "Inventory & Character"), 30, UiTheme.Gold, TextAlignmentOptions.MidlineLeft)
@@ -419,7 +426,7 @@ internal sealed partial class InventoryPanel
         var w = _slotByKey[slotKey];
         var canvas = SUIViewport.GetComponent<RectTransform>().rect;
         float cx = (canvas.width - WinW) / 2 + w.X + w.Size / 2;
-        float cy = (canvas.height - WinH) / 2 + w.Y + w.Size / 2;
+        float cy = WinTop(canvas.height) + w.Y + w.Size / 2;
         float scale = SUIViewport.scaleFactor;
         return new Vector2(cx * scale, (canvas.height - cy) * scale);
     }
@@ -511,6 +518,16 @@ internal sealed partial class InventoryPanel
     public (float RowsBottom, float PanelHeight) SheetFit =>
         (SheetRowsTop + _sheetData.Sum(r => r.Header ? _headerH : _rowH), PanelH);
 
+    /// <summary>Bottom of the last sheet row from the top of the canvas, and the canvas height (canvas units).</summary>
+    public (float RowsBottom, float CanvasHeight) SheetRowsOnCanvas
+    {
+        get
+        {
+            float h = CanvasSize.y;
+            return (WinTop(h) + BodyTop + SheetFit.RowsBottom, h);
+        }
+    }
+
     private void RefreshSets()
     {
         var pc = Character;
@@ -571,7 +588,7 @@ internal sealed partial class InventoryPanel
         // Place beside the slot; flip to its left when there is no room, and keep inside the canvas.
         var canvas = SUIViewport.GetComponent<RectTransform>().rect;
         float cw = canvas.width, ch = canvas.height;
-        float winLeft = (cw - WinW) / 2, winTop = (ch - WinH) / 2;
+        float winLeft = (cw - WinW) / 2, winTop = WinTop(ch);
         float sx = winLeft + w.X, sy = winTop + w.Y;
         float x = sx + w.Size + 10;
         TooltipOnLeft = x + TipW > cw - 8;

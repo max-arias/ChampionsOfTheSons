@@ -37,7 +37,7 @@ public static class TestKit
     /// (calling ReceivedDamage directly skips the caller that normally starts it).</summary>
     public static void Kill(VailActor actor)
     {
-        for (int i = 0; i < 6 && actor.GetHealth() > 0; i++) Hit(actor, 1e9f);
+        for (int i = 0; i < 200 && actor.GetHealth() > 0; i++) Hit(actor, 1e9f); // Hell elites have ~1e10 health
         if (!actor.IsDead() && actor.GetHealth() <= 0) actor.OnDeath();
     }
 

@@ -195,6 +195,9 @@ internal static class UiSelfTest
             $"{rows["armor"].Value} / {rows["physical_reduction"].Value}");
         var (bottom, height) = Panel.SheetFit;
         SelfTest.Check("ui: every sheet row inside the panel (COS-58)", bottom <= height, $"rows end at {bottom:0} of {height:0}");
+        var (onCanvas, canvasH) = Panel.SheetRowsOnCanvas;
+        // The game's own bottom menu bar covers roughly the lowest 140 units while a panel is open.
+        SelfTest.Check("ui: sheet rows clear of the game's bottom bar (COS-58)", onCanvas <= canvasH - 140, $"rows end at {onCanvas:0} of {canvasH:0}");
         SelfTest.Check("ui: HUD hidden while a panel is open (COS-58)", Hud.HudFeature.Instance is not { Shown: true } && Spells.SpellBar.Instance is not { Visible: true },
             $"hud {Hud.HudFeature.Instance?.Shown}, spell bar {Spells.SpellBar.Instance?.Visible}");
         SelfTest.Log("sheet: " + string.Join("; ", Panel.SheetRows.Where(r => !r.Header).Select(r => $"{r.Label}={r.Value}")));

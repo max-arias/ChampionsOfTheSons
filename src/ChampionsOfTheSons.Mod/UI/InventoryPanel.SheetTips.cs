@@ -82,7 +82,7 @@ internal sealed partial class InventoryPanel
 
         var canvas = SUIViewport.GetComponent<RectTransform>().rect;
         float cw = canvas.width, ch = canvas.height;
-        float winLeft = (cw - WinW) / 2, winTop = (ch - WinH) / 2;
+        float winLeft = (cw - WinW) / 2, winTop = WinTop(ch);
         float x = winLeft + SheetX + SheetW + 10;
         float sy = winTop + BodyTop + g.Y;
         float h = _tip.RectTransform.rect.height;
@@ -98,7 +98,7 @@ internal sealed partial class InventoryPanel
         var g = _rowGeometry[rowId];
         var canvas = SUIViewport.GetComponent<RectTransform>().rect;
         float cx = (canvas.width - WinW) / 2 + SheetX + SheetW / 2;
-        float cy = (canvas.height - WinH) / 2 + BodyTop + g.Y + g.H / 2;
+        float cy = WinTop(canvas.height) + BodyTop + g.Y + g.H / 2;
         float scale = SUIViewport.scaleFactor;
         return new Vector2(cx * scale, (canvas.height - cy) * scale);
     }

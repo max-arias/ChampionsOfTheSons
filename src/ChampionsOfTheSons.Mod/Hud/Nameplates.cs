@@ -125,6 +125,12 @@ internal sealed class Nameplates
         p.BarBack.Add(p.Fill);
         p.Affix = HudKit.Label("", 15, UiTheme.TextDim, TextAlignmentOptions.Center).TopLeft(8, 51).Size(PlateW - 16, 20);
         p.Root.Add(p.Affix);
+        // Long affix lists shrink, then end in "...", so the line never leaves the plate (COS-54).
+        p.Affix.TextObject.enableAutoSizing = true;
+        p.Affix.TextObject.fontSizeMin = 11;
+        p.Affix.TextObject.fontSizeMax = 15;
+        p.Affix.TextObject.enableWordWrapping = false;
+        p.Affix.TextObject.overflowMode = TextOverflowModes.Ellipsis;
 
         p.Rt = p.Root.RectTransform;
         p.Group = HudKit.Group(p.Root.Root);
