@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
+using ChampionsOfTheSons.Mod.Loot;
 using SUI;
 using TMPro;
 using UnityEngine;
@@ -33,7 +34,7 @@ internal sealed class SlotWidget
 /// with an item tooltip. Built once with SUI (uGUI), shown and hidden with <see cref="Open"/>/<see cref="Close"/>.
 /// Slots are placed absolutely so the tooltip can be positioned from the slot's known rectangle.
 /// </summary>
-internal sealed class InventoryPanel
+internal sealed partial class InventoryPanel
 {
     public const string PanelId = "cots-inventory";
 
@@ -136,7 +137,7 @@ internal sealed class InventoryPanel
 
         _window.Add(Label(UiText.T("ui.inventory.title", "Inventory & Character"), 30, UiTheme.Gold, TextAlignmentOptions.MidlineLeft)
             .TopLeft(28, 14).Size(700, 44));
-        _window.Add(Label(UiText.T("ui.inventory.hint", "Click an item to equip or unequip it. Hover for details."), 17, UiTheme.TextDim,
+        _window.Add(Label(UiText.T("ui.inventory.hint_actions", "Click: equip/unequip. Right-click: menu. Drag to move."), 17, UiTheme.TextDim,
                 TextAlignmentOptions.MidlineRight)
             .TopLeft(WinW - 64 - 28 - 700, 14).Size(700, 44));
         _window.Add(SBgButton.Text("X").FontSize(24).FontColor(UiTheme.Text).Color(C("#2B333E"), C("#4A3036")).Notify(Close)
@@ -146,6 +147,8 @@ internal sealed class InventoryPanel
         BuildEquipment();
         BuildBag();
         BuildTooltip();
+        BuildMenu();
+        BuildDragGhost();
 
         Character.Inventory.Changed += MarkDirty;
         Character.Stats.Changed += MarkDirty;
@@ -216,7 +219,7 @@ internal sealed class InventoryPanel
 
     private void AddSlot(SContainerOptions parent, float parentX, string key, float x, float y, float size, bool equip)
     {
-        var btn = SBgButton.Text("").FontColor(UiTheme.Text).Notify(() => ClickSlot(key));
+        var btn = SBgButton.Text("").FontColor(UiTheme.Text); // clicks, right-clicks and drags are handled by PollPointer
         btn.TopLeft(x, y).Size(size, size);
         btn.Color(C(UiTheme.SlotFrameEmpty), C(UiTheme.SlotFrameEmpty));
         parent.Add(btn);
@@ -300,6 +303,8 @@ internal sealed class InventoryPanel
     public void Close()
     {
         HideTooltip();
+        CloseMenu();
+        EndDrag();
         _hoverKey = null;
         _root.Active(false);
     }
@@ -317,6 +322,7 @@ internal sealed class InventoryPanel
             _sheetTimer = 0;
             RefreshAll();
         }
+        PollPointer();
         UpdateHover();
     }
 
@@ -364,6 +370,11 @@ internal sealed class InventoryPanel
 
     private void UpdateHover()
     {
+        if (MenuVisible || Dragging)
+        {
+            if (_hoverKey != null) { _hoverKey = null; HideTooltip(); }
+            return;
+        }
         string? hovered = _useSimulatedHover ? _simulatedHover : RaycastSlot();
         if (hovered == _hoverKey) return;
         _hoverKey = hovered;
