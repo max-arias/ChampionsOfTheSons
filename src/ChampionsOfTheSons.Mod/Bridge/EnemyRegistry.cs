@@ -10,11 +10,48 @@ namespace ChampionsOfTheSons.Mod.Bridge;
 /// <summary>Our state for one live enemy (host side).</summary>
 public sealed class EnemyRuntime
 {
-    public EnemyRuntime(EnemyKind kind, EnemyProfile profile, double vanillaMaxHealth)
+    public EnemyRuntime(EnemyKind kind, EnemyProfile profile, double vanillaMaxHealth, VailActor? actor, EnemyCombatState combat)
     {
         Kind = kind;
         Profile = profile;
         VanillaMaxHealth = vanillaMaxHealth;
+        Actor = actor;
+        Combat = combat;
+    }
+
+    /// <summary>The in-world actor. The one SetMaxHealthStat sees is not always the live one, so it is re-resolved by stats (see <see cref="EnemyRegistry.ResolveActors"/>) and on every hit.</summary>
+    public VailActor? Actor { get; set; }
+    public bool ActorLive { get; set; }
+    /// <summary>The stats object shared by every actor of this enemy (health lives here).</summary>
+    public StatsManager? Stats { get; set; }
+    /// <summary>Abilities, debuffs and DoTs in motion (see <see cref="EnemyCombatState"/>).</summary>
+    public EnemyCombatState Combat { get; }
+    public bool ScaleApplied { get; set; }
+    /// <summary>Undead used its revive.</summary>
+    public bool Revived { get; set; }
+    public float AppliedSpeed { get; set; } = -1;
+    public float WantedSpeed { get; set; } = -1;
+    /// <summary>Where it was when last seen alive (a dead actor's position is not reliable).</summary>
+    public UnityEngine.Vector3? LastPosition { get; set; }
+
+    /// <summary>Self-tests only: the headless game keeps spawned enemies dormant, so a test can declare one active (true) or inactive (false). Null = ask the game.</summary>
+    public bool? TestActive { get; set; }
+
+    /// <summary>Alive, enabled in the scene and not despawned: the only state in which abilities may act (the original's bug #43).</summary>
+    public bool IsActive
+    {
+        get
+        {
+            try
+            {
+                if (Actor == null || Actor.IsDead() || Actor.GetHealth() <= 0) return false;
+                return TestActive ?? Actor.gameObject.activeInHierarchy;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 
     public EnemyKind Kind { get; }
@@ -51,11 +88,15 @@ public static class EnemyRegistry
         return vsm == null ? null : Get(vsm.GetStatsManager());
     }
 
-    public static EnemyRuntime GetOrRoll(StatsManager stats, EnemyKind kind, double vanillaMaxHealth)
+    /// <summary>A snapshot of every tracked enemy (safe to change the registry while looping).</summary>
+    public static List<EnemyRuntime> Snapshot() => ByStats.Values.ToList();
+
+    public static EnemyRuntime GetOrRoll(StatsManager stats, EnemyKind kind, double vanillaMaxHealth, VailActor? actor = null)
     {
         if (ByStats.TryGetValue(stats.Pointer, out var existing)) return existing;
         var profile = EnemyScaler.Roll(kind, vanillaMaxHealth, WorldState.Rules, Rng);
-        var runtime = new EnemyRuntime(kind, profile, vanillaMaxHealth);
+        var runtime = new EnemyRuntime(kind, profile, vanillaMaxHealth, actor, new EnemyCombatState(profile, WorldState.Rules.Difficulty));
+        runtime.Stats = stats;
         ByStats[stats.Pointer] = runtime;
         return runtime;
     }
@@ -67,8 +108,31 @@ public static class EnemyRegistry
 
     public static void Clear() => ByStats.Clear();
 
+    /// <summary>Points every enemy at the live (active in the scene) actor that shares its stats.</summary>
+    public static void ResolveActors()
+    {
+        if (!ByStats.Values.Any(r => !r.ActorLive)) return;
+        foreach (var a in UnityEngine.Resources.FindObjectsOfTypeAll<VailActor>())
+        {
+            var r = Get(a);
+            if (r == null) continue;
+            bool live = a.gameObject.activeInHierarchy;
+            if (live || !r.ActorLive)
+            {
+                r.Actor = a;
+                if (live) r.ActorLive = true;
+            }
+        }
+    }
+
     /// <summary>Drop actors the world simulation removed (despawned without dying).</summary>
     public static void Init() => SonsSdk.SdkEvents.OnWorldSimActorRemoved.Subscribe(actor => Remove(actor?.StatManager));
+
+    public static HealthStat? HealthOf(VailActor? actor)
+    {
+        var stats = actor?.GetStatsManager()?.GetStatsManager();
+        return stats == null ? null : Health(stats);
+    }
 
     public static HealthStat? Health(StatsManager stats) =>
         stats.GetStat(Il2CppType.Of<HealthStat>())?.TryCast<HealthStat>();

@@ -72,9 +72,9 @@ public static class EnemyDefense
 {
     /// <summary>Damage after armor (physical/magic), damage-taken multiplier and the steadfast cap,
     /// plus the enemy's new armor reduction after this hit's armor pierce.</summary>
-    public static (double Damage, double ArmorReduction) Apply(EnemyProfile profile, double armorReduction, OutgoingHit hit, double damageTakenMult = 1)
+    public static (double Damage, double ArmorReduction) Apply(EnemyProfile profile, double armorReduction, OutgoingHit hit, double damageTakenMult = 1, double armorMult = 1)
     {
-        double effectiveArmor = Math.Max(0, profile.Armor - armorReduction);
+        double effectiveArmor = Math.Max(0, profile.Armor * armorMult - armorReduction);
         double dmg = hit.Amount * damageTakenMult;
         dmg *= hit.Kind switch
         {

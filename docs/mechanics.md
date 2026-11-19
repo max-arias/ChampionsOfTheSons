@@ -76,6 +76,16 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Incoming physical: dodge if `U > getHitChance`; else `dmg × damageTaken × (1 − DR(armor − lostArmor)) − block` ✱; magic `× magicDamageTaken`.
 - Energy: stamina refills toward energy; `energyRecMult = 1 + (1 + INT·enRecPerInt) × allRecovery × staminaPerSecRate`. Health regen per second `(vanilla + 0.25%·maxHP + LPS) × (healthPerSecRate + 1) × allRecovery` ✱.
 
+## Passive abilities and effects in game (this mod's numbers where COTF's are unknown)
+- Abilities and debuffs only advance while the enemy is alive and active (COTF bug #43). Active spell-like abilities register an `IAbilityHandler` (`Bridge/EnemyAbilities.cs`).
+- Shielding: the first hit while ready is absorbed and raises a 3 s immunity, then it recharges for the difficulty's cooldown. Undead: the first lethal hit leaves half health. Juggernaut: ignores slow, stun and knockdown. Basher: the player's movement stops for 1 s (unless `stun_immunity`). Poisonous: `hit × √(damageMult/10)/10` damage per second for 6 s on the player. Rain Empowerment: damage ×5, armor ×5, speed ×2 while it rains.
+- Avenger: each enemy dying within 30 m adds a stack (max 5, 20 s): +25% damage and +10% speed per stack. Sacrifice: on death, enemies within 25 m heal 30% of max health and deal ×1.5 damage for 15 s. (New rules.)
+- Gargantuan/Tiny set the actor's scale; speed is the profile speed times every slow/stun/rain factor, applied to the actor's animator.
+- Player on-hit stats: life/energy on hit (× all recovery), chance to slow (×0.5 speed, 8 s), bleed (hit/20 per s, 10 s) and weaken (×1.2 damage taken, 8 s), hammer stun (`i_hammer_stun_amount` chance, `i_hammer_stun_duration` s). DoTs are pure damage (no armor) but meet steadfast caps and shields. Thorns = `(thorns + per-STR·STR + per-VIT·VIT) × thornsDmgMult` back at the enemy that hit you, ignoring `thorns_armor_piercing` of its armor. Fire damage multiplies hits on burning enemies by `1 + fireDamage`. Explosion damage multiplies thrown/explosive hits by `1 + explosionDamage`.
+- Energy is the game's stamina bar for now: max = vanilla × `MaxEnergy/100`; regeneration adds `staminaPerSecond + energyPerSecond` plus the game's own rate × (energy recovery multiplier / 2 − 1). Attack speed and attack cost scale the held melee weapon's data (and ranged fire delay); projectile speed, size and pierce scale the held ranged weapon's bullet data (pierce raises bullet weight up to ×4).
+- Unique items (new rules): Vampiric Band 3% leech; Vampire Ring 6% leech and 5% max health per kill; Lama Mega's Blood Bag 1% max health per second below half health; Undying Promise: a lethal hit leaves 30% health, once per 300 s; Heart of Purity: use to respec.
+- Dropped for now: `weapon_range`, rafts, spell numbers (read by the spell system), the other `i_*` unique flags (see COS-17).
+
 ## Perks
 - Fields: id, name, category (MeleeOffense, RangedOffense, MagicOffense, Defense, Support, Utility), unlock path (any one of), requirements (all of), cost, level requirement, stackable (no max), tree position, effects.
 - Buy: points ≥ cost, path and requirements met, level met, not bought unless stackable. Each purchase applies the effects again. No single refund; respec unbuys all perks and spells and sets points = level + permanent bonus.
