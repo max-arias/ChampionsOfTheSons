@@ -6,5 +6,6 @@
   "version": "0.1.0",
   "description": "RPG overhaul: enemy levels, loot with rarities and stats, perks, spells and difficulty tiers up to Hell.",
   "gameVersion": "1.0.0",
+  "platform": "Universal",
   "type": "Mod"
 }

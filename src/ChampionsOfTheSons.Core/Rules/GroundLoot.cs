@@ -46,6 +46,16 @@ public sealed class GroundLoot
         return drop;
     }
 
+    /// <summary>Client side of co-op: shows a drop the host created, under the host's id (<see cref="Add"/> would number it itself).</summary>
+    public GroundDrop Mirror(int id, ItemInstance item, float x, float y, float z, int stackSize = 1)
+    {
+        Remove(id);
+        var drop = new GroundDrop { Id = id, Item = item, X = x, Y = y, Z = z, StackSize = stackSize };
+        _drops[id] = drop;
+        Added?.Invoke(drop);
+        return drop;
+    }
+
     /// <summary>Removes a drop without giving it to anyone (destroyed or despawned).</summary>
     public bool Remove(int id)
     {
