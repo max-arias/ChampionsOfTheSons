@@ -27,6 +27,20 @@ Rarity shows in materials and craft, then at the top something otherworldly.
 | 6 Mythic | Printed polymer, titanium, bunker prototypes, trophies from mutants. | Printed Polymer Chassis, Knucklebone Necklace |
 | 7 Primal | Wrong and otherworldly: the Cube, gold nobody mined, things that hum or watch. | Cubeglass Bracers, Hand of the Cube, Golden Visage |
 
+## Classic action-RPG naming
+
+Names follow classic action-RPG conventions (Diablo, Path of Exile) on top of the Sons of the Forest grit above. No name from the original Champions of the Forest mod is kept.
+
+- Short and punchy: 1-3 words, about 26 characters at most. Every item, perk and set name is unique.
+- Tiers read at a glance:
+  - Common/Uncommon: plain and worn. Rusted Cleaver, Torn Tarp Hood.
+  - Magic/Rare: material plus piece, or a coined compound. Gloomgrip, Boiled Hide Cuirass.
+  - Epic/Legendary: coined compounds with a strong noun. Ashmaw Visor, Rebar Reaper.
+  - Mythic/Primal: uniques with proper-noun names, "The X", or one "X of the Y". Grudgeblade, Hollowlight, The Hungering Band.
+- Compound coinages (Wolfsbane, Ghostwire) and role possessives (Scavenger's, Cultist's, Greenskeeper's) are welcome. Never real names, brands or the original mod's character names.
+- The piece must stay readable (boots, ring, spear) and set pieces keep their set's word.
+- Perks are passive-skill titles in the Path of Exile notable style (Iron Reflexes, Cold Resolve); perks tied to a spell keep the spell prefix.
+
 ## Naming patterns
 
 - **Armor and clothing:** `<material or origin> <piece>`. Steel Helmet, Whiteout Shroud, Hunter's Harness, Fairway Boots. Use "Leggings" (not "Leggins").
