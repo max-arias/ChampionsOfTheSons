@@ -65,7 +65,31 @@ internal sealed class DamageNumbers
         }
     }
 
-    public void Spawn(Vector3 world, double damage, bool crit)
+    public static readonly Color PhysicalColor = new(1f, 1f, 1f, 1f);
+    public static readonly Color MagicColor = new(0.45f, 0.65f, 1f, 1f);
+    public static readonly Color PureColor = new(1f, 0.45f, 0.9f, 1f);
+    public static readonly Color CritColor = new(1f, 0.82f, 0.2f, 1f);
+    public static readonly Color HurtColor = new(1f, 0.3f, 0.25f, 1f);
+    public static readonly Color DodgeColor = new(0.7f, 0.9f, 0.7f, 1f);
+
+    public static Color ColorOf(Core.Rules.DamageKind kind) => kind switch
+    {
+        Core.Rules.DamageKind.Magic => MagicColor,
+        Core.Rules.DamageKind.Pure => PureColor,
+        _ => PhysicalColor,
+    };
+
+    /// <summary>Color of the last number spawned (self-tests).</summary>
+    public Color LastColor { get; private set; }
+
+    public void Spawn(Vector3 world, double damage, bool crit, Core.Rules.DamageKind kind = Core.Rules.DamageKind.Physical)
+    {
+        string text = HudKit.Compact(damage);
+        if (crit) text += "!";
+        Spawn(world, text, crit ? CritColor : ColorOf(kind), crit);
+    }
+
+    public void Spawn(Vector3 world, string text, Color color, bool big)
     {
         // Free slot first, otherwise recycle round-robin (the oldest in practice).
         Number? n = null;
@@ -84,20 +108,19 @@ internal sealed class DamageNumbers
         }
 
         n.Active = true;
-        n.Crit = crit;
+        n.Crit = big;
         n.Age = 0;
         n.World = world;
         n.DriftX = (UnityEngine.Random.value - 0.5f) * 70f;
-        string text = HudKit.Compact(damage);
-        if (crit) text += "!";
         n.Text.text = text;
-        n.Text.fontSize = crit ? 46 : 30;
-        n.Text.color = crit ? new Color(1f, 0.82f, 0.2f, 1f) : new Color(1f, 1f, 1f, 1f);
+        n.Text.fontSize = big ? 46 : 30;
+        n.Text.color = color;
         n.Group.alpha = 0;
         n.Label.Active(true);
         Spawned++;
         LastText = text;
-        LastCrit = crit;
+        LastCrit = big;
+        LastColor = color;
     }
 
     public void Update(float dt, bool enabled)

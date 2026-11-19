@@ -46,6 +46,35 @@ public sealed class LootFeature : IModFeature
             try { LastPos.AddOrUpdate(runtime, actor.transform.position); } catch { /* actor gone */ }
         };
         EnemyPatches.EnemyKilled += OnKilled;
+        PlayerState.Character.LeveledUp += OnLeveledUp;
+    }
+
+    // ---------------------------------------------------------------- level-up rewards (COS-43)
+
+    private static void OnLeveledUp(LevelUpResult r)
+    {
+        try { foreach (var id in r.RewardItemIds) GiveReward(id); }
+        catch (Exception e) { RLog.Error($"Champions of the Sons: level-up reward failed: {e}"); }
+    }
+
+    /// <summary>Creates a reward item and puts it in the bag; what does not fit lands at the player's feet.</summary>
+    public static void GiveReward(string baseId)
+    {
+        if (!ModContent.Db.Items.TryGetValue(baseId, out var def)) return;
+        GiveOrDrop(Roller.RollItem(def, PlayerState.Character.Progress.Level, Rng), def.StackSize);
+    }
+
+    /// <summary>Bag first; a full bag drops the rest next to the player (not auto-picked until they step away) with a message.</summary>
+    public static void GiveOrDrop(ItemInstance item, int stackSize)
+    {
+        if (PlayerState.Character.Inventory.AddToBag(item, stackSize, out var rest) || rest == null) return;
+        if (LocalPlayer.IsInWorld)
+        {
+            var drop = SpawnScattered(rest, PlayerPosition(), 0.8f, 1.5f);
+            NoAutoPickup.Add(drop.Id);
+        }
+        else Ground.Add(rest, 0, 0, 0, stackSize);
+        Message(UI.UiText.T("ui.loot.bag_full", "Your bag is full."));
     }
 
     public void OnGameStart() => ClearAll();
@@ -171,6 +200,7 @@ public sealed class LootFeature : IModFeature
         if (result == PickupResult.Ok && item != null)
         {
             if (SelfTest.Enabled) SelfTest.Log($"loot: picked up {item.BaseId}");
+            Message(string.Format(UI.UiText.T("ui.followups.picked_up", "Picked up {0}"), UI.UiText.ItemName(item)));
         }
         else if (result == PickupResult.BagFull && item != null)
         {

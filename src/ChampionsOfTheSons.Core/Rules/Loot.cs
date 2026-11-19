@@ -112,6 +112,21 @@ public sealed class LootRoller
         return _content.ItemStats.TryGetValue(option, out var def) ? def : null;
     }
 
+    /// <summary>The lowest and highest value <see cref="RollValue"/> can give for a stat at a level and rarity (crafting preview).</summary>
+    public static (double Min, double Max) ValueRange(ItemStatDef stat, int level, int rarity)
+    {
+        double Value(double u)
+        {
+            double v = u * Math.Pow(Math.Max(1, level), stat.LevelPow);
+            if (stat.Cap is double cap) v = Math.Min(v, cap);
+            v *= stat.Multiplier;
+            v *= RarityMultiplier[Math.Clamp(rarity, 0, 7)];
+            if (stat.Cap is double cap2) v = Math.Min(v, cap2);
+            return v;
+        }
+        return (Value(stat.Min), Value(stat.Max));
+    }
+
     /// <summary>v = U(min,max) × level^pow, capped, × stat multiplier × rarity multiplier, capped again.</summary>
     public static double RollValue(ItemStatDef stat, int level, int rarity, Rng rng)
     {

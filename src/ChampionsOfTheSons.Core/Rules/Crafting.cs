@@ -9,6 +9,8 @@ public enum CraftMode
     Polish,
     Empower,
     IndividualReroll,
+    /// <summary>Destroys the item for crafting materials; takes no ingredients (see <see cref="Crafting.Scrap"/>).</summary>
+    Scrap,
 }
 
 public enum CraftError
@@ -20,6 +22,13 @@ public enum CraftError
     BadStatIndex,
     NothingToReroll,
     NoAlternativeBase,
+    NoMaterial,
+}
+
+/// <summary>What scrapping an item gives: one stack of a material.</summary>
+public sealed record ScrapResult(ItemInstance? Material, CraftError Error)
+{
+    public bool Ok => Error == CraftError.None;
 }
 
 public sealed record CraftResult(ItemInstance? Item, CraftError Error)
@@ -44,13 +53,35 @@ public sealed class Crafting
         CraftMode.Reroll => 2,
         CraftMode.Reforge => 3,
         CraftMode.Empower => 9,
+        CraftMode.Scrap => 0,
         _ => 1,
     };
+
+    /// <summary>Rarity of the material a scrapped item gives: its own, but at least 3 (materials start at Rare) and at most 7.</summary>
+    public static int ScrapMaterialRarity(Rarity rarity) => Math.Clamp((int)rarity, 3, 7);
+
+    /// <summary>Material count: 1 for Common/Uncommon/Magic, then one more per rarity step, plus one per 40 item levels.</summary>
+    public static int ScrapYield(Rarity rarity, int level) => Math.Max(1, (int)rarity - 1) + Math.Max(0, level) / 40;
+
+    /// <summary>
+    /// Scrap: equippable items only. Gives <see cref="ScrapYield"/> of one random material of
+    /// <see cref="ScrapMaterialRarity"/> (a stack of one kind, level 1). Falls back one rarity at a time if that rarity has none.
+    /// </summary>
+    public ScrapResult Scrap(ItemInstance item, Rng rng)
+    {
+        if (!_content.Items.TryGetValue(item.BaseId, out var baseDef) || !LootRoller.IsEquippable(baseDef))
+            return new ScrapResult(null, CraftError.NotEquippable);
+        var material = _loot.PickBase(ScrapMaterialRarity(item.Rarity), int.MaxValue, rng, d => d.Type == "material");
+        if (material == null) return new ScrapResult(null, CraftError.NoMaterial);
+        var stack = _loot.RollItem(material, 1, rng) with { Amount = Math.Min(material.StackSize, ScrapYield(item.Rarity, item.Level)) };
+        return new ScrapResult(stack, CraftError.None);
+    }
 
     /// <param name="statIndex">For Polish and IndividualReroll: index into the target's stats.</param>
     /// <param name="playerLevel">For Empower.</param>
     public CraftResult Craft(CraftMode mode, ItemInstance target, IReadOnlyList<ItemInstance> ingredients, Rng rng, int statIndex = -1, int playerLevel = 1)
     {
+        if (mode == CraftMode.Scrap) return Fail(CraftError.NotEquippable); // use Scrap()
         if (ingredients.Count != IngredientCount(mode)) return Fail(CraftError.WrongIngredientCount);
         if (ingredients.Any(i => i.Rarity < target.Rarity)) return Fail(CraftError.IngredientRarityTooLow);
         if (!_content.Items.TryGetValue(target.BaseId, out var baseDef)) return Fail(CraftError.NothingToReroll);

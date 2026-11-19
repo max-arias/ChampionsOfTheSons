@@ -141,4 +141,38 @@ public class CraftingTests
         var result = Crafting.Craft(CraftMode.IndividualReroll, target, new[] { Ring() }, new Rng(5), statIndex: lifeIndex);
         Assert.Equal(CraftError.NothingToReroll, result.Error); // pool ["stat.max_life"] has no alternative
     }
+
+    private const string ScrapItems = """
+    { "items": [
+      { "id": "item.ring", "name": "Test Ring", "type": "ring", "rarity": 2, "minLevel": 1, "maxLevel": 50, "statPools": [ ["stat.max_life"] ] },
+      { "id": "item.ore3", "name": "Ore", "type": "material", "rarity": 3, "minLevel": 20, "maxLevel": 300, "statPools": [], "stackSize": 100 },
+      { "id": "item.ore5", "name": "Ore5", "type": "material", "rarity": 5, "minLevel": 20, "maxLevel": 300, "statPools": [], "stackSize": 100 },
+      { "id": "item.heart", "name": "Heart", "type": "other", "rarity": 5, "minLevel": 1, "maxLevel": 2, "statPools": [], "stackSize": 100 }
+    ] }
+    """;
+
+    [Fact]
+    public void Scrap_gives_a_material_stack_scaling_with_rarity_and_level()
+    {
+        var db = TestContent.Create(new() { ["items.json"] = ScrapItems });
+        var crafting = new Crafting(db, new LootRoller(db));
+        var ring = new ItemInstance { BaseId = "item.ring", Level = 90, Rarity = Rarity.Legendary };
+        var result = crafting.Scrap(ring, new Rng(1));
+        Assert.True(result.Ok);
+        Assert.Equal("item.ore5", result.Material!.BaseId); // never the "other" heart, rarity 5 = Legendary
+        Assert.Equal(Crafting.ScrapYield(Rarity.Legendary, 90), result.Material.Amount);
+        Assert.Equal(6, result.Material.Amount); // (5-1) + 90/40
+        Assert.Equal(1, Crafting.ScrapYield(Rarity.Common, 1));
+    }
+
+    [Fact]
+    public void Scrap_of_low_rarity_gives_the_lowest_material_rarity_and_refuses_materials()
+    {
+        var db = TestContent.Create(new() { ["items.json"] = ScrapItems });
+        var crafting = new Crafting(db, new LootRoller(db));
+        var common = crafting.Scrap(new ItemInstance { BaseId = "item.ring", Level = 5, Rarity = Rarity.Common }, new Rng(2));
+        Assert.Equal("item.ore3", common.Material!.BaseId);
+        var scrapMaterial = crafting.Scrap(new ItemInstance { BaseId = "item.ore3", Level = 1, Rarity = Rarity.Rare }, new Rng(3));
+        Assert.Equal(CraftError.NotEquippable, scrapMaterial.Error);
+    }
 }
