@@ -16,6 +16,11 @@ RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, 
 - The mod build needs RedLoader 0.8.6 installed in the game folder and the game launched once, so `_RedLoader\Game` holds the interop assemblies. Game folder: `C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest` (override with `-p:GameDir=`).
 - Fast in-game checks: launch options `--sdk.loadintomain` (straight into a world) or `--savegame <id>`; RedLoader log in `_RedLoader\Latest.log`.
 
+## Parallel work conventions
+- New features implement `IModFeature` (`src/ChampionsOfTheSons.Mod/Features.cs`) in their own folder; they are discovered automatically. Don't edit `ChampionsOfTheSonsMod.cs` for wiring.
+- New English strings go in a fragment `content/text/en.<feature>.json` (keys prefixed `ui.<feature>.`), not in `en.json`; fragments merge into English at load. Don't touch other languages' files.
+- Self-tests: `SelfTest.Add(delay, name, step)` from `RegisterSelfTests()`, using `TestKit` (spawn, hit, kill, give items, screenshots to `%TEMP%\cots-ui\`).
+
 ## Rules
 - Core code must not reference Unity or game types; the bridge converts.
 - Content IDs are stable strings; never derive IDs from order. Saves must keep loading: bump the save version and add a migration for any format change.

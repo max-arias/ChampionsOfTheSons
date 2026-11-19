@@ -109,6 +109,18 @@ public class TextDbTests
     }
 
     [Fact]
+    public void Fragments_merge_into_their_language_and_duplicates_are_reported()
+    {
+        var db = TextDb.Load(new Dictionary<string, string>
+        {
+            ["text/en.json"] = """{ "a": "A" }""",
+            ["text/en.loot.json"] = """{ "ui.loot.title": "Loot", "a": "dup" }""",
+        });
+        Assert.Equal("Loot", db.Get("ui.loot.title"));
+        Assert.Contains(db.Errors, e => e.Contains("duplicate key 'a'"));
+    }
+
+    [Fact]
     public void Broken_language_file_is_an_error_not_a_crash()
     {
         var db = TextDb.Load(new Dictionary<string, string> { ["text/en.json"] = "{}", ["text/fr.json"] = "{ nope" });

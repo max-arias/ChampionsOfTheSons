@@ -31,10 +31,19 @@ public sealed class TextDb
         {
             var normalized = path.Replace('\\', '/');
             if (!normalized.StartsWith("text/", StringComparison.Ordinal) || !normalized.EndsWith(".json", StringComparison.Ordinal)) continue;
-            var lang = normalized.Substring(5, normalized.Length - 10);
+            // "text/en.json" and fragments like "text/en.loot.json" all merge into language "en".
+            var name = normalized.Substring(5, normalized.Length - 10);
+            int dot = name.IndexOf('.');
+            var lang = dot < 0 ? name : name.Substring(0, dot);
             try
             {
-                db._tables[lang] = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new();
+                var table = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new();
+                if (!db._tables.TryGetValue(lang, out var existing)) db._tables[lang] = existing = new();
+                foreach (var (k, v) in table)
+                {
+                    if (existing.ContainsKey(k)) db._errors.Add($"{normalized}: duplicate key '{k}'");
+                    existing[k] = v;
+                }
             }
             catch (JsonException e)
             {
