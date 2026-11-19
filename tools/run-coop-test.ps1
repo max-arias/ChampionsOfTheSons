@@ -56,7 +56,10 @@ try {
     "server ready after {0:N0}s" -f ((Get-Date) - $started).TotalSeconds
 
     $clientStart = Get-Date
-    & $steam -applaunch 1326470 --cots-join $JoinAddress +connect_ds $GameAddress --cots-expect-difficulty $ServerDifficulty -logFile $unityClientLog -batchmode
+    # The game joins a dedicated server from "+connect_ds ip:port", but only reads it from Steam's launch command line,
+    # which Steam fills for steam://run URLs (not for steam.exe -applaunch).
+    $launchArgs = "--cots-join $JoinAddress +connect_ds $GameAddress --cots-expect-difficulty $ServerDifficulty -batchmode"
+    Start-Process ("steam://run/1326470//" + [uri]::EscapeDataString($launchArgs) + "/")
     $done = $false
     while (((Get-Date) - $clientStart).TotalSeconds -lt $TimeoutSeconds) {
         Start-Sleep -Seconds 5
