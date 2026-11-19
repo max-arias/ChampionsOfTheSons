@@ -30,7 +30,7 @@ internal static class CotsUi
     {
         Inventory.Tick();
         if (!Inventory.IsOpen) return;
-        if (Input.GetKeyDown(KeyCode.Escape)) Inventory.Close();
+        if (Input.GetKeyDown(KeyCode.Escape)) { if (!Inventory.CloseMenu()) Inventory.Close(); }
         else if (Config.InventoryKey.GetAction().WasPressedThisFrame()) Inventory.Toggle();
     }
 }

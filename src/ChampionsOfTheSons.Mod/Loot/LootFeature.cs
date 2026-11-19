@@ -1,0 +1,196 @@
+using System.Runtime.CompilerServices;
+using ChampionsOfTheSons.Core;
+using ChampionsOfTheSons.Core.Rules;
+using ChampionsOfTheSons.Mod.Bridge;
+using RedLoader;
+using SonsSdk;
+using TheForest.Utils;
+using UnityEngine;
+
+namespace ChampionsOfTheSons.Mod.Loot;
+
+/// <summary>
+/// Loot drops and pickup (COS-9, COS-31). Kills roll drops with <see cref="LootRoller"/>; <see cref="Ground"/> holds the
+/// authoritative drop list (a network layer drives it later, COS-14); <see cref="LootVisuals"/> renders it.
+/// Pickup: walk within <see cref="PickupRadius"/> m of a drop and it jumps into the bag. A drop the player threw away
+/// stays put until they have walked <see cref="RearmDistance"/> m away, so it is not grabbed again at once.
+/// A full bag leaves the drop on the ground with a message.
+/// </summary>
+public sealed class LootFeature : IModFeature
+{
+    public const float PickupRadius = 1.5f;
+    public const float RearmDistance = 3f;
+    public const float ThrowDistance = 2.5f;
+
+    public static GroundLoot Ground { get; } = new();
+
+    private static readonly Rng Rng = Rng.FromTime();
+    private static LootRoller? _roller;
+    private static readonly ConditionalWeakTable<EnemyRuntime, object> LastPos = new();
+    private static readonly HashSet<int> NoAutoPickup = new();
+    private static readonly Dictionary<int, float> FullBagMessageAt = new();
+
+    private static LootRoller Roller => _roller ??= new LootRoller(ModContent.Db);
+
+    public void Init()
+    {
+        Ground.Added += LootVisuals.Create;
+        Ground.Removed += (d, _) =>
+        {
+            LootVisuals.Destroy(d.Id);
+            NoAutoPickup.Remove(d.Id);
+            FullBagMessageAt.Remove(d.Id);
+        };
+        EnemyPatches.EnemyHit += (actor, runtime, _, _) =>
+        {
+            try { LastPos.AddOrUpdate(runtime, actor.transform.position); } catch { /* actor gone */ }
+        };
+        EnemyPatches.EnemyKilled += OnKilled;
+    }
+
+    public void OnGameStart() => ClearAll();
+
+    public void RegisterSelfTests() => LootSelfTest.Register();
+
+    public void Update(float dt, bool inWorld)
+    {
+        if (!inWorld) return;
+        Ground.Tick(dt);
+        LootVisuals.Spin(dt);
+        TryPickups();
+    }
+
+    public static void ClearAll()
+    {
+        foreach (var id in Ground.All.Select(d => d.Id).ToList()) Ground.Remove(id);
+    }
+
+    // ---------------------------------------------------------------- drops
+
+    private static void OnKilled(EnemyRuntime runtime, double xp)
+    {
+        try
+        {
+            var pos = LastPos.TryGetValue(runtime, out var o) ? (Vector3)o : PlayerPosition() + LocalPlayer.Transform.forward * 4;
+            var drops = RollForKill(runtime.Profile, WorldState.Rules);
+            if (SelfTest.Enabled) SelfTest.Log($"loot: kill of level {runtime.Profile.Level} {runtime.Profile.Tier} rolled {drops.Count} drops");
+            foreach (var item in drops) SpawnScattered(item, pos);
+        }
+        catch (Exception e)
+        {
+            RLog.Error($"Champions of the Sons: loot drop failed: {e}");
+        }
+    }
+
+    /// <summary>Rolls the items one kill drops (empty when the kill drops nothing). Item level = player level.</summary>
+    public static List<ItemInstance> RollForKill(EnemyProfile enemy, WorldRules rules)
+    {
+        var result = new List<ItemInstance>();
+        var stats = PlayerState.Character.Stats;
+        double mf = stats.Get(StatIds.MagicFind);
+        if (mf <= 0) mf = 1;
+        if (!LootRoller.ShouldDrop(enemy, rules, mf, Rng)) return result;
+        int level = PlayerState.Character.Progress.Level;
+        int count = LootRoller.DropCount(enemy, rules, Rng);
+        for (int i = 0; i < count; i++)
+        {
+            var item = Roller.RollDrop(enemy.Bounty, level, mf, rules.Difficulty.Index, Rng, rules.MinLootRarity);
+            if (item != null) result.Add(item);
+        }
+        return result;
+    }
+
+    public static GroundDrop SpawnScattered(ItemInstance item, Vector3 around, float minRadius = 0.6f, float maxRadius = 1.8f)
+    {
+        float angle = (float)(Rng.NextDouble() * Math.PI * 2);
+        float r = minRadius + (float)Rng.NextDouble() * (maxRadius - minRadius);
+        return SpawnAt(item, around + new Vector3(Mathf.Cos(angle) * r, 0, Mathf.Sin(angle) * r));
+    }
+
+    public static GroundDrop SpawnAt(ItemInstance item, Vector3 pos)
+    {
+        pos = SnapToGround(pos);
+        int stack = ModContent.Db.Items.TryGetValue(item.BaseId, out var def) ? def.StackSize : 1;
+        return Ground.Add(item, pos.x, pos.y, pos.z, stack);
+    }
+
+    private static Vector3 SnapToGround(Vector3 pos)
+    {
+        // The lowest surface just around pos: the first hit from above can be a player or corpse collider.
+        var hits = Physics.RaycastAll(pos + Vector3.up * 2f, Vector3.down, 6f);
+        bool found = false;
+        float y = 0;
+        foreach (var h in hits)
+        {
+            if (h.point.y > pos.y + 1f) continue;
+            if (!found || h.point.y < y) { y = h.point.y; found = true; }
+        }
+        return found ? new Vector3(pos.x, y + 0.05f, pos.z) : pos;
+    }
+
+    /// <summary>Inventory "drop to world": the item lands ahead of the player and is not auto-picked until they step away.</summary>
+    public static GroundDrop? DropFromInventory(string slot)
+    {
+        var inv = PlayerState.Character.Inventory;
+        if (inv.Get(slot) == null || !LocalPlayer.IsInWorld) return null;
+        var item = inv.Remove(slot)!;
+        var t = LocalPlayer.Transform;
+        var drop = SpawnAt(item, t.position + t.forward * ThrowDistance);
+        NoAutoPickup.Add(drop.Id);
+        return drop;
+    }
+
+    /// <summary>Inventory "destroy": the item is gone for good.</summary>
+    public static bool Destroy(string slot) => PlayerState.Character.Inventory.Remove(slot) != null;
+
+    // ---------------------------------------------------------------- pickup
+
+    private static Vector3 PlayerPosition() => LocalPlayer.Transform.position;
+
+    private static void TryPickups()
+    {
+        if (Ground.Count == 0) return;
+        var p = PlayerPosition();
+        foreach (var d in Ground.All.ToList())
+        {
+            // The player transform sits well above the feet, so only the horizontal distance counts (plus a loose height limit).
+            float dist = Mathf.Abs(p.y - d.Y) > 5f ? float.MaxValue : Mathf.Sqrt((p.x - d.X) * (p.x - d.X) + (p.z - d.Z) * (p.z - d.Z));
+            if (NoAutoPickup.Contains(d.Id))
+            {
+                if (dist > RearmDistance) NoAutoPickup.Remove(d.Id);
+                continue;
+            }
+            if (dist <= PickupRadius) Pickup(d.Id);
+        }
+    }
+
+    public static PickupResult Pickup(int id)
+    {
+        var item = Ground.Get(id)?.Item;
+        var result = Ground.TryPickup(id, PlayerState.Character.Inventory);
+        if (result == PickupResult.Ok && item != null)
+        {
+            if (SelfTest.Enabled) SelfTest.Log($"loot: picked up {item.BaseId}");
+        }
+        else if (result == PickupResult.BagFull && item != null)
+        {
+            // Throttled: the player may stand on the drop for a while.
+            float now = Time.realtimeSinceStartup;
+            if (!FullBagMessageAt.TryGetValue(id, out var last) || now - last > 4f)
+            {
+                FullBagMessageAt[id] = now;
+                Message(UI.UiText.T("ui.loot.bag_full", "Your bag is full."));
+            }
+        }
+        return result;
+    }
+
+    public static void Message(string text)
+    {
+        LastMessage = text;
+        try { SonsTools.ShowMessage(text); } catch (Exception e) { RLog.Warning($"Champions of the Sons: message failed: {e.Message}"); }
+    }
+
+    /// <summary>Last message shown, for self-tests.</summary>
+    public static string? LastMessage { get; private set; }
+}
