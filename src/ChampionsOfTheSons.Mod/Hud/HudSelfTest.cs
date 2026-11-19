@@ -125,7 +125,7 @@ internal static class HudSelfTest
         SelfTest.Check("hud: no payout banner before the streak ends", !Hud.Progress.PayoutBanner.Visible);
         double before = Pc.Progress.Xp;
         int level = Pc.Progress.Level;
-        // Streak ends: pays out through AddXp, and enough extra XP to cross level 20 (a Heart of Purity reward).
+        // Streak ends: pays out through AddXp, and enough extra XP to cross level 20 (a Untainted Heart reward).
         Pc.Tick(1000);
         double need = 0;
         for (int l = Pc.Progress.Level; l < 21; l++) need += XpCurve.Goal(l);

@@ -178,7 +178,7 @@
     {
       "id": "item.armsy_skin_footwear",
       "legacyIndex": 6,
-      "name": "Armsy Skin Footwear",
+      "name": "Fleshhide Footwear",
       "type": "boot",
       "rarity": 6,
       "minLevel": 5,
@@ -635,7 +635,7 @@
     {
       "id": "item.plate_armour",
       "legacyIndex": 17,
-      "name": "Plate armour",
+      "name": "Plate Armor",
       "type": "chest_armor",
       "rarity": 4,
       "minLevel": 1,
@@ -726,7 +726,7 @@
     {
       "id": "item.archer_s_gear",
       "legacyIndex": 19,
-      "name": "Archer's Gear",
+      "name": "Hunter's Harness",
       "type": "chest_armor",
       "rarity": 5,
       "minLevel": 7,
@@ -842,7 +842,7 @@
     {
       "id": "item.mysterious_robe",
       "legacyIndex": 21,
-      "name": "Mysterious robe",
+      "name": "Cave Shroud",
       "type": "chest_armor",
       "rarity": 7,
       "minLevel": 15,
@@ -951,7 +951,7 @@
     {
       "id": "item.rusty_longsword",
       "legacyIndex": 22,
-      "name": "Rusty Longsword",
+      "name": "Rusty Machete",
       "type": "weapon",
       "rarity": 3,
       "minLevel": 13,
@@ -994,7 +994,7 @@
     {
       "id": "item.longsword",
       "legacyIndex": 23,
-      "name": "Longsword",
+      "name": "Salvaged Machete",
       "type": "weapon",
       "rarity": 4,
       "minLevel": 20,
@@ -1177,7 +1177,7 @@
     {
       "id": "item.smokey_s_sacred_quiver",
       "legacyIndex": 26,
-      "name": "Smokey's Sacred Quiver",
+      "name": "Scorched Quiver",
       "type": "quiver",
       "rarity": 7,
       "minLevel": 5,
@@ -1273,7 +1273,7 @@
     {
       "id": "item.broken_shield",
       "legacyIndex": 27,
-      "name": "Broken shield",
+      "name": "Broken Shield",
       "type": "shield",
       "rarity": 0,
       "minLevel": 1,
@@ -1512,7 +1512,7 @@
     {
       "id": "item.hubble_s_vision",
       "legacyIndex": 34,
-      "name": "Hubble's Vision",
+      "name": "Cracked Lens Helm",
       "type": "helmet",
       "rarity": 6,
       "minLevel": 10,
@@ -1911,7 +1911,7 @@
     {
       "id": "item.golden_ring_of_strength",
       "legacyIndex": 47,
-      "name": "Golden Ring of Strength",
+      "name": "Gold Brawler Ring",
       "type": "ring",
       "rarity": 5,
       "minLevel": 10,
@@ -1951,7 +1951,7 @@
     {
       "id": "item.golden_ring_of_vitality",
       "legacyIndex": 48,
-      "name": "Golden Ring of Vitality",
+      "name": "Gold Survivor Ring",
       "type": "ring",
       "rarity": 5,
       "minLevel": 10,
@@ -1997,7 +1997,7 @@
     {
       "id": "item.golden_ring_of_agility",
       "legacyIndex": 49,
-      "name": "Golden Ring of Agility",
+      "name": "Gold Sprinter Ring",
       "type": "ring",
       "rarity": 5,
       "minLevel": 10,
@@ -2045,7 +2045,7 @@
     {
       "id": "item.golden_ring_of_intelligence",
       "legacyIndex": 50,
-      "name": "Golden Ring of Intelligence",
+      "name": "Gold Tinker Ring",
       "type": "ring",
       "rarity": 5,
       "minLevel": 10,
@@ -2093,7 +2093,7 @@
     {
       "id": "item.silver_ring_of_strength",
       "legacyIndex": 51,
-      "name": "Silver Ring of Strength",
+      "name": "Silver Brawler Ring",
       "type": "ring",
       "rarity": 4,
       "minLevel": 5,
@@ -2124,7 +2124,7 @@
     {
       "id": "item.silver_ring_of_vitality",
       "legacyIndex": 52,
-      "name": "Silver Ring of Vitality",
+      "name": "Silver Survivor Ring",
       "type": "ring",
       "rarity": 4,
       "minLevel": 5,
@@ -2154,7 +2154,7 @@
     {
       "id": "item.silver_ring_of_agility",
       "legacyIndex": 53,
-      "name": "Silver Ring of Agility",
+      "name": "Silver Sprinter Ring",
       "type": "ring",
       "rarity": 4,
       "minLevel": 5,
@@ -2193,7 +2193,7 @@
     {
       "id": "item.silver_ring_of_intelligence",
       "legacyIndex": 54,
-      "name": "Silver Ring of Intelligence",
+      "name": "Silver Tinker Ring",
       "type": "ring",
       "rarity": 4,
       "minLevel": 5,
@@ -2230,7 +2230,7 @@
     {
       "id": "item.steel_ring_of_strength",
       "legacyIndex": 55,
-      "name": "Steel Ring of Strength",
+      "name": "Steel Brawler Ring",
       "type": "ring",
       "rarity": 2,
       "minLevel": 1,
@@ -2258,7 +2258,7 @@
     {
       "id": "item.steel_ring_of_vitality",
       "legacyIndex": 56,
-      "name": "Steel Ring of Vitality",
+      "name": "Steel Survivor Ring",
       "type": "ring",
       "rarity": 2,
       "minLevel": 1,
@@ -2287,7 +2287,7 @@
     {
       "id": "item.steel_ring_of_agility",
       "legacyIndex": 57,
-      "name": "Steel Ring of Agility",
+      "name": "Steel Sprinter Ring",
       "type": "ring",
       "rarity": 2,
       "minLevel": 1,
@@ -2317,7 +2317,7 @@
     {
       "id": "item.steel_ring_of_intelligence",
       "legacyIndex": 58,
-      "name": "Steel Ring of Intelligence",
+      "name": "Steel Tinker Ring",
       "type": "ring",
       "rarity": 2,
       "minLevel": 1,
@@ -2348,7 +2348,7 @@
     {
       "id": "item.the_one_ring_to_rule_them_all",
       "legacyIndex": 59,
-      "name": "The One Ring To Rule Them All",
+      "name": "The Hungering Band",
       "type": "ring",
       "rarity": 7,
       "minLevel": 20,
@@ -2445,7 +2445,7 @@
     {
       "id": "item.golden_locket_of_strength",
       "legacyIndex": 60,
-      "name": "Golden Locket of Strength",
+      "name": "Gold Brawler Locket",
       "type": "amulet",
       "rarity": 3,
       "minLevel": 15,
@@ -2482,7 +2482,7 @@
     {
       "id": "item.golden_locket_of_vitality",
       "legacyIndex": 61,
-      "name": "Golden Locket of Vitality",
+      "name": "Gold Survivor Locket",
       "type": "amulet",
       "rarity": 3,
       "minLevel": 15,
@@ -2515,7 +2515,7 @@
     {
       "id": "item.golden_locket_of_agility",
       "legacyIndex": 62,
-      "name": "Golden Locket of Agility",
+      "name": "Gold Sprinter Locket",
       "type": "amulet",
       "rarity": 3,
       "minLevel": 15,
@@ -2556,7 +2556,7 @@
     {
       "id": "item.golden_locket_of_intelligence",
       "legacyIndex": 63,
-      "name": "Golden Locket of Intelligence",
+      "name": "Gold Tinker Locket",
       "type": "amulet",
       "rarity": 3,
       "minLevel": 15,
@@ -2596,7 +2596,7 @@
     {
       "id": "item.silver_locket_of_strength",
       "legacyIndex": 64,
-      "name": "Silver Locket of Strength",
+      "name": "Silver Brawler Locket",
       "type": "amulet",
       "rarity": 2,
       "minLevel": 5,
@@ -2631,7 +2631,7 @@
     {
       "id": "item.silver_locket_of_vitality",
       "legacyIndex": 65,
-      "name": "Silver Locket of Vitality",
+      "name": "Silver Survivor Locket",
       "type": "amulet",
       "rarity": 2,
       "minLevel": 5,
@@ -2667,7 +2667,7 @@
     {
       "id": "item.silver_locket_of_agility",
       "legacyIndex": 66,
-      "name": "Silver Locket of Agility",
+      "name": "Silver Sprinter Locket",
       "type": "amulet",
       "rarity": 2,
       "minLevel": 5,
@@ -2712,7 +2712,7 @@
     {
       "id": "item.silver_locket_of_intelligence",
       "legacyIndex": 67,
-      "name": "Silver Locket of Intelligence",
+      "name": "Silver Tinker Locket",
       "type": "amulet",
       "rarity": 2,
       "minLevel": 5,
@@ -2751,7 +2751,7 @@
     {
       "id": "item.emerald_pendant_of_strength",
       "legacyIndex": 68,
-      "name": "Emerald Pendant of Strength",
+      "name": "Emerald Brawler Pendant",
       "type": "amulet",
       "rarity": 5,
       "minLevel": 10,
@@ -2793,7 +2793,7 @@
     {
       "id": "item.emerald_pendant_of_vitality",
       "legacyIndex": 69,
-      "name": "Emerald Pendant of Vitality",
+      "name": "Emerald Survivor Pendant",
       "type": "amulet",
       "rarity": 5,
       "minLevel": 10,
@@ -2834,7 +2834,7 @@
     {
       "id": "item.emerald_pendant_of_agility",
       "legacyIndex": 70,
-      "name": "Emerald Pendant of Agility",
+      "name": "Emerald Sprinter Pendant",
       "type": "amulet",
       "rarity": 5,
       "minLevel": 10,
@@ -2886,7 +2886,7 @@
     {
       "id": "item.emerald_pendant_of_intelligence",
       "legacyIndex": 71,
-      "name": "Emerald Pendant of Intelligence",
+      "name": "Emerald Tinker Pendant",
       "type": "amulet",
       "rarity": 5,
       "minLevel": 10,
@@ -2934,7 +2934,7 @@
     {
       "id": "item.diamond_pendant_of_strength",
       "legacyIndex": 72,
-      "name": "Diamond Pendant of Strength",
+      "name": "Diamond Brawler Pendant",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 12,
@@ -2972,7 +2972,7 @@
     {
       "id": "item.diamond_pendant_of_vitality",
       "legacyIndex": 73,
-      "name": "Diamond Pendant of Vitality",
+      "name": "Diamond Survivor Pendant",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 12,
@@ -3017,7 +3017,7 @@
     {
       "id": "item.diamond_pendant_of_agility",
       "legacyIndex": 74,
-      "name": "Diamond Pendant of Agility",
+      "name": "Diamond Sprinter Pendant",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 12,
@@ -3076,7 +3076,7 @@
     {
       "id": "item.diamond_pendant_of_intelligence",
       "legacyIndex": 75,
-      "name": "Diamond Pendant of Intelligence",
+      "name": "Diamond Tinker Pendant",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 12,
@@ -3138,7 +3138,7 @@
     {
       "id": "item.armsy_finger_necklace",
       "legacyIndex": 76,
-      "name": "Armsy Finger Necklace",
+      "name": "Knucklebone Necklace",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 1,
@@ -3181,7 +3181,7 @@
     {
       "id": "item.virginia_heart_pendant",
       "legacyIndex": 77,
-      "name": "Virginia Heart Pendant",
+      "name": "Mutant Heart Pendant",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 1,
@@ -3227,7 +3227,7 @@
     {
       "id": "item.cowman_toe_necklace",
       "legacyIndex": 78,
-      "name": "Cowman Toe Necklace",
+      "name": "Heavy's Toe Necklace",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 20,
@@ -3285,7 +3285,7 @@
     {
       "id": "item.pendant_of_perpetual_rebirth",
       "legacyIndex": 79,
-      "name": "Pendant of Perpetual Rebirth",
+      "name": "Loop-Glass Pendant",
       "type": "amulet",
       "rarity": 7,
       "minLevel": 30,
@@ -3354,7 +3354,7 @@
     {
       "id": "item.megan_s_locket",
       "legacyIndex": 80,
-      "name": "Megan's Locket",
+      "name": "Keepsake Locket",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 1,
@@ -3452,7 +3452,7 @@
     {
       "id": "item.relic_hammer",
       "legacyIndex": 81,
-      "name": "Relic Hammer",
+      "name": "Ruin Hammer",
       "type": "weapon",
       "rarity": 2,
       "minLevel": 20,
@@ -3479,7 +3479,7 @@
     {
       "id": "item.black_hammer",
       "legacyIndex": 82,
-      "name": "Black Hammer",
+      "name": "Blackened Sledge",
       "type": "weapon",
       "rarity": 4,
       "minLevel": 30,
@@ -3610,7 +3610,7 @@
     {
       "id": "item.spellbound_quiver",
       "legacyIndex": 86,
-      "name": "Spellbound Quiver",
+      "name": "Cube-Stitched Quiver",
       "type": "quiver",
       "rarity": 3,
       "minLevel": 6,
@@ -3739,7 +3739,7 @@
     {
       "id": "item.spell_scroll",
       "legacyIndex": 88,
-      "name": "Spell Scroll",
+      "name": "Waxed Notes",
       "type": "spell_scroll",
       "rarity": 1,
       "minLevel": 1,
@@ -3803,7 +3803,7 @@
     {
       "id": "item.rough_hide_leggins",
       "legacyIndex": 90,
-      "name": "Rough Hide Leggins",
+      "name": "Rough Hide Leggings",
       "type": "pants",
       "rarity": 3,
       "minLevel": 1,
@@ -3846,7 +3846,7 @@
     {
       "id": "item.plate_leggins",
       "legacyIndex": 91,
-      "name": "Plate Leggins",
+      "name": "Plate Leggings",
       "type": "pants",
       "rarity": 4,
       "minLevel": 4,
@@ -3894,7 +3894,7 @@
     {
       "id": "item.sage_s_robes",
       "legacyIndex": 92,
-      "name": "Sage's Robes",
+      "name": "Ink-Stained Trousers",
       "type": "pants",
       "rarity": 3,
       "minLevel": 1,
@@ -4068,7 +4068,7 @@
     {
       "id": "item.hexed_pants_of_mr_m",
       "legacyIndex": 95,
-      "name": "Hexed Pants of Mr M.",
+      "name": "Never-Sit Trousers",
       "type": "pants",
       "rarity": 7,
       "minLevel": 14,
@@ -4250,7 +4250,7 @@
     {
       "id": "item.etched_mantle",
       "legacyIndex": 99,
-      "name": "Etched Mantle",
+      "name": "Scrawled Mantle",
       "type": "shoulder_armor",
       "rarity": 3,
       "minLevel": 1,
@@ -4302,7 +4302,7 @@
     {
       "id": "item.assassins_pauldrons",
       "legacyIndex": 100,
-      "name": "Assassins Pauldrons",
+      "name": "Cutthroat Pauldrons",
       "type": "shoulder_armor",
       "rarity": 5,
       "minLevel": 4,
@@ -4378,7 +4378,7 @@
     {
       "id": "item.death_pact",
       "legacyIndex": 101,
-      "name": "Death Pact",
+      "name": "Blood Debt Pauldrons",
       "type": "shoulder_armor",
       "rarity": 7,
       "minLevel": 5,
@@ -4465,7 +4465,7 @@
     {
       "id": "item.maximale_qualit_t",
       "legacyIndex": 102,
-      "name": "Maximale Qualitöt",
+      "name": "Machined Signet",
       "type": "ring",
       "rarity": 6,
       "minLevel": 1,
@@ -4552,7 +4552,7 @@
     {
       "id": "item.heart_of_purity",
       "legacyIndex": 103,
-      "name": "Heart of Purity",
+      "name": "Untainted Heart",
       "type": "other",
       "rarity": 4,
       "minLevel": 1,
@@ -4756,7 +4756,7 @@
     {
       "id": "item.dull_longsword",
       "legacyIndex": 108,
-      "name": "Dull Longsword",
+      "name": "Dull Machete",
       "type": "weapon",
       "rarity": 0,
       "minLevel": 15,
@@ -5133,7 +5133,7 @@
     {
       "id": "item.old_scroll",
       "legacyIndex": 114,
-      "name": "Old Scroll",
+      "name": "Bunker Locker Notes",
       "type": "spell_scroll",
       "rarity": 3,
       "minLevel": 1,
@@ -5163,7 +5163,7 @@
     {
       "id": "item.wormhole_stabilizators",
       "legacyIndex": 115,
-      "name": "Wormhole Stabilizators",
+      "name": "Wormhole Stabilizers",
       "type": "bracer",
       "rarity": 7,
       "minLevel": 4,
@@ -5374,7 +5374,7 @@
     {
       "id": "item.scroll_of_recovery",
       "legacyIndex": 118,
-      "name": "Scroll of Recovery",
+      "name": "Triage Notes",
       "type": "spell_scroll",
       "rarity": 1,
       "minLevel": 1,
@@ -5436,7 +5436,7 @@
     {
       "id": "item.chastity_belt",
       "legacyIndex": 120,
-      "name": "Chastity belt",
+      "name": "Locked Iron Belt",
       "type": "pants",
       "rarity": 2,
       "minLevel": 1,
@@ -5468,7 +5468,7 @@
     {
       "id": "item.ice_scroll",
       "legacyIndex": 121,
-      "name": "Ice Scroll",
+      "name": "Frostbitten Pages",
       "type": "spell_scroll",
       "rarity": 4,
       "minLevel": 30,
@@ -5583,7 +5583,7 @@
     {
       "id": "item.axe_of_swiftness",
       "legacyIndex": 123,
-      "name": "Axe of Swiftness",
+      "name": "Hunter's Hatchet",
       "type": "weapon",
       "rarity": 3,
       "minLevel": 15,
@@ -5669,7 +5669,7 @@
     {
       "id": "item.golden_axe_of_fortune",
       "legacyIndex": 125,
-      "name": "Golden Axe of Fortune",
+      "name": "Gilded Showpiece Axe",
       "type": "weapon",
       "rarity": 5,
       "minLevel": 35,
@@ -5766,7 +5766,7 @@
     {
       "id": "item.axe_of_misfortune",
       "legacyIndex": 126,
-      "name": "Axe of Misfortune",
+      "name": "Shrine-Breaker Axe",
       "type": "weapon",
       "rarity": 5,
       "minLevel": 6,
@@ -6238,7 +6238,7 @@
     {
       "id": "item.frost_giant",
       "legacyIndex": 134,
-      "name": "Frost Giant",
+      "name": "Glacier Maul",
       "type": "weapon",
       "rarity": 7,
       "minLevel": 1,
@@ -6304,7 +6304,7 @@
     {
       "id": "item.alexander_s_shield",
       "legacyIndex": 135,
-      "name": "Alexander's Shield",
+      "name": "Stairwell Shield",
       "type": "shield",
       "rarity": 7,
       "minLevel": 1,
@@ -6360,7 +6360,7 @@
     {
       "id": "item.king_qruies",
       "legacyIndex": 136,
-      "name": "King Qruies",
+      "name": "Grudgeblade",
       "type": "weapon",
       "rarity": 7,
       "minLevel": 10,
@@ -6425,7 +6425,7 @@
     {
       "id": "item.grip_of_sora",
       "legacyIndex": 137,
-      "name": "Grip of Sora",
+      "name": "Cord Grip Bracers",
       "type": "bracer",
       "rarity": 7,
       "minLevel": 10,
@@ -6516,7 +6516,7 @@
     {
       "id": "item.ancient_greatbow",
       "legacyIndex": 138,
-      "name": "Ancient Greatbow",
+      "name": "Weathered Greatbow",
       "type": "weapon",
       "rarity": 4,
       "minLevel": 10,
@@ -6564,7 +6564,7 @@
     {
       "id": "item.phoenix_s_death",
       "legacyIndex": 139,
-      "name": "Phoenix's Death",
+      "name": "Cinder Greatbow",
       "type": "weapon",
       "rarity": 6,
       "minLevel": 10,
@@ -6647,7 +6647,7 @@
     {
       "id": "item.soulstring",
       "legacyIndex": 140,
-      "name": "Soulstring",
+      "name": "Redsinew Bow",
       "type": "weapon",
       "rarity": 7,
       "minLevel": 10,
@@ -6853,7 +6853,7 @@
     {
       "id": "item.novice_magic_caster_s_bracers",
       "legacyIndex": 143,
-      "name": "Novice Magic Caster's Bracers",
+      "name": "Initiate's Bracers",
       "type": "bracer",
       "rarity": 4,
       "minLevel": 1,
@@ -6912,7 +6912,7 @@
     {
       "id": "item.ranger_s_bracers",
       "legacyIndex": 144,
-      "name": "Ranger's Bracers",
+      "name": "Tracker's Bracers",
       "type": "bracer",
       "rarity": 4,
       "minLevel": 1,
@@ -6970,7 +6970,7 @@
     {
       "id": "item.swordsman_s_bracers",
       "legacyIndex": 145,
-      "name": "Swordsman's Bracers",
+      "name": "Duelist's Bracers",
       "type": "bracer",
       "rarity": 4,
       "minLevel": 1,
@@ -7030,7 +7030,7 @@
     {
       "id": "item.healer_s_bracers",
       "legacyIndex": 146,
-      "name": "Healer's Bracers",
+      "name": "Medic's Bracers",
       "type": "bracer",
       "rarity": 5,
       "minLevel": 1,
@@ -7094,7 +7094,7 @@
     {
       "id": "item.novice_magic_caster_s_gloves",
       "legacyIndex": 147,
-      "name": "Novice Magic Caster's Gloves",
+      "name": "Initiate's Gloves",
       "type": "glove",
       "rarity": 4,
       "minLevel": 1,
@@ -7152,7 +7152,7 @@
     {
       "id": "item.ranger_s_gloves",
       "legacyIndex": 148,
-      "name": "Ranger's Gloves",
+      "name": "Tracker's Gloves",
       "type": "glove",
       "rarity": 4,
       "minLevel": 1,
@@ -7207,7 +7207,7 @@
     {
       "id": "item.swordsman_s_gloves",
       "legacyIndex": 149,
-      "name": "Swordsman's Gloves",
+      "name": "Duelist's Gloves",
       "type": "glove",
       "rarity": 4,
       "minLevel": 1,
@@ -7266,7 +7266,7 @@
     {
       "id": "item.healer_s_gloves",
       "legacyIndex": 150,
-      "name": "Healer's Gloves",
+      "name": "Medic's Gloves",
       "type": "glove",
       "rarity": 5,
       "minLevel": 1,
@@ -7330,7 +7330,7 @@
     {
       "id": "item.fate_gloves",
       "legacyIndex": 151,
-      "name": "Fate Gloves",
+      "name": "Fairway Gloves",
       "type": "glove",
       "rarity": 6,
       "minLevel": 1,
@@ -7375,7 +7375,7 @@
     {
       "id": "item.fate_boots",
       "legacyIndex": 152,
-      "name": "Fate Boots",
+      "name": "Fairway Boots",
       "type": "boot",
       "rarity": 6,
       "minLevel": 1,
@@ -7477,7 +7477,7 @@
     {
       "id": "item.titanium_leggins",
       "legacyIndex": 154,
-      "name": "Titanium Leggins",
+      "name": "Titanium Leggings",
       "type": "pants",
       "rarity": 6,
       "minLevel": 1,
@@ -7600,7 +7600,7 @@
     {
       "id": "item.magefist",
       "legacyIndex": 156,
-      "name": "Magefist",
+      "name": "Scorch Gauntlet",
       "type": "glove",
       "rarity": 7,
       "minLevel": 1,
@@ -7779,7 +7779,7 @@
     {
       "id": "item.forbidden_scroll",
       "legacyIndex": 159,
-      "name": "Forbidden Scroll",
+      "name": "Burned Cult Pages",
       "type": "spell_scroll",
       "rarity": 6,
       "minLevel": 1,
@@ -7834,7 +7834,7 @@
     {
       "id": "item.doom_pauldrons",
       "legacyIndex": 160,
-      "name": "Doom Pauldrons",
+      "name": "Cult Enforcer Pauldrons",
       "type": "shoulder_armor",
       "rarity": 6,
       "minLevel": 5,
@@ -7876,7 +7876,7 @@
     {
       "id": "item.wind_armor",
       "legacyIndex": 161,
-      "name": "Wind armor",
+      "name": "Glider Wreck Armor",
       "type": "chest_armor",
       "rarity": 7,
       "minLevel": 5,
@@ -7958,7 +7958,7 @@
     {
       "id": "item.crusader_helmet",
       "legacyIndex": 162,
-      "name": "Crusader Helmet",
+      "name": "Antique Display Helm",
       "type": "helmet",
       "rarity": 5,
       "minLevel": 2,
@@ -8074,7 +8074,7 @@
     {
       "id": "item.the_spark_of_light_in_the_darkness",
       "legacyIndex": 164,
-      "name": "The Spark of Light in The Darkness",
+      "name": "Last Engineer's Note",
       "type": "spell_scroll",
       "rarity": 7,
       "minLevel": 15,
@@ -8177,7 +8177,7 @@
     {
       "id": "item.purgatory",
       "legacyIndex": 165,
-      "name": "Purgatory",
+      "name": "Cinder Ledger",
       "type": "ring",
       "rarity": 7,
       "minLevel": 20,
@@ -8330,7 +8330,7 @@
     {
       "id": "item.archangel",
       "legacyIndex": 167,
-      "name": "Archangel",
+      "name": "Triage Bow",
       "type": "weapon",
       "rarity": 7,
       "minLevel": 10,
@@ -8540,7 +8540,7 @@
     {
       "id": "item.thornmail",
       "legacyIndex": 170,
-      "name": "Thornmail",
+      "name": "Barbed Wire Hauberk",
       "type": "chest_armor",
       "rarity": 7,
       "minLevel": 20,
@@ -8700,7 +8700,7 @@
     {
       "id": "item.wonderful_feather",
       "legacyIndex": 176,
-      "name": "Wonderful Feather",
+      "name": "Iridescent Feather",
       "type": "material",
       "rarity": 6,
       "minLevel": 20,
@@ -8820,7 +8820,7 @@
     {
       "id": "item.enchanted_sapphire",
       "legacyIndex": 186,
-      "name": "Enchanted Sapphire",
+      "name": "Humming Sapphire",
       "type": "material",
       "rarity": 6,
       "minLevel": 20,
@@ -8832,7 +8832,7 @@
     {
       "id": "item.celestial_sapphire",
       "legacyIndex": 187,
-      "name": "Celestial Sapphire",
+      "name": "Cubestruck Sapphire",
       "type": "material",
       "rarity": 7,
       "minLevel": 20,
@@ -8880,7 +8880,7 @@
     {
       "id": "item.enchanted_moonstone",
       "legacyIndex": 191,
-      "name": "Enchanted Moonstone",
+      "name": "Humming Moonstone",
       "type": "material",
       "rarity": 6,
       "minLevel": 20,
@@ -8892,7 +8892,7 @@
     {
       "id": "item.celestial_moonstone",
       "legacyIndex": 192,
-      "name": "Celestial Moonstone",
+      "name": "Cubestruck Moonstone",
       "type": "material",
       "rarity": 7,
       "minLevel": 20,
@@ -8964,7 +8964,7 @@
     {
       "id": "item.knife_on_a_stick",
       "legacyIndex": 198,
-      "name": "Knife on a stick",
+      "name": "Knife on a Stick",
       "type": "weapon",
       "rarity": 5,
       "minLevel": 30,
@@ -9035,7 +9035,7 @@
     {
       "id": "item.aezyn",
       "legacyIndex": 201,
-      "name": "Aezyn",
+      "name": "Cubeglass Bracers",
       "type": "bracer",
       "rarity": 7,
       "minLevel": 20,
@@ -9052,7 +9052,7 @@
     {
       "id": "item.punny_s_reflective_ring",
       "legacyIndex": 202,
-      "name": "Punny's Reflective Ring",
+      "name": "Echoing Ring",
       "type": "ring",
       "rarity": 7,
       "minLevel": 20,
@@ -9112,7 +9112,7 @@
     {
       "id": "item.torso_of_strength",
       "legacyIndex": 206,
-      "name": "Torso of Strength",
+      "name": "Muscle Cuirass",
       "type": "chest_armor",
       "rarity": 4,
       "minLevel": 1,
@@ -9122,7 +9122,7 @@
     {
       "id": "item.demoman_s_vest",
       "legacyIndex": 207,
-      "name": "Demoman's Vest",
+      "name": "Demolition Vest",
       "type": "chest_armor",
       "rarity": 5,
       "minLevel": 1,
@@ -9163,7 +9163,7 @@
     {
       "id": "item.kuldars_s_scarf",
       "legacyIndex": 211,
-      "name": "Kuldars's Scarf",
+      "name": "Itchy Red Scarf",
       "type": "amulet",
       "rarity": 2,
       "minLevel": 1,
@@ -9173,7 +9173,7 @@
     {
       "id": "item.sword_devil_s_scarf",
       "legacyIndex": 212,
-      "name": "Sword Devil's Scarf",
+      "name": "Horned-Grin Scarf",
       "type": "amulet",
       "rarity": 4,
       "minLevel": 1,
@@ -9183,7 +9183,7 @@
     {
       "id": "item.peasant_s_scarf",
       "legacyIndex": 213,
-      "name": "Peasant's Scarf",
+      "name": "Patched Wool Scarf",
       "type": "amulet",
       "rarity": 3,
       "minLevel": 1,
@@ -9193,7 +9193,7 @@
     {
       "id": "item.bombastinc_choker",
       "legacyIndex": 214,
-      "name": "Bombastinc Choker",
+      "name": "Fuse Choker",
       "type": "amulet",
       "rarity": 6,
       "minLevel": 1,
@@ -9233,7 +9233,7 @@
     {
       "id": "item.gunpowder_filled_socks",
       "legacyIndex": 218,
-      "name": "Gunpowder filled socks",
+      "name": "Gunpowder-Filled Socks",
       "type": "boot",
       "rarity": 6,
       "minLevel": 1,
@@ -9273,7 +9273,7 @@
     {
       "id": "item.ring_of_fortune",
       "legacyIndex": 222,
-      "name": "Ring of Fortune",
+      "name": "Gambler's Ring",
       "type": "ring",
       "rarity": 6,
       "minLevel": 10,
@@ -9283,7 +9283,7 @@
     {
       "id": "item.mana_ring",
       "legacyIndex": 223,
-      "name": "Mana Ring",
+      "name": "Pulse Ring",
       "type": "ring",
       "rarity": 6,
       "minLevel": 10,
@@ -9303,7 +9303,7 @@
     {
       "id": "item.moritz_s_gear",
       "legacyIndex": 225,
-      "name": "Moritz's Gear",
+      "name": "Scavenger's Suit",
       "type": "chest_armor",
       "rarity": 6,
       "minLevel": 5,
@@ -9313,7 +9313,7 @@
     {
       "id": "item.band_of_hurting",
       "legacyIndex": 226,
-      "name": "Band of Hurting",
+      "name": "Barbed Iron Band",
       "type": "ring",
       "rarity": 6,
       "minLevel": 5,
@@ -9333,7 +9333,7 @@
     {
       "id": "item.hood_2",
       "legacyIndex": 228,
-      "name": "Hood",
+      "name": "Lined Hood",
       "type": "helmet",
       "rarity": 2,
       "minLevel": 1,
@@ -9354,7 +9354,7 @@
     {
       "id": "item.star_robe",
       "legacyIndex": 230,
-      "name": "Star Robe",
+      "name": "Midnight Robe",
       "type": "chest_armor",
       "rarity": 6,
       "minLevel": 5,
@@ -9382,7 +9382,7 @@
     {
       "id": "item.yuki_onna_strides",
       "legacyIndex": 232,
-      "name": "Yuki-Onna Strides",
+      "name": "Whiteout Strides",
       "type": "boot",
       "rarity": 7,
       "minLevel": 1,
@@ -9393,7 +9393,7 @@
     {
       "id": "item.yuki_onna_greaves",
       "legacyIndex": 233,
-      "name": "Yuki-Onna Greaves",
+      "name": "Whiteout Leggings",
       "type": "pants",
       "rarity": 7,
       "minLevel": 1,
@@ -9404,7 +9404,7 @@
     {
       "id": "item.yuki_onna_kimono",
       "legacyIndex": 234,
-      "name": "Yuki-Onna Kimono",
+      "name": "Whiteout Shroud",
       "type": "chest_armor",
       "rarity": 7,
       "minLevel": 1,
@@ -9415,7 +9415,7 @@
     {
       "id": "item.yuki_onna_s_headdress",
       "legacyIndex": 235,
-      "name": "Yuki-Onna's Headdress",
+      "name": "Whiteout Crown",
       "type": "helmet",
       "rarity": 7,
       "minLevel": 1,
@@ -9426,7 +9426,7 @@
     {
       "id": "item.lama_mega_s_blood_bag",
       "legacyIndex": 236,
-      "name": "Lama Mega's Blood Bag",
+      "name": "Healer's Blood Bag",
       "type": "amulet",
       "rarity": 7,
       "minLevel": 1,
@@ -9487,7 +9487,7 @@
     {
       "id": "item.iron_plate_full_of_holes",
       "legacyIndex": 241,
-      "name": "Iron plate full of holes",
+      "name": "Iron Plate Full of Holes",
       "type": "chest_armor",
       "rarity": 3,
       "minLevel": 50,
@@ -9788,7 +9788,7 @@
     {
       "id": "item.vampiric_band",
       "legacyIndex": 250,
-      "name": "Vampiric Band",
+      "name": "Biting Band",
       "type": "ring",
       "rarity": 3,
       "minLevel": 1,
@@ -9800,7 +9800,7 @@
     {
       "id": "item.vampire_ring",
       "legacyIndex": 251,
-      "name": "Vampire Ring",
+      "name": "Gorged Ring",
       "type": "ring",
       "rarity": 6,
       "minLevel": 1,
@@ -9812,7 +9812,7 @@
     {
       "id": "item.tricksters_scarf",
       "legacyIndex": 252,
-      "name": "Tricksters Scarf",
+      "name": "Trickster's Scarf",
       "type": "amulet",
       "rarity": 4,
       "minLevel": 20,
@@ -9829,7 +9829,7 @@
     {
       "id": "item.magus_necktie",
       "legacyIndex": 253,
-      "name": "Magus' Necktie",
+      "name": "Interrogator's Necktie",
       "type": "amulet",
       "rarity": 5,
       "minLevel": 50,
@@ -9846,7 +9846,7 @@
     {
       "id": "item.discounted_knockoff_magic_quiver",
       "legacyIndex": 254,
-      "name": "Discounted Knockoff Magic Quiver",
+      "name": "Discounted Knockoff Quiver",
       "type": "quiver",
       "rarity": 3,
       "minLevel": 2,
@@ -9901,7 +9901,7 @@
     {
       "id": "item.magic_quiver",
       "legacyIndex": 255,
-      "name": "Magic Quiver",
+      "name": "Humming Quiver",
       "type": "quiver",
       "rarity": 4,
       "minLevel": 2,
@@ -9969,7 +9969,7 @@
     {
       "id": "item.improved_magic_quiver",
       "legacyIndex": 256,
-      "name": "Improved Magic Quiver",
+      "name": "Wired Humming Quiver",
       "type": "quiver",
       "rarity": 5,
       "minLevel": 2,
@@ -10214,7 +10214,7 @@
     {
       "id": "item.chaos_water",
       "legacyIndex": 267,
-      "name": "Chaos Water",
+      "name": "Restless Water",
       "type": "material",
       "rarity": 4,
       "minLevel": 1,
@@ -10226,7 +10226,7 @@
     {
       "id": "item.upgraded_chaos_water",
       "legacyIndex": 268,
-      "name": "Upgraded Chaos Water",
+      "name": "Churning Water",
       "type": "material",
       "rarity": 6,
       "minLevel": 1,
@@ -10335,7 +10335,7 @@
     {
       "id": "item.pyromancy_mask",
       "legacyIndex": 275,
-      "name": "Pyromancy Mask",
+      "name": "Soot Mask",
       "type": "helmet",
       "rarity": 5,
       "minLevel": 2,
@@ -10396,7 +10396,7 @@
     {
       "id": "item.ancient_scroll",
       "legacyIndex": 278,
-      "name": "Ancient Scroll",
+      "name": "Yellowed Ledger Pages",
       "type": "spell_scroll",
       "rarity": 6,
       "minLevel": 1,
@@ -10413,7 +10413,7 @@
     {
       "id": "item.guide_on_tearing_spacetime",
       "legacyIndex": 279,
-      "name": "Guide on Tearing Spacetime",
+      "name": "Cube Folding Manual",
       "type": "spell_scroll",
       "rarity": 7,
       "minLevel": 1,
@@ -10429,7 +10429,7 @@
     {
       "id": "item.300th_spear",
       "legacyIndex": 280,
-      "name": "300th Spear",
+      "name": "Tally Spear",
       "type": "weapon",
       "rarity": 6,
       "minLevel": 30,
@@ -10491,7 +10491,7 @@
     {
       "id": "item.battle_scarred_shoulder_pads",
       "legacyIndex": 284,
-      "name": "Battle scarred Shoulder Pads",
+      "name": "Battle-Scarred Shoulder Pads",
       "type": "shoulder_armor",
       "rarity": 5,
       "minLevel": 1,
@@ -10508,7 +10508,7 @@
     {
       "id": "item.mystery_shoulder_pads",
       "legacyIndex": 285,
-      "name": "Mystery Shoulder Pads",
+      "name": "Seamless Shoulder Pads",
       "type": "shoulder_armor",
       "rarity": 6,
       "minLevel": 1,
@@ -10576,7 +10576,7 @@
     {
       "id": "item.guardian",
       "legacyIndex": 289,
-      "name": "Guardian",
+      "name": "Watcher Shield",
       "type": "shield",
       "rarity": 5,
       "minLevel": 1,
@@ -10593,7 +10593,7 @@
     {
       "id": "item.mystery_shield",
       "legacyIndex": 290,
-      "name": "Mystery Shield",
+      "name": "Seamless Shield",
       "type": "shield",
       "rarity": 6,
       "minLevel": 1,
@@ -10678,7 +10678,7 @@
     {
       "id": "item.mystery_boots",
       "legacyIndex": 295,
-      "name": "Mystery Boots",
+      "name": "Seamless Boots",
       "type": "boot",
       "rarity": 6,
       "minLevel": 1,
@@ -10763,7 +10763,7 @@
     {
       "id": "item.mystery_gauntlet",
       "legacyIndex": 300,
-      "name": "Mystery Gauntlet",
+      "name": "Seamless Gauntlet",
       "type": "glove",
       "rarity": 6,
       "minLevel": 1,
@@ -10831,7 +10831,7 @@
     {
       "id": "item.black_steel_leggins",
       "legacyIndex": 304,
-      "name": "Black Steel Leggins",
+      "name": "Black Steel Leggings",
       "type": "pants",
       "rarity": 5,
       "minLevel": 1,
@@ -10848,7 +10848,7 @@
     {
       "id": "item.mystery_leggins",
       "legacyIndex": 305,
-      "name": "Mystery Leggins",
+      "name": "Seamless Leggings",
       "type": "pants",
       "rarity": 6,
       "minLevel": 1,
@@ -10933,7 +10933,7 @@
     {
       "id": "item.mystery_breastplate",
       "legacyIndex": 310,
-      "name": "Mystery Breastplate",
+      "name": "Seamless Chestplate",
       "type": "chest_armor",
       "rarity": 6,
       "minLevel": 1,
@@ -11001,7 +11001,7 @@
     {
       "id": "item.baron_wristguards",
       "legacyIndex": 314,
-      "name": "Baron Wristguards",
+      "name": "Gilt-Crest Wristguards",
       "type": "bracer",
       "rarity": 5,
       "minLevel": 1,
@@ -11018,7 +11018,7 @@
     {
       "id": "item.mystery_wristguards",
       "legacyIndex": 315,
-      "name": "Mystery Wristguards",
+      "name": "Seamless Wristguards",
       "type": "bracer",
       "rarity": 6,
       "minLevel": 1,
@@ -11035,7 +11035,7 @@
     {
       "id": "item.horned_helmet_2",
       "legacyIndex": 316,
-      "name": "Horned Helmet",
+      "name": "Iron Horned Helmet",
       "type": "helmet",
       "rarity": 2,
       "minLevel": 1,
@@ -11103,7 +11103,7 @@
     {
       "id": "item.mystery_helmet",
       "legacyIndex": 320,
-      "name": "Mystery Helmet",
+      "name": "Seamless Helm",
       "type": "helmet",
       "rarity": 6,
       "minLevel": 1,
@@ -11120,7 +11120,7 @@
     {
       "id": "item.yorium_s_gaze",
       "legacyIndex": 321,
-      "name": "Yorium's Gaze",
+      "name": "Blood Oath Helm",
       "type": "helmet",
       "rarity": 7,
       "minLevel": 1,
@@ -11131,7 +11131,7 @@
     {
       "id": "item.yorium_s_ruthlessness",
       "legacyIndex": 322,
-      "name": "Yorium's Ruthlessness",
+      "name": "Blood Oath Cuirass",
       "type": "chest_armor",
       "rarity": 7,
       "minLevel": 1,
@@ -11142,7 +11142,7 @@
     {
       "id": "item.yorium_s_burden",
       "legacyIndex": 323,
-      "name": "Yorium's Burden",
+      "name": "Blood Oath Pauldrons",
       "type": "shoulder_armor",
       "rarity": 7,
       "minLevel": 1,
@@ -11153,7 +11153,7 @@
     {
       "id": "item.yorium_s_resolve",
       "legacyIndex": 324,
-      "name": "Yorium's Resolve",
+      "name": "Blood Oath Bracers",
       "type": "bracer",
       "rarity": 7,
       "minLevel": 1,
@@ -11175,7 +11175,7 @@
     {
       "id": "item.yorium_s_assault",
       "legacyIndex": 326,
-      "name": "Yorium's Assault",
+      "name": "Blood Oath Gauntlets",
       "type": "glove",
       "rarity": 7,
       "minLevel": 1,
@@ -11198,7 +11198,7 @@
     {
       "id": "item.unnamed",
       "legacyIndex": 328,
-      "name": "Unnamed",
+      "name": "Fury's Hamstrings",
       "type": "pants",
       "rarity": 7,
       "minLevel": 20,
@@ -11220,7 +11220,7 @@
     {
       "id": "item.unnamed_2",
       "legacyIndex": 329,
-      "name": "Unnamed",
+      "name": "Berserker's Reckoning",
       "type": "weapon",
       "rarity": 7,
       "minLevel": 6,
@@ -11238,7 +11238,7 @@
     {
       "id": "item.unnamed_3",
       "legacyIndex": 330,
-      "name": "Unnamed",
+      "name": "Rage Cleaver",
       "type": "weapon",
       "rarity": 6,
       "minLevel": 6,
@@ -11256,7 +11256,7 @@
     {
       "id": "item.unnamed_4",
       "legacyIndex": 331,
-      "name": "Unnamed",
+      "name": "Redmist Pendant",
       "type": "amulet",
       "rarity": 5,
       "minLevel": 6,
@@ -11278,7 +11278,7 @@
     {
       "id": "item.unnamed_5",
       "legacyIndex": 332,
-      "name": "Unnamed",
+      "name": "Heart of the Rampage",
       "type": "amulet",
       "rarity": 7,
       "minLevel": 60,
@@ -11310,7 +11310,7 @@
     {
       "id": "item.unnamed_6",
       "legacyIndex": 333,
-      "name": "Unnamed",
+      "name": "Domeward Cuff",
       "type": "bracer",
       "rarity": 7,
       "minLevel": 1,

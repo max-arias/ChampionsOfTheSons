@@ -141,7 +141,7 @@
     {
       "id": "stat.staminaregeneration",
       "legacyId": 9,
-      "name": "Energy Regeneration",
+      "name": "Stamina Regeneration",
       "min": 0.02,
       "max": 0.03,
       "levelPow": 0.45,
@@ -221,7 +221,7 @@
     {
       "id": "stat.criticalhitdamage",
       "legacyId": 13,
-      "name": "Criticalhitdamage",
+      "name": "Critical Hit Damage",
       "min": 0.03,
       "max": 0.06,
       "levelPow": 0.4,
