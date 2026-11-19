@@ -177,7 +177,7 @@ internal static class FollowupsSelfTest
         {
             panel.Clear();
             panel.ClickBag(key);
-            TestKit.Give(null, 4, 10);
+            TestKit.Give(null, (int)current.Rarity, current.Level); // ingredients must be at least the target's rarity
             panel.ClickBag(Inventory.Bag(1));
             panel.PickStat(i);
             panel.DoCraft();

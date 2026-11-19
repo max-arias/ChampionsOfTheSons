@@ -68,19 +68,24 @@ internal static class HudSelfTest
         SelfTest.Check("hud: full health bar", a is { Fraction: > 0.99f });
     }
 
+    private static int _damagingHits;
+
     private static void Hit()
     {
         _numbersBefore = Hud.Numbers.Spawned;
-        TestKit.Hit(_a!, 20);
-        TestKit.Hit(_a!, 20);
-        TestKit.Hit(_elite!, 5000);
-        TestKit.Hit(_b!, 9);
+        _damagingHits = 0;
+        // A number per hit that dealt damage: the Hell elite may roll a defensive affix that swallows its hit.
+        foreach (var (target, amount) in new[] { (_a!, 20f), (_a!, 20f), (_elite!, 5000f), (_b!, 9f) })
+        {
+            TestKit.Hit(target, amount);
+            if (Bridge.EnemyPatches.LastHit is { } h && h.Item2 > 0) _damagingHits++;
+        }
     }
 
     private static void Numbers()
     {
         int spawned = Hud.Numbers.Spawned - _numbersBefore;
-        SelfTest.Check("hud: damage numbers spawned per hit", spawned == 4, $"{spawned} (last '{Hud.Numbers.LastText}', crit {Hud.Numbers.LastCrit}), {Hud.Numbers.Active} on screen");
+        SelfTest.Check("hud: damage numbers spawned per hit", spawned == _damagingHits && _damagingHits >= 3, $"{spawned} (last '{Hud.Numbers.LastText}', crit {Hud.Numbers.LastCrit}), {Hud.Numbers.Active} on screen");
         var a = Hud.Plates.Info(_a!);
         var rt = TestKit.Profile(_a);
         var hp = EnemyRegistry.Health(_a!.GetStatsManager().GetStatsManager());

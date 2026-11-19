@@ -93,8 +93,15 @@ internal static class CraftingSelfTest
                 SelfTest.Check("craft Reroll: same item and level, new stats", after.BaseId == before.BaseId && after.Level == before.Level && after.Rarity == before.Rarity);
                 break;
             case CraftMode.Reforge:
-                SelfTest.Check("craft Reforge: different item, same type and rarity",
-                    after.BaseId != before.BaseId && after.Rarity == before.Rarity && ModContent.Db.Items[after.BaseId].Type == _baseType, $"{before.BaseId} -> {after.BaseId}");
+            {
+                // Same type; same rarity when another item of it exists, otherwise the nearest rarity (Crafting.cs, Reforge).
+                var others = ModContent.Db.Items.Values.Where(d => d.Id != before.BaseId && d.Type == _baseType).ToList();
+                int nearest = others.Count == 0 ? 0 : others.Min(d => Math.Abs(d.Rarity - (int)before.Rarity));
+                var got = ModContent.Db.Items[after.BaseId];
+                SelfTest.Check("craft Reforge: different item, same type, nearest rarity",
+                    after.BaseId != before.BaseId && got.Type == _baseType && Math.Abs(got.Rarity - (int)before.Rarity) == nearest,
+                    $"{before.BaseId} -> {after.BaseId} (rarity {(int)before.Rarity} -> {got.Rarity}, nearest gap {nearest})");
+            }
                 break;
             case CraftMode.Polish:
             {
