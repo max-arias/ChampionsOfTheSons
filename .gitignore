@@ -7,3 +7,5 @@ obj/
 TestResults/
 ReleaseBuild/
 artifacts/
+tools/icons/cache/
+__pycache__/

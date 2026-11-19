@@ -3,7 +3,7 @@
     {
       "id": "perk.stronger_hits",
       "legacyIndex": 0,
-      "name": "Stronger Hits",
+      "name": "Iron Knuckle",
       "category": "melee_offense",
       "cost": 0,
       "levelReq": 1,
@@ -23,7 +23,7 @@
     {
       "id": "perk.stronger_spells",
       "legacyIndex": 1,
-      "name": "Stronger Spells",
+      "name": "Searing Mind",
       "category": "magic_offense",
       "cost": 0,
       "levelReq": 1,
@@ -43,7 +43,7 @@
     {
       "id": "perk.stronger_projectiles",
       "legacyIndex": 2,
-      "name": "Stronger Projectiles",
+      "name": "Steady Aim",
       "category": "ranged_offense",
       "cost": 0,
       "levelReq": 1,
@@ -63,7 +63,7 @@
     {
       "id": "perk.inner_energy",
       "legacyIndex": 3,
-      "name": "Inner Energy",
+      "name": "Quiet Reserves",
       "category": "utility",
       "cost": 0,
       "levelReq": 1,
@@ -83,7 +83,7 @@
     {
       "id": "perk.more_stamina",
       "legacyIndex": 4,
-      "name": "More Stamina",
+      "name": "Second Wind",
       "category": "utility",
       "cost": 0,
       "levelReq": 1,
@@ -103,7 +103,7 @@
     {
       "id": "perk.more_health",
       "legacyIndex": 5,
-      "name": "More Health",
+      "name": "Thick Hide",
       "category": "defense",
       "cost": 0,
       "levelReq": 1,
@@ -123,7 +123,7 @@
     {
       "id": "perk.more_healing",
       "legacyIndex": 6,
-      "name": "More Healing",
+      "name": "Mending Touch",
       "category": "support",
       "cost": 1,
       "levelReq": 1,
@@ -143,7 +143,7 @@
     {
       "id": "perk.metabolism",
       "legacyIndex": 7,
-      "name": "Metabolism",
+      "name": "Lean Belly",
       "category": "utility",
       "cost": 1,
       "levelReq": 5,
@@ -170,7 +170,7 @@
     {
       "id": "perk.breath_under_control",
       "legacyIndex": 8,
-      "name": "Breath under control",
+      "name": "Even Breathing",
       "category": "utility",
       "cost": 1,
       "levelReq": 5,
@@ -192,7 +192,7 @@
     {
       "id": "perk.grip_strength",
       "legacyIndex": 9,
-      "name": "Grip Strength",
+      "name": "Whitened Grip",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 4,
@@ -215,7 +215,7 @@
     {
       "id": "perk.arm_strength",
       "legacyIndex": 10,
-      "name": "Arm Strength",
+      "name": "Corded Forearms",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 4,
@@ -239,7 +239,7 @@
     {
       "id": "perk.body_strength",
       "legacyIndex": 11,
-      "name": "Body Strength",
+      "name": "Ironbound Frame",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 4,
@@ -262,7 +262,7 @@
     {
       "id": "perk.projectile_damage",
       "legacyIndex": 12,
-      "name": "Projectile Damage",
+      "name": "Barbed Payload",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 4,
@@ -284,7 +284,7 @@
     {
       "id": "perk.large_caliber",
       "legacyIndex": 13,
-      "name": "Large caliber",
+      "name": "Heavy Ordnance",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 4,
@@ -306,7 +306,7 @@
     {
       "id": "perk.speed",
       "legacyIndex": 14,
-      "name": "Speed",
+      "name": "Swift Flight",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 4,
@@ -328,7 +328,7 @@
     {
       "id": "perk.transmutation",
       "legacyIndex": 15,
-      "name": "Stamina Casting",
+      "name": "Sinew Channel",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 4,
@@ -350,7 +350,7 @@
     {
       "id": "perk.resource_cost_reduction",
       "legacyIndex": 16,
-      "name": "Resource Cost Reduction",
+      "name": "Thrifty Spark",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 7,
@@ -372,7 +372,7 @@
     {
       "id": "perk.indestructable",
       "legacyIndex": 17,
-      "name": "Indestructible",
+      "name": "Scarwall",
       "category": "defense",
       "cost": 1,
       "levelReq": 8,
@@ -404,7 +404,7 @@
     {
       "id": "perk.cooldown_reduction",
       "legacyIndex": 18,
-      "name": "Cooldown Reduction",
+      "name": "Short Fuse",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 7,
@@ -426,7 +426,7 @@
     {
       "id": "perk.greater_cooldown_reduction",
       "legacyIndex": 19,
-      "name": "Greater Cooldown Reduction",
+      "name": "Clockwork Mind",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 8,
@@ -448,7 +448,7 @@
     {
       "id": "perk.all_attributes",
       "legacyIndex": 20,
-      "name": "All attributes",
+      "name": "Well Rounded",
       "category": "utility",
       "cost": 1,
       "levelReq": 1,
@@ -485,7 +485,7 @@
     {
       "id": "perk.all_attributes_2",
       "legacyIndex": 21,
-      "name": "Hardened Survivor",
+      "name": "Weathered Veteran",
       "category": "utility",
       "cost": 1,
       "levelReq": 2,
@@ -522,7 +522,7 @@
     {
       "id": "perk.attack_speed",
       "legacyIndex": 22,
-      "name": "Attack speed",
+      "name": "Quick Hands",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 6,
@@ -544,7 +544,7 @@
     {
       "id": "perk.reusability_i",
       "legacyIndex": 23,
-      "name": "Reusability I",
+      "name": "Salvage I",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 7,
@@ -567,7 +567,7 @@
     {
       "id": "perk.reusability_ii",
       "legacyIndex": 24,
-      "name": "Reusability II",
+      "name": "Salvage II",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 9,
@@ -589,7 +589,7 @@
     {
       "id": "perk.reusability_iii",
       "legacyIndex": 25,
-      "name": "Reusability III",
+      "name": "Salvage III",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 12,
@@ -611,7 +611,7 @@
     {
       "id": "perk.all_attributes_3",
       "legacyIndex": 26,
-      "name": "Island Forged",
+      "name": "Bone Deep",
       "category": "utility",
       "cost": 1,
       "levelReq": 15,
@@ -648,7 +648,7 @@
     {
       "id": "perk.jump",
       "legacyIndex": 27,
-      "name": "Jump",
+      "name": "Springheel",
       "category": "utility",
       "cost": 1,
       "levelReq": 10,
@@ -670,7 +670,7 @@
     {
       "id": "perk.light_foot",
       "legacyIndex": 28,
-      "name": "Light foot",
+      "name": "Ghostfoot",
       "category": "utility",
       "cost": 1,
       "levelReq": 15,
@@ -692,7 +692,7 @@
     {
       "id": "perk.bonus_health",
       "legacyIndex": 29,
-      "name": "Bonus Health",
+      "name": "Padded Hide",
       "category": "defense",
       "cost": 1,
       "levelReq": 2,
@@ -714,7 +714,7 @@
     {
       "id": "perk.health_regen",
       "legacyIndex": 30,
-      "name": "Health Regen",
+      "name": "Slow Stitch",
       "category": "support",
       "cost": 1,
       "levelReq": 10,
@@ -736,7 +736,7 @@
     {
       "id": "perk.armor",
       "legacyIndex": 31,
-      "name": "Armor",
+      "name": "Scrap Plating",
       "category": "defense",
       "cost": 1,
       "levelReq": 2,
@@ -758,7 +758,7 @@
     {
       "id": "perk.durability",
       "legacyIndex": 32,
-      "name": "Durability",
+      "name": "Numb Skin",
       "category": "defense",
       "cost": 1,
       "levelReq": 20,
@@ -780,7 +780,7 @@
     {
       "id": "perk.durability_ii",
       "legacyIndex": 33,
-      "name": "Enduring Frame",
+      "name": "Hardened Bones",
       "category": "defense",
       "cost": 1,
       "levelReq": 35,
@@ -802,7 +802,7 @@
     {
       "id": "perk.durability_iii",
       "legacyIndex": 34,
-      "name": "Unyielding Frame",
+      "name": "Scarred Bulwark",
       "category": "defense",
       "cost": 1,
       "levelReq": 40,
@@ -824,7 +824,7 @@
     {
       "id": "perk.magic_resistance",
       "legacyIndex": 35,
-      "name": "Magic Resistance",
+      "name": "Hexproof",
       "category": "defense",
       "cost": 1,
       "levelReq": 6,
@@ -847,7 +847,7 @@
     {
       "id": "perk.dodge",
       "legacyIndex": 36,
-      "name": "Dodge",
+      "name": "Elusive",
       "category": "defense",
       "cost": 1,
       "levelReq": 50,
@@ -869,7 +869,7 @@
     {
       "id": "perk.armor_penetration",
       "legacyIndex": 37,
-      "name": "Armor Penetration",
+      "name": "Gapfinder",
       "category": "support",
       "cost": 1,
       "levelReq": 6,
@@ -891,7 +891,7 @@
     {
       "id": "perk.armor_piercing_edge",
       "legacyIndex": 38,
-      "name": "Armor Piercing Edge",
+      "name": "Hidesplitter",
       "category": "support",
       "cost": 1,
       "levelReq": 8,
@@ -913,7 +913,7 @@
     {
       "id": "perk.anti_armor_projectiles",
       "legacyIndex": 39,
-      "name": "Anti armor projectiles",
+      "name": "Needle Tips",
       "category": "support",
       "cost": 1,
       "levelReq": 8,
@@ -935,7 +935,7 @@
     {
       "id": "perk.more_health_regen",
       "legacyIndex": 40,
-      "name": "More Health Regen",
+      "name": "Knitting Flesh",
       "category": "support",
       "cost": 1,
       "levelReq": 10,
@@ -957,7 +957,7 @@
     {
       "id": "perk.energy_generation",
       "legacyIndex": 41,
-      "name": "Energy generation",
+      "name": "Static Trickle",
       "category": "support",
       "cost": 1,
       "levelReq": 10,
@@ -979,7 +979,7 @@
     {
       "id": "perk.insight",
       "legacyIndex": 42,
-      "name": "Insight",
+      "name": "Hard Lessons",
       "category": "support",
       "cost": 1,
       "levelReq": 10,
@@ -1001,7 +1001,7 @@
     {
       "id": "perk.combat_health_regen",
       "legacyIndex": 43,
-      "name": "Combat Health Regen",
+      "name": "Feeding Blows",
       "category": "support",
       "cost": 1,
       "levelReq": 20,
@@ -1023,7 +1023,7 @@
     {
       "id": "perk.combat_energy_regen",
       "legacyIndex": 44,
-      "name": "Combat Energy Regen",
+      "name": "Kindling Blows",
       "category": "support",
       "cost": 1,
       "levelReq": 20,
@@ -1045,7 +1045,7 @@
     {
       "id": "perk.alternative_cloth_sources",
       "legacyIndex": 45,
-      "name": "Furs to Fabric",
+      "name": "Pelt Weaver",
       "category": "utility",
       "cost": 1,
       "levelReq": 5,
@@ -1061,7 +1061,7 @@
     {
       "id": "perk.demolition",
       "legacyIndex": 46,
-      "name": "Demolition",
+      "name": "Powder Cache",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1077,7 +1077,7 @@
     {
       "id": "perk.pockets_for_explosives",
       "legacyIndex": 47,
-      "name": "Pockets for explosives",
+      "name": "Blasting Bandolier",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1093,7 +1093,7 @@
     {
       "id": "perk.demolition_expert",
       "legacyIndex": 48,
-      "name": "Demolition Expert",
+      "name": "Blastsmith",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1109,7 +1109,7 @@
     {
       "id": "perk.meds",
       "legacyIndex": 49,
-      "name": "Meds",
+      "name": "Field Pharmacy",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1125,7 +1125,7 @@
     {
       "id": "perk.fuel",
       "legacyIndex": 50,
-      "name": "Fuel",
+      "name": "Jerrycan Reserve",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1142,7 +1142,7 @@
     {
       "id": "perk.booze",
       "legacyIndex": 51,
-      "name": "Booze",
+      "name": "Moonshiner",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1158,7 +1158,7 @@
     {
       "id": "perk.more_booze",
       "legacyIndex": 52,
-      "name": "More Booze",
+      "name": "Clinking Pockets",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1174,7 +1174,7 @@
     {
       "id": "perk.more_meds",
       "legacyIndex": 53,
-      "name": "More Meds",
+      "name": "Gauze Lining",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1190,7 +1190,7 @@
     {
       "id": "perk.endless_quiver",
       "legacyIndex": 54,
-      "name": "Endless Quiver",
+      "name": "Bottomless Quiver",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 37,
@@ -1212,7 +1212,7 @@
     {
       "id": "perk.spell_power",
       "legacyIndex": 55,
-      "name": "Spell Power",
+      "name": "Raw Surge",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 8,
@@ -1234,7 +1234,7 @@
     {
       "id": "perk.more_meat",
       "legacyIndex": 56,
-      "name": "More Meat",
+      "name": "Meat Locker",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1250,7 +1250,7 @@
     {
       "id": "perk.more_snacks",
       "legacyIndex": 57,
-      "name": "More Snacks",
+      "name": "Sugar Stash",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1266,7 +1266,7 @@
     {
       "id": "perk.more_bolts",
       "legacyIndex": 58,
-      "name": "More Bolts",
+      "name": "Bolt Belt",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1282,7 +1282,7 @@
     {
       "id": "perk.corpse_collecting",
       "legacyIndex": 59,
-      "name": "Corpse collecting",
+      "name": "Bone Collector",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1298,7 +1298,7 @@
     {
       "id": "perk.more_limbs",
       "legacyIndex": 60,
-      "name": "Macabre Haul",
+      "name": "Grisly Satchel",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1314,7 +1314,7 @@
     {
       "id": "perk.more_building_resources",
       "legacyIndex": 61,
-      "name": "More Building Resources",
+      "name": "Builder's Pack",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1330,7 +1330,7 @@
     {
       "id": "perk.more_miscellaneous_items",
       "legacyIndex": 62,
-      "name": "More Miscellaneous Items",
+      "name": "Junk Drawer",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -1346,7 +1346,7 @@
     {
       "id": "perk.more_ammo",
       "legacyIndex": 63,
-      "name": "More Ammo",
+      "name": "Crafty Munitions",
       "category": "utility",
       "cost": 1,
       "levelReq": 10,
@@ -1362,7 +1362,7 @@
     {
       "id": "perk.spear_specialization",
       "legacyIndex": 64,
-      "name": "Spear Specialization",
+      "name": "Spearcaster",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 15,
@@ -1384,7 +1384,7 @@
     {
       "id": "perk.pistol_specialization",
       "legacyIndex": 65,
-      "name": "Pistol Specialization",
+      "name": "Sidearm Mastery",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 15,
@@ -1406,7 +1406,7 @@
     {
       "id": "perk.crossbow_specialization",
       "legacyIndex": 66,
-      "name": "Crossbow Specialization",
+      "name": "Bolthand",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 15,
@@ -1428,7 +1428,7 @@
     {
       "id": "perk.bow_specialization",
       "legacyIndex": 67,
-      "name": "Bow Specialization",
+      "name": "Taut String",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 15,
@@ -1450,7 +1450,7 @@
     {
       "id": "perk.temple_of_protection",
       "legacyIndex": 68,
-      "name": "Fortified Ground",
+      "name": "Stonewall Dome",
       "category": "support",
       "cost": 1,
       "levelReq": 10,
@@ -1471,7 +1471,7 @@
     {
       "id": "perk.enchant_weapon",
       "legacyIndex": 69,
-      "name": "Black Flame Edge",
+      "name": "Soot Brand",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 28,
@@ -1487,7 +1487,7 @@
     {
       "id": "perk.empowered_war_cry",
       "legacyIndex": 70,
-      "name": "Empowered War Cry",
+      "name": "Rallying Howl",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 14,
@@ -1508,7 +1508,7 @@
     {
       "id": "perk.power_swing",
       "legacyIndex": 71,
-      "name": "Power Swing",
+      "name": "Haymaker",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 10,
@@ -1536,7 +1536,7 @@
     {
       "id": "perk.overcharge",
       "legacyIndex": 72,
-      "name": "Overcharge",
+      "name": "Redline",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 15,
@@ -1564,7 +1564,7 @@
     {
       "id": "perk.exposure",
       "legacyIndex": 73,
-      "name": "Exposure",
+      "name": "Marked Prey",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 28,
@@ -1585,7 +1585,7 @@
     {
       "id": "perk.disabler",
       "legacyIndex": 74,
-      "name": "Disabler",
+      "name": "Festering Mark",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 40,
@@ -1607,7 +1607,7 @@
     {
       "id": "perk.magic_binding",
       "legacyIndex": 75,
-      "name": "Magic Binding",
+      "name": "Cold Tether",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 46,
@@ -1628,7 +1628,7 @@
     {
       "id": "perk.charged_attack",
       "legacyIndex": 76,
-      "name": "Charged Attack",
+      "name": "Coiled Strike",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 15,
@@ -1650,7 +1650,7 @@
     {
       "id": "perk.super_charged_attack",
       "legacyIndex": 77,
-      "name": "Devastating Charge",
+      "name": "Skullsplitter",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 30,
@@ -1672,7 +1672,7 @@
     {
       "id": "perk.lucky_hits",
       "legacyIndex": 78,
-      "name": "Lucky Hits",
+      "name": "Brutal Edge",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 20,
@@ -1695,7 +1695,7 @@
     {
       "id": "perk.overwhelming_odds",
       "legacyIndex": 79,
-      "name": "Overwhelming Odds",
+      "name": "Vital Strike",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 35,
@@ -1718,7 +1718,7 @@
     {
       "id": "perk.endurance",
       "legacyIndex": 80,
-      "name": "Endurance",
+      "name": "Deep Reserves",
       "category": "utility",
       "cost": 1,
       "levelReq": 8,
@@ -1740,7 +1740,7 @@
     {
       "id": "perk.multishot_empower",
       "legacyIndex": 81,
-      "name": "Multishot Empower",
+      "name": "Volley Surge",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 31,
@@ -1762,7 +1762,7 @@
     {
       "id": "perk.transporter",
       "legacyIndex": 82,
-      "name": "Land Raft",
+      "name": "Landskimmer",
       "category": "utility",
       "cost": 1,
       "levelReq": 22,
@@ -1784,7 +1784,7 @@
     {
       "id": "perk.turbo",
       "legacyIndex": 83,
-      "name": "Land Raft Boost",
+      "name": "Overdriven Skimmer",
       "category": "utility",
       "cost": 1,
       "levelReq": 23,
@@ -1806,7 +1806,7 @@
     {
       "id": "perk.closing_wounds",
       "legacyIndex": 84,
-      "name": "Closing Wounds",
+      "name": "Purging Salve",
       "category": "support",
       "cost": 1,
       "levelReq": 10,
@@ -1827,7 +1827,7 @@
     {
       "id": "perk.greater_cooldown_reduction_2",
       "legacyIndex": 85,
-      "name": "Swifter Recovery",
+      "name": "Tight Cadence",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 24,
@@ -1849,7 +1849,7 @@
     {
       "id": "perk.greater_cooldown_reduction_3",
       "legacyIndex": 86,
-      "name": "Rapid Recovery",
+      "name": "Racing Pulse",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 35,
@@ -1871,7 +1871,7 @@
     {
       "id": "perk.greater_cooldown_reduction_4",
       "legacyIndex": 87,
-      "name": "Instant Recovery",
+      "name": "Breathless Pace",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 46,
@@ -1893,7 +1893,7 @@
     {
       "id": "perk.infinity",
       "legacyIndex": 88,
-      "name": "Infinity",
+      "name": "Feedback Loop",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 60,
@@ -1914,7 +1914,7 @@
     {
       "id": "perk.armageddon",
       "legacyIndex": 89,
-      "name": "Scorched Earth",
+      "name": "Cinder Rain",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 61,
@@ -1936,7 +1936,7 @@
     {
       "id": "perk.inner_fire",
       "legacyIndex": 90,
-      "name": "Inner Fire",
+      "name": "Smolder Mark",
       "category": "support",
       "cost": 1,
       "levelReq": 2,
@@ -1955,7 +1955,7 @@
     {
       "id": "perk.near_death_experience",
       "legacyIndex": 91,
-      "name": "Near Death Experience",
+      "name": "Last Breath",
       "category": "defense",
       "cost": 2,
       "levelReq": 20,
@@ -1976,7 +1976,7 @@
     {
       "id": "perk.seeking_arrow_head_hunting",
       "legacyIndex": 92,
-      "name": "Seeking Arrow: Skullseeker",
+      "name": "Seeking Arrow: Headtaker",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 30,
@@ -1998,7 +1998,7 @@
     {
       "id": "perk.sniper",
       "legacyIndex": 93,
-      "name": "Sniper",
+      "name": "Far Reach",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 25,
@@ -2020,7 +2020,7 @@
     {
       "id": "perk.seeking_arrow_crippling_precision",
       "legacyIndex": 94,
-      "name": "Seeking Arrow: Lingering Cripple",
+      "name": "Seeking Arrow: Sinewcut",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 30,
@@ -2042,7 +2042,7 @@
     {
       "id": "perk.seeking_arrow_movement_impairing_arrows",
       "legacyIndex": 95,
-      "name": "Seeking Arrow: Hobbling Barbs",
+      "name": "Seeking Arrow: Thorns",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 30,
@@ -2064,7 +2064,7 @@
     {
       "id": "perk.focus_perfection",
       "legacyIndex": 96,
-      "name": "Focus: Dead Eye",
+      "name": "Focus: Needlepoint",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 14,
@@ -2087,7 +2087,7 @@
     {
       "id": "perk.focus_quickscope",
       "legacyIndex": 97,
-      "name": "Focus: Snap Shot",
+      "name": "Focus: Flicker",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 15,
@@ -2109,7 +2109,7 @@
     {
       "id": "perk.focus_quickerscope",
       "legacyIndex": 98,
-      "name": "Focus: Hair Trigger",
+      "name": "Focus: Twitch",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 25,
@@ -2131,7 +2131,7 @@
     {
       "id": "perk.focus_cripple",
       "legacyIndex": 99,
-      "name": "Focus: Hamstring",
+      "name": "Focus: Kneecap",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 35,
@@ -2153,7 +2153,7 @@
     {
       "id": "perk.afterburn",
       "legacyIndex": 100,
-      "name": "Afterburn",
+      "name": "Lingering Char",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 29,
@@ -2169,7 +2169,7 @@
     {
       "id": "perk.netherflame",
       "legacyIndex": 101,
-      "name": "Coalblack Flame",
+      "name": "Pitchfire",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 33,
@@ -2185,7 +2185,7 @@
     {
       "id": "perk.frenzy_haste",
       "legacyIndex": 102,
-      "name": "Frenzy: Bloodrush",
+      "name": "Frenzy: Red Tempo",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 20,
@@ -2207,7 +2207,7 @@
     {
       "id": "perk.concussive_bash",
       "legacyIndex": 103,
-      "name": "Concussive Bash",
+      "name": "Skullringer",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 26,
@@ -2229,7 +2229,7 @@
     {
       "id": "perk.shield_endurance",
       "legacyIndex": 104,
-      "name": "Shield: Lingering Ward",
+      "name": "Shield: Stubborn Hold",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 10,
@@ -2251,7 +2251,7 @@
     {
       "id": "perk.blink_passthrough",
       "legacyIndex": 105,
-      "name": "Blink: Rift Slash",
+      "name": "Blink: Cutthrough",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 40,
@@ -2273,7 +2273,7 @@
     {
       "id": "perk.inner_energy_ii",
       "legacyIndex": 106,
-      "name": "Inner Energy II",
+      "name": "Quiet Reserves II",
       "category": "utility",
       "cost": 1,
       "levelReq": 30,
@@ -2295,7 +2295,7 @@
     {
       "id": "perk.flame_guard",
       "legacyIndex": 107,
-      "name": "Flame Guard",
+      "name": "Kindled Guard",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 10,
@@ -2316,7 +2316,7 @@
     {
       "id": "perk.parry_range",
       "legacyIndex": 108,
-      "name": "Parry range",
+      "name": "Wide Guard",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 20,
@@ -2339,7 +2339,7 @@
     {
       "id": "perk.luck_enchantment",
       "legacyIndex": 109,
-      "name": "Lucky Charm",
+      "name": "Scavenger's Luck",
       "category": "utility",
       "cost": 1,
       "levelReq": 5,
@@ -2359,7 +2359,7 @@
     {
       "id": "perk.luck_enchantment_ii",
       "legacyIndex": 110,
-      "name": "Lucky Charm II",
+      "name": "Streak of Luck",
       "category": "utility",
       "cost": 1,
       "levelReq": 15,
@@ -2381,7 +2381,7 @@
     {
       "id": "perk.near_death_arrow",
       "legacyIndex": 111,
-      "name": "Near death arrow",
+      "name": "Desperate Draw",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 16,
@@ -2403,7 +2403,7 @@
     {
       "id": "perk.arcane_blood",
       "legacyIndex": 112,
-      "name": "Spent Blood",
+      "name": "Crimson Payoff",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 14,
@@ -2425,7 +2425,7 @@
     {
       "id": "perk.energy_field",
       "legacyIndex": 113,
-      "name": "Energy Field",
+      "name": "Humming Ground",
       "category": "support",
       "cost": 1,
       "levelReq": 15,
@@ -2446,7 +2446,7 @@
     {
       "id": "perk.enhanced_vitality",
       "legacyIndex": 114,
-      "name": "Enhanced vitality",
+      "name": "Marrow Might",
       "category": "defense",
       "cost": 1,
       "levelReq": 4,
@@ -2468,7 +2468,7 @@
     {
       "id": "perk.enhanced_energy",
       "legacyIndex": 115,
-      "name": "Enhanced energy",
+      "name": "Wide Reserves",
       "category": "utility",
       "cost": 1,
       "levelReq": 9,
@@ -2490,7 +2490,7 @@
     {
       "id": "perk.rerolling",
       "legacyIndex": 116,
-      "name": "Rerolling",
+      "name": "Scrapbench Gamble",
       "category": "utility",
       "cost": 0,
       "levelReq": 5,
@@ -2509,7 +2509,7 @@
     {
       "id": "perk.reforging",
       "legacyIndex": 117,
-      "name": "Reforging",
+      "name": "Second Forge",
       "category": "utility",
       "cost": 0,
       "levelReq": 10,
@@ -2530,7 +2530,7 @@
     {
       "id": "perk.light_the_way",
       "legacyIndex": 118,
-      "name": "Light The Way",
+      "name": "Bright Vigil",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -2557,7 +2557,7 @@
     {
       "id": "perk.glass_cannon",
       "legacyIndex": 119,
-      "name": "Glass Cannon",
+      "name": "Brittle Fury",
       "category": "defense",
       "cost": 1,
       "levelReq": 8,
@@ -2584,7 +2584,7 @@
     {
       "id": "perk.size_matters",
       "legacyIndex": 120,
-      "name": "Size Matters",
+      "name": "Heavy Calibre",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 32,
@@ -2605,7 +2605,7 @@
     {
       "id": "perk.momentum_transfer",
       "legacyIndex": 121,
-      "name": "Momentum transfer",
+      "name": "Rolling Landing",
       "category": "utility",
       "cost": 1,
       "levelReq": 11,
@@ -2626,7 +2626,7 @@
     {
       "id": "perk.long_arm",
       "legacyIndex": 122,
-      "name": "Long arm",
+      "name": "Long Reach",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 4,
@@ -2648,7 +2648,7 @@
     {
       "id": "perk.bleed",
       "legacyIndex": 123,
-      "name": "Bleed",
+      "name": "Red Trail",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 30,
@@ -2671,7 +2671,7 @@
     {
       "id": "perk.weaken",
       "legacyIndex": 124,
-      "name": "Weaken",
+      "name": "Exposed Flaw",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 17,
@@ -2694,7 +2694,7 @@
     {
       "id": "perk.gold_medalist",
       "legacyIndex": 125,
-      "name": "Gold Medalist",
+      "name": "Headhunter's Toss",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 30,
@@ -2716,7 +2716,7 @@
     {
       "id": "perk.spear_gamble",
       "legacyIndex": 126,
-      "name": "Spear gamble",
+      "name": "Wild Lob",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 33,
@@ -2738,7 +2738,7 @@
     {
       "id": "perk.double_spears",
       "legacyIndex": 127,
-      "name": "Double spears",
+      "name": "Twinfang Throw",
       "category": "ranged_offense",
       "cost": 2,
       "levelReq": 34,
@@ -2760,7 +2760,7 @@
     {
       "id": "perk.spears",
       "legacyIndex": 128,
-      "name": "Spears!",
+      "name": "Spearstorm",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 53,
@@ -2782,7 +2782,7 @@
     {
       "id": "perk.spear_mastery",
       "legacyIndex": 129,
-      "name": "Spear Mastery",
+      "name": "Hurler's Edge",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 50,
@@ -2804,7 +2804,7 @@
     {
       "id": "perk.deadeye",
       "legacyIndex": 130,
-      "name": "Deadeye",
+      "name": "Gunmetal Calm",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 45,
@@ -2826,7 +2826,7 @@
     {
       "id": "perk.piercing",
       "legacyIndex": 131,
-      "name": "Piercing",
+      "name": "Plate Splitter",
       "category": "ranged_offense",
       "cost": 2,
       "levelReq": 35,
@@ -2848,7 +2848,7 @@
     {
       "id": "perk.bunny_hopping",
       "legacyIndex": 132,
-      "name": "Bunny hopping",
+      "name": "Hare Leap",
       "category": "utility",
       "cost": 2,
       "levelReq": 55,
@@ -2869,7 +2869,7 @@
     {
       "id": "perk.curse_of_quickening",
       "legacyIndex": 133,
-      "name": "Curse of Quickening",
+      "name": "Hasty Hands",
       "category": "melee_offense",
       "cost": 2,
       "levelReq": 77,
@@ -2901,7 +2901,7 @@
     {
       "id": "perk.curse_of_strengthening",
       "legacyIndex": 134,
-      "name": "Curse of Strengthening",
+      "name": "Lumbering Might",
       "category": "melee_offense",
       "cost": 2,
       "levelReq": 77,
@@ -2928,7 +2928,7 @@
     {
       "id": "perk.curse_of_binding",
       "legacyIndex": 135,
-      "name": "Curse of Binding",
+      "name": "Ironfist Pact",
       "category": "melee_offense",
       "cost": 2,
       "levelReq": 77,
@@ -2955,7 +2955,7 @@
     {
       "id": "perk.melee_mastery",
       "legacyIndex": 136,
-      "name": "Melee Mastery",
+      "name": "Brawler's Craft",
       "category": "melee_offense",
       "cost": 2,
       "levelReq": 60,
@@ -2988,7 +2988,7 @@
     {
       "id": "perk.curse_of_binding_2",
       "legacyIndex": 137,
-      "name": "Curse of the Dead Fist",
+      "name": "Sheathed Pact",
       "category": "ranged_offense",
       "cost": 2,
       "levelReq": 77,
@@ -3015,7 +3015,7 @@
     {
       "id": "perk.curse_of_crippling",
       "legacyIndex": 138,
-      "name": "Curse of Crippling",
+      "name": "Planted Feet",
       "category": "ranged_offense",
       "cost": 2,
       "levelReq": 77,
@@ -3047,7 +3047,7 @@
     {
       "id": "perk.curse_of_quickening_2",
       "legacyIndex": 139,
-      "name": "Curse of Overcharge",
+      "name": "Redline Surge",
       "category": "ranged_offense",
       "cost": 2,
       "levelReq": 77,
@@ -3094,7 +3094,7 @@
     {
       "id": "perk.curse_of_size",
       "legacyIndex": 140,
-      "name": "Curse of Size",
+      "name": "Hollow Reservoir",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 77,
@@ -3126,7 +3126,7 @@
     {
       "id": "perk.curse_of_speed",
       "legacyIndex": 141,
-      "name": "Curse of Speed",
+      "name": "Rushed Rhythm",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 77,
@@ -3153,7 +3153,7 @@
     {
       "id": "perk.curse_of_power",
       "legacyIndex": 142,
-      "name": "Curse of Power",
+      "name": "Cultist's Bargain",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 77,
@@ -3185,7 +3185,7 @@
     {
       "id": "perk.counter_strike",
       "legacyIndex": 143,
-      "name": "Counter Strike",
+      "name": "Grudge Bank",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 10,
@@ -3208,7 +3208,7 @@
     {
       "id": "perk.skull_basher",
       "legacyIndex": 144,
-      "name": "Skull Basher",
+      "name": "Dentcrown",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 45,
@@ -3230,7 +3230,7 @@
     {
       "id": "perk.skull_basher_ii",
       "legacyIndex": 145,
-      "name": "Skull Basher II",
+      "name": "Bone Rattler",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 50,
@@ -3252,7 +3252,7 @@
     {
       "id": "perk.dance_of_the_firegod",
       "legacyIndex": 146,
-      "name": "Fire Dance",
+      "name": "Ember Heart",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 45,
@@ -3273,7 +3273,7 @@
     {
       "id": "perk.combat_regen",
       "legacyIndex": 147,
-      "name": "Combat Regen",
+      "name": "Fighter's Wind",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 5,
@@ -3295,7 +3295,7 @@
     {
       "id": "perk.mania",
       "legacyIndex": 148,
-      "name": "Mania",
+      "name": "Manic Stride",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 26,
@@ -3316,7 +3316,7 @@
     {
       "id": "perk.fury_swipes",
       "legacyIndex": 149,
-      "name": "Frenzied Swipes",
+      "name": "Repeat Offender",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 43,
@@ -3337,7 +3337,7 @@
     {
       "id": "perk.lucky_bashes",
       "legacyIndex": 150,
-      "name": "Lucky Bashes",
+      "name": "Fortunate Shove",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 27,
@@ -3359,7 +3359,7 @@
     {
       "id": "perk.more_carried_logs",
       "legacyIndex": 151,
-      "name": "More Carried Logs",
+      "name": "Log Hauler",
       "category": "utility",
       "cost": 1,
       "levelReq": 20,
@@ -3381,7 +3381,7 @@
     {
       "id": "perk.looting",
       "legacyIndex": 152,
-      "name": "Looting",
+      "name": "Light Fingers",
       "category": "utility",
       "cost": 1,
       "levelReq": 25,
@@ -3403,7 +3403,7 @@
     {
       "id": "perk.speed_matters",
       "legacyIndex": 153,
-      "name": "Speed Matters",
+      "name": "Velocity Bite",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 30,
@@ -3424,7 +3424,7 @@
     {
       "id": "perk.magic_arrow_devastation",
       "legacyIndex": 154,
-      "name": "Magic Arrow Devastation",
+      "name": "Magic Arrow: Barbed",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 30,
@@ -3445,7 +3445,7 @@
     {
       "id": "perk.nuke_conjuration",
       "legacyIndex": 155,
-      "name": "Nuke Conjuration",
+      "name": "Ball Lightning: Fork",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 62,
@@ -3466,7 +3466,7 @@
     {
       "id": "perk.blink_wormhole",
       "legacyIndex": 156,
-      "name": "Blink - Wormhole",
+      "name": "Blink: Far Step",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 40,
@@ -3488,7 +3488,7 @@
     {
       "id": "perk.fiery_embrace",
       "legacyIndex": 157,
-      "name": "Fiery Embrace",
+      "name": "Ashen Warmth",
       "category": "support",
       "cost": 1,
       "levelReq": 10,
@@ -3510,7 +3510,7 @@
     {
       "id": "perk.cursed_arrow",
       "legacyIndex": 158,
-      "name": "Cursed Arrow",
+      "name": "Tithe Arrow",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 44,
@@ -3536,7 +3536,7 @@
     {
       "id": "perk.concussive_shot",
       "legacyIndex": 159,
-      "name": "Concussive shot",
+      "name": "Bellringer",
       "category": "ranged_offense",
       "cost": 2,
       "levelReq": 30,
@@ -3557,7 +3557,7 @@
     {
       "id": "perk.rejuvenation",
       "legacyIndex": 160,
-      "name": "Rejuvenation",
+      "name": "Wound Dividend",
       "category": "support",
       "cost": 1,
       "levelReq": 47,
@@ -3585,7 +3585,7 @@
     {
       "id": "perk.endless_stream",
       "legacyIndex": 161,
-      "name": "Endless stream",
+      "name": "Arrow Flood",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 47,
@@ -3602,7 +3602,7 @@
     {
       "id": "perk.parry_mastery",
       "legacyIndex": 162,
-      "name": "Parry Mastery",
+      "name": "Open Guard",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 34,
@@ -3628,7 +3628,7 @@
     {
       "id": "perk.thorny_skin",
       "legacyIndex": 163,
-      "name": "Thorny Skin",
+      "name": "Briar Hide",
       "category": "defense",
       "cost": 1,
       "levelReq": 3,
@@ -3650,7 +3650,7 @@
     {
       "id": "perk.iron_maiden",
       "legacyIndex": 164,
-      "name": "Iron Maiden",
+      "name": "Spiked Carapace",
       "category": "defense",
       "cost": 1,
       "levelReq": 25,
@@ -3677,7 +3677,7 @@
     {
       "id": "perk.anti_magic_training",
       "legacyIndex": 165,
-      "name": "Anti-Magic Training",
+      "name": "Cold Resolve",
       "category": "defense",
       "cost": 1,
       "levelReq": 24,
@@ -3700,7 +3700,7 @@
     {
       "id": "perk.dense_matter",
       "legacyIndex": 166,
-      "name": "Dense Matter",
+      "name": "Leaden Bones",
       "category": "defense",
       "cost": 1,
       "levelReq": 30,
@@ -3721,7 +3721,7 @@
     {
       "id": "perk.warmth",
       "legacyIndex": 167,
-      "name": "Warmth",
+      "name": "Hearth Blood",
       "category": "defense",
       "cost": 1,
       "levelReq": 30,
@@ -3742,7 +3742,7 @@
     {
       "id": "perk.true_aim",
       "legacyIndex": 168,
-      "name": "True Aim",
+      "name": "Distant Mark",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 70,
@@ -3765,7 +3765,7 @@
     {
       "id": "perk.spikes",
       "legacyIndex": 169,
-      "name": "Spikes",
+      "name": "Nailstud",
       "category": "defense",
       "cost": 1,
       "levelReq": 15,
@@ -3787,7 +3787,7 @@
     {
       "id": "perk.storm_season",
       "legacyIndex": 170,
-      "name": "Storm Season",
+      "name": "Thunderclock",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 80,
@@ -3803,7 +3803,7 @@
     {
       "id": "perk.endless_storm",
       "legacyIndex": 171,
-      "name": "Endless Storm",
+      "name": "Roiling Sky",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 120,
@@ -3819,7 +3819,7 @@
     {
       "id": "perk.quick_silver",
       "legacyIndex": 172,
-      "name": "Quick Silver",
+      "name": "Vanishing Habit",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 66,
@@ -3835,7 +3835,7 @@
     {
       "id": "perk.wrath_of_the_sun",
       "legacyIndex": 173,
-      "name": "Midday Flare",
+      "name": "Flarewright",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 44,
@@ -3851,7 +3851,7 @@
     {
       "id": "perk.full_counter",
       "legacyIndex": 174,
-      "name": "Full Counter",
+      "name": "Turned Blow",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 20,
@@ -3873,7 +3873,7 @@
     {
       "id": "perk.golden_resolve",
       "legacyIndex": 175,
-      "name": "Golden Resolve",
+      "name": "Gilded Nerve",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 50,
@@ -3894,7 +3894,7 @@
     {
       "id": "perk.sudden_rampage",
       "legacyIndex": 176,
-      "name": "Sudden Rampage",
+      "name": "Red Mist",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 50,
@@ -3910,7 +3910,7 @@
     {
       "id": "perk.safe_heaven",
       "legacyIndex": 177,
-      "name": "Safe Haven",
+      "name": "Warded Ground",
       "category": "support",
       "cost": 1,
       "levelReq": 44,
@@ -3932,7 +3932,7 @@
     {
       "id": "perk.time_of_need",
       "legacyIndex": 178,
-      "name": "Time of Need",
+      "name": "Hasty Rescue",
       "category": "support",
       "cost": 1,
       "levelReq": 58,
@@ -3948,7 +3948,7 @@
     {
       "id": "perk.breathing_tehniques",
       "legacyIndex": 179,
-      "name": "Breathing Techniques",
+      "name": "Measured Breath",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 46,
@@ -3969,7 +3969,7 @@
     {
       "id": "perk.polishing",
       "legacyIndex": 180,
-      "name": "Polishing",
+      "name": "Fine Honing",
       "category": "utility",
       "cost": 0,
       "levelReq": 20,
@@ -3990,7 +3990,7 @@
     {
       "id": "perk.empowering",
       "legacyIndex": 181,
-      "name": "Empowering",
+      "name": "Tempered Gear",
       "category": "utility",
       "cost": 0,
       "levelReq": 25,
@@ -4015,7 +4015,7 @@
     {
       "id": "perk.luck_enchantment_iii",
       "legacyIndex": 182,
-      "name": "Lucky Charm III",
+      "name": "Lucky Streak",
       "category": "utility",
       "cost": 2,
       "levelReq": 55,
@@ -4037,7 +4037,7 @@
     {
       "id": "perk.heavy_metal",
       "legacyIndex": 183,
-      "name": "Heavy metal",
+      "name": "Ironhide",
       "category": "defense",
       "cost": 1,
       "levelReq": 41,
@@ -4065,7 +4065,7 @@
     {
       "id": "perk.autocast_shield",
       "legacyIndex": 184,
-      "name": "Autocast Shield",
+      "name": "Unbidden Ward",
       "category": "defense",
       "cost": 1,
       "levelReq": 10,
@@ -4087,7 +4087,7 @@
     {
       "id": "perk.seeking_arrow_improved_memory",
       "legacyIndex": 185,
-      "name": "Seeking Arrow - Improved Memory",
+      "name": "Seeking Arrow: Grudge",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 30,
@@ -4109,7 +4109,7 @@
     {
       "id": "perk.storm_of_the_century",
       "legacyIndex": 186,
-      "name": "Storm of the century",
+      "name": "Walking Tempest",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 130,
@@ -4131,7 +4131,7 @@
     {
       "id": "perk.craftable_plane_axe",
       "legacyIndex": 187,
-      "name": "Rescue Axe",
+      "name": "Fuselage Axe",
       "category": "utility",
       "cost": 1,
       "levelReq": 5,
@@ -4148,7 +4148,7 @@
     {
       "id": "perk.hawk_s_eye",
       "legacyIndex": 188,
-      "name": "Hawk's eye",
+      "name": "Keen Sight",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 38,
@@ -4170,7 +4170,7 @@
     {
       "id": "perk.explosion_damage_up",
       "legacyIndex": 189,
-      "name": "Explosion Damage Up",
+      "name": "Powder Keg",
       "category": "utility",
       "cost": 1,
       "levelReq": 5,
@@ -4192,7 +4192,7 @@
     {
       "id": "perk.ranged_mastery",
       "legacyIndex": 190,
-      "name": "Ranged Mastery",
+      "name": "Marksman's Craft",
       "category": "ranged_offense",
       "cost": 2,
       "levelReq": 65,
@@ -4229,7 +4229,7 @@
     {
       "id": "perk.harvester",
       "legacyIndex": 191,
-      "name": "Harvester",
+      "name": "Brush Cutter",
       "category": "utility",
       "cost": 1,
       "levelReq": 5,
@@ -4251,7 +4251,7 @@
     {
       "id": "perk.block",
       "legacyIndex": 192,
-      "name": "Block",
+      "name": "Stout Guard",
       "category": "defense",
       "cost": 1,
       "levelReq": 45,
@@ -4274,7 +4274,7 @@
     {
       "id": "perk.thorny_skin_ii",
       "legacyIndex": 193,
-      "name": "Thorny Skin II",
+      "name": "Wirevein",
       "category": "defense",
       "cost": 1,
       "levelReq": 16,
@@ -4296,7 +4296,7 @@
     {
       "id": "perk.corrosive_skin",
       "legacyIndex": 194,
-      "name": "Corrosive Skin",
+      "name": "Rust Touch",
       "category": "defense",
       "cost": 1,
       "levelReq": 17,
@@ -4318,7 +4318,7 @@
     {
       "id": "perk.pyromancy",
       "legacyIndex": 195,
-      "name": "Pyromancy",
+      "name": "Kindler",
       "category": "support",
       "cost": 1,
       "levelReq": 20,
@@ -4340,7 +4340,7 @@
     {
       "id": "perk.heat_surge",
       "legacyIndex": 196,
-      "name": "Heat Surge",
+      "name": "Flashpoint",
       "category": "support",
       "cost": 1,
       "levelReq": 70,
@@ -4362,7 +4362,7 @@
     {
       "id": "perk.flame_lifetime",
       "legacyIndex": 197,
-      "name": "Flame lifetime",
+      "name": "Slow Embers",
       "category": "support",
       "cost": 1,
       "levelReq": 20,
@@ -4384,7 +4384,7 @@
     {
       "id": "perk.lingering_flames",
       "legacyIndex": 198,
-      "name": "Lingering flames",
+      "name": "Smoulder",
       "category": "support",
       "cost": 1,
       "levelReq": 70,
@@ -4406,7 +4406,7 @@
     {
       "id": "perk.insight_ii",
       "legacyIndex": 199,
-      "name": "Insight II",
+      "name": "Hard Lessons II",
       "category": "support",
       "cost": 1,
       "levelReq": 25,
@@ -4428,7 +4428,7 @@
     {
       "id": "perk.the_real_armageddon",
       "legacyIndex": 200,
-      "name": "Burn It All Down",
+      "name": "Scorched Earth",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 122,
@@ -4450,7 +4450,7 @@
     {
       "id": "perk.the_big_suck",
       "legacyIndex": 201,
-      "name": "The Big Suck",
+      "name": "Hungry Dark",
       "category": "magic_offense",
       "cost": 2,
       "levelReq": 128,
@@ -4472,7 +4472,7 @@
     {
       "id": "perk.event_horizon_expansion",
       "legacyIndex": 202,
-      "name": "Event Horizon Expansion",
+      "name": "Widening Dark",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 132,
@@ -4494,7 +4494,7 @@
     {
       "id": "perk.event_horizon_expansion_2",
       "legacyIndex": 203,
-      "name": "Gravity Well",
+      "name": "Crushing Pull",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 130,
@@ -4516,7 +4516,7 @@
     {
       "id": "perk.vitality",
       "legacyIndex": 204,
-      "name": "Vitality",
+      "name": "Hardy Frame",
       "category": "defense",
       "cost": 1,
       "levelReq": 5,
@@ -4538,7 +4538,7 @@
     {
       "id": "perk.curse_of_thorns",
       "legacyIndex": 205,
-      "name": "Curse of Thorns",
+      "name": "Barbwire Oath",
       "category": "defense",
       "cost": 2,
       "levelReq": 77,
@@ -4582,7 +4582,7 @@
     {
       "id": "perk.restoration",
       "legacyIndex": 206,
-      "name": "Restoration",
+      "name": "Deep Recovery",
       "category": "support",
       "cost": 1,
       "levelReq": 76,
@@ -4604,7 +4604,7 @@
     {
       "id": "perk.falter",
       "legacyIndex": 207,
-      "name": "Falter",
+      "name": "Stumblestep",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 10,
@@ -4620,7 +4620,7 @@
     {
       "id": "perk.line_up",
       "legacyIndex": 208,
-      "name": "Line up",
+      "name": "Gathering Call",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 12,
@@ -4641,7 +4641,7 @@
     {
       "id": "perk.charge_pushback",
       "legacyIndex": 209,
-      "name": "Charge Pushback",
+      "name": "Ramming Swing",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 37,
@@ -4662,7 +4662,7 @@
     {
       "id": "perk.instant_riposte",
       "legacyIndex": 210,
-      "name": "Instant Riposte",
+      "name": "Quick Retort",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 30,
@@ -4684,7 +4684,7 @@
     {
       "id": "perk.rerolling_individual_stats",
       "legacyIndex": 211,
-      "name": "Rerolling individual stats",
+      "name": "Chisel and Flux",
       "category": "utility",
       "cost": 0,
       "levelReq": 22,
@@ -4705,7 +4705,7 @@
     {
       "id": "perk.firebolt_upgrade",
       "legacyIndex": 212,
-      "name": "Firebolt upgrade",
+      "name": "Firebolt: Kindling",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 10,
@@ -4732,7 +4732,7 @@
     {
       "id": "perk.firebolt_upgrade_2",
       "legacyIndex": 213,
-      "name": "Firebolt Overload",
+      "name": "Firebolt: Overburn",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 17,
@@ -4759,7 +4759,7 @@
     {
       "id": "perk.heaviest_blow",
       "legacyIndex": 214,
-      "name": "Heaviest Blow",
+      "name": "Wreckfall",
       "category": "melee_offense",
       "cost": 2,
       "levelReq": 60,
@@ -4781,7 +4781,7 @@
     {
       "id": "perk.body_strength_ii",
       "legacyIndex": 215,
-      "name": "Body Strength II",
+      "name": "Iron Sinew",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 40,
@@ -4803,7 +4803,7 @@
     {
       "id": "perk.steroid",
       "legacyIndex": 216,
-      "name": "Steroid",
+      "name": "Juiced Arms",
       "category": "melee_offense",
       "cost": 1,
       "levelReq": 60,
@@ -4825,7 +4825,7 @@
     {
       "id": "perk.firebolt_cost_reduction",
       "legacyIndex": 217,
-      "name": "Firebolt cost reduction",
+      "name": "Firebolt: Thrift",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 60,
@@ -4847,7 +4847,7 @@
     {
       "id": "perk.target_practise",
       "legacyIndex": 218,
-      "name": "Target practise",
+      "name": "Range Drills",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 16,
@@ -4869,7 +4869,7 @@
     {
       "id": "perk.bullseye",
       "legacyIndex": 219,
-      "name": "Bullseye",
+      "name": "Pinpoint",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 36,
@@ -4891,7 +4891,7 @@
     {
       "id": "perk.improved_dodges",
       "legacyIndex": 220,
-      "name": "Improved Dodges",
+      "name": "Nimble Recovery",
       "category": "defense",
       "cost": 1,
       "levelReq": 60,
@@ -4907,7 +4907,7 @@
     {
       "id": "perk.critical_infusion",
       "legacyIndex": 221,
-      "name": "Critical Infusion",
+      "name": "Bloodmark",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 55,
@@ -4928,7 +4928,7 @@
     {
       "id": "perk.supersonic",
       "legacyIndex": 222,
-      "name": "Supersonic",
+      "name": "Snapflight",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 90,
@@ -4950,7 +4950,7 @@
     {
       "id": "perk.deployable_shield",
       "legacyIndex": 223,
-      "name": "Deployable Shield",
+      "name": "Sidestep Ward",
       "category": "defense",
       "cost": 1,
       "levelReq": 100,
@@ -4966,7 +4966,7 @@
     {
       "id": "perk.deployable_shield_2",
       "legacyIndex": 224,
-      "name": "Bulwark Reflex",
+      "name": "Hardened Sidestep",
       "category": "defense",
       "cost": 1,
       "levelReq": 100,
@@ -4982,7 +4982,7 @@
     {
       "id": "perk.pound_of_flesh",
       "legacyIndex": 225,
-      "name": "Pound of flesh",
+      "name": "Flesh Surplus",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 50,
@@ -5004,7 +5004,7 @@
     {
       "id": "perk.pantheon_of_champions",
       "legacyIndex": 226,
-      "name": "Last Stand Circle",
+      "name": "Rally Ring",
       "category": "support",
       "cost": 1,
       "levelReq": 45,
@@ -5031,7 +5031,7 @@
     {
       "id": "perk.magic_tower",
       "legacyIndex": 227,
-      "name": "Firelit Camp",
+      "name": "Hearthside Focus",
       "category": "support",
       "cost": 1,
       "levelReq": 40,
@@ -5058,7 +5058,7 @@
     {
       "id": "perk.golden_cooldown",
       "legacyIndex": 228,
-      "name": "Golden Cooldown",
+      "name": "Gilded Pace",
       "category": "magic_offense",
       "cost": 1,
       "levelReq": 51,
@@ -5080,7 +5080,7 @@
     {
       "id": "perk.adrenaline_rush",
       "legacyIndex": 229,
-      "name": "Adrenaline Rush",
+      "name": "Panic Fuel",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 37,
@@ -5096,7 +5096,7 @@
     {
       "id": "perk.adrenaline_rush_ii",
       "legacyIndex": 230,
-      "name": "Adrenaline Rush II",
+      "name": "Panic Engine",
       "category": "ranged_offense",
       "cost": 1,
       "levelReq": 38,
@@ -5112,7 +5112,7 @@
     {
       "id": "perk.meteorite_resistance",
       "legacyIndex": 231,
-      "name": "Meteorite Resistance",
+      "name": "Skyfall Hide",
       "category": "defense",
       "cost": 1,
       "levelReq": 31,
@@ -5134,7 +5134,7 @@
     {
       "id": "perk.power_slowdown",
       "legacyIndex": 232,
-      "name": "Power Slowdown",
+      "name": "Heavy Hands",
       "category": "melee_offense",
       "cost": 0,
       "levelReq": 5,
@@ -5162,7 +5162,7 @@
     {
       "id": "perk.power_slowdown_crit",
       "legacyIndex": 233,
-      "name": "Power Slowdown (Crit)",
+      "name": "Slow Release",
       "category": "ranged_offense",
       "cost": 0,
       "levelReq": 0,

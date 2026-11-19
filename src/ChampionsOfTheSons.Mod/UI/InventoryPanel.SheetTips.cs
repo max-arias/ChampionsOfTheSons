@@ -68,6 +68,7 @@ internal sealed partial class InventoryPanel
 
         _tip.Root.GetComponent<Image>().color = C(UiTheme.Gold);
         _tipTitle.RichText($"<color={UiTheme.Gold}>{row.Value.Label}</color>  <color={UiTheme.Text}>{row.Value.Value}</color>");
+        _tipIcon.Active(false);
         _tipSub.RichText("");
         _tipSub.Active(false);
         _tipBody.RichText($"<color={UiTheme.Description}>{row.Value.Tip}</color>");

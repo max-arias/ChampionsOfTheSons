@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
+using ChampionsOfTheSons.Mod.Icons;
 using ChampionsOfTheSons.Mod.Loot;
 using SUI;
 using TMPro;
@@ -22,6 +23,7 @@ internal sealed class SlotWidget
     public float X, Y, Size;
 
     public SBgButtonOptions Button = null!;
+    public SImageOptions Icon = null!;
     public SLabelOptions Level = null!;
     public SLabelOptions Amount = null!;
 
@@ -80,6 +82,7 @@ internal sealed partial class InventoryPanel
 
     // tooltip
     private SContainerOptions _tip = null!;
+    private SImageOptions _tipIcon = null!;
     private SLabelOptions _tipTitle = null!, _tipSub = null!, _tipBody = null!, _tipCompare = null!;
     private SContainerOptions _tipDivider = null!;
 
@@ -242,6 +245,9 @@ internal sealed partial class InventoryPanel
         text.overflowMode = TextOverflowModes.Truncate;
         text.raycastTarget = false;
 
+        var icon = IconView.Create().Anchor(AnchorType.Fill).Margin(3f);
+        btn.Add(icon);
+
         var level = Label("", 12, UiTheme.TextDim, TextAlignmentOptions.TopLeft).Anchor(AnchorType.Fill);
         level.TextObject.margin = new Vector4(5, 3, 3, 3);
         btn.Add(level);
@@ -252,7 +258,7 @@ internal sealed partial class InventoryPanel
         var w = new SlotWidget
         {
             Key = key, IsEquip = equip, X = parentX + x, Y = BodyTop + y, Size = size,
-            Button = btn, Level = level, Amount = amount,
+            Button = btn, Icon = icon, Level = level, Amount = amount,
         };
         _slots.Add(w);
         _slotByKey[key] = w;
@@ -266,12 +272,15 @@ internal sealed partial class InventoryPanel
         var inner = SContainer.Background(C(UiTheme.TooltipInner), EBackground.None).Vertical(4, "EC").Padding(14, 14, 11, 12);
         _tip.Add(inner);
 
-        _tipTitle = Label("", 22, UiTheme.Text, TextAlignmentOptions.TopLeft, wrap: true);
+        _tipIcon = IconView.Create().PWidth(72).PHeight(72);
+        _tipTitle = Label("", 22, UiTheme.Text, TextAlignmentOptions.MidlineLeft, wrap: true).PWidth(10).FlexWidth(1);
+        var header = SContainer.Horizontal(10, "CC");
+        header.Add(_tipIcon).Add(_tipTitle);
         _tipSub = Label("", 16, UiTheme.TextDim, TextAlignmentOptions.TopLeft, wrap: true);
         _tipBody = Label("", 17, UiTheme.Text, TextAlignmentOptions.TopLeft, wrap: true);
         _tipDivider = SContainer.Background(C(UiTheme.Divider), EBackground.None).PHeight(1);
         _tipCompare = Label("", 17, UiTheme.Text, TextAlignmentOptions.TopLeft, wrap: true);
-        inner.Add(_tipTitle).Add(_tipSub).Add(_tipBody).Add(_tipDivider).Add(_tipCompare);
+        inner.Add(header).Add(_tipSub).Add(_tipBody).Add(_tipDivider).Add(_tipCompare);
 
         foreach (var img in _tip.Root.GetComponentsInChildren<Image>(true)) img.raycastTarget = false;
         _root.Add(_tip);
@@ -438,6 +447,7 @@ internal sealed partial class InventoryPanel
         {
             w.Button.Color(C(UiTheme.SlotFrameEmpty), C("#3C4756"));
             w.Button.Text(w.IsEquip ? UiText.SlotName(w.Key) : "").FontColor(UiTheme.TextFaint);
+            w.Icon.Active(false);
             w.Level.Text("");
             w.Amount.Text("");
             return;
@@ -445,7 +455,7 @@ internal sealed partial class InventoryPanel
 
         var rarity = C(UiTheme.RarityHex(item.Rarity));
         w.Button.Color(rarity, Color.Lerp(rarity, Color.white, 0.4f));
-        w.Button.Text(UiText.ItemName(item)).FontColor(UiTheme.Text);
+        w.Button.Text(IconView.Show(w.Icon, item.BaseId) ? "" : UiText.ItemName(item)).FontColor(UiTheme.Text);
         bool leveled = ModContent.Db.Items.TryGetValue(item.BaseId, out var def) && !LootRoller.IsMaterialOrOther(def);
         w.Level.Text(leveled ? item.Level.ToString() : "");
         w.Amount.Text(item.Amount > 1 ? "×" + item.Amount : "");
@@ -526,6 +536,7 @@ internal sealed partial class InventoryPanel
 
         _tip.Root.GetComponent<Image>().color = C(d.RarityHex);
         _tipTitle.RichText(d.Title);
+        IconView.Show(_tipIcon, item.BaseId);
         _tipSub.RichText(d.Subtitle);
         _tipSub.Active(true);
         RowTipShown = null;

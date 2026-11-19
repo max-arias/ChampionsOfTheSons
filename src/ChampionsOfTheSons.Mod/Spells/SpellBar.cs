@@ -1,4 +1,5 @@
 using ChampionsOfTheSons.Core.Rules;
+using ChampionsOfTheSons.Mod.Icons;
 using ChampionsOfTheSons.Mod.UI;
 using SUI;
 using TMPro;
@@ -23,6 +24,7 @@ internal sealed class SpellBar
     private sealed class Slot
     {
         public SContainerOptions Frame = null!, Cooldown = null!;
+        public SImageOptions Icon = null!;
         public SLabelOptions Key = null!, Name = null!, Remaining = null!;
         public string? ShownSpell;
         public string ShownKey = "";
@@ -58,6 +60,8 @@ internal sealed class SpellBar
             bar.Add(s.Frame);
             var inner = SContainer.Anchor(AnchorType.Fill).Margin(2f).Background(C("#0B0E12E8"), EBackground.None);
             s.Frame.Add(inner);
+            s.Icon = IconView.Create().Anchor(AnchorType.Fill);
+            inner.Add(s.Icon);
             s.Name = Label("", 13, UiTheme.Text, TextAlignmentOptions.Center, wrap: true).Anchor(AnchorType.Fill);
             s.Name.TextObject.margin = new Vector4(4, 14, 4, 4);
             s.Name.TextObject.enableAutoSizing = true;
@@ -116,6 +120,7 @@ internal sealed class SpellBar
             {
                 s.ShownSpell = id;
                 s.Name.Text(id == null ? "" : ModContent.Text.Get(id + ".name", ModContent.Db.Spells[id].Name));
+                s.Name.Active(!IconView.Show(s.Icon, id)); // the icon replaces the name text when there is one
                 s.ShownReady = null;
             }
             string key = SpellKeys.Label(i);
