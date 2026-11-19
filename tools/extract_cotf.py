@@ -514,6 +514,10 @@ def perks():
     return out, problems
 
 
+# Names/ids from the original we don't ship (real-world politics or religion): renamed on extraction.
+ID_RENAMES = {"item.maga_cap": ("item.sunscorched_cap", "Sunscorched Cap"),
+              "item.jihad_vest": ("item.zealots_powder_vest", "Zealot's Powder Vest")}
+
 # Known bugs in the original data, fixed on extraction: (kind, id, stat, field, new value, why).
 FIXES = [
     ("perk", "perk.melee_mastery", "attack_speed", "value", 0.25,
@@ -542,6 +546,9 @@ def main():
     it, p2 = items(enum)
     pk, p3 = perks()
     apply_fixes(it, pk)
+    for item in it:
+        if item["id"] in ID_RENAMES:
+            item["id"], item["name"] = ID_RENAMES[item["id"]]
     # stat pools reference legacy numeric stat ids -> map to our stat ids
     by_legacy = {s["legacyId"]: s["id"] for s in st}
     for item in it:

@@ -12,6 +12,9 @@ public sealed class Massacre
 
     public bool Active => TimeLeft > 0;
 
+    /// <summary>Raised when a streak ends by timeout and pays out: kills, banked XP, multiplier, XP paid. Not raised by <see cref="Reset"/>.</summary>
+    public event Action<int, double, double, double>? Paid;
+
     /// <summary>Banks a kill. <paramref name="maxTime"/> and <paramref name="bonusPerKill"/> come from the stat sheet.</summary>
     public void OnKill(double xp, double maxTime, double bonusPerKill)
     {
@@ -26,8 +29,12 @@ public sealed class Massacre
         if (TimeLeft <= 0) return 0;
         TimeLeft -= dt;
         if (TimeLeft > 0) return 0;
-        double payout = PendingXp * Multiplier(Kills);
+        double mult = Multiplier(Kills);
+        double payout = PendingXp * mult;
+        int kills = Kills;
+        double banked = PendingXp;
         Reset();
+        Paid?.Invoke(kills, banked, mult, payout);
         return payout;
     }
 

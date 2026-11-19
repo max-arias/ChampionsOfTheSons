@@ -19,8 +19,13 @@ public sealed class Inventory
     public IEnumerable<KeyValuePair<string, ItemInstance>> Equipped => _slots.Where(kv => kv.Key.StartsWith("equip.", StringComparison.Ordinal));
 
     /// <summary>Puts an item in the first free bag slot. Stacks onto an equal stackable item first. False if the bag is full.</summary>
-    public bool AddToBag(ItemInstance item, int stackSize = 1)
+    public bool AddToBag(ItemInstance item, int stackSize = 1) => AddToBag(item, stackSize, out _);
+
+    /// <summary>As above, but reports what could not be placed (null when everything fitted).</summary>
+    public bool AddToBag(ItemInstance item, int stackSize, out ItemInstance? remainder)
     {
+        remainder = null;
+        int startAmount = item.Amount;
         if (stackSize > 1)
         {
             foreach (var (slot, existing) in _slots.ToList())
@@ -40,6 +45,8 @@ public sealed class Inventory
             Changed?.Invoke();
             return true;
         }
+        remainder = item;
+        if (item.Amount != startAmount) Changed?.Invoke();
         return false;
     }
 
@@ -104,6 +111,9 @@ public sealed class PlayerCharacter
     public StatSheet Stats { get; }
     public Massacre Massacre { get; } = new();
 
+    /// <summary>Raised by <see cref="AddXp"/> when it leveled the character up (HUD notice).</summary>
+    public event Action<LevelUpResult>? LeveledUp;
+
     public PlayerCharacter(ContentDb content)
     {
         Content = content;
@@ -122,7 +132,11 @@ public sealed class PlayerCharacter
     public LevelUpResult AddXp(double xp)
     {
         var result = Progress.AddXp(xp, Stats.Get(StatIds.ExpGain));
-        if (result.LeveledUp) RebuildLevel();
+        if (result.LeveledUp)
+        {
+            RebuildLevel();
+            LeveledUp?.Invoke(result);
+        }
         return result;
     }
 

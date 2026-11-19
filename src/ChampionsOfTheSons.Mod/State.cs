@@ -55,7 +55,16 @@ public static class WorldState
     {
         Rules = Rules with { Difficulty = tier };
         DifficultyChosen = true;
+        Changed?.Invoke();
     }
+
+    /// <summary>Changes the host's multipliers and switches (host settings panel). The difficulty itself goes through <see cref="SetDifficulty"/>.</summary>
+    public static void Update(Func<WorldRules, WorldRules> change) => Rules = change(Rules);
+
+    /// <summary>Raised when the difficulty or any host setting changed.</summary>
+    public static event Action? Changed;
+
+    public static void NotifyChanged() => Changed?.Invoke();
 
     /// <summary>Self-tests only: swap rules without marking the difficulty as chosen.</summary>
     public static void SetRulesForTest(WorldRules rules) => Rules = rules;
