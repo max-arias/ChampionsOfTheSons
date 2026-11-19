@@ -15,11 +15,14 @@ public enum MessageType : byte
     EnemyHealth = 12,
     Hit = 13,
     XpGranted = 14,
+    DamageShown = 15,
+    PlayerPos = 16,
     DropSpawned = 20,
     PickupRequest = 21,
     PickupGranted = 22,
     DropRemoved = 23,
     SpellCast = 30,
+    AuraPulse = 31,
     Ping = 40,
 }
 
@@ -146,4 +149,25 @@ public enum PingKind : byte
 public sealed record Ping(uint PlayerId, PingKind Kind, Vec3 Position, ulong TargetId) : IMessage
 {
     public MessageType Type => MessageType.Ping;
+}
+
+/// <summary>Host → clients: a hit landed on an enemy, so every client can show a damage number (COS-44).
+/// <paramref name="PlayerId"/> is the attacker; that player's own client already showed it.</summary>
+public sealed record DamageShown(uint PlayerId, ulong EnemyNetId, Vec3 Position, float Amount, HitFlags Flags) : IMessage
+{
+    public MessageType Type => MessageType.DamageShown;
+}
+
+/// <summary>Caster → everyone: a Support perk or aura is active around <paramref name="Origin"/> for a moment.
+/// Receivers inside <paramref name="Radius"/> get the buff for <paramref name="Seconds"/>; it is repeated while the aura lasts,
+/// so a teammate who leaves the range loses it when the last pulse runs out (COS-23).</summary>
+public sealed record AuraPulse(uint PlayerId, string BuffId, Vec3 Origin, float Radius, float Seconds) : IMessage
+{
+    public MessageType Type => MessageType.AuraPulse;
+}
+
+/// <summary>Client → host, about once a second: where I am and my level (the host decides who is in range of a kill and a pickup).</summary>
+public sealed record PlayerPos(Vec3 Position, int Level) : IMessage
+{
+    public MessageType Type => MessageType.PlayerPos;
 }

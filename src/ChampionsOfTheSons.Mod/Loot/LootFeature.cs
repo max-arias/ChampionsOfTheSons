@@ -120,6 +120,7 @@ public sealed class LootFeature : IModFeature
         if (mf <= 0) mf = 1;
         if (!LootRoller.ShouldDrop(enemy, rules, mf, Rng)) return result;
         int level = PlayerState.Character.Progress.Level;
+        if (Net.CoopSession.IsHost && Net.CoopFeature.Verified.Count > 0) level = Net.CoopSession.LootLevel(level); // co-op: the host's loot-level policy over all players
         int count = LootRoller.DropCount(enemy, rules, Rng);
         for (int i = 0; i < count; i++)
         {

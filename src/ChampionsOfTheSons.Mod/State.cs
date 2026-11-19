@@ -51,6 +51,13 @@ public static class WorldState
 
     public static bool FriendlyFire { get; private set; }
 
+    /// <summary>Dedicated server config / host settings.</summary>
+    public static void SetFriendlyFire(bool on)
+    {
+        FriendlyFire = on;
+        Changed?.Invoke();
+    }
+
     public static void SetDifficulty(DifficultyTier tier)
     {
         Rules = Rules with { Difficulty = tier };

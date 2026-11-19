@@ -36,8 +36,19 @@ public class ChampionsOfTheSonsMod : SonsMod
         Config.Init();
     }
 
-    protected override void OnSdkInitialized()
+    private static bool _initialized;
+
+    protected override void OnSdkInitialized() => EnsureInitialized();
+
+    /// <summary>
+    /// Content, saves, networking and features. Normally runs when the SDK is ready; a dedicated server never raises that event,
+    /// so OnGameStart calls it too (idempotent).
+    /// </summary>
+    private static void EnsureInitialized()
     {
+        if (_initialized) return;
+        _initialized = true;
+        bool server = Net.ServerConfig.IsDedicatedServer;
         ModContent.Load();
 
         SonsSaveTools.Register(new PlayerProgressSaveable());
@@ -45,12 +56,12 @@ public class ChampionsOfTheSonsMod : SonsMod
 
         Packets.Register(CotsNetEvent.Instance);
         Bridge.EnemyRegistry.Init();
-        UI.CotsUi.Init();
-        Features.Discover();
+        if (!server) UI.CotsUi.Init();
+        Features.Discover(server);
         Features.Each("Init", f => f.Init());
 
-        RLog.Msg($"Champions of the Sons {Manifest.Version} loaded: {ModContent.Db.Summary()}");
-        if (SelfTest.Enabled)
+        RLog.Msg($"Champions of the Sons {Instance!.Manifest.Version} loaded{(server ? " (dedicated server)" : "")}: {ModContent.Db.Summary()}");
+        if (SelfTest.Enabled && !server)
         {
             SelfTest.PhaseReset += () =>
             {
@@ -75,6 +86,7 @@ public class ChampionsOfTheSonsMod : SonsMod
 
     protected override void OnGameStart()
     {
+        EnsureInitialized();
         Bridge.PlayerBridge.Reset();
         Features.Each("OnGameStart", f => f.OnGameStart());
         RLog.Msg($"Champions of the Sons: game started (difficulty {WorldState.Rules.Difficulty.Name}, level {PlayerState.Character.Progress.Level})");

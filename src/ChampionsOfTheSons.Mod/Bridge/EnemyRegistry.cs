@@ -76,7 +76,7 @@ public static class EnemyRegistry
     public static bool IsAuthority => !BoltNetwork.isRunning || BoltNetwork.isServer;
 
     public static EnemyKind? KindFor(VailActorTypeId type) =>
-        ModContent.Db.Enemies.TryGetValue(type.ToString(), out var k) ? k : null;
+        ModContent.Db != null && ModContent.Db.Enemies.TryGetValue(type.ToString(), out var k) ? k : null;
 
     public static EnemyRuntime? Get(StatsManager? stats) =>
         stats != null && ByStats.TryGetValue(stats.Pointer, out var r) ? r : null;
@@ -97,6 +97,19 @@ public static class EnemyRegistry
         var profile = EnemyScaler.Roll(kind, vanillaMaxHealth, WorldState.Rules, Rng);
         var runtime = new EnemyRuntime(kind, profile, vanillaMaxHealth, actor, new EnemyCombatState(profile, WorldState.Rules.Difficulty));
         runtime.Stats = stats;
+        ByStats[stats.Pointer] = runtime;
+        return runtime;
+    }
+
+    /// <summary>Client side of co-op: registers the host's profile for an enemy so nameplates and hit code see it like a local roll.</summary>
+    public static EnemyRuntime Mirror(StatsManager stats, EnemyKind kind, EnemyProfile profile, VailActor? actor)
+    {
+        if (ByStats.TryGetValue(stats.Pointer, out var existing)) return existing;
+        var runtime = new EnemyRuntime(kind, profile, profile.MaxHealth, actor, new EnemyCombatState(profile, WorldState.Rules.Difficulty))
+        {
+            Stats = stats,
+            ScaleApplied = true,
+        };
         ByStats[stats.Pointer] = runtime;
         return runtime;
     }
