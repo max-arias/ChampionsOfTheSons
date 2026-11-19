@@ -22,7 +22,8 @@ internal static class UiTheme
 
     public const string Text = "#E6E9EE";
     public const string TextDim = "#8A93A0";
-    public const string TextFaint = "#5B6470";
+    public const string TextFaint = "#707A89";
+    public const string Description = "#A3ACB9";
     public const string Gold = "#E3B341";
     public const string Good = "#6FE07A";
     public const string Bad = "#FF6B6B";

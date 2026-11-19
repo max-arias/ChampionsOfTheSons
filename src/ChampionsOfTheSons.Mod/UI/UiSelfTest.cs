@@ -3,7 +3,6 @@ using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
 using UnityEngine;
-using UnityEngine.Rendering.HighDefinition;
 
 namespace ChampionsOfTheSons.Mod.UI;
 
@@ -16,11 +15,15 @@ internal static class UiSelfTest
     private static InventoryPanel Panel => CotsUi.Inventory;
     private static PlayerCharacter Pc => PlayerState.Character;
 
+    private static readonly List<string> Shots = new();
+
     public static void Register()
     {
         SelfTest.Add(0.2f, "ui: seed bag", SeedBag);
-        SelfTest.Add(0.4f, "ui: capture setup", UiCapture.Begin);
+        SelfTest.Add(0.4f, "ui: capture setup", UiCapture.Prepare);
+        SelfTest.Add(1.2f, "ui: screen size", UiCapture.LogScreen);
         SelfTest.Add(1.5f, "ui: open inventory", OpenInventory);
+        SelfTest.Add(2.5f, "ui: pointer hit-test", HitTest);
         SelfTest.Add(3f, "ui: shot inventory", () => Shot("01-inventory"));
         SelfTest.Add(3.5f, "ui: equip ring + stat", EquipRing);
         SelfTest.Add(4.5f, "ui: tooltip + compare", TooltipCompare);
@@ -32,7 +35,10 @@ internal static class UiSelfTest
         SelfTest.Add(10.5f, "ui: shot sheet", () => Shot("04-character-sheet"));
         SelfTest.Add(11f, "ui: equipped tooltip", EquippedTooltip);
         SelfTest.Add(12f, "ui: shot equipped tooltip", () => Shot("05-tooltip-equipped"));
-        SelfTest.Add(12.5f, "ui: unequip + close", UnequipAndClose);
+        SelfTest.Add(12.5f, "ui: tooltip at the right edge", EdgeTooltip);
+        SelfTest.Add(13.5f, "ui: shot tooltip edge", () => Shot("06-tooltip-right-edge"));
+        SelfTest.Add(14f, "ui: verify screenshots", VerifyShots);
+        SelfTest.Add(14.5f, "ui: unequip + close", UnequipAndClose);
     }
 
     // ------------------------------------------------------------------ steps
@@ -67,6 +73,10 @@ internal static class UiSelfTest
         }
         foreach (var id in new[] { "item.yuki_onna_strides", "item.yuki_onna_greaves" })
             if (db.Items.TryGetValue(id, out var def)) Pc.Inventory.AddToBag(roller.RollItem(def, 3, rng));
+
+        // A well-rolled item in the right-most bag column, to see the tooltip flip to the slot's left.
+        var rich = roller.PickBase(6, level, rng, d => d.Type == "chest_armor" && d.StatPools.Count >= 5);
+        if (rich != null) Pc.Inventory.Restore(Pc.Inventory.Slots.Append(new("bag.47", roller.RollItem(rich, level, rng))).ToList());
 
         int count = Pc.Inventory.Slots.Count;
         SelfTest.Check("ui: bag seeded", count >= 15, $"{count} items");
@@ -204,100 +214,51 @@ internal static class UiSelfTest
     private static string? SlotOf(string baseId) =>
         Pc.Inventory.Slots.Where(kv => kv.Key.StartsWith("bag.") && kv.Value.BaseId == baseId).Select(kv => kv.Key).FirstOrDefault();
 
+    /// <summary>A UI raycast at a slot's screen position must find that slot (this is what hover and click rely on).</summary>
+    private static void HitTest()
+    {
+        var failures = new List<string>();
+        foreach (var key in new[] { "bag.0", "bag.11", "bag.47", "bag.100", "bag.119", "equip.helmet", "equip.ring2", "equip.offhand" })
+        {
+            var at = Panel.ScreenPointOf(key);
+            var found = Panel.RaycastSlotAt(at);
+            if (found != key) failures.Add($"{key}@{at.x:0},{at.y:0} -> {found ?? "none"}");
+        }
+        SelfTest.Check("ui: raycast finds the slot under a point", failures.Count == 0, string.Join("; ", failures));
+        SelfTest.Check("ui: raycast outside the window finds nothing", Panel.RaycastSlotAt(new Vector2(2, 2)) == null);
+    }
+
+    private static void EdgeTooltip()
+    {
+        Panel.SimulateHover("bag.47");
+        SelfTest.Check("ui: right-edge item has a tooltip", Panel.TooltipShown != null);
+        var tip = Panel.TooltipBounds;
+        var slot = Panel.SlotBounds("bag.47");
+        var canvas = Panel.CanvasSize;
+        SelfTest.Check("ui: tooltip stays on the canvas", tip.xMin >= 0 && tip.yMin >= 0 && tip.xMax <= canvas.x && tip.yMax <= canvas.y,
+            $"tooltip {tip}, canvas {canvas}");
+        SelfTest.Check("ui: tooltip does not cover its slot", !tip.Overlaps(slot), $"tooltip {tip}, slot {slot}, onLeft={Panel.TooltipOnLeft}");
+    }
+
     private static void Shot(string name)
     {
-        var path = UiCapture.Save(name);
-        SelfTest.Check($"ui: screenshot {name}", path != null, path ?? UiCapture.LastError);
-    }
-}
-
-/// <summary>
-/// Renders the SUI canvas into a 1920x1080 texture through a dedicated camera and writes PNGs. Works in batchmode and with any
-/// window size, because it does not depend on the screen back buffer. The canvas stays in camera mode for the rest of the run.
-/// </summary>
-internal static class UiCapture
-{
-    private const int W = 1920, H = 1080;
-    public static readonly string Dir = Path.Combine(Path.GetTempPath(), "cots-ui");
-
-    private static RenderTexture? _rt;
-    private static Camera? _cam;
-
-    public static string LastError { get; private set; } = "";
-
-    public static void Begin()
-    {
-        Directory.CreateDirectory(Dir);
-        foreach (var old in Directory.GetFiles(Dir, "*.png")) File.Delete(old);
-
-        _rt = new RenderTexture(W, H, 24, RenderTextureFormat.ARGB32);
-        var go = new GameObject("cots-ui-capture-camera");
-        UnityEngine.Object.DontDestroyOnLoad(go);
-        go.transform.position = new Vector3(0, 20000, 0); // far from anything the world renders
-        _cam = go.AddComponent<Camera>();
-        _cam.orthographic = true;
-        _cam.orthographicSize = H / 2f;
-        _cam.nearClipPlane = 0.1f;
-        _cam.farClipPlane = 100f;
-        _cam.targetTexture = _rt;
-        _cam.clearFlags = CameraClearFlags.SolidColor;
-        _cam.backgroundColor = new Color(0.07f, 0.1f, 0.13f, 1f);
-        try
+        if (Application.isBatchMode)
         {
-            var hd = go.AddComponent<HDAdditionalCameraData>();
-            hd.clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
-            hd.backgroundColorHDR = _cam.backgroundColor;
+            SelfTest.Log($"screenshot {name} skipped: batchmode has no back buffer (run tools/run-selftest.ps1 without -Headless)");
+            return;
         }
-        catch (Exception e)
-        {
-            SelfTest.Log($"capture: no HDRP camera data ({e.GetType().Name})");
-        }
-
-        var canvas = SUI.SUI.SUIViewport;
-        canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        canvas.worldCamera = _cam;
-        canvas.planeDistance = 10;
-        SelfTest.Log($"capture: canvas now renders to {W}x{H} texture, screen is {Screen.width}x{Screen.height}, batchmode={Application.isBatchMode}");
+        var path = UiCapture.SaveScreen(name);
+        if (path != null) Shots.Add(path);
+        SelfTest.Check($"ui: screenshot {name} requested", path != null, path ?? UiCapture.LastError);
     }
 
-    /// <summary>Saves what the camera rendered last frame. Returns the file path, or null (see <see cref="LastError"/>).</summary>
-    public static string? Save(string name)
+    /// <summary>Screen captures are written at the end of the frame, so they are checked here, a while after they were taken.</summary>
+    private static void VerifyShots()
     {
-        if (_rt == null) { LastError = "capture not started"; return null; }
-        var path = Path.Combine(Dir, name + ".png");
-        var previous = RenderTexture.active;
-        try
+        foreach (var path in Shots)
         {
-            Canvas.ForceUpdateCanvases();
-            RenderTexture.active = _rt;
-            var tex = new Texture2D(W, H, TextureFormat.RGBA32, false);
-            tex.ReadPixels(new Rect(0, 0, W, H), 0, 0);
-            tex.Apply();
-            File.WriteAllBytes(path, ImageConversion.EncodeToPNG(tex));
-
-            // Is anything but the clear color in the picture?
-            var px = tex.GetPixels32();
-            int differing = 0, samples = 0;
-            var bg = (Color32)_cam!.backgroundColor;
-            for (int i = 0; i < px.Length; i += 97)
-            {
-                samples++;
-                var p = px[i];
-                if (Math.Abs(p.r - bg.r) + Math.Abs(p.g - bg.g) + Math.Abs(p.b - bg.b) > 24) differing++;
-            }
-            UnityEngine.Object.Destroy(tex);
-            SelfTest.Log($"screenshot {path} ({differing}/{samples} samples differ from the background)");
-            if (differing < samples / 50) { LastError = "image is (almost) empty"; return null; }
-            return path;
-        }
-        catch (Exception e)
-        {
-            LastError = e.GetType().Name + ": " + e.Message;
-            return null;
-        }
-        finally
-        {
-            RenderTexture.active = previous;
+            var (ok, detail) = UiCapture.Verify(path);
+            SelfTest.Check($"ui: screenshot {Path.GetFileName(path)} has content", ok, detail);
         }
     }
 }

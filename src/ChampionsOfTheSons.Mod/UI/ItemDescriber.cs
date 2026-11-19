@@ -104,7 +104,7 @@ internal static class ItemDescriber
         var desc = ModContent.Text.Get(item.BaseId + ".description", "");
         var lore = ModContent.Text.Get(item.BaseId + ".lore", "");
         if (desc.Length > 0 || lore.Length > 0) sb.Append('\n');
-        if (desc.Length > 0) sb.Append("<i>").Append(Color(UiTheme.TextDim, desc)).Append("</i>\n");
+        if (desc.Length > 0) sb.Append("<i>").Append(Color(UiTheme.Description, desc)).Append("</i>\n");
         if (lore.Length > 0) sb.Append("<i>").Append(Color(UiTheme.TextFaint, lore)).Append("</i>\n");
     }
 

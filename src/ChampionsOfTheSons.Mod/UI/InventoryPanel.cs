@@ -96,6 +96,23 @@ internal sealed class InventoryPanel
 
     public string? TooltipSlot { get; private set; }
 
+    /// <summary>True when the tooltip had no room to the right of its slot and sits on the left.</summary>
+    public bool TooltipOnLeft { get; private set; }
+
+    /// <summary>Where the tooltip sits, in canvas units with the origin at the top-left corner.</summary>
+    public Rect TooltipBounds { get; private set; }
+
+    /// <summary>The canvas size in canvas units (1080 high; the width follows the screen's aspect ratio).</summary>
+    public Vector2 CanvasSize => SUIViewport.GetComponent<RectTransform>().rect.size;
+
+    /// <summary>A slot's rectangle in canvas units with the origin at the top-left corner.</summary>
+    public Rect SlotBounds(string slotKey)
+    {
+        var w = _slotByKey[slotKey];
+        var c = CanvasSize;
+        return new Rect((c.x - WinW) / 2 + w.X, (c.y - WinH) / 2 + w.Y, w.Size, w.Size);
+    }
+
     public IReadOnlyList<SlotWidget> Slots => _slots;
 
     public IReadOnlyList<SheetRow> SheetRows => _sheetData;
@@ -215,7 +232,7 @@ internal sealed class InventoryPanel
         text.enableAutoSizing = true;
         text.fontSizeMin = 8;
         text.fontSizeMax = equip ? 14 : 13;
-        text.margin = new Vector4(4, 12, 4, 12);
+        text.margin = new Vector4(3, 13, 3, 3);
         text.overflowMode = TextOverflowModes.Truncate;
         text.raycastTarget = false;
 
@@ -353,12 +370,17 @@ internal sealed class InventoryPanel
         if (hovered == null) HideTooltip(); else ShowTooltip(hovered);
     }
 
-    private string? RaycastSlot()
+    private string? RaycastSlot() => RaycastSlotAt(Input.mousePosition);
+
+    /// <summary>The slot under a screen point (pixels, origin bottom-left), found the way a real pointer would: a UI raycast.</summary>
+    public string? RaycastSlotAt(Vector2 screenPoint)
     {
         if (EventSystem.current == null || SUIRaycaster == null) return null;
-        foreach (var go in GetHoveredUiObjects(SUIRaycaster))
+        var hits = new Il2CppSystem.Collections.Generic.List<RaycastResult>();
+        SUIRaycaster.Raycast(new PointerEventData(EventSystem.current) { position = screenPoint }, hits);
+        foreach (var hit in hits)
         {
-            var t = go.transform;
+            var t = hit.gameObject.transform;
             while (t != null)
             {
                 if (_slotByObjectId.TryGetValue(t.gameObject.GetInstanceID(), out var key)) return key;
@@ -366,6 +388,17 @@ internal sealed class InventoryPanel
             }
         }
         return null;
+    }
+
+    /// <summary>Screen point (pixels, origin bottom-left) at the center of a slot, for hit-testing.</summary>
+    public Vector2 ScreenPointOf(string slotKey)
+    {
+        var w = _slotByKey[slotKey];
+        var canvas = SUIViewport.GetComponent<RectTransform>().rect;
+        float cx = (canvas.width - WinW) / 2 + w.X + w.Size / 2;
+        float cy = (canvas.height - WinH) / 2 + w.Y + w.Size / 2;
+        float scale = SUIViewport.scaleFactor;
+        return new Vector2(cx * scale, (canvas.height - cy) * scale);
     }
 
     // ---------------------------------------------------------------- refresh
@@ -489,11 +522,13 @@ internal sealed class InventoryPanel
         float winLeft = (cw - WinW) / 2, winTop = (ch - WinH) / 2;
         float sx = winLeft + w.X, sy = winTop + w.Y;
         float x = sx + w.Size + 10;
-        if (x + TipW > cw - 8) x = sx - TipW - 10;
+        TooltipOnLeft = x + TipW > cw - 8;
+        if (TooltipOnLeft) x = sx - TipW - 10;
         x = Mathf.Max(8, x);
         float h = _tip.RectTransform.rect.height;
         float y = Mathf.Max(8, Mathf.Min(sy, ch - 8 - h));
         _tip.RectTransform.anchoredPosition = new Vector2(x, -y);
+        TooltipBounds = new Rect(x, y, TipW, h);
     }
 
     public void HideTooltip()
