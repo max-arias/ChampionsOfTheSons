@@ -55,9 +55,22 @@ public static class PlayerBridge
         {
             if (damage <= 0) return;
             var kind = isDemonic ? DamageKind.Magic : DamageKind.Physical;
-            var result = PlayerDefense.Incoming(PlayerState.Character.Stats, damage, kind, Rng);
-            LastIncoming = (damage, result.Damage, result.Dodged);
-            damage = (float)result.Damage;
+            var character = PlayerState.Character;
+            var result = PlayerDefense.Incoming(character.Stats, damage, kind, Rng);
+            double final = result.Damage;
+            if (!result.Dodged && final > 0)
+            {
+                OnEnemyHitPlayer(character, final);
+                var health = LocalPlayer.Vitals?.Health;
+                // Undying Promise: a lethal hit leaves 30% health instead, once per cooldown.
+                if (health != null && PlayerEffects.Undying.TryTrigger(character.Inventory, health._currentValue, final))
+                {
+                    health.SetCurrentValue(health.GetMax() * (float)UniqueItems.UndyingHealth);
+                    final = 0;
+                }
+            }
+            LastIncoming = (damage, final, result.Dodged);
+            damage = (float)final;
         }
         catch (Exception e)
         {
@@ -65,10 +78,31 @@ public static class PlayerBridge
         }
     }
 
+    /// <summary>What the enemy that just hit us does besides damage: Basher stun, Poisonous, and our thorns back at it.</summary>
+    private static void OnEnemyHitPlayer(PlayerCharacter character, double damageTaken)
+    {
+        if (PlayerEffects.LastAttacker is not { } last || Time.time - last.Time > 0.75f) return;
+        var enemy = last.Enemy;
+        PlayerEffects.LastAttacker = null;
+        PlayerEffects.Stun(EnemyHitEffects.StunSeconds(enemy.Profile));
+        PlayerEffects.AddPoison(EnemyHitEffects.PoisonPerSecond(enemy.Profile, damageTaken), AbilityTuning.PoisonSeconds);
+        double thorns = PlayerHitEffects.Thorns(character.Stats);
+        if (thorns > 0 && enemy.IsActive)
+        {
+            double pierce = enemy.Profile.Armor * Math.Clamp(character.Stats.Get("thorns_armor_piercing"), 0, 1);
+            EnemyPatches.DealForced(enemy, new OutgoingHit(thorns, DamageKind.Physical, false, pierce), creditPlayer: true);
+        }
+    }
+
     [HarmonyPatch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.GetTargetVelocity))]
     [HarmonyPostfix]
     private static void AfterTargetVelocity(ref Vector3 __result)
     {
+        if (PlayerEffects.Stunned)
+        {
+            __result = new Vector3(0, __result.y, 0);
+            return;
+        }
         float m = (float)PlayerState.Character.Stats.Get(StatIds.MovementSpeed);
         if (m <= 0 || Mathf.Approximately(m, 1)) return;
         __result = new Vector3(__result.x * m, __result.y, __result.z * m);
@@ -80,5 +114,6 @@ public static class PlayerBridge
     {
         float m = (float)PlayerState.Character.Stats.Get(StatIds.JumpPower);
         if (m > 0) __result *= m;
+        if (PlayerEffects.Stunned) __result = 0;
     }
 }
