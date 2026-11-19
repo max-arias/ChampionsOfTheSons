@@ -69,6 +69,8 @@ public class ChampionsOfTheSonsMod : SonsMod
                 Perks.PerksFeature.Panel?.Close();
                 Crafting.CraftingFeature.Panel?.Close();
                 HostRules.WorldRulesFeature.Settings?.Close();
+                // Enemies from earlier phases stay in the world: switch them off so they neither cast nor take part in this phase.
+                foreach (var enemy in Bridge.EnemyRegistry.Snapshot()) enemy.TestActive = false;
             };
             SelfTest.RegisterDefaultSteps();
             // --cots-selftest-only=<FeatureTypeName>: run just that feature's checks (quick loop while developing it).

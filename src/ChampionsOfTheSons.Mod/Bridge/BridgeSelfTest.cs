@@ -20,7 +20,11 @@ public static class BridgeSelfTest
         {
             var t = LocalPlayer.Transform;
             WorldState.SetDifficulty(Difficulties.Easy);
+            // no elite: a random defensive affix (shield, steadfast) would swallow the 10-damage probe below
+            var easyRules = WorldState.Rules;
+            WorldState.SetRulesForTest(easyRules with { AllowElites = false });
             _easy = ActorTools.Spawn(VailActorTypeId.Carl, t.position + t.forward * 6 + t.right * 2);
+            WorldState.SetRulesForTest(easyRules);
             WorldState.SetDifficulty(Difficulties.Hell);
             _hell = ActorTools.Spawn(VailActorTypeId.Carl, t.position + t.forward * 6 - t.right * 2);
             WorldState.SetDifficulty(Difficulties.Easy);

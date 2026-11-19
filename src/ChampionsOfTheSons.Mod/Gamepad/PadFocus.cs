@@ -173,7 +173,7 @@ internal static class PadFocus
     private static void PlaceFrame(GameObject target)
     {
         if (_frame == null) return;
-        var rt = (RectTransform)_frame.transform;
+        var rt = _frame.GetComponent<RectTransform>();
         var canvasRt = SUI.SUI.SUIViewport.GetComponent<RectTransform>();
         CanvasCorners(target.GetComponent<RectTransform>(), canvasRt, out var lo, out var hi);
         rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
