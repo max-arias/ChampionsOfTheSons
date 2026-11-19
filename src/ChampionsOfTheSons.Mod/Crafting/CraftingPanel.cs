@@ -70,6 +70,7 @@ internal sealed class CraftingPanel
     public Rng Rng { get; set; } = Rng.FromTime();
 
     public bool IsOpen => _root != null && _root.Root.activeSelf;
+    public GameObject? PadRoot => _root?.Root;
     public CraftMode Mode => _mode;
     public string? Target => _target;
     public IReadOnlyList<string> Picked => _picked;
@@ -214,7 +215,7 @@ internal sealed class CraftingPanel
             _dirty = false;
             Refresh();
         }
-        string? hovered = _useSimulatedHover ? _simulatedHover : RaycastKey(_hoverIds, Input.mousePosition);
+        string? hovered = _useSimulatedHover ? _simulatedHover : RaycastKey(_hoverIds, Pad.PadPointer.Position);
         if (hovered != _hover)
         {
             _hover = hovered;

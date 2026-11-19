@@ -30,6 +30,9 @@ internal sealed partial class InventoryPanel
 
     public bool MenuVisible => MenuSlot != null;
 
+    /// <summary>The right-click menu object while it is open (gamepad focus is limited to it), else null.</summary>
+    public GameObject? PadMenuRoot => MenuVisible ? _menu.Root : null;
+
     /// <summary>The menu's rectangle in canvas units (origin top-left); empty when closed.</summary>
     public Rect MenuBounds => MenuVisible ? new Rect(_menuPos.x, _menuPos.y, MenuW, MenuH) : default;
 
@@ -82,11 +85,11 @@ internal sealed partial class InventoryPanel
     /// a release without a drag on the same slot is a click (equip/unequip). Right button opens the item menu.</summary>
     private void PollPointer()
     {
-        var mouse = (Vector2)Input.mousePosition;
+        var mouse = Pad.PadPointer.Position;
         var canvasPos = ScreenToCanvas(mouse);
         bool overMenu = MenuVisible && MenuBounds.Contains(canvasPos);
 
-        if (Input.GetMouseButtonDown(0))
+        if (Pad.PadPointer.ButtonDown(0))
         {
             if (MenuVisible && !overMenu) CloseMenu();
             _pressKey = null;
@@ -96,12 +99,12 @@ internal sealed partial class InventoryPanel
                 if (key != null && Character.Inventory.Get(key) != null) { _pressKey = key; _pressPoint = mouse; }
             }
         }
-        else if (Input.GetMouseButton(0) && _pressKey != null)
+        else if (Pad.PadPointer.Button(0) && _pressKey != null)
         {
             if (!Dragging && Vector2.Distance(mouse, _pressPoint) > DragThreshold) BeginDrag(_pressKey);
             if (Dragging) MoveGhost(canvasPos);
         }
-        else if (Input.GetMouseButtonUp(0) && _pressKey != null)
+        else if (Pad.PadPointer.ButtonUp(0) && _pressKey != null)
         {
             var from = _pressKey;
             bool wasDragging = Dragging;
@@ -111,7 +114,7 @@ internal sealed partial class InventoryPanel
             else if (over == from) ClickSlot(from);
         }
 
-        if (Input.GetMouseButtonDown(1))
+        if (Pad.PadPointer.ButtonDown(1))
         {
             EndDrag();
             var key = overMenu ? null : RaycastSlotAt(mouse);

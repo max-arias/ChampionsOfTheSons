@@ -3,6 +3,7 @@
 #   ./tools/run-selftest.ps1                 # windowed 640x360
 #   ./tools/run-selftest.ps1 -Headless -NoGraphics   # -nographics crashes in UnityPlayer.dll after world activation (2026-11-18)
 #   -NoBuild                                  # run whatever is deployed already
+#   -Only GamepadFeature                      # run just that feature's checks (type name of its IModFeature): ~2 min instead of ~9
 # One game folder is shared by every checkout/worktree, so build+deploy+run happen under a machine-wide lock:
 # never deploy any other way (build with -p:DeployToGame=false otherwise).
 # The test save is a copy of a real save in its own slot (1999999999) so real saves are never touched.
@@ -11,6 +12,7 @@ param(
     [switch]$Headless,
     [switch]$NoGraphics,
     [switch]$NoBuild,
+    [string]$Only = '',
     [int]$TimeoutSeconds = 600,
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
@@ -36,6 +38,7 @@ try {
     $started = Get-Date
 
     $gameArgs = @('--savegame', $SaveId, '--cots-selftest', '-logFile', $unityLog)
+    if ($Only) { $gameArgs += "--cots-selftest-only=$Only" }
     if ($Headless) { $gameArgs += @('-batchmode'); if ($NoGraphics) { $gameArgs += @('-nographics') } }
     else { $gameArgs += @('-screen-fullscreen', '0', '-screen-width', '640', '-screen-height', '360') }
 

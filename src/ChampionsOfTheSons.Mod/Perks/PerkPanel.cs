@@ -94,6 +94,7 @@ internal sealed class PerkPanel
     private string _lastMessage = "";
 
     public bool IsOpen => _root != null && _root.Root.activeSelf;
+    public GameObject? PadRoot => _root?.Root;
     public string CurrentTab => _tab;
     public string? Selected => _selected;
     public IReadOnlyCollection<string> NodeIds => _nodes.Keys;
@@ -305,7 +306,7 @@ internal sealed class PerkPanel
             _timer = 0;
             Refresh();
         }
-        string? hovered = _useSimulatedHover ? _simulatedHover : RaycastKey(_hoverIds, Input.mousePosition);
+        string? hovered = _useSimulatedHover ? _simulatedHover : RaycastKey(_hoverIds, Pad.PadPointer.Position);
         if (hovered != _hover)
         {
             _hover = hovered;

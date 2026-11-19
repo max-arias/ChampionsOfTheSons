@@ -16,6 +16,7 @@ internal abstract class ModalPanel
     protected static Color C(string hex) => ColorFromString(hex);
 
     public bool IsOpen => Root != null && Root.Root.activeSelf;
+    public GameObject? PadRoot => Root?.Root;
 
     protected void BuildShell(string id, float w, float h, string title)
     {
