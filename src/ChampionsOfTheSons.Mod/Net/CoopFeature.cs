@@ -26,7 +26,7 @@ public sealed class CoopFeature : IModFeature
     public static string? RejectReason { get; private set; }
 
     /// <summary>Host side: connections that passed the version check.</summary>
-    public static readonly HashSet<BoltConnection> Verified = new();
+    public static readonly HashSet<BoltConnection> Verified = new(ConnectionComparer.Instance);
 
     private bool _sentHello;
     private float _resend;
@@ -66,7 +66,7 @@ public sealed class CoopFeature : IModFeature
     /// <summary>Host: forget clients that left.</summary>
     private static void PruneGone()
     {
-        var alive = new HashSet<BoltConnection>();
+        var alive = new HashSet<BoltConnection>(ConnectionComparer.Instance);
         var it = BoltNetwork.clients.GetEnumerator();
         var nonGeneric = it.Cast<Il2CppSystem.Collections.IEnumerator>();
         while (nonGeneric.MoveNext()) alive.Add(it.Current);

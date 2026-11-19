@@ -30,6 +30,7 @@ public sealed class CoopExtras : IModFeature
 
     private static readonly List<Source> Sources = new();
     private static float _auraTimer, _posTimer;
+    private static bool _posLogged;
     private static string? _castSpell;
 
     private static KeybindConfigEntry? _pingKey;
@@ -68,6 +69,7 @@ public sealed class CoopExtras : IModFeature
             if (_posTimer <= 0)
             {
                 _posTimer = 1f;
+                if (!_posLogged) { _posLogged = true; RLog.Msg($"{CoopTestJoin.Tag} client: reporting position to the host"); }
                 CoopSession.SendToHost(new PlayerPos(CoopSession.ToVec(LocalPlayer.Transform.position), PlayerState.Character.Progress.Level));
             }
         }

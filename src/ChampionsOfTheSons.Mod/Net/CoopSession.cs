@@ -12,8 +12,8 @@ public static class CoopSession
     /// <summary>The host's own player id (a dedicated server has no local player but still uses it for host-made events).</summary>
     public const uint HostId = 0;
 
-    private static readonly Dictionary<BoltConnection, Vec3> Positions = new();
-    private static readonly Dictionary<BoltConnection, int> Levels = new();
+    private static readonly Dictionary<BoltConnection, Vec3> Positions = new(ConnectionComparer.Instance);
+    private static readonly Dictionary<BoltConnection, int> Levels = new(ConnectionComparer.Instance);
 
     public static bool Active => BoltNetwork.isRunning;
     public static bool IsHost => BoltNetwork.isRunning && BoltNetwork.isServer;
@@ -94,4 +94,16 @@ public static class CoopSession
         if (IsHost) SendToPeers(message);
         else SendToHost(message);
     }
+}
+
+/// <summary>Compares Bolt connections by the native object: IL2CPP interop hands out a new managed wrapper for the same connection
+/// on every callback, so reference equality would count one peer several times and drop its later messages.</summary>
+public sealed class ConnectionComparer : IEqualityComparer<BoltConnection>
+{
+    public static readonly ConnectionComparer Instance = new();
+
+    public bool Equals(BoltConnection? a, BoltConnection? b) =>
+        ReferenceEquals(a, b) || (a != null && b != null && a.Pointer == b.Pointer);
+
+    public int GetHashCode(BoltConnection c) => c.Pointer.GetHashCode();
 }

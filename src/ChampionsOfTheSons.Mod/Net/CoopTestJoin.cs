@@ -57,9 +57,31 @@ public sealed class CoopTestJoin : IModFeature
         return i >= 0 && i + 1 < args.Length ? args[i + 1] : null;
     }
 
+    private float _skipCheck;
+
+    /// <summary>The test client joins a world it has never been in, so the game plays its arrival cutscenes; nobody is there to skip them,
+    /// and the player is not in control (no position reports) until they end. Skip them the way the skip key does.</summary>
+    private void SkipCutscenes()
+    {
+        if (Time.realtimeSinceStartup < _skipCheck) return;
+        _skipCheck = Time.realtimeSinceStartup + 1f;
+        try
+        {
+            if (!Sons.Cutscenes.CutsceneManager.IsCutscenePlaying()) return;
+            RLog.Msg($"{Tag} join: skipping a cutscene");
+            Sons.Cutscenes.CutsceneManager.SkipActiveCutscene();
+        }
+        catch (Exception e)
+        {
+            RLog.Warning($"{Tag} cutscene skip failed: {e.Message}");
+        }
+    }
+
     public void Update(float dt, bool inWorld)
     {
-        if (Target == null || inWorld || _connected) return;
+        if (Target == null) return;
+        SkipCutscenes();
+        if (inWorld || _connected) return;
         if (_started < 0) _started = Time.realtimeSinceStartup;
         AcceptJoinDialog();
         if (Time.realtimeSinceStartup - _started < _next) return;

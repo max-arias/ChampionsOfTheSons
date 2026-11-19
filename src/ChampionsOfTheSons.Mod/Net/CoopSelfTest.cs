@@ -54,11 +54,21 @@ public sealed class CoopSelfTest : IModFeature
 
     // ================================================================= server half
 
+    private static float _diagAt;
+
     public void Update(float dt, bool inWorld)
     {
-        if (!ServerDriver || !CoopSession.IsHost || CoopFeature.Verified.Count == 0) return;
-        var conn = CoopSession.Peers.FirstOrDefault(c => CoopSession.TryPosition(c, out _));
-        if (conn == null) return;
+        if (!ServerDriver) return;
+        var conn = CoopSession.IsHost && CoopFeature.Verified.Count > 0 ? CoopSession.Peers.FirstOrDefault(c => CoopSession.TryPosition(c, out _)) : null;
+        if (conn == null)
+        {
+            if (Time.realtimeSinceStartup > _diagAt)
+            {
+                _diagAt = Time.realtimeSinceStartup + 10;
+                RLog.Msg($"{CoopTestJoin.Tag} server: waiting: host={CoopSession.IsHost} verified={CoopFeature.Verified.Count} peers={CoopSession.Peers.Count()} withPosition={CoopSession.Peers.Count(c => CoopSession.TryPosition(c, out _))} inWorld={inWorld}");
+            }
+            return;
+        }
         CoopSession.TryPosition(conn, out var pos);
         var at = CoopSession.ToUnity(pos);
         float now = Time.realtimeSinceStartup;

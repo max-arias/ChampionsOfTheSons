@@ -119,13 +119,16 @@ internal sealed class ProgressHud
     private void BuildXpBar(SContainerOptions layer)
     {
         _xpRoot = SContainer.TopLeft(0, 0).Size(BarW, 34);
-        _xpLevel = HudKit.Label("", 24, UiTheme.Gold, TextAlignmentOptions.MidlineRight).TopLeft(-106, 0).Size(96, 34);
+        // On a dark backing like the bars, so it stays readable over snow and sky.
+        var levelBack = SContainer.TopLeft(-88, 4).Size(80, 26).Background(HudKit.C("#0A0D12D0"), EBackground.Round10);
+        _xpLevel = HudKit.Label("", 20, UiTheme.Gold, TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
+        levelBack.Add(_xpLevel);
         var back = SContainer.TopLeft(0, 8).Size(BarW, 18).Background(HudKit.C("#0A0D12D0"), EBackground.Round10);
         _xpFill = SContainer.Background(HudKit.C("#E3B341"), EBackground.None);
         back.Add(_xpFill);
         _xpText = HudKit.Label("", 13, "#FFFFFF", TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
         back.Add(_xpText);
-        _xpRoot.Add(_xpLevel);
+        _xpRoot.Add(levelBack);
         _xpRoot.Add(back);
         layer.Add(_xpRoot);
         HudKit.NoRaycast(_xpRoot.Root);
