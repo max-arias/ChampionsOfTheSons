@@ -125,12 +125,17 @@ internal static class FollowupsSelfTest
 
     // ---------------------------------------------------------------- COS-47 / COS-48
 
+    /// <summary>A fixed equippable base of the rarity (a random pick can be a material without stats since the item cut).</summary>
+    private static string Equippable(int rarity, int level) =>
+        ModContent.Db.Items.Values.Where(d => LootRoller.IsEquippable(d) && d.Rarity == rarity && d.MinLevel <= level)
+            .OrderBy(d => d.Id, StringComparer.Ordinal).First().Id;
+
     private static void Scrap()
     {
         var panel = CraftingFeature.Panel;
         panel.Open();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        var item = TestKit.Give(null, 5, 90);
+        var item = TestKit.Give(Equippable(5, 90), 5, 90);
         string key = Inventory.Bag(0);
         panel.SetMode(CraftMode.Scrap);
         panel.Clear();
@@ -153,7 +158,7 @@ internal static class FollowupsSelfTest
         var panel = CraftingFeature.Panel;
         panel.Open();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        var item = TestKit.Give(null, 4, 40);
+        var item = TestKit.Give(Equippable(4, 40), 4, 40);
         string key = Inventory.Bag(0);
         panel.Clear();
         panel.ClickBag(key);
@@ -177,7 +182,7 @@ internal static class FollowupsSelfTest
         {
             panel.Clear();
             panel.ClickBag(key);
-            var ingredient = TestKit.Give(null, (int)current.Rarity, current.Level); // ingredients must be at least the target's rarity
+            var ingredient = TestKit.Give(Equippable((int)current.Rarity, current.Level), (int)current.Rarity, current.Level); // at least the target's rarity
             // The bag may hold earlier materials: click the slot the ingredient actually went to.
             var slot = Enumerable.Range(0, LootRoller.BagSlots).Select(Inventory.Bag).FirstOrDefault(k => ReferenceEquals(Pc.Inventory.Get(k), ingredient));
             if (slot != null) panel.ClickBag(slot);
