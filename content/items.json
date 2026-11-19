@@ -1481,9 +1481,9 @@
       ]
     },
     {
-      "id": "item.maga_cap",
+      "id": "item.sunscorched_cap",
       "legacyIndex": 33,
-      "name": "MAGA Cap",
+      "name": "Sunscorched Cap",
       "type": "helmet",
       "rarity": 1,
       "minLevel": 1,
@@ -9261,9 +9261,9 @@
       "statPools": []
     },
     {
-      "id": "item.jihad_vest",
+      "id": "item.zealots_powder_vest",
       "legacyIndex": 221,
-      "name": "Jihad Vest",
+      "name": "Zealot's Powder Vest",
       "type": "chest_armor",
       "rarity": 5,
       "minLevel": 1,

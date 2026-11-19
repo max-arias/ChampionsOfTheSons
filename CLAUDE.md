@@ -25,6 +25,7 @@ RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, 
 - Core code must not reference Unity or game types; the bridge converts.
 - Content IDs are stable strings; never derive IDs from order. Saves must keep loading: bump the save version and add a migration for any format change.
 - Host is authoritative for enemies, drops and difficulty. A client computes its own outgoing hits; the host applies defense.
+- Content stays fantasy and RPG: nothing political or religious, no real-world people, slogans or brands (names, text, icons).
 - Do not copy code or lore/description text from the original Champions of the Forest repo (it has no license). Mechanics and numbers are fine.
 - Tests: rules, save migrations and codec round-trips. No tests that restate content values.
 
