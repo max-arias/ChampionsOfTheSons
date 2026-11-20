@@ -2,8 +2,9 @@
 // Ground-drop models (COS-63) and held-weapon models for the weapon-type work (COS-93), plus the loot marker and
 // sparkle. Sources (Assets/ThirdParty, credited in CREDITS.md): Low Poly Weapon Pack (Kickin It Studios) for the
 // weapons, KayKit Fantasy Weapons Bits (CC0) for the shield, Deepvein Mine Kit (CC0) for the chest, key and coin
-// fallbacks. Every model gets one cold grey-metal look, like the original mod's single metallic drop material: the
-// sources' colour slots and texture maps are remapped to greys here, nothing is painted by hand.
+// fallbacks. Weapons and the shield wear one worn-steel set (COS-111, look-dev variant B): Poly Haven CC0 textures
+// (metal_plate_02, rusty_metal_04, rough_wood, brown_leather, wood_table_worn) on UVs box-projected in metres, since the
+// sources are flat-coloured. The Deepvein props keep their own painted maps, half desaturated to sit with them.
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,11 +15,16 @@ using UnityEngine.Rendering;
 public static class CotsLootPrefabs
 {
     private const string Src = "Assets/ThirdParty";
-    private static readonly Color SteelTint = new(0.93f, 0.96f, 1f);
 
-    // Grey-metal set for the flat-coloured Kickin It models, keyed by their material names.
+    // Worn-steel set for the flat-coloured models, keyed by the Kickin It material names.
     private static Dictionary<string, Material> _slots = new();
-    private static Material _kaykit = null!;
+
+    /// <summary>Real length (m) of each Kickin It model's longest side: its UVs come out in metres whatever the prefab's size.</summary>
+    private static readonly Dictionary<string, float> RealLength = new()
+    {
+        ["Arming_Sword"] = 1.05f, ["Great_Sword"] = 1.6f, ["Bearded_Axe"] = 0.95f, ["War_Hammer"] = 1.1f, ["Spear"] = 2.0f,
+        ["Bow"] = 1.4f, ["Halberd"] = 2.1f, ["Double_Axe"] = 1.2f, ["Double_Hammer"] = 1.4f, ["Broadhead_Arrow"] = 0.75f,
+    };
 
     public static void Generate()
     {
@@ -27,14 +33,14 @@ public static class CotsLootPrefabs
 
         _slots = new Dictionary<string, Material>
         {
-            // Metallic stays moderate: fully metallic surfaces read black wherever the game has no reflection probe.
-            ["Metal"] = CotsGen.Lit("GreyMetal_Bright", Grey(0.78f), 0.45f, 0.6f),
-            ["Dark Metal"] = CotsGen.Lit("GreyMetal_Dark", Grey(0.38f), 0.45f, 0.5f),
-            ["Wood"] = CotsGen.Lit("GreyMetal_Grip", Grey(0.26f), 0.25f, 0.32f),
-            ["Chord"] = CotsGen.Lit("GreyMetal_Wrap", Grey(0.42f), 0.2f, 0.28f),
-            ["Bone"] = CotsGen.Lit("GreyMetal_Pale", Grey(0.85f), 0.3f, 0.5f),
+            // Metallic capped at 0.45: fully metallic surfaces read black wherever the game has no reflection probe.
+            // Arguments: metallic and smoothness caps (the mask map scales them), tile size in metres, colour grade.
+            ["Metal"] = Worn("Worn_Steel", "metal_plate_02", 0.45f, 0.75f, 0.6f, c => Desat(c, 0.45f) * 1.3f),
+            ["Dark Metal"] = Worn("Worn_DarkMetal", "rusty_metal_04", 0.45f, 0.6f, 0.35f, c => c * 0.75f),
+            ["Wood"] = Worn("Worn_Wood", "rough_wood", 0, 0.55f, 0.5f, c => c * 0.72f),
+            ["Chord"] = Worn("Worn_Leather", "brown_leather", 0, 0.6f, 0.2f, c => Desat(c, 0.35f) * 0.8f),
+            ["Bone"] = Worn("Worn_Bone", "wood_table_worn", 0, 0.5f, 0.3f, c => Desat(c, 0.7f) * 1.5f),
         };
-        _kaykit = CotsGen.Lit("GreyMetal_KayKit", Color.white, 0.45f, 0.5f, GreyTexture($"{Src}/KayKit/weapons_bits_texture.png", "KayKitGrey", 256));
 
         // Held weapons (COS-93): real size, origin at the end of the grip, +Y toward the blade or head, +Z out of the flat.
         Weapon("Weapon_Sword", "Arming_Sword", 1.05f);
@@ -63,7 +69,98 @@ public static class CotsLootPrefabs
         Drop("Drop_Consumable", Deepvein("Props", "potion_a", new[] { "m_potion_a", "m_potion_a_cork" }, extra: new() { ["m_potion_a_cork"] = "cork_a" }), 0.4f, Vector3.zero);
     }
 
-    private static Color Grey(float v) => new(v * SteelTint.r, v * SteelTint.g, v * SteelTint.b, 1);
+    // ---- worn-steel materials (COS-111) ----
+
+    /// <summary>
+    /// An HDRP/Lit material from one Poly Haven set in Assets/ThirdParty/PolyHaven: the colour map graded by
+    /// <paramref name="grade"/>, its OpenGL normal map, and an HDRP mask map (R metallic, G AO, A smoothness) made from the
+    /// ARM map (AO, roughness, metallic). The emissive colour stays free for the weapon glow (COS-108).
+    /// </summary>
+    private static Material Worn(string name, string asset, float metallic, float smoothness, float tileMetres, System.Func<Color, Color> grade)
+    {
+        var dir = $"{Src}/PolyHaven/{asset}";
+        var c = Raw($"{dir}/{asset}_diff_512.jpg");
+        var arm = Raw($"{dir}/{asset}_arm_512.jpg");
+        var col = new Texture2D(c.width, c.height, TextureFormat.RGBA32, false);
+        col.SetPixels(c.GetPixels().Select(p =>
+        {
+            var g = grade(p);
+            return new Color(Mathf.Clamp01(g.r), Mathf.Clamp01(g.g), Mathf.Clamp01(g.b), 1);
+        }).ToArray());
+        var mask = new Texture2D(arm.width, arm.height, TextureFormat.RGBA32, false, true);
+        mask.SetPixels(arm.GetPixels().Select(a => new Color(a.b, a.r, 1, 1 - a.g)).ToArray());
+        Object.DestroyImmediate(c);
+        Object.DestroyImmediate(arm);
+        var normalPath = $"{dir}/{asset}_nor_gl_512.jpg";
+        var imp = (TextureImporter)AssetImporter.GetAtPath(normalPath);
+        if (imp.textureType != TextureImporterType.NormalMap || imp.textureCompression != TextureImporterCompression.CompressedHQ)
+        {
+            imp.textureType = TextureImporterType.NormalMap;
+            imp.textureCompression = TextureImporterCompression.CompressedHQ;
+            imp.wrapMode = TextureWrapMode.Repeat;
+            imp.SaveAndReimport();
+        }
+        return CotsGen.Lit(name, Color.white, metallic, smoothness, CotsGen.SavePng(col, name + "_c", false, true),
+            AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath), CotsGen.SavePng(mask, name + "_m", true, true), tileMetres: tileMetres);
+    }
+
+    /// <summary>An image file's bytes as a readable texture, no colour conversion.</summary>
+    private static Texture2D Raw(string path)
+    {
+        var t = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
+        t.LoadImage(File.ReadAllBytes(path));
+        return t;
+    }
+
+    private static Color Desat(Color c, float amount)
+    {
+        float l = c.r * 0.2126f + c.g * 0.7152f + c.b * 0.0722f;
+        return Color.Lerp(c, new Color(l, l, l, 1), amount);
+    }
+
+    /// <summary>
+    /// <paramref name="src"/> with every triangle given its own vertices and a box-projected UV in metres (side faces:
+    /// V runs along the model's length), one sub-mesh per list in <paramref name="subs"/>. <paramref name="metresPerUnit"/>
+    /// converts the source's units, so tiling textures sit at real-world scale.
+    /// </summary>
+    private static Mesh BoxUv(Mesh src, string name, float metresPerUnit, List<int[]> subs)
+    {
+        var sv = src.vertices;
+        var sn = src.normals;
+        var verts = new List<Vector3>();
+        var norms = new List<Vector3>();
+        var uvs = new List<Vector2>();
+        var outSubs = new List<int[]>();
+        foreach (var tris in subs)
+        {
+            var o = new int[tris.Length];
+            for (int t = 0; t < tris.Length; t += 3)
+            {
+                Vector3 a = sv[tris[t]], b = sv[tris[t + 1]], c = sv[tris[t + 2]];
+                var n = Vector3.Cross(b - a, c - a);
+                var an = new Vector3(Mathf.Abs(n.x), Mathf.Abs(n.y), Mathf.Abs(n.z));
+                for (int j = 0; j < 3; j++)
+                {
+                    var p = sv[tris[t + j]] * metresPerUnit;
+                    o[t + j] = verts.Count;
+                    verts.Add(sv[tris[t + j]]);
+                    norms.Add(sn.Length > 0 ? sn[tris[t + j]] : n.normalized);
+                    uvs.Add(an.x >= an.y && an.x >= an.z ? new Vector2(p.z, p.y) : an.y >= an.z ? new Vector2(p.x, p.z) : new Vector2(p.x, p.y));
+                }
+            }
+            outSubs.Add(o);
+        }
+        var m = new Mesh { name = name, indexFormat = verts.Count > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16 };
+        m.SetVertices(verts);
+        m.SetNormals(norms);
+        m.SetUVs(0, uvs);
+        m.subMeshCount = outSubs.Count;
+        for (int s = 0; s < outSubs.Count; s++) m.SetTriangles(outSubs[s], s);
+        m.RecalculateTangents();
+        return CotsGen.SaveMesh(m);
+    }
+
+    private static float Longest(Bounds b) => Mathf.Max(b.size.x, Mathf.Max(b.size.y, b.size.z));
 
     // ---- sources ----
 
@@ -71,20 +168,49 @@ public static class CotsLootPrefabs
     private static GameObject Kickin(string file)
     {
         var path = $"{Src}/KickinIt/{file}.fbx";
-        var mesh = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Mesh>().First();
         var fbx = AssetDatabase.LoadAssetAtPath<GameObject>(path);
         var srcMats = fbx.GetComponentInChildren<Renderer>().sharedMaterials;
+        if (!KickinMeshes.TryGetValue(file, out var mesh))
+        {
+            var src = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Mesh>().First();
+            var subs = Enumerable.Range(0, src.subMeshCount).Select(src.GetTriangles).ToList();
+            KickinMeshes[file] = mesh = BoxUv(src, file + "_uv", RealLength[file] / Longest(src.bounds), subs);
+        }
         var root = new GameObject(file);
         var child = CotsGen.Child(root, "model", mesh, _slots["Metal"]);
         child.GetComponent<MeshRenderer>().sharedMaterials = srcMats.Select(m => _slots.TryGetValue(m.name, out var g) ? g : _slots["Metal"]).ToArray();
         return root;
     }
 
+    private static readonly Dictionary<string, Mesh> KickinMeshes = new();
+
+    /// <summary>
+    /// A KayKit model (the shield, about 0.6 m across): its atlas is flat colour blocks, so each triangle goes to the worn
+    /// slot its block's colour suggests (grey: metal, brown: wood, other colours: leather) and gets box UVs.
+    /// </summary>
     private static GameObject KayKit(string file)
     {
-        var mesh = AssetDatabase.LoadAllAssetsAtPath($"{Src}/KayKit/{file}.fbx").OfType<Mesh>().First();
+        var src = AssetDatabase.LoadAllAssetsAtPath($"{Src}/KayKit/{file}.fbx").OfType<Mesh>().First();
+        var atlas = Raw($"{Src}/KayKit/weapons_bits_texture.png");
+        string[] order = { "Metal", "Dark Metal", "Wood", "Chord" };
+        var lists = order.Select(_ => new List<int>()).ToArray();
+        var tris = src.triangles;
+        var uv = src.uv;
+        for (int t = 0; t < tris.Length; t += 3)
+        {
+            var mid = (uv[tris[t]] + uv[tris[t + 1]] + uv[tris[t + 2]]) / 3;
+            var c = atlas.GetPixelBilinear(mid.x, mid.y);
+            Color.RGBToHSV(c, out float h, out float s, out float v);
+            int slot = s < 0.2f ? (v > 0.45f ? 0 : 1) : h is > 0.02f and < 0.15f ? 2 : 3;
+            lists[slot].AddRange(new[] { tris[t], tris[t + 1], tris[t + 2] });
+        }
+        Object.DestroyImmediate(atlas);
+        Debug.Log($"cots: {file} worn slots: " + string.Join(", ", order.Select((o, i) => $"{o} {lists[i].Count / 3}")));
+        var used = Enumerable.Range(0, order.Length).Where(i => lists[i].Count > 0).ToArray();
+        var mesh = BoxUv(src, file + "_uv", 0.6f / Longest(src.bounds), used.Select(i => lists[i].ToArray()).ToList());
         var root = new GameObject(file);
-        CotsGen.Child(root, "model", mesh, _kaykit);
+        var child = CotsGen.Child(root, "model", mesh, _slots["Wood"]);
+        child.GetComponent<MeshRenderer>().sharedMaterials = used.Select(i => _slots[order[i]]).ToArray();
         return root;
     }
 
@@ -140,44 +266,21 @@ public static class CotsLootPrefabs
                 normal = AssetDatabase.LoadAssetAtPath<Texture2D>($"{dir}/t_{key}_normal.png");
             }
         }
-        m = CotsGen.Lit("GreyMetal_" + key, Color.white, 0.45f, 0.55f, GreyTexture($"{dir}/t_{key}_color.png", "Grey_" + key, 512), normal);
+        m = CotsGen.Lit("Prop_" + key, Color.white, 0.45f, 0.55f, WornTexture($"{dir}/t_{key}_color.png", "Worn_" + key), normal);
         DeepveinMats[key] = m;
         return m;
     }
 
-    /// <summary>A desaturated, steel-tinted copy of a colour map, contrast stretched so parts stay distinguishable.</summary>
-    private static Texture2D GreyTexture(string path, string name, int size)
+    /// <summary>A Deepvein colour map half desaturated, to sit with the worn-steel weapons (no resizing: the maps are 512).</summary>
+    private static Texture2D WornTexture(string path, string name)
     {
-        var src = new Texture2D(2, 2);
-        src.LoadImage(File.ReadAllBytes(path));
-        var px = src.GetPixels();
-        float lo = 1, hi = 0;
-        foreach (var c in px)
+        var src = Raw(path);
+        var outTex = new Texture2D(src.width, src.height, TextureFormat.RGBA32, false);
+        outTex.SetPixels(src.GetPixels().Select(c =>
         {
-            float l = c.r * 0.3f + c.g * 0.59f + c.b * 0.11f;
-            lo = Mathf.Min(lo, l);
-            hi = Mathf.Max(hi, l);
-        }
-        int w = src.width, h = src.height;
-        var outTex = new Texture2D(w, h, TextureFormat.RGBA32, false);
-        var o = new Color[px.Length];
-        for (int i = 0; i < px.Length; i++)
-        {
-            float l = px[i].r * 0.3f + px[i].g * 0.59f + px[i].b * 0.11f;
-            float v = Mathf.Lerp(0.25f, 0.88f, Mathf.InverseLerp(lo, hi, l));
-            o[i] = new Color(v * SteelTint.r, v * SteelTint.g, v * SteelTint.b, 1);
-        }
-        outTex.SetPixels(o);
-        if (w > size)
-        {
-            // Point-sample down: the KayKit atlas is flat colour blocks, the Deepvein maps are already 512.
-            var small = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            for (int y = 0; y < size; y++)
-                for (int x = 0; x < size; x++)
-                    small.SetPixel(x, y, outTex.GetPixel(x * w / size, y * h / size));
-            Object.DestroyImmediate(outTex);
-            outTex = small;
-        }
+            var d = Desat(c, 0.5f);
+            return new Color(d.r, d.g, d.b, 1);
+        }).ToArray());
         Object.DestroyImmediate(src);
         return CotsGen.SavePng(outTex, name, false, false);
     }

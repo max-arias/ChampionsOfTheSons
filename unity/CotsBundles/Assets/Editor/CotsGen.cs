@@ -81,11 +81,13 @@ public static class CotsGen
     // ---- materials ----
 
     public static Material Lit(string name, Color color, float metallic, float smoothness, Texture2D? baseMap = null, Texture2D? normal = null,
-        Texture2D? mask = null, Color? emissive = null)
+        Texture2D? mask = null, Color? emissive = null, float tileMetres = 0)
     {
         var m = new Material(Shader.Find("HDRP/Lit")) { name = name };
         m.SetColor("_BaseColor", color);
         if (baseMap != null) m.SetTexture("_BaseColorMap", baseMap);
+        // HDRP/Lit tiles every main map with the base map's scale; meshes with UVs in metres pass the tile size.
+        if (tileMetres > 0) m.SetTextureScale("_BaseColorMap", Vector2.one / tileMetres);
         m.SetFloat("_Metallic", metallic);
         m.SetFloat("_Smoothness", smoothness);
         if (normal != null)
