@@ -13,6 +13,8 @@ internal enum BookTab
     Gear,
     Bag,
     Character,
+    /// <summary>The in-game guide (COS-97): what the mod is, the keys, and one page per system.</summary>
+    Help,
 }
 
 /// <summary>

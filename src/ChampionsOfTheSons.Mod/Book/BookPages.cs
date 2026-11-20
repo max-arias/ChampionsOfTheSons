@@ -41,7 +41,7 @@ internal static class BookPages
 
     private static readonly (BookTab Tab, string Key, string Fallback)[] SubTabs =
     {
-        (BookTab.Gear, "ui.book.tab.gear", "Gear"), (BookTab.Character, "ui.book.tab.character", "Character"),
+        (BookTab.Gear, "ui.book.tab.gear", "Gear"), (BookTab.Character, "ui.book.tab.character", "Character"), (BookTab.Help, "ui.book.tab.help", "Help"),
     };
 
     /// <summary>Equip slots in a body shape, page pixels (x, y from the top-left, width, height).</summary>
@@ -101,7 +101,11 @@ internal static class BookPages
         return keys;
     }
 
-    private static RectTransform _gear = null!, _char = null!;
+    private static RectTransform _gear = null!, _char = null!, _help = null!;
+    private static TextMeshProUGUI _helpTitle = null!, _helpBody = null!, _helpPager = null!;
+    private static readonly List<(TextMeshProUGUI Name, TextMeshProUGUI Key)> HelpRows = new();
+    private const float HelpRowH = 30;
+    public static int HelpPage { get; private set; }
     private static readonly List<PageSlot> GearSlots = new(), BagSlots = new();
     private static readonly List<PageHit> Hits = new();
     private static TextMeshProUGUI _sets = null!, _gearCount = null!, _bagCount = null!, _bagPager = null!, _charPager = null!;
@@ -134,8 +138,10 @@ internal static class BookPages
         bg.raycastTarget = false;
         _gear = PageKit.Fill(page, "gear");
         _char = PageKit.Fill(page, "character");
+        _help = PageKit.Fill(page, "help");
         BuildGear();
         BuildCharacter();
+        BuildHelp();
         Pc.Inventory.Changed += MarkDirty;
         Pc.Stats.Changed += MarkDirty;
         Show(BookTab.None);
@@ -253,12 +259,22 @@ internal static class BookPages
         _sets = PageKit.Text(_charStats, "sets", Left, setsY + 34, XpW, PagerY - setsY - 44, "", 20, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
     }
 
+    private static void BuildHelp()
+    {
+        TitleBar(_help, BookTab.Help);
+        _helpTitle = PageKit.Text(_help, "help-title", Left, Header + 12, XpW, 48, "", 34, PageKit.TitleBar);
+        PageKit.Box(_help, "help-rule", Left, Header + 64, XpW, 2, PageKit.InkFaint);
+        _helpBody = PageKit.Text(_help, "help-body", Left, Header + 80, XpW, PagerY - Header - 96, "", 23, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
+        _helpPager = Pager(_help);
+    }
+
     // ------------------------------------------------------------------ show / refresh
 
     public static void Show(BookTab tab)
     {
         _gear.gameObject.SetActive(tab is BookTab.Gear or BookTab.Bag);
         _char.gameObject.SetActive(tab == BookTab.Character);
+        _help.gameObject.SetActive(tab == BookTab.Help);
         _dirty = true;
         Refresh(tab);
     }
@@ -282,6 +298,7 @@ internal static class BookPages
                 RefreshBag();
                 break;
             case BookTab.Character: RefreshCharacter(); break;
+            case BookTab.Help: RefreshHelp(); break;
         }
     }
 
@@ -385,6 +402,39 @@ internal static class BookPages
         AddPagerHits();
     }
 
+    private static void RefreshHelp()
+    {
+        int pages = BookGuide.Pages;
+        HelpPage = Math.Clamp(HelpPage, 0, pages - 1);
+        var (title, body) = BookGuide.Page(HelpPage, PageKit.HexOf(PageKit.TitleBar), PageKit.HexOf(PageKit.InkFaint));
+        _helpTitle.text = title;
+        // The Keys page: one fixed row per action (name left, key right) so each key sits on its line on the tilted page;
+        // the body then holds only the footer, below the rows.
+        var keys = HelpPage == 1 ? BookGuide.KeyRows() : new List<(string Name, string Key)>();
+        float top = Header + 80;
+        while (HelpRows.Count < keys.Count)
+        {
+            int n = HelpRows.Count;
+            // Keys sit right after the names: the book is tilted, so a key at the far right edge reads as one row higher.
+            HelpRows.Add((PageKit.Text(_help, "help-row-name-" + n, Left, top + n * HelpRowH, 230, HelpRowH, "", 23, PageKit.Ink, TextAlignmentOptions.MidlineLeft),
+                PageKit.Text(_help, "help-row-key-" + n, Left + 240, top + n * HelpRowH, 160, HelpRowH, "", 23, PageKit.TitleBar, TextAlignmentOptions.MidlineLeft)));
+        }
+        for (int n = 0; n < HelpRows.Count; n++)
+        {
+            bool on = n < keys.Count;
+            HelpRows[n].Name.gameObject.SetActive(on);
+            HelpRows[n].Key.gameObject.SetActive(on);
+            if (!on) continue;
+            HelpRows[n].Name.text = keys[n].Name;
+            HelpRows[n].Key.text = keys[n].Key;
+        }
+        float bodyTop = keys.Count > 0 ? top + keys.Count * HelpRowH + 16 : top;
+        _helpBody.rectTransform.anchoredPosition = new Vector2(Left, -bodyTop);
+        _helpBody.text = HelpPage == 1 ? BookGuide.KeysFooter(PageKit.HexOf(PageKit.InkFaint)) : body;
+        _helpPager.text = $"{HelpPage + 1}/{pages}";
+        AddPagerHits();
+    }
+
     private static void RenderSlot(PageSlot s, ItemInstance? item, bool force = false)
     {
         bool selected = s.Key.Length > 0 && s.Key == Selected;
@@ -429,6 +479,7 @@ internal static class BookPages
     {
         if (tab is BookTab.Bag or BookTab.Gear) BagPage = (BagPage + delta + BagPages) % BagPages;
         else if (tab == BookTab.Character) CharPage = (CharPage + delta + 3) % 3;
+        else if (tab == BookTab.Help) HelpPage = (HelpPage + delta + BookGuide.Pages) % BookGuide.Pages;
         _dirty = true;
     }
 
@@ -480,6 +531,7 @@ internal static class BookPages
             case "tab.Gear": BookHost.ShowModPage(BookTab.Gear); return "tab";
             case "tab.Bag": BookHost.ShowModPage(BookTab.Bag); return "tab";
             case "tab.Character": BookHost.ShowModPage(BookTab.Character); return "tab";
+            case "tab.Help": BookHost.ShowModPage(BookTab.Help); return "tab";
             case "prev": Page(tab, -1); return "page";
             case "next": Page(tab, +1); return "page";
             case "sort": InventoryActions.SortBag(); Selected = null; return "sort";

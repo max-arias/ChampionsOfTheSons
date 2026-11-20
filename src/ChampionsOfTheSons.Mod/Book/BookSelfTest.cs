@@ -68,6 +68,18 @@ internal static class BookSelfTest
         SelfTest.Add(26.2f, "book: shot character 2", () => TestKit.Screenshot("book-character-2"));
         SelfTest.Add(26.4f, "book: character page 3", () => BookPages.Page(BookTab.Character, 1));
         SelfTest.Add(27f, "book: shot character 3", () => TestKit.Screenshot("book-character-3"));
+        // Help tab (COS-97): a third sub-tab after Character; its Keys page lists the live bindings.
+        SelfTest.Add(27.05f, "book: help tab", () => BookHost.ShowModPage(BookTab.Help));
+        SelfTest.Add(27.12f, "book: help tab shows the guide", () =>
+        {
+            SelfTest.Check("book: the Help tab opens on its first page", BookHost.Tab == BookTab.Help && BookPages.HelpPage == 0 && BookGuide.Pages >= 7,
+                $"tab {BookHost.Tab}, page {BookPages.HelpPage}, pages {BookGuide.Pages}");
+            BookPages.Page(BookTab.Help, 1);
+            var keys = string.Join(" ", BookGuide.KeyRows().Select(r => r.Key));
+            string spell1 = Settings.KeyNames.Short(Settings.ModKeys.Value("spell_slot_1"));
+            SelfTest.Check("book: the Keys page lists the current spell key", keys.Contains(spell1), spell1);
+        });
+        SelfTest.Add(27.2f, "book: shot help keys", () => TestKit.Screenshot("book-help-keys"));
         SelfTest.Add(27.3f, "book: game tab gives the page back", GamePage);
         SelfTest.Add(28f, "book: shot game page", () => TestKit.Screenshot("book-game-page"));
         SelfTest.Add(28.3f, "book: tab idle", TabIdle);
