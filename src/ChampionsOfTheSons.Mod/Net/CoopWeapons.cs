@@ -21,7 +21,8 @@ public sealed class CoopWeapons : IModFeature
 
     private sealed class Remote
     {
-        public string TypeId = "";
+        public string TypeId = "", ItemId = "";
+        public int Rarity;
         public Vector3 Position;
         public float Seen;
         public WeaponSkin? Skin;
@@ -29,7 +30,8 @@ public sealed class CoopWeapons : IModFeature
 
     private static readonly Dictionary<uint, Remote> Players = new();
     private static float _sendTimer, _matchTimer;
-    private static string _sentType = "";
+    private static string _sentType = "", _sentItem = "";
+    private static int _sentRarity;
 
     /// <summary>Self-tests and logs: remote players currently showing a model.</summary>
     public static int RemoteModels => Players.Values.Count(p => p.Skin?.Alive == true);
@@ -47,12 +49,15 @@ public sealed class CoopWeapons : IModFeature
     {
         if (!CoopSession.Active || !inWorld || LocalPlayer.Transform == null) return;
         string type = WeaponModels.Active?.Id ?? "";
+        var item = type != "" ? PlayerState.Character.Inventory.Get(Core.Rules.WeaponTypes.WeaponSlot) : null;
+        string itemId = item?.BaseId ?? "";
+        int rarity = (int)(item?.Rarity ?? 0);
         _sendTimer -= dt;
-        if (type != _sentType || (type != "" && _sendTimer <= 0))
+        if (type != _sentType || itemId != _sentItem || rarity != _sentRarity || (type != "" && _sendTimer <= 0))
         {
             _sendTimer = Resend;
-            _sentType = type;
-            CoopSession.Broadcast(new HeldWeapon(0, type, CoopSession.ToVec(LocalPlayer.Transform.position)));
+            (_sentType, _sentItem, _sentRarity) = (type, itemId, rarity);
+            CoopSession.Broadcast(new HeldWeapon(0, type, CoopSession.ToVec(LocalPlayer.Transform.position), rarity, itemId));
         }
         _matchTimer -= dt;
         if (_matchTimer <= 0)
@@ -77,6 +82,8 @@ public sealed class CoopWeapons : IModFeature
             }
             if (!Players.TryGetValue(held.PlayerId, out var p)) Players[held.PlayerId] = p = new Remote();
             p.TypeId = held.TypeId;
+            p.ItemId = held.ItemId;
+            p.Rarity = held.Rarity;
             p.Position = CoopSession.ToUnity(held.Position);
             p.Seen = Time.realtimeSinceStartup;
         }
@@ -105,15 +112,16 @@ public sealed class CoopWeapons : IModFeature
                     if (d < bestDist) { bestDist = d; best = c; }
                 }
 
+            var look = type != null ? GlowLook.For(p.ItemId == "" ? null : p.ItemId, (Core.Rarity)p.Rarity) : GlowLook.None;
             var skin = p.Skin;
-            if (skin != null && (!skin.Alive || best == null || skin.Holder != best.Value.Holder || skin.Type != type))
+            if (skin != null && (!skin.Alive || best == null || skin.Holder != best.Value.Holder || skin.Type != type || skin.Look.Key != look.Key))
             {
                 if (skin.Holder != null) skin.Remove();
                 p.Skin = null;
             }
             if (p.Skin == null && best != null && type != null)
             {
-                p.Skin = new WeaponSkin(best.Value.Holder, type);
+                p.Skin = new WeaponSkin(best.Value.Holder, type, look);
                 // Reach stays the wielder's business: their own client computes their hits.
                 p.Skin.Apply(stretchReach: false);
                 RLog.Msg($"{CoopTestJoin.Tag} player {id} shows {type.Id} on {best.Value.Holder.name} ({p.Skin.Source})");

@@ -2627,6 +2627,7 @@
         }
       ],
       "weaponModel": "hammer",
+      "glow": { "tint": "#8fd8ff", "style": "frost" },
       "uniqueEffects": [
         {
           "stat": "i_hammer_stun_duration",
@@ -2935,6 +2936,7 @@
         }
       ],
       "weaponModel": "greatbow",
+      "glow": { "tint": "#ff8a2a", "style": "ember" },
       "uniqueEffects": [
         {
           "stat": "i_great_bow_ignites",
@@ -3688,6 +3690,7 @@
         }
       ],
       "weaponModel": "greatbow",
+      "glow": { "tint": "#ff5a1a", "style": "ember" },
       "uniqueEffects": [
         {
           "stat": "i_eruption_bow",

@@ -50,7 +50,11 @@ public sealed class WeaponsFeature : IModFeature
 
     public void OnGameStart() => WeaponModels.Reset();
 
-    public void RegisterSelfTests() => WeaponsSelfTest.Register();
+    public void RegisterSelfTests()
+    {
+        WeaponsSelfTest.Register();
+        GlowSelfTest.Register(55f);
+    }
 }
 
 /// <summary>Game item ids by name (the item database), with a fallback id when the name is not found.</summary>

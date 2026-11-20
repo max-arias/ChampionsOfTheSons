@@ -6,8 +6,9 @@ namespace ChampionsOfTheSons.Core.Networking;
 /// </summary>
 public static class MessageCodec
 {
-    /// <remarks>2: <see cref="EnemySync"/> carries the damage multiplier and the elite name (COS-68).</remarks>
-    public const int ProtocolVersion = 2;
+    /// <remarks>2: <see cref="EnemySync"/> carries the damage multiplier and the elite name (COS-68).
+    /// 3: <see cref="HeldWeapon"/> carries the item's rarity and base id (COS-108).</remarks>
+    public const int ProtocolVersion = 3;
 
     public static byte[] Encode(IMessage message)
     {
@@ -45,7 +46,7 @@ public static class MessageCodec
                 break;
             case Ping m: w.VarUInt(m.PlayerId).Byte((byte)m.Kind); WriteVec(w, m.Position); w.UInt64(m.TargetId); break;
             case AdminGrant m: w.Byte((byte)m.Action).UInt64(unchecked((ulong)BitConverter.DoubleToInt64Bits(m.Amount))).String(m.Arg); break;
-            case HeldWeapon m: w.VarUInt(m.PlayerId).String(m.TypeId); WriteVec(w, m.Position); break;
+            case HeldWeapon m: w.VarUInt(m.PlayerId).String(m.TypeId); WriteVec(w, m.Position); w.VarUInt((uint)m.Rarity).String(m.ItemId); break;
             default: throw new ArgumentException($"No encoding for {message.GetType().Name}");
         }
         return w.ToArray();
@@ -76,7 +77,7 @@ public static class MessageCodec
             MessageType.SpellCast => new SpellCast(r.VarUInt(), r.String() ?? "", ReadVec(r), ReadVec(r), r.UInt64()),
             MessageType.Ping => new Ping(r.VarUInt(), (PingKind)r.Byte(), ReadVec(r), r.UInt64()),
             MessageType.AdminGrant => new AdminGrant((AdminAction)r.Byte(), BitConverter.Int64BitsToDouble(unchecked((long)r.UInt64())), r.String() ?? ""),
-            MessageType.HeldWeapon => new HeldWeapon(r.VarUInt(), r.String() ?? "", ReadVec(r)),
+            MessageType.HeldWeapon => new HeldWeapon(r.VarUInt(), r.String() ?? "", ReadVec(r), (int)r.VarUInt(), r.String() ?? ""),
             _ => throw new PacketException($"Unknown message type {(byte)type}"),
         };
         if (!r.AtEnd) throw new PacketException($"Trailing bytes after {type}");

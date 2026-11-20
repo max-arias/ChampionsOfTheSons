@@ -132,6 +132,8 @@ public sealed class ItemBaseDef
     /// roll attack speed as a penalty).</summary>
     public List<SlotMultiplier> StatMultipliers { get; set; } = new();
     public string? WeaponModel { get; set; }
+    /// <summary>A unique weapon's own glow look (COS-108); null = the rarity's colour and the default wisp.</summary>
+    public GlowDef? Glow { get; set; }
     public string? Set { get; set; }
     public List<StatEffect> UniqueEffects { get; set; } = new();
     public bool Manual { get; set; }
@@ -146,6 +148,14 @@ public sealed class ItemBaseDef
             if (m.Slot == slot && m.Stat == statId) return m.Multiplier;
         return null;
     }
+}
+
+/// <summary>The glow of a unique weapon (COS-108): a tint ("#rrggbb", null = the Legendary colour) and a particle style.</summary>
+public sealed class GlowDef
+{
+    public string? Tint { get; set; }
+    /// <summary>One of <see cref="Rules.WeaponGlow.Styles"/>; null = "ember".</summary>
+    public string? Style { get; set; }
 }
 
 public sealed class SlotMultiplier

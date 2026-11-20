@@ -140,10 +140,10 @@ internal static class WeaponsSelfTest
         });
     }
 
-    private static void EquipItem(string itemId, string typeId)
+    internal static void EquipItem(string itemId, string typeId, Rarity rarity = Rarity.Rare)
     {
         Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
-        var item = new ItemInstance { BaseId = itemId, Level = 10, Rarity = Rarity.Rare, Stats = Array.Empty<RolledStat>() };
+        var item = new ItemInstance { BaseId = itemId, Level = 10, Rarity = rarity, Stats = Array.Empty<RolledStat>() };
         Pc.Inventory.AddToBag(item);
         var slot = Pc.Inventory.Slots.First(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && kv.Value == item).Key;
         SelfTest.Check($"weapons: {typeId} item equipped", Pc.Inventory.Equip(slot, ModContent.Db));

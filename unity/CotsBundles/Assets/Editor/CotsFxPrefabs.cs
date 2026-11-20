@@ -86,9 +86,50 @@ public static class CotsFxPrefabs
         Glyph();
         Gas();
         WeaponTrail();
+        WeaponGlow();
     }
 
     // ---- prefabs ----
+
+    /// <summary>
+    /// Weapon glow (COS-108). Fx_WeaponEdge: a fresnel shell; the mod gives its MeshFilter the weapon's own mesh and tints it
+    /// in the rarity colour. Fx_WeaponWisp / _Ember / _Frost: unique-weapon particles from a thin box 1 m along +Y (the mod
+    /// sets the box length to the blade), simulated in world space so they hang behind a moving blade.
+    /// </summary>
+    private static void WeaponGlow()
+    {
+        var edge = new GameObject("Fx_WeaponEdge");
+        CotsGen.Child(edge, "shell", _disc, CotsGen.Fx("FxWeaponEdgeMat", _white, new Color(1, 1, 1, 0.8f), 1.3f, fresnel: 1.8f, pulse: 0.15f, cullBack: true));
+        CotsGen.SavePrefab(edge);
+
+        WeaponParticles("Fx_WeaponWisp", rate: 9, life: 1.8f, size: 0.05f, rise: 0.12f, noise: 0.2f, intensity: 1.6f);
+        WeaponParticles("Fx_WeaponEmber", rate: 14, life: 1.1f, size: 0.03f, rise: 0.55f, noise: 0.35f, intensity: 2.4f);
+        WeaponParticles("Fx_WeaponFrost", rate: 10, life: 1.9f, size: 0.045f, rise: -0.12f, noise: 0.12f, intensity: 1.8f);
+    }
+
+    private static void WeaponParticles(string name, float rate, float life, float size, float rise, float noise, float intensity)
+    {
+        var go = new GameObject(name);
+        var ps = Particles(Sub(go, "motes"), CotsGen.Fx(name + "Mat", SoftDot(), Color.white, intensity));
+        Steady(ps, rate, life, size);
+        var main = ps.main;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.scalingMode = ParticleSystemScalingMode.Shape;
+        main.startSize = new ParticleSystem.MinMaxCurve(size * 0.6f, size * 1.3f);
+        var shape = ps.shape;
+        shape.enabled = true;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        shape.position = new Vector3(0, 0.5f, 0);
+        shape.scale = new Vector3(0.03f, 1f, 0.03f);
+        Velocity(ps, new Vector3(0, rise, 0));
+        { var vel = ps.velocityOverLifetime; vel.space = ParticleSystemSimulationSpace.World; } // rise is world up, whatever the blade's angle
+        var n = ps.noise;
+        n.enabled = true;
+        n.strength = noise;
+        n.frequency = 0.6f;
+        FadeInOut(ps);
+        CotsGen.SavePrefab(go);
+    }
 
     /// <summary>
     /// The swing trail of a held weapon type (COS-93): a TrailRenderer the mod parents to the weapon tip, switches on while

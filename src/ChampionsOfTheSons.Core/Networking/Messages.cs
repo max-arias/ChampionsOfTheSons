@@ -203,8 +203,9 @@ public sealed record AdminGrant(AdminAction Action, double Amount, string Arg) :
 }
 
 /// <summary>Player → everyone, on change and every few seconds while set: the weapon type in my hand ("" = none), and where
-/// I am, so receivers can find my body and show the model on my held game weapon (COS-93).</summary>
-public sealed record HeldWeapon(uint PlayerId, string TypeId, Vec3 Position) : IMessage
+/// I am, so receivers can find my body and show the model on my held game weapon (COS-93). Also the item's rarity and base
+/// item id, so receivers show the same glow (COS-108).</summary>
+public sealed record HeldWeapon(uint PlayerId, string TypeId, Vec3 Position, int Rarity = 0, string ItemId = "") : IMessage
 {
     public MessageType Type => MessageType.HeldWeapon;
 }

@@ -26,10 +26,17 @@ internal sealed class WeaponSkin
     private readonly List<(BoxCollider Box, Vector3 Size, Vector3 Center)> _boxes = new();
     private readonly List<(weaponInfo Info, bool NoTreeCut)> _treeFlags = new();
 
-    public WeaponSkin(Transform holder, WeaponTypeDef type)
+    /// <summary>The item's glow (COS-108).</summary>
+    public readonly GlowLook Look;
+
+    /// <summary>Glow parts made (edge shells, light, wisp).</summary>
+    public int GlowParts { get; private set; }
+
+    public WeaponSkin(Transform holder, WeaponTypeDef type, GlowLook look = default)
     {
         Holder = holder;
         Type = type;
+        Look = look.Style == null ? GlowLook.None : look; // default(GlowLook) has no style // default(GlowLook) has no style
     }
 
     public bool Alive => Holder != null && Model != null;
@@ -74,6 +81,8 @@ internal sealed class WeaponSkin
         var anchor = bow ? b.center : new Vector3(b.center.x, b.min.y, b.center.z);
         t.localPosition = new Vector3(0, 0, -(float)Type.Grip / holderScale) - rot * (anchor * s);
         if (Type.TrailWidth > 0 && !bow) AddTrail(new Vector3(b.center.x, b.max.y - 0.08f * b.size.y, b.center.z));
+        GlowParts = WeaponGlowFx.Apply(Model, Look, light: true);
+        if (Trail != null) WeaponGlowFx.Brighten(Trail, Look);
         if (stretchReach) StretchReach((float)WeaponTypes.ReachFactor(Type));
         if (!WeaponTypes.CanCutTrees(Type))
             foreach (var info in Holder.GetComponentsInChildren<weaponInfo>(true))
@@ -264,6 +273,7 @@ internal static class WeaponModels
 
     public static void Tick(float dt)
     {
+        WeaponGlowFx.Tick();
         _local?.Keep();
         _scan -= dt;
         if (_scan > 0) return;
@@ -280,7 +290,8 @@ internal static class WeaponModels
         var kind = found?.Kind ?? HeldKind.None;
         var type = WeaponTypes.Active(PlayerState.Character.Inventory, ModContent.Db, kind);
 
-        if (_local != null && (!_local.Alive || type != _local.Type || held == null || held.Pointer != _localHolder))
+        var look = type != null ? GlowLook.For(PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot)) : GlowLook.None;
+        if (_local != null && (!_local.Alive || type != _local.Type || look.Key != _local.Look.Key || held == null || held.Pointer != _localHolder))
         {
             if (_local.Holder != null) _local.Remove();
             _local = null;
@@ -289,10 +300,10 @@ internal static class WeaponModels
         {
             try
             {
-                _local = new WeaponSkin(held, type);
+                _local = new WeaponSkin(held, type, look);
                 _local.Apply(stretchReach: true);
                 _localHolder = held.Pointer;
-                RLog.Msg($"Champions of the Sons: {type.Id} on {held.name} ({_local.Source})");
+                RLog.Msg($"Champions of the Sons: {type.Id} on {held.name} ({_local.Source}{(look.Glows ? ", glow " + look.Key : "")})");
             }
             catch (Exception e)
             {
@@ -397,7 +408,8 @@ internal static class WeaponFx
     public static void LocalHit()
     {
         var skin = WeaponModels.LocalSkin;
-        if (skin?.Holder != null && skin.Type.Base != WeaponBase.Bow)
-            ModAudio.PlayAt(skin.Type.HitSound, skin.Holder.position, SoundRange, 0.9f, (float)skin.Type.SoundPitch);
+        if (skin?.Holder == null || skin.Type.Base == WeaponBase.Bow) return;
+        ModAudio.PlayAt(skin.Type.HitSound, skin.Holder.position, SoundRange, 0.9f, (float)skin.Type.SoundPitch);
+        WeaponGlowFx.HitSparks(skin);
     }
 }
