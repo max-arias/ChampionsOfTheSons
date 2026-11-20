@@ -168,8 +168,9 @@ public static class EnemyRegistry
     /// <summary>Self-tests: a runtime whose TestActive was set to true stays in <see cref="Live"/> (the headless game keeps it dormant).</summary>
     internal static void SetTestForced(EnemyRuntime r, bool forced)
     {
-        if (forced) TestForced.Add(r);
-        else TestForced.Remove(r);
+        // A test that switches an enemy on acts on it right away (casts, hits): put it in Live now, not at the next refresh.
+        if (forced && TestForced.Add(r)) ResolveActors();
+        else if (!forced) TestForced.Remove(r);
     }
 
     /// <summary>
