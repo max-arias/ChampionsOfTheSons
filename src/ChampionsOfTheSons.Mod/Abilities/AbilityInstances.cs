@@ -190,7 +190,7 @@ internal abstract class CastInstance : AbilityInstance
 internal sealed class MeteorInstance : CastInstance
 {
     private Vector3 _spot;
-    private GameObject? _marker;
+    private GameObject? _marker, _rock;
 
     public MeteorInstance(EnemyRuntime e) : base(e, ActiveAbilityRules.Spec(EnemyAbility.Meteor)) { }
 
@@ -198,7 +198,12 @@ internal sealed class MeteorInstance : CastInstance
     {
         _spot = target;
         _marker = Track(AbilityVisuals.Disc(new Color(1f, 0.25f, 0.1f), _spot, (float)Spec.Radius, "cots-ability-meteor-mark"));
+        // The meteor itself, falling onto the mark over the wind-up (visual only; the hit lands when the wind-up ends).
+        _rock = Track(AbilityVisuals.Make(PrimitiveType.Sphere, new Color(1f, 0.45f, 0.1f), _spot + MeteorDrop, Vector3.one * 1.6f, "cots-ability-meteor"));
+        AbilityVisuals.AddLight(_rock, new Color(1f, 0.5f, 0.2f), 18, 300);
     }
+
+    private static readonly Vector3 MeteorDrop = new(6, 35, 0);
 
     protected override bool Advance(float dt)
     {
@@ -206,6 +211,7 @@ internal sealed class MeteorInstance : CastInstance
         {
             float k = Mathf.Clamp01(T / (float)Spec.Windup);
             _marker.transform.localScale = new Vector3((float)Spec.Radius * 2, 0.04f + 0.02f * Mathf.Sin(T * 14), (float)Spec.Radius * 2) * (0.6f + 0.4f * k);
+            if (_rock != null) _rock.transform.position = _spot + MeteorDrop * (1 - k * k);
         }
         if (T < Spec.Windup) return false;
         Flash(new Color(1f, 0.55f, 0.1f), _spot + Vector3.up, (float)Spec.Radius, 0.5f);
@@ -220,6 +226,7 @@ internal sealed class MeteorInstance : CastInstance
         var m = _marker;
         Remove(ref m);
         _marker = null;
+        Remove(ref _rock);
     }
 }
 

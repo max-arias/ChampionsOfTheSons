@@ -111,7 +111,7 @@ public static class CotsGen
 
     /// <summary>A Cots/Fx material: additive glow, or alpha blend when <paramref name="additive"/> is false.</summary>
     public static Material Fx(string name, Texture2D tex, Color tint, float intensity = 1, bool additive = true, float fresnel = 0,
-        bool fresnelInvert = false, Vector2 scroll = default, float pulse = 0, bool cullBack = false, bool overlay = false)
+        bool fresnelInvert = false, Vector2 scroll = default, float pulse = 0, bool cullBack = false, bool overlay = false, bool fadeEnds = false)
     {
         var m = new Material(Shader.Find("Cots/Fx")) { name = name };
         m.SetTexture("_MainTex", tex);
@@ -121,6 +121,7 @@ public static class CotsGen
         m.SetFloat("_FresnelInvert", fresnelInvert ? 1 : 0);
         m.SetVector("_Scroll", scroll);
         m.SetFloat("_Pulse", pulse);
+        m.SetFloat("_FadeEnds", fadeEnds ? 1 : 0);
         m.SetFloat("_SrcBlend", additive ? (float)BlendMode.One : (float)BlendMode.SrcAlpha);
         m.SetFloat("_DstBlend", additive ? (float)BlendMode.One : (float)BlendMode.OneMinusSrcAlpha);
         m.SetFloat("_Cull", cullBack ? (float)CullMode.Back : (float)CullMode.Off);

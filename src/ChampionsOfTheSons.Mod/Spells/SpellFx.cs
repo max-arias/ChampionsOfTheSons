@@ -1,14 +1,22 @@
+using ChampionsOfTheSons.Mod.Visuals;
 using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Spells;
 
 /// <summary>
-/// Placeholder visuals for spells: coloured Unity primitives (spheres, flat discs, columns) that live for a time and then go.
-/// Real effects come with the asset pipeline (COS-5). Timers run on the dt the spell world is stepped with, so they work
-/// while the game itself is paused (headless self-tests).
+/// Spell visuals that live for a time and then go. With the asset bundle (COS-5) they are the bundled particle effects
+/// (COS-102, <see cref="FxKit"/>); without it, coloured Unity primitives (spheres, flat discs, columns). The size passed
+/// in is the spell's real radius either way, so what you see matches what is hit. Timers run on the dt the spell world
+/// is stepped with, so they work while the game itself is paused (headless self-tests).
 /// </summary>
 internal static class SpellFx
 {
+    /// <summary>
+    /// Which effect a call draws. <see cref="Look.Auto"/> picks from the shape and lifetime: a short disc or sphere is a
+    /// burst, a lasting disc an area ring, a lasting small sphere an orb, a lasting sphere that follows the player a bubble.
+    /// </summary>
+    public enum Look { Auto, Burst, Ring, Dome, Orb, Bubble, BlackHole, Snow, Gas, Glyph, Flame, SunFlare }
+
     private sealed class Item
     {
         public GameObject Go = null!;
@@ -27,15 +35,116 @@ internal static class SpellFx
         Holy = new(1f, 0.9f, 0.4f), Heal = new(0.4f, 1f, 0.5f), Blood = new(0.75f, 0.05f, 0.1f), Dark = new(0.12f, 0.05f, 0.2f),
         Storm = new(0.6f, 0.8f, 1f), Steel = new(0.8f, 0.85f, 0.95f);
 
-    public static GameObject Sphere(Vector3 pos, float radius, Color color, float seconds, Transform? follow = null) =>
-        Make(PrimitiveType.Sphere, pos, Vector3.one * radius * 2, color, seconds, follow);
+    /// <summary>Lifetime below which a disc or sphere counts as a one-shot burst.</summary>
+    private const float BurstSeconds = 2f;
+
+    public static GameObject Sphere(Vector3 pos, float radius, Color color, float seconds, Transform? follow = null, Look look = Look.Auto)
+    {
+        if (look == Look.Auto)
+            look = seconds <= BurstSeconds && follow == null ? Look.Burst : follow != null ? Look.Bubble : radius <= 1f ? Look.Orb : Look.Bubble;
+        return Fx(look, pos, radius, 0, color, seconds, follow) ?? Make(PrimitiveType.Sphere, pos, Vector3.one * radius * 2, color, seconds, follow);
+    }
 
     /// <summary>A flat disc lying on the ground, <paramref name="radius"/> across to its edge.</summary>
-    public static GameObject Disc(Vector3 pos, float radius, Color color, float seconds, Transform? follow = null) =>
-        Make(PrimitiveType.Cylinder, pos, new Vector3(radius * 2, 0.04f, radius * 2), color, seconds, follow);
+    public static GameObject Disc(Vector3 pos, float radius, Color color, float seconds, Transform? follow = null, Look look = Look.Auto)
+    {
+        if (look == Look.Auto) look = seconds <= BurstSeconds ? Look.Burst : Look.Ring;
+        return Fx(look, pos, radius, 0, color, seconds, follow) ?? Make(PrimitiveType.Cylinder, pos, new Vector3(radius * 2, 0.04f, radius * 2), color, seconds, follow);
+    }
 
-    public static GameObject Column(Vector3 pos, float radius, float height, Color color, float seconds) =>
-        Make(PrimitiveType.Cylinder, pos + Vector3.up * height / 2, new Vector3(radius * 2, height / 2, radius * 2), color, seconds, null);
+    public static GameObject Column(Vector3 pos, float radius, float height, Color color, float seconds)
+    {
+        var go = FxKit.Spawn(FxKit.Column, pos, new Vector3(radius, height, radius), color);
+        if (go != null)
+        {
+            FxKit.AddLight(go, color, radius * 3 + 6, 60, offset: Vector3.up * 0.3f);
+            return Track(go, seconds, null);
+        }
+        return Make(PrimitiveType.Cylinder, pos + Vector3.up * height / 2, new Vector3(radius * 2, height / 2, radius * 2), color, seconds, null);
+    }
+
+    /// <summary>A standing portal facing <paramref name="facing"/> (its 1 m radius ring stands on the ground); a column without the bundle.</summary>
+    public static GameObject Portal(Vector3 pos, Vector3 facing, Color color, float seconds)
+    {
+        var go = FxKit.Spawn(FxKit.Portal, pos, 1f, color);
+        if (go == null) return Column(pos, 0.9f, 2.4f, color, seconds);
+        facing.y = 0;
+        if (facing.sqrMagnitude > 1e-4f) go.transform.rotation = Quaternion.LookRotation(facing.normalized);
+        FxKit.AddLight(go, color, 6, 40, offset: Vector3.up * 1.1f);
+        return Track(go, seconds, null);
+    }
+
+    /// <summary>The bundled effect for <paramref name="look"/>, tracked like a primitive; null without the bundle.</summary>
+    private static GameObject? Fx(Look look, Vector3 pos, float radius, float height, Color color, float seconds, Transform? follow)
+    {
+        if (!FxKit.Available) return null;
+        GameObject? go;
+        switch (look)
+        {
+            case Look.Burst:
+                go = FxKit.Spawn(FxKit.Burst, pos, radius, color);
+                if (go != null && radius >= 1.5f) FxKit.AddLight(go, color, radius + 4, 30, offset: Vector3.up);
+                seconds = Mathf.Max(seconds, 0.7f); // let the wave finish
+                break;
+            case Look.Ring:
+                go = FxKit.Spawn(FxKit.Ring, pos, radius, color);
+                break;
+            case Look.Dome:
+                go = FxKit.Spawn(FxKit.Dome, pos, radius, color);
+                if (go != null) FxKit.AddLight(go, color, radius + 4, 40, offset: Vector3.up * 1.5f);
+                break;
+            case Look.Orb:
+                go = FxKit.Spawn(FxKit.Orb, pos, radius, color);
+                if (go != null) FxKit.AddLight(go, color, 6 + radius * 4, 40);
+                break;
+            case Look.Bubble:
+                go = FxKit.Spawn(FxKit.Bubble, pos, radius, color);
+                break;
+            case Look.BlackHole:
+                // radius = the dark core's; the prefab's core is 0.22 of its unit size, the pull swirl reaches the rest.
+                go = FxKit.Spawn(FxKit.BlackHole, pos, radius / 0.22f, color);
+                if (go != null) FxKit.AddLight(go, new Color(0.55f, 0.25f, 1f), radius + 6, 80, essential: true);
+                break;
+            case Look.Snow:
+                go = FxKit.Spawn(FxKit.Ring, pos, radius, color);
+                if (go != null)
+                {
+                    var snow = FxKit.Spawn(FxKit.Snow, pos, new Vector3(radius, 7, radius), Color.white);
+                    snow?.transform.SetParent(go.transform, true);
+                }
+                break;
+            case Look.Gas:
+                go = FxKit.Spawn(FxKit.Gas, pos, radius, Color.Lerp(color, new Color(0.45f, 0.6f, 0.2f), 0.6f));
+                seconds = Mathf.Max(seconds, 2.5f); // the cloud lingers a moment after the hit
+                break;
+            case Look.Glyph:
+                go = FxKit.Spawn(FxKit.Glyph, pos, radius, color) ?? FxKit.Spawn(FxKit.Burst, pos, radius, color);
+                break;
+            case Look.Flame:
+                go = FxKit.Spawn(FxKit.Flame, pos, radius, color);
+                break;
+            case Look.SunFlare:
+                // A ring on the ground and a beam from the sky onto it, lit from above.
+                go = FxKit.Spawn(FxKit.Ring, pos, radius, color);
+                if (go != null)
+                {
+                    var beam = FxKit.Spawn(FxKit.Beam, pos, new Vector3(radius * 0.4f, 60, radius * 0.4f), color);
+                    beam?.transform.SetParent(go.transform, true);
+                    FxKit.AddLight(go, color, radius + 10, 200, essential: true, offset: Vector3.up * 4);
+                }
+                break;
+            default:
+                go = null;
+                break;
+        }
+        return go == null ? null : Track(go, seconds, follow);
+    }
+
+    private static GameObject Track(GameObject go, float seconds, Transform? follow)
+    {
+        Items.Add(new Item { Go = go, Left = seconds, Follow = follow, Offset = follow != null ? go.transform.position - follow.position : Vector3.zero });
+        return go;
+    }
 
     private static GameObject Make(PrimitiveType type, Vector3 pos, Vector3 scale, Color color, float seconds, Transform? follow)
     {
@@ -63,8 +172,7 @@ internal static class SpellFx
                 rend.material.color = color;
             }
         }
-        Items.Add(new Item { Go = go, Left = seconds, Follow = follow, Offset = follow != null ? pos - follow.position : Vector3.zero });
-        return go;
+        return Track(go, seconds, follow);
     }
 
     /// <summary>Removes one effect early.</summary>

@@ -202,14 +202,56 @@ internal static class AbilityForcePatch
     }
 }
 
-/// <summary>Placeholder visuals: Unity primitives with flat unlit colour (the asset pipeline, COS-5, comes later).</summary>
+/// <summary>
+/// Ability visuals. With the asset bundle each named object is a bundled effect (COS-102, <see cref="Visuals.FxKit"/>)
+/// inside an adapter that keeps the primitive's transform meaning (a sphere's scale is its diameter, a cylinder is
+/// centred and 2 m tall at scale 1), so ability code positions, scales and stretches either one the same way.
+/// Without the bundle: Unity primitives with flat unlit colour.
+/// </summary>
 internal static class AbilityVisuals
 {
     private static Shader? _unlit;
     private static bool _shaderLooked;
 
+    /// <summary>The effect drawn for each named ability object, and how the inner effect sits in the primitive-shaped adapter.</summary>
+    private static (string Fx, Vector3 Offset, Vector3 Scale, Color? Tint)? FxFor(string name, PrimitiveType type)
+    {
+        var sphere = (Vector3.zero, Vector3.one * 0.5f);
+        var column = (Vector3.down, new Vector3(0.5f, 2f, 0.5f)); // cylinder centre and half-height -> base and full height
+        var disc = (Vector3.zero, new Vector3(0.5f, 25f, 0.5f));  // discs are 0.04 tall: undo that
+        (string, (Vector3, Vector3), Color?)? pick = name switch
+        {
+            "cots-ability-flash" => (Visuals.FxKit.Burst, sphere, null),
+            "cots-ability-radiance" or "cots-ability-flare" or "cots-ability-warp" => (Visuals.FxKit.Orb, sphere, null),
+            "cots-ability-meteor" => (Visuals.FxKit.Orb, sphere, null),
+            // The core sphere is the hole's dark centre; the effect's pull swirl reaches about four times further.
+            "cots-ability-blackhole" => (Visuals.FxKit.BlackHole, (Vector3.zero, Vector3.one * 2.3f), new Color(1f, 0.3f, 0.3f)),
+            "cots-ability-laser" => (Visuals.FxKit.Beam, column, null),
+            "cots-ability-chains" => (Visuals.FxKit.Chain, column, null),
+            "cots-ability-cataclysm" => (Visuals.FxKit.Column, column, null),
+            _ when type == PrimitiveType.Cylinder && name.EndsWith("-disc", StringComparison.Ordinal) => (Visuals.FxKit.Ring, disc, null),
+            "cots-ability-aura" or "cots-ability-meteor-mark" or "cots-ability-blackhole-mark" or "cots-ability-trap" => (Visuals.FxKit.Ring, disc, null),
+            _ => null,
+        };
+        return pick is { } p ? (p.Item1, p.Item2.Item1, p.Item2.Item2, p.Item3) : null;
+    }
+
     public static GameObject Make(PrimitiveType type, Color color, Vector3 position, Vector3 scale, string name = "cots-ability")
     {
+        if (Visuals.FxKit.Available && FxFor(name, type) is { } fx)
+        {
+            var inner = Visuals.FxKit.Spawn(fx.Fx, position, Vector3.one, fx.Tint ?? Visuals.FxKit.Glow(color));
+            if (inner != null)
+            {
+                var holder = new GameObject(name);
+                holder.transform.position = position;
+                inner.transform.SetParent(holder.transform, false);
+                inner.transform.localPosition = fx.Offset;
+                inner.transform.localScale = fx.Scale;
+                holder.transform.localScale = scale;
+                return holder;
+            }
+        }
         var go = GameObject.CreatePrimitive(type);
         go.name = name;
         var col = go.GetComponent<Collider>();
@@ -232,6 +274,9 @@ internal static class AbilityVisuals
         go.transform.position = (a + b) / 2;
         if (len > 0.01f) go.transform.up = d / len;
         go.transform.localScale = new Vector3(width, len / 2, width); // a cylinder is 2 m tall at scale 1
+        if (go.name == "cots-ability-chains" && go.GetComponent<Renderer>() == null)
+            foreach (var r in go.GetComponentsInChildren<Renderer>())
+                r.material.mainTextureScale = new Vector2(1, len / Mathf.Max(width * 1.6f, 0.05f)); // one link per ~1.6 widths
     }
 
     public static Light AddLight(GameObject go, Color color, float range, float intensity)
@@ -247,7 +292,11 @@ internal static class AbilityVisuals
     public static void Recolor(GameObject go, Color color)
     {
         var rend = go.GetComponent<Renderer>();
-        if (rend == null) return;
+        if (rend == null)
+        {
+            Visuals.FxKit.Tint(go, Visuals.FxKit.Glow(color));
+            return;
+        }
         rend.material.SetColor("_UnlitColor", color);
         rend.material.color = color;
     }

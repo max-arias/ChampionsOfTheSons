@@ -7,6 +7,7 @@
 //   _Fresnel   > 0 brightens edges (domes, shields, the black-hole rim); 0 = flat
 //   _Scroll    UV scroll speed (xy) for the main texture: fire columns, portals, beams
 //   _Pulse     brightness pulse per second (0 = steady)
+//   _FadeEnds  1 = fade out towards both ends of the mesh's V (unscrolled), so columns have no hard rims
 Shader "Cots/Fx"
 {
     Properties
@@ -18,6 +19,7 @@ Shader "Cots/Fx"
         _FresnelInvert ("Fresnel invert (dark core)", Float) = 0
         _Scroll ("UV scroll (xy)", Vector) = (0, 0, 0, 0)
         _Pulse ("Pulse per second", Float) = 0
+        _FadeEnds ("Fade the mesh's V ends (columns, beams)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src blend", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst blend", Float) = 1
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
@@ -55,6 +57,7 @@ Shader "Cots/Fx"
                 float _FresnelInvert;
                 float4 _Scroll;
                 float _Pulse;
+                float _FadeEnds;
                 float _SrcBlend;
                 float _DstBlend;
                 float _Cull;
@@ -76,6 +79,7 @@ Shader "Cots/Fx"
                 float2 uv : TEXCOORD0;
                 float3 normalWS : TEXCOORD1;
                 float3 positionWS : TEXCOORD2;
+                float rawV : TEXCOORD3;
             };
 
             Varyings Vert(Attributes v)
@@ -86,6 +90,7 @@ Shader "Cots/Fx"
                 o.positionWS = positionWS;
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.color = v.color;
+                o.rawV = v.uv.y;
                 o.uv = v.uv * _MainTex_ST.xy + _MainTex_ST.zw + _Scroll.xy * _Time.y;
                 return o;
             }
@@ -102,6 +107,7 @@ Shader "Cots/Fx"
                     c.a *= f;
                     c.rgb *= lerp(f, 1, _FresnelInvert);
                 }
+                if (_FadeEnds > 0) c.a *= smoothstep(0, 0.15, i.rawV) * smoothstep(1, 0.6, i.rawV);
                 float pulse = _Pulse > 0 ? 0.75 + 0.25 * sin(_Time.y * _Pulse * 6.2831853) : 1;
                 c.rgb *= _Intensity * pulse;
                 // Additive (One One) has no alpha: fold it into colour so faded particles fade out.

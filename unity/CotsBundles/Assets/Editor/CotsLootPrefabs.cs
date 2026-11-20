@@ -27,13 +27,14 @@ public static class CotsLootPrefabs
 
         _slots = new Dictionary<string, Material>
         {
-            ["Metal"] = CotsGen.Lit("GreyMetal_Bright", Grey(0.62f), 1f, 0.62f),
-            ["Dark Metal"] = CotsGen.Lit("GreyMetal_Dark", Grey(0.22f), 1f, 0.5f),
-            ["Wood"] = CotsGen.Lit("GreyMetal_Grip", Grey(0.16f), 0.55f, 0.32f),
-            ["Chord"] = CotsGen.Lit("GreyMetal_Wrap", Grey(0.3f), 0.4f, 0.28f),
-            ["Bone"] = CotsGen.Lit("GreyMetal_Pale", Grey(0.75f), 0.7f, 0.5f),
+            // Metallic stays moderate: fully metallic surfaces read black wherever the game has no reflection probe.
+            ["Metal"] = CotsGen.Lit("GreyMetal_Bright", Grey(0.78f), 0.45f, 0.6f),
+            ["Dark Metal"] = CotsGen.Lit("GreyMetal_Dark", Grey(0.38f), 0.45f, 0.5f),
+            ["Wood"] = CotsGen.Lit("GreyMetal_Grip", Grey(0.26f), 0.25f, 0.32f),
+            ["Chord"] = CotsGen.Lit("GreyMetal_Wrap", Grey(0.42f), 0.2f, 0.28f),
+            ["Bone"] = CotsGen.Lit("GreyMetal_Pale", Grey(0.85f), 0.3f, 0.5f),
         };
-        _kaykit = CotsGen.Lit("GreyMetal_KayKit", Color.white, 0.85f, 0.5f, GreyTexture($"{Src}/KayKit/weapons_bits_texture.png", "KayKitGrey", 256));
+        _kaykit = CotsGen.Lit("GreyMetal_KayKit", Color.white, 0.45f, 0.5f, GreyTexture($"{Src}/KayKit/weapons_bits_texture.png", "KayKitGrey", 256));
 
         // Held weapons (COS-93): real size, origin at the end of the grip, +Y toward the blade or head, +Z out of the flat.
         Weapon("Weapon_Sword", "Arming_Sword", 1.05f);
@@ -139,7 +140,7 @@ public static class CotsLootPrefabs
                 normal = AssetDatabase.LoadAssetAtPath<Texture2D>($"{dir}/t_{key}_normal.png");
             }
         }
-        m = CotsGen.Lit("GreyMetal_" + key, Color.white, 0.9f, 0.55f, GreyTexture($"{dir}/t_{key}_color.png", "Grey_" + key, 512), normal);
+        m = CotsGen.Lit("GreyMetal_" + key, Color.white, 0.45f, 0.55f, GreyTexture($"{dir}/t_{key}_color.png", "Grey_" + key, 512), normal);
         DeepveinMats[key] = m;
         return m;
     }
@@ -163,7 +164,7 @@ public static class CotsLootPrefabs
         for (int i = 0; i < px.Length; i++)
         {
             float l = px[i].r * 0.3f + px[i].g * 0.59f + px[i].b * 0.11f;
-            float v = Mathf.Lerp(0.12f, 0.8f, Mathf.InverseLerp(lo, hi, l));
+            float v = Mathf.Lerp(0.25f, 0.88f, Mathf.InverseLerp(lo, hi, l));
             o[i] = new Color(v * SteelTint.r, v * SteelTint.g, v * SteelTint.b, 1);
         }
         outTex.SetPixels(o);

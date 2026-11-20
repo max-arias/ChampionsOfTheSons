@@ -93,8 +93,8 @@ public static class CotsFxPrefabs
     private static void Ring()
     {
         var go = new GameObject("Fx_Ring");
-        CotsGen.Child(go, "fill", _disc, CotsGen.Fx("FxRingFill", _fill, new Color(1, 1, 1, 0.3f), 1, additive: false), new Vector3(0, 0.04f, 0));
-        CotsGen.Child(go, "edge", _disc, CotsGen.Fx("FxRingEdge", _ring, Color.white, 2.2f, pulse: 0.6f), new Vector3(0, 0.06f, 0));
+        CotsGen.Child(go, "fill", _disc, CotsGen.Fx("FxRingFill", _fill, new Color(1, 1, 1, 0.45f), 1.4f, additive: false), new Vector3(0, 0.04f, 0));
+        CotsGen.Child(go, "edge", _disc, CotsGen.Fx("FxRingEdge", _ring, Color.white, 4f, pulse: 0.6f), new Vector3(0, 0.06f, 0));
         var ps = Particles(Sub(go, "motes"), CotsGen.Fx("FxMotes", SoftDot(), Color.white, 2.5f));
         var main = ps.main;
         main.startLifetime = 1.3f;
@@ -205,8 +205,8 @@ public static class CotsFxPrefabs
     private static void Column()
     {
         var go = new GameObject("Fx_Column");
-        CotsGen.Child(go, "core", _cylinder, CotsGen.Fx("FxColumnCore", _noise, Color.white, 1.8f, fresnel: 1.5f, fresnelInvert: true, scroll: new Vector2(0.15f, -1.1f)));
-        CotsGen.Child(go, "shell", _cylinder, CotsGen.Fx("FxColumnShell", _noise, new Color(1, 1, 1, 0.6f), 1f, fresnel: 2f, fresnelInvert: true, scroll: new Vector2(-0.1f, -0.6f)),
+        CotsGen.Child(go, "core", _cylinder, CotsGen.Fx("FxColumnCore", _noise, Color.white, 1.8f, fresnel: 1.5f, fresnelInvert: true, scroll: new Vector2(0.15f, -1.1f), fadeEnds: true));
+        CotsGen.Child(go, "shell", _cylinder, CotsGen.Fx("FxColumnShell", _noise, new Color(1, 1, 1, 0.35f), 0.8f, fresnel: 2f, fresnelInvert: true, scroll: new Vector2(-0.1f, -0.6f), fadeEnds: true),
             scale: new Vector3(1.25f, 1, 1.25f));
         var flames = Particles(Sub(go, "flames"), CotsGen.Fx("FxColumnFlames", _flame, Color.white, 2f));
         Steady(flames, 40, 0.6f, 0.9f);
@@ -325,7 +325,7 @@ public static class CotsFxPrefabs
         var go = new GameObject("Fx_Beam");
         CotsGen.Child(go, "core", _cylinder, CotsGen.Fx("FxBeamCore", _noise, Color.white, 2.5f, fresnel: 1f, fresnelInvert: true, scroll: new Vector2(0.3f, -3f)),
             scale: new Vector3(0.5f, 1, 0.5f));
-        CotsGen.Child(go, "glow", _cylinder, CotsGen.Fx("FxBeamGlow", _white, new Color(1, 1, 1, 0.8f), 1f, fresnel: 1.5f, fresnelInvert: true));
+        CotsGen.Child(go, "glow", _cylinder, CotsGen.Fx("FxBeamGlow", _white, new Color(1, 1, 1, 0.8f), 1f, fresnel: 1.5f, fresnelInvert: true, fadeEnds: true));
         CotsGen.SavePrefab(go);
     }
 
