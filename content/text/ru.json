@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "Уже открыто.",
  "ui.perks.points": "Очки",
  "ui.perks.respec": "Сброс",
+ "ui.perks.respec_confirm": "Нажмите для подтверждения",
  "ui.perks.stackable": "Складывается",
  "ui.perks.tab.spells": "Книга заклинаний",
  "ui.perks.title": "Перки",

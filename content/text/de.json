@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "Bereits freigeschaltet.",
  "ui.perks.points": "Punkte",
  "ui.perks.respec": "Zurücksetzen",
+ "ui.perks.respec_confirm": "Zum Bestätigen klicken",
  "ui.perks.stackable": "Stapelbar",
  "ui.perks.tab.spells": "Zauberbuch",
  "ui.perks.title": "Perks",

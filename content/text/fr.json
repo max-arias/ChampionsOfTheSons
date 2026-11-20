@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "Déjà débloqué.",
  "ui.perks.points": "Points",
  "ui.perks.respec": "Réinitialiser",
+ "ui.perks.respec_confirm": "Cliquez pour confirmer",
  "ui.perks.stackable": "Cumulable",
  "ui.perks.tab.spells": "Grimoire",
  "ui.perks.title": "Atouts",

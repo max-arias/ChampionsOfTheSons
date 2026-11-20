@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "Already unlocked.",
  "ui.perks.points": "Points",
  "ui.perks.respec": "Respec",
+ "ui.perks.respec_confirm": "Click to confirm",
  "ui.perks.stackable": "Stackable",
  "ui.perks.tab.spells": "Spell book",
  "ui.perks.title": "Perks",

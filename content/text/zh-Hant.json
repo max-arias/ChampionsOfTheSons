@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "已解鎖。",
  "ui.perks.points": "點數",
  "ui.perks.respec": "重置",
+ "ui.perks.respec_confirm": "點擊確認",
  "ui.perks.stackable": "可疊加",
  "ui.perks.tab.spells": "法術書",
  "ui.perks.title": "專長",

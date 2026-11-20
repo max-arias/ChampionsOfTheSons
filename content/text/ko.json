@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "이미 해금했다.",
  "ui.perks.points": "포인트",
  "ui.perks.respec": "초기화",
+ "ui.perks.respec_confirm": "클릭하여 확인",
  "ui.perks.stackable": "중첩 가능",
  "ui.perks.tab.spells": "주문서",
  "ui.perks.title": "특전",

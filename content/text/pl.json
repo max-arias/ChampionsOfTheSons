@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "Już odblokowano.",
  "ui.perks.points": "Punkty",
  "ui.perks.respec": "Reset",
+ "ui.perks.respec_confirm": "Kliknij, aby potwierdzić",
  "ui.perks.stackable": "Kumulowalny",
  "ui.perks.tab.spells": "Księga czarów",
  "ui.perks.title": "Atuty",

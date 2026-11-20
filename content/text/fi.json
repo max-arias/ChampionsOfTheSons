@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "Jo avattu.",
  "ui.perks.points": "Pisteet",
  "ui.perks.respec": "Jaa uudelleen",
+ "ui.perks.respec_confirm": "Vahvista napsauttamalla",
  "ui.perks.stackable": "Kertyvä",
  "ui.perks.tab.spells": "Loitsukirja",
  "ui.perks.title": "Kyvyt",

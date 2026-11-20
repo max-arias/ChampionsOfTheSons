@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "已解锁。",
  "ui.perks.points": "点数",
  "ui.perks.respec": "重置天赋",
+ "ui.perks.respec_confirm": "点击确认",
  "ui.perks.stackable": "可叠加",
  "ui.perks.tab.spells": "法术书",
  "ui.perks.title": "天赋",

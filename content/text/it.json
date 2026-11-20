@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "Già sbloccato.",
  "ui.perks.points": "Punti",
  "ui.perks.respec": "Reset",
+ "ui.perks.respec_confirm": "Clicca per confermare",
  "ui.perks.stackable": "Cumulabile",
  "ui.perks.tab.spells": "Libro degli incantesimi",
  "ui.perks.title": "Vantaggi",

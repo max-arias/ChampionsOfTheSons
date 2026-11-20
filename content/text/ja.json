@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "すでに解放済み。",
  "ui.perks.points": "ポイント",
  "ui.perks.respec": "リスペック",
+ "ui.perks.respec_confirm": "クリックで確定",
  "ui.perks.stackable": "スタック可能",
  "ui.perks.tab.spells": "スペルブック",
  "ui.perks.title": "パーク",

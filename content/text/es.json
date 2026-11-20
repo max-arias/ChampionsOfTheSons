@@ -2032,6 +2032,7 @@
  "ui.perks.owned": "Ya desbloqueada.",
  "ui.perks.points": "Puntos",
  "ui.perks.respec": "Reasignar",
+ "ui.perks.respec_confirm": "Haz clic para confirmar",
  "ui.perks.stackable": "Acumulable",
  "ui.perks.tab.spells": "Libro de hechizos",
  "ui.perks.title": "Ventajas",
