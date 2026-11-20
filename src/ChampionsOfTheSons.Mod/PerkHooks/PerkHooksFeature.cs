@@ -124,10 +124,11 @@ public sealed class PerkHooksFeature : IModFeature
         using var perf = Perf.Perf.Scope(PerfLights);
         var (intensity, drain) = PerkRules.Flashlight(Pc.Stats);
         AppliedLight = (intensity, drain);
-        // The game's flashlight is not under the player's transform, so it takes a scan of every object, which costs ~65 ms:
-        // once, then every 30 s for lights made later (COS-132: was twice a second). The factors are applied to the cached list.
+        // The game's flashlight (FlashlightHeld) is its own root object, not under the player, so finding it takes a scan of every
+        // object (~65-80 ms). Scan once and keep it; scan again (at most every 30 s) only while none is cached or one was destroyed
+        // (COS-132: was twice a second). The factors are applied to the cached list.
         _lightSearch -= 0.5f;
-        if (_lightSearch <= 0)
+        if (_lightSearch <= 0 && (OwnLights.Count == 0 || OwnLights.Exists(l => l == null)))
         {
             _lightSearch = 30f;
             OwnLights.Clear();
