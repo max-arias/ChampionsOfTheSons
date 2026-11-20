@@ -26,10 +26,23 @@ internal static class PerfSelfTest
         SelfTest.Add(5f, "perf: start", Start);
         SelfTest.Add(5f + Seconds, "perf: report", Report);
         SelfTest.Add(6f + Seconds, "perf: cleanup", Cleanup);
+        SelfTest.Add(9f + Seconds, "perf: clean", Clean);
+    }
+
+    /// <summary>While the scene runs (setup to cleanup) the player cannot be hurt: the unpaused enemies attack, and a dead or
+    /// wounded player breaks every later phase (spells return NotInWorld).</summary>
+    internal static bool Protecting { get; private set; }
+
+    /// <summary>Every frame from <see cref="PerfFeature"/> while <see cref="Protecting"/>.</summary>
+    internal static void Protect()
+    {
+        var health = LocalPlayer.Vitals?.Health;
+        if (health != null && health._currentValue > 0 && health._currentValue < health.GetMax()) health.SetCurrentValue(health.GetMax());
     }
 
     private static void Setup()
     {
+        Protecting = true;
         TestKit.Unpause();
         Spawned.Clear();
         for (int i = 0; i < 15; i++)
@@ -77,5 +90,17 @@ internal static class PerfSelfTest
         }
         Spawned.Clear();
         LootFeature.ClearAll();
+    }
+
+    /// <summary>Kill loot can land a frame or more after the kill: clear again, heal, and check the next phase gets a clean world.</summary>
+    private static void Clean()
+    {
+        LootFeature.ClearAll();
+        Protecting = false;
+        var health = LocalPlayer.Vitals?.Health;
+        if (health != null && health._currentValue > 0) health.SetCurrentValue(health.GetMax());
+        int alive = EnemyRegistry.Live.Count(r => r.IsActive);
+        SelfTest.Check("perf: scene cleaned up", LocalPlayer.IsInWorld && health != null && health._currentValue > 0 && LootFeature.Ground.All.Count() == 0,
+            $"in world {LocalPlayer.IsInWorld}, health {health?._currentValue:0}, drops {LootFeature.Ground.All.Count()}, active enemies {alive}");
     }
 }
