@@ -98,7 +98,8 @@ public sealed class ItemStatDef
     /// <summary>Exponent applied to item level when scaling the roll.</summary>
     public double LevelPow { get; set; } = 1;
     public StatCombine Combine { get; set; }
-    /// <summary>Lowest item rarity this stat can roll on as a random ("*") stat.</summary>
+    /// <summary>COTF's rarity field for the stat. Kept as data only: COTF's "*" slots offer every common stat whatever the item's
+    /// rarity, and no roll here gates on it.</summary>
     public int Rarity { get; set; }
     public bool Percent { get; set; }
     public int Rounding { get; set; }
@@ -126,6 +127,10 @@ public sealed class ItemBaseDef
     public int StackSize { get; set; } = 1;
     public bool Consumable { get; set; }
     public List<List<string?>> StatPools { get; set; } = new();
+    /// <summary>Per-slot roll multipliers (COTF's `PossibleStats[slot][i].Multipier`): when <see cref="SlotMultiplier.Slot"/>
+    /// rolls <see cref="SlotMultiplier.Stat"/>, this value replaces the stat's own multiplier. Often negative (heavy weapons
+    /// roll attack speed as a penalty).</summary>
+    public List<SlotMultiplier> StatMultipliers { get; set; } = new();
     public string? WeaponModel { get; set; }
     public string? Set { get; set; }
     public List<StatEffect> UniqueEffects { get; set; } = new();
@@ -133,6 +138,21 @@ public sealed class ItemBaseDef
     public string? ConsumeAction { get; set; }
 
     public const string AnyStat = "*";
+
+    /// <summary>The multiplier that replaces the stat's own when slot <paramref name="slot"/> rolls <paramref name="statId"/>, or null.</summary>
+    public double? MultiplierFor(int slot, string statId)
+    {
+        foreach (var m in StatMultipliers)
+            if (m.Slot == slot && m.Stat == statId) return m.Multiplier;
+        return null;
+    }
+}
+
+public sealed class SlotMultiplier
+{
+    public int Slot { get; set; }
+    public string Stat { get; set; } = "";
+    public double Multiplier { get; set; } = 1;
 }
 
 public enum PerkCategory

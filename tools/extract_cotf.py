@@ -375,6 +375,36 @@ def item_stats():
 
 
 # ---------------------------------------------------------------- items
+COMMON_STAT_IDS = (list(range(1, 19)) + list(range(21, 27)) + [31] + list(range(34, 48))
+                   + list(range(49, 58)) + list(range(59, 68)))
+MULT_RE = r"\.PossibleStats\[(\d+)\]\[(\d+)\]\.Multipier\s*=\s*(-?[\d.]+)f?\s*;"
+
+
+def slot_multipliers(src, start, iend, pools):
+    """Per-slot roll multipliers set after an item's initializer, either chained (`}.PossibleStats[a][b].Multipier = x`)
+    or through the variable the item was stored in. COTF indexes options after expanding "any stat" (-1) into the
+    common stat list, and the value replaces the stat's own multiplier."""
+    found = []
+    cm = re.match(r"\s*" + MULT_RE, src[iend:])
+    if cm:
+        found.append(cm.groups())
+    vm = re.search(r"(\w+)\s*=\s*$", src[max(0, start - 80):start])
+    if vm:
+        nxt = src.find("new BaseItem(", iend)
+        scope = src[iend:nxt if nxt >= 0 else len(src)]
+        found += re.findall(re.escape(vm.group(1)) + MULT_RE, scope)
+    out = []
+    for a, b, x in found:
+        expanded = []
+        for v in pools[int(a)]:
+            expanded += COMMON_STAT_IDS if v == "*" else [v]
+        stat = expanded[int(b)]
+        if stat is None:
+            continue
+        out.append({"slot": int(a), "stat": stat, "multiplier": num(x)})
+    return out
+
+
 def items(enum):
     src = read("Items/ItemDataBase_ItemDefinitions.cs")
     sets = {"AkagiSet": "set.akagi", "BerserkSet": "set.berserk"}
@@ -383,10 +413,11 @@ def items(enum):
         pstart = src.index("{", m.end() - 1)
         pend = matching(src, pstart)
         pools = []
-        for pm in re.finditer(r"new (?:int|Stat)\s*\[\]\s*\{(.*?)\}", src[pstart:pend], re.S):
+        # two syntaxes: `new int[] { 1, 2 }` and the enum-style `new[] { STRENGTH, ALL }`
+        for pm in re.finditer(r"new\s*(?:int|Stat)?\s*\[\]\s*\{(.*?)\}", src[pstart:pend], re.S):
             pool = []
-            for tok in pm.group(1).split(","):
-                tok = re.sub(r"//.*|/\*.*?\*/", "", tok).strip()
+            for tok in re.sub(r"//[^\n]*|/\*.*?\*/", "", pm.group(1), flags=re.S).split(","):
+                tok = tok.strip()
                 if not tok:
                     continue
                 tok = tok.replace("Stat.", "")
@@ -445,6 +476,9 @@ def items(enum):
                     problems.append(f"{iid}: {flat[:150]}")
         if "onConsume" in fields:
             item["consumeAction"] = "manual"
+        mults = slot_multipliers(src, m.start(), iend, pools)
+        if mults:
+            item["statMultipliers"] = mults
         out.append(item)
     return out, problems
 
@@ -688,6 +722,8 @@ def main():
     by_legacy = {s["legacyId"]: s["id"] for s in st}
     for item in it:
         item["statPools"] = [[x if x in (None, "*") else by_legacy.get(x, f"stat.unknown_{x}") for x in pool] for pool in item["statPools"]]
+        for sm in item.get("statMultipliers", []):
+            sm["stat"] = by_legacy.get(sm["stat"], f"stat.unknown_{sm['stat']}")
 
     def dump(name, key, data):
         with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\n") as f:
