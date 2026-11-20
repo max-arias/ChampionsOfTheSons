@@ -63,7 +63,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Stat slots: each pool rolls one option uniformly; `null` = slot stays empty; `*` = one of the common stats (COTF IDs 1–18, 21–26, 31, 34–47, 49–57, 59–67).
 - Value: `v = U(min, max) × level^levelPow`; `v = min(v, cap)`; `× statMultiplier`; `× rarityMult(r)`; `v = min(v, cap)`. `rarityMult = 0.5, 0.7, 1, 1.4, 2.3, 3.4, 4.5, 5.6`.
 - Sockets: equippable, level > 20, `U ≤ 0.175` → `U[1, max]` empty sockets (max 1 most slots; 2 bracer/pants/shield/quiver/scroll; 3 chest). Gems fill a socket with a slot-dependent stat.
-- Inventory: 120 bag slots; equipment: helmet, chest, pants, boots, shoulders, gloves, amulet, bracer, ring ×2, weapon, offhand (shield/quiver/scroll).
+- Inventory: 120 bag slots (COTF: a fixed 8 x 15 grid; its bag never grows with level or stats, checked 2026-11-19, COS-64); equipment: helmet, chest, pants, boots, shoulders, gloves, amulet, bracer, ring ×2, weapon, offhand (shield/quiver/scroll).
 
 ## Stats and combat
 - Player stat kinds: add (`default + Σ`), mult (`default × Π`), multi (`(default + Σ adds) × (defaultMult × Π mults)`), bool. ✱ Our sheet rebuilds from named sources instead of add/subtract pairs.
