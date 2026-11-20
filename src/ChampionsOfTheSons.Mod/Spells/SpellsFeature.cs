@@ -5,34 +5,28 @@ using TheForest.Utils;
 
 namespace ChampionsOfTheSons.Mod.Spells;
 
-/// <summary>Hotkeys for the six spell slots, kept in this feature's own config entries.</summary>
+/// <summary>Hotkeys for the six spell slots (entries in <see cref="Config.SpellKeys"/>, rebindable in the settings overlay, COS-104).</summary>
 internal static class SpellKeys
 {
-    private static readonly string[] Defaults = { "z", "x", "v", "b", "n", "m" };
-    private static readonly KeybindConfigEntry[] Entries = new KeybindConfigEntry[SpellBook.Slots];
-
     public static void Init()
     {
         for (int i = 0; i < SpellBook.Slots; i++)
         {
             int slot = i;
-            var e = Config.Category.CreateKeybindEntry($"spell_slot_{i + 1}", Defaults[i], $"Spell slot {i + 1}", $"Cast the spell in slot {i + 1}.");
-            e.SetScope(needsPlayerControllable: true);
-            e.Notify(() => SpellCaster.Cast(slot));
-            Entries[i] = e;
+            Config.SpellKeys[i].Notify(() => SpellCaster.Cast(slot));
         }
     }
 
-    /// <summary>The key shown on the bar: the configured key in upper case.</summary>
+    /// <summary>The key shown on the bar.</summary>
     public static string Label(int slot)
     {
         try
         {
-            return Entries[slot]?.Value?.ToUpperInvariant() ?? (slot + 1).ToString();
+            return Settings.KeyNames.Short(Config.SpellKeys[slot]?.Value ?? Config.SpellDefaults[slot]);
         }
         catch
         {
-            return Defaults[slot].ToUpperInvariant();
+            return Settings.KeyNames.Short(Config.SpellDefaults[slot]);
         }
     }
 }

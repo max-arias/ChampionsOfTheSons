@@ -46,6 +46,7 @@ internal sealed class GamepadFeature : IModFeature
             ("perks", "LeftShoulder+DpadRight", "Perks"),
             ("crafting", "LeftShoulder+DpadDown", "Crafting"),
             ("host_settings", "LeftShoulder+DpadLeft", "Host settings"),
+            ("settings", "LeftShoulder+Select", "Mod settings"),
         };
         foreach (var (name, binding, title) in defaults)
             PanelEntries[name] = cat.CreateEntry($"pad_{name}", binding, $"Gamepad: {title}", $"Pad buttons that open the {title.ToLowerInvariant()} panel, e.g. LeftShoulder+DpadUp.");
@@ -65,6 +66,8 @@ internal sealed class GamepadFeature : IModFeature
                 () => WorldRulesFeature.Settings.PadRoot),
             new("picker", () => WorldRulesFeature.Picker.IsOpen, () => { if (WorldRulesFeature.Picker.IsOpen) WorldRulesFeature.Picker.Close(); else WorldRulesFeature.Picker.Open(); }, () => WorldRulesFeature.Picker.Close(),
                 () => WorldRulesFeature.Picker.PadRoot),
+            new("settings", () => Settings.SettingsFeature.Panel.IsOpen, () => Settings.SettingsFeature.Panel.Toggle(), () => Settings.SettingsFeature.Panel.Back(),
+                () => Settings.SettingsFeature.Panel.PadRoot),
         };
     }
 

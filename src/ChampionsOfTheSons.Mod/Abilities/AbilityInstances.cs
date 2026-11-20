@@ -103,6 +103,8 @@ internal abstract class AuraInstance : AbilityInstance
 
     protected virtual void Created(GameObject disc) { }
 
+    private Audio.AudioLoop? _loop;
+
     protected virtual void InsideEachFrame(Vector3 player) { }
 
     protected override void Step(float dt)
@@ -111,8 +113,10 @@ internal abstract class AuraInstance : AbilityInstance
         {
             _disc = Track(AbilityVisuals.Disc(_color, EnemyPos, (float)Spec.Radius, "cots-ability-aura"));
             Created(_disc);
+            _loop = Audio.ModAudio.StartLoop(Audio.SoundCues.AuraLoop(Spec.Ability), EnemyPos, 30f, 0.5f);
         }
         _disc.transform.position = EnemyPos + Vector3.up * 0.05f;
+        _loop?.Move(EnemyPos);
 
         bool inside = false;
         foreach (var p in AbilityTargets.Positions())
@@ -126,6 +130,13 @@ internal abstract class AuraInstance : AbilityInstance
         if (_phase < Spec.TickSeconds) return;
         _phase -= (float)Spec.TickSeconds;
         if (inside) AbilityDamage.HitPlayer(Enemy, Spec.Ability, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, Spec.Ability, Rng));
+    }
+
+    public override void Dispose()
+    {
+        _loop?.Stop();
+        _loop = null;
+        base.Dispose();
     }
 }
 
@@ -153,7 +164,11 @@ internal abstract class CastInstance : AbilityInstance
 {
     private readonly AbilityClock _clock = AbilityClock.Start(Rng);
     private bool _casting;
+    private bool _impactSounded;
     protected float T;
+
+    /// <summary>Where the cast lands, for its impact sound (COS-101); the enemy's chest unless the cast picks a spot.</summary>
+    protected virtual Vector3 ImpactPoint => Chest;
 
     protected CastInstance(EnemyRuntime enemy, ActiveAbilitySpec spec) : base(enemy, spec) { }
 
@@ -178,8 +193,15 @@ internal abstract class CastInstance : AbilityInstance
             T = 0;
             AbilityDamage.NoteFired(Enemy, Spec.Ability);
             Begin(target);
+            _impactSounded = false;
+            Audio.ModAudio.PlayAt(Audio.SoundCues.Telegraph(Spec.Ability), EnemyPos, 50f);
         }
         T += dt;
+        if (!_impactSounded && T >= Spec.Windup)
+        {
+            _impactSounded = true;
+            Audio.ModAudio.PlayAt(Audio.SoundCues.Impact(Spec.Ability), ImpactPoint, 60f);
+        }
         if (!Advance(dt)) return;
         _casting = false;
         Finish();
@@ -193,6 +215,8 @@ internal sealed class MeteorInstance : CastInstance
     private GameObject? _marker;
 
     public MeteorInstance(EnemyRuntime e) : base(e, ActiveAbilityRules.Spec(EnemyAbility.Meteor)) { }
+
+    protected override Vector3 ImpactPoint => _spot;
 
     protected override void Begin(Vector3 target)
     {
@@ -345,6 +369,8 @@ internal sealed class FlareInstance : CastInstance
     private bool _burstDone;
 
     public FlareInstance(EnemyRuntime e) : base(e, ActiveAbilityRules.Spec(EnemyAbility.Flare)) { }
+
+    protected override Vector3 ImpactPoint => _burst;
 
     protected override void Begin(Vector3 target)
     {
