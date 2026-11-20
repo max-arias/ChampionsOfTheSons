@@ -5,7 +5,10 @@ using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Loot;
 
-/// <summary>World objects for ground drops, built from primitives: a gem, a vertical beam and a light in the rarity's color.</summary>
+/// <summary>
+/// World objects for ground drops: a grey-metal model of the item's type from the asset bundle (COS-63; a rarity-tinted
+/// gem when the bundle or model is missing), rising sparks, a vertical beam and a light in the rarity's colour.
+/// </summary>
 internal static class LootVisuals
 {
     internal sealed class Visual
@@ -35,15 +38,24 @@ internal static class LootVisuals
         var root = new GameObject("cots-drop-" + drop.Id);
         root.transform.position = pos;
 
-        // The bundled marker mesh and sparkle effect when the asset bundle is present (COS-5), else a primitive gem.
-        var gem = Bundles.CotsBundle.Spawn(Bundles.CotsBundle.LootMarker, root.transform);
-        if (gem != null)
+        // The item type's model when the asset bundle has it (COS-63), else the bundled crystal marker (COS-5), else a primitive gem.
+        GameObject? gem = null;
+        if (DropPrefabFor(drop.Item.BaseId) is string model && Bundles.CotsBundle.Spawn(model, root.transform) is GameObject m)
+        {
+            gem = m;
+            foreach (var r in gem.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            gem.transform.localPosition = new Vector3(0, 0.6f, 0);
+            gem.transform.localScale = Vector3.one * (1f + 0.05f * rarity);
+            gem.transform.localRotation = Quaternion.Euler(0, (drop.Id * 47) % 360, 0);
+        }
+        if (gem == null) gem = Bundles.CotsBundle.Spawn(Bundles.CotsBundle.LootMarker, root.transform);
+        if (gem != null && gem.name == Bundles.CotsBundle.LootMarker)
         {
             Tint(gem, color);
             gem.transform.localPosition = new Vector3(0, 0.4f, 0);
             gem.transform.localScale = Vector3.one * (1f + 0.1f * rarity);
         }
-        else
+        else if (gem == null)
         {
             gem = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Prepare(gem, root.transform, color);
@@ -78,6 +90,43 @@ internal static class LootVisuals
         light.intensity = 40;
 
         ById[drop.Id] = new Visual { Root = root, Gem = gem.transform, Color = color, Rarity = drop.Item.Rarity, Position = pos };
+    }
+
+    /// <summary>Every drop model prefab (self-tests).</summary>
+    public static readonly string[] DropPrefabs =
+    {
+        "Drop_Sword", "Drop_GreatSword", "Drop_Axe", "Drop_Hammer", "Drop_Bow", "Drop_Polearm", "Drop_Shield",
+        "Drop_Quiver", "Drop_Scroll", "Drop_Armor", "Drop_Jewelry", "Drop_Material", "Drop_Consumable",
+    };
+
+    /// <summary>
+    /// The bundled model for an item: weapons by their weapon model, the rest by item type. No armor or jewelry models
+    /// exist in the free sets we use, so armor drops show a chest, jewelry a coin, spell scrolls a key, materials a small
+    /// chest and consumables (hearts) a flask.
+    /// </summary>
+    public static string? DropPrefabFor(string baseId)
+    {
+        if (!ModContent.Db.Items.TryGetValue(baseId, out var def)) return null;
+        return def.Type switch
+        {
+            "weapon" => def.WeaponModel switch
+            {
+                "great_sword" => "Drop_GreatSword",
+                "axe" => "Drop_Axe",
+                "hammer" => "Drop_Hammer",
+                "greatbow" => "Drop_Bow",
+                "polearm" => "Drop_Polearm",
+                _ => "Drop_Sword",
+            },
+            "shield" => "Drop_Shield",
+            "quiver" => "Drop_Quiver",
+            "spell_scroll" => "Drop_Scroll",
+            "helmet" or "chest_armor" or "pants" or "boot" or "glove" or "shoulder_armor" or "bracer" => "Drop_Armor",
+            "ring" or "amulet" => "Drop_Jewelry",
+            "material" => "Drop_Material",
+            "other" => "Drop_Consumable",
+            _ => null,
+        };
     }
 
     public static void Destroy(int id)

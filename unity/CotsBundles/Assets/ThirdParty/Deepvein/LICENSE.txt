@@ -1,0 +1,4 @@
+Deepvein Mine Kit (Unity package folder "Modular Dungeon Crawler Starter Pack")
+https://elliottfhotmailfr.itch.io/deepvein-mine-kit
+License: CC0 (per the LICENSE.txt in the downloaded zip). Only the chest, props (potions, keys, coin) and their
+textures are copied here; textures were downsized to 512 px (particles 256 px).
