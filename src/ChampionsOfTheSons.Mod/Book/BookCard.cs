@@ -1,0 +1,184 @@
+using ChampionsOfTheSons.Mod.Icons;
+using ChampionsOfTheSons.Mod.UI;
+using SUI;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using static SUI.SUI;
+
+namespace ChampionsOfTheSons.Mod.Book;
+
+/// <summary>
+/// The detail card beside the guide book (COS-59): item text from <see cref="ItemDescriber"/> or a stat row's
+/// explanation, on the free screen area right of the page. With a selected item it shows action buttons, clicked with
+/// the book cursor (screen pixels).
+/// </summary>
+internal static class BookCard
+{
+    public const string PanelId = "cots-book-card";
+    private const float W = 470;
+
+    private static SPanelOptions _root = null!;
+    private static SContainerOptions _card = null!;
+    private static SImageOptions _icon = null!;
+    private static SLabelOptions _title = null!, _sub = null!, _body = null!, _compare = null!;
+    private static SContainerOptions _divider = null!, _actions = null!;
+    private static SBgButtonOptions _equip = null!, _drop = null!, _destroy = null!;
+    private static bool _built, _destroyArmed;
+    private static string? _shownKey;
+
+    public static string? ShownKey => _shownKey;
+    public static bool ActionsVisible => _built && _actions.Root.activeSelf;
+    public static string Text => _built ? _title.TextObject.text + "\n" + _body.TextObject.text : "";
+
+    public static void Build()
+    {
+        if (_built) return;
+        _built = true;
+        _root = RegisterNewPanel(PanelId, enableInput: false);
+        _card = SContainer.TopLeft(0, 0).Size(W, 10).Background(PageKit.Hex("#5A4636"), EBackground.None).Vertical(0, "EC").Padding(3).AutoSize("XP");
+        var inner = SContainer.Background(PageKit.Hex("#14120FF2"), EBackground.None).Vertical(5, "EC").Padding(16, 16, 12, 14);
+        _card.Add(inner);
+        _icon = IconView.Create().PWidth(72).PHeight(72);
+        _title = Label(22).PWidth(10).FlexWidth(1);
+        var header = SContainer.Horizontal(10, "CC");
+        header.Add(_icon).Add(_title);
+        _sub = Label(16);
+        _body = Label(17);
+        _divider = SContainer.Background(PageKit.Hex("#5A4636"), EBackground.None).PHeight(1);
+        _compare = Label(17);
+        _actions = SContainer.Horizontal(8, "CC").PHeight(44);
+        _equip = Button();
+        _drop = Button();
+        _destroy = Button();
+        _actions.Add(_equip).Add(_drop).Add(_destroy);
+        inner.Add(header).Add(_sub).Add(_body).Add(_divider).Add(_compare).Add(_actions);
+        foreach (var img in _root.Root.GetComponentsInChildren<Image>(true)) img.raycastTarget = false;
+        _root.Active(false);
+    }
+
+    private static SLabelOptions Label(int size)
+    {
+        var l = SLabel.Text("").FontSize(size).FontColor(UiTheme.Text).Alignment(TextAlignmentOptions.TopLeft).Wrap(true);
+        l.TextObject.raycastTarget = false;
+        l.TextObject.richText = true;
+        return l;
+    }
+
+    private static SBgButtonOptions Button() =>
+        SBgButton.Text("").FontSize(18).FontColor("#EFE7D6").Color(PageKit.Hex("#5A4636"), PageKit.Hex("#7A5E48")).PHeight(42).FlexWidth(1);
+
+    public static void Hide()
+    {
+        _shownKey = null;
+        _destroyArmed = false;
+        if (_built && _root.Root.activeSelf) _root.Active(false);
+    }
+
+    /// <summary>Shows an item (slot key) or a stat row ("row.id"). <paramref name="pinned"/>: the selected item, with actions.</summary>
+    public static void Show(string key, bool pinned)
+    {
+        Build();
+        if (key != _shownKey) _destroyArmed = false;
+        _shownKey = key;
+        var pc = PlayerState.Character;
+        if (key.StartsWith("row.", StringComparison.Ordinal))
+        {
+            var row = SheetData.Build(pc).FirstOrDefault(r => r.Id == key.Substring(4));
+            if (row.Id == null) { Hide(); return; }
+            IconView.Show(_icon, null);
+            _icon.Active(false);
+            _title.Text($"<b>{row.Label}</b>  <color={UiTheme.Gold}>{row.Value}</color>");
+            _sub.Active(false);
+            _body.Text(row.Tip);
+            _divider.Active(false);
+            _compare.Active(false);
+            _actions.Active(false);
+        }
+        else
+        {
+            var item = pc.Inventory.Get(key);
+            if (item == null) { Hide(); return; }
+            var d = ItemDescriber.Describe(item, pc, key);
+            _icon.Active(IconView.Show(_icon, item.BaseId));
+            _title.Text(d.Title);
+            _sub.Active(true);
+            _sub.Text(d.Subtitle);
+            _body.Text(d.Body);
+            bool cmp = !string.IsNullOrEmpty(d.Compare);
+            _divider.Active(cmp);
+            _compare.Active(cmp);
+            if (cmp) _compare.Text(d.Compare!);
+            _actions.Active(pinned);
+            if (pinned)
+            {
+                bool equipped = key.StartsWith("equip.", StringComparison.Ordinal);
+                _equip.Text(UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
+                _drop.Text(UiText.T("ui.inventory.menu.drop", "Drop"));
+                _destroy.Text(_destroyArmed ? UiText.T("ui.book.destroy_confirm", "Again to destroy") : UiText.T("ui.inventory.menu.destroy", "Destroy"));
+            }
+        }
+        if (!_root.Root.activeSelf) _root.Active(true);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_card.RectTransform);
+        Place();
+    }
+
+    /// <summary>Right of the page on screen, top-aligned; flips left of the page when there is no room.</summary>
+    private static void Place()
+    {
+        var page = BookHost.PageScreenRect();
+        float scale = Mathf.Max(0.01f, SUIViewport.scaleFactor);
+        var canvas = SUIViewport.GetComponent<RectTransform>().rect;
+        float h = _card.RectTransform.rect.height;
+        float x = page.xMax / scale + 30;
+        if (x + W > canvas.width - 10) x = page.xMin / scale - 30 - W;
+        float yTop = canvas.height - page.yMax / scale;
+        yTop = Mathf.Clamp(yTop, 10, Mathf.Max(10, canvas.height - h - 10));
+        _card.RectTransform.anchoredPosition = new Vector2(Mathf.Max(10, x), -yTop);
+    }
+
+    /// <summary>Which action button is under a screen point: "equip", "drop", "destroy" or null.</summary>
+    public static string? ActionAt(Vector2 screen)
+    {
+        if (!ActionsVisible) return null;
+        if (Contains(_equip, screen)) return "equip";
+        if (Contains(_drop, screen)) return "drop";
+        if (Contains(_destroy, screen)) return "destroy";
+        return null;
+    }
+
+    private static bool Contains(SBgButtonOptions b, Vector2 screen)
+    {
+        var corners = new Vector3[4];
+        b.RectTransform.GetWorldCorners(corners);
+        return screen.x >= corners[0].x && screen.x <= corners[2].x && screen.y >= corners[0].y && screen.y <= corners[2].y;
+    }
+
+    public static Vector2 ActionScreenCenter(string action)
+    {
+        var b = action == "equip" ? _equip : action == "drop" ? _drop : _destroy;
+        var corners = new Vector3[4];
+        b.RectTransform.GetWorldCorners(corners);
+        return (corners[0] + corners[2]) / 2;
+    }
+
+    /// <summary>Runs a card action on the selected slot. Destroy needs two clicks.</summary>
+    public static string Act(string action, string key)
+    {
+        switch (action)
+        {
+            case "equip":
+                BookPages.Selected = null;
+                return InventoryActions.ToggleEquip(key) ? "equipped" : "no-room";
+            case "drop":
+                BookPages.Selected = null;
+                return InventoryActions.Drop(key) ? "dropped" : "failed";
+            case "destroy":
+                if (!_destroyArmed) { _destroyArmed = true; return "armed"; }
+                _destroyArmed = false;
+                BookPages.Selected = null;
+                return InventoryActions.Destroy(key) ? "destroyed" : "failed";
+        }
+        return "none";
+    }
+}

@@ -79,12 +79,15 @@ public sealed class LootRoller
     public ItemInstance? RollDrop(double worth, int itemLevel, double magicFind, int difficulty, Rng rng, int minRarity = 0)
     {
         int rarity = RollRarity(worth, itemLevel, magicFind, difficulty, rng);
-        var baseDef = PickBase(rarity, itemLevel, rng);
-        if (baseDef == null || baseDef.Rarity < minRarity && !IsMaterialOrOther(baseDef)) return null;
+        var baseDef = PickBase(rarity, itemLevel, rng, IsDroppable);
+        if (baseDef == null || baseDef.Rarity < minRarity) return null;
         return RollItem(baseDef, itemLevel, rng);
     }
 
     public static bool IsMaterialOrOther(ItemBaseDef d) => d.Type is "material" or "other";
+
+    /// <summary>What enemies can drop. First pass: equipment only; materials and consumables stay defined but unused (COS-59).</summary>
+    public static bool IsDroppable(ItemBaseDef d) => IsEquippable(d);
 
     /// <summary>A fresh instance of <paramref name="baseDef"/> at <paramref name="level"/>.</summary>
     public ItemInstance RollItem(ItemBaseDef baseDef, int level, Rng rng)

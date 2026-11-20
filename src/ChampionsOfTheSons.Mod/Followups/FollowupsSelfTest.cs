@@ -130,27 +130,13 @@ internal static class FollowupsSelfTest
         ModContent.Db.Items.Values.Where(d => LootRoller.IsEquippable(d) && d.Rarity == rarity && d.MinLevel <= level)
             .OrderBy(d => d.Id, StringComparer.Ordinal).First().Id;
 
+    /// <summary>Scrap gives materials, which are out of the game for now (COS-59): the mode must not be offered.</summary>
     private static void Scrap()
     {
         var panel = CraftingFeature.Panel;
         panel.Open();
-        Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        var item = TestKit.Give(Equippable(5, 90), 5, 90);
-        string key = Inventory.Bag(0);
-        panel.SetMode(CraftMode.Scrap);
-        panel.Clear();
-        SelfTest.Check("followups: Scrap mode is in the panel", CraftingPanel.Modes.Contains(CraftMode.Scrap) && panel.ModeButtonVisible(CraftMode.Scrap));
-        panel.ClickBag(key);
-        SelfTest.Check("followups: scrap needs only the item", panel.Blocker() == null, panel.Blocker() ?? "");
-        var result = panel.DoCraft();
-        var mat = panel.LastScrap;
-        SelfTest.Check("followups: scrap succeeded", result is { Ok: true } && mat != null, result?.Error.ToString() ?? "blocked");
-        SelfTest.Check("followups: scrapped item is gone", Pc.Inventory.Slots.All(kv => !(kv.Value.BaseId == item.BaseId && kv.Value.Level == item.Level && kv.Value.Stats.SequenceEqual(item.Stats))));
-        var inBag = mat == null ? null : Pc.Inventory.Slots.Values.FirstOrDefault(v => v.BaseId == mat.BaseId);
-        SelfTest.Check("followups: materials are in the bag in the rules' amount", inBag != null && mat != null && inBag.Amount == Core.Rules.Crafting.ScrapYield(item.Rarity, item.Level),
-            $"{inBag?.Amount} of {mat?.BaseId}, expected {Core.Rules.Crafting.ScrapYield(item.Rarity, item.Level)}");
-        SelfTest.Check("followups: scrap shows what was got", panel.BeforeAfter.Length > 0, panel.BeforeAfter);
-        panel.SetMode(CraftMode.Reroll);
+        SelfTest.Check("followups: Scrap mode is not offered while drops are equipment only", !CraftingPanel.Modes.Contains(CraftMode.Scrap) && !panel.ModeButtonVisible(CraftMode.Scrap));
+        panel.Close();
     }
 
     private static void Previews()

@@ -11,6 +11,7 @@ public static class Config
     public static KeybindConfigEntry PerksKey { get; private set; } = null!;
     public static ConfigEntry<bool> ShowNameplates { get; private set; } = null!;
     public static ConfigEntry<bool> ShowDamageNumbers { get; private set; } = null!;
+    public static ConfigEntry<bool> InventoryInBook { get; private set; } = null!;
 
     public static void Init()
     {
@@ -24,5 +25,6 @@ public static class Config
 
         ShowNameplates = Category.CreateEntry("show_nameplates", true, "Enemy nameplates", "Show level and health above enemies.");
         ShowDamageNumbers = Category.CreateEntry("show_damage_numbers", true, "Damage numbers", "Show floating damage numbers.");
+        InventoryInBook = Category.CreateEntry("inventory_in_book", true, "Inventory in the guide book", "Show gear, bag and character on the guide book pages. Off: the screen panel.");
     }
 }

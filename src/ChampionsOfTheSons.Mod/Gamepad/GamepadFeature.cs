@@ -55,7 +55,7 @@ internal sealed class GamepadFeature : IModFeature
 
         _panels = new List<PadPanel>
         {
-            new("inventory", () => CotsUi.Inventory.IsOpen, () => CotsUi.Inventory.Toggle(),
+            new("inventory", () => CotsUi.Inventory.IsOpen, () => CotsUi.ToggleInventory(),
                 () => { if (!CotsUi.Inventory.CloseMenu()) CotsUi.Inventory.Close(); },
                 () => CotsUi.Inventory.PadRoot, () => CotsUi.Inventory.PadMenuRoot),
             new("perks", () => PerksFeature.Panel.IsOpen, () => PerksFeature.Panel.Toggle(), () => PerksFeature.Panel.Close(), () => PerksFeature.Panel.PadRoot),

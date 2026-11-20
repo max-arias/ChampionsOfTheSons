@@ -26,8 +26,27 @@ internal static class CotsUi
 
         // The keybind only fires while the player is controllable, which is not the case with a panel open:
         // closing is handled in Update. Toggle ignores a second call in the same frame, so both paths can fire safely.
-        Config.InventoryKey.Notify(Inventory.Toggle);
+        Config.InventoryKey.Notify(ToggleInventory);
         GlobalEvents.OnUpdate.Subscribe(Update);
+    }
+
+    /// <summary>The inventory key: the guide book pages (COS-59), or the screen panel when that is off or the book is unavailable.</summary>
+    public static void ToggleInventory()
+    {
+        if (Book.BookHost.ModPageActive) return; // the book handles its own close
+        if (!Inventory.IsOpen && Config.InventoryInBook.Value)
+        {
+            try
+            {
+                if (Book.BookHost.Open(Book.BookTab.Gear)) return;
+                RLog.Msg("Champions of the Sons: no guide book to open, using the inventory panel");
+            }
+            catch (Exception e)
+            {
+                RLog.Error($"Champions of the Sons: opening the book failed, using the inventory panel: {e.Message}");
+            }
+        }
+        Inventory.Toggle();
     }
 
     private static void Update()

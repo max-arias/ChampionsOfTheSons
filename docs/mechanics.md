@@ -59,6 +59,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
   - r6: `w > 1440 and U < 0.18 + 0.033mf + 0.003d`, kept if `d > 3 or U < 0.05`
   - r7: `w > 5000 and U < 0.04 + 0.01mf`, kept if `d > 4 or U < 0.001`
 - Base item: uniform among that rarity's items with `minLevel ≤ level`; none → try one rarity lower.
+- ✱ First pass (COS-59): drops are equipment only. Materials and consumables stay defined in `content/` but never drop, and the crafting panel does not offer Scrap. Level-up hearts are still given.
 - Stat slots: each pool rolls one option uniformly; `null` = slot stays empty; `*` = one of the common stats (COTF IDs 1–18, 21–26, 31, 34–47, 49–57, 59–67).
 - Value: `v = U(min, max) × level^levelPow`; `v = min(v, cap)`; `× statMultiplier`; `× rarityMult(r)`; `v = min(v, cap)`. `rarityMult = 0.5, 0.7, 1, 1.4, 2.3, 3.4, 4.5, 5.6`.
 - Sockets: equippable, level > 20, `U ≤ 0.175` → `U[1, max]` empty sockets (max 1 most slots; 2 bracer/pants/shield/quiver/scroll; 3 chest). Gems fill a socket with a slot-dependent stat.

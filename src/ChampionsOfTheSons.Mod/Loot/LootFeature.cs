@@ -162,7 +162,8 @@ public sealed class LootFeature : IModFeature
     public static GroundDrop? DropFromInventory(string slot)
     {
         var inv = PlayerState.Character.Inventory;
-        if (inv.Get(slot) == null || !LocalPlayer.IsInWorld) return null;
+        // Not IsInWorld: holding the guide book clears it, and the book inventory drops from there (COS-59).
+        if (inv.Get(slot) == null || LocalPlayer.Transform == null) return null;
         var item = inv.Remove(slot)!;
         var t = LocalPlayer.Transform;
         var drop = SpawnAt(item, t.position + t.forward * ThrowDistance);

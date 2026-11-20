@@ -167,6 +167,19 @@ public class CraftingTests
     """;
 
     [Fact]
+    public void Drops_are_equipment_only_even_where_a_rarity_has_only_materials()
+    {
+        var loot = new LootRoller(TestContent.Create(new() { ["items.json"] = ScrapItems }));
+        var rng = new Rng(21);
+        for (int i = 0; i < 500; i++)
+        {
+            var drop = loot.RollDrop(worth: 1e6, itemLevel: 60, magicFind: 3, difficulty: 10, rng);
+            Assert.NotNull(drop); // rarities 3-7 hold only materials and the heart: the pick falls back to the ring
+            Assert.Equal("item.ring", drop!.BaseId);
+        }
+    }
+
+    [Fact]
     public void Scrap_gives_a_material_stack_scaling_with_rarity_and_level()
     {
         var db = TestContent.Create(new() { ["items.json"] = ScrapItems });

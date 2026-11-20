@@ -350,28 +350,12 @@ internal sealed partial class InventoryPanel
     /// <summary>What a click does: bag item -> equip, equipped item -> back into the first free bag slot.</summary>
     public bool ClickSlot(string key)
     {
-        var inv = Character.Inventory;
-        var db = ModContent.Db;
-        if (inv.Get(key) == null) return false;
-
-        bool ok;
-        if (key.StartsWith("bag.", StringComparison.Ordinal))
-            ok = inv.Equip(key, db);
-        else
-        {
-            var free = FirstFreeBagSlot(inv);
-            ok = free != null && inv.Move(key, free, db);
-        }
+        bool ok = InventoryActions.ToggleEquip(key);
         if (ok) { _dirty = false; RefreshAll(); }
         return ok;
     }
 
-    public static string? FirstFreeBagSlot(Inventory inv)
-    {
-        for (int i = 0; i < LootRoller.BagSlots; i++)
-            if (inv.Get(Inventory.Bag(i)) == null) return Inventory.Bag(i);
-        return null;
-    }
+    public static string? FirstFreeBagSlot(Inventory inv) => InventoryActions.FirstFreeBagSlot(inv);
 
     /// <summary>For automated tests: act as if the pointer rests on this slot (null = on no slot). Cleared with <see cref="ReleaseSimulatedHover"/>.</summary>
     public void SimulateHover(string? key)
@@ -530,23 +514,8 @@ internal sealed partial class InventoryPanel
 
     private void RefreshSets()
     {
-        var pc = Character;
-        var counts = ItemEffects.SetCounts(pc.Inventory.Equipped.Select(kv => kv.Value), pc.Content);
-        var sb = new StringBuilder();
-        foreach (var (setId, have) in counts)
-        {
-            if (!pc.Content.Sets.TryGetValue(setId, out var set)) continue;
-            int total = pc.Content.Items.Values.Count(i => i.Set == setId);
-            sb.Append($"<color={UiTheme.Gold}><b>{ModContent.Text.Get(setId + ".name", set.Name)}</b> ({have}/{total})</color>\n");
-            foreach (var bonus in set.Bonuses.OrderBy(b => b.Pieces))
-            {
-                var text = ModContent.Text.Get($"{setId}.bonus.{bonus.Pieces}", "");
-                if (text.Length == 0) continue;
-                sb.Append($"<color={(have >= bonus.Pieces ? UiTheme.Good : UiTheme.TextFaint)}>({bonus.Pieces}) {text}</color>\n");
-            }
-            sb.Append('\n');
-        }
-        _setsLabel.Text(sb.Length == 0 ? $"<color={UiTheme.TextFaint}>{UiText.T("ui.sets.none", "No set pieces equipped.")}</color>" : sb.ToString().TrimEnd());
+        var text = InventoryActions.SetBonusText(UiTheme.Gold, UiTheme.Good, UiTheme.TextFaint);
+        _setsLabel.Text(text.Length == 0 ? $"<color={UiTheme.TextFaint}>{UiText.T("ui.sets.none", "No set pieces equipped.")}</color>" : text);
     }
 
     // ---------------------------------------------------------------- tooltip

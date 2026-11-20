@@ -27,7 +27,8 @@ internal sealed class CraftingPanel
 
     public static readonly CraftMode[] Modes =
     {
-        CraftMode.Reroll, CraftMode.Reforge, CraftMode.Polish, CraftMode.Empower, CraftMode.IndividualReroll, CraftMode.Scrap,
+        // Scrap (gives materials) is left out while drops are equipment only (COS-59); the rule stays in Core.
+        CraftMode.Reroll, CraftMode.Reforge, CraftMode.Polish, CraftMode.Empower, CraftMode.IndividualReroll,
     };
 
     private sealed class Cellw

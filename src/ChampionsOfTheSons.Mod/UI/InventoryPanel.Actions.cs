@@ -196,7 +196,7 @@ internal sealed partial class InventoryPanel
         var key = MenuSlot;
         CloseMenu();
         if (key == null) return false;
-        bool ok = LootFeature.DropFromInventory(key) != null;
+        bool ok = InventoryActions.Drop(key);
         if (ok) { _dirty = false; RefreshAll(); }
         return ok;
     }
@@ -213,7 +213,7 @@ internal sealed partial class InventoryPanel
             return false;
         }
         CloseMenu();
-        bool ok = LootFeature.Destroy(key);
+        bool ok = InventoryActions.Destroy(key);
         if (ok) { _dirty = false; RefreshAll(); }
         return ok;
     }
