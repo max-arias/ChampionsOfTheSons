@@ -14,11 +14,13 @@ internal static class BookTabs
 {
     private sealed record TabDef(BookTab Tab, string IconId, string ColorHex);
 
+    /// <summary>
+    /// One tab for the mod (only one fits under the game's column); Gear, Bag and Character are sub-tabs in the page's
+    /// title bar. Keyed by <see cref="BookTab.Gear"/>; it opens the last mod page shown.
+    /// </summary>
     private static readonly TabDef[] Defs =
     {
         new(BookTab.Gear, "item.steel_breastplate", "#8A4B2C"),
-        new(BookTab.Bag, "perk.more_building_resources", "#6B5A3A"),
-        new(BookTab.Character, "perk.all_attributes_2", "#46535E"),
     };
 
     private static readonly Dictionary<BookTab, Renderer> Ours = new();
@@ -80,7 +82,7 @@ internal static class BookTabs
             if (r == null) continue;
             var home = Home[t];
             r.transform.localPosition = home;
-            if (t == tab) r.transform.position += _slideOut;
+            if (tab != BookTab.None) r.transform.position += _slideOut;
         }
     }
 

@@ -52,6 +52,9 @@ internal static class BookCard
         _destroy = Button();
         _actions.Add(_equip).Add(_drop).Add(_destroy);
         inner.Add(header).Add(_sub).Add(_body).Add(_divider).Add(_compare).Add(_actions);
+        var layer = SContainer.Anchor(AnchorType.Fill);
+        _root.Add(layer);
+        layer.Add(_card);
         foreach (var img in _root.Root.GetComponentsInChildren<Image>(true)) img.raycastTarget = false;
         // The card stays active and hides by moving off screen: toggling it (and its RawImage icon) before its
         // graphics ever initialised threw inside uGUI.

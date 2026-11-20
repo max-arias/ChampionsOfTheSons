@@ -51,7 +51,7 @@ public sealed class BookFeature : IModFeature
         if (click)
         {
             var tab = BookTabs.HitTest(screen);
-            if (tab != BookTab.None) { BookHost.ShowModPage(tab); LastAction = "tab " + tab; return; }
+            if (tab != BookTab.None) { BookHost.ShowModPage(BookPages.LastTab); LastAction = "tab " + BookPages.LastTab; return; }
         }
         if (!BookHost.ModPageActive) { BookCard.Hide(); return; }
         var current = BookHost.Tab;

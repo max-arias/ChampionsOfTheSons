@@ -29,6 +29,19 @@ internal static class BookPages
     public const int BagCols = 5, BagRows = 7, BagPerPage = BagCols * BagRows;
     public static int BagPages => (LootRoller.BagSlots + BagPerPage - 1) / BagPerPage;
     private const float Header = 80;
+    /// <summary>Page margins: the spiral covers the left edge and the thumb the bottom left (COS-59 screenshots).</summary>
+    private const float Left = 46, Right = 16, Bottom = 92;
+    private const float PagerY = PageKit.H - Bottom - 50, PagerH = 44;
+    private const float NextX = PageKit.W - Right - 56, PrevX = NextX - 56 - 90, SortX = PrevX - 124;
+    private const float XpW = PageKit.W - Left - Right;
+
+    /// <summary>The mod page the book tab opens (the last one shown).</summary>
+    public static BookTab LastTab { get; private set; } = BookTab.Gear;
+
+    private static readonly (BookTab Tab, string Key, string Fallback)[] SubTabs =
+    {
+        (BookTab.Gear, "ui.book.tab.gear", "Gear"), (BookTab.Bag, "ui.book.tab.bag", "Bag"), (BookTab.Character, "ui.book.tab.character", "Character"),
+    };
 
     private static readonly string[][] EquipLayout =
     {
@@ -44,7 +57,7 @@ internal static class BookPages
     private static TextMeshProUGUI _sets = null!, _gearCount = null!, _bagCount = null!, _bagPager = null!, _charPager = null!;
     private static TextMeshProUGUI _level = null!, _xpText = null!, _perks = null!;
     private static RectTransform _xpFill = null!;
-    private static readonly List<(TextMeshProUGUI Name, TextMeshProUGUI Value)> Rows = new();
+    private static readonly List<(TextMeshProUGUI Name, TextMeshProUGUI Value, Image Shade)> Rows = new();
     private static List<SheetRow> _sheet = new();
     private static bool _dirty = true;
 
@@ -80,11 +93,32 @@ internal static class BookPages
         Show(BookTab.None);
     }
 
-    private static TextMeshProUGUI TitleBar(RectTransform root, string key, string fallback)
+    /// <summary>The title bar holds the three sub-tabs; the open one is paper colored, like an open tab.</summary>
+    private static TextMeshProUGUI TitleBar(RectTransform root, BookTab own)
     {
         PageKit.Box(root, "titlebar", 0, 0, PageKit.W, Header - 14, PageKit.TitleBar);
-        PageKit.Text(root, "title", 28, 6, 400, Header - 26, UiText.T(key, fallback).ToUpperInvariant(), 38, PageKit.TitleText);
-        return PageKit.Text(root, "title-right", PageKit.W - 260, 6, 232, Header - 26, "", 24, PageKit.TitleText, TextAlignmentOptions.MidlineRight);
+        float x = Left;
+        foreach (var (tab, key, fallback) in SubTabs)
+        {
+            bool open = tab == own;
+            PageKit.Box(root, "subtab-" + tab, x, 12, SubTabW, Header - 26, open ? PageKit.Paper : PageKit.TitleBar);
+            PageKit.Text(root, "subtab-text-" + tab, x, 12, SubTabW, Header - 26, UiText.T(key, fallback).ToUpperInvariant(), 22,
+                open ? PageKit.Ink : PageKit.TitleText, TextAlignmentOptions.Center);
+            x += SubTabW + 6;
+        }
+        return PageKit.Text(root, "title-right", PageKit.W - Right - 110, 12, 104, Header - 26, "", 20, PageKit.TitleText, TextAlignmentOptions.MidlineRight);
+    }
+
+    private const float SubTabW = 150;
+
+    private static void AddSubTabHits()
+    {
+        float x = Left;
+        foreach (var (tab, _, _) in SubTabs)
+        {
+            Hits.Add(new PageHit("tab." + tab, x, 12, SubTabW, Header - 26));
+            x += SubTabW + 6;
+        }
     }
 
     private static PageSlot Slot(RectTransform root, string key, float x, float y, float size, string? emptyLabel)
@@ -107,9 +141,9 @@ internal static class BookPages
 
     private static void BuildGear()
     {
-        _gearCount = TitleBar(_gear, "ui.book.tab.gear", "Gear");
-        const float cell = 132, gapX = 26, gapY = 26;
-        float x0 = (PageKit.W - (3 * cell + 2 * gapX)) / 2, y0 = Header + 28;
+        _gearCount = TitleBar(_gear, BookTab.Gear);
+        const float cell = 120, gapX = 26, gapY = 24;
+        float x0 = Left + (PageKit.W - Left - Right - (3 * cell + 2 * gapX)) / 2, y0 = Header + 20;
         for (int r = 0; r < EquipLayout.Length; r++)
             for (int c = 0; c < 3; c++)
             {
@@ -117,40 +151,40 @@ internal static class BookPages
                 GearSlots.Add(Slot(_gear, key, x0 + c * (cell + gapX), y0 + r * (cell + gapY), cell, UiText.SlotName(key)));
             }
         float setsY = y0 + 4 * (cell + gapY) + 4;
-        PageKit.Text(_gear, "sets-title", 34, setsY, 600, 30, UiText.T("ui.book.sets", "Set bonuses"), 24, PageKit.Ink);
-        _sets = PageKit.Text(_gear, "sets", 34, setsY + 32, PageKit.W - 68, PageKit.H - setsY - 44, "", 20, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
+        PageKit.Text(_gear, "sets-title", Left, setsY, 560, 30, UiText.T("ui.book.sets", "Set bonuses"), 24, PageKit.Ink);
+        _sets = PageKit.Text(_gear, "sets", Left, setsY + 32, PageKit.W - Left - Right, PageKit.H - Bottom - setsY - 32, "", 20, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
     }
 
     private static void BuildBag()
     {
-        _bagCount = TitleBar(_bag, "ui.book.tab.bag", "Bag");
-        const float cell = 112, gap = 10;
-        float x0 = (PageKit.W - (BagCols * cell + (BagCols - 1) * gap)) / 2, y0 = Header + 14;
+        _bagCount = TitleBar(_bag, BookTab.Bag);
+        const float cell = 104, gap = 10;
+        float x0 = Left + (PageKit.W - Left - Right - (BagCols * cell + (BagCols - 1) * gap)) / 2, y0 = Header + 6;
         for (int i = 0; i < BagPerPage; i++)
             BagSlots.Add(Slot(_bag, "page-bag-" + i, x0 + (i % BagCols) * (cell + gap), y0 + (i / BagCols) * (cell + gap), cell, null));
         _bagPager = Pager(_bag);
         // Sort button in the pager row.
-        PageKit.Box(_bag, "sort-bg", PageKit.W - 170, PageKit.H - 66, 140, 46, PageKit.TitleBar);
-        PageKit.Text(_bag, "sort", PageKit.W - 170, PageKit.H - 66, 140, 46, UiText.T("ui.book.sort", "Sort"), 24, PageKit.TitleText, TextAlignmentOptions.Center);
+        PageKit.Box(_bag, "sort-bg", SortX, PagerY, 110, PagerH, PageKit.TitleBar);
+        PageKit.Text(_bag, "sort", SortX, PagerY, 110, PagerH, UiText.T("ui.book.sort", "Sort"), 24, PageKit.TitleText, TextAlignmentOptions.Center);
     }
 
     private static TextMeshProUGUI Pager(RectTransform root)
     {
-        PageKit.Box(root, "prev-bg", 30, PageKit.H - 66, 60, 46, PageKit.TitleBar);
-        PageKit.Text(root, "prev", 30, PageKit.H - 66, 60, 46, "<", 30, PageKit.TitleText, TextAlignmentOptions.Center);
-        PageKit.Box(root, "next-bg", 210, PageKit.H - 66, 60, 46, PageKit.TitleBar);
-        PageKit.Text(root, "next", 210, PageKit.H - 66, 60, 46, ">", 30, PageKit.TitleText, TextAlignmentOptions.Center);
-        return PageKit.Text(root, "pager", 90, PageKit.H - 66, 120, 46, "", 26, PageKit.Ink, TextAlignmentOptions.Center);
+        PageKit.Box(root, "prev-bg", PrevX, PagerY, 56, PagerH, PageKit.TitleBar);
+        PageKit.Text(root, "prev", PrevX, PagerY, 56, PagerH, "<", 30, PageKit.TitleText, TextAlignmentOptions.Center);
+        PageKit.Box(root, "next-bg", NextX, PagerY, 56, PagerH, PageKit.TitleBar);
+        PageKit.Text(root, "next", NextX, PagerY, 56, PagerH, ">", 30, PageKit.TitleText, TextAlignmentOptions.Center);
+        return PageKit.Text(root, "pager", PrevX + 56, PagerY, 90, PagerH, "", 26, PageKit.Ink, TextAlignmentOptions.Center);
     }
 
     private static void BuildCharacter()
     {
-        TitleBar(_char, "ui.book.tab.character", "Character");
-        _level = PageKit.Text(_char, "level", 34, Header + 8, 400, 48, "", 40, PageKit.Ink);
-        _perks = PageKit.Text(_char, "perks", 330, Header + 14, 302, 40, "", 22, PageKit.Good, TextAlignmentOptions.MidlineRight);
-        PageKit.Box(_char, "xp-back", 34, Header + 62, PageKit.W - 68, 16, PageKit.PaperShade);
-        _xpFill = PageKit.Box(_char, "xp-fill", 34, Header + 62, PageKit.W - 68, 16, PageKit.RarityColor(3)).rectTransform;
-        _xpText = PageKit.Text(_char, "xp-text", 34, Header + 80, PageKit.W - 68, 28, "", 20, PageKit.InkFaint, TextAlignmentOptions.Center);
+        TitleBar(_char, BookTab.Character);
+        _level = PageKit.Text(_char, "level", Left, Header + 8, 320, 48, "", 40, PageKit.Ink);
+        _perks = PageKit.Text(_char, "perks", Left + 300, Header + 14, XpW - 300, 40, "", 22, PageKit.Good, TextAlignmentOptions.MidlineRight);
+        PageKit.Box(_char, "xp-back", Left, Header + 62, XpW, 16, PageKit.PaperShade);
+        _xpFill = PageKit.Box(_char, "xp-fill", Left, Header + 62, XpW, 16, PageKit.RarityColor(3)).rectTransform;
+        _xpText = PageKit.Text(_char, "xp-text", Left, Header + 80, XpW, 28, "", 20, PageKit.InkFaint, TextAlignmentOptions.Center);
         _charPager = Pager(_char);
     }
 
@@ -174,6 +208,8 @@ internal static class BookPages
     {
         _dirty = false;
         Hits.Clear();
+        AddSubTabHits();
+        if (tab != BookTab.None) LastTab = tab;
         switch (tab)
         {
             case BookTab.Gear: RefreshGear(); break;
@@ -209,13 +245,13 @@ internal static class BookPages
         _bagCount.text = $"{InventoryActions.BagCount()}/{LootRoller.BagSlots}";
         _bagPager.text = $"{BagPage + 1}/{BagPages}";
         AddPagerHits();
-        Hits.Add(new PageHit("sort", PageKit.W - 170, PageKit.H - 66, 140, 46));
+        Hits.Add(new PageHit("sort", SortX, PagerY, 110, PagerH));
     }
 
     private static void AddPagerHits()
     {
-        Hits.Add(new PageHit("prev", 30, PageKit.H - 66, 60, 46));
-        Hits.Add(new PageHit("next", 210, PageKit.H - 66, 60, 46));
+        Hits.Add(new PageHit("prev", PrevX, PagerY, 56, PagerH));
+        Hits.Add(new PageHit("next", NextX, PagerY, 56, PagerH));
     }
 
     private static void RefreshCharacter()
@@ -223,7 +259,7 @@ internal static class BookPages
         var sum = SheetData.Summary(Pc);
         _level.text = $"{UiText.T("ui.sheet.level", "Level")} {sum.Level}";
         _perks.text = sum.PerkPoints > 0 ? $"{sum.PerkPoints} {UiText.T("ui.book.perk_points", "perk points")}" : "";
-        _xpFill.sizeDelta = new Vector2((PageKit.W - 68) * (float)sum.Fraction, 16);
+        _xpFill.sizeDelta = new Vector2(XpW * (float)sum.Fraction, 16);
         var inv = System.Globalization.CultureInfo.InvariantCulture;
         _xpText.text = $"{Math.Floor(sum.Xp).ToString("N0", inv)} / {sum.Goal.ToString("N0", inv)} XP";
 
@@ -232,28 +268,33 @@ internal static class BookPages
         int split = _sheet.FindIndex(r => r.Header && r.Id == "defense");
         if (split < 0) split = _sheet.Count / 2;
         var rows = CharPage == 0 ? _sheet.Take(split).ToList() : _sheet.Skip(split).ToList();
-        const float rowH = 38, top = Header + 124;
+        const float rowH = 36, top = Header + 116;
         while (Rows.Count < rows.Count)
         {
             int i = Rows.Count;
-            Rows.Add((PageKit.Text(_char, "row-name-" + i, 34, 0, 420, rowH, "", 24, PageKit.Ink),
-                PageKit.Text(_char, "row-value-" + i, 420, 0, PageKit.W - 454, rowH, "", 24, PageKit.Ink, TextAlignmentOptions.MidlineRight)));
+            // Alternate rows are shaded so label and value read as one line on the tilted page.
+            var shade = PageKit.Box(_char, "row-shade-" + i, Left - 6, 0, XpW + 12, rowH, i % 2 == 0 ? new Color(0, 0, 0, 0.06f) : Color.clear);
+            shade.transform.SetAsFirstSibling();
+            Rows.Add((PageKit.Text(_char, "row-name-" + i, Left, 0, 380, rowH, "", 24, PageKit.Ink),
+                PageKit.Text(_char, "row-value-" + i, Left + 380, 0, XpW - 380, rowH, "", 24, PageKit.Ink, TextAlignmentOptions.MidlineRight), shade));
         }
         for (int i = 0; i < Rows.Count; i++)
         {
-            var (name, value) = Rows[i];
+            var (name, value, shadeImg) = Rows[i];
             bool on = i < rows.Count;
             name.gameObject.SetActive(on);
             value.gameObject.SetActive(on);
+            shadeImg.gameObject.SetActive(on);
             if (!on) continue;
             var row = rows[i];
             float y = top + i * rowH;
-            name.rectTransform.anchoredPosition = new Vector2(34, -y);
-            value.rectTransform.anchoredPosition = new Vector2(420, -y);
+            name.rectTransform.anchoredPosition = new Vector2(Left, -y);
+            shadeImg.rectTransform.anchoredPosition = new Vector2(Left - 6, -y);
+            value.rectTransform.anchoredPosition = new Vector2(Left + 380, -y);
             name.text = row.Header ? $"<b>{row.Label.ToUpperInvariant()}</b>" : row.Label;
             name.color = row.Header ? PageKit.TitleBar : PageKit.Ink;
             value.text = row.Value;
-            if (!row.Header) Hits.Add(new PageHit("row." + row.Id, 30, y, PageKit.W - 60, rowH));
+            if (!row.Header) Hits.Add(new PageHit("row." + row.Id, Left, y, XpW, rowH));
         }
         _charPager.text = $"{CharPage + 1}/2";
         AddPagerHits();
@@ -322,6 +363,9 @@ internal static class BookPages
     {
         switch (key)
         {
+            case "tab.Gear": BookHost.ShowModPage(BookTab.Gear); return "tab";
+            case "tab.Bag": BookHost.ShowModPage(BookTab.Bag); return "tab";
+            case "tab.Character": BookHost.ShowModPage(BookTab.Character); return "tab";
             case "prev": Page(tab, -1); return "page";
             case "next": Page(tab, +1); return "page";
             case "sort": InventoryActions.SortBag(); Selected = null; return "sort";
