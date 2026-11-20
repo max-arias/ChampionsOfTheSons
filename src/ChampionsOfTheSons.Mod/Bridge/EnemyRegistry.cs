@@ -37,6 +37,9 @@ public sealed class EnemyRuntime
     /// <summary>Self-tests only: the headless game keeps spawned enemies dormant, so a test can declare one active (true) or inactive (false). Null = ask the game.</summary>
     public bool? TestActive { get; set; }
 
+    /// <summary>Self-tests only: overrides whether the boss bar sees this enemy as aware of the player (COS-67). Null = ask the game.</summary>
+    public bool? TestAware { get; set; }
+
     /// <summary>Alive, enabled in the scene and not despawned: the only state in which abilities may act (the original's bug #43).</summary>
     public bool IsActive
     {
@@ -88,6 +91,12 @@ public static class EnemyRegistry
         return vsm == null ? null : Get(vsm.GetStatsManager());
     }
 
+    /// <summary>Every tracked enemy, without a copy (do not change the registry while looping).</summary>
+    public static Dictionary<IntPtr, EnemyRuntime>.ValueCollection All => ByStats.Values;
+
+    /// <summary>Self-tests only: rewrites a freshly rolled profile (e.g. to force a Boss), applied before anything sees it.</summary>
+    public static Func<EnemyProfile, EnemyProfile>? TestProfileOverride { get; set; }
+
     /// <summary>A snapshot of every tracked enemy (safe to change the registry while looping).</summary>
     public static List<EnemyRuntime> Snapshot() => ByStats.Values.ToList();
 
@@ -95,6 +104,9 @@ public static class EnemyRegistry
     {
         if (ByStats.TryGetValue(stats.Pointer, out var existing)) return existing;
         var profile = EnemyScaler.Roll(kind, vanillaMaxHealth, WorldState.Rules, Rng);
+        if (TestProfileOverride != null) profile = TestProfileOverride(profile);
+        if (profile.Name == null && ModContent.Db != null)
+            profile = profile with { Name = EnemyInfo.PickName(profile.Tier, ModContent.Db.EliteGivenIds, ModContent.Db.EliteEpithetIds, Rng) };
         var runtime = new EnemyRuntime(kind, profile, vanillaMaxHealth, actor, new EnemyCombatState(profile, WorldState.Rules.Difficulty));
         runtime.Stats = stats;
         ByStats[stats.Pointer] = runtime;

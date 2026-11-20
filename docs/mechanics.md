@@ -120,6 +120,12 @@ Host only; each runs only while the enemy is alive and active and is removed the
 | Trapper | 18 s | 4-28 m | 1.5 s | 3 snares (r 2.5 m; one under the player, two within 6 m) wait 20 s (max 9 live); stepping on one roots 3 s and deals 0.2·D |
 Not synced yet: the host applies effects to its own player; track E decides how remote players are targeted (`AbilityTargets.Positions`) and receive pull/root.
 
+## Enemy scanner, danger and names (COS-68, COS-67; new rules, our own design)
+- Danger (`Core/Rules/EnemyInfo.cs`): the level gap against the local player in steps of `max(3, playerLevel / 10)` levels: more than 2 steps below Trivial, up to 1 step above Even, up to 3 steps above Tough, beyond Dangerous; Elite and Miniboss +1, Boss +2, capped at Deadly. Nameplates show it as 1-5 tally marks (last one struck across), grey to red.
+- Named elites: Elite, Miniboss and Boss tiers get a random given name and epithet from `content/elite_names.json` (host-rolled, sent in `EnemySync` as ids; text keys `<id>.name`, joined by `ui.elites.format`). The plate shows the name; the scanner shows kind and tier.
+- Scanner: the crosshair resting 0.25 s on an enemy's body (within 40 m, plate drawn) opens a card beside its plate: name, kind, tier, level, danger word; health current/max and armor with the amount stripped (4 Hz); extra damage per hit (`max(0, damageMult − 20)`, see `DamageToPlayer`); XP bounty; one line per affix saying what it does. It lingers 0.6 s after the look leaves. Setting `show_scanner`.
+- Boss bar: a Boss-tier enemy within 60 m that is in the game's combat-aware AI state, or that the local player hit in the last 10 s, gets a wide bar at the top centre (name, kind and level, health with a pale chunk for damage just taken, affixes). Hidden at once on death or despawn, 3 s after it stops being engaged, and with the HUD while panels, the book or menus are open. Two bars at most, nearest first. On a client the AI runs on the host, so the AI state may not be seen there: a hit always engages (not verified in co-op yet). Setting `show_boss_bar`.
+
 ## Perks
 - Fields: id, name, category (MeleeOffense, RangedOffense, MagicOffense, Defense, Support, Utility), unlock path (any one of), requirements (all of), cost, level requirement, stackable (no max), tree position, effects.
 - Buy: points ≥ cost, path and requirements met, level met, not bought unless stackable. Each purchase applies the effects again. No single refund; respec unbuys all perks and spells and sets points = level + permanent bonus.
