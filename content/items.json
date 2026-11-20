@@ -288,7 +288,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -299,7 +298,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -310,7 +308,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -321,7 +318,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -332,7 +328,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -343,7 +338,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -354,7 +348,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -955,7 +948,6 @@
         [
           "stat.spelldmgfromint",
           "stat.spellcostreduction",
-          "stat.spellcosttostamina",
           "stat.allattributes"
         ],
         [
@@ -1035,7 +1027,6 @@
           null
         ],
         [
-          "stat.spellcosttostamina",
           "stat.allhealingpercent",
           "stat.energyonhit",
           "stat.lifeonhit"
@@ -1067,13 +1058,11 @@
         ],
         [
           "stat.spelldmgfromint",
-          "stat.spellcostreduction",
-          "stat.spellcosttostamina"
+          "stat.spellcostreduction"
         ],
         [
           "stat.spelldmgfromint",
-          "stat.spellcostreduction",
-          "stat.spellcosttostamina"
+          "stat.spellcostreduction"
         ]
       ],
       "uniqueEffects": [
@@ -1559,7 +1548,6 @@
           "stat.spellcostreduction",
           "stat.meleeweaponrange",
           "stat.attackcostreduction",
-          "stat.spellcosttostamina",
           "stat.energypersecond",
           "stat.percentmaximumlife",
           "stat.cooldownreduction"
@@ -1738,8 +1726,7 @@
         [
           "stat.cooldownreduction",
           "stat.energyonhit",
-          "stat.spellcostreduction",
-          "stat.spellcosttostamina"
+          "stat.spellcostreduction"
         ],
         [
           "stat.lesserintelligence",
@@ -2020,8 +2007,7 @@
           "stat.dodgechance"
         ],
         [
-          "stat.spellcostreduction",
-          "stat.spellcosttostamina"
+          "stat.spellcostreduction"
         ],
         [
           "stat.lesserintelligence",
@@ -3476,7 +3462,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -3487,7 +3472,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -3498,7 +3482,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -3509,7 +3492,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",
@@ -3520,7 +3502,6 @@
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
-          "stat.spellcosttostamina",
           "stat.spelldamageincrease",
           "stat.basespelldamage",
           "stat.staminapersecond",

@@ -23,6 +23,19 @@ public static class XpCurve
     }
 }
 
+/// <summary>
+/// XP penalty on player death (COS-76; COTS rule, COTF reset the whole bar): half of the XP into the current level,
+/// but never more than a tenth of that level's goal. The level and its perk points are never lost.
+/// </summary>
+public static class DeathPenalty
+{
+    public const double ShareOfProgress = 0.5;
+    public const double MaxShareOfGoal = 0.1;
+
+    public static double XpLost(int level, double xp) =>
+        xp <= 0 ? 0 : Math.Min(xp * ShareOfProgress, XpCurve.Goal(level) * MaxShareOfGoal);
+}
+
 /// <summary>What one call to <see cref="Progress.AddXp"/> did.</summary>
 public sealed record LevelUpResult(int OldLevel, int NewLevel, IReadOnlyList<string> RewardItemIds)
 {
@@ -68,8 +81,20 @@ public sealed class Progress
         return new LevelUpResult(old, Level, rewards);
     }
 
-    /// <summary>Death: XP into the current level is lost; the level is kept.</summary>
-    public void OnDeath() => Xp = 0;
+    /// <summary>Death: loses <see cref="DeathPenalty.XpLost"/> of the XP into the current level; the level is kept. Returns the XP lost.</summary>
+    public double OnDeath()
+    {
+        double lost = DeathPenalty.XpLost(Level, Xp);
+        Xp -= lost;
+        return lost;
+    }
+
+    /// <summary>Admin: sets the level directly, with no XP into it. Clamped to 1..<see cref="XpCurve.PracticalMaxLevel"/>.</summary>
+    public void SetLevel(int level)
+    {
+        Level = Math.Clamp(level, 1, XpCurve.PracticalMaxLevel);
+        Xp = 0;
+    }
 
     public double ProgressToNext => Xp / XpCurve.Goal(Level);
 }

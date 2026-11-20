@@ -2011,6 +2011,7 @@
  "ui.crafting.rarity_low": "Ainesten on oltava vähintään yhtä harvinaisia.",
  "ui.crafting.target": "Esine",
  "ui.crafting.title": "Valmistus",
+ "ui.death.title": "Kuolit",
  "ui.elites.format": "{0} {1}",
  "ui.equipment.title": "Varusteet",
  "ui.followups.before_after": "Ennen -> jälkeen",

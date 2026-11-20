@@ -164,10 +164,24 @@ public sealed class PlayerCharacter
         return payout > 0 ? AddXp(payout) : null;
     }
 
-    public void OnDeath()
+    /// <summary>Raised by <see cref="OnDeath"/> with the XP lost (HUD notice).</summary>
+    public event Action<double>? Died;
+
+    /// <summary>Player death: the XP penalty and the pending massacre streak are lost. Returns the XP lost from the bar.</summary>
+    public double OnDeath()
     {
-        Progress.OnDeath();
+        double lost = Progress.OnDeath();
         Massacre.Reset();
+        Died?.Invoke(lost);
+        return lost;
+    }
+
+    /// <summary>Admin: sets the level. Perks are refunded when they cost more points than the new level gives.</summary>
+    public void SetLevel(int level)
+    {
+        Progress.SetLevel(level);
+        if (Perks.SpentPoints > Progress.TotalPerkPoints) Respec();
+        RebuildLevel();
     }
 
     /// <summary>Whether a perk can be bought now, including the custom conditions of canBuyManual perks.</summary>

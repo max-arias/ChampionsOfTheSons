@@ -25,6 +25,21 @@ Keys (change them in the RedLoader mod settings, file ChampionsOfTheSons.cfg)
   O  host settings (difficulty)   H  ping              Z X V B N M  spell slots 1-6
   Gamepad: LB + D-pad opens the panels.
 
+Admin and cheat commands (host or server admin only)
+- Single player and co-op host: open the game's debug console and type "cots help". Co-op clients
+  cannot use them. Dedicated server: players with the Admin role type "/cots ..." in chat.
+- Switch them off in ChampionsOfTheSonsAdmin.cfg (commands_enabled).
+  cots help                          the list below
+  cots players                       player ids for [player] (0 = host, all = everyone)
+  cots xp <amount> [player]          add XP
+  cots level <n> [player]            set the level        cots addlevels <n> [player]
+  cots points <n> [player]           bonus perk points    cots respec [player]
+  cots give <item id|random[:rarity]> [level] [player]   roll an item into the bag
+  cots heal [player]                 full health and energy
+  cots god [on|off] [player]         no damage taken      cots nocooldowns [on|off] [player]
+  cots spawn <normal|elite|miniboss|boss> [actor type] [count]
+  cots difficulty <id|0-10>          cots list <items|perks|spells|stats|enemies|difficulties> [filter]
+
 Saves
 - Your level, items and perks are saved with the game's own save (through RedLoader). Each player's
   character is kept in their own save in multiplayer.

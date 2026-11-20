@@ -42,11 +42,41 @@ public class ProgressionTests
     }
 
     [Fact]
-    public void Death_keeps_the_level_and_clears_xp()
+    public void Death_takes_half_the_level_progress_and_keeps_the_level()
     {
         var p = new Progress(12, 500, 0);
-        p.OnDeath();
+        Assert.True(500 * 0.5 < XpCurve.Goal(12) * 0.1);
+        Assert.Equal(250, p.OnDeath(), 6);
         Assert.Equal(12, p.Level);
+        Assert.Equal(250, p.Xp, 6);
+    }
+
+    [Fact]
+    public void Death_never_takes_more_than_a_tenth_of_the_level_goal()
+    {
+        double goal = XpCurve.Goal(30);
+        var p = new Progress(30, goal * 0.9, 0);
+        Assert.Equal(goal * 0.1, p.OnDeath(), 3);
+        Assert.Equal(goal * 0.8, p.Xp, 3);
+        Assert.Equal(30, p.Level);
+    }
+
+    [Fact]
+    public void Death_with_an_empty_bar_costs_nothing()
+    {
+        var p = new Progress(5, 0, 0);
+        Assert.Equal(0, p.OnDeath());
+        Assert.Equal(5, p.Level);
+    }
+
+    [Fact]
+    public void Admin_set_level_clamps_and_clears_xp()
+    {
+        var p = new Progress(12, 500, 0);
+        p.SetLevel(500);
+        Assert.Equal(XpCurve.PracticalMaxLevel, p.Level);
+        p.SetLevel(0);
+        Assert.Equal(1, p.Level);
         Assert.Equal(0, p.Xp);
     }
 

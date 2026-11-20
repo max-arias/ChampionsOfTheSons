@@ -2011,6 +2011,7 @@
  "ui.crafting.rarity_low": "Les ingrédients doivent être de même rareté ou supérieure.",
  "ui.crafting.target": "Objet",
  "ui.crafting.title": "Fabrication",
+ "ui.death.title": "Vous êtes mort",
  "ui.elites.format": "{0} {1}",
  "ui.equipment.title": "Équipement",
  "ui.followups.before_after": "Avant -> après",

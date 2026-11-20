@@ -2011,6 +2011,7 @@
  "ui.crafting.rarity_low": "Ингредиенты должны быть той же редкости или выше.",
  "ui.crafting.target": "Предмет",
  "ui.crafting.title": "Создание",
+ "ui.death.title": "Вы погибли",
  "ui.elites.format": "{0} {1}",
  "ui.equipment.title": "Снаряжение",
  "ui.followups.before_after": "До -> после",

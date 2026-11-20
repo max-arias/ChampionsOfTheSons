@@ -26,6 +26,32 @@ public class PlayerCharacterTests
     private static PlayerCharacter NewCharacter() => new(TestContent.Create(new() { ["player_stats.json"] = Stats }));
 
     [Fact]
+    public void Death_loses_the_pending_streak_and_reports_the_xp_lost()
+    {
+        var c = NewCharacter();
+        c.AddXp(20);
+        c.OnKill(1000);
+        double reported = -1;
+        c.Died += lost => reported = lost;
+        double lost = c.OnDeath();
+        Assert.Equal(lost, reported);
+        Assert.True(lost > 0);
+        Assert.Null(c.Tick(60));
+        Assert.Equal(1, c.Progress.Level);
+    }
+
+    [Fact]
+    public void Admin_set_level_refunds_perks_that_the_new_level_cannot_pay_for()
+    {
+        var c = NewCharacter();
+        c.SetLevel(40);
+        Assert.Equal(40, c.Progress.Level);
+        c.SetLevel(3);
+        Assert.Equal(3, c.Progress.Level);
+        Assert.True(c.Perks.SpentPoints <= c.Progress.TotalPerkPoints);
+    }
+
+    [Fact]
     public void Equipping_changes_stats_and_unequipping_restores_them()
     {
         var c = NewCharacter();

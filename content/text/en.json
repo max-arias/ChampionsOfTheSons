@@ -2011,6 +2011,7 @@
  "ui.crafting.rarity_low": "Ingredients must be the same rarity or better.",
  "ui.crafting.target": "Item",
  "ui.crafting.title": "Crafting",
+ "ui.death.title": "You died",
  "ui.elites.format": "{0} {1}",
  "ui.equipment.title": "Equipment",
  "ui.followups.before_after": "Before -> after",

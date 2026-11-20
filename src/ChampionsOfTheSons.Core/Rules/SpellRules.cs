@@ -100,6 +100,10 @@ public static class SpellTuning
     /// <summary>Health per second the Healing Dome gives to a player standing in it.</summary>
     public static double HealingDomeHeal(double maxHealth, StatSheet s) => maxHealth * HealingDomeHealFraction * s.Get(StatIds.AllRecoveryMult);
 
+    /// <summary>Energy per second the Healing Dome gives with Humming Ground (<c>spell_healing_dome_reg_energy</c>): the heal's share of max energy.</summary>
+    public static double HealingDomeEnergy(double maxEnergy, StatSheet s) =>
+        s.IsOn("spell_healing_dome_reg_energy") ? maxEnergy * HealingDomeHealFraction * s.Get(StatIds.AllRecoveryMult) : 0;
+
     /// <summary>Ball Lightning: each zap does a tenth of (<c>spell_ball_lightning_damage</c> + flat × scaling).</summary>
     public static OutgoingHit BallLightningZap(StatSheet s, Rng rng) =>
         PlayerAttack.Spell(s, s.Get("spell_ball_lightning_damage") * BallLightningShare, s.Get("spell_ball_lightning_damage_scaling") * BallLightningShare, rng,

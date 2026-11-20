@@ -24,6 +24,7 @@ public enum MessageType : byte
     SpellCast = 30,
     AuraPulse = 31,
     Ping = 40,
+    AdminGrant = 50,
 }
 
 public interface IMessage
@@ -175,4 +176,27 @@ public sealed record AuraPulse(uint PlayerId, string BuffId, Vec3 Origin, float 
 public sealed record PlayerPos(Vec3 Position, int Level) : IMessage
 {
     public MessageType Type => MessageType.PlayerPos;
+}
+
+/// <summary>What an <see cref="AdminGrant"/> does to the receiving player.</summary>
+public enum AdminAction : byte
+{
+    AddXp = 1,
+    SetLevel = 2,
+    AddLevels = 3,
+    AddPerkPoints = 4,
+    Respec = 5,
+    /// <summary><c>Arg</c> = item base id, <c>Amount</c> = item level.</summary>
+    GiveItem = 6,
+    Heal = 7,
+    /// <summary><c>Amount</c> 1 = on, 0 = off.</summary>
+    God = 8,
+    /// <summary><c>Amount</c> 1 = on, 0 = off.</summary>
+    NoCooldowns = 9,
+}
+
+/// <summary>Host → one client: an admin command applied to that player (COS-99). Clients accept it only from the host.</summary>
+public sealed record AdminGrant(AdminAction Action, double Amount, string Arg) : IMessage
+{
+    public MessageType Type => MessageType.AdminGrant;
 }

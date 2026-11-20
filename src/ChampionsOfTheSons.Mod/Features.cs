@@ -31,10 +31,10 @@ public static class Features
     /// <summary>Finds every non-abstract IModFeature with a parameterless constructor, ordered by type name.</summary>
     public static void Discover(bool dedicatedServer = false)
     {
-        // A dedicated server has no screen, camera or player body: only the networking and loot-rule features run there.
+        // A dedicated server has no screen, camera or player body: only the networking, loot-rule and admin-command features run there.
         var types = typeof(Features).Assembly.GetTypes()
             .Where(t => typeof(IModFeature).IsAssignableFrom(t) && !t.IsAbstract && !t.IsInterface && t.GetConstructor(Type.EmptyTypes) != null)
-            .Where(t => !dedicatedServer || t.Namespace is "ChampionsOfTheSons.Mod.Net" or "ChampionsOfTheSons.Mod.Loot")
+            .Where(t => !dedicatedServer || t.Namespace is "ChampionsOfTheSons.Mod.Net" or "ChampionsOfTheSons.Mod.Loot" or "ChampionsOfTheSons.Mod.Admin")
             .OrderBy(t => t.FullName, StringComparer.Ordinal);
         foreach (var t in types) All.Add((IModFeature)Activator.CreateInstance(t)!);
         RLog.Msg($"Champions of the Sons features: {string.Join(", ", All.Select(f => f.GetType().Name))}");

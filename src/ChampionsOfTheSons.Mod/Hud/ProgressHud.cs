@@ -179,6 +179,13 @@ internal sealed class ProgressHud
         _payoutBanner.Show(title, body, 4f);
     }
 
+    /// <summary>COS-76: the death XP penalty, on the payout banner.</summary>
+    public void OnDied(double xpLost)
+    {
+        if (xpLost <= 0) return;
+        _payoutBanner.Show(UiText.T("ui.death.title", "You died"), $"<color={UiTheme.Bad}>-{HudKit.Grouped(xpLost)} XP</color>", 4f);
+    }
+
     private void ShowLevelUp()
     {
         var sb = new System.Text.StringBuilder();

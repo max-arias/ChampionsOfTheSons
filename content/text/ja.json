@@ -2011,6 +2011,7 @@
  "ui.crafting.rarity_low": "素材は同じレアリティ以上でなければなりません。",
  "ui.crafting.target": "アイテム",
  "ui.crafting.title": "クラフト",
+ "ui.death.title": "死んでしまった",
  "ui.elites.format": "{1}{0}",
  "ui.equipment.title": "装備",
  "ui.followups.before_after": "変更前 -> 変更後",

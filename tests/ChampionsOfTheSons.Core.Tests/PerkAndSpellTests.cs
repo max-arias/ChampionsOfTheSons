@@ -141,6 +141,18 @@ public class PerkAndSpellTests
     }
 
     [Fact]
+    public void A_cast_needs_the_whole_cost_because_energy_and_stamina_are_one_bar()
+    {
+        var book = new SpellBook(_db);
+        var stats = new StatSheet(_db);
+        stats.SetSource("gear", new[] { new StatModifier("spell_cost_energy_cost", EffectOp.Mult, 0.25) });
+        book.Restore(new[] { "spell.blink" });
+        Assert.Equal(CastResult.NotEnoughEnergy, book.TryCast(0, 10, stats, out _));
+        Assert.Equal(CastResult.Ok, book.TryCast(0, 25, stats, out var cost));
+        Assert.Equal(25, cost.Total, 6);
+    }
+
+    [Fact]
     public void Not_enough_energy_fails_without_starting_the_cooldown()
     {
         var book = new SpellBook(_db);

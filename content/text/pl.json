@@ -2011,6 +2011,7 @@
  "ui.crafting.rarity_low": "Składniki muszą mieć tę samą lub wyższą rzadkość.",
  "ui.crafting.target": "Przedmiot",
  "ui.crafting.title": "Rzemiosło",
+ "ui.death.title": "Zginąłeś",
  "ui.elites.format": "{0} {1}",
  "ui.equipment.title": "Wyposażenie",
  "ui.followups.before_after": "Przed -> po",

@@ -68,4 +68,6 @@ public sealed record WorldRules
     public IReadOnlyCollection<EnemyAbility> DisabledAbilities { get; init; } = Array.Empty<EnemyAbility>();
     public LootLevelPolicy LootLevel { get; init; } = LootLevelPolicy.Highest;
     public int MinLootRarity { get; init; }
+    /// <summary>Admin spawn only (never saved or synced): every enemy rolled under these rules gets this tier.</summary>
+    public EnemyTier? ForcedTier { get; init; }
 }

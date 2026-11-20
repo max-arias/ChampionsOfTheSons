@@ -126,20 +126,23 @@ public static class EnemyScaler
         var d = rules.Difficulty;
         int level = RollLevel(kind, rules, rng);
 
-        bool elite = rules.AllowElites && kind.CanBeElite && (rng.Chance(0.1) || kind.BossType || d.IsHell);
+        var forced = rules.ForcedTier;
+        bool elite = forced is { } f ? f != EnemyTier.Normal : rules.AllowElites && kind.CanBeElite && (rng.Chance(0.1) || kind.BossType || d.IsHell);
         var tier = EnemyTier.Normal;
         var abilities = new List<EnemyAbility>();
         if (elite)
         {
             int n = kind.BossType ? 10 : rng.RangeInclusive(d.EliteAbilityCount.Min, d.EliteAbilityCount.Max);
+            if (forced == EnemyTier.Boss) n = Math.Max(n, 6);
+            else if (forced == EnemyTier.Miniboss) n = Math.Max(n, 5);
             abilities = PickAbilities(n, kind, d, rng, rules.DisabledAbilities);
-            if (n >= 6 && rng.Chance(0.1))
+            if (forced is { } ft ? ft == EnemyTier.Boss : n >= 6 && rng.Chance(0.1))
             {
                 tier = EnemyTier.Boss;
                 abilities.RemoveAll(a => Steadfasts.Contains(a));
                 abilities.Add(EnemyAbility.BossSteadfast);
             }
-            else if (n > 4 && rng.Chance(0.25))
+            else if (forced is { } fm ? fm == EnemyTier.Miniboss : n > 4 && rng.Chance(0.25))
             {
                 tier = EnemyTier.Miniboss;
                 abilities.RemoveAll(a => Steadfasts.Contains(a));

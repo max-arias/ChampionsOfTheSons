@@ -2294,7 +2294,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "es": {
   "difficulty.challenge1": "89786dcd",
@@ -4591,7 +4592,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "fi": {
   "difficulty.challenge1": "89786dcd",
@@ -6888,7 +6890,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "fr": {
   "difficulty.challenge1": "89786dcd",
@@ -9185,7 +9188,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "it": {
   "difficulty.challenge1": "89786dcd",
@@ -11482,7 +11486,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "ja": {
   "difficulty.challenge1": "89786dcd",
@@ -13779,7 +13784,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "ko": {
   "difficulty.challenge1": "89786dcd",
@@ -16076,7 +16082,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "pl": {
   "difficulty.challenge1": "89786dcd",
@@ -18373,7 +18380,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "ru": {
   "difficulty.challenge1": "89786dcd",
@@ -20670,7 +20678,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "tr": {
   "difficulty.challenge1": "89786dcd",
@@ -22967,7 +22976,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "zh-Hans": {
   "difficulty.challenge1": "89786dcd",
@@ -25264,7 +25274,8 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  },
  "zh-Hant": {
   "difficulty.challenge1": "89786dcd",
@@ -27561,6 +27572,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6"
+  "ui.worldrules.row.xp": "5b5aafe6",
+  "ui.death.title": "ee8ac18e"
  }
 }

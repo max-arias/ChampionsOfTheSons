@@ -40,6 +40,7 @@ public sealed class HudFeature : IModFeature
         PlayerBridge.PlayerHurt += OnPlayerHurt;
         PlayerState.Character.LeveledUp += Progress.OnLeveledUp;
         PlayerState.Character.Massacre.Paid += Progress.OnPaid;
+        PlayerState.Character.Died += Progress.OnDied;
     }
 
     public void Update(float dt, bool inWorld)

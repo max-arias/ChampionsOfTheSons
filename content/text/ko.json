@@ -2011,6 +2011,7 @@
  "ui.crafting.rarity_low": "재료는 같거나 더 높은 등급이어야 한다.",
  "ui.crafting.target": "아이템",
  "ui.crafting.title": "제작",
+ "ui.death.title": "사망했습니다",
  "ui.elites.format": "{1} {0}",
  "ui.equipment.title": "장비",
  "ui.followups.before_after": "이전 -> 이후",
