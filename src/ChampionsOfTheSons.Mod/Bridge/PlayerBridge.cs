@@ -144,7 +144,7 @@ public static class PlayerBridge
         var me = LocalPlayer.Transform.position;
         EnemyRuntime? best = null;
         float bestDist = range;
-        foreach (var e in EnemyRegistry.Snapshot())
+        foreach (var e in EnemyRegistry.Live)
         {
             if (!e.IsActive) continue;
             float d = Vector3.Distance(e.Actor!.transform.position, me);

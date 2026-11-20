@@ -44,6 +44,8 @@ internal sealed class Nameplates
         public bool Occluded;
         public float NextOcclusion;
         public float NextProfileCheck;
+        /// <summary>Far out of range: not looked at again before this time (COS-132: thousands of world-sim enemies per frame).</summary>
+        public float NextRangeCheck;
         public string Why = "new";
         public float LastHit = -100f;
     }
@@ -269,6 +271,7 @@ internal sealed class Nameplates
             else if (EnemyRegistry.Get(e.Stats) == null) { Remove(i); continue; } // died or despawned
             if (!show) { e.Why = cam == null ? "no camera" : "disabled"; Release(e); continue; }
             if (e.Runtime.TestActive == false) { e.Why = "test-inactive"; Release(e); continue; } // switched off between self-test phases
+            if (_time < e.NextRangeCheck) continue; // far away at the last look (no plate)
             var pos = e.Sim._position;
 
             var profile = e.Runtime.Profile;
@@ -276,10 +279,19 @@ internal sealed class Nameplates
             Vector3 head = pos + new Vector3(0, 2.1f * scale, 0);
             float range = profile.Tier == EnemyTier.Normal ? 40f : profile.Tier == EnemyTier.Elite ? 60f : 90f;
             float sqr = (head - camPos).sqrMagnitude;
-            if (sqr > range * range) { e.Why = $"range {Mathf.Sqrt(sqr):0} cam {camPos} {cam!.name} head {head} scale {scale}"; Release(e); continue; }
+            if (sqr > range * range)
+            {
+                e.Why = "range";
+                Release(e);
+                // Well beyond range: skip it for a while (staggered so the checks spread over frames). 30 m of margin covers
+                // anything the player can move in that time.
+                float far = Mathf.Sqrt(sqr) - range;
+                if (far > 30f) e.NextRangeCheck = _time + Mathf.Min(2f, 0.4f + far / 200f) + (e.Ptr.ToInt64() & 15) * 0.01f;
+                continue;
+            }
 
             Vector3 sp = cam!.WorldToScreenPoint(head);
-            if (sp.z <= 0.1f || sp.x < -40 || sp.x > screenW + 40 || sp.y < -40 || sp.y > screenH + 40) { e.Why = $"offscreen {sp}"; Release(e); continue; }
+            if (sp.z <= 0.1f || sp.x < -40 || sp.x > screenW + 40 || sp.y < -40 || sp.y > screenH + 40) { e.Why = "offscreen"; Release(e); continue; }
 
             if (_time >= e.NextOcclusion)
             {

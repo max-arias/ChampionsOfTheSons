@@ -87,12 +87,14 @@ internal static class AbilityReplicas
         return i;
     }
 
+    private static readonly EnemyAbility[] Auras = { EnemyAbility.Blizzard, EnemyAbility.Radiance };
+
     public static void Tick(float dt)
     {
-        foreach (var enemy in EnemyRegistry.Snapshot())
+        foreach (var enemy in EnemyRegistry.Live)
         {
-            if (!enemy.IsActive) continue;
-            foreach (var aura in new[] { EnemyAbility.Blizzard, EnemyAbility.Radiance })
+            if (enemy.Profile.Abilities.Count == 0 || !enemy.IsActive) continue;
+            foreach (var aura in Auras)
                 if (enemy.Profile.Has(aura) && !Live.ContainsKey((enemy, aura)) && GetOrCreate(enemy, aura) != null) AurasRun++;
         }
         foreach (var key in Live.Keys.ToList())

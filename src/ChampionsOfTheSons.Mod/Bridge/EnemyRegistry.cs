@@ -35,7 +35,16 @@ public sealed class EnemyRuntime
     public UnityEngine.Vector3? LastPosition { get; set; }
 
     /// <summary>Self-tests only: the headless game keeps spawned enemies dormant, so a test can declare one active (true) or inactive (false). Null = ask the game.</summary>
-    public bool? TestActive { get; set; }
+    public bool? TestActive
+    {
+        get => _testActive;
+        set
+        {
+            _testActive = value;
+            EnemyRegistry.SetTestForced(this, value == true);
+        }
+    }
+    private bool? _testActive;
 
     /// <summary>Self-tests only: overrides whether the boss bar sees this enemy as aware of the player (COS-67). Null = ask the game.</summary>
     public bool? TestAware { get; set; }
@@ -110,6 +119,7 @@ public static class EnemyRegistry
         var runtime = new EnemyRuntime(kind, profile, vanillaMaxHealth, actor, new EnemyCombatState(profile, WorldState.Rules.Difficulty));
         runtime.Stats = stats;
         ByStats[stats.Pointer] = runtime;
+        Dirty = true;
         return runtime;
     }
 
@@ -123,6 +133,7 @@ public static class EnemyRegistry
             ScaleApplied = true,
         };
         ByStats[stats.Pointer] = runtime;
+        Dirty = true;
         return runtime;
     }
 
@@ -131,26 +142,85 @@ public static class EnemyRegistry
         if (stats != null) ByStats.Remove(stats.Pointer);
     }
 
-    public static void Clear() => ByStats.Clear();
+    public static void Clear()
+    {
+        ByStats.Clear();
+        _live.Clear();
+        TestForced.Clear();
+    }
 
     private static readonly int PerfResolve = Perf.Perf.Register("  EnemyRegistry.ResolveActors");
 
-    /// <summary>Points every enemy at the live (active in the scene) actor that shares its stats.</summary>
+    // Double-buffered so a loop over Live never sees the list change under it (a refresh fills the other buffer, then swaps).
+    private static List<EnemyRuntime> _live = new(), _liveBack = new();
+    private static readonly HashSet<EnemyRuntime> TestForced = new();
+
+    /// <summary>
+    /// Tracked enemies whose actor was active in the scene at the last <see cref="ResolveActors"/> (at most a fraction of a second
+    /// ago): the few dozen near the player, not the thousands the world simulation tracks (COS-132). Callers still check
+    /// <see cref="EnemyRuntime.IsActive"/>. Do not keep the list across frames.
+    /// </summary>
+    public static IReadOnlyList<EnemyRuntime> Live => _live;
+
+    /// <summary>An enemy was added since the last <see cref="ResolveActors"/>: refresh <see cref="Live"/> now rather than at the next interval.</summary>
+    public static bool Dirty { get; private set; }
+
+    /// <summary>Self-tests: a runtime whose TestActive was set to true stays in <see cref="Live"/> (the headless game keeps it dormant).</summary>
+    internal static void SetTestForced(EnemyRuntime r, bool forced)
+    {
+        if (forced) TestForced.Add(r);
+        else TestForced.Remove(r);
+    }
+
+    /// <summary>
+    /// Points every enemy at its live actor and rebuilds <see cref="Live"/>. Walks only the game's active actors
+    /// (VailActorManager.GetActiveActors), not every VailActor object in memory (COS-132: that scan was the biggest frame cost).
+    /// </summary>
     public static void ResolveActors()
     {
         using var perf = Perf.Perf.Scope(PerfResolve);
-        if (!ByStats.Values.Any(r => !r.ActorLive)) return;
-        foreach (var a in UnityEngine.Resources.FindObjectsOfTypeAll<VailActor>())
+        Dirty = false;
+        var next = _liveBack;
+        next.Clear();
+        var active = VailActorManager.GetActiveActors();
+        if (active != null)
         {
-            var r = Get(a);
-            if (r == null) continue;
-            bool live = a.gameObject.activeInHierarchy;
-            if (live || !r.ActorLive)
+            for (int i = 0; i < active.Count; i++)
             {
+                var a = active[i];
+                if (a == null) continue;
+                var r = Get(a);
+                if (r == null || !a.gameObject.activeInHierarchy) continue;
                 r.Actor = a;
-                if (live) r.ActorLive = true;
+                r.ActorLive = true;
+                next.Add(r);
             }
         }
+        if (TestForced.Count > 0) ResolveForced(next);
+        _liveBack = _live;
+        _live = next;
+    }
+
+    /// <summary>Self-tests only: dormant test enemies are not in the game's active list, so find their actor the slow way.</summary>
+    private static void ResolveForced(List<EnemyRuntime> next)
+    {
+        TestForced.RemoveWhere(r => r.Stats == null || !ByStats.ContainsKey(r.Stats.Pointer));
+        if (TestForced.Any(r => r.Actor == null || !r.ActorLive))
+        {
+            foreach (var a in UnityEngine.Resources.FindObjectsOfTypeAll<VailActor>())
+            {
+                var r = Get(a);
+                if (r == null || !TestForced.Contains(r)) continue;
+                bool live = a.gameObject.activeInHierarchy;
+                if (live || !r.ActorLive)
+                {
+                    r.Actor = a;
+                    if (live) r.ActorLive = true;
+                }
+            }
+        }
+        foreach (var r in TestForced)
+            if (!next.Contains(r)) next.Add(r);
     }
 
     /// <summary>Drop actors the world simulation removed (despawned without dying).</summary>

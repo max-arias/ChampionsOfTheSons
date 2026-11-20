@@ -21,7 +21,7 @@ public sealed class StatBridge : IModFeature
     private static readonly Dictionary<IntPtr, BulletOriginal> BulletData = new();
     private static readonly Dictionary<IntPtr, float> FireDelays = new();
     private static float _vanillaStaminaMax = -1;
-    private static float _scanTimer;
+    private static float _scanTimer, _inactiveScan;
 
     private static StatSheet Sheet => PlayerState.Character.Stats;
 
@@ -116,7 +116,10 @@ public sealed class StatBridge : IModFeature
         {
             // Measured Breath: while Black Flame burns, the swing speed is fixed (COS-86).
             double baseSwing = MeleeRules.SwingSpeed(Sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame"));
-            foreach (var weapon in Resources.FindObjectsOfTypeAll<MeleeWeaponController>())
+            // The local player's own children only (COS-132: these were three scans of every object in memory twice a second).
+            var root = LocalPlayer.Transform;
+            if (root == null) return;
+            foreach (var weapon in root.GetComponentsInChildren<MeleeWeaponController>(false))
             {
                 var data = weapon._meleeWeaponData;
                 if (data == null || !weapon.gameObject.activeInHierarchy) continue;
@@ -135,7 +138,11 @@ public sealed class StatBridge : IModFeature
             var bowType = Weapons.WeaponModels.Active;
             double force = bowType?.Base == Core.Content.WeaponBase.Bow ? bowType.ProjectileForce : 1; // greatbow, COS-93
             double size = ProjectileSize, projSpeed = ProjectileSpeed * force, pen = ProjectilePenetration;
-            foreach (var weapon in Resources.FindObjectsOfTypeAll<RangedWeapon>())
+            // Inactive guns too, now and then, so a gun is scaled before its first shot; the held one every scan.
+            _inactiveScan -= 0.5f;
+            bool all = _inactiveScan <= 0;
+            if (all) _inactiveScan = 5f;
+            foreach (var weapon in root.GetComponentsInChildren<RangedWeapon>(all))
             {
                 var info = weapon.bulletInfo;
                 if (info == null || !weapon._isLocalPlayer) continue;
@@ -148,7 +155,7 @@ public sealed class StatBridge : IModFeature
                 LastBulletSize = orig.Diameter > 0 ? info.diameter / orig.Diameter : size;
             }
 
-            foreach (var controller in Resources.FindObjectsOfTypeAll<RangedWeaponController>())
+            foreach (var controller in root.GetComponentsInChildren<RangedWeaponController>(false))
             {
                 if (!controller.gameObject.activeInHierarchy) continue;
                 if (!FireDelays.TryGetValue(controller.Pointer, out var delay)) FireDelays[controller.Pointer] = delay = controller._fireDelay;

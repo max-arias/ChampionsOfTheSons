@@ -95,8 +95,15 @@ internal static class HeldWeapons
     /// <summary>The local player's held weapon (melee, spear or bow), or null.</summary>
     public static Held? Local()
     {
-        foreach (var h in All())
-            if (IsUnderLocalPlayer(h.Holder)) return h;
+        // Only the player's own active children (COS-132: was every HeldItemIdentifier in memory, five times a second).
+        var root = LocalPlayer.Transform;
+        if (root == null) return null;
+        foreach (var id in root.GetComponentsInChildren<HeldItemIdentifier>(false))
+        {
+            if (id == null) continue;
+            var kind = Classify(id._itemId);
+            if (kind != HeldKind.Other) return new Held(id.transform, id._itemId, kind);
+        }
         return null;
     }
 

@@ -175,7 +175,7 @@ public sealed class CoopHits : IModFeature
 
     private static void ApplyRemoteHit(uint playerId, Hit hit, BoltConnection from)
     {
-        var runtime = EnemyRegistry.Snapshot().FirstOrDefault(r => EnemySyncFeature.NetIdOf(r.Actor) == hit.EnemyNetId);
+        var runtime = EnemyRegistry.Live.FirstOrDefault(r => EnemySyncFeature.NetIdOf(r.Actor) == hit.EnemyNetId);
         if (runtime == null) return;
         // Clamp what a client may claim: finite, non-negative.
         float amount = float.IsFinite(hit.Amount) ? Mathf.Max(0, hit.Amount) : 0;

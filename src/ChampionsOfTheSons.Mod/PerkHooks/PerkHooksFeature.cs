@@ -114,12 +114,27 @@ public sealed class PerkHooksFeature : IModFeature
 
     private static readonly int PerfLights = Perf.Perf.Register("  PerkHooks.ApplyFlashlights");
 
+    private static readonly List<FlashlightController> OwnLights = new();
+    private static float _lightSearch;
+    private static IntPtr _lightRoot;
+
     private static void ApplyFlashlights()
     {
         using var perf = Perf.Perf.Scope(PerfLights);
         var (intensity, drain) = PerkRules.Flashlight(Pc.Stats);
         AppliedLight = (intensity, drain);
-        foreach (var light in Resources.FindObjectsOfTypeAll<FlashlightController>())
+        // The local player's own lights only, found every few seconds (COS-132: was every FlashlightController in memory twice a second).
+        var root = LocalPlayer.Transform;
+        if (root == null) return;
+        _lightSearch -= 0.5f;
+        if (_lightSearch <= 0 || root.Pointer != _lightRoot)
+        {
+            _lightSearch = 5f;
+            _lightRoot = root.Pointer;
+            OwnLights.Clear();
+            foreach (var l in root.GetComponentsInChildren<FlashlightController>(true)) OwnLights.Add(l);
+        }
+        foreach (var light in OwnLights)
         {
             if (light == null) continue;
             if (!Lights.TryGetValue(light.Pointer, out var orig))
