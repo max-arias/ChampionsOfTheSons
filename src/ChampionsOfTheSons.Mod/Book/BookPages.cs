@@ -62,6 +62,7 @@ internal static class BookPages
     };
 
     private static TextMeshProUGUI _gearStats = null!;
+    private static Image _ghost = null!;
 
     /// <summary>Bag filters (layout D, Max's pick): All, Weapons (weapons and off-hands), Armor, Jewelry.</summary>
     private static readonly (string Key, string Fallback, float W)[] Filters =
@@ -218,6 +219,10 @@ internal static class BookPages
         _bagPager = Pager(_gear);
         PageKit.Box(_gear, "sort-bg", SortX, PagerY, 110, PagerH, PageKit.TitleBar);
         PageKit.Text(_gear, "sort", SortX, PagerY, 110, PagerH, UiText.T("ui.book.sort", "Sort"), 24, PageKit.TitleText, TextAlignmentOptions.Center);
+        // The dragged item's icon follows the cursor, drawn last so it sits over the slots.
+        _ghost = PageKit.Box(_gear, "drag-ghost", 0, 0, BagCell * 0.8f, BagCell * 0.8f, new Color(1, 1, 1, 0.85f));
+        _ghost.preserveAspect = true;
+        _ghost.enabled = false;
     }
 
     private static TextMeshProUGUI Pager(RectTransform root)
@@ -424,6 +429,34 @@ internal static class BookPages
         if (tab is BookTab.Bag or BookTab.Gear) BagPage = (BagPage + delta + BagPages) % BagPages;
         else if (tab == BookTab.Character) CharPage = (CharPage + delta + 3) % 3;
         _dirty = true;
+    }
+
+    /// <summary>Shows the dragged item's icon centred on a page point; null hides it.</summary>
+    public static void SetDragGhost(ItemInstance? item, Vector2 px)
+    {
+        if (_ghost == null) return;
+        var sprite = item != null ? Icons.IconCache.GetSprite(item.BaseId) : null;
+        _ghost.enabled = sprite != null;
+        if (sprite == null) return;
+        _ghost.sprite = sprite;
+        float half = _ghost.rectTransform.sizeDelta.x / 2;
+        _ghost.rectTransform.anchoredPosition = new Vector2(px.x - half, -(px.y - half));
+        _ghost.transform.SetAsLastSibling();
+    }
+
+    /// <summary>
+    /// A drag released on <paramref name="to"/>: bag to equip slot (equip, swapping out what was there), equip slot to
+    /// bag (unequip into that slot, or swap with a fitting item), bag to bag (move or swap). Returns what happened.
+    /// </summary>
+    public static string Drop(string from, string? to)
+    {
+        _dirty = true;
+        Selected = null;
+        if (to == null || to == from) return "cancel";
+        bool fromItem = from.StartsWith("bag.", StringComparison.Ordinal) || from.StartsWith("equip.", StringComparison.Ordinal);
+        bool toItem = to.StartsWith("bag.", StringComparison.Ordinal) || to.StartsWith("equip.", StringComparison.Ordinal);
+        if (!fromItem || !toItem || Pc.Inventory.Get(from) == null) return "cancel";
+        return InventoryActions.MoveTo(from, to) ? "moved" : "no-fit";
     }
 
     /// <summary>The bag page that shows a bag key, so a test or the card can jump to it.</summary>

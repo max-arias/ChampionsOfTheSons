@@ -23,6 +23,7 @@ internal static class BookCard
     private static SLabelOptions _title = null!, _sub = null!, _body = null!, _compare = null!;
     private static SContainerOptions _divider = null!, _actions = null!;
     private static SBgButtonOptions _equip = null!, _drop = null!, _destroy = null!;
+    private static Image? _icon;
     private static bool _built, _destroyArmed;
     private static string? _shownKey;
 
@@ -38,10 +39,10 @@ internal static class BookCard
         _card = SContainer.TopLeft(0, 0).Size(W, 10).Background(PageKit.Hex("#5A4636"), EBackground.None).Vertical(0, "EC").Padding(3).AutoSize("XP");
         var inner = SContainer.Background(PageKit.Hex("#14120FF2"), EBackground.None).Vertical(5, "EC").Padding(16, 16, 12, 14);
         _card.Add(inner);
-        // No icon here: the item's icon is on its page slot (a RawImage on this card threw inside uGUI).
         _title = Label(22).PWidth(10).FlexWidth(1);
         var header = SContainer.Horizontal(10, "CC");
         header.Add(_title);
+        _icon = BuildIcon(header.RectTransform);
         _sub = Label(16);
         _body = Label(17);
         _divider = SContainer.Background(PageKit.Hex("#5A4636"), EBackground.None).PHeight(1);
@@ -69,6 +70,41 @@ internal static class BookCard
     private static bool _hidden;
 
     public static bool Visible => _built && !_hidden;
+
+    /// <summary>
+    /// The item icon left of the title: a plain uGUI Image on a GameObject of our own (a SUI RawImage here threw
+    /// inside uGUI). It stays active and shows a clear color when there is no sprite.
+    /// </summary>
+    private static Image BuildIcon(RectTransform header)
+    {
+        var go = new GameObject("cots-card-icon");
+        go.transform.SetParent(header, false);
+        go.transform.SetAsFirstSibling();
+        go.AddComponent<RectTransform>();
+        var le = go.AddComponent<LayoutElement>();
+        le.minWidth = le.preferredWidth = IconSize;
+        le.minHeight = le.preferredHeight = IconSize;
+        le.flexibleWidth = 0;
+        var img = go.AddComponent<Image>();
+        img.preserveAspect = true;
+        img.raycastTarget = false;
+        img.color = Color.clear;
+        return img;
+    }
+
+    private const float IconSize = 64;
+
+    private static void SetIcon(Sprite? sprite)
+    {
+        if (_icon == null) return;
+        _icon.sprite = sprite;
+        _icon.color = sprite != null ? Color.white : Color.clear;
+        var le = _icon.GetComponent<LayoutElement>();
+        if (le != null) le.minWidth = le.preferredWidth = sprite != null ? IconSize : 0;
+    }
+
+    /// <summary>True when the card shows an item icon (self-test).</summary>
+    public static bool IconShown => _built && !_hidden && _icon != null && _icon.sprite != null && _icon.color.a > 0;
 
     private static SLabelOptions Label(int size)
     {
@@ -117,6 +153,7 @@ internal static class BookCard
             var row = SheetData.Build(pc).FirstOrDefault(r => r.Id == key.Substring(4));
             if (row.Id == null) { Hide(); return; }
             _title.Text($"<b>{row.Label}</b>  <color={UiTheme.Gold}>{row.Value}</color>");
+            SetIcon(null);
             On(_sub.Root, false);
             _body.Text(row.Tip);
             On(_divider.Root, false);
@@ -129,6 +166,7 @@ internal static class BookCard
             if (item == null) { Hide(); return; }
             var d = ItemDescriber.Describe(item, pc, key);
             _title.Text(d.Title);
+            SetIcon(Icons.IconCache.GetSprite(item.BaseId));
             On(_sub.Root, true);
             _sub.Text(d.Subtitle);
             _body.Text(d.Body);

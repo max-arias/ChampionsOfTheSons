@@ -23,6 +23,9 @@ internal static class InventoryActions
     /// <summary>Moves a bag item into a chosen equip slot (or swaps). False when it does not fit.</summary>
     public static bool EquipInto(string bagKey, string equipKey) => bagKey != equipKey && Pc.Inventory.Move(bagKey, equipKey, ModContent.Db);
 
+    /// <summary>Moves (or swaps) any slot to any other: bag, equip slot, either way. False when an item does not fit.</summary>
+    public static bool MoveTo(string from, string to) => from != to && Pc.Inventory.Move(from, to, ModContent.Db);
+
     public static string? FirstFreeBagSlot(Inventory inv)
     {
         for (int i = 0; i < LootRoller.BagSlots; i++)

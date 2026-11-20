@@ -46,17 +46,32 @@ internal static class BookSelfTest
         SelfTest.Add(17.5f, "book: equip from the card", EquipFromCard);
         SelfTest.Add(18.2f, "book: shot gear equipped", () => TestKit.Screenshot("book-gear-equipped"));
         SelfTest.Add(18.5f, "book: right-click unequips", Unequip);
-        SelfTest.Add(19f, "book: sort", Sort);
-        SelfTest.Add(19.5f, "book: drop and destroy", DropAndDestroy);
-        SelfTest.Add(20.5f, "book: character tab", () => BookHost.ShowModPage(BookTab.Character));
-        SelfTest.Add(21.2f, "book: character rows", CharacterRows);
-        SelfTest.Add(21.3f, "book: shot character 1", () => TestKit.Screenshot("book-character-1"));
-        SelfTest.Add(21.6f, "book: character page 2", () => BookPages.Page(BookTab.Character, 1));
-        SelfTest.Add(22.2f, "book: shot character 2", () => TestKit.Screenshot("book-character-2"));
-        SelfTest.Add(22.5f, "book: game tab gives the page back", GamePage);
-        SelfTest.Add(23.2f, "book: shot game page", () => TestKit.Screenshot("book-game-page"));
-        SelfTest.Add(23.5f, "book: close", () => BookHost.Close());
-        SelfTest.Add(25f, "book: closed and cleanup", Cleanup);
+        SelfTest.Add(19f, "book: drag bag to doll", DragBagToDoll);
+        SelfTest.Add(19.3f, "book: drag doll to bag", DragDollToBag);
+        SelfTest.Add(19.6f, "book: drag bag to bag", DragBagToBag);
+        SelfTest.Add(19.9f, "book: pad South selects, West equips and unequips", PadButtons);
+        SelfTest.Add(20.2f, "book: pad shoulders page the bag", PadShoulders);
+        SelfTest.Add(20.5f, "book: empty-slot labels fit", LabelsFit);
+        for (int f = 1; f <= 3; f++)
+        {
+            int filter = f;
+            SelfTest.Add(20.8f + (f - 1) * 0.7f, $"book: filter {f} for the shot", () => { BookPages.Click(BookTab.Gear, "filter." + filter, false); BookPages.Refresh(BookTab.Gear); });
+            SelfTest.Add(21.2f + (f - 1) * 0.7f, $"book: shot filter {f}", () => TestKit.Screenshot("book-gear-filter-" + filter));
+        }
+        SelfTest.Add(22.9f, "book: filter All again", () => { BookPages.Click(BookTab.Gear, "filter.0", false); BookPages.Refresh(BookTab.Gear); });
+        SelfTest.Add(23f, "book: sort", Sort);
+        SelfTest.Add(23.5f, "book: drop and destroy", DropAndDestroy);
+        SelfTest.Add(24.5f, "book: character tab", () => BookHost.ShowModPage(BookTab.Character));
+        SelfTest.Add(25.2f, "book: character rows", CharacterRows);
+        SelfTest.Add(25.3f, "book: shot character 1", () => TestKit.Screenshot("book-character-1"));
+        SelfTest.Add(25.6f, "book: character page 2", () => BookPages.Page(BookTab.Character, 1));
+        SelfTest.Add(26.2f, "book: shot character 2", () => TestKit.Screenshot("book-character-2"));
+        SelfTest.Add(26.4f, "book: character page 3", () => BookPages.Page(BookTab.Character, 1));
+        SelfTest.Add(27f, "book: shot character 3", () => TestKit.Screenshot("book-character-3"));
+        SelfTest.Add(27.3f, "book: game tab gives the page back", GamePage);
+        SelfTest.Add(28f, "book: shot game page", () => TestKit.Screenshot("book-game-page"));
+        SelfTest.Add(28.3f, "book: close", () => BookHost.Close());
+        SelfTest.Add(29.8f, "book: closed and cleanup", Cleanup);
     }
 
     private static void Unpause()
@@ -179,6 +194,8 @@ internal static class BookSelfTest
     {
         SelfTest.Check("book: the card shows the selected item with actions", BookCard.ShownKey == Inventory.Bag(0) && BookCard.ActionsVisible,
             $"shown {BookCard.ShownKey}, actions {BookCard.ActionsVisible}");
+        bool hasSprite = Icons.IconCache.GetSprite(Pc.Inventory.Get(Inventory.Bag(0))?.BaseId ?? "") != null;
+        SelfTest.Check("book: the card shows the item icon", !hasSprite || BookCard.IconShown, $"sprite {hasSprite}, shown {BookCard.IconShown}");
         var page = BookHost.PageScreenRect();
         SelfTest.Log($"book: page on screen {page}, card text {BookCard.Text.Length} chars, {BookCard.Debug}");
     }
@@ -203,6 +220,140 @@ internal static class BookSelfTest
         string r = BookPages.Click(BookTab.Gear, _equippedSlot, right: true);
         bool back = Pc.Inventory.Get(_equippedSlot) == null && Pc.Inventory.Slots.Any(kv => kv.Key.StartsWith("bag.") && Equals(kv.Value, _equippedItem));
         SelfTest.Check("book: right-click on an equipped item puts it back in the bag", r == "toggle" && back, r);
+    }
+
+    // ------------------------------------------------------------------ drag and drop, pad (driven through BookFeature.Handle)
+
+    private static Vector2 ScreenOf(PageSlot s) => BookHost.ScreenOfPagePx(new Vector2(s.X + s.W / 2, s.Y + s.H / 2));
+
+    private static PageSlot? GearSlot(string key) => BookPages.Slots(BookTab.Gear).FirstOrDefault(s => s.Key == key);
+
+    /// <summary>Mouse press on one screen point, two moves, release on another: one frame each.</summary>
+    private static void Drag(Vector2 from, Vector2 to)
+    {
+        BookFeature.Handle(BookInput.MouseAt(from, down: true, held: true));
+        BookFeature.Handle(BookInput.MouseAt(Vector2.Lerp(from, to, 0.5f), held: true));
+        BookFeature.Handle(BookInput.MouseAt(to, held: true));
+        BookFeature.Handle(BookInput.MouseAt(to, up: true));
+        BookPages.Refresh(BookTab.Gear);
+    }
+
+    private static void ShowBagFirstPage()
+    {
+        BookHost.ShowModPage(BookTab.Gear);
+        BookPages.Click(BookTab.Gear, "filter.0", false);
+        BookPages.Selected = null;
+        BookPages.Refresh(BookTab.Gear);
+    }
+
+    private static string? _dragEquip;
+
+    private static void DragBagToDoll()
+    {
+        ShowBagFirstPage();
+        var src = BookPages.Slots(BookTab.Bag).FirstOrDefault(s => s.Shown != null && ModContent.Db.Items.TryGetValue(s.Shown.BaseId, out var d)
+            && LootRoller.SlotsFor(d.Type).Any(k => Pc.Inventory.Get(k) == null && GearSlot(k) != null));
+        if (src == null) { SelfTest.Check("book: drag bag to doll: a bag item with a free slot", false); return; }
+        var item = src.Shown!;
+        var target = LootRoller.SlotsFor(ModContent.Db.Items[item.BaseId].Type).First(k => Pc.Inventory.Get(k) == null && GearSlot(k) != null);
+        Drag(ScreenOf(src), ScreenOf(GearSlot(target)!));
+        _dragEquip = target;
+        SelfTest.Check("book: dragging a bag item onto its doll slot equips it", Equals(Pc.Inventory.Get(target), item), $"{src.Key} -> {target}: {BookFeature.LastAction}");
+    }
+
+    private static void DragDollToBag()
+    {
+        if (_dragEquip == null) return;
+        var item = Pc.Inventory.Get(_dragEquip);
+        var empty = BookPages.Slots(BookTab.Bag).LastOrDefault(s => s.Key.Length > 0 && s.Shown == null);
+        if (item == null || empty == null) { SelfTest.Check("book: drag doll to bag: an equipped item and an empty bag slot", false); return; }
+        string to = empty.Key;
+        Drag(ScreenOf(GearSlot(_dragEquip)!), ScreenOf(empty));
+        SelfTest.Check("book: dragging an equipped item onto an empty bag slot unequips it there",
+            Pc.Inventory.Get(_dragEquip) == null && Equals(Pc.Inventory.Get(to), item), $"{_dragEquip} -> {to}: {BookFeature.LastAction}");
+    }
+
+    private static void DragBagToBag()
+    {
+        var slots = BookPages.Slots(BookTab.Bag);
+        var full = slots.Where(s => s.Shown != null).ToList();
+        var empty = slots.FirstOrDefault(s => s.Key.Length > 0 && s.Shown == null);
+        if (full.Count < 2 || empty == null) { SelfTest.Check("book: drag bag to bag: two items and an empty slot", false); return; }
+        var a = full[0];
+        var item = a.Shown!;
+        string from = a.Key, to = empty.Key;
+        Drag(ScreenOf(a), ScreenOf(empty));
+        SelfTest.Check("book: dragging a bag item onto an empty bag slot moves it", Pc.Inventory.Get(from) == null && Equals(Pc.Inventory.Get(to), item), $"{from} -> {to}");
+        // Swap two occupied slots.
+        var x = slots.First(s => s.Key == to);
+        var y = slots.First(s => s.Shown != null && s.Key != to);
+        var itemX = x.Shown!;
+        var itemY = y.Shown!;
+        string kx = x.Key, ky = y.Key;
+        Drag(ScreenOf(x), ScreenOf(y));
+        SelfTest.Check("book: dragging onto another bag item swaps them", Equals(Pc.Inventory.Get(ky), itemX) && Equals(Pc.Inventory.Get(kx), itemY), $"{kx} <-> {ky}");
+        // A short press without moving far is still a click (select).
+        var at = ScreenOf(x);
+        BookFeature.Handle(BookInput.MouseAt(at, down: true, held: true));
+        BookFeature.Handle(BookInput.MouseAt(at + new Vector2(BookFeature.DragThreshold / 3, 0), up: true));
+        SelfTest.Check("book: a click without moving still selects", BookPages.Selected == kx && BookFeature.Dragging == null, $"selected {BookPages.Selected}");
+        BookPages.Selected = null;
+    }
+
+    private static void PadButtons()
+    {
+        ShowBagFirstPage();
+        var src = BookPages.Slots(BookTab.Bag).FirstOrDefault(s => s.Shown != null && ModContent.Db.Items.TryGetValue(s.Shown.BaseId, out var d) && LootRoller.SlotsFor(d.Type).Count > 0);
+        if (src == null) { SelfTest.Check("book: pad: an equippable bag item", false); return; }
+        var item = src.Shown!;
+        string key = src.Key;
+        var at = ScreenOf(src);
+        BookFeature.Handle(BookInput.Pad(at, southDown: true, southHeld: true));
+        BookFeature.Handle(BookInput.Pad(at, southUp: true));
+        SelfTest.Check("book: pad South on a bag item selects it", BookPages.Selected == key, $"selected {BookPages.Selected}");
+        BookFeature.Handle(BookInput.Pad(at, west: true));
+        var equipped = Pc.Inventory.Equipped.FirstOrDefault(kv => Equals(kv.Value, item)).Key;
+        SelfTest.Check("book: pad West on a bag item equips it", equipped != null && Pc.Inventory.Get(key) == null, $"slot {equipped}");
+        if (equipped == null) return;
+        BookPages.Refresh(BookTab.Gear);
+        var gear = GearSlot(equipped);
+        if (gear == null) return;
+        BookFeature.Handle(BookInput.Pad(ScreenOf(gear), west: true));
+        bool back = Pc.Inventory.Get(equipped) == null && Pc.Inventory.Slots.Any(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && Equals(kv.Value, item));
+        SelfTest.Check("book: pad West on an equipped item unequips it", back, BookFeature.LastAction);
+    }
+
+    private static void PadShoulders()
+    {
+        ShowBagFirstPage();
+        int pages = BookPages.BagPages;
+        var off = new Vector2(5, 5);
+        BookFeature.Handle(BookInput.Pad(off, rb: true));
+        int afterRb = BookPages.BagPage;
+        BookFeature.Handle(BookInput.Pad(off, lb: true));
+        int afterLb = BookPages.BagPage;
+        SelfTest.Check("book: pad RB pages the bag forward and LB back", pages > 1 && afterRb == 1 && afterLb == 0, $"pages {pages}, RB {afterRb}, LB {afterLb}");
+        BookHost.ShowModPage(BookTab.Character);
+        int c0 = BookPages.CharPage;
+        BookFeature.Handle(BookInput.Pad(off, rb: true));
+        SelfTest.Check("book: pad RB pages the character sheet", BookPages.CharPage == (c0 + 1) % 3, $"{c0} -> {BookPages.CharPage}");
+        BookFeature.Handle(BookInput.Pad(off, lb: true));
+        BookHost.ShowModPage(BookTab.Gear);
+    }
+
+    /// <summary>Empty doll slots show their slot name; with autosize it must fit inside the slot (current language).</summary>
+    private static void LabelsFit()
+    {
+        ShowBagFirstPage();
+        var bad = new List<string>();
+        foreach (var s in BookPages.Slots(BookTab.Gear))
+        {
+            if (s.Shown != null || string.IsNullOrEmpty(s.Fallback.text)) continue;
+            s.Fallback.ForceMeshUpdate();
+            SelfTest.Log($"book: label {s.Key} '{s.Fallback.text}' font {s.Fallback.fontSize:0.#} in {s.W - 8}x{s.H - 8}, overflow {s.Fallback.isTextOverflowing}");
+            if (s.Fallback.isTextOverflowing) bad.Add($"{s.Key} ({s.Fallback.text})");
+        }
+        SelfTest.Check("book: empty-slot labels fit their slots", bad.Count == 0, string.Join(", ", bad));
     }
 
     private static void Sort()

@@ -247,7 +247,10 @@ internal static class BookHost
     public static Vector2 CursorScreen => Book != null ? Book._mouseScreenPosition : Vector2.zero;
 
     /// <summary>The cursor as page pixels (origin top-left), by intersecting the camera ray with the page plane.</summary>
-    public static bool CursorOnPage(out Vector2 px)
+    public static bool CursorOnPage(out Vector2 px) => CursorOnPage(CursorScreen, out px);
+
+    /// <summary>A screen point as page pixels (see <see cref="CursorOnPage(out Vector2)"/>).</summary>
+    public static bool CursorOnPage(Vector2 screen, out Vector2 px)
     {
         px = default;
         var cam = Camera.main;
@@ -255,7 +258,7 @@ internal static class BookHost
         var t = _pageRenderer.transform;
         var normal = t.TransformDirection(_nAxis == 0 ? Vector3.right : _nAxis == 1 ? Vector3.up : Vector3.forward);
         var plane = new Plane(normal, t.TransformPoint(_pageLocal.center));
-        var ray = cam.ScreenPointToRay(CursorScreen);
+        var ray = cam.ScreenPointToRay(screen);
         if (!plane.Raycast(ray, out float d)) return false;
         var local = t.InverseTransformPoint(ray.GetPoint(d));
         float u = (local[_uAxis] - _pageLocal.min[_uAxis]) / _pageLocal.size[_uAxis];
