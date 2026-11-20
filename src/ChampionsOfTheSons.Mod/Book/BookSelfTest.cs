@@ -38,6 +38,7 @@ internal static class BookSelfTest
         SelfTest.Add(14.2f, "book: shot gear", () => TestKit.Screenshot("book-gear"));
         SelfTest.Add(14.5f, "book: bag tab", BagTab);
         SelfTest.Add(15.2f, "book: shot bag", () => TestKit.Screenshot("book-bag-1"));
+        SelfTest.Add(15.3f, "book: filters", Filters);
         SelfTest.Add(15.5f, "book: cursor maps onto slots", CursorMapping);
         SelfTest.Add(16f, "book: select shows the card", Select);
         SelfTest.Add(16.8f, "book: card pinned", CardPinned);
@@ -131,6 +132,25 @@ internal static class BookSelfTest
         BookPages.Refresh(BookTab.Bag);
         int shown = BookPages.Slots(BookTab.Bag).Count(s => s.Shown != null);
         SelfTest.Check("book: the bag page shows the picked-up items", shown == Math.Min(_picked, BookPages.BagPerPage), $"{shown} of {_picked}");
+    }
+
+    private static void Filters()
+    {
+        foreach (int f in new[] { 1, 2, 3 })
+        {
+            BookPages.Click(BookTab.Gear, "filter." + f, right: false);
+            BookPages.Refresh(BookTab.Gear);
+            var shown = BookPages.Slots(BookTab.Bag).Where(s => s.Shown != null).Select(s => ModContent.Db.Items[s.Shown!.BaseId].Type).ToList();
+            bool ok = f switch
+            {
+                1 => shown.All(t => t is "weapon" or "shield" or "quiver" or "spell_scroll"),
+                2 => shown.All(t => t is "helmet" or "chest_armor" or "pants" or "boot" or "shoulder_armor" or "glove" or "bracer"),
+                _ => shown.All(t => t is "ring" or "amulet"),
+            };
+            SelfTest.Check($"book: filter {f} shows only its kind", ok, string.Join(",", shown));
+        }
+        BookPages.Click(BookTab.Gear, "filter.0", right: false);
+        BookPages.Refresh(BookTab.Gear);
     }
 
     private static void CursorMapping()

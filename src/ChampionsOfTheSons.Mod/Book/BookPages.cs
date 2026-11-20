@@ -26,8 +26,9 @@ internal sealed class PageSlot
 /// </summary>
 internal static class BookPages
 {
-    public const int BagCols = 5, BagRows = 7, BagPerPage = BagCols * BagRows;
-    public static int BagPages => (LootRoller.BagSlots + BagPerPage - 1) / BagPerPage;
+    public const int BagCols = 6, BagRows = 4, BagPerPage = BagCols * BagRows;
+    /// <summary>Bag pages for the current filter (All shows every slot, empty ones too; a filter only the matching items).</summary>
+    public static int BagPages => Math.Max(1, (BagKeys().Count + BagPerPage - 1) / BagPerPage);
     private const float Header = 80;
     /// <summary>Page margins: the spiral covers the left edge and the thumb the bottom left (COS-59 screenshots).</summary>
     private const float Left = 46, Right = 16, Bottom = 92;
@@ -40,29 +41,66 @@ internal static class BookPages
 
     private static readonly (BookTab Tab, string Key, string Fallback)[] SubTabs =
     {
-        (BookTab.Gear, "ui.book.tab.gear", "Gear"), (BookTab.Bag, "ui.book.tab.bag", "Bag"), (BookTab.Character, "ui.book.tab.character", "Character"),
+        (BookTab.Gear, "ui.book.tab.gear", "Gear"), (BookTab.Character, "ui.book.tab.character", "Character"),
     };
 
     /// <summary>Equip slots in a body shape, page pixels (x, y from the top-left, width, height).</summary>
     private static readonly (string Key, float X, float Y, float W, float H)[] BodyLayout =
     {
-        ("equip.helmet", 300, 92, 96, 96),
-        ("equip.chest", 284, 204, 128, 150),
-        ("equip.pants", 284, 370, 128, 150),
-        ("equip.boots", 300, 536, 96, 96),
-        ("equip.shoulders", 172, 204, 96, 96),
-        ("equip.gloves", 172, 316, 96, 96),
-        ("equip.ring1", 188, 428, 64, 64),
-        ("equip.amulet", 428, 204, 96, 96),
-        ("equip.bracer", 428, 316, 96, 96),
-        ("equip.ring2", 444, 428, 64, 64),
-        ("equip.weapon", 56, 248, 104, 210),
-        ("equip.offhand", 536, 248, 104, 210),
+        ("equip.helmet", 296, 84, 72, 72),
+        ("equip.chest", 282, 164, 100, 112),
+        ("equip.pants", 282, 284, 100, 104),
+        ("equip.boots", 296, 396, 72, 64),
+        ("equip.shoulders", 192, 164, 72, 72),
+        ("equip.gloves", 192, 244, 72, 72),
+        ("equip.ring1", 204, 324, 56, 56),
+        ("equip.amulet", 400, 164, 72, 72),
+        ("equip.bracer", 400, 244, 72, 72),
+        ("equip.ring2", 412, 324, 56, 56),
+        ("equip.weapon", 92, 176, 82, 170),
+        ("equip.offhand", 490, 176, 82, 170),
     };
 
     private static TextMeshProUGUI _gearStats = null!;
 
-    private static RectTransform _gear = null!, _bag = null!, _char = null!;
+    /// <summary>Bag filters (layout D, Max's pick): All, Weapons (weapons and off-hands), Armor, Jewelry.</summary>
+    private static readonly (string Key, string Fallback, float W)[] Filters =
+    {
+        ("ui.book.filter.all", "All", 70), ("ui.book.filter.weapons", "Weapons", 120), ("ui.book.filter.armor", "Armor", 120), ("ui.book.filter.jewelry", "Jewelry", 120),
+    };
+    private static readonly List<(Image Bg, TextMeshProUGUI Text, float X)> FilterChips = new();
+    private const float ChipY = 480, ChipH = 36, BagX = Left + 30, BagY = 526, BagCell = 80, BagGap = 8;
+    public static int Filter { get; private set; }
+    private static RectTransform _charStats = null!;
+
+    private static bool Matches(ItemInstance item, int filter)
+    {
+        if (filter == 0) return true;
+        if (!ModContent.Db.Items.TryGetValue(item.BaseId, out var def)) return false;
+        return filter switch
+        {
+            1 => def.Type is "weapon" or "shield" or "quiver" or "spell_scroll",
+            2 => def.Type is "helmet" or "chest_armor" or "pants" or "boot" or "shoulder_armor" or "glove" or "bracer",
+            3 => def.Type is "ring" or "amulet",
+            _ => true,
+        };
+    }
+
+    /// <summary>The bag slot keys the grid shows, in order, for the current filter.</summary>
+    private static List<string> BagKeys()
+    {
+        var keys = new List<string>();
+        for (int i = 0; i < LootRoller.BagSlots; i++)
+        {
+            var key = Inventory.Bag(i);
+            if (Filter == 0) { keys.Add(key); continue; }
+            var item = Pc.Inventory.Get(key);
+            if (item != null && Matches(item, Filter)) keys.Add(key);
+        }
+        return keys;
+    }
+
+    private static RectTransform _gear = null!, _char = null!;
     private static readonly List<PageSlot> GearSlots = new(), BagSlots = new();
     private static readonly List<PageHit> Hits = new();
     private static TextMeshProUGUI _sets = null!, _gearCount = null!, _bagCount = null!, _bagPager = null!, _charPager = null!;
@@ -94,10 +132,8 @@ internal static class BookPages
         bg.color = PageKit.Paper;
         bg.raycastTarget = false;
         _gear = PageKit.Fill(page, "gear");
-        _bag = PageKit.Fill(page, "bag");
         _char = PageKit.Fill(page, "character");
         BuildGear();
-        BuildBag();
         BuildCharacter();
         Pc.Inventory.Changed += MarkDirty;
         Pc.Stats.Changed += MarkDirty;
@@ -148,6 +184,11 @@ internal static class BookPages
         s.Icon.preserveAspect = true;
         s.Icon.enabled = false;
         s.Fallback = PageKit.Text(root, key + "-label", x + 4, y + 4, w - 8, h - 8, emptyLabel ?? "", Mathf.Max(15, size * 0.17f), PageKit.InkFaint, TextAlignmentOptions.Center, wrap: true);
+        // Empty-slot labels shrink to fit narrow slots ("Shoulders" wrapped in 72 px).
+        s.Fallback.enableAutoSizing = true;
+        s.Fallback.fontSizeMin = 10;
+        s.Fallback.fontSizeMax = Mathf.Max(15, size * 0.17f);
+        s.Fallback.enableWordWrapping = false;
         s.Level = PageKit.Text(root, key + "-lvl", x + 4, y + 2, w - 8, 22, "", 18, PageKit.Ink, TextAlignmentOptions.TopRight);
         s.Amount = PageKit.Text(root, key + "-amt", x + 4, y + h - 24, w - 8, 22, "", 18, PageKit.Ink, TextAlignmentOptions.BottomRight);
         s.SelectFrame = PageKit.Frame(root, x - 5, y - 5, w + 10, h + 10, PageKit.Select, 4);
@@ -162,26 +203,21 @@ internal static class BookPages
         // shoulders/gloves/ring on one side, neck/bracer/ring on the other, weapon and off-hand as tall slots outside.
         foreach (var (key, x, y, w, h) in BodyLayout)
             GearSlots.Add(Slot(_gear, key, x, y, w, h, UiText.SlotName(key)));
-        // A small stat box like a character card: armor, health and melee damage.
-        float boxY = 664;
-        PageKit.Box(_gear, "stats-box", Left, boxY, PageKit.W - Left - Right, 70, PageKit.TitleBar);
-        _gearStats = PageKit.Text(_gear, "stats", Left + 16, boxY, PageKit.W - Left - Right - 32, 70, "", 24, PageKit.TitleText, TextAlignmentOptions.Center);
-        float setsY = boxY + 82;
-        PageKit.Text(_gear, "sets-title", Left, setsY, 560, 30, UiText.T("ui.book.sets", "Set bonuses"), 24, PageKit.Ink);
-        _sets = PageKit.Text(_gear, "sets", Left, setsY + 32, PageKit.W - Left - Right, PageKit.H - Bottom - setsY - 32, "", 20, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
-    }
-
-    private static void BuildBag()
-    {
-        _bagCount = TitleBar(_bag, BookTab.Bag);
-        const float cell = 104, gap = 10;
-        float x0 = Left + (PageKit.W - Left - Right - (BagCols * cell + (BagCols - 1) * gap)) / 2, y0 = Header + 6;
+        // The bag on the same page (layout D): a rule, the filter chips, a 6x4 grid, then Sort and the pager.
+        PageKit.Box(_gear, "bag-rule", Left, 470, PageKit.W - Left - Right, 2, PageKit.InkFaint);
+        float cx = BagX;
+        foreach (var (key, fallback, w) in Filters)
+        {
+            var bg = PageKit.Box(_gear, "chip-" + key, cx, ChipY, w, ChipH, PageKit.PaperShade);
+            var text = PageKit.Text(_gear, "chip-text-" + key, cx, ChipY, w, ChipH, UiText.T(key, fallback), 18, PageKit.Ink, TextAlignmentOptions.Center);
+            FilterChips.Add((bg, text, cx));
+            cx += w + 8;
+        }
         for (int i = 0; i < BagPerPage; i++)
-            BagSlots.Add(Slot(_bag, "page-bag-" + i, x0 + (i % BagCols) * (cell + gap), y0 + (i / BagCols) * (cell + gap), cell, null));
-        _bagPager = Pager(_bag);
-        // Sort button in the pager row.
-        PageKit.Box(_bag, "sort-bg", SortX, PagerY, 110, PagerH, PageKit.TitleBar);
-        PageKit.Text(_bag, "sort", SortX, PagerY, 110, PagerH, UiText.T("ui.book.sort", "Sort"), 24, PageKit.TitleText, TextAlignmentOptions.Center);
+            BagSlots.Add(Slot(_gear, "page-bag-" + i, BagX + (i % BagCols) * (BagCell + BagGap), BagY + (i / BagCols) * (BagCell + BagGap), BagCell, null));
+        _bagPager = Pager(_gear);
+        PageKit.Box(_gear, "sort-bg", SortX, PagerY, 110, PagerH, PageKit.TitleBar);
+        PageKit.Text(_gear, "sort", SortX, PagerY, 110, PagerH, UiText.T("ui.book.sort", "Sort"), 24, PageKit.TitleText, TextAlignmentOptions.Center);
     }
 
     private static TextMeshProUGUI Pager(RectTransform root)
@@ -202,14 +238,21 @@ internal static class BookPages
         _xpFill = PageKit.Box(_char, "xp-fill", Left, Header + 62, XpW, 16, PageKit.RarityColor(3)).rectTransform;
         _xpText = PageKit.Text(_char, "xp-text", Left, Header + 80, XpW, 28, "", 20, PageKit.InkFaint, TextAlignmentOptions.Center);
         _charPager = Pager(_char);
+        // Page 3: the stat box and set bonuses (moved off the Gear page to make room for the bag).
+        _charStats = PageKit.Fill(_char, "char-stats");
+        float boxY = Header + 124;
+        PageKit.Box(_charStats, "stats-box", Left, boxY, XpW, 70, PageKit.TitleBar);
+        _gearStats = PageKit.Text(_charStats, "stats", Left + 16, boxY, XpW - 32, 70, "", 24, PageKit.TitleText, TextAlignmentOptions.Center);
+        float setsY = boxY + 86;
+        PageKit.Text(_charStats, "sets-title", Left, setsY, 560, 30, UiText.T("ui.book.sets", "Set bonuses"), 24, PageKit.Ink);
+        _sets = PageKit.Text(_charStats, "sets", Left, setsY + 34, XpW, PagerY - setsY - 44, "", 20, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
     }
 
     // ------------------------------------------------------------------ show / refresh
 
     public static void Show(BookTab tab)
     {
-        _gear.gameObject.SetActive(tab == BookTab.Gear);
-        _bag.gameObject.SetActive(tab == BookTab.Bag);
+        _gear.gameObject.SetActive(tab is BookTab.Gear or BookTab.Bag);
         _char.gameObject.SetActive(tab == BookTab.Character);
         _dirty = true;
         Refresh(tab);
@@ -228,8 +271,11 @@ internal static class BookPages
         if (tab != BookTab.None) LastTab = tab;
         switch (tab)
         {
-            case BookTab.Gear: RefreshGear(); break;
-            case BookTab.Bag: RefreshBag(); break;
+            case BookTab.Gear:
+            case BookTab.Bag:
+                RefreshGear();
+                RefreshBag();
+                break;
             case BookTab.Character: RefreshCharacter(); break;
         }
     }
@@ -241,30 +287,32 @@ internal static class BookPages
             RenderSlot(s, Pc.Inventory.Get(s.Key));
             Hits.Add(new PageHit(s.Key, s.X, s.Y, s.W, s.H));
         }
-        var st = Pc.Stats;
-        var inv = System.Globalization.CultureInfo.InvariantCulture;
-        _gearStats.text = $"{UiText.T("ui.sheet.armor", "Armor")} <b>{st.Get(StatIds.Armor).ToString("N0", inv)}</b>    "
-            + $"{UiText.T("ui.sheet.max_health", "Max health")} <b>{Derived.MaxHealth(st).ToString("N0", inv)}</b>    "
-            + $"{UiText.T("ui.sheet.melee_damage", "Melee damage")} <b>x{Derived.MeleeMultiplier(st).ToString("0.00", inv)}</b>";
         _gearCount.text = $"{UiText.T("ui.book.tab.bag", "Bag")} {InventoryActions.BagCount()}/{LootRoller.BagSlots}";
-        var sets = InventoryActions.SetBonusText(PageKit.HexOf(PageKit.TitleBar), PageKit.HexOf(PageKit.Good), PageKit.HexOf(PageKit.InkFaint));
-        _sets.text = sets.Length == 0 ? $"<color={PageKit.HexOf(PageKit.InkFaint)}>{UiText.T("ui.sets.none", "No set pieces equipped.")}</color>" : sets;
     }
 
     private static void RefreshBag()
     {
-        BagPage = Math.Clamp(BagPage, 0, BagPages - 1);
+        var keys = BagKeys();
+        int pages = Math.Max(1, (keys.Count + BagPerPage - 1) / BagPerPage);
+        BagPage = Math.Clamp(BagPage, 0, pages - 1);
         for (int i = 0; i < BagSlots.Count; i++)
         {
             var s = BagSlots[i];
             int index = BagPage * BagPerPage + i;
-            bool exists = index < LootRoller.BagSlots;
-            s.Key = exists ? Inventory.Bag(index) : "";
+            bool exists = index < keys.Count;
+            s.Key = exists ? keys[index] : "";
             RenderSlot(s, exists ? Pc.Inventory.Get(s.Key) : null, force: true);
             if (exists) Hits.Add(new PageHit(s.Key, s.X, s.Y, s.W, s.H));
         }
-        _bagCount.text = $"{InventoryActions.BagCount()}/{LootRoller.BagSlots}";
-        _bagPager.text = $"{BagPage + 1}/{BagPages}";
+        for (int i = 0; i < FilterChips.Count; i++)
+        {
+            var (bg, text, x) = FilterChips[i];
+            bool on = i == Filter;
+            bg.color = on ? PageKit.TitleBar : PageKit.PaperShade;
+            text.color = on ? PageKit.TitleText : PageKit.Ink;
+            Hits.Add(new PageHit("filter." + i, x, ChipY, Filters[i].W, ChipH));
+        }
+        _bagPager.text = $"{BagPage + 1}/{pages}";
         AddPagerHits();
         Hits.Add(new PageHit("sort", SortX, PagerY, 110, PagerH));
     }
@@ -285,10 +333,20 @@ internal static class BookPages
         _xpText.text = $"{Math.Floor(sum.Xp).ToString("N0", inv)} / {sum.Goal.ToString("N0", inv)} XP";
 
         _sheet = SheetData.Build(Pc);
-        // Page 1: attributes, vitals, offense. Page 2: defense, utility.
+        // Page 1: attributes, vitals, offense. Page 2: defense, utility. Page 3: stat box and set bonuses.
         int split = _sheet.FindIndex(r => r.Header && r.Id == "defense");
         if (split < 0) split = _sheet.Count / 2;
-        var rows = CharPage == 0 ? _sheet.Take(split).ToList() : _sheet.Skip(split).ToList();
+        var rows = CharPage == 0 ? _sheet.Take(split).ToList() : CharPage == 1 ? _sheet.Skip(split).ToList() : new List<SheetRow>();
+        _charStats.gameObject.SetActive(CharPage == 2);
+        if (CharPage == 2)
+        {
+            var st = Pc.Stats;
+            _gearStats.text = $"{UiText.T("ui.sheet.armor", "Armor")} <b>{st.Get(StatIds.Armor).ToString("N0", inv)}</b>    "
+                + $"{UiText.T("ui.sheet.max_health", "Max health")} <b>{Derived.MaxHealth(st).ToString("N0", inv)}</b>    "
+                + $"{UiText.T("ui.sheet.melee_damage", "Melee damage")} <b>x{Derived.MeleeMultiplier(st).ToString("0.00", inv)}</b>";
+            var sets = InventoryActions.SetBonusText(PageKit.HexOf(PageKit.TitleBar), PageKit.HexOf(PageKit.Good), PageKit.HexOf(PageKit.InkFaint));
+            _sets.text = sets.Length == 0 ? $"<color={PageKit.HexOf(PageKit.InkFaint)}>{UiText.T("ui.sets.none", "No set pieces equipped.")}</color>" : sets;
+        }
         const float rowH = 36, top = Header + 116;
         while (Rows.Count < rows.Count)
         {
@@ -317,7 +375,7 @@ internal static class BookPages
             value.text = row.Value;
             if (!row.Header) Hits.Add(new PageHit("row." + row.Id, Left, y, XpW, rowH));
         }
-        _charPager.text = $"{CharPage + 1}/2";
+        _charPager.text = $"{CharPage + 1}/3";
         AddPagerHits();
     }
 
@@ -363,8 +421,8 @@ internal static class BookPages
 
     public static void Page(BookTab tab, int delta)
     {
-        if (tab == BookTab.Bag) BagPage = (BagPage + delta + BagPages) % BagPages;
-        else if (tab == BookTab.Character) CharPage = (CharPage + delta + 2) % 2;
+        if (tab is BookTab.Bag or BookTab.Gear) BagPage = (BagPage + delta + BagPages) % BagPages;
+        else if (tab == BookTab.Character) CharPage = (CharPage + delta + 3) % 3;
         _dirty = true;
     }
 
@@ -372,6 +430,7 @@ internal static class BookPages
     public static void ShowBagSlot(string bagKey)
     {
         if (!int.TryParse(bagKey.AsSpan(4), out int i)) return;
+        Filter = 0;
         BagPage = i / BagPerPage;
         _dirty = true;
     }
@@ -390,6 +449,11 @@ internal static class BookPages
             case "prev": Page(tab, -1); return "page";
             case "next": Page(tab, +1); return "page";
             case "sort": InventoryActions.SortBag(); Selected = null; return "sort";
+            case "filter.0": case "filter.1": case "filter.2": case "filter.3":
+                Filter = key[^1] - '0';
+                BagPage = 0;
+                _dirty = true;
+                return "filter";
         }
         if (key.StartsWith("row.", StringComparison.Ordinal)) return "row";
         var item = Pc.Inventory.Get(key);
