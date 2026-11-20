@@ -219,10 +219,13 @@ internal static class AbilityForces
 [HarmonyPatch]
 internal static class AbilityForcePatch
 {
+    private static readonly int PerfAfterTargetVelocity = Perf.Perf.Register("Hook.AbilityTargetVelocity");
+
     [HarmonyPatch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.GetTargetVelocity))]
     [HarmonyPostfix]
     private static void AfterTargetVelocity(ref Vector3 __result)
     {
+        using var perf = Perf.Perf.Scope(PerfAfterTargetVelocity);
         float m = AbilityForces.SpeedMultiplier;
         if (!Mathf.Approximately(m, 1)) __result = new Vector3(__result.x * m, __result.y, __result.z * m);
         var pull = AbilityForces.PullVelocity;

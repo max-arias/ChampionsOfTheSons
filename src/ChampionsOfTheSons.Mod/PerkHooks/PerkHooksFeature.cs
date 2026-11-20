@@ -112,8 +112,11 @@ public sealed class PerkHooksFeature : IModFeature
 
     // ---------------------------------------------------------------- Light the Way
 
+    private static readonly int PerfLights = Perf.Perf.Register("  PerkHooks.ApplyFlashlights");
+
     private static void ApplyFlashlights()
     {
+        using var perf = Perf.Perf.Scope(PerfLights);
         var (intensity, drain) = PerkRules.Flashlight(Pc.Stats);
         AppliedLight = (intensity, drain);
         foreach (var light in Resources.FindObjectsOfTypeAll<FlashlightController>())

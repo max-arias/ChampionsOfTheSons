@@ -50,10 +50,13 @@ public static class PlayerBridge
 
     public static void Reset() => _appliedMaxHealth = -1;
 
+    private static readonly int PerfBeforePlayerHit = Perf.Perf.Register("Hook.PlayerHit");
+
     [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.Hit))]
     [HarmonyPrefix]
     private static void BeforePlayerHit(ref float damage, ImpactType impactType, bool isDemonic)
     {
+        using var perf = Perf.Perf.Scope(PerfBeforePlayerHit);
         try
         {
             if (damage <= 0) return;
@@ -150,10 +153,13 @@ public static class PlayerBridge
         return best;
     }
 
+    private static readonly int PerfAfterTargetVelocity = Perf.Perf.Register("Hook.PlayerTargetVelocity");
+
     [HarmonyPatch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.GetTargetVelocity))]
     [HarmonyPostfix]
     private static void AfterTargetVelocity(ref Vector3 __result)
     {
+        using var perf = Perf.Perf.Scope(PerfAfterTargetVelocity);
         if (Net.ServerConfig.OnDedicatedServer) return;
         if (PlayerEffects.Stunned)
         {
@@ -165,10 +171,13 @@ public static class PlayerBridge
         __result = new Vector3(__result.x * m, __result.y, __result.z * m);
     }
 
+    private static readonly int PerfAfterJumpSpeed = Perf.Perf.Register("Hook.JumpSpeed");
+
     [HarmonyPatch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.CalculateJumpVerticalSpeed))]
     [HarmonyPostfix]
     private static void AfterJumpSpeed(ref float __result)
     {
+        using var perf = Perf.Perf.Scope(PerfAfterJumpSpeed);
         if (Net.ServerConfig.OnDedicatedServer) return;
         float m = (float)PlayerState.Character.Stats.Get(StatIds.JumpPower);
         if (m > 0) __result *= m;

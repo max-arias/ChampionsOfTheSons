@@ -133,9 +133,12 @@ public static class EnemyRegistry
 
     public static void Clear() => ByStats.Clear();
 
+    private static readonly int PerfResolve = Perf.Perf.Register("  EnemyRegistry.ResolveActors");
+
     /// <summary>Points every enemy at the live (active in the scene) actor that shares its stats.</summary>
     public static void ResolveActors()
     {
+        using var perf = Perf.Perf.Scope(PerfResolve);
         if (!ByStats.Values.Any(r => !r.ActorLive)) return;
         foreach (var a in UnityEngine.Resources.FindObjectsOfTypeAll<VailActor>())
         {

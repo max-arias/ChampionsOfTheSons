@@ -45,6 +45,11 @@ public sealed class HudFeature : IModFeature
         PlayerState.Character.Died += Progress.OnDied;
     }
 
+    private static readonly int PerfPlates = Perf.Perf.Register("  Hud.Nameplates");
+    private static readonly int PerfNumbers = Perf.Perf.Register("  Hud.DamageNumbers");
+    private static readonly int PerfProgress = Perf.Perf.Register("  Hud.Progress");
+    private static readonly int PerfParty = Perf.Perf.Register("  Hud.Party");
+
     public void Update(float dt, bool inWorld)
     {
         if (!_built) return;
@@ -52,10 +57,10 @@ public sealed class HudFeature : IModFeature
         bool show = inWorld && !UI.CotsUi.AnyPanelOpen;
         if (_root.Root.activeSelf != show) _root.Active(show);
         if (!show) return;
-        Plates.Update(dt, Config.ShowNameplates.Value);
-        Numbers.Update(dt, Config.ShowDamageNumbers.Value);
-        Progress.Update(dt, true);
-        Party.Update(dt, true);
+        using (Perf.Perf.Scope(PerfPlates)) Plates.Update(dt, Config.ShowNameplates.Value);
+        using (Perf.Perf.Scope(PerfNumbers)) Numbers.Update(dt, Config.ShowDamageNumbers.Value);
+        using (Perf.Perf.Scope(PerfProgress)) Progress.Update(dt, true);
+        using (Perf.Perf.Scope(PerfParty)) Party.Update(dt, true);
     }
 
     public void OnGameStart()

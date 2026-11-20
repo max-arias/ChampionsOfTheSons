@@ -33,10 +33,13 @@ public static class EnemyPatches
     /// <summary>The local player's weapon hit an enemy (before damage is applied): item effects that react to hits by weapon class.</summary>
     public static event Action<EnemyRuntime, WeaponClass>? LocalWeaponHit;
 
+    private static readonly int PerfAfterSetMaxHealth = Perf.Perf.Register("Hook.SetMaxHealth");
+
     [HarmonyPatch(typeof(VailActor), nameof(VailActor.SetMaxHealthStat))]
     [HarmonyPostfix]
     private static void AfterSetMaxHealth(VailActor __instance, StatsManager statsManager)
     {
+        using var perf = Perf.Perf.Scope(PerfAfterSetMaxHealth);
         try
         {
             if (!EnemyRegistry.IsAuthority || statsManager == null || __instance == null) return;
@@ -107,10 +110,13 @@ public static class EnemyPatches
         return damage;
     }
 
+    private static readonly int PerfBeforeReceivedDamage = Perf.Perf.Register("Hook.ReceivedDamage");
+
     [HarmonyPatch(typeof(VailActor), nameof(VailActor.ReceivedDamage))]
     [HarmonyPrefix]
     private static void BeforeReceivedDamage(VailActor __instance, object[] __args, ImpactType impactType, MonoBehaviourStimuli sourceStimuli, ref float amount, bool fromPlayer)
     {
+        using var perf = Perf.Perf.Scope(PerfBeforeReceivedDamage);
         try
         {
             if (!EnemyRegistry.IsAuthority || amount <= 0) return;
@@ -236,10 +242,13 @@ public static class EnemyPatches
         if (WeaponTypes.HitSlow(Weapons.WeaponModels.Active, character.Stats) is { } hammer) combat.ApplySlow("weapon.hammer", hammer.SpeedMult, hammer.Seconds);
     }
 
+    private static readonly int PerfAfterActorDied = Perf.Perf.Register("Hook.ActorDied");
+
     [HarmonyPatch(typeof(VailWorldSimulation), nameof(VailWorldSimulation.OnActorDied))]
     [HarmonyPostfix]
     private static void AfterActorDied(WorldSimActor deadActor, bool killedByPlayer)
     {
+        using var perf = Perf.Perf.Scope(PerfAfterActorDied);
         try
         {
             if (!EnemyRegistry.IsAuthority || deadActor == null) return;
@@ -264,10 +273,13 @@ public static class EnemyPatches
         }
     }
 
+    private static readonly int PerfAfterEnemyMeleeImpact = Perf.Perf.Register("Hook.EnemyMeleeImpact");
+
     [HarmonyPatch(typeof(Sons.Gameplay.MeleeWeapon), nameof(Sons.Gameplay.MeleeWeapon.GetNewImpactData))]
     [HarmonyPostfix]
     private static void AfterEnemyMeleeImpact(Sons.Gameplay.MeleeWeapon __instance, MeleeImpactData __result)
     {
+        using var perf = Perf.Perf.Scope(PerfAfterEnemyMeleeImpact);
         try
         {
             // Also on a co-op client: its own player's hits are resolved there, and the mirror carries the host's profile (COS-79).

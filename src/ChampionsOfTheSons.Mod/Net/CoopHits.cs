@@ -107,10 +107,13 @@ public sealed class CoopHits : IModFeature
         if (CoopTest.Enabled) RLog.Msg($"{CoopTestJoin.Tag} client: sent Hit {hit.Amount:F0} to enemy {enemyNetId}");
     }
 
+    private static readonly int PerfBeforeReceivedDamage = Perf.Perf.Register("Hook.CoopReceivedDamage");
+
     [HarmonyPatch(typeof(VailActor), nameof(VailActor.ReceivedDamage))]
     [HarmonyPrefix]
     private static void BeforeReceivedDamage(VailActor __instance, ImpactType impactType, MonoBehaviourStimuli sourceStimuli, ref float amount, bool fromPlayer)
     {
+        using var perf = Perf.Perf.Scope(PerfBeforeReceivedDamage);
         try
         {
             if (amount <= 0 || !fromPlayer || !CoopSession.Active) return;

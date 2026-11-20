@@ -107,8 +107,11 @@ public sealed class StatBridge : IModFeature
         if (rate > 0) PlayerEffects.Heal(rate * health.GetMax() * dt);
     }
 
+    private static readonly int PerfScan = Perf.Perf.Register("  StatBridge.ScanWeapons");
+
     private static void ScanWeapons()
     {
+        using var perf = Perf.Perf.Scope(PerfScan);
         try
         {
             // Measured Breath: while Black Flame burns, the swing speed is fixed (COS-86).
