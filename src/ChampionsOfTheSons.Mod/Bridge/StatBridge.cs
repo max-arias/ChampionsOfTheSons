@@ -187,13 +187,15 @@ public static class StatCoverage
     {
         [CombatStatIds.WeaponRange] = "needs per-weapon collider changes; no safe hook found",
         ["perk_raft_speed_multipier"] = "rafts are a vanilla survival feature we leave alone",
-        ["spell_blackhole_radius"] = "spell numbers: read by the spell system (COS-20/COS-25) when the spell is cast",
-        ["spell_blackhole_duration"] = "spell numbers: read by the spell system",
-        ["spell_blackhole_pullforce"] = "spell numbers: read by the spell system",
-        ["spell_blackhole_damage"] = "spell numbers: read by the spell system",
-        ["spell_snap_freeze_duration"] = "spell numbers: read by the spell system",
+    };
+
+    /// <summary>Spell numbers item stats change; read by <c>Spells/SpellEffects.cs</c> when the spell is cast.</summary>
+    public static readonly HashSet<string> Spells = new()
+    {
+        "spell_blackhole_radius", "spell_blackhole_duration", "spell_blackhole_pullforce", "spell_blackhole_damage", "spell_snap_freeze_duration",
     };
 
     public static string? Classify(string playerStat) =>
-        Core.Contains(playerStat) ? "core" : Bridge.Contains(playerStat) ? "bridge" : Dropped.ContainsKey(playerStat) ? "dropped" : null;
+        Core.Contains(playerStat) ? "core" : Bridge.Contains(playerStat) ? "bridge" : Spells.Contains(playerStat) ? "spells"
+        : Dropped.ContainsKey(playerStat) ? "dropped" : null;
 }

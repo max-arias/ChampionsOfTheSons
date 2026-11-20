@@ -1,6 +1,6 @@
 # HDRP asset bundles
 
-Meshes, materials and particle effects that code cannot build well ship in one asset bundle, `content/bundles/cots`, embedded in the mod DLL (resource `bundles/cots`). The mod loads it once (`src/ChampionsOfTheSons.Mod/Bundles/CotsBundle.cs`) and looks prefabs up by name. Every caller keeps a primitive fallback, so a build without the bundle still plays.
+Meshes, materials and particle effects that code cannot build well ship in one asset bundle, `content/bundles/cots`, embedded in the mod DLL (resource `bundles/cots`). The mod loads it once (`src/ChampionsOfTheSons.Mod/Bundles/CotsBundle.cs`) and looks prefabs up by name. Every caller keeps a primitive fallback, so a build without the bundle still plays. Neither `content/bundles/cots` nor the prefab folders exist until the first bundle build (COS-5).
 
 ## Why the exact Unity version
 
