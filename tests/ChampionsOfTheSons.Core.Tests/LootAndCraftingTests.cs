@@ -17,7 +17,7 @@ public class LootTests
         for (int i = 0; i < 2000; i++)
         {
             int level = rng.RangeInclusive(1, 300);
-            int rarity = rng.RangeInclusive(0, 7);
+            int rarity = rng.RangeInclusive(0, Rarities.Max);
             double v = LootRoller.RollValue(life, level, rarity, rng);
             double scale = Math.Pow(level, life.LevelPow) * LootRoller.RarityMultiplier[rarity];
             Assert.InRange(v, life.Min * scale * (1 - 1e-6), life.Max * scale * (1 + 1e-6));
@@ -31,7 +31,7 @@ public class LootTests
         var life = _db.ItemStats["stat.max_life"];
         var rng = new Rng(11);
         double Avg(int r) => Enumerable.Range(0, 500).Average(_ => LootRoller.RollValue(life, 20, r, rng));
-        for (int r = 0; r < 7; r++) Assert.True(Avg(r + 1) > Avg(r));
+        for (int r = 0; r < Rarities.Max; r++) Assert.True(Avg(r + 1) > Avg(r));
     }
 
     [Fact]
@@ -43,7 +43,19 @@ public class LootTests
         Assert.True(Avg(100_000, 1, 3) > Avg(1_000, 1, 3) + 0.5);
         Assert.True(Avg(10_000, 2, 0) > Avg(10_000, 1, 0));
         Assert.True(Avg(10_000, 1, 8) > Avg(10_000, 1, 0));
-        Assert.All(Enumerable.Range(0, 3000), _ => Assert.InRange(LootRoller.RollRarity(1e9, 1, 10, 10, rng), 0, 7));
+        Assert.All(Enumerable.Range(0, 3000), _ => Assert.InRange(LootRoller.RollRarity(1e9, 1, 10, 10, rng), 0, Rarities.Max));
+    }
+
+    [Fact]
+    public void Rarity_is_the_eight_step_climb_folded_into_four_tiers()
+    {
+        // Same seed, same draws: the four-tier roll is the eight-step roll mapped (COS-109), so drop pacing is unchanged.
+        for (ulong seed = 0; seed < 200; seed++)
+        {
+            int step = LootRoller.RollStep(5_000, 10, 2, 6, new Rng(seed));
+            Assert.Equal((int)Rarities.FromLegacy(step), LootRoller.RollRarity(5_000, 10, 2, 6, new Rng(seed)));
+        }
+        Assert.Equal(new[] { 0, 0, 1, 2, 2, 3, 3, 3 }, Enumerable.Range(0, 8).Select(r => (int)Rarities.FromLegacy(r)));
     }
 
     [Fact]
@@ -137,7 +149,7 @@ public class CraftingTests
     public void Reforge_falls_back_to_the_nearest_rarity_of_the_same_type()
     {
         const string extra =
-            "{ \"id\": \"item.far_ring\", \"name\": \"Far Ring\", \"type\": \"ring\", \"rarity\": 7, \"minLevel\": 1, \"maxLevel\": 50, \"statPools\": [ [\"stat.max_life\"] ] },\n" +
+            "{ \"id\": \"item.far_ring\", \"name\": \"Far Ring\", \"type\": \"ring\", \"rarity\": 0, \"minLevel\": 1, \"maxLevel\": 50, \"statPools\": [ [\"stat.max_life\"] ] },\n" +
             "{ \"id\": \"item.near_ring\", \"name\": \"Near Ring\", \"type\": \"ring\", \"rarity\": 3, \"minLevel\": 1, \"maxLevel\": 50, \"statPools\": [ [\"stat.max_life\"] ] },\n";
         var items = TestContent.Items.Replace("{ \"id\": \"item.boots\",", extra + "{ \"id\": \"item.boots\",");
         var db = TestContent.Create(new() { ["items.json"] = items });
@@ -160,9 +172,9 @@ public class CraftingTests
     private const string ScrapItems = """
     { "items": [
       { "id": "item.ring", "name": "Test Ring", "type": "ring", "rarity": 2, "minLevel": 1, "maxLevel": 50, "statPools": [ ["stat.max_life"] ] },
-      { "id": "item.ore3", "name": "Ore", "type": "material", "rarity": 3, "minLevel": 20, "maxLevel": 300, "statPools": [], "stackSize": 100 },
-      { "id": "item.ore5", "name": "Ore5", "type": "material", "rarity": 5, "minLevel": 20, "maxLevel": 300, "statPools": [], "stackSize": 100 },
-      { "id": "item.heart", "name": "Heart", "type": "other", "rarity": 5, "minLevel": 1, "maxLevel": 2, "statPools": [], "stackSize": 100 }
+      { "id": "item.ore3", "name": "Ore", "type": "material", "rarity": 2, "minLevel": 20, "maxLevel": 300, "statPools": [], "stackSize": 100 },
+      { "id": "item.ore5", "name": "Ore5", "type": "material", "rarity": 3, "minLevel": 20, "maxLevel": 300, "statPools": [], "stackSize": 100 },
+      { "id": "item.heart", "name": "Heart", "type": "other", "rarity": 3, "minLevel": 1, "maxLevel": 2, "statPools": [], "stackSize": 100 }
     ] }
     """;
 
@@ -174,7 +186,7 @@ public class CraftingTests
         for (int i = 0; i < 500; i++)
         {
             var drop = loot.RollDrop(worth: 1e6, itemLevel: 60, magicFind: 3, difficulty: 10, rng);
-            Assert.NotNull(drop); // rarities 3-7 hold only materials and the heart: the pick falls back to the ring
+            Assert.NotNull(drop); // Legendary holds only a material and the heart: the pick falls back to the ring
             Assert.Equal("item.ring", drop!.BaseId);
         }
     }
@@ -187,9 +199,9 @@ public class CraftingTests
         var ring = new ItemInstance { BaseId = "item.ring", Level = 90, Rarity = Rarity.Legendary };
         var result = crafting.Scrap(ring, new Rng(1));
         Assert.True(result.Ok);
-        Assert.Equal("item.ore5", result.Material!.BaseId); // never the "other" heart, rarity 5 = Legendary
+        Assert.Equal("item.ore5", result.Material!.BaseId); // never the "other" heart; Legendary items give Legendary material
         Assert.Equal(Crafting.ScrapYield(Rarity.Legendary, 90), result.Material.Amount);
-        Assert.Equal(6, result.Material.Amount); // (5-1) + 90/40
+        Assert.Equal(6, result.Material.Amount); // 4 for Legendary + 90/40
         Assert.Equal(1, Crafting.ScrapYield(Rarity.Common, 1));
     }
 

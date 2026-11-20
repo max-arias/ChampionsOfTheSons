@@ -60,7 +60,7 @@ public static class TestKit
     public static EnemyRuntime? Profile(VailActor? actor) => EnemyRegistry.Get(actor);
 
     /// <summary>Rolls an item into the bag. Null base id = random item of the given rarity.</summary>
-    public static ItemInstance Give(string? baseId = null, int rarity = 4, int level = 20)
+    public static ItemInstance Give(string? baseId = null, int rarity = 2, int level = 20)
     {
         var loot = new LootRoller(ModContent.Db);
         var def = baseId != null ? ModContent.Db.Items[baseId] : loot.PickBase(rarity, level, Rng)!;

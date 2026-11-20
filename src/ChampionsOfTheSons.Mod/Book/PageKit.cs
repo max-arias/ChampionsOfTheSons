@@ -26,10 +26,10 @@ internal static class PageKit
     public static readonly Color Good = Hex("#3E6B2A");
     public static readonly Color Bad = Hex("#8E2424");
 
-    /// <summary>Rarity tape colors 0..7 (COS-57): muted so they sit on paper.</summary>
+    /// <summary>Rarity tape colors 0..3 (COS-57, COS-109): muted so they sit on paper.</summary>
     private static readonly Color[] Rarity =
     {
-        Hex("#9A968C"), Hex("#6E8B4E"), Hex("#4F7FA6"), Hex("#C9982A"), Hex("#7A4A82"), Hex("#D9622B"), Hex("#9E2B2B"), Hex("#6A52C8"),
+        Hex("#9A968C"), Hex("#4F7FA6"), Hex("#C9982A"), Hex("#C24A22"),
     };
 
     public static Color RarityColor(int r) => Rarity[Math.Clamp(r, 0, Rarity.Length - 1)];

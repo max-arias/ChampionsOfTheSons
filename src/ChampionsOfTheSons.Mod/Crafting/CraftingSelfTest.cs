@@ -66,7 +66,7 @@ internal static class CraftingSelfTest
 
         // A (type, rarity) with at least two equippable bases that carry stats, so Reforge has an alternative.
         var groups = ModContent.Db.Items.Values
-            .Where(d => LootRoller.IsEquippable(d) && d.StatPools.Count >= 2 && d.Rarity >= 3 && d.Rarity <= 6)
+            .Where(d => LootRoller.IsEquippable(d) && d.StatPools.Count >= 2 && d.Rarity == (int)Rarity.Legendary) // a lower-rarity (Rare) material exists for the refusal check
             .GroupBy(d => (d.Type, d.Rarity)).Where(g => g.Count() >= 2).OrderByDescending(g => g.Count()).First();
         _baseType = groups.Key.Type;
         _rarity = groups.Key.Rarity;

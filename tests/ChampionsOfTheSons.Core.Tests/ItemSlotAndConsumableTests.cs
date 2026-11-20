@@ -14,10 +14,10 @@ public class ItemSlotAndConsumableTests
         "effects": [ { "stat": "max_health", "op": "add", "transform": "round" } ] },
       { "id": "stat.crit", "legacyId": 12, "name": "Crit Chance", "min": 0.01, "max": 0.02, "levelPow": 0.25, "combine": "sum", "rarity": 3, "cap": 0.5,
         "effects": [ { "stat": "crit_chance", "op": "add", "transform": "x" } ] },
-      { "id": "stat.damage_reduction", "legacyId": 11, "name": "Damage Reduction", "min": 0.005, "max": 0.0075, "levelPow": 0.5, "combine": "one_minus_product", "rarity": 4,
+      { "id": "stat.damage_reduction", "legacyId": 11, "name": "Damage Reduction", "min": 0.005, "max": 0.0075, "levelPow": 0.5, "combine": "one_minus_product", "rarity": 2,
         "effects": [ { "stat": "all_damage_taken", "op": "mult", "transform": "one_minus" } ] },
-      { "id": "stat.permanentperkpoints", "legacyId": 32, "name": "Perk Points", "min": 0.25, "max": 0.25, "levelPow": 0, "combine": "sum", "rarity": 7, "effects": [] },
-      { "id": "stat.experience", "legacyId": 33, "name": "Experience", "min": 30, "max": 30, "levelPow": 3, "combine": "sum", "rarity": 5, "effects": [] },
+      { "id": "stat.permanentperkpoints", "legacyId": 32, "name": "Perk Points", "min": 0.25, "max": 0.25, "levelPow": 0, "combine": "sum", "rarity": 3, "effects": [] },
+      { "id": "stat.experience", "legacyId": 33, "name": "Experience", "min": 30, "max": 30, "levelPow": 3, "combine": "sum", "rarity": 3, "effects": [] },
       { "id": "stat.emptysocket", "legacyId": 3000, "name": "Empty Socket", "min": 1, "max": 3.5, "levelPow": 0, "combine": "sum", "rarity": 0, "multiplier": 0, "effects": [] }
     ] }
     """;
@@ -29,11 +29,11 @@ public class ItemSlotAndConsumableTests
         "statMultipliers": [ { "slot": 1, "stat": "stat.crit", "multiplier": -2 } ] },
       { "id": "item.mixed", "name": "Mixed Ring", "type": "ring", "rarity": 2, "minLevel": 1, "maxLevel": 50,
         "statPools": [ ["stat.max_life"], ["stat.crit", "*"] ] },
-      { "id": "item.greater_mutated_heart", "name": "Big Heart", "type": "other", "rarity": 7, "minLevel": 1, "maxLevel": 1, "stackSize": 100,
+      { "id": "item.greater_mutated_heart", "name": "Big Heart", "type": "other", "rarity": 3, "minLevel": 1, "maxLevel": 1, "stackSize": 100,
         "statPools": [ ["stat.permanentperkpoints"] ] },
-      { "id": "item.lesser_mutated_heart", "name": "Xp Heart", "type": "other", "rarity": 5, "minLevel": 1, "maxLevel": 1,
+      { "id": "item.lesser_mutated_heart", "name": "Xp Heart", "type": "other", "rarity": 3, "minLevel": 1, "maxLevel": 1,
         "statPools": [ ["stat.experience"] ] },
-      { "id": "item.heart_of_purity", "name": "Respec Heart", "type": "other", "rarity": 4, "minLevel": 1, "maxLevel": 1, "stackSize": 100, "statPools": [] },
+      { "id": "item.heart_of_purity", "name": "Respec Heart", "type": "other", "rarity": 2, "minLevel": 1, "maxLevel": 1, "stackSize": 100, "statPools": [] },
       { "id": "item.pebble", "name": "Pebble", "type": "other", "rarity": 0, "minLevel": 1, "maxLevel": 1, "statPools": [] }
     ] }
     """;
@@ -216,7 +216,7 @@ public class ItemSlotAndConsumableTests
         var heart = Loot.RollItem(_db.Items["item.lesser_mutated_heart"], 2, new Rng(10));
         pc.Inventory.AddToBag(heart);
         Assert.True(Consumables.Use(pc, "bag.0"));
-        Assert.Equal(30 * 8 * 3.4, pc.Progress.Xp, 2); // 30 × level³ × rarity multiplier (rarity 5), × XP gain 1
+        Assert.Equal(30 * 8 * LootRoller.RarityMultiplier[(int)Rarity.Legendary], pc.Progress.Xp, 2); // 30 × level³ × rarity multiplier, × XP gain 1
         Assert.Null(pc.Inventory.Get("bag.0"));
     }
 

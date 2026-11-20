@@ -5,8 +5,8 @@ namespace ChampionsOfTheSons.Core.Rules;
 /// <summary>Drops, rarity rolls and item generation.</summary>
 public sealed class LootRoller
 {
-    /// <summary>Roll multiplier per rarity 0..7.</summary>
-    public static readonly double[] RarityMultiplier = { 0.5, 0.7, 1, 1.4, 2.3, 3.4, 4.5, 5.6 };
+    /// <summary>Roll multiplier per rarity 0..3 (COS-109: the old eight averaged per tier, Legendary the middle of its three).</summary>
+    public static readonly double[] RarityMultiplier = { 0.6, 1.0, 1.8, 4.5 };
 
     /// <summary>COTF's common stat IDs, used for "*" slots.</summary>
     private static readonly HashSet<int> CommonLegacyStatIds = new(
@@ -41,8 +41,13 @@ public sealed class LootRoller
         return Math.Max(0, (int)Math.Round(count * rules.DropQuantity, MidpointRounding.AwayFromZero));
     }
 
-    /// <summary>Climbing rarity roll: each step must pass to try the next. <paramref name="worth"/> is the enemy bounty.</summary>
-    public static int RollRarity(double worth, int itemLevel, double magicFind, int difficulty, Rng rng)
+    /// <summary>The drop's rarity: the original's eight-step climb (<see cref="RollStep"/>, so drop pacing stays as tuned)
+    /// mapped onto the four tiers.</summary>
+    public static int RollRarity(double worth, int itemLevel, double magicFind, int difficulty, Rng rng) =>
+        (int)Rarities.FromLegacy(RollStep(worth, itemLevel, magicFind, difficulty, rng));
+
+    /// <summary>Climbing roll 0..7: each step must pass to try the next. <paramref name="worth"/> is the enemy bounty.</summary>
+    public static int RollStep(double worth, int itemLevel, double magicFind, int difficulty, Rng rng)
     {
         double w = worth / Math.Max(1, itemLevel) * magicFind;
         double mf = Math.Sqrt(Math.Max(0, magicFind)) - 1;
@@ -67,7 +72,7 @@ public sealed class LootRoller
     /// <summary>Uniform base item of that rarity with minLevel ≤ level; falls back one rarity at a time.</summary>
     public ItemBaseDef? PickBase(int rarity, int level, Rng rng, Func<ItemBaseDef, bool>? filter = null)
     {
-        for (int r = Math.Clamp(rarity, 0, 7); r >= 0; r--)
+        for (int r = Rarities.Clamp(rarity); r >= 0; r--)
         {
             if (!_byRarity.TryGetValue(r, out var items)) continue;
             var pool = items.Where(i => i.MinLevel <= level && (filter == null || filter(i))).ToList();
@@ -154,7 +159,7 @@ public sealed class LootRoller
         double v = u * Math.Pow(Math.Max(1, level), stat.LevelPow);
         if (stat.Cap is double cap) v = Math.Min(v, cap);
         v *= multiplier ?? stat.Multiplier;
-        v *= RarityMultiplier[Math.Clamp(rarity, 0, 7)];
+        v *= RarityMultiplier[Rarities.Clamp(rarity)];
         if (stat.Cap is double cap2) v = Math.Min(v, cap2);
         return v;
     }

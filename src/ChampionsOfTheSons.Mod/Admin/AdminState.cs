@@ -72,7 +72,7 @@ public static class AdminState
         }
     }
 
-    /// <summary>Arg: an item id, or "random" / "random:&lt;rarity 0-7&gt;".</summary>
+    /// <summary>Arg: an item id, or "random" / "random:&lt;rarity 0-3&gt;".</summary>
     private static string GiveItem(string arg, int level)
     {
         var db = ModContent.Db;
@@ -80,7 +80,7 @@ public static class AdminState
         ItemBaseDef? def;
         if (arg.StartsWith("random", StringComparison.OrdinalIgnoreCase))
         {
-            int rarity = arg.Contains(':') && int.TryParse(arg.Split(':')[1], out var r) ? Math.Clamp(r, 0, 7) : 4;
+            int rarity = arg.Contains(':') && int.TryParse(arg.Split(':')[1], out var r) ? Rarities.Clamp(r) : (int)Rarity.Rare;
             def = loot.PickBase(rarity, level, Rng);
             if (def == null) return $"no item of rarity {rarity} at level {level}";
         }

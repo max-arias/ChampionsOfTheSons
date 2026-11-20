@@ -21,7 +21,18 @@ public static class SaveCodec
     {
         MarkStatSlotsUnknown, // 1 → 2 (COS-73)
         RemoveDeletedPerks,   // 2 → 3 (COS-86/COS-87)
+        CollapseItemRarities, // 3 → 4 (COS-109)
     };
+
+    /// <summary>3 → 4: eight rarities became four (<see cref="Rarities.FromLegacy"/>). Uniques are raised to Legendary on load,
+    /// from content (<see cref="Rules.PlayerCharacter.Load"/>).</summary>
+    private static void CollapseItemRarities(JsonObject save)
+    {
+        if (save["slots"] is not JsonObject slots) return;
+        foreach (var (_, item) in slots)
+            if (item is JsonObject o)
+                o["rarity"] = (int)Rarities.FromLegacy(o["rarity"]?.GetValue<int>() ?? 0);
+    }
 
     /// <summary>1 → 2: rolled stats gained a slot index. Old ones are marked unknown (-1); <see cref="Rules.PlayerCharacter.Load"/>
     /// infers each from the base item's stat pools, which a save alone cannot.</summary>
@@ -47,7 +58,15 @@ public static class SaveCodec
         foreach (var id in DeletedPerks) perks.Remove(id);
     }
 
-    private static readonly Action<JsonObject>[] WorldMigrations = Array.Empty<Action<JsonObject>>();
+    private static readonly Action<JsonObject>[] WorldMigrations =
+    {
+        CollapseMinLootRarity, // 1 → 2 (COS-109)
+    };
+
+    private static void CollapseMinLootRarity(JsonObject save)
+    {
+        if (save["minLootRarity"] is JsonNode n) save["minLootRarity"] = (int)Rarities.FromLegacy(n.GetValue<int>());
+    }
 
     public static string Write(PlayerSave save)
     {

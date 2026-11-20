@@ -60,9 +60,9 @@ internal static class UiSelfTest
 
         var wanted = new (string Type, int Rarity)[]
         {
-            ("helmet", 1), ("chest_armor", 3), ("pants", 2), ("boot", 4), ("shoulder_armor", 5), ("glove", 0),
-            ("amulet", 6), ("bracer", 3), ("ring", 2), ("ring", 4), ("ring", 7), ("weapon", 5), ("weapon", 1),
-            ("shield", 3), ("quiver", 2), ("spell_scroll", 4), ("material", 0),
+            ("helmet", 1), ("chest_armor", 2), ("pants", 1), ("boot", 2), ("shoulder_armor", 3), ("glove", 0),
+            ("amulet", 3), ("bracer", 2), ("ring", 1), ("ring", 2), ("ring", 3), ("weapon", 3), ("weapon", 1),
+            ("shield", 2), ("quiver", 1), ("spell_scroll", 2), ("material", 0),
         };
         foreach (var (type, rarity) in wanted)
         {
@@ -81,7 +81,7 @@ internal static class UiSelfTest
 
         int count = Pc.Inventory.Slots.Count;
         SelfTest.Check("ui: bag seeded", count >= 15, $"{count} items");
-        SelfTest.Check("ui: rarity spread", Pc.Inventory.Slots.Values.Select(i => i.Rarity).Distinct().Count() >= 5,
+        SelfTest.Check("ui: rarity spread", Pc.Inventory.Slots.Values.Select(i => i.Rarity).Distinct().Count() >= 3,
             string.Join(",", Pc.Inventory.Slots.Values.Select(i => (int)i.Rarity).Distinct().OrderBy(x => x)));
     }
 

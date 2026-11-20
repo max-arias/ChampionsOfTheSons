@@ -178,7 +178,7 @@ public sealed class AdminFeature : IModFeature
         ("addlevels <n> [player]", "add levels"),
         ("points <n> [player]", "add permanent bonus perk points (negative removes)"),
         ("respec [player]", "refund every perk and spell"),
-        ("give <item id | random[:rarity]> [level] [player]", "roll an item into the bag (rarity 0-7; level defaults to the target's)"),
+        ("give <item id | random[:rarity]> [level] [player]", "roll an item into the bag (rarity 0-3; level defaults to the target's)"),
         ("heal [player]", "full health and energy, debuffs cleared"),
         ("god [on|off] [player]", "incoming hits do no damage"),
         ("nocooldowns [on|off] [player]", "spells are always ready"),

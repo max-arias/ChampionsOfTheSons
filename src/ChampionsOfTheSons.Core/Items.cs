@@ -1,16 +1,29 @@
 namespace ChampionsOfTheSons.Core;
 
-/// <summary>Rarity tiers 0..7, as in the original mod.</summary>
+/// <summary>Rarity tiers 0..3 (COS-109, Max 2026-11-20). The original mod had eight; see <see cref="Rarities.FromLegacy"/>.</summary>
 public enum Rarity
 {
     Common = 0,
-    Uncommon = 1,
-    Magic = 2,
-    Rare = 3,
-    Epic = 4,
-    Legendary = 5,
-    Mythic = 6,
-    Primal = 7,
+    Magic = 1,
+    Rare = 2,
+    Legendary = 3,
+}
+
+public static class Rarities
+{
+    public const int Max = (int)Rarity.Legendary;
+
+    /// <summary>The original eight tiers (Common, Uncommon, Magic, Rare, Epic, Legendary, Mythic, Primal) onto the four:
+    /// Common/Uncommon → Common, Magic → Magic, Rare/Epic → Rare, Legendary/Mythic/Primal → Legendary.</summary>
+    public static Rarity FromLegacy(int legacy) => legacy switch
+    {
+        <= 1 => Rarity.Common,
+        2 => Rarity.Magic,
+        3 or 4 => Rarity.Rare,
+        _ => Rarity.Legendary,
+    };
+
+    public static int Clamp(int rarity) => Math.Clamp(rarity, 0, Max);
 }
 
 /// <summary>One rolled stat on an item instance. <paramref name="Slot"/> is the index of the base item's stat pool it came from

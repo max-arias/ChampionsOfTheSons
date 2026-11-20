@@ -25,14 +25,8 @@ public static class WeaponGlow
     public const string DefaultStyle = "ember";
     public static readonly IReadOnlyList<string> Styles = new[] { "ember", "frost", "wisp" };
 
-    /// <summary>Today's rarities onto the four looks.</summary>
-    public static GlowLevel LevelOf(Rarity rarity) => rarity switch
-    {
-        Rarity.Common or Rarity.Uncommon => GlowLevel.Common,
-        Rarity.Magic => GlowLevel.Magic,
-        Rarity.Rare or Rarity.Epic => GlowLevel.Rare,
-        _ => GlowLevel.Legendary,
-    };
+    /// <summary>One look per rarity (COS-109).</summary>
+    public static GlowLevel LevelOf(Rarity rarity) => (GlowLevel)Rarities.Clamp((int)rarity);
 
     public static bool IsUnique(ItemBaseDef def) => def.UniqueEffects.Count > 0;
 

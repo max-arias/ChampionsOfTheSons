@@ -118,7 +118,7 @@ internal static class LootSelfTest
         var items = LootFeature.RollForKill(boss, rules);
         SelfTest.Check("loot: boss rolls many drops", items.Count >= 9, $"{items.Count}");
         int maxRarity = items.Select(i => (int)i.Rarity).DefaultIfEmpty(0).Max();
-        SelfTest.Check("loot: boss drops reach high rarity", maxRarity >= 4, $"max rarity {maxRarity}");
+        SelfTest.Check("loot: boss drops reach high rarity", maxRarity >= (int)Rarity.Rare, $"max rarity {maxRarity}");
         SelfTest.Check("loot: item level follows the player", items.All(i => ModContent.Db.Items.TryGetValue(i.BaseId, out var d) && LootRoller.IsMaterialOrOther(d) || i.Level == Pc.Progress.Level),
             $"player level {Pc.Progress.Level}");
 
@@ -127,18 +127,18 @@ internal static class LootSelfTest
         var roller = new LootRoller(ModContent.Db);
         var rng = new Rng(77);
         int n = 0;
-        for (int r = 0; r < 8; r++)
+        for (int r = 0; r <= Rarities.Max; r++)
         {
             var def = roller.PickBase(r, 100, rng, d => !LootRoller.IsMaterialOrOther(d) && d.Rarity == r) ?? roller.PickBase(r, 100, rng);
             if (def == null) continue;
-            var pos = t.position + t.forward * 5 + t.right * (-3.5f + r);
+            var pos = t.position + t.forward * 5 + t.right * (-3f + 2f * r);
             LootFeature.SpawnAt(roller.RollItem(def, 30, rng), pos);
             n++;
         }
         SelfTest.Check("loot: spawned a row of rarities", n >= 6, $"{n}");
         CheckVisuals("row");
         var colors = LootVisuals.All.Values.Select(v => ColorRarity(v.Color)).Distinct().Count();
-        SelfTest.Check("loot: several rarity colors present", colors >= 5, $"{colors}");
+        SelfTest.Check("loot: several rarity colors present", colors >= 3, $"{colors}");
     }
 
     private static void WalkOver()
@@ -227,7 +227,7 @@ internal static class LootSelfTest
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
         TestKit.Give("item.yuki_onna_strides", level: 5);
         // bag.1 must be equippable for the menu-equip check (a random base can be a material or consumable).
-        TestKit.Give(ModContent.Db.Items.Values.Where(d => LootRoller.IsEquippable(d) && (int)d.Rarity == 3 && d.MinLevel <= 20).OrderBy(d => d.Id, StringComparer.Ordinal).First().Id, level: 20);
+        TestKit.Give(ModContent.Db.Items.Values.Where(d => LootRoller.IsEquippable(d) && (int)d.Rarity == (int)Rarity.Rare && d.MinLevel <= 20).OrderBy(d => d.Id, StringComparer.Ordinal).First().Id, level: 20);
         TestKit.Give(rarity: 5, level: 20);
         Panel.Open();
         var bounds = Panel.SlotBounds("bag.1");

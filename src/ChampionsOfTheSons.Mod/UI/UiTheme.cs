@@ -5,17 +5,13 @@ namespace ChampionsOfTheSons.Mod.UI;
 /// <summary>Colors shared by the panels. All values are hex strings (#RRGGBB or #RRGGBBAA) so the text builders stay free of Unity types.</summary>
 internal static class UiTheme
 {
-    /// <summary>Rarity 0..7: Common, Uncommon, Magic, Rare, Epic, Legendary, Mythic, Primal. Picked to stay readable on the dark window.</summary>
+    /// <summary>Rarity 0..3 (COS-109): Common white, Magic blue, Rare yellow, Legendary red-orange. Readable on the dark window.</summary>
     private static readonly string[] RarityHexes =
     {
-        "#C9CED6", // Common: light gray
-        "#5BD75B", // Uncommon: green
+        "#E8E8E8", // Common: white
         "#4D9DFF", // Magic: blue
         "#FFD94A", // Rare: yellow
-        "#B86BFF", // Epic: purple
-        "#FF9A2E", // Legendary: orange
-        "#FF5A5A", // Mythic: red
-        "#3DE8D6", // Primal: cyan
+        "#FF6A2E", // Legendary: red-orange
     };
 
     public static string RarityHex(Rarity r) => RarityHexes[Math.Clamp((int)r, 0, RarityHexes.Length - 1)];
@@ -28,7 +24,7 @@ internal static class UiTheme
     public const string Good = "#6FE07A";
     public const string Bad = "#FF6B6B";
     public const string Stat = "#9CCBFF";
-    public const string Unique = "#FFB86B";
+    public const string Unique = "#FF8A4C";
 
     public const string Dim = "#000000A8";
     public const string Window = "#12161CF2";

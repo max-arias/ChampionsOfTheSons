@@ -9,8 +9,9 @@ public static class MessageCodec
     /// <remarks>2: <see cref="EnemySync"/> carries the damage multiplier and the elite name (COS-68).
     /// 3: <see cref="EnemySync"/> carries the scale; <see cref="SpellCast"/> its mode, cast id and visuals; new
     /// <see cref="SpellFxEvent"/>, <see cref="AbilityEvent"/>, <see cref="PlayerInfo"/>, <see cref="Announce"/> (COS-79/80/81);
-    /// <see cref="HeldWeapon"/> carries the item's rarity and base id (COS-108).</remarks>
-    public const int ProtocolVersion = 3;
+    /// <see cref="HeldWeapon"/> carries the item's rarity and base id (COS-108).
+    /// 4: items carry the four rarities 0..3 (COS-109).</remarks>
+    public const int ProtocolVersion = 4;
 
     public static byte[] Encode(IMessage message)
     {

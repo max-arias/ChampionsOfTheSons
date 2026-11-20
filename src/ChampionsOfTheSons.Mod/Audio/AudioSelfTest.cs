@@ -28,7 +28,7 @@ internal static class AudioSelfTest
     {
         SelfTest.Check("audio: sounds registered", ModAudio.Ready && ModAudio.KnownCues.Count >= 20, $"{ModAudio.KnownCues.Count} cues");
         foreach (var cue in new[] { SoundCues.LevelUp, SoundCues.Pickup, SoundCues.PerkBought, SoundCues.Craft, SoundCues.UiClick, SoundCues.UiOpen,
-                     SoundCues.Drop(Rarity.Common), SoundCues.Drop(Rarity.Primal), SoundCues.Spell("spell.firebolt"), SoundCues.Telegraph(EnemyAbility.Meteor),
+                     SoundCues.Drop(Rarity.Common), SoundCues.Drop(Rarity.Legendary), SoundCues.Spell("spell.firebolt"), SoundCues.Telegraph(EnemyAbility.Meteor),
                      SoundCues.Impact(EnemyAbility.Meteor), SoundCues.LoopWind, SoundCues.LoopFire })
             SelfTest.Check($"audio: cue {cue} exists", ModAudio.KnownCues.Contains(cue));
         SelfTest.Log($"audio: game sfx volume {SonsSdk.SoundTools.SfxVolume:0.##}, mod volume {Config.SoundVolume.Value:0.##}, effective {ModAudio.Volume:0.##}");

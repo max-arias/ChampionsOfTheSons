@@ -82,11 +82,13 @@ public sealed class Crafting
         _ => 1,
     };
 
-    /// <summary>Rarity of the material a scrapped item gives: its own, but at least 3 (materials start at Rare) and at most 7.</summary>
-    public static int ScrapMaterialRarity(Rarity rarity) => Math.Clamp((int)rarity, 3, 7);
+    /// <summary>Rarity of the material a scrapped item gives: Legendary for Legendary items, else Rare (materials start at Rare).</summary>
+    public static int ScrapMaterialRarity(Rarity rarity) => rarity == Rarity.Legendary ? (int)Rarity.Legendary : (int)Rarity.Rare;
 
-    /// <summary>Material count: 1 for Common/Uncommon/Magic, then one more per rarity step, plus one per 40 item levels.</summary>
-    public static int ScrapYield(Rarity rarity, int level) => Math.Max(1, (int)rarity - 1) + Math.Max(0, level) / 40;
+    private static readonly int[] ScrapBase = { 1, 1, 2, 4 };
+
+    /// <summary>Material count by rarity (1, 1, 2, 4), plus one per 40 item levels.</summary>
+    public static int ScrapYield(Rarity rarity, int level) => ScrapBase[Rarities.Clamp((int)rarity)] + Math.Max(0, level) / 40;
 
     /// <summary>
     /// Scrap: equippable items only. Gives <see cref="ScrapYield"/> of one random material of

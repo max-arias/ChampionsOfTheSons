@@ -246,8 +246,12 @@ public sealed class PlayerCharacter
         Perks.Restore(save.Perks, save.UnlockedSpells);
         Spells.Restore(save.SpellLoadout);
         var loot = new LootRoller(Content);
-        Inventory.Restore(save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, loot.InferSlots(kv.Value.ToItem()))));
+        // An item's rarity is its base's (COS-109: uniques became Legendary, which a save migration cannot know).
+        Inventory.Restore(save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, loot.InferSlots(WithBaseRarity(kv.Value.ToItem())))));
         Massacre.Reset();
         RebuildAll();
     }
+
+    private ItemInstance WithBaseRarity(ItemInstance item) =>
+        Content.Items.TryGetValue(item.BaseId, out var def) ? item with { Rarity = (Rarity)Rarities.Clamp(def.Rarity) } : item;
 }

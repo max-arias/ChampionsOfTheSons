@@ -12,7 +12,7 @@ public class SaveCodecTests
         {
             BaseId = "item.some_amulet",
             Level = 40,
-            Rarity = Rarity.Epic,
+            Rarity = Rarity.Rare,
             Stats = new[] { new RolledStat("stat.max_health", 55.5f) },
         });
         save.Slots["equip.ring1"] = new SavedItem { BaseId = "item.removed_in_a_later_version", Level = 3 };
@@ -93,5 +93,26 @@ public class SaveCodecTests
         var tree = new Rules.PerkTree(TestContent.Create(new() { ["perks.json"] = perks }));
         tree.Restore(loaded.Perks, loaded.UnlockedSpells);
         Assert.Equal(9, tree.AvailablePoints(new Rules.Progress(loaded.Level, 0, loaded.BonusPerkPoints)));
+    }
+
+    [Fact]
+    public void Version_3_saves_fold_eight_rarities_into_four()
+    {
+        var v3 = "{\"version\":3,\"level\":5,\"slots\":{\"bag.0\":{\"baseId\":\"item.a\",\"rarity\":1},\"bag.1\":{\"baseId\":\"item.b\",\"rarity\":4},\"bag.2\":{\"baseId\":\"item.c\",\"rarity\":7}}}";
+        var loaded = SaveCodec.ReadPlayer(v3);
+        Assert.Equal(new[] { 0, 2, 3 }, new[] { "bag.0", "bag.1", "bag.2" }.Select(k => loaded.Slots[k].Rarity));
+        var world = SaveCodec.ReadWorld("{\"version\":1,\"minLootRarity\":5}");
+        Assert.Equal((int)Rarity.Legendary, world.MinLootRarity);
+    }
+
+    [Fact]
+    public void Loaded_items_take_their_base_rarity_so_old_uniques_become_legendary()
+    {
+        var db = TestContent.Create();
+        var save = new PlayerSave { Level = 5 };
+        save.Slots["bag.0"] = new SavedItem { BaseId = "item.ring", Level = 3, Rarity = (int)Rarity.Common };
+        var pc = new Rules.PlayerCharacter(db);
+        pc.Load(SaveCodec.ReadPlayer(SaveCodec.Write(save)));
+        Assert.Equal((Rarity)db.Items["item.ring"].Rarity, pc.Inventory.Get("bag.0")!.Rarity);
     }
 }

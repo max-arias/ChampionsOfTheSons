@@ -36,9 +36,9 @@ public static class SoundCues
     /// <summary>The drop cue by rarity: brighter for rarer items, heard from far (COTF picked the drop sound by item type).</summary>
     public static string Drop(Rarity rarity) => rarity switch
     {
-        <= Rarity.Magic => "drop_low",
-        <= Rarity.Epic => "drop_mid",
-        <= Rarity.Mythic => "drop_high",
+        Rarity.Common => "drop_low",
+        Rarity.Magic => "drop_mid",
+        Rarity.Rare => "drop_high",
         _ => "drop_top",
     };
 

@@ -13,14 +13,10 @@ public class WeaponGlowTests
 
     [Theory]
     [InlineData(Rarity.Common, GlowLevel.Common)]
-    [InlineData(Rarity.Uncommon, GlowLevel.Common)]
     [InlineData(Rarity.Magic, GlowLevel.Magic)]
     [InlineData(Rarity.Rare, GlowLevel.Rare)]
-    [InlineData(Rarity.Epic, GlowLevel.Rare)]
     [InlineData(Rarity.Legendary, GlowLevel.Legendary)]
-    [InlineData(Rarity.Mythic, GlowLevel.Legendary)]
-    [InlineData(Rarity.Primal, GlowLevel.Legendary)]
-    public void Eight_rarities_map_onto_four_looks(Rarity rarity, GlowLevel level) => Assert.Equal(level, WeaponGlow.Level(Weapon(), rarity));
+    public void Each_rarity_has_its_own_look(Rarity rarity, GlowLevel level) => Assert.Equal(level, WeaponGlow.Level(Weapon(), rarity));
 
     [Fact]
     public void Glow_grows_with_the_look_and_uniques_are_always_legendary()
@@ -29,7 +25,7 @@ public class WeaponGlowTests
         Assert.True(WeaponGlow.Strength(GlowLevel.Magic) < WeaponGlow.Strength(GlowLevel.Rare));
         Assert.True(WeaponGlow.Strength(GlowLevel.Rare) < WeaponGlow.Strength(GlowLevel.Legendary));
         Assert.Equal(GlowLevel.Legendary, WeaponGlow.Level(Weapon(unique: true), Rarity.Common));
-        Assert.Equal(GlowLevel.Common, WeaponGlow.Level(new ItemBaseDef { Id = "item.ring" }, Rarity.Primal));
+        Assert.Equal(GlowLevel.Common, WeaponGlow.Level(new ItemBaseDef { Id = "item.ring" }, Rarity.Legendary));
         Assert.False(WeaponGlow.HasExtras(GlowLevel.Rare));
         Assert.True(WeaponGlow.HasExtras(GlowLevel.Legendary));
     }

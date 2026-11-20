@@ -35,7 +35,7 @@ internal static class GlowSelfTest
 
         SelfTest.Add(t, "glow: common", () =>
         {
-            Equip("item.dull_longsword", "long_sword", Rarity.Uncommon);
+            Equip("item.dull_longsword", "long_sword", Rarity.Common);
             var skin = WeaponModels.LocalSkin;
             SelfTest.Check("glow: common look has no glow", skin != null && !skin.Look.Glows && Count(skin.Model, "cots-glow") == 0, Describe(skin));
         });
@@ -43,7 +43,7 @@ internal static class GlowSelfTest
         t += 1.8f;
 
         // Magic, Rare (rolled Epic: Epic maps onto Rare) and Legendary (rolled Primal), in hand, one screenshot each.
-        foreach (var (rarity, level) in new[] { (Rarity.Magic, GlowLevel.Magic), (Rarity.Epic, GlowLevel.Rare), (Rarity.Primal, GlowLevel.Legendary) })
+        foreach (var (rarity, level) in new[] { (Rarity.Magic, GlowLevel.Magic), (Rarity.Rare, GlowLevel.Rare), (Rarity.Legendary, GlowLevel.Legendary) })
         {
             SelfTest.Add(t, $"glow: {level}", () =>
             {
@@ -102,7 +102,7 @@ internal static class GlowSelfTest
         // Magic. The frame cost compares the same row of models without glow (Common, non-unique) against it with glow.
         var row = new[]
         {
-            ("item.rage", Rarity.Common), ("item.frost_giant", Rarity.Rare), ("item.dull_longsword", Rarity.Primal), ("item.relic_hammer", Rarity.Epic),
+            ("item.rage", Rarity.Common), ("item.frost_giant", Rarity.Rare), ("item.dull_longsword", Rarity.Legendary), ("item.relic_hammer", Rarity.Rare),
             ("item.dull_longsword", Rarity.Magic), ("item.relic_hammer", Rarity.Magic), ("item.axe_of_swiftness", Rarity.Magic),
         };
         var plain = new[] { "item.dull_longsword", "item.dull_longsword", "item.dull_longsword", "item.relic_hammer", "item.dull_longsword", "item.relic_hammer", "item.axe_of_swiftness" };

@@ -7,8 +7,8 @@ namespace ChampionsOfTheSons.Core.Saving;
 /// </summary>
 public sealed class PlayerSave
 {
-    /// <summary>2: rolled stats carry their stat slot (COS-73). 3: deleted perks removed (COS-86/COS-87).</summary>
-    public const int CurrentVersion = 3;
+    /// <summary>2: rolled stats carry their stat slot (COS-73). 3: deleted perks removed (COS-86/COS-87). 4: four rarities (COS-109).</summary>
+    public const int CurrentVersion = 4;
 
     public int Version { get; set; } = CurrentVersion;
     public double Xp { get; set; }
@@ -68,7 +68,7 @@ public sealed class SavedStat
 /// <summary>World-wide settings, stored in the world save and owned by the host.</summary>
 public sealed class WorldSave
 {
-    public const int CurrentVersion = 1;
+    public const int CurrentVersion = 2;
 
     public int Version { get; set; } = CurrentVersion;
 

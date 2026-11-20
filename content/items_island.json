@@ -4,7 +4,7 @@
       "id": "item.hollow_congregant_cowl",
       "name": "Hushed Cowl",
       "type": "helmet",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 72,
       "maxLevel": 102,
       "statPools": [
@@ -35,7 +35,7 @@
       "id": "item.vestment_of_the_quiet_choir",
       "name": "Hushed Smock",
       "type": "chest_armor",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 76,
       "maxLevel": 106,
       "statPools": [
@@ -69,7 +69,7 @@
       "id": "item.censer_gloves",
       "name": "Smudge-Pot Gloves",
       "type": "glove",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 80,
       "maxLevel": 110,
       "statPools": [
@@ -100,7 +100,7 @@
       "id": "item.sigil_ring_of_the_nameless_flock",
       "name": "Nameless Signet",
       "type": "ring",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 84,
       "maxLevel": 114,
       "statPools": [
@@ -130,7 +130,7 @@
       "id": "item.ash_rosary",
       "name": "Ash Bead Cord",
       "type": "amulet",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 88,
       "maxLevel": 118,
       "statPools": [
@@ -160,7 +160,7 @@
       "id": "item.gps_locator_visor",
       "name": "GPS Locator Visor",
       "type": "helmet",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 92,
       "maxLevel": 122,
       "statPools": [
@@ -194,7 +194,7 @@
       "id": "item.printed_polymer_chassis",
       "name": "Printed Polymer Chassis",
       "type": "chest_armor",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 96,
       "maxLevel": 126,
       "statPools": [
@@ -231,7 +231,7 @@
       "id": "item.keycard_bracer",
       "name": "Keycard Bracer",
       "type": "bracer",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 100,
       "maxLevel": 130,
       "statPools": [
@@ -262,7 +262,7 @@
       "id": "item.printed_sole_runners",
       "name": "Printed Sole Runners",
       "type": "boot",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 104,
       "maxLevel": 134,
       "statPools": [
@@ -292,7 +292,7 @@
       "id": "item.riot_door_shield",
       "name": "Riot Door Shield",
       "type": "shield",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 108,
       "maxLevel": 138,
       "statPools": [
@@ -326,7 +326,7 @@
       "id": "item.golden_visage",
       "name": "Golden Visage",
       "type": "helmet",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 118,
       "maxLevel": 148,
       "statPools": [
@@ -363,7 +363,7 @@
       "id": "item.golden_cuirass",
       "name": "Golden Cuirass",
       "type": "chest_armor",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 126,
       "maxLevel": 150,
       "statPools": [
@@ -402,7 +402,7 @@
       "id": "item.golden_pauldrons",
       "name": "Golden Pauldrons",
       "type": "shoulder_armor",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 122,
       "maxLevel": 150,
       "statPools": [
@@ -435,7 +435,7 @@
       "id": "item.golden_gauntlets",
       "name": "Golden Gauntlets",
       "type": "glove",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 130,
       "maxLevel": 150,
       "statPools": [
@@ -469,7 +469,7 @@
       "id": "item.golden_greaves",
       "name": "Golden Greaves",
       "type": "pants",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 134,
       "maxLevel": 150,
       "statPools": [
@@ -503,7 +503,7 @@
       "id": "item.nine_iron_of_last_resort",
       "name": "Nine Iron of Last Resort",
       "type": "weapon",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 34,
       "maxLevel": 64,
       "statPools": [
@@ -534,7 +534,7 @@
       "id": "item.plaid_trousers_of_quiet_rage",
       "name": "Plaid Trousers of Quiet Rage",
       "type": "pants",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 38,
       "maxLevel": 68,
       "statPools": [
@@ -564,7 +564,7 @@
       "id": "item.clubhouse_visor",
       "name": "Clubhouse Visor",
       "type": "helmet",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 42,
       "maxLevel": 72,
       "statPools": [
@@ -591,7 +591,7 @@
       "id": "item.spiked_cleats",
       "name": "Spiked Cleats",
       "type": "boot",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 46,
       "maxLevel": 76,
       "statPools": [
@@ -622,7 +622,7 @@
       "id": "item.rippers_cleaver",
       "name": "Ripper's Cleaver",
       "type": "weapon",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 60,
       "maxLevel": 90,
       "statPools": [
@@ -656,7 +656,7 @@
       "id": "item.twin_skull_pauldrons",
       "name": "Twin-Skull Pauldrons",
       "type": "shoulder_armor",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 64,
       "maxLevel": 94,
       "statPools": [
@@ -689,7 +689,7 @@
       "id": "item.knucklebone_choker",
       "name": "Knucklebone Choker",
       "type": "amulet",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 68,
       "maxLevel": 98,
       "statPools": [
@@ -719,7 +719,7 @@
       "id": "item.hide_takers_gloves",
       "name": "Hide-Taker's Gloves",
       "type": "glove",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 72,
       "maxLevel": 102,
       "statPools": [
@@ -753,7 +753,7 @@
       "id": "item.lantern_skull_helm",
       "name": "Lantern-Skull Helm",
       "type": "helmet",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 62,
       "maxLevel": 92,
       "statPools": [
@@ -800,7 +800,7 @@
       "id": "item.traders_puffer_jacket",
       "name": "Trader's Puffer Jacket",
       "type": "chest_armor",
-      "rarity": 2,
+      "rarity": 1,
       "minLevel": 9,
       "maxLevel": 39,
       "statPools": [
@@ -824,7 +824,7 @@
       "id": "item.rendered_fat_hauberk",
       "name": "Rendered-Fat Hauberk",
       "type": "chest_armor",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 95,
       "maxLevel": 125,
       "statPools": [
@@ -867,7 +867,7 @@
       "id": "item.printed_kevlar_chaps",
       "name": "Printed Kevlar Chaps",
       "type": "pants",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 48,
       "maxLevel": 78,
       "statPools": [
@@ -896,7 +896,7 @@
       "id": "item.sled_runner_boots",
       "name": "Sled Runner Boots",
       "type": "boot",
-      "rarity": 3,
+      "rarity": 2,
       "minLevel": 24,
       "maxLevel": 54,
       "statPools": [
@@ -922,7 +922,7 @@
       "id": "item.zipline_grippers",
       "name": "Zipline Grippers",
       "type": "boot",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 58,
       "maxLevel": 88,
       "statPools": [
@@ -962,7 +962,7 @@
       "id": "item.cultists_bone_epaulets",
       "name": "Cultist's Bone Epaulets",
       "type": "shoulder_armor",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 42,
       "maxLevel": 72,
       "statPools": [
@@ -992,7 +992,7 @@
       "id": "item.gliderwing_mantle",
       "name": "Gliderwing Mantle",
       "type": "shoulder_armor",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 100,
       "maxLevel": 130,
       "statPools": [
@@ -1041,7 +1041,7 @@
       "id": "item.welders_gloves",
       "name": "Welder's Gloves",
       "type": "glove",
-      "rarity": 2,
+      "rarity": 1,
       "minLevel": 8,
       "maxLevel": 38,
       "statPools": [
@@ -1062,7 +1062,7 @@
       "id": "item.hand_of_the_cube",
       "name": "Hand of the Cube",
       "type": "glove",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 140,
       "maxLevel": 150,
       "statPools": [
@@ -1115,7 +1115,7 @@
       "id": "item.weathered_dog_tags",
       "name": "Weathered Dog Tags",
       "type": "amulet",
-      "rarity": 3,
+      "rarity": 2,
       "minLevel": 20,
       "maxLevel": 50,
       "statPools": [
@@ -1140,7 +1140,7 @@
       "id": "item.cube_fragment_pendant",
       "name": "Cube Fragment Pendant",
       "type": "amulet",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 110,
       "maxLevel": 140,
       "statPools": [
@@ -1183,7 +1183,7 @@
       "id": "item.mothers_beating_pendant",
       "name": "Mother's Beating Pendant",
       "type": "amulet",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 135,
       "maxLevel": 150,
       "statPools": [
@@ -1236,7 +1236,7 @@
       "id": "item.cursed_resort_key_ring",
       "name": "Cursed Resort Key Ring",
       "type": "ring",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 68,
       "maxLevel": 98,
       "statPools": [
@@ -1276,7 +1276,7 @@
       "id": "item.ring_of_seven_bites",
       "name": "Ring of Seven Bites",
       "type": "ring",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 120,
       "maxLevel": 150,
       "statPools": [
@@ -1326,7 +1326,7 @@
       "id": "item.fire_hardened_spear",
       "name": "Fire-Hardened Spear",
       "type": "weapon",
-      "rarity": 2,
+      "rarity": 1,
       "minLevel": 3,
       "maxLevel": 33,
       "statPools": [
@@ -1347,7 +1347,7 @@
       "id": "item.rebar_greatsword",
       "name": "Rebar Greatsword",
       "type": "weapon",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 45,
       "maxLevel": 75,
       "statPools": [
@@ -1372,7 +1372,7 @@
       "id": "item.revving_fury",
       "name": "Revving Fury",
       "type": "weapon",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 70,
       "maxLevel": 100,
       "statPools": [
@@ -1416,7 +1416,7 @@
       "id": "item.sacrificial_kris",
       "name": "Cult Ritual Knife",
       "type": "weapon",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 98,
       "maxLevel": 128,
       "statPools": [
@@ -1468,7 +1468,7 @@
       "id": "item.longbow_of_the_last_hunt",
       "name": "Longbow of the Last Hunt",
       "type": "weapon",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 142,
       "maxLevel": 150,
       "statPools": [
@@ -1519,7 +1519,7 @@
       "id": "item.pot_lid_shield",
       "name": "Pot Lid Shield",
       "type": "shield",
-      "rarity": 2,
+      "rarity": 1,
       "minLevel": 4,
       "maxLevel": 34,
       "statPools": [
@@ -1541,7 +1541,7 @@
       "id": "item.frozen_kite_shield",
       "name": "Ice-Caked Shield",
       "type": "shield",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 72,
       "maxLevel": 102,
       "statPools": [
@@ -1588,7 +1588,7 @@
       "id": "item.shield_of_the_first_survivor",
       "name": "Shield of the First Survivor",
       "type": "shield",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 138,
       "maxLevel": 150,
       "statPools": [
@@ -1637,7 +1637,7 @@
       "id": "item.quiver_of_bottled_lightning",
       "name": "Quiver of Bottled Lightning",
       "type": "quiver",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 105,
       "maxLevel": 135,
       "statPools": [
@@ -1714,7 +1714,7 @@
       "id": "item.scroll_of_the_frozen_choir",
       "name": "Frozen Voices Transcript",
       "type": "spell_scroll",
-      "rarity": 5,
+      "rarity": 3,
       "minLevel": 66,
       "maxLevel": 96,
       "statPools": [
@@ -1755,7 +1755,7 @@
       "id": "item.cult_ritual_liturgy",
       "name": "Cult Ritual Chant",
       "type": "spell_scroll",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 96,
       "maxLevel": 126,
       "statPools": [
@@ -1804,7 +1804,7 @@
       "id": "item.the_seventh_page",
       "name": "The Seventh Page",
       "type": "spell_scroll",
-      "rarity": 7,
+      "rarity": 3,
       "minLevel": 146,
       "maxLevel": 150,
       "statPools": [
@@ -1859,7 +1859,7 @@
       "id": "item.frostbound_wristguard",
       "name": "Frostbound Wristguard",
       "type": "bracer",
-      "rarity": 3,
+      "rarity": 2,
       "minLevel": 30,
       "maxLevel": 60,
       "statPools": [
@@ -1884,7 +1884,7 @@
       "id": "item.canned_pasta_ration",
       "name": "Canned Pasta Ration",
       "type": "other",
-      "rarity": 2,
+      "rarity": 1,
       "minLevel": 1,
       "maxLevel": 31,
       "statPools": [],
@@ -1895,7 +1895,7 @@
       "id": "item.cult_sacrament_wafer",
       "name": "Cult Ration Wafer",
       "type": "other",
-      "rarity": 3,
+      "rarity": 2,
       "minLevel": 20,
       "maxLevel": 50,
       "statPools": [],
@@ -1906,7 +1906,7 @@
       "id": "item.minibar_whiskey",
       "name": "Minibar Whiskey",
       "type": "other",
-      "rarity": 2,
+      "rarity": 1,
       "minLevel": 10,
       "maxLevel": 40,
       "statPools": [],
@@ -1917,7 +1917,7 @@
       "id": "item.bottled_cave_water",
       "name": "Bottled Cave Water",
       "type": "other",
-      "rarity": 3,
+      "rarity": 2,
       "minLevel": 30,
       "maxLevel": 60,
       "statPools": [],
@@ -1928,7 +1928,7 @@
       "id": "item.golden_tooth",
       "name": "Golden Tooth",
       "type": "material",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 40,
       "maxLevel": 70,
       "statPools": [],
@@ -1938,7 +1938,7 @@
       "id": "item.printer_filament_spool",
       "name": "Printer Filament Spool",
       "type": "material",
-      "rarity": 3,
+      "rarity": 2,
       "minLevel": 25,
       "maxLevel": 55,
       "statPools": [],
@@ -1948,7 +1948,7 @@
       "id": "item.mutant_marrow",
       "name": "Mutant Marrow",
       "type": "material",
-      "rarity": 4,
+      "rarity": 2,
       "minLevel": 45,
       "maxLevel": 75,
       "statPools": [],
@@ -1958,7 +1958,7 @@
       "id": "item.cube_shard",
       "name": "Cube Shard",
       "type": "material",
-      "rarity": 6,
+      "rarity": 3,
       "minLevel": 100,
       "maxLevel": 130,
       "statPools": [],

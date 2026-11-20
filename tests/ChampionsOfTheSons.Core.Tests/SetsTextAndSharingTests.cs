@@ -9,9 +9,9 @@ public class SetBonusTests
     { "items": [
       { "id": "item.ring", "name": "Test Ring", "type": "ring", "rarity": 2, "minLevel": 1, "maxLevel": 50, "statPools": [ ["stat.max_life"] ] },
       { "id": "item.boots", "name": "Test Boots", "type": "boot", "rarity": 0, "minLevel": 1, "maxLevel": 5, "statPools": [ ["stat.max_life"] ] },
-      { "id": "item.set_helm", "name": "Set Helm", "type": "helmet", "rarity": 5, "set": "set.test", "statPools": [ ["stat.max_life"] ] },
-      { "id": "item.set_boots", "name": "Set Boots", "type": "boot", "rarity": 5, "set": "set.test", "statPools": [ ["stat.max_life"] ] },
-      { "id": "item.set_gloves", "name": "Set Gloves", "type": "glove", "rarity": 5, "set": "set.test", "statPools": [ ["stat.max_life"] ] }
+      { "id": "item.set_helm", "name": "Set Helm", "type": "helmet", "rarity": 3, "set": "set.test", "statPools": [ ["stat.max_life"] ] },
+      { "id": "item.set_boots", "name": "Set Boots", "type": "boot", "rarity": 3, "set": "set.test", "statPools": [ ["stat.max_life"] ] },
+      { "id": "item.set_gloves", "name": "Set Gloves", "type": "glove", "rarity": 3, "set": "set.test", "statPools": [ ["stat.max_life"] ] }
     ] }
     """;
 

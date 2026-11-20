@@ -1,19 +1,15 @@
 # Translation glossaries (COS-27)
 
-Term choices each translator made while translating `content/text/en.json` into its language (2026-11-19). They include the rarity tiers (Common to Primal) and difficulty tiers, which are not in `en.json` yet (see COS-31). Use these when adding strings or when a reviewer revisits terminology (COS-33). Format: `English = translation`. Machine translation, not reviewed by a native speaker.
+Term choices each translator made while translating `content/text/en.json` into its language (2026-11-19). They include the rarity tiers (Common, Magic, Rare, Legendary since COS-109) and difficulty tiers, which are not in `en.json` yet (see COS-31). Use these when adding strings or when a reviewer revisits terminology (COS-33). Format: `English = translation`. Machine translation, not reviewed by a native speaker.
 
 
 ## Chinese (Simplified) (`zh-Hans`)
 
 ```
 Common = 普通
-Uncommon = 优秀
 Magic = 魔法
 Rare = 稀有
-Epic = 史诗
 Legendary = 传说
-Mythic = 神话
-Primal = 原初
 Easy = 简单
 Veteran = 老兵
 Elite = 精英
@@ -128,13 +124,9 @@ Format: digits/% attach directly to Chinese (350能量, 40%); unit tokens keep a
 
 ```
 Common = 普通
-Uncommon = 優良
 Magic = 魔法
 Rare = 稀有
-Epic = 史詩
 Legendary = 傳說
-Mythic = 神話
-Primal = 原初
 Easy = 簡單
 Veteran = 老兵
 Elite = 菁英
@@ -290,13 +282,9 @@ Perk = kyky
 Buff = vahvistus
 Debuff = haittavaikutus
 Common = Tavallinen
-Uncommon = Epätavallinen
 Magic = Maaginen
 Rare = Harvinainen
-Epic = Eeppinen
 Legendary = Legendaarinen
-Mythic = Myyttinen
-Primal = Alkukantainen
 Easy = Helppo
 Veteran = Veteraani
 Elite = Eliitti
@@ -337,13 +325,9 @@ Virginia = Virginia
 
 ```
 Common = Commun
-Uncommon = Peu commun
 Magic = Magique
 Rare = Rare
-Epic = Épique
 Legendary = Légendaire
-Mythic = Mythique
-Primal = Primordial
 Easy = Facile
 Veteran = Vétéran
 Elite = Élite
@@ -458,13 +442,9 @@ Each piece: = Chaque pièce :
 
 ```
 Common = Gewöhnlich
-Uncommon = Ungewöhnlich
 Magic = Magisch
 Rare = Selten
-Epic = Episch
 Legendary = Legendär
-Mythic = Mythisch
-Primal = Urtümlich
 Easy = Leicht
 Veteran = Veteran
 Elite = Elite
@@ -616,13 +596,9 @@ Taunt = Provocazione
 War Cry = Grido di Guerra
 Wide Reach = Portata Estesa
 Common = Comune
-Uncommon = Non comune
 Magic = Magico
 Rare = Raro
-Epic = Epico
 Legendary = Leggendario
-Mythic = Mitico
-Primal = Primordiale
 (rarity in running text: "rarita' Leggendaria o inferiore", feminine, to avoid item-gender agreement)
 Strength = Forza
 Agility = Agilita'
@@ -700,13 +676,9 @@ Enzyme AGI/39 etc. = Enzima AGI/39 (labels AGILITA' / INTELLETTO / FORZA / VITAL
 
 ```
 Common = コモン
-Uncommon = アンコモン
 Magic = マジック
 Rare = レア
-Epic = エピック
 Legendary = レジェンダリー
-Mythic = ミシック
-Primal = プライマル
 Strength = 筋力
 Agility = 敏捷性
 Vitality = 体力
@@ -805,13 +777,9 @@ Set piece = セット装備
 
 ```
 Common = 일반
-Uncommon = 고급
 Magic = 마법
 Rare = 희귀
-Epic = 영웅
 Legendary = 전설
-Mythic = 신화
-Primal = 원초
 Easy = 쉬움
 Veteran = 숙련
 Elite = 정예
@@ -1011,13 +979,9 @@ Quiver = Kołczan
 Locket = Medalion
 Bracers = Karwasze
 Common = Zwykły
-Uncommon = Niezwykły
 Magic = Magiczny
 Rare = Rzadki
-Epic = Epicki
 Legendary = Legendarny
-Mythic = Mityczny
-Primal = Pierwotny
 Easy = Łatwy
 Veteran = Weteran
 Elite = Elita
@@ -1195,13 +1159,9 @@ Tasset = набедренники
 
 ```
 Common = Común
-Uncommon = Poco común
 Magic = Mágico
 Rare = Raro
-Epic = Épico
 Legendary = Legendario
-Mythic = Mítico
-Primal = Primigenio
 Strength = Fuerza
 Agility = Agilidad
 Vitality = Vitalidad
@@ -1347,13 +1307,9 @@ War Cry = Savaş Narası
 Wide Reach = Geniş Erişim
 (spell names take suffixes with an apostrophe: Kar Fırtınası'nın, Kara Alev'in)
 Common = Sıradan
-Uncommon = Seyrek
 Magic = Büyülü
 Rare = Nadir
-Epic = Epik
 Legendary = Efsanevi
-Mythic = Mitik
-Primal = İlksel
 Strength = Güç
 Agility = Çeviklik
 Vitality = Canlılık

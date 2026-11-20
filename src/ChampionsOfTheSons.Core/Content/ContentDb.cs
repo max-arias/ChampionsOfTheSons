@@ -130,7 +130,7 @@ public sealed class ContentDb
         foreach (var item in _items.Values.ToList())
         {
             if (item.MaxLevel < item.MinLevel) _errors.Add($"item {item.Id}: maxLevel < minLevel");
-            if (item.Rarity is < 0 or > 7) _errors.Add($"item {item.Id}: rarity {item.Rarity} out of range");
+            if (item.Rarity is < 0 or > Rarities.Max) _errors.Add($"item {item.Id}: rarity {item.Rarity} out of range");
             foreach (var pool in item.StatPools)
             {
                 if (pool.Count == 0) _errors.Add($"item {item.Id}: empty stat pool");

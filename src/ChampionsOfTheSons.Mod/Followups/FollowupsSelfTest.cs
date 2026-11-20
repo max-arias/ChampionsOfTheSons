@@ -145,7 +145,7 @@ internal static class FollowupsSelfTest
         CraftingSelfTest.UnlockAll();
         panel.Open();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        var item = TestKit.Give(Equippable(4, 40), 4, 40);
+        var item = TestKit.Give(Equippable(2, 40), 2, 40);
         string key = Inventory.Bag(0);
         panel.Clear();
         panel.ClickBag(key);

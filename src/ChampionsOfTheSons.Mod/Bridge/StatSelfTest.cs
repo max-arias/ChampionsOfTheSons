@@ -30,7 +30,7 @@ internal static class StatSelfTest
     }
 
     private static ItemInstance Item(string baseId, params (string Stat, float Value)[] stats) =>
-        new() { BaseId = baseId, Level = 10, Rarity = Rarity.Epic, Stats = stats.Select(s => new RolledStat(s.Stat, s.Value)).ToArray() };
+        new() { BaseId = baseId, Level = 10, Rarity = Rarity.Rare, Stats = stats.Select(s => new RolledStat(s.Stat, s.Value)).ToArray() };
 
     private static void Equip(ItemInstance item)
     {

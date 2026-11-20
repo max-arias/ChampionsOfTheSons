@@ -33,7 +33,9 @@ internal static class LootVisuals
         Destroy(drop.Id);
         var pos = new Vector3(drop.X, drop.Y, drop.Z);
         var color = ColorOf(drop.Item.Rarity);
-        int rarity = (int)drop.Item.Rarity;
+        // Size and beam grow with rarity on the old 0..7 scale, so a Legendary drop is as big as a Primal one was (COS-109).
+        float rarity = (int)drop.Item.Rarity * 7f / Rarities.Max;
+        const float DropScale = 0.9f; // Max (2026-11-20): drops 10% smaller
 
         var root = new GameObject("cots-drop-" + drop.Id);
         root.transform.position = pos;
@@ -45,7 +47,7 @@ internal static class LootVisuals
             gem = m;
             foreach (var r in gem.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             gem.transform.localPosition = new Vector3(0, 0.6f, 0);
-            gem.transform.localScale = Vector3.one * (1f + 0.05f * rarity);
+            gem.transform.localScale = Vector3.one * (DropScale * (1f + 0.05f * rarity));
             gem.transform.localRotation = Quaternion.Euler(0, (drop.Id * 47) % 360, 0);
             // Top-rarity and unique weapons glow on the ground as in hand (COS-108); the drop has its own light.
             Weapons.WeaponGlowFx.Apply(gem, Weapons.GlowLook.For(drop.Item), light: false);
@@ -55,14 +57,14 @@ internal static class LootVisuals
         {
             Tint(gem, color);
             gem.transform.localPosition = new Vector3(0, 0.4f, 0);
-            gem.transform.localScale = Vector3.one * (1f + 0.1f * rarity);
+            gem.transform.localScale = Vector3.one * (DropScale * (1f + 0.1f * rarity));
         }
         else if (gem == null)
         {
             gem = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Prepare(gem, root.transform, color);
             gem.transform.localPosition = new Vector3(0, 0.4f, 0);
-            gem.transform.localScale = Vector3.one * (0.22f + 0.03f * rarity);
+            gem.transform.localScale = Vector3.one * (DropScale * (0.22f + 0.03f * rarity));
             gem.transform.localRotation = Quaternion.Euler(35, 45, 0);
         }
         var sparkle = Bundles.CotsBundle.Spawn(Bundles.CotsBundle.LootSparkle, root.transform);

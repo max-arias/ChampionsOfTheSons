@@ -21,7 +21,7 @@ public static class TestContent
         "effects": [ { "stat": "max_health", "op": "add", "transform": "round" } ] },
       { "id": "stat.crit", "legacyId": 12, "name": "Crit Chance", "min": 0.01, "max": 0.02, "levelPow": 0.25, "combine": "sum", "rarity": 3, "cap": 0.5,
         "effects": [ { "stat": "crit_chance", "op": "add", "transform": "x" } ] },
-      { "id": "stat.damage_reduction", "legacyId": 11, "name": "Damage Reduction", "min": 0.005, "max": 0.0075, "levelPow": 0.5, "combine": "one_minus_product", "rarity": 4,
+      { "id": "stat.damage_reduction", "legacyId": 11, "name": "Damage Reduction", "min": 0.005, "max": 0.0075, "levelPow": 0.5, "combine": "one_minus_product", "rarity": 2,
         "effects": [ { "stat": "all_damage_taken", "op": "mult", "transform": "one_minus" } ] }
     ] }
     """;
