@@ -85,9 +85,83 @@ public static class CotsFxPrefabs
         Flame();
         Glyph();
         Gas();
+        WeaponTrail();
+        WeaponGlow();
     }
 
     // ---- prefabs ----
+
+    /// <summary>
+    /// Weapon glow (COS-108). Fx_WeaponEdge: a fresnel shell; the mod gives its MeshFilter the weapon's own mesh and tints it
+    /// in the rarity colour. Fx_WeaponWisp / _Ember / _Frost: unique-weapon particles from a thin box 1 m along +Y (the mod
+    /// sets the box length to the blade), simulated in world space so they hang behind a moving blade.
+    /// </summary>
+    private static void WeaponGlow()
+    {
+        var edge = new GameObject("Fx_WeaponEdge");
+        CotsGen.Child(edge, "shell", _disc, CotsGen.Fx("FxWeaponEdgeMat", _white, new Color(1, 1, 1, 0.8f), 1.3f, fresnel: 1.8f, pulse: 0.15f, cullBack: true));
+        CotsGen.SavePrefab(edge);
+
+        WeaponParticles("Fx_WeaponWisp", rate: 9, life: 1.8f, size: 0.05f, rise: 0.12f, noise: 0.2f, intensity: 1.6f);
+        WeaponParticles("Fx_WeaponEmber", rate: 14, life: 1.1f, size: 0.03f, rise: 0.55f, noise: 0.35f, intensity: 2.4f);
+        WeaponParticles("Fx_WeaponFrost", rate: 10, life: 1.9f, size: 0.045f, rise: -0.12f, noise: 0.12f, intensity: 1.8f);
+    }
+
+    private static void WeaponParticles(string name, float rate, float life, float size, float rise, float noise, float intensity)
+    {
+        var go = new GameObject(name);
+        var ps = Particles(Sub(go, "motes"), CotsGen.Fx(name + "Mat", SoftDot(), Color.white, intensity));
+        Steady(ps, rate, life, size);
+        var main = ps.main;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.scalingMode = ParticleSystemScalingMode.Shape;
+        main.startSize = new ParticleSystem.MinMaxCurve(size * 0.6f, size * 1.3f);
+        var shape = ps.shape;
+        shape.enabled = true;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        shape.position = new Vector3(0, 0.5f, 0);
+        shape.scale = new Vector3(0.03f, 1f, 0.03f);
+        Velocity(ps, new Vector3(0, rise, 0));
+        { var vel = ps.velocityOverLifetime; vel.space = ParticleSystemSimulationSpace.World; } // rise is world up, whatever the blade's angle
+        var n = ps.noise;
+        n.enabled = true;
+        n.strength = noise;
+        n.frequency = 0.6f;
+        FadeInOut(ps);
+        CotsGen.SavePrefab(go);
+    }
+
+    /// <summary>
+    /// The swing trail of a held weapon type (COS-93): a TrailRenderer the mod parents to the weapon tip, switches on while
+    /// the tip moves fast and widens per type. Not emitting by default; width 1 (the mod sets widthMultiplier).
+    /// </summary>
+    private static void WeaponTrail()
+    {
+        var swipe = CotsGen.Tex("FxSwipe", 128, (u, v) =>
+        {
+            // u runs along the trail (0 = at the blade), v across it: bright core near the blade edge, fading behind.
+            float across = Mathf.Exp(-Mathf.Pow((v - 0.6f) / 0.28f, 2));
+            float along = Mathf.Pow(1 - u, 1.5f);
+            return White(Mathf.Clamp01(across * along * 1.2f));
+        });
+        var go = new GameObject("Fx_WeaponTrail");
+        var trail = go.AddComponent<TrailRenderer>();
+        trail.sharedMaterial = CotsGen.Fx("FxWeaponTrailMat", swipe, new Color(0.85f, 0.9f, 1f, 0.7f), 1.4f);
+        trail.time = 0.16f;
+        trail.minVertexDistance = 0.03f;
+        trail.widthMultiplier = 1f;
+        trail.widthCurve = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 0.15f));
+        trail.textureMode = LineTextureMode.Stretch;
+        trail.alignment = LineAlignment.View;
+        trail.emitting = false;
+        trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        trail.receiveShadows = false;
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
+            new[] { new GradientAlphaKey(0.8f, 0), new GradientAlphaKey(0, 1) });
+        trail.colorGradient = g;
+        CotsGen.SavePrefab(go);
+    }
 
     /// <summary>A lasting ground area or telegraph: faint fill, bright pulsing edge, motes rising from the edge.</summary>
     private static void Ring()

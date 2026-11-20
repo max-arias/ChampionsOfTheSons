@@ -47,6 +47,9 @@ public sealed class StatBridge : IModFeature
     public static double? BulletSizeRatio => BulletData.Count == 0 ? null : LastBulletSize;
     private static double LastMeleeRatio, LastBulletRatio, LastBulletSize;
 
+    /// <summary>The last bow shot-delay multiplier a bow type applied (self-tests), 1 when none.</summary>
+    public static double LastShotDelayFactor { get; private set; } = 1;
+
     public void Update(float dt, bool inWorld)
     {
         if (inWorld) Frame(dt);
@@ -146,7 +149,11 @@ public sealed class StatBridge : IModFeature
             {
                 if (!controller.gameObject.activeInHierarchy) continue;
                 if (!FireDelays.TryGetValue(controller.Pointer, out var delay)) FireDelays[controller.Pointer] = delay = controller._fireDelay;
-                controller._fireDelay = delay / (float)speed;
+                // A bow type's draw speed (greatbow: slower), only on the bow it is built on (COS-93).
+                var holder = Weapons.WeaponModels.LocalSkin?.Holder;
+                double draw = holder != null && controller.transform.IsChildOf(holder) ? WeaponTypes.ShotDelayFactor(bowType) : 1;
+                controller._fireDelay = delay * (float)(draw / speed);
+                if (draw != 1) LastShotDelayFactor = delay > 0 ? controller._fireDelay / delay : draw / speed;
             }
         }
         catch (Exception e)

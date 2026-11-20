@@ -153,10 +153,17 @@ public sealed class ContentDb
         if (_weaponTypes.Count > 0)
             foreach (var item in _items.Values)
                 if (item.WeaponModel != null && !_weaponTypes.ContainsKey(item.WeaponModel)) _errors.Add($"item {item.Id}: unknown weapon type '{item.WeaponModel}'");
+        foreach (var item in _items.Values)
+            if (item.Glow is { } glow)
+            {
+                if (glow.Tint != null && Rules.WeaponGlow.ParseHex(glow.Tint) == null) _errors.Add($"item {item.Id}: glow tint '{glow.Tint}' is not #rrggbb");
+                if (glow.Style != null && !Rules.WeaponGlow.Styles.Contains(glow.Style)) _errors.Add($"item {item.Id}: unknown glow style '{glow.Style}'");
+            }
         foreach (var w in _weaponTypes.Values)
         {
             if (w.SwingSpeed <= 0 || w.Reach <= 0 || w.StaminaCost < 0 || w.Length <= 0) _errors.Add($"weapon type {w.Id}: swing speed, reach and length must be > 0");
             if (w.StunSlow is < 0 or > 1) _errors.Add($"weapon type {w.Id}: stunSlow must be in 0..1");
+            if (w.DrawSpeed <= 0 || w.SoundPitch <= 0 || w.TrailWidth < 0) _errors.Add($"weapon type {w.Id}: drawSpeed and soundPitch must be > 0, trailWidth >= 0");
         }
         foreach (var set in _sets.Values)
             foreach (var bonus in set.Bonuses)

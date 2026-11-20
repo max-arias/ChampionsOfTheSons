@@ -26,7 +26,8 @@ public class WeaponTypeTests
     { "weaponTypes": [
       { "id": "long_sword", "base": "melee", "damage": 20, "swingSpeed": 0.8 },
       { "id": "hammer", "base": "melee", "stunSlow": 0.25, "stunSlowSeconds": 0.4 },
-      { "id": "greatbow", "base": "bow", "rangedFlatDamage": 10, "rangedDamageMult": 2 }
+      { "id": "greatbow", "base": "bow", "rangedFlatDamage": 10, "rangedDamageMult": 2, "drawSpeed": 0.5 },
+      { "id": "polearm", "base": "spear", "canThrow": false }
     ] }
     """;
 
@@ -88,5 +89,16 @@ public class WeaponTypeTests
     {
         var db = Db("""{ "items": [ { "id": "item.x", "name": "X", "type": "weapon", "weaponModel": "nunchaku", "statPools": [ ["stat.max_life"] ] } ] }""");
         Assert.Contains(db.Errors, e => e.Contains("nunchaku"));
+    }
+
+    [Fact]
+    public void Only_spear_types_can_forbid_the_throw_and_only_bow_types_change_the_draw()
+    {
+        var db = Db();
+        Assert.False(WeaponTypes.CanThrow(db.WeaponTypes["polearm"]));
+        Assert.True(WeaponTypes.CanThrow(null));
+        Assert.True(WeaponTypes.CanThrow(new Content.WeaponTypeDef { Base = WeaponBase.Melee, CanThrow = false }));
+        Assert.Equal(2, WeaponTypes.ShotDelayFactor(db.WeaponTypes["greatbow"]));
+        Assert.Equal(1, WeaponTypes.ShotDelayFactor(new Content.WeaponTypeDef { Base = WeaponBase.Melee, DrawSpeed = 0.5 }));
     }
 }

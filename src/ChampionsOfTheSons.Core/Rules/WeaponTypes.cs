@@ -59,6 +59,12 @@ public static class WeaponTypes
     /// <summary>Whether a hit on a tree does damage: types like swords and hammers cannot fell trees.</summary>
     public static bool CanCutTrees(WeaponTypeDef? type) => type == null || type.CutsTrees;
 
+    /// <summary>Whether a held spear may be thrown: only types built on the spear can forbid it.</summary>
+    public static bool CanThrow(WeaponTypeDef? type) => type == null || type.Base != WeaponBase.Spear || type.CanThrow;
+
+    /// <summary>Multiplier of the time between bow shots (a slower draw is a longer wait).</summary>
+    public static double ShotDelayFactor(WeaponTypeDef? type) => type == null || type.Base != WeaponBase.Bow ? 1 : 1 / type.DrawSpeed;
+
     /// <summary>
     /// The hammer rule: with the hammer stun stat, every hit of a type with a stun slow slows the enemy
     /// (speed multiplier, seconds), or null. COTF slowed to 25% for 0.4 s.

@@ -132,6 +132,8 @@ public sealed class ItemBaseDef
     /// roll attack speed as a penalty).</summary>
     public List<SlotMultiplier> StatMultipliers { get; set; } = new();
     public string? WeaponModel { get; set; }
+    /// <summary>A unique weapon's own glow look (COS-108); null = the rarity's colour and the default wisp.</summary>
+    public GlowDef? Glow { get; set; }
     public string? Set { get; set; }
     public List<StatEffect> UniqueEffects { get; set; } = new();
     public bool Manual { get; set; }
@@ -146,6 +148,14 @@ public sealed class ItemBaseDef
             if (m.Slot == slot && m.Stat == statId) return m.Multiplier;
         return null;
     }
+}
+
+/// <summary>The glow of a unique weapon (COS-108): a tint ("#rrggbb", null = the Legendary colour) and a particle style.</summary>
+public sealed class GlowDef
+{
+    public string? Tint { get; set; }
+    /// <summary>One of <see cref="Rules.WeaponGlow.Styles"/>; null = "ember".</summary>
+    public string? Style { get; set; }
 }
 
 public sealed class SlotMultiplier
@@ -257,6 +267,8 @@ public sealed class WeaponTypeDef
     /// <summary>Length multiplier of the game weapon's hit volume.</summary>
     public double Reach { get; set; } = 1;
     public bool CutsTrees { get; set; } = true;
+    /// <summary>Spear types: whether the game's throw (aim, then attack) is allowed.</summary>
+    public bool CanThrow { get; set; } = true;
     /// <summary>With the hammer stun stat: every hit slows the enemy to this speed (0 = no slow) ...</summary>
     public double StunSlow { get; set; }
     /// <summary>... for this many seconds.</summary>
@@ -267,17 +279,23 @@ public sealed class WeaponTypeDef
     public double RangedDamageMult { get; set; } = 1;
     public double ProjectileForce { get; set; } = 1;
     public bool NoGravity { get; set; }
-    /// <summary>Draw and reload speed multiplier.</summary>
+    /// <summary>Draw speed multiplier: below 1 the bow needs longer between shots.</summary>
     public double DrawSpeed { get; set; } = 1;
 
     // ---- model
-    /// <summary>Bundle prefab name (COS-5). Its grip is at the origin and its blade points along +Y.</summary>
+    /// <summary>Bundle prefab name (COS-5): real size, origin at the end of the grip (bows: grip centre), +Y toward the head.</summary>
     public string Model { get; set; } = "";
-    /// <summary>Development stand-in model (a glTF file name) used while the bundle has no prefab.</summary>
-    public string? StandIn { get; set; }
     /// <summary>Length of the model in hand, in metres.</summary>
     public double Length { get; set; } = 1;
-    /// <summary>Where the hand holds the model, in model units along +Y (0 = the origin).</summary>
+    /// <summary>Where the hand holds the model: metres from the end of the grip (bows: offset from the grip centre).</summary>
     public double Grip { get; set; }
+    /// <summary>Width of the swing trail at the tip, in metres (0 = no trail).</summary>
+    public double TrailWidth { get; set; }
+
+    // ---- sound (cue names of the mod's audio layer)
+    public string? SwingSound { get; set; }
+    public string? HitSound { get; set; }
+    /// <summary>Pitch of the type's swing, hit and shot sounds (heavier weapons sound lower).</summary>
+    public double SoundPitch { get; set; } = 1;
 }
 

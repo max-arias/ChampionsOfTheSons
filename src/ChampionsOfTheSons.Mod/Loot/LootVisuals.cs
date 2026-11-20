@@ -47,6 +47,8 @@ internal static class LootVisuals
             gem.transform.localPosition = new Vector3(0, 0.6f, 0);
             gem.transform.localScale = Vector3.one * (1f + 0.05f * rarity);
             gem.transform.localRotation = Quaternion.Euler(0, (drop.Id * 47) % 360, 0);
+            // Top-rarity and unique weapons glow on the ground as in hand (COS-108); the drop has its own light.
+            Weapons.WeaponGlowFx.Apply(gem, Weapons.GlowLook.For(drop.Item), light: false);
         }
         if (gem == null) gem = Bundles.CotsBundle.Spawn(Bundles.CotsBundle.LootMarker, root.transform);
         if (gem != null && gem.name == Bundles.CotsBundle.LootMarker)

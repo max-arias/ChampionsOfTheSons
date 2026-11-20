@@ -49,7 +49,7 @@ public class MessageCodecTests
         new Announce(AnnounceKind.LevelUp, 2u, "Wanderer", 88),
         new Announce(AnnounceKind.Left, 0u, "", 0),
         new Ping(3u, PingKind.Enemy, new Vec3(10, 20, 30), 42UL),
-        new HeldWeapon(2u, "long_sword", new Vec3(1, 2, 3)),
+        new HeldWeapon(2u, "long_sword", new Vec3(1, 2, 3), 7, "item.rage"),
         new WorldSettings("difficulty.ünïcødé", false),
         new AdminGrant(AdminAction.GiveItem, 42, "item.test_ring"),
         new AdminGrant(AdminAction.AddXp, 1.5e15, ""),
