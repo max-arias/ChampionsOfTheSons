@@ -225,7 +225,8 @@ internal static class LootSelfTest
     {
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
         TestKit.Give("item.yuki_onna_strides", level: 5);
-        TestKit.Give(rarity: 3, level: 20);
+        // bag.1 must be equippable for the menu-equip check (a random base can be a material or consumable).
+        TestKit.Give(ModContent.Db.Items.Values.Where(d => LootRoller.IsEquippable(d) && (int)d.Rarity == 3 && d.MinLevel <= 20).OrderBy(d => d.Id, StringComparer.Ordinal).First().Id, level: 20);
         TestKit.Give(rarity: 5, level: 20);
         Panel.Open();
         var bounds = Panel.SlotBounds("bag.1");

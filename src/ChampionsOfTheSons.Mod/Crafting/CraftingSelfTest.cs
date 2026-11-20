@@ -32,7 +32,8 @@ internal static class CraftingSelfTest
         SelfTest.Check("craft: panel open", Panel.IsOpen);
         foreach (var m in CraftingPanel.Modes)
             SelfTest.Check($"craft: mode button {m} visible", Panel.ModeButtonVisible(m));
-        SelfTest.Check("craft: five modes", CraftingPanel.Modes.Length == Enum.GetValues<CraftMode>().Length);
+        // Every mode but Scrap, which is hidden while drops are equipment only (COS-59).
+        SelfTest.Check("craft: five modes", CraftingPanel.Modes.Length == Enum.GetValues<CraftMode>().Length - 1 && !CraftingPanel.Modes.Contains(CraftMode.Scrap));
 
         // A (type, rarity) with at least two equippable bases that carry stats, so Reforge has an alternative.
         var groups = ModContent.Db.Items.Values
