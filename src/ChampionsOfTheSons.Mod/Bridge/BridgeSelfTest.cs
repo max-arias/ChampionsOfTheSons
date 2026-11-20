@@ -39,8 +39,11 @@ public static class BridgeSelfTest
             if (easy == null || hell == null) return;
             SelfTest.Log($"easy: level {easy.Profile.Level} {easy.Profile.Tier} hp {_easy!.GetMaxHealth():N0} (vanilla {easy.VanillaMaxHealth:N0}) armor {easy.Profile.Armor:N0}");
             SelfTest.Log($"hell: level {hell.Profile.Level} {hell.Profile.Tier} [{string.Join(",", hell.Profile.Abilities)}] hp {_hell!.GetMaxHealth():N0} armor {hell.Profile.Armor:N0} bounty {hell.Profile.Bounty:N0}");
-            SelfTest.Check("easy level in range", easy.Profile.Level is >= 2 and <= 4, easy.Profile.Level.ToString());
-            SelfTest.Check("hell level is 301", hell.Profile.Level == 301, hell.Profile.Level.ToString());
+            // COS-130: party level (the override) ± 1 + kind extra + game-difficulty offset + host extra levels.
+            int Center(EnemyRuntime e, int party) => Math.Max(1, party + e.Kind.LevelExtra + WorldState.Rules.GameDifficulty.LevelOffset + WorldState.Rules.ExtraEnemyLevels);
+            SelfTest.Check("easy level follows party level 1", Math.Abs(easy.Profile.Level - Center(easy, 1)) <= 1, $"{easy.Profile.Level} vs {Center(easy, 1)} ± 1");
+            SelfTest.Check("hell level follows party level 300", Math.Abs(hell.Profile.Level - Center(hell, Difficulties.Hell.BaseLevelMin)) <= 1,
+                $"{hell.Profile.Level} vs {Center(hell, Difficulties.Hell.BaseLevelMin)} ± 1");
             SelfTest.Check("game max health = our max health", Math.Abs(_easy.GetMaxHealth() - easy.Profile.MaxHealth) <= easy.Profile.MaxHealth * 0.01 + 1,
                 $"{_easy.GetMaxHealth()} vs {easy.Profile.MaxHealth}");
             SelfTest.Check("hell enemy is much tougher", _hell.GetMaxHealth() > _easy.GetMaxHealth() * 1000);
