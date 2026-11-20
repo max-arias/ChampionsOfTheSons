@@ -129,6 +129,25 @@ public sealed class ContentDb
             foreach (var other in perk.UnlockPath.Concat(perk.Requires))
                 if (!_perks.ContainsKey(other)) _errors.Add($"perk {perk.Id}: unknown perk '{other}'");
         }
+        foreach (var id in UnreachablePerks()) _errors.Add($"perk {id}: not reachable from a root perk");
+    }
+
+    /// <summary>Perks no sequence of purchases can reach: neither a root nor unlocked by reachable perks.</summary>
+    private List<string> UnreachablePerks()
+    {
+        var reachable = new HashSet<string>();
+        bool grew = true;
+        while (grew)
+        {
+            grew = false;
+            foreach (var perk in _perks.Values)
+            {
+                if (reachable.Contains(perk.Id)) continue;
+                bool path = perk.UnlockPath.Count == 0 || perk.UnlockPath.Any(reachable.Contains);
+                if (path && perk.Requires.All(reachable.Contains) && reachable.Add(perk.Id)) grew = true;
+            }
+        }
+        return _perks.Keys.Where(id => !reachable.Contains(id)).OrderBy(id => id, StringComparer.Ordinal).ToList();
     }
 
     /// <summary>
