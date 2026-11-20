@@ -250,7 +250,7 @@ internal static class StatSelfTest
             SelfTest.Check("bought a perk", Pc.BuyPerk(perk.Id) == BuyResult.Ok);
             Pc.Inventory.AddToBag(new ItemInstance { BaseId = UniqueItems.HeartOfPurity, Amount = 2 }, 100);
             var slot = Pc.Inventory.Slots.First(kv => kv.Value.BaseId == UniqueItems.HeartOfPurity).Key;
-            SelfTest.Check("used a heart", UniqueItems.UseHeartOfPurity(Pc, slot));
+            SelfTest.Check("used a heart", Consumables.Use(Pc, slot));
             SelfTest.Check("perks were respecced", Pc.Perks.Bought.Count == 0 && Pc.Perks.AvailablePoints(Pc.Progress) == Pc.Progress.TotalPerkPoints);
             SelfTest.Check("one heart is left", Pc.Inventory.Slots.Values.Where(i => i.BaseId == UniqueItems.HeartOfPurity).Sum(i => i.Amount) == 1);
             Clean();

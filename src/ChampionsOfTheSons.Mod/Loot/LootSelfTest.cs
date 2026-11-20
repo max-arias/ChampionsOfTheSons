@@ -46,6 +46,7 @@ internal static class LootSelfTest
         SelfTest.Add(T0 + 25.5f, "loot: menu destroy", MenuDestroy);
         SelfTest.Add(T0 + 26, "loot: menu drop", MenuDrop);
         SelfTest.Add(T0 + 26.5f, "loot: drag and drop", DragAndDrop);
+        SelfTest.Add(T0 + 27f, "loot: level 25 heart, menu Use", UseHeart);
         SelfTest.Add(T0 + 27.5f, "loot: cleanup", Cleanup);
     }
 
@@ -250,6 +251,35 @@ internal static class LootSelfTest
         Panel.OpenMenu(slot, new Vector2(sb.center.x, sb.center.y));
         SelfTest.Check("loot: menu offers unequip on an equipped item", Panel.MenuEquipText == UiText.T("ui.inventory.menu.unequip", "Unequip"), Panel.MenuEquipText);
         SelfTest.Check("loot: menu unequip moves it to the bag", Panel.MenuEquipClicked() && Pc.Inventory.Equipped.Count() == 0);
+    }
+
+    /// <summary>COS-72: level 24 -> 25 gives the bonus-point heart; the menu offers Use on it and using it adds one permanent point.</summary>
+    private static void UseHeart()
+    {
+        var original = Pc.ToSave();
+        try
+        {
+            var start = Pc.ToSave();
+            start.Level = 24;
+            start.Xp = 0;
+            start.Slots.Clear();
+            Pc.Load(start);
+            int bonus = Pc.Progress.BonusPerkPoints, points = Pc.Perks.AvailablePoints(Pc.Progress);
+            Pc.AddXp(XpCurve.Goal(24) / Math.Max(1e-9, Pc.Stats.Get(StatIds.ExpGain)) + 1);
+            var heart = Pc.Inventory.Slots.FirstOrDefault(kv => kv.Value.BaseId == Progress.GreaterMutatedHeart).Key;
+            SelfTest.Check("loot: level 25 gives the bonus-point heart", Pc.Progress.Level == 25 && heart != null, $"level {Pc.Progress.Level}");
+            if (heart == null) return;
+            Panel.Open();
+            Panel.OpenMenu(heart, new Vector2(300, 300));
+            SelfTest.Check("loot: menu offers Use on the heart", Panel.MenuEquipText == UiText.T("ui.catalog.use", "Use"), Panel.MenuEquipText);
+            bool used = Panel.MenuEquipClicked();
+            SelfTest.Check("loot: using the heart adds one permanent perk point",
+                used && Pc.Progress.BonusPerkPoints == bonus + 1 && Pc.Perks.AvailablePoints(Pc.Progress) == points + 2,
+                $"bonus {bonus} -> {Pc.Progress.BonusPerkPoints}, points {points} -> {Pc.Perks.AvailablePoints(Pc.Progress)}");
+            SelfTest.Check("loot: the used heart is gone", Pc.Inventory.Get(heart) == null);
+            Panel.Close();
+        }
+        finally { Pc.Load(original); }
     }
 
     private static void MenuDestroy()

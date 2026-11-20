@@ -178,7 +178,9 @@ internal static class BookCard
             if (pinned)
             {
                 bool equipped = key.StartsWith("equip.", StringComparison.Ordinal);
-                _equip.Text(UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
+                _equip.Text(InventoryActions.IsUsable(key)
+                    ? UiText.T("ui.catalog.use", "Use")
+                    : UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
                 _drop.Text(UiText.T("ui.inventory.menu.drop", "Drop"));
                 _destroy.Text(_destroyArmed ? UiText.T("ui.book.destroy_confirm", "Again to destroy") : UiText.T("ui.inventory.menu.destroy", "Destroy"));
             }
@@ -233,6 +235,12 @@ internal static class BookCard
         switch (action)
         {
             case "equip":
+                if (InventoryActions.IsUsable(key))
+                {
+                    bool more = InventoryActions.Use(key) && PlayerState.Character.Inventory.Get(key) != null;
+                    if (!more) BookPages.Selected = null;
+                    return "used";
+                }
                 BookPages.Selected = null;
                 return InventoryActions.ToggleEquip(key) ? "equipped" : "no-room";
             case "drop":

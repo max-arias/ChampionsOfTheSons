@@ -167,10 +167,13 @@ public sealed class FollowupsFeature : IModFeature
         return best.ToDictionary(kv => kv.Key, kv => (kv.Value.Item, kv.Value.Amount));
     }
 
-    /// <summary>Sets the carry limit of every item a bought capacity perk names to its original limit plus the perk bonus; undoes it when perks are gone.</summary>
+    /// <summary>Sets the carry limit of every item a bought capacity perk or a worn carry stat names to its original limit plus
+    /// the bonus; undoes it when the perks or items are gone.</summary>
     public static void ApplyCapacities(bool force = false)
     {
         var totals = UtilityPerks.Totals(Pc.Perks, UtilityKind.Capacity);
+        foreach (var (name, amount) in ItemCarry.Totals(Pc.Inventory.Equipped.Select(kv => kv.Value)))
+            totals[name] = totals.GetValueOrDefault(name) + amount;
         string sig = string.Join(";", totals.OrderBy(kv => kv.Key).Select(kv => $"{kv.Key}={kv.Value}"));
         if (!force && sig == _capacitySig) return;
         _capacitySig = sig;

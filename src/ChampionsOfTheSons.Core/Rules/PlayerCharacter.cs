@@ -50,6 +50,15 @@ public sealed class Inventory
         return false;
     }
 
+    /// <summary>Removes one unit of the stack in a slot, in place (the slot empties at the last unit).</summary>
+    public void TakeOne(string slot)
+    {
+        if (!_slots.TryGetValue(slot, out var item)) return;
+        if (item.Amount > 1) _slots[slot] = item with { Amount = item.Amount - 1 };
+        else _slots.Remove(slot);
+        Changed?.Invoke();
+    }
+
     public ItemInstance? Remove(string slot)
     {
         if (!_slots.Remove(slot, out var item)) return null;
@@ -217,7 +226,8 @@ public sealed class PlayerCharacter
         Progress = new Progress(save.Level, save.Xp, save.BonusPerkPoints);
         Perks.Restore(save.Perks, save.UnlockedSpells);
         Spells.Restore(save.SpellLoadout);
-        Inventory.Restore(save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, kv.Value.ToItem())));
+        var loot = new LootRoller(Content);
+        Inventory.Restore(save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, loot.InferSlots(kv.Value.ToItem()))));
         Massacre.Reset();
         RebuildAll();
     }

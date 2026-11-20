@@ -128,3 +128,33 @@ public class TextDbTests
         Assert.Equal("x", db.Get("x"));
     }
 }
+
+public class LanguageMatchTests
+{
+    [Theory]
+    [InlineData("de", "de")]
+    [InlineData("de-DE", "de")]
+    [InlineData("zh-Hans", "zh-Hans")]
+    [InlineData("zh-CN", "zh-Hans")]
+    [InlineData("zh-TW", "zh-Hant")]
+    [InlineData("zh-Hant-HK", "zh-Hant")]
+    [InlineData("pt-BR", "en")]
+    [InlineData("", "en")]
+    [InlineData(null, "en")]
+    public void Game_locale_maps_to_a_shipped_table_or_english(string? code, string expected) =>
+        Assert.Equal(expected, TextDb.MatchLanguage(code));
+
+    [Fact]
+    public void On_screen_text_is_retranslated_only_when_it_is_a_whole_string_of_the_old_language()
+    {
+        var db = TextDb.Load(new Dictionary<string, string>
+        {
+            ["text/en.json"] = """{ "ui.a": "Bag", "ui.b": "Only English" }""",
+            ["text/de.json"] = """{ "ui.a": "Tasche" }""",
+        });
+        Assert.Equal("Tasche", db.Retranslate("Bag", "en", "de"));
+        Assert.Equal("Bag", db.Retranslate("Tasche", "de", "en"));
+        Assert.Equal("Only English", db.Retranslate("Only English", "en", "de")); // no German: English fallback
+        Assert.Null(db.Retranslate("Bag: 3 items", "en", "de"));
+    }
+}

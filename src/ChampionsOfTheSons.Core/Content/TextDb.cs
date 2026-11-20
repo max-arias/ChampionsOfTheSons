@@ -81,4 +81,54 @@ public sealed class TextDb
         _tables.TryGetValue(language, out var other);
         return en.Keys.Where(k => other == null || !other.ContainsKey(k));
     }
+
+    /// <summary>
+    /// The shipped language for a game locale code ("de", "de-DE", "zh-Hans", "zh-TW", "pt-BR"...): Chinese by script or
+    /// region, the rest by the language part; anything we do not ship is English.
+    /// </summary>
+    public static string MatchLanguage(string? localeCode)
+    {
+        if (string.IsNullOrWhiteSpace(localeCode)) return English;
+        var code = localeCode.Trim().Replace('_', '-');
+        foreach (var lang in Languages)
+            if (string.Equals(code, lang, StringComparison.OrdinalIgnoreCase)) return lang;
+        var parts = code.Split('-');
+        var main = parts[0].ToLowerInvariant();
+        if (main == "zh")
+        {
+            var rest = parts.Skip(1).Select(p => p.ToLowerInvariant()).ToList();
+            return rest.Any(p => p is "hant" or "tw" or "hk" or "mo") ? "zh-Hant" : "zh-Hans";
+        }
+        return Languages.Contains(main) ? main : English;
+    }
+
+    private readonly Dictionary<string, Dictionary<string, string>> _reverse = new();
+
+    /// <summary>
+    /// <paramref name="text"/> in <paramref name="to"/> when it is exactly a string of <paramref name="from"/> (or of English,
+    /// its fallback); otherwise null. Used to re-label text already on screen after a language change.
+    /// </summary>
+    public string? Retranslate(string text, string from, string to)
+    {
+        if (string.IsNullOrEmpty(text) || from == to) return null;
+        string? key = ReverseKey(from, text) ?? (from == English ? null : ReverseKey(English, text));
+        if (key == null) return null;
+        var saved = Language;
+        Language = to;
+        try { return Get(key); }
+        finally { Language = saved; }
+    }
+
+    private string? ReverseKey(string language, string text)
+    {
+        if (!_reverse.TryGetValue(language, out var map))
+        {
+            map = new Dictionary<string, string>(StringComparer.Ordinal);
+            if (_tables.TryGetValue(language, out var table))
+                foreach (var (k, v) in table.OrderBy(kv => kv.Key, StringComparer.Ordinal))
+                    map.TryAdd(v, k);
+            _reverse[language] = map;
+        }
+        return map.TryGetValue(text, out var key) ? key : null;
+    }
 }

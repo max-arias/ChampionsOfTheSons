@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ChampionsOfTheSons.Core.Rules;
 
 namespace ChampionsOfTheSons.Core.Content;
 
@@ -113,6 +114,15 @@ public sealed class ContentDb
                     if (option != null && option != ItemBaseDef.AnyStat && !_itemStats.ContainsKey(option))
                         _errors.Add($"item {item.Id}: unknown stat '{option}'");
             }
+            foreach (var m in item.StatMultipliers)
+            {
+                if (m.Slot < 0 || m.Slot >= item.StatPools.Count) _errors.Add($"item {item.Id}: stat multiplier slot {m.Slot} out of range");
+                else if (!item.StatPools[m.Slot].Contains(m.Stat) && !item.StatPools[m.Slot].Contains(ItemBaseDef.AnyStat))
+                    _errors.Add($"item {item.Id}: stat multiplier '{m.Stat}' is not an option of slot {m.Slot}");
+                if (!_itemStats.ContainsKey(m.Stat)) _errors.Add($"item {item.Id}: stat multiplier on unknown stat '{m.Stat}'");
+            }
+            if (LootRoller.IsEquippable(item) && item.StatPools.Count == 0)
+                _errors.Add($"item {item.Id}: equippable item with no stat pools");
             foreach (var e in item.UniqueEffects)
                 if (!_playerStats.ContainsKey(e.Stat)) _errors.Add($"item {item.Id}: unknown player stat '{e.Stat}'");
         }

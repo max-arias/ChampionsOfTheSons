@@ -384,7 +384,9 @@
           "op": "add",
           "transform": "x"
         }
-      ]
+      ],
+      "percent": true,
+      "rounding": 1
     },
     {
       "id": "stat.meleedamageincrease",
@@ -1261,8 +1263,7 @@
       "levelPow": 0.0,
       "combine": "sum",
       "rarity": 4,
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "stat.extracarriedrocks",
@@ -1273,8 +1274,7 @@
       "levelPow": 0.0,
       "combine": "sum",
       "rarity": 4,
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "stat.extracarriedropes",
@@ -1285,8 +1285,7 @@
       "levelPow": 0.0,
       "combine": "sum",
       "rarity": 4,
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "stat.extracarrieddrinks",
@@ -1297,8 +1296,7 @@
       "levelPow": 0.0,
       "combine": "sum",
       "rarity": 4,
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "stat.extracarriedfood",
@@ -1309,8 +1307,7 @@
       "levelPow": 0.0,
       "combine": "sum",
       "rarity": 4,
-      "effects": [],
-      "manual": true
+      "effects": []
     },
     {
       "id": "stat.blackholesize",

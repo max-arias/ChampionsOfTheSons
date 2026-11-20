@@ -14,6 +14,7 @@ internal static class CraftingSelfTest
 
     public static void Register()
     {
+        SelfTest.Add(31.5f, "craft: locked without crafting perks", Locked);
         SelfTest.Add(32f, "craft: open, all modes reachable", OpenAndModes);
         SelfTest.Add(33f, "craft: reroll", () => Run(CraftMode.Reroll));
         SelfTest.Add(34f, "craft: reforge", () => Run(CraftMode.Reforge));
@@ -26,8 +27,36 @@ internal static class CraftingSelfTest
         SelfTest.Add(41f, "craft: close", () => { Panel.ReleaseSimulatedHover(); Panel.Close(); });
     }
 
+    /// <summary>Buys every crafting perk (on top of what is bought), so all modes show.</summary>
+    public static void UnlockAll()
+    {
+        var perks = Pc.Perks.Bought.ToDictionary(kv => kv.Key, kv => kv.Value);
+        foreach (var m in CraftingPanel.Modes)
+            if (CraftingUnlocks.PerkFor(m) is { } id && ModContent.Db.Perks.ContainsKey(id)) perks[id] = 1;
+        Pc.Perks.Restore(perks, Pc.Perks.UnlockedSpells.ToList());
+    }
+
+    private static void Locked()
+    {
+        var spells = Pc.Perks.UnlockedSpells.ToList();
+        var bought = Pc.Perks.Bought.ToDictionary(kv => kv.Key, kv => kv.Value);
+        Pc.Perks.Restore(new Dictionary<string, int>(), spells);
+        Panel.Open();
+        bool gated = CraftingPanel.Modes.Any(m => CraftingUnlocks.PerkFor(m) is { } id && ModContent.Db.Perks.ContainsKey(id));
+        SelfTest.Check("craft: no crafting perk, no mode button", !gated || CraftingPanel.Modes.All(m => !Panel.ModeButtonVisible(m)));
+        SelfTest.Check("craft: locked panel refuses to craft", !gated || (CraftingPanel.AllLocked && Panel.Blocker() != null));
+        Panel.Close();
+        Pc.Perks.Restore(new Dictionary<string, int> { [CraftingUnlocks.PerkFor(CraftMode.Reroll)!] = 1 }, spells);
+        Panel.Open();
+        SelfTest.Check("craft: one perk shows only its mode", Panel.ModeButtonVisible(CraftMode.Reroll) && !Panel.ModeButtonVisible(CraftMode.Empower)
+            || !ModContent.Db.Perks.ContainsKey(CraftingUnlocks.PerkFor(CraftMode.Empower)!));
+        Panel.Close();
+        Pc.Perks.Restore(bought, spells);
+    }
+
     private static void OpenAndModes()
     {
+        UnlockAll();
         Panel.Open();
         SelfTest.Check("craft: panel open", Panel.IsOpen);
         foreach (var m in CraftingPanel.Modes)

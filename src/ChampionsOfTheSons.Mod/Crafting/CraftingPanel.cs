@@ -11,8 +11,9 @@ using static SUI.SUI;
 namespace ChampionsOfTheSons.Mod.Crafting;
 
 /// <summary>
-/// The crafting window: all five modes as buttons, the bag to pick from (first click = the item to craft, further clicks =
-/// ingredients), a stat picker for the modes that need one, a preview and the Craft button.
+/// The crafting window: a button per mode whose crafting perk is bought (<see cref="CraftingUnlocks"/>), the bag to pick from
+/// (first click = the item to craft, further clicks = ingredients), a stat picker with each stat's range for the modes that
+/// need one, a preview and the Craft button. With no crafting perk the panel says how to unlock crafting.
 /// </summary>
 internal sealed class CraftingPanel
 {
@@ -55,7 +56,7 @@ internal sealed class CraftingPanel
     private SLabelOptions _itemTitle = null!, _itemSub = null!, _itemBody = null!;
     private SBgButtonOptions _craft = null!, _clear = null!;
     private readonly List<SBgButtonOptions> _statRows = new();
-    private SLabelOptions _statHeader = null!;
+    private SLabelOptions _statHeader = null!, _locked = null!;
 
     private CraftMode _mode = CraftMode.Reroll;
     private string? _target;
@@ -112,6 +113,8 @@ internal sealed class CraftingPanel
             _modeButtons[mode] = btn;
             bx += 112;
         }
+        _locked = Label("", 17, UiTheme.Description, TextAlignmentOptions.MidlineLeft, wrap: true).TopLeft(18, 14).Size(LeftW - 36, 44);
+        left.Add(_locked);
         left.Add(Label(UiText.T("ui.bag.title", "Bag"), 18, UiTheme.Gold, TextAlignmentOptions.MidlineLeft).UpperCase().TopLeft(18, 66).Size(300, 26));
         float gx = (LeftW - (Cols * Cell + (Cols - 1) * CellGap)) / 2;
         for (int i = 0; i < LootRoller.BagSlots; i++)
@@ -199,6 +202,7 @@ internal sealed class CraftingPanel
         Perks.PerkPanel.Instance?.Close();
         _root.Active(true);
         _dirty = false;
+        RefreshModeButtons();
         Refresh();
     }
 
@@ -252,6 +256,35 @@ internal sealed class CraftingPanel
     // ------------------------------------------------------------------ actions
 
     public bool ModeButtonVisible(CraftMode m) => _modeButtons.TryGetValue(m, out var b) && b.Root.activeInHierarchy;
+
+    public static bool IsUnlocked(CraftMode m) => CraftingUnlocks.IsUnlocked(m, Pc.Perks, ModContent.Db);
+
+    /// <summary>True when no mode is unlocked: the panel shows how to unlock crafting and refuses to craft.</summary>
+    public static bool AllLocked => !Modes.Any(IsUnlocked);
+
+    /// <summary>Shows the buttons of unlocked modes side by side; moves off the current mode if it is locked.</summary>
+    private void RefreshModeButtons()
+    {
+        float bx = 16;
+        foreach (var mode in Modes)
+        {
+            var btn = _modeButtons[mode];
+            bool on = IsUnlocked(mode);
+            btn.Active(on);
+            if (!on) continue;
+            btn.RectTransform.anchoredPosition = new Vector2(bx, -14);
+            bx += 112;
+        }
+        bool none = AllLocked;
+        _locked.Active(none);
+        if (none)
+        {
+            var id = CraftingUnlocks.PerkFor(CraftMode.Reroll)!;
+            string perk = ModContent.Db.Perks.TryGetValue(id, out var p) ? ModContent.Text.Get(id + ".name", p.Name) : id;
+            _locked.Text(string.Format(UiText.T("ui.catalog.crafting_locked", "Crafting is locked. Buy the {0} perk in the perk tree to unlock it; more perks there unlock the other modes."), perk));
+        }
+        else if (!IsUnlocked(_mode)) SetMode(Modes.First(IsUnlocked));
+    }
 
     public void SetMode(CraftMode m)
     {
@@ -325,10 +358,13 @@ internal sealed class CraftingPanel
     public string? Blocker()
     {
         var inv = Pc.Inventory;
+        if (AllLocked || !IsUnlocked(_mode)) return UiText.T("ui.catalog.mode_locked", "This crafting mode is locked.");
         if (_target == null || inv.Get(_target) == null) return UiText.T("ui.crafting.need_target", "Pick the item to craft.");
         int need = Core.Rules.Crafting.IngredientCount(_mode);
         if (_picked.Count != need) return string.Format(UiText.T("ui.crafting.need_ingredients", "Pick {0} ingredients ({1} so far)."), need, _picked.Count);
         if (NeedsStat(_mode) && _statIndex < 0) return UiText.T("ui.crafting.need_stat", "Pick a stat.");
+        if (_mode == CraftMode.Polish && inv.Get(_target)!.Stats.ElementAtOrDefault(_statIndex)?.StatId == LootRoller.EmptySocketStat)
+            return ErrorText(CraftError.EmptySocket);
         return null;
     }
 
@@ -444,8 +480,8 @@ internal sealed class CraftingPanel
                 var st = target.Stats[_statIndex];
                 if (st.StatId == LootRoller.EmptySocketStat || st.StatId.StartsWith("stat.socket", StringComparison.Ordinal))
                     return UiText.T("ui.followups.preview.polish_socket", "The filled socket is emptied.");
-                if (!db.ItemStats.TryGetValue(st.StatId, out var def)) return null;
-                var (lo, hi) = LootRoller.ValueRange(def, target.Level, (int)target.Rarity);
+                if (_crafting.Range(target, st) is not { } r) return null;
+                var (lo, hi) = r;
                 return string.Format(UiText.T("ui.followups.preview.polish", "{0} is now {1}. New value is random between {2} and {3}."),
                     UiText.StatName(st.StatId), UiText.StatValue(st.StatId, st.Value, false), UiText.StatValue(st.StatId, lo, false), UiText.StatValue(st.StatId, hi, false));
             }
@@ -453,8 +489,16 @@ internal sealed class CraftingPanel
                 return string.Format(UiText.T("ui.followups.preview.empower", "{0}: level {1} -> {2} (your level). Every stat value is rerolled at the new level, so values are random but higher on average."),
                     name, target.Level, Pc.Progress.Level);
             case CraftMode.IndividualReroll:
+            {
                 if (_statIndex < 0 || _statIndex >= target.Stats.Count) return UiText.T("ui.followups.preview.single_pick", "Pick the stat to replace. It becomes a different stat from the same pool.");
-                return string.Format(UiText.T("ui.followups.preview.single", "{0} will be replaced by a different random stat from the same pool."), UiText.StatName(target.Stats[_statIndex].StatId));
+                var options = _crafting.RerollOptions(target, _statIndex);
+                if (options.Count == 0) return ErrorText(CraftError.NothingToReroll);
+                const int shown = 12;
+                string list = string.Join(", ", options.Take(shown).Select(UiText.StatName));
+                if (options.Count > shown) list += " " + string.Format(UiText.T("ui.catalog.more", "and {0} more"), options.Count - shown);
+                return string.Format(UiText.T("ui.followups.preview.single", "{0} will be replaced by a different random stat from the same pool."), UiText.StatName(target.Stats[_statIndex].StatId))
+                    + "\n" + string.Format(UiText.T("ui.catalog.possible_stats", "Possible stats: {0}"), list);
+            }
             default:
             {
                 int rarity = Core.Rules.Crafting.ScrapMaterialRarity(target.Rarity);
@@ -473,6 +517,7 @@ internal sealed class CraftingPanel
         CraftError.NothingToReroll => UiText.T("ui.crafting.err.nothing", "This stat can't be rerolled."),
         CraftError.NoMaterial => UiText.T("ui.followups.err.no_material", "There is no material for this item."),
         CraftError.NoAlternativeBase => UiText.T("ui.crafting.err.no_alt", "There is no other item of this type and rarity."),
+        CraftError.EmptySocket => UiText.T("ui.catalog.err.empty_socket", "An empty socket has nothing to polish."),
         _ => e.ToString(),
     };
 
@@ -532,7 +577,10 @@ internal sealed class CraftingPanel
             if (!show) continue;
             var st = target!.Stats[i];
             bool socket = st.StatId.StartsWith("stat.socket", StringComparison.Ordinal) || st.StatId == LootRoller.EmptySocketStat;
-            row.Text(socket ? UiText.StatName(st.StatId) : $"{UiText.StatName(st.StatId)}  {UiText.StatValue(st.StatId, st.Value)}");
+            string range = _crafting.Range(target, st) is { } r
+                ? $"  <color={UiTheme.TextDim}>({UiText.StatValue(st.StatId, r.Min, false)} - {UiText.StatValue(st.StatId, r.Max, false)})</color>"
+                : "";
+            row.Text(socket ? UiText.StatName(st.StatId) : $"{UiText.StatName(st.StatId)}  {UiText.StatValue(st.StatId, st.Value)}{range}");
             var c = C(i == _statIndex ? "#5C4A1E" : UiTheme.SlotFrameEmpty);
             row.Color(c, C("#3C4756"));
         }

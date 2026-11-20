@@ -33,6 +33,19 @@ internal static class InventoryActions
         return null;
     }
 
+    /// <summary>A bag item the Use action can consume (hearts and other items with a use effect).</summary>
+    public static bool IsUsable(string key) =>
+        key.StartsWith("bag.", StringComparison.Ordinal) && Pc.Inventory.Get(key) is { } item && Consumables.CanUse(item);
+
+    /// <summary>Uses one unit of a bag item and says what it was.</summary>
+    public static bool Use(string key)
+    {
+        var item = Pc.Inventory.Get(key);
+        if (item == null || !Consumables.Use(Pc, key)) return false;
+        LootFeature.Message(string.Format(UiText.T("ui.catalog.used", "Used {0}."), UiText.ItemName(item)));
+        return true;
+    }
+
     public static bool Drop(string key) => LootFeature.DropFromInventory(key) != null;
 
     public static bool Destroy(string key) => LootFeature.Destroy(key);

@@ -1108,6 +1108,13 @@
           "stat.chanceonhittoweaken"
         ]
       ],
+      "statMultipliers": [
+        {
+          "slot": 1,
+          "stat": "stat.attackspeed",
+          "multiplier": -4.0
+        }
+      ],
       "weaponModel": "hammer"
     },
     {
@@ -1155,6 +1162,13 @@
           "stat.maximumlife",
           "stat.maximumenergy"
         ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 1,
+          "stat": "stat.attackspeed",
+          "multiplier": -3.0
+        }
       ],
       "weaponModel": "hammer"
     },
@@ -1599,6 +1613,13 @@
           "stat.chanceonhittoweaken"
         ]
       ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.attackspeed",
+          "multiplier": -3.0
+        }
+      ],
       "weaponModel": "long_sword"
     },
     {
@@ -1625,6 +1646,13 @@
         [
           "stat.thorns"
         ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.armor",
+          "multiplier": 2.0
+        }
       ],
       "uniqueEffects": [
         {
@@ -1679,6 +1707,13 @@
         [
           "*"
         ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.armor",
+          "multiplier": 5.0
+        }
       ],
       "uniqueEffects": [
         {
@@ -2176,6 +2211,13 @@
           "stat.armorpiercing"
         ]
       ],
+      "statMultipliers": [
+        {
+          "slot": 1,
+          "stat": "stat.attackspeed",
+          "multiplier": 1.6
+        }
+      ],
       "weaponModel": "axe"
     },
     {
@@ -2370,6 +2412,13 @@
           "stat.firedamage"
         ]
       ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.basemeleedamage",
+          "multiplier": 5.0
+        }
+      ],
       "weaponModel": "great_sword",
       "uniqueEffects": [
         {
@@ -2440,6 +2489,13 @@
           "*"
         ]
       ],
+      "statMultipliers": [
+        {
+          "slot": 1,
+          "stat": "stat.attackspeed",
+          "multiplier": 2.0
+        }
+      ],
       "weaponModel": "axe",
       "uniqueEffects": [
         {
@@ -2509,6 +2565,13 @@
           "stat.firedamage"
         ]
       ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.basemeleedamage",
+          "multiplier": 3.0
+        }
+      ],
       "weaponModel": "long_sword",
       "uniqueEffects": [
         {
@@ -2569,6 +2632,13 @@
         [
           "*"
         ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.basemeleedamage",
+          "multiplier": 3.25
+        }
       ],
       "weaponModel": "hammer",
       "uniqueEffects": [
@@ -2871,6 +2941,13 @@
           "stat.rangeddmgfromagi"
         ]
       ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.attackspeed",
+          "multiplier": -1.7
+        }
+      ],
       "weaponModel": "greatbow",
       "uniqueEffects": [
         {
@@ -2956,6 +3033,13 @@
           "stat.energyonhit",
           "stat.rangeddmgfromagi"
         ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.attackspeed",
+          "multiplier": -1.7
+        }
       ],
       "weaponModel": "greatbow",
       "uniqueEffects": [
@@ -3615,6 +3699,13 @@
           "stat.rangeddmgfromagi"
         ]
       ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.attackspeed",
+          "multiplier": -1.6
+        }
+      ],
       "weaponModel": "greatbow",
       "uniqueEffects": [
         {
@@ -3701,6 +3792,13 @@
           "stat.energyonhit",
           "stat.rangeddmgfromagi"
         ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.attackspeed",
+          "multiplier": -2.0
+        }
       ],
       "weaponModel": "greatbow",
       "uniqueEffects": [
@@ -4177,7 +4275,65 @@
       "rarity": 7,
       "minLevel": 20,
       "maxLevel": 22,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.strength"
+        ],
+        [
+          "stat.strength",
+          "stat.allattributes",
+          "stat.meleearmorpiercing",
+          "stat.meleedamageincrease",
+          "stat.cooldownreduction",
+          "stat.spelldamageincrease"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.vitality",
+          "stat.percentmaximumlife",
+          "stat.allattributes"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.thorns"
+        ],
+        [
+          "stat.vitality",
+          "stat.lifepersecond",
+          "stat.liferegeneration"
+        ],
+        [
+          "stat.vitality",
+          "stat.lifepersecond",
+          "stat.liferegeneration",
+          "stat.thorns"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.maximumenergy",
+          "stat.dodgechance",
+          "stat.armor"
+        ],
+        [
+          "stat.strength",
+          "stat.intelligence",
+          "stat.armor",
+          "stat.armorpiercing",
+          "stat.thorns"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "thorns_per_vit",
@@ -4194,7 +4350,65 @@
       "rarity": 7,
       "minLevel": 20,
       "maxLevel": 22,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.intelligence",
+          "stat.agility"
+        ],
+        [
+          "stat.magicfind",
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.maxenergyfromagi",
+          "stat.spelldmgfromint",
+          "stat.rangeddmgfromagi"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.vitality",
+          "stat.lifepersecond",
+          "stat.liferegeneration",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.strength",
+          "stat.allattributes"
+        ],
+        [
+          "stat.cooldownreduction",
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.movementspeed",
+          "stat.damagereduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.dodgechance",
+          "stat.armor",
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
+        ],
+        [
+          "stat.baserangeddamage",
+          "stat.rangedarmorpiercing",
+          "stat.rangeddamageincrease"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_magic_arrow_damage_scaling",
@@ -4211,7 +4425,60 @@
       "rarity": 7,
       "minLevel": 20,
       "maxLevel": 22,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.intelligence",
+          "stat.agility"
+        ],
+        [
+          "stat.criticalhitchance"
+        ],
+        [
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.vitality",
+          "stat.lifepersecond",
+          "stat.liferegeneration",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.strength",
+          "stat.allattributes"
+        ],
+        [
+          "stat.cooldownreduction",
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.movementspeed",
+          "stat.damagereduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.dodgechance",
+          "stat.armor",
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
+        ],
+        [
+          "stat.baserangeddamage",
+          "stat.rangedarmorpiercing",
+          "stat.rangeddamageincrease"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_magic_arrow_volley_count",
@@ -4250,7 +4517,22 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": []
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.lesserstrength"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.vitality",
+          "stat.meleedmgfromstr",
+          "stat.armor"
+        ],
+        [
+          "stat.meleearmorpiercing",
+          "stat.meleedamageincrease"
+        ]
+      ]
     },
     {
       "id": "item.sword_devil_s_scarf",
@@ -4260,7 +4542,36 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": []
+      "statPools": [
+        [
+          "stat.meleedamageincrease",
+          "stat.meleedmgfromstr"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.vitality",
+          "stat.meleedamageincrease",
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.meleearmorpiercing",
+          "stat.meleedamageincrease",
+          "stat.meleeweaponrange",
+          "stat.armor"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.criticalhitdamage",
+          "stat.criticalhitchance"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.strength",
+          "stat.lesserstrength"
+        ]
+      ]
     },
     {
       "id": "item.peasant_s_scarf",
@@ -4270,7 +4581,26 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": []
+      "statPools": [
+        [
+          "stat.strength"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.vitality"
+        ],
+        [
+          "stat.meleearmorpiercing",
+          "stat.meleedamageincrease"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.strength"
+        ]
+      ]
     },
     {
       "id": "item.anger",
@@ -4280,7 +4610,84 @@
       "rarity": 7,
       "minLevel": 6,
       "maxLevel": 9,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.attackspeed"
+        ],
+        [
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.dodgechance",
+          "stat.damagereduction",
+          "stat.meleeweaponrange",
+          "stat.armorpiercing",
+          "stat.firedamage",
+          "stat.criticalhitchance"
+        ],
+        [
+          "stat.vitality",
+          "stat.maxhealthfromvit",
+          "stat.maximumlife",
+          "stat.percentmaximumlife",
+          "stat.lifepersecond",
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.spellcosttostamina",
+          "stat.percentmaximumenergy",
+          "stat.liferegeneration"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.percentmaximumenergy",
+          "stat.maxenergyfromagi"
+        ],
+        [
+          "stat.intelligence",
+          "stat.staminapersecond",
+          "stat.staminaregeneration"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.allattributes"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.energyonhit",
+          "stat.energypersecond",
+          "stat.maximumlife",
+          "stat.massacreduration",
+          "stat.magicfind",
+          "stat.explosiondamage"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.attackspeed",
+          "multiplier": 1.5
+        }
+      ],
       "weaponModel": "long_sword",
       "uniqueEffects": [
         {
@@ -4298,7 +4705,78 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.armor",
+          "stat.allattributes"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.vitality",
+          "stat.maxhealthfromvit",
+          "stat.maximumlife",
+          "stat.percentmaximumlife",
+          "stat.lifepersecond",
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage",
+          "stat.armor",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.spellcosttostamina",
+          "stat.percentmaximumenergy",
+          "stat.liferegeneration"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.percentmaximumenergy",
+          "stat.maxenergyfromagi"
+        ],
+        [
+          "stat.intelligence",
+          "stat.staminapersecond",
+          "stat.staminaregeneration",
+          "stat.allattributes",
+          "stat.allhealingpercent"
+        ],
+        [
+          "stat.energyonhit",
+          "stat.energypersecond",
+          "stat.maximumlife",
+          "stat.massacreduration",
+          "stat.magicfind",
+          "stat.explosiondamage"
+        ]
+      ],
       "set": "set.akagi"
     },
     {
@@ -4309,7 +4787,78 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.intelligence",
+          null
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.allhealingpercent",
+          "stat.dodgechance",
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.spelldmgfromint",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.armor",
+          "stat.allattributes"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction",
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.intelligence",
+          "stat.maximumlife",
+          "stat.lifepersecond",
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.vitality",
+          "stat.maximumlife",
+          "stat.percentmaximumlife",
+          "stat.lifepersecond",
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage",
+          "stat.armor"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.spellcosttostamina",
+          "stat.percentmaximumenergy",
+          "stat.liferegeneration",
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.percentmaximumenergy",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.intelligence",
+          "stat.staminapersecond",
+          "stat.staminaregeneration",
+          "stat.allattributes",
+          "stat.allhealingpercent"
+        ]
+      ],
       "set": "set.akagi"
     },
     {
@@ -4320,7 +4869,78 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.intelligence",
+          null
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.allhealingpercent",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.spelldmgfromint",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.armor",
+          "stat.allattributes"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction",
+          "stat.resistancetomagic",
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.intelligence",
+          "stat.maximumlife",
+          "stat.lifepersecond",
+          "stat.spelldamageincrease",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.vitality",
+          "stat.maximumlife",
+          "stat.percentmaximumlife",
+          "stat.lifepersecond",
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage",
+          "stat.armor"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.spellcosttostamina",
+          "stat.percentmaximumenergy",
+          "stat.liferegeneration",
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.percentmaximumenergy",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.intelligence",
+          "stat.staminapersecond",
+          "stat.staminaregeneration",
+          "stat.allattributes",
+          "stat.allhealingpercent"
+        ]
+      ],
       "set": "set.akagi"
     },
     {
@@ -4331,7 +4951,75 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.intelligence",
+          null
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.armor",
+          "stat.allattributes"
+        ],
+        [
+          "stat.armor",
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.intelligence",
+          "stat.maximumlife",
+          "stat.lifepersecond"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.maximumlife",
+          "stat.percentmaximumlife",
+          "stat.lifepersecond",
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage",
+          "stat.armor"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.spellcosttostamina",
+          "stat.percentmaximumenergy",
+          "stat.liferegeneration",
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.percentmaximumenergy",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.intelligence",
+          "stat.staminapersecond",
+          "stat.staminaregeneration",
+          "stat.allattributes",
+          "stat.allhealingpercent"
+        ]
+      ],
       "set": "set.akagi"
     },
     {
@@ -4342,7 +5030,75 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.intelligence",
+          null
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.armor",
+          "stat.allattributes"
+        ],
+        [
+          "stat.armor",
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.intelligence",
+          "stat.maximumlife",
+          "stat.lifepersecond"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.maximumlife",
+          "stat.percentmaximumlife",
+          "stat.lifepersecond",
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage",
+          "stat.armor"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.spellcosttostamina",
+          "stat.percentmaximumenergy",
+          "stat.liferegeneration",
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.percentmaximumenergy",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.intelligence",
+          "stat.staminapersecond",
+          "stat.staminaregeneration",
+          "stat.allattributes",
+          "stat.allhealingpercent"
+        ]
+      ],
       "uniqueEffects": [],
       "manual": true
     },
@@ -4366,7 +5122,34 @@
       "rarity": 3,
       "minLevel": 16,
       "maxLevel": 18,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "stat.intelligence",
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.allattributes",
+          "stat.vitality"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          null,
+          "stat.jumppower"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.movementspeed",
+          "multiplier": 3.0
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "movement_speed",
@@ -4383,7 +5166,29 @@
       "rarity": 4,
       "minLevel": 6,
       "maxLevel": 9,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.spelldmgfromint",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.allattributes",
+          "stat.agility",
+          "stat.strength",
+          "stat.intelligence",
+          "stat.vitality"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_frenzy_max_stacks",
@@ -4400,7 +5205,32 @@
       "rarity": 4,
       "minLevel": 6,
       "maxLevel": 9,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.spelldmgfromint",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.allattributes",
+          "stat.agility",
+          "stat.strength",
+          "stat.intelligence",
+          "stat.vitality"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_frenzy_max_stacks",
@@ -4417,7 +5247,35 @@
       "rarity": 5,
       "minLevel": 6,
       "maxLevel": 9,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.spelldmgfromint",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.allattributes",
+          "stat.agility",
+          "stat.strength",
+          "stat.intelligence",
+          "stat.vitality"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_frenzy_max_stacks",
@@ -4434,7 +5292,38 @@
       "rarity": 5,
       "minLevel": 5,
       "maxLevel": 9,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.movementspeed",
+          "stat.cooldownreduction"
+        ],
+        [
+          "stat.jumppower",
+          "stat.attackspeed",
+          "stat.movementspeed",
+          "stat.energypersecond"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.allattributes",
+          "stat.agility",
+          "stat.strength",
+          "stat.intelligence",
+          "stat.vitality"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_blink_range",
@@ -4451,7 +5340,24 @@
       "rarity": 6,
       "minLevel": 80,
       "maxLevel": 90,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.cooldownreduction",
+          null
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "i_infinity_loop",
@@ -4566,7 +5472,39 @@
       "rarity": 5,
       "minLevel": 30,
       "maxLevel": 35,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleedmgfromstr"
+        ],
+        [
+          "stat.strength"
+        ],
+        [
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.attackcostreduction",
+          "stat.attackspeed",
+          "stat.lifeonhit",
+          "stat.energyonhit",
+          null,
+          null,
+          null
+        ],
+        [
+          "stat.allattributes",
+          "stat.vitality",
+          "stat.meleedamageincrease",
+          "stat.meleearmorpiercing"
+        ]
+      ],
       "weaponModel": "hammer",
       "uniqueEffects": [
         {
@@ -4584,7 +5522,22 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.energyonhit"
+        ],
+        [
+          "stat.staminaregeneration",
+          "stat.percentmaximumenergy",
+          "stat.percentmaximumlife"
+        ]
+      ],
       "uniqueEffects": [],
       "manual": true
     },
@@ -4596,7 +5549,37 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.rangeddamageincrease",
+          "stat.spelldamageincrease"
+        ],
+        [
+          "stat.energyonhit"
+        ],
+        [
+          "stat.staminaregeneration",
+          "stat.percentmaximumenergy",
+          "stat.percentmaximumlife"
+        ]
+      ],
       "uniqueEffects": [],
       "manual": true
     },
@@ -4608,7 +5591,34 @@
       "rarity": 4,
       "minLevel": 20,
       "maxLevel": 22,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.vitality",
+          "stat.lifepersecond",
+          "stat.liferegeneration",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.strength",
+          "stat.allattributes"
+        ],
+        [
+          "stat.cooldownreduction",
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.intelligence",
+          "stat.damagereduction"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_magic_arrow_volley_count",
@@ -4625,7 +5635,40 @@
       "rarity": 5,
       "minLevel": 50,
       "maxLevel": 52,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.vitality",
+          "stat.lifepersecond",
+          "stat.liferegeneration",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.strength",
+          "stat.allattributes"
+        ],
+        [
+          "stat.cooldownreduction",
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.intelligence",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.intelligence"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_magic_arrow_volley_count",
@@ -5034,7 +6077,73 @@
       "rarity": 6,
       "minLevel": 35,
       "maxLevel": 36,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.spellcostreduction",
+          "stat.meleedamageincrease",
+          "stat.spelldamageincrease",
+          "stat.cooldownreduction",
+          "stat.damagereduction",
+          "stat.rangeddmgfromagi",
+          "stat.attackspeed"
+        ],
+        [
+          "stat.agility",
+          "stat.lesseragility"
+        ],
+        [
+          "stat.meleearmorpiercing",
+          "stat.rangedarmorpiercing",
+          "stat.armorpiercing",
+          "stat.armor"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.rangeddmgfromagi",
+          "stat.baserangeddamage",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage",
+          "stat.allattributes"
+        ],
+        [
+          "stat.intelligence",
+          "stat.strength",
+          "stat.agility",
+          "stat.vitality",
+          "stat.allattributes",
+          "stat.maximumlife",
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.intelligence",
+          "stat.strength",
+          "stat.agility",
+          "stat.vitality",
+          "stat.allattributes",
+          "stat.lifeonhit",
+          "stat.energyonhit",
+          "stat.energypersecond",
+          "stat.allhealingpercent"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.baserangeddamage",
+          "stat.agility"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.spellcostreduction",
+          "multiplier": -1.0
+        }
+      ],
       "weaponModel": "axe",
       "uniqueEffects": [
         {
@@ -5052,7 +6161,87 @@
       "rarity": 7,
       "minLevel": 35,
       "maxLevel": 36,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.spellcostreduction",
+          "stat.basespelldamage",
+          "stat.spelldamageincrease",
+          "stat.cooldownreduction",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.attackspeed",
+          "stat.projectilesize",
+          "stat.projectilespeed"
+        ],
+        [
+          "stat.agility",
+          "stat.lesseragility"
+        ],
+        [
+          "stat.headshotdamage"
+        ],
+        [
+          "stat.meleearmorpiercing",
+          "stat.rangedarmorpiercing",
+          "stat.armorpiercing",
+          "stat.armor",
+          "stat.resistancetomagic",
+          "stat.magicfind"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.rangeddmgfromagi",
+          "stat.baserangeddamage",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage",
+          "stat.allattributes",
+          "stat.maxenergyfromagi"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.baserangeddamage",
+          "stat.agility",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.baserangeddamage",
+          "stat.agility",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.headshotdamage"
+        ],
+        [
+          "stat.intelligence",
+          "stat.strength",
+          "stat.agility",
+          "stat.vitality",
+          "stat.allattributes",
+          "stat.maximumlife",
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.intelligence",
+          "stat.strength",
+          "stat.agility",
+          "stat.vitality",
+          "stat.allattributes",
+          "stat.lifeonhit",
+          "stat.energyonhit",
+          "stat.energypersecond",
+          "stat.allhealingpercent"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "weaponModel": "axe",
       "uniqueEffects": [
         {
@@ -5075,7 +6264,68 @@
       "rarity": 7,
       "minLevel": 50,
       "maxLevel": 52,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.armorpiercing",
+          "stat.meleearmorpiercing"
+        ],
+        [
+          "stat.block",
+          null
+        ],
+        [
+          "stat.armor",
+          "stat.maximumlife",
+          "stat.maxhealthfromvit",
+          "stat.damagereduction",
+          "stat.resistancetomagic",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.armor",
+          "stat.maximumlife",
+          "stat.maxhealthfromvit",
+          "stat.damagereduction",
+          "stat.vitality",
+          "stat.strength",
+          "stat.allattributes"
+        ],
+        [
+          "stat.armor",
+          "stat.maximumlife",
+          "stat.maxhealthfromvit",
+          "stat.damagereduction",
+          "stat.vitality",
+          "stat.strength",
+          "stat.allattributes",
+          "stat.thorns"
+        ],
+        [
+          "stat.thorns",
+          "stat.meleedamageincrease",
+          "stat.vitality",
+          "stat.strength"
+        ],
+        [
+          "stat.strength",
+          "stat.armor",
+          "stat.meleearmorpiercing"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleedmgfromstr",
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.attackspeed",
+          "stat.basemeleedamage",
+          "stat.meleeweaponrange"
+        ],
+        [
+          "*"
+        ]
+      ],
       "weaponModel": "great_sword",
       "uniqueEffects": [
         {
@@ -5093,7 +6343,72 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 2,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.armorpiercing",
+          "stat.meleearmorpiercing"
+        ],
+        [
+          "stat.block",
+          "stat.strength"
+        ],
+        [
+          "stat.armor",
+          "stat.maximumlife",
+          "stat.maxhealthfromvit",
+          "stat.damagereduction",
+          "stat.resistancetomagic",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.armor",
+          "stat.maximumlife",
+          "stat.damagereduction",
+          "stat.vitality",
+          "stat.strength",
+          "stat.allattributes"
+        ],
+        [
+          "stat.armor",
+          "stat.maximumlife",
+          "stat.damagereduction",
+          "stat.vitality",
+          "stat.strength",
+          "stat.allattributes",
+          "stat.thorns"
+        ],
+        [
+          "stat.thorns",
+          "stat.meleedamageincrease",
+          "stat.vitality",
+          "stat.strength"
+        ],
+        [
+          "stat.strength",
+          "stat.armor",
+          "stat.meleearmorpiercing"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleedmgfromstr",
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.attackspeed",
+          "stat.basemeleedamage",
+          "stat.meleeweaponrange"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_frenzy_dmg",
@@ -5110,7 +6425,52 @@
       "rarity": 5,
       "minLevel": 2,
       "maxLevel": 6,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.firedamage"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.maximumlife",
+          "stat.percentmaximumenergy",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.spellcostreduction"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.resistancetomagic",
+          "stat.magicfind",
+          "stat.movementspeed",
+          "stat.armor"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.firedamage",
+          "multiplier": 2.0
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "fire_duration",
@@ -5127,7 +6487,67 @@
       "rarity": 7,
       "minLevel": 2,
       "maxLevel": 6,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.firedamage"
+        ],
+        [
+          "stat.spelldmgfromint",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi"
+        ],
+        [
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.maximumlife",
+          "stat.percentmaximumenergy",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.spellcostreduction"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.resistancetomagic",
+          "stat.magicfind",
+          "stat.movementspeed",
+          "stat.armor"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.firedamage",
+          "multiplier": 5.0
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "fire_duration",
@@ -5149,7 +6569,67 @@
       "rarity": 7,
       "minLevel": 5,
       "maxLevel": 8,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.firedamage"
+        ],
+        [
+          "stat.armor",
+          "stat.dodgechance"
+        ],
+        [
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.maximumlife",
+          "stat.percentmaximumenergy",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.spellcostreduction",
+          "stat.projectilespeed",
+          "stat.projectilesize"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.resistancetomagic",
+          "stat.magicfind",
+          "stat.movementspeed",
+          "stat.armor"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_firebolt_energy_cost",
@@ -5171,7 +6651,54 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 1,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.maximumlife",
+          "stat.percentmaximumenergy",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.spellcosttostamina"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.resistancetomagic",
+          "stat.energyonhit",
+          "stat.energypersecond",
+          "stat.staminaregeneration",
+          "stat.staminapersecond"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_firebolt_damage_scaling",
@@ -5188,7 +6715,66 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 1,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.maximumlife",
+          "stat.percentmaximumenergy",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.spellcosttostamina"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.resistancetomagic",
+          "stat.energyonhit",
+          "stat.energypersecond",
+          "stat.staminaregeneration",
+          "stat.staminapersecond"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_blink_do_explosion",
@@ -5204,7 +6790,31 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed",
+          "stat.attackspeed"
+        ],
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.movementspeed",
+          "multiplier": -0.3
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5221,7 +6831,28 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5238,7 +6869,31 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5255,7 +6910,37 @@
       "rarity": 5,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5272,7 +6957,42 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5289,7 +7009,34 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed",
+          "stat.attackspeed"
+        ],
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "stat.block"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.movementspeed",
+          "multiplier": -0.3
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5306,7 +7053,35 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.block"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5323,7 +7098,39 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          "stat.armor"
+        ],
+        [
+          "stat.block"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5340,7 +7147,44 @@
       "rarity": 5,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.block"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5357,7 +7201,56 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.block"
+        ],
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.block",
+          "multiplier": 2.0
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5374,7 +7267,30 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.movementspeed",
+          "multiplier": 1.3
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5391,7 +7307,32 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5408,7 +7349,35 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          "stat.armor"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5425,7 +7394,40 @@
       "rarity": 5,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5442,7 +7444,45 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5459,7 +7499,27 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.strength",
+          "multiplier": -0.3
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5476,7 +7536,28 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5493,7 +7574,31 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5510,7 +7615,37 @@
       "rarity": 5,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5527,7 +7662,42 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5544,7 +7714,31 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.strength",
+          "multiplier": -0.3
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5561,7 +7755,32 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5578,7 +7797,35 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5595,7 +7842,41 @@
       "rarity": 5,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5612,7 +7893,46 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5629,7 +7949,27 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.strength",
+          "multiplier": -0.3
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5646,7 +7986,28 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5663,7 +8024,31 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5680,7 +8065,41 @@
       "rarity": 5,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5697,7 +8116,46 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5714,7 +8172,27 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.strength",
+          "multiplier": -0.3
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5731,7 +8209,28 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5748,7 +8247,31 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5765,7 +8288,37 @@
       "rarity": 5,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5782,7 +8335,42 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5799,7 +8387,31 @@
       "rarity": 2,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.strength",
+          "multiplier": -0.3
+        }
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5816,7 +8428,32 @@
       "rarity": 3,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5833,7 +8470,35 @@
       "rarity": 4,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5850,7 +8515,41 @@
       "rarity": 5,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "*",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5867,7 +8566,46 @@
       "rarity": 6,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -5884,7 +8622,75 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleeweaponrange",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.attackspeed",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.meleedamageincrease",
+          null,
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.attackspeed",
+          "stat.attackcostreduction",
+          "stat.cooldownreduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ]
+      ],
       "set": "set.berserk"
     },
     {
@@ -5895,7 +8701,69 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleeweaponrange",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.attackspeed",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.maximumlife"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.attackspeed",
+          "stat.attackcostreduction",
+          "stat.cooldownreduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction",
+          "stat.allattributes"
+        ]
+      ],
       "set": "set.berserk"
     },
     {
@@ -5906,7 +8774,79 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleeweaponrange",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.attackspeed",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.maximumlife"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.attackspeed",
+          "stat.attackcostreduction",
+          "stat.cooldownreduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction",
+          "stat.allattributes"
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ]
+      ],
       "set": "set.berserk"
     },
     {
@@ -5917,7 +8857,79 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleeweaponrange",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.attackspeed",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.maximumlife"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.attackspeed",
+          "stat.attackcostreduction",
+          "stat.cooldownreduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction",
+          "stat.allattributes"
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ]
+      ],
       "set": "set.berserk"
     },
     {
@@ -5928,7 +8940,75 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleeweaponrange",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.attackspeed",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.maximumlife"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.attackspeed",
+          "stat.attackcostreduction",
+          "stat.cooldownreduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction",
+          "stat.allattributes"
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ]
+      ],
       "set": "set.berserk"
     },
     {
@@ -5939,7 +9019,79 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.maxenergyfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.meleeweaponrange",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.attackspeed",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.maximumlife"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.maximumlife",
+          "stat.percentmaximumlife"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.attackspeed",
+          "stat.attackcostreduction",
+          "stat.cooldownreduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction",
+          "stat.allattributes"
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ],
+        [
+          "stat.emptysocket",
+          null
+        ]
+      ],
       "set": "set.berserk"
     },
     {
@@ -5950,7 +9102,81 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "*",
+          "stat.expgain",
+          "stat.magicfind"
+        ],
+        [
+          "stat.meleedmgfromstr",
+          "stat.maxenergyfromagi",
+          "stat.rangeddmgfromagi",
+          "stat.maxhealthfromvit",
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.basemeleedamage",
+          "stat.strength"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.baserangeddamage",
+          "stat.agility"
+        ],
+        [
+          "stat.spelldamageincrease",
+          "stat.basespelldamage",
+          "stat.intelligence"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.maximumlife"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.percentmaximumlife",
+          "stat.maximumenergy",
+          "stat.percentmaximumenergy"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.agility",
+          "stat.allattributes",
+          "stat.attackspeed",
+          "stat.attackcostreduction",
+          "stat.spellcostreduction",
+          "stat.cooldownreduction"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*",
+          null
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction",
+          "stat.allattributes",
+          null
+        ]
+      ],
       "uniqueEffects": [],
       "manual": true
     },
@@ -5962,7 +9188,54 @@
       "rarity": 7,
       "minLevel": 20,
       "maxLevel": 28,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.agility"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.maximumlife"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_frenzy_active_crit_chance",
@@ -5984,7 +9257,70 @@
       "rarity": 7,
       "minLevel": 6,
       "maxLevel": 9,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.basemeleedamage",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.basemeleedamage",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.agility"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.spelldamageincrease"
+        ],
+        [
+          "stat.attackspeed"
+        ],
+        [
+          "stat.criticalhitchance"
+        ],
+        [
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.meleedmgfromstr"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.block",
+          null
+        ],
+        [
+          "stat.maximumlife"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.basemeleedamage",
+          "multiplier": 5.0
+        }
+      ],
       "weaponModel": "great_sword",
       "uniqueEffects": [
         {
@@ -6002,7 +9338,54 @@
       "rarity": 6,
       "minLevel": 6,
       "maxLevel": 9,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.basemeleedamage",
+          "stat.basespelldamage"
+        ],
+        [
+          "stat.basemeleedamage",
+          null
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.intelligence",
+          "stat.agility"
+        ],
+        [
+          "stat.meleedamageincrease",
+          "stat.spelldamageincrease"
+        ],
+        [
+          "stat.attackspeed"
+        ],
+        [
+          "stat.criticalhitchance"
+        ],
+        [
+          "stat.criticalhitdamage"
+        ],
+        [
+          "stat.meleedmgfromstr"
+        ],
+        [
+          "stat.strength"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ]
+      ],
+      "statMultipliers": [
+        {
+          "slot": 0,
+          "stat": "stat.basemeleedamage",
+          "multiplier": 2.0
+        }
+      ],
       "weaponModel": "great_sword",
       "uniqueEffects": [
         {
@@ -6020,7 +9403,36 @@
       "rarity": 5,
       "minLevel": 6,
       "maxLevel": 9,
-      "statPools": [],
+      "statPools": [
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage",
+          null
+        ],
+        [
+          "stat.spelldmgfromint",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.allattributes",
+          "stat.agility",
+          "stat.strength",
+          "stat.intelligence",
+          "stat.vitality"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_berserk_attack_speed",
@@ -6042,7 +9454,69 @@
       "rarity": 7,
       "minLevel": 60,
       "maxLevel": 62,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.agility",
+          "stat.allattributes",
+          "stat.intelligence"
+        ],
+        [
+          "stat.maxenergyfromagi",
+          "stat.meleedmgfromstr",
+          "stat.spelldmgfromint",
+          "stat.rangeddmgfromagi",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage",
+          null
+        ],
+        [
+          "stat.spelldmgfromint",
+          "stat.meleedmgfromstr",
+          "stat.rangeddmgfromagi",
+          "stat.damagereduction"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "melee_increased_dmg",
@@ -6074,7 +9548,81 @@
       "rarity": 7,
       "minLevel": 1,
       "maxLevel": 3,
-      "statPools": [],
+      "statPools": [
+        [
+          "stat.lifepersecond"
+        ],
+        [
+          "stat.armor",
+          null,
+          "stat.allhealingpercent"
+        ],
+        [
+          "*"
+        ],
+        [
+          "stat.spelldmgfromint"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.spellcosttostamina",
+          "stat.armor",
+          "stat.allattributes"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.allattributes"
+        ],
+        [
+          "stat.basespelldamage",
+          "stat.spelldamageincrease",
+          "stat.intelligence",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.vitality",
+          "stat.maxhealthfromvit",
+          "stat.maximumlife",
+          "stat.percentmaximumlife",
+          "stat.lifepersecond",
+          "stat.lifeonhit"
+        ],
+        [
+          "stat.spellcostreduction",
+          "stat.cooldownreduction",
+          "stat.criticalhitchance",
+          "stat.criticalhitdamage",
+          "stat.armor",
+          "stat.maxhealthfromvit"
+        ],
+        [
+          "stat.damagereduction",
+          "stat.percentmaximumenergy",
+          "stat.liferegeneration"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.percentmaximumenergy",
+          "stat.maxenergyfromagi"
+        ],
+        [
+          "stat.intelligence",
+          "stat.staminapersecond",
+          "stat.staminaregeneration",
+          "stat.allattributes",
+          "stat.allhealingpercent"
+        ],
+        [
+          "stat.energyonhit",
+          "stat.energypersecond",
+          "stat.maximumlife",
+          "stat.massacreduration",
+          "stat.magicfind",
+          "stat.explosiondamage"
+        ]
+      ],
       "uniqueEffects": [
         {
           "stat": "spell_healing_dome_cooldown_rate",

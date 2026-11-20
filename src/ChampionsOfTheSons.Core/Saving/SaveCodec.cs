@@ -17,7 +17,21 @@ public static class SaveCodec
     };
 
     /// <summary>Migrations for <see cref="PlayerSave"/>: index i upgrades version i+1 → i+2 (in place).</summary>
-    private static readonly Action<JsonObject>[] PlayerMigrations = Array.Empty<Action<JsonObject>>();
+    private static readonly Action<JsonObject>[] PlayerMigrations =
+    {
+        MarkStatSlotsUnknown,
+    };
+
+    /// <summary>1 → 2: rolled stats gained a slot index. Old ones are marked unknown (-1); <see cref="Rules.PlayerCharacter.Load"/>
+    /// infers each from the base item's stat pools, which a save alone cannot.</summary>
+    private static void MarkStatSlotsUnknown(JsonObject save)
+    {
+        if (save["slots"] is not JsonObject slots) return;
+        foreach (var (_, item) in slots)
+            if (item?["stats"] is JsonArray stats)
+                foreach (var stat in stats)
+                    if (stat is JsonObject s) s["slot"] = -1;
+    }
 
     private static readonly Action<JsonObject>[] WorldMigrations = Array.Empty<Action<JsonObject>>();
 

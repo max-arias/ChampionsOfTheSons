@@ -81,7 +81,7 @@ public class PlayerCharacterTests
     {
         var c = NewCharacter();
         c.AddXp(1000);
-        c.Inventory.AddToBag(new ItemInstance { BaseId = "item.ring", Level = 7, Stats = new[] { new RolledStat("stat.crit", 0.02f) } });
+        c.Inventory.AddToBag(new ItemInstance { BaseId = "item.ring", Level = 7, Stats = new[] { new RolledStat("stat.crit", 0.02f, 1) } });
         c.Inventory.Equip("bag.0", c.Content);
         c.Inventory.AddToBag(new ItemInstance { BaseId = "item.no_longer_exists" });
 
