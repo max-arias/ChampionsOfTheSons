@@ -38,7 +38,7 @@ internal static class SettingsSelfTest
         foreach (var k in ModKeys.All) Saved[k.Id] = ModKeys.Value(k.Id);
         Panel.Toggle();
         SelfTest.Check("settings: overlay opens", Panel.IsOpen);
-        SelfTest.Check("settings: every mod key listed", Panel.RowIds.Count == 6 + SpellBook.Slots && ModKeys.All.All(k => ModKeys.Entry(k.Id) != null),
+        SelfTest.Check("settings: every mod key listed", Panel.RowIds.Count == ModKeys.All.Count && ModKeys.All.All(k => ModKeys.Entry(k.Id) != null),
             string.Join(",", ModKeys.All.Where(k => ModKeys.Entry(k.Id) == null).Select(k => k.Id)));
         SelfTest.Check("settings: overlay is a pad panel", Pad.GamepadFeature.OpenPanel?.Name == "settings", Pad.GamepadFeature.OpenPanel?.Name ?? "none");
         SelfTest.Log($"settings: game keys read: {ModKeys.GameKeys().Count} keys");

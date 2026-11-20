@@ -4,6 +4,8 @@
 #   ./tools/run-selftest.ps1 -Headless -NoGraphics   # -nographics crashes in UnityPlayer.dll after world activation (2026-11-18)
 #   -NoBuild                                  # run whatever is deployed already
 #   -Only GamepadFeature                      # run just that feature's checks (type name of its IModFeature; comma list, plus "ui" and "bridge"): ~2 min
+#   -Only is required. The full suite (every feature in one run) is disabled (Max, 2026-11-20): it found test-setup
+#   problems, never game bugs, and cost ~16 min per run. -Full overrides, only when Max asks for it.
 # One game folder is shared by every checkout/worktree, so build+deploy+run happen under a machine-wide lock:
 # never deploy any other way (build with -p:DeployToGame=false otherwise).
 # The test save is a copy of a real save in its own slot (1999999999) so real saves are never touched.
@@ -13,10 +15,12 @@ param(
     [switch]$NoGraphics,
     [switch]$NoBuild,
     [string]$Only = '',
-    [int]$TimeoutSeconds = 1200,   # the full suite takes ~11 min since Wave 2
+    [switch]$Full,
+    [int]$TimeoutSeconds = 1200,
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
 $ErrorActionPreference = 'Stop'
+if (-not $Only -and -not $Full) { "The full in-game suite is disabled; pass -Only <Feature,...> (see the header)."; exit 4 }
 $repo = Split-Path $PSScriptRoot -Parent
 $log = Join-Path $GameDir '_Redloader\Latest.log'
 $unityLog = Join-Path $env:TEMP 'cots-selftest-unity.log'

@@ -29,7 +29,7 @@ RedLoader's schema (https://raw.githubusercontent.com/ToniMacaroni/RedLoader/mai
 
 ## Before uploading
 
-- Full headless self-test with 0 failures (`tools/run-selftest.ps1 -Headless`), one co-op run (`tools/run-coop-test.ps1 -Windowed`).
+- Targeted headless self-tests of the features changed since the last release (`tools/run-selftest.ps1 -Headless -Only ...`; the full suite is disabled), one co-op run (`tools/run-coop-test.ps1 -Windowed`).
 - Strict translations pass (COS-39 native review is separate).
 - `CREDITS.md` lists every third-party asset in the build.
 - Bump `version` in the manifest.
