@@ -22,7 +22,7 @@ public static class Consumables
         if (!bagSlot.StartsWith("bag.", StringComparison.Ordinal)) return false;
         var item = pc.Inventory.Get(bagSlot);
         if (item == null || !CanUse(item)) return false;
-        if (item.BaseId == UniqueItems.HeartOfPurity && pc.Perks.SpentPoints == 0) return false; // nothing to respec: keep the heart
+        if (item.BaseId == UniqueItems.HeartOfPurity && pc.Perks.Bought.Count == 0 && pc.Perks.UnlockedSpells.Count == 0) return false; // nothing to respec: keep the heart
         pc.Inventory.TakeOne(bagSlot);
         foreach (var stat in item.Stats)
         {
