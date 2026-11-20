@@ -26,7 +26,7 @@ internal sealed class CraftingFeature : IModFeature
         Panel.Tick();
         if (!Panel.IsOpen) return;
         if (Input.GetKeyDown(KeyCode.Escape)) Panel.Close();
-        else if (_key.GetAction().WasPressedThisFrame()) Panel.Toggle();
+        else if (Settings.ModKeys.PressedThisFrame(_key)) Panel.Toggle();
     }
 
     public void RegisterSelfTests() => CraftingSelfTest.Register();

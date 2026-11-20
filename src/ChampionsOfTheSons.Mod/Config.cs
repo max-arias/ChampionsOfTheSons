@@ -6,16 +6,19 @@ namespace ChampionsOfTheSons.Mod;
 
 public static class Config
 {
-    /// <summary>Spell slot defaults since COS-104: keys the game does not use (checked against the game's input maps on 2026-11-20:
-    /// Z sleeps, X opens building, V is push-to-talk, B the guide book, M the GPS, P the player list).</summary>
-    public static readonly string[] SpellDefaults = { "f", "y", "j", "n", "comma", "period" };
+    /// <summary>Spell slot defaults since COS-133: Alt+1..Alt+6, in a row on the number keys. Plain 1-9 stay the game's item hotkeys;
+    /// the game's own Alt+number (set hotkey) is held back while the player plays (<see cref="Settings.ModKeys.Tick"/>).</summary>
+    public static readonly string[] SpellDefaults = { "alt+1", "alt+2", "alt+3", "alt+4", "alt+5", "alt+6" };
 
-    /// <summary>The defaults before COS-104, moved once by <see cref="MigrateKeys"/> when a player still has them.</summary>
+    /// <summary>COS-104's defaults (keys the game does not use, scattered over the board), moved once to <see cref="SpellDefaults"/>.</summary>
+    private static readonly string[] V1SpellDefaults = { "f", "y", "j", "n", "comma", "period" };
+
+    /// <summary>The defaults before COS-104 (Z sleeps, X opens building, V is push-to-talk, B the guide book, M the GPS).</summary>
     private static readonly string[] OldSpellDefaults = { "z", "x", "v", "b", "n", "m" };
     private const string OldPerksDefault = "p", PerksDefault = "u";
 
     /// <summary>Bump when a default key changes again and add the move to <see cref="MigrateKeys"/>.</summary>
-    private const int KeysVersion = 1;
+    private const int KeysVersion = 2;
 
     public static ConfigCategory Category { get; private set; } = null!;
 
@@ -65,18 +68,38 @@ public static class Config
         _keysVersion = Category.CreateEntry("keys_version", 0, "Key defaults version", "Internal: which key defaults this file was moved to. Do not edit.");
         _keysVersion.IsHidden = true;
         MigrateKeys();
+        Settings.ModKeys.ApplyAll(); // combos bind their base key (COS-133); feature keys follow at game start
     }
 
     /// <summary>
-    /// COS-104: once per config file, keys still on the old defaults that clash with the game move to the new defaults. Keys the player
-    /// changed stay, and a key whose new default another mod key already uses stays too (no new clash is made).
+    /// Once per config file, keys still on an old default move to the new one, step by step: version 1 (COS-104) off the game's keys,
+    /// version 2 (COS-133) onto Alt+1..Alt+6. Keys the player changed stay, and a key whose new default another mod key already uses
+    /// stays too (no new clash is made).
     /// </summary>
     private static void MigrateKeys()
     {
-        if (_keysVersion.Value >= KeysVersion) return;
-        var moves = new List<(KeybindConfigEntry Entry, string Old, string New)> { (PerksKey, OldPerksDefault, PerksDefault) };
-        for (int i = 0; i < SpellBook.Slots; i++) moves.Add((SpellKeys[i], OldSpellDefaults[i], SpellDefaults[i]));
+        int from = _keysVersion.Value;
+        if (from >= KeysVersion) return;
+        int moved = 0;
+        if (from < 1)
+        {
+            var moves = new List<(KeybindConfigEntry Entry, string Old, string New)> { (PerksKey, OldPerksDefault, PerksDefault) };
+            for (int i = 0; i < SpellBook.Slots; i++) moves.Add((SpellKeys[i], OldSpellDefaults[i], V1SpellDefaults[i]));
+            moved += Move(moves);
+        }
+        if (from < 2)
+        {
+            var moves = new List<(KeybindConfigEntry Entry, string Old, string New)>();
+            for (int i = 0; i < SpellBook.Slots; i++) moves.Add((SpellKeys[i], V1SpellDefaults[i], SpellDefaults[i]));
+            moved += Move(moves);
+        }
+        _keysVersion.Value = KeysVersion;
+        try { Category.SaveToFile(false); } catch (Exception e) { RLog.Warning($"Champions of the Sons: could not save keys: {e.Message}"); }
+        if (moved > 0) RLog.Msg($"Champions of the Sons: moved {moved} keys to the new defaults (keys version {from} -> {KeysVersion})");
+    }
 
+    private static int Move(List<(KeybindConfigEntry Entry, string Old, string New)> moves)
+    {
         var plan = KeyMigration.Plan(moves.Select(m => (m.Entry.Identifier, Value(m.Entry), m.Old, m.New)).ToList());
         int moved = 0;
         foreach (var m in moves)
@@ -85,9 +108,7 @@ public static class Config
             m.Entry.Value = to;
             moved++;
         }
-        _keysVersion.Value = KeysVersion;
-        try { Category.SaveToFile(false); } catch (Exception e) { RLog.Warning($"Champions of the Sons: could not save keys: {e.Message}"); }
-        if (moved > 0) RLog.Msg($"Champions of the Sons: moved {moved} keys off the game's keys (COS-104)");
+        return moved;
     }
 
     private static string Value(KeybindConfigEntry e)

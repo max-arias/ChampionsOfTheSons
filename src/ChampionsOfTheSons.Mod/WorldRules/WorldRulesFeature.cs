@@ -61,7 +61,7 @@ public sealed class WorldRulesFeature : IModFeature
 
         // Close with Escape; the panel takes the cursor while open.
         if (Settings.IsOpen && Input.GetKeyDown(KeyCode.Escape)) Settings.Close();
-        else if (Settings.IsOpen && HostSettingsKey.GetAction().WasPressedThisFrame()) Settings.Close();
+        else if (Settings.IsOpen && Mod.Settings.ModKeys.PressedThisFrame(HostSettingsKey)) Settings.Close();
 
         // The host re-reads the game's difficulty and repeats its settings now and then, so players who join later get them too.
         if (!inWorld || !EnemyRegistry.IsAuthority) return;

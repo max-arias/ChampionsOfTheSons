@@ -2153,7 +2153,7 @@
  "ui.settings.key.settings": "Paramètres du mod",
  "ui.settings.key.spell": "Emplacement de sort {0}",
  "ui.settings.key.weapon": "Dégainer l'arme",
- "ui.settings.keys_hint": "Cliquez sur une touche, puis appuyez sur la nouvelle. Échap annule.",
+ "ui.settings.keys_hint": "Cliquez sur une touche, puis appuyez sur la nouvelle. Maintenez Alt, Ctrl ou Shift en même temps pour une combinaison. Échap annule.",
  "ui.settings.press_key": "Appuyez sur une touche...",
  "ui.settings.reset": "Touches par défaut",
  "ui.settings.reset_done": "Touches remises par défaut.",

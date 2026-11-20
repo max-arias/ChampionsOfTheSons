@@ -2153,7 +2153,7 @@
  "ui.settings.key.settings": "MOD設定",
  "ui.settings.key.spell": "呪文スロット {0}",
  "ui.settings.key.weapon": "武器を構える",
- "ui.settings.keys_hint": "キーをクリックしてから新しいキーを押してください。Escでキャンセル。",
+ "ui.settings.keys_hint": "キーをクリックしてから新しいキーを押してください。Alt、Ctrl、Shiftを押しながらで組み合わせになります。Escでキャンセル。",
  "ui.settings.press_key": "キーを押してください...",
  "ui.settings.reset": "キーを初期設定に戻す",
  "ui.settings.reset_done": "キーを初期設定に戻しました。",

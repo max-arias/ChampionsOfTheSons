@@ -21,7 +21,7 @@ internal sealed class PerksFeature : IModFeature
         Panel.Tick();
         if (!Panel.IsOpen) return;
         if (Input.GetKeyDown(KeyCode.Escape)) Panel.Close();
-        else if (Config.PerksKey.GetAction().WasPressedThisFrame()) Panel.Toggle();
+        else if (Settings.ModKeys.PressedThisFrame(Config.PerksKey)) Panel.Toggle();
     }
 
     public void RegisterSelfTests() => PerksSelfTest.Register();

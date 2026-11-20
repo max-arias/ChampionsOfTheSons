@@ -54,6 +54,6 @@ internal static class CotsUi
         Inventory.Tick();
         if (!Inventory.IsOpen) return;
         if (Input.GetKeyDown(KeyCode.Escape)) { if (!Inventory.CloseMenu()) Inventory.Close(); }
-        else if (Config.InventoryKey.GetAction().WasPressedThisFrame()) Inventory.Toggle();
+        else if (Settings.ModKeys.PressedThisFrame(Config.InventoryKey)) Inventory.Toggle();
     }
 }

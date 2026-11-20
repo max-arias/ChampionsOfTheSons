@@ -2153,7 +2153,7 @@
  "ui.settings.key.settings": "모드 설정",
  "ui.settings.key.spell": "주문 슬롯 {0}",
  "ui.settings.key.weapon": "무기 꺼내기",
- "ui.settings.keys_hint": "키를 클릭한 다음 새 키를 누르세요. Esc로 취소합니다.",
+ "ui.settings.keys_hint": "키를 클릭한 다음 새 키를 누르세요. Alt, Ctrl 또는 Shift를 함께 누르면 조합 키가 됩니다. Esc로 취소합니다.",
  "ui.settings.press_key": "키를 누르세요...",
  "ui.settings.reset": "키 초기화",
  "ui.settings.reset_done": "키를 기본값으로 되돌렸습니다.",

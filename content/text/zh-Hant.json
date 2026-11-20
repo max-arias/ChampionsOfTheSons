@@ -2153,7 +2153,7 @@
  "ui.settings.key.settings": "模組設定",
  "ui.settings.key.spell": "法術欄位 {0}",
  "ui.settings.key.weapon": "拔出武器",
- "ui.settings.keys_hint": "點擊一個按鍵，然後按下新鍵。按 Esc 取消。",
+ "ui.settings.keys_hint": "點擊一個按鍵，然後按下新鍵。同時按住 Alt、Ctrl 或 Shift 可設為組合鍵。按 Esc 取消。",
  "ui.settings.press_key": "請按下一個鍵...",
  "ui.settings.reset": "重設按鍵",
  "ui.settings.reset_done": "按鍵已重設為預設。",

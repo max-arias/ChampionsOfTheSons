@@ -2153,7 +2153,7 @@
  "ui.settings.key.settings": "Ustawienia moda",
  "ui.settings.key.spell": "Miejsce zaklęcia {0}",
  "ui.settings.key.weapon": "Dobądź broń",
- "ui.settings.keys_hint": "Kliknij klawisz, potem naciśnij nowy. Esc anuluje.",
+ "ui.settings.keys_hint": "Kliknij klawisz, potem naciśnij nowy. Przytrzymaj przy tym Alt, Ctrl lub Shift, aby ustawić kombinację. Esc anuluje.",
  "ui.settings.press_key": "Naciśnij klawisz...",
  "ui.settings.reset": "Przywróć domyślne klawisze",
  "ui.settings.reset_done": "Przywrócono domyślne klawisze.",

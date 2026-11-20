@@ -1,3 +1,4 @@
+using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Audio;
 using ChampionsOfTheSons.Mod.HostRules;
 using ChampionsOfTheSons.Mod.UI;
@@ -44,8 +45,12 @@ internal sealed class SettingsPanel : ModalPanel
         Window.Add(Button("X", 24, Close, "#2B333E", "#4A3036").TopLeft(W - 64, 16).Size(40, 40));
 
         Window.Add(Label(UiText.T("ui.settings.section.keys", "Keys"), 22, UiTheme.Gold, TextAlignmentOptions.MidlineLeft).TopLeft(28, 66).Size(300, 36));
-        Window.Add(Label(UiText.T("ui.settings.keys_hint", "Click a key, then press the new one. Esc cancels."), 16, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft)
-            .TopLeft(340, 66).Size(W - 380, 36));
+        var hint = Label(UiText.T("ui.settings.keys_hint", "Click a key, then press the new one. Hold Alt, Ctrl or Shift with it for a combo. Esc cancels."), 16,
+            UiTheme.TextDim, TextAlignmentOptions.MidlineLeft);
+        hint.TextObject.enableAutoSizing = true;
+        hint.TextObject.fontSizeMin = 11;
+        hint.TextObject.fontSizeMax = 16;
+        Window.Add(hint.TopLeft(340, 60).Size(W - 380, 48));
 
         for (int i = 0; i < ModKeys.All.Count; i++)
         {
@@ -149,8 +154,7 @@ internal sealed class SettingsPanel : ModalPanel
         if (Listening == null)
         {
             // The keybind only fires while the player is controllable, which a panel prevents: close on its key here.
-            bool own = false;
-            try { own = SonsSdk.ModInputCache.GetAction(Config.SettingsKey)?.WasPressedThisFrame() ?? false; } catch { /* no action yet */ }
+            bool own = ModKeys.PressedThisFrame(Config.SettingsKey);
             if ((kb != null && kb.escapeKey.wasPressedThisFrame) || (own && Time.frameCount != _openedFrame)) Close();
             return;
         }
@@ -158,14 +162,19 @@ internal sealed class SettingsPanel : ModalPanel
         if (kb.escapeKey.wasPressedThisFrame) { CancelListening(); return; }
         foreach (Key k in Enum.GetValues(typeof(Key)))
         {
-            if (k is Key.None or Key.Escape or Key.IMESelected) continue;
+            // Alt, Ctrl and Shift alone do not end listening: held with the next key they make a combo (COS-133).
+            if (k is Key.None or Key.Escape or Key.IMESelected or Key.LeftAlt or Key.RightAlt or Key.LeftCtrl or Key.RightCtrl
+                or Key.LeftShift or Key.RightShift or Key.LeftMeta or Key.RightMeta) continue;
             KeyControl? c;
             try { c = kb[k]; } catch { continue; }
             if (c == null || !c.wasPressedThisFrame) continue;
-            Accept(c.name);
+            Accept(Combine(c.name, kb.ctrlKey.isPressed, kb.shiftKey.isPressed, kb.altKey.isPressed));
             return;
         }
     }
+
+    /// <summary>The key pressed while listening, with the modifiers held at that moment ("alt+1"); no modifiers gives the plain key.</summary>
+    public static string Combine(string key, bool ctrl, bool shift, bool alt) => new KeyCombo(key, ctrl, shift, alt).ToString();
 
     public string WarningText(string id) => _rows.FirstOrDefault(r => r.Key.Id == id)?.Warning.TextObject.text ?? "";
 
