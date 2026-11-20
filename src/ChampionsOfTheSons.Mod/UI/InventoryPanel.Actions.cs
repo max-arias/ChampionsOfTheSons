@@ -163,7 +163,9 @@ internal sealed partial class InventoryPanel
         MenuSlot = key;
         _destroyArmed = false;
         bool equipped = key.StartsWith("equip.", StringComparison.Ordinal);
-        _menuEquip.Text(UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
+        _menuEquip.Text(InventoryActions.IsUsable(key)
+            ? UiText.T("ui.catalog.use", "Use")
+            : UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
         _menuDrop.Text(UiText.T("ui.inventory.menu.drop", "Drop"));
         _menuDestroy.Text(UiText.T("ui.inventory.menu.destroy", "Destroy")).FontColor(UiTheme.Bad);
 
@@ -184,11 +186,16 @@ internal sealed partial class InventoryPanel
         return was;
     }
 
+    /// <summary>The first row: Use for usable items, else Equip/Unequip.</summary>
     public bool MenuEquipClicked()
     {
         var key = MenuSlot;
         CloseMenu();
-        return key != null && ClickSlot(key);
+        if (key == null) return false;
+        if (!InventoryActions.IsUsable(key)) return ClickSlot(key);
+        bool ok = InventoryActions.Use(key);
+        if (ok) { _dirty = false; RefreshAll(); }
+        return ok;
     }
 
     public bool MenuDropClicked()

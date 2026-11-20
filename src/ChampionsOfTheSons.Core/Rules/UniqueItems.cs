@@ -31,16 +31,6 @@ public static class UniqueItems
     public static double BloodBagRegen(Inventory inv, double healthFraction) =>
         IsEquipped(inv, BloodBag) && healthFraction < BloodBagBelow ? BloodBagPerSecond : 0;
 
-    /// <summary>Untainted Heart: uses one from the bag slot and respecs perks and spells. False if the slot holds no heart.</summary>
-    public static bool UseHeartOfPurity(PlayerCharacter pc, string bagSlot)
-    {
-        var item = pc.Inventory.Get(bagSlot);
-        if (item == null || item.BaseId != HeartOfPurity) return false;
-        pc.Inventory.Remove(bagSlot);
-        if (item.Amount > 1) pc.Inventory.AddToBag(item with { Amount = item.Amount - 1 }, 100);
-        pc.Respec();
-        return true;
-    }
 }
 
 /// <summary>Undying Promise: a lethal hit leaves 30% health instead, once per 5 minutes.</summary>
