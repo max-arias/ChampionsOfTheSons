@@ -11,7 +11,7 @@ namespace ChampionsOfTheSons.Mod.Book;
 internal sealed class PageSlot
 {
     public string Key = "";
-    public float X, Y, Size;
+    public float X, Y, Size, W, H;
     public Image Bg = null!, Icon = null!, Tape = null!;
     public Image[] Frame = null!, SelectFrame = null!;
     public TextMeshProUGUI Level = null!, Amount = null!, Fallback = null!;
@@ -43,13 +43,24 @@ internal static class BookPages
         (BookTab.Gear, "ui.book.tab.gear", "Gear"), (BookTab.Bag, "ui.book.tab.bag", "Bag"), (BookTab.Character, "ui.book.tab.character", "Character"),
     };
 
-    private static readonly string[][] EquipLayout =
+    /// <summary>Equip slots in a body shape, page pixels (x, y from the top-left, width, height).</summary>
+    private static readonly (string Key, float X, float Y, float W, float H)[] BodyLayout =
     {
-        new[] { "equip.shoulders", "equip.helmet", "equip.amulet" },
-        new[] { "equip.weapon", "equip.chest", "equip.offhand" },
-        new[] { "equip.gloves", "equip.pants", "equip.bracer" },
-        new[] { "equip.ring1", "equip.boots", "equip.ring2" },
+        ("equip.helmet", 300, 92, 96, 96),
+        ("equip.chest", 284, 204, 128, 150),
+        ("equip.pants", 284, 370, 128, 150),
+        ("equip.boots", 300, 536, 96, 96),
+        ("equip.shoulders", 172, 204, 96, 96),
+        ("equip.gloves", 172, 316, 96, 96),
+        ("equip.ring1", 188, 428, 64, 64),
+        ("equip.amulet", 428, 204, 96, 96),
+        ("equip.bracer", 428, 316, 96, 96),
+        ("equip.ring2", 444, 428, 64, 64),
+        ("equip.weapon", 56, 248, 104, 210),
+        ("equip.offhand", 536, 248, 104, 210),
     };
+
+    private static TextMeshProUGUI _gearStats = null!;
 
     private static RectTransform _gear = null!, _bag = null!, _char = null!;
     private static readonly List<PageSlot> GearSlots = new(), BagSlots = new();
@@ -121,20 +132,25 @@ internal static class BookPages
         }
     }
 
-    private static PageSlot Slot(RectTransform root, string key, float x, float y, float size, string? emptyLabel)
+    private static PageSlot Slot(RectTransform root, string key, float x, float y, float size, string? emptyLabel) =>
+        Slot(root, key, x, y, size, size, emptyLabel);
+
+    /// <summary>A slot of any shape (weapons and armor pieces are taller); the icon stays square in the middle.</summary>
+    private static PageSlot Slot(RectTransform root, string key, float x, float y, float w, float h, string? emptyLabel)
     {
-        var s = new PageSlot { Key = key, X = x, Y = y, Size = size };
-        s.Bg = PageKit.Box(root, key, x, y, size, size, PageKit.PaperShade);
-        s.Frame = PageKit.Frame(root, x, y, size, size, PageKit.InkFaint, 2);
+        float size = Mathf.Min(w, h), icon = size * 0.76f;
+        var s = new PageSlot { Key = key, X = x, Y = y, Size = size, W = w, H = h };
+        s.Bg = PageKit.Box(root, key, x, y, w, h, PageKit.PaperShade);
+        s.Frame = PageKit.Frame(root, x, y, w, h, PageKit.InkFaint, 2);
         s.Tape = PageKit.Box(root, key + "-tape", x - 6, y - 4, size * 0.42f, 14, Color.clear);
         s.Tape.rectTransform.localRotation = Quaternion.Euler(0, 0, 18);
-        s.Icon = PageKit.Box(root, key + "-icon", x + size * 0.12f, y + size * 0.12f, size * 0.76f, size * 0.76f, Color.white);
+        s.Icon = PageKit.Box(root, key + "-icon", x + (w - icon) / 2, y + (h - icon) / 2, icon, icon, Color.white);
         s.Icon.preserveAspect = true;
         s.Icon.enabled = false;
-        s.Fallback = PageKit.Text(root, key + "-label", x + 4, y + 4, size - 8, size - 8, emptyLabel ?? "", size * 0.15f, PageKit.InkFaint, TextAlignmentOptions.Center, wrap: true);
-        s.Level = PageKit.Text(root, key + "-lvl", x + 4, y + 2, size - 8, 22, "", 18, PageKit.Ink, TextAlignmentOptions.TopRight);
-        s.Amount = PageKit.Text(root, key + "-amt", x + 4, y + size - 24, size - 8, 22, "", 18, PageKit.Ink, TextAlignmentOptions.BottomRight);
-        s.SelectFrame = PageKit.Frame(root, x - 5, y - 5, size + 10, size + 10, PageKit.Select, 4);
+        s.Fallback = PageKit.Text(root, key + "-label", x + 4, y + 4, w - 8, h - 8, emptyLabel ?? "", Mathf.Max(15, size * 0.17f), PageKit.InkFaint, TextAlignmentOptions.Center, wrap: true);
+        s.Level = PageKit.Text(root, key + "-lvl", x + 4, y + 2, w - 8, 22, "", 18, PageKit.Ink, TextAlignmentOptions.TopRight);
+        s.Amount = PageKit.Text(root, key + "-amt", x + 4, y + h - 24, w - 8, 22, "", 18, PageKit.Ink, TextAlignmentOptions.BottomRight);
+        s.SelectFrame = PageKit.Frame(root, x - 5, y - 5, w + 10, h + 10, PageKit.Select, 4);
         foreach (var f in s.SelectFrame) f.enabled = false;
         return s;
     }
@@ -142,15 +158,15 @@ internal static class BookPages
     private static void BuildGear()
     {
         _gearCount = TitleBar(_gear, BookTab.Gear);
-        const float cell = 120, gapX = 26, gapY = 24;
-        float x0 = Left + (PageKit.W - Left - Right - (3 * cell + 2 * gapX)) / 2, y0 = Header + 20;
-        for (int r = 0; r < EquipLayout.Length; r++)
-            for (int c = 0; c < 3; c++)
-            {
-                var key = EquipLayout[r][c];
-                GearSlots.Add(Slot(_gear, key, x0 + c * (cell + gapX), y0 + r * (cell + gapY), cell, UiText.SlotName(key)));
-            }
-        float setsY = y0 + 4 * (cell + gapY) + 4;
+        // Slots in the shape of a body (COS-59, Max's reference): head, chest, legs and feet down the middle,
+        // shoulders/gloves/ring on one side, neck/bracer/ring on the other, weapon and off-hand as tall slots outside.
+        foreach (var (key, x, y, w, h) in BodyLayout)
+            GearSlots.Add(Slot(_gear, key, x, y, w, h, UiText.SlotName(key)));
+        // A small stat box like a character card: armor, health and melee damage.
+        float boxY = 664;
+        PageKit.Box(_gear, "stats-box", Left, boxY, PageKit.W - Left - Right, 70, PageKit.TitleBar);
+        _gearStats = PageKit.Text(_gear, "stats", Left + 16, boxY, PageKit.W - Left - Right - 32, 70, "", 24, PageKit.TitleText, TextAlignmentOptions.Center);
+        float setsY = boxY + 82;
         PageKit.Text(_gear, "sets-title", Left, setsY, 560, 30, UiText.T("ui.book.sets", "Set bonuses"), 24, PageKit.Ink);
         _sets = PageKit.Text(_gear, "sets", Left, setsY + 32, PageKit.W - Left - Right, PageKit.H - Bottom - setsY - 32, "", 20, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
     }
@@ -223,8 +239,13 @@ internal static class BookPages
         foreach (var s in GearSlots)
         {
             RenderSlot(s, Pc.Inventory.Get(s.Key));
-            Hits.Add(new PageHit(s.Key, s.X, s.Y, s.Size, s.Size));
+            Hits.Add(new PageHit(s.Key, s.X, s.Y, s.W, s.H));
         }
+        var st = Pc.Stats;
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        _gearStats.text = $"{UiText.T("ui.sheet.armor", "Armor")} <b>{st.Get(StatIds.Armor).ToString("N0", inv)}</b>    "
+            + $"{UiText.T("ui.sheet.max_health", "Max health")} <b>{Derived.MaxHealth(st).ToString("N0", inv)}</b>    "
+            + $"{UiText.T("ui.sheet.melee_damage", "Melee damage")} <b>x{Derived.MeleeMultiplier(st).ToString("0.00", inv)}</b>";
         _gearCount.text = $"{UiText.T("ui.book.tab.bag", "Bag")} {InventoryActions.BagCount()}/{LootRoller.BagSlots}";
         var sets = InventoryActions.SetBonusText(PageKit.HexOf(PageKit.TitleBar), PageKit.HexOf(PageKit.Good), PageKit.HexOf(PageKit.InkFaint));
         _sets.text = sets.Length == 0 ? $"<color={PageKit.HexOf(PageKit.InkFaint)}>{UiText.T("ui.sets.none", "No set pieces equipped.")}</color>" : sets;
@@ -240,7 +261,7 @@ internal static class BookPages
             bool exists = index < LootRoller.BagSlots;
             s.Key = exists ? Inventory.Bag(index) : "";
             RenderSlot(s, exists ? Pc.Inventory.Get(s.Key) : null, force: true);
-            if (exists) Hits.Add(new PageHit(s.Key, s.X, s.Y, s.Size, s.Size));
+            if (exists) Hits.Add(new PageHit(s.Key, s.X, s.Y, s.W, s.H));
         }
         _bagCount.text = $"{InventoryActions.BagCount()}/{LootRoller.BagSlots}";
         _bagPager.text = $"{BagPage + 1}/{BagPages}";
