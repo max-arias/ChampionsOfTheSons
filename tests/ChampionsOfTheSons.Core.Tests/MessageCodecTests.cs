@@ -23,6 +23,7 @@ public class MessageCodecTests
         new EnemyProfileRequest(0xDEADBEEF12345678UL),
         new EnemySync(42UL, "enemy.cannibal_heavy", 250, 3, 1.5e6f, 1.2e6f, 4500f, new[] { "affix.meteor", "affix.steadfast" }, 9_000_000_000L),
         new EnemySync(43UL, "enemy.fingers", 1, 0, 100f, 100f, 0f, Array.Empty<string>(), 0),
+        new EnemySync(44UL, "Carl", 77, 1, 9e5f, 4e5f, 1200f, new[] { "Meteor" }, 123_456L, 3.4e4f, "elite_name.ashjaw", "elite_name.unburied"),
         new EnemyHealth(42UL, 99.5f, 12f),
         new Hit(42UL, 12345.678f, HitFlags.Crit | HitFlags.Melee, 300f),
         new XpGranted(-5),

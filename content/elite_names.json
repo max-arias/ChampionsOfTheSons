@@ -1,0 +1,315 @@
+{
+  "_comment": "COS-68: personal names for elites, minibosses and bosses: a given name and an epithet, joined by ui.elites.format. Our own list (docs/style.md); display text is <id>.name in content/text.",
+  "eliteNames": [
+    {
+      "id": "elite.given.ashjaw",
+      "part": "given",
+      "name": "Ashjaw"
+    },
+    {
+      "id": "elite.given.bonesap",
+      "part": "given",
+      "name": "Bonesap"
+    },
+    {
+      "id": "elite.given.burl",
+      "part": "given",
+      "name": "Burl"
+    },
+    {
+      "id": "elite.given.cinderlip",
+      "part": "given",
+      "name": "Cinderlip"
+    },
+    {
+      "id": "elite.given.coldwick",
+      "part": "given",
+      "name": "Coldwick"
+    },
+    {
+      "id": "elite.given.driftskin",
+      "part": "given",
+      "name": "Driftskin"
+    },
+    {
+      "id": "elite.given.flintgut",
+      "part": "given",
+      "name": "Flintgut"
+    },
+    {
+      "id": "elite.given.gristle",
+      "part": "given",
+      "name": "Gristle"
+    },
+    {
+      "id": "elite.given.gutterhook",
+      "part": "given",
+      "name": "Gutterhook"
+    },
+    {
+      "id": "elite.given.hollowcheek",
+      "part": "given",
+      "name": "Hollowcheek"
+    },
+    {
+      "id": "elite.given.hookfinger",
+      "part": "given",
+      "name": "Hookfinger"
+    },
+    {
+      "id": "elite.given.knotback",
+      "part": "given",
+      "name": "Knotback"
+    },
+    {
+      "id": "elite.given.lichenface",
+      "part": "given",
+      "name": "Lichenface"
+    },
+    {
+      "id": "elite.given.marrowgnaw",
+      "part": "given",
+      "name": "Marrowgnaw"
+    },
+    {
+      "id": "elite.given.mirefoot",
+      "part": "given",
+      "name": "Mirefoot"
+    },
+    {
+      "id": "elite.given.nailtooth",
+      "part": "given",
+      "name": "Nailtooth"
+    },
+    {
+      "id": "elite.given.pitchmouth",
+      "part": "given",
+      "name": "Pitchmouth"
+    },
+    {
+      "id": "elite.given.rattlebone",
+      "part": "given",
+      "name": "Rattlebone"
+    },
+    {
+      "id": "elite.given.rimefang",
+      "part": "given",
+      "name": "Rimefang"
+    },
+    {
+      "id": "elite.given.scab",
+      "part": "given",
+      "name": "Scab"
+    },
+    {
+      "id": "elite.given.splint",
+      "part": "given",
+      "name": "Splint"
+    },
+    {
+      "id": "elite.given.stump",
+      "part": "given",
+      "name": "Stump"
+    },
+    {
+      "id": "elite.given.tallowhand",
+      "part": "given",
+      "name": "Tallowhand"
+    },
+    {
+      "id": "elite.given.tarthroat",
+      "part": "given",
+      "name": "Tarthroat"
+    },
+    {
+      "id": "elite.given.thistle",
+      "part": "given",
+      "name": "Thistle"
+    },
+    {
+      "id": "elite.given.wickeye",
+      "part": "given",
+      "name": "Wickeye"
+    },
+    {
+      "id": "elite.given.ochre",
+      "part": "given",
+      "name": "Ochre"
+    },
+    {
+      "id": "elite.given.sootling",
+      "part": "given",
+      "name": "Sootling"
+    },
+    {
+      "id": "elite.given.kettle",
+      "part": "given",
+      "name": "Kettle"
+    },
+    {
+      "id": "elite.given.tinder",
+      "part": "given",
+      "name": "Tinder"
+    },
+    {
+      "id": "elite.given.gravel",
+      "part": "given",
+      "name": "Gravel"
+    },
+    {
+      "id": "elite.given.hackle",
+      "part": "given",
+      "name": "Hackle"
+    },
+    {
+      "id": "elite.epithet.unburied",
+      "part": "epithet",
+      "name": "the Unburied"
+    },
+    {
+      "id": "elite.epithet.twice_drowned",
+      "part": "epithet",
+      "name": "Twice-Drowned"
+    },
+    {
+      "id": "elite.epithet.counts_teeth",
+      "part": "epithet",
+      "name": "Who Counts Teeth"
+    },
+    {
+      "id": "elite.epithet.ash_fed",
+      "part": "epithet",
+      "name": "the Ash-Fed"
+    },
+    {
+      "id": "elite.epithet.quiet",
+      "part": "epithet",
+      "name": "the Quiet"
+    },
+    {
+      "id": "elite.epithet.hums",
+      "part": "epithet",
+      "name": "Who Hums"
+    },
+    {
+      "id": "elite.epithet.skinned",
+      "part": "epithet",
+      "name": "the Skinned"
+    },
+    {
+      "id": "elite.epithet.ninth_hole",
+      "part": "epithet",
+      "name": "of the Ninth Hole"
+    },
+    {
+      "id": "elite.epithet.frostbitten",
+      "part": "epithet",
+      "name": "the Frostbitten"
+    },
+    {
+      "id": "elite.epithet.rope_necked",
+      "part": "epithet",
+      "name": "Rope-Necked"
+    },
+    {
+      "id": "elite.epithet.gnawed",
+      "part": "epithet",
+      "name": "the Gnawed"
+    },
+    {
+      "id": "elite.epithet.waits_below",
+      "part": "epithet",
+      "name": "Who Waits Below"
+    },
+    {
+      "id": "elite.epithet.tally_keeper",
+      "part": "epithet",
+      "name": "Keeper of Tallies"
+    },
+    {
+      "id": "elite.epithet.unblinking",
+      "part": "epithet",
+      "name": "the Unblinking"
+    },
+    {
+      "id": "elite.epithet.wears_faces",
+      "part": "epithet",
+      "name": "Who Wears Faces"
+    },
+    {
+      "id": "elite.epithet.cold_handed",
+      "part": "epithet",
+      "name": "the Cold-Handed"
+    },
+    {
+      "id": "elite.epithet.low_fire",
+      "part": "epithet",
+      "name": "of the Low Fire"
+    },
+    {
+      "id": "elite.epithet.last_awake",
+      "part": "epithet",
+      "name": "the Last Awake"
+    },
+    {
+      "id": "elite.epithet.bent_backed",
+      "part": "epithet",
+      "name": "Bent-Backed"
+    },
+    {
+      "id": "elite.epithet.sawtoothed",
+      "part": "epithet",
+      "name": "the Sawtoothed"
+    },
+    {
+      "id": "elite.epithet.heard_the_hum",
+      "part": "epithet",
+      "name": "Who Heard the Hum"
+    },
+    {
+      "id": "elite.epithet.bunker_born",
+      "part": "epithet",
+      "name": "the Bunker-Born"
+    },
+    {
+      "id": "elite.epithet.patchwork",
+      "part": "epithet",
+      "name": "the Patchwork"
+    },
+    {
+      "id": "elite.epithet.long_armed",
+      "part": "epithet",
+      "name": "the Long-Armed"
+    },
+    {
+      "id": "elite.epithet.keycard_thief",
+      "part": "epithet",
+      "name": "the Keycard Thief"
+    },
+    {
+      "id": "elite.epithet.rust_eaten",
+      "part": "epithet",
+      "name": "the Rust-Eaten"
+    },
+    {
+      "id": "elite.epithet.many_scarred",
+      "part": "epithet",
+      "name": "the Many-Scarred"
+    },
+    {
+      "id": "elite.epithet.ice_walker",
+      "part": "epithet",
+      "name": "the Ice-Walker"
+    },
+    {
+      "id": "elite.epithet.feeds_the_fire",
+      "part": "epithet",
+      "name": "Who Feeds the Fire"
+    },
+    {
+      "id": "elite.epithet.tarp_wrapped",
+      "part": "epithet",
+      "name": "the Tarp-Wrapped"
+    }
+  ]
+}
