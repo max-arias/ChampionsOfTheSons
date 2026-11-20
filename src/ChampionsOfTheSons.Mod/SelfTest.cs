@@ -98,8 +98,11 @@ public static class SelfTest
             Steps.Clear();
             Steps.AddRange(ordered);
         }
-        float t = Time.realtimeSinceStartup - _start - _lag;
-        while (_next < Steps.Count && t >= Steps[_next].At)
+        // Re-read the clock before every step: some steps block for seconds (simulated frames), and a stale t would
+        // hide how late the next phase really is.
+        float Now() => Time.realtimeSinceStartup - _start - _lag;
+        float t = Now();
+        while (_next < Steps.Count && (t = Now()) >= Steps[_next].At)
         {
             var (at, name, step) = Steps[_next++];
             // A phase that starts late (the one before ran long or the game hitched) would otherwise fire all of its
