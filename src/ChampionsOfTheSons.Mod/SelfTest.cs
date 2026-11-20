@@ -14,6 +14,8 @@ public static class SelfTest
     public const string Tag = "[COTS-SELFTEST]";
 
     private static readonly List<(float At, string Name, Action Step)> Steps = new();
+    /// <summary>Seconds the timeline has been pushed back because a phase started late (see <see cref="Update"/>).</summary>
+    private static float _lag;
     private static float _start = -1;
     private static int _next;
     private static int _failures;
@@ -24,8 +26,8 @@ public static class SelfTest
     /// <summary>Seconds to wait after the player is in the world before the first step.</summary>
     private const float SettleTime = 8f;
 
-    /// <summary>Hard limit so a stuck run never keeps the game open.</summary>
-    private const float Timeout = 900f;
+    /// <summary>Hard limit so a stuck run never keeps the game open (below run-selftest.ps1's 1200 s default).</summary>
+    private const float Timeout = 1140f;
 
     private static readonly float LaunchTime = Time.realtimeSinceStartup;
 
@@ -96,10 +98,18 @@ public static class SelfTest
             Steps.Clear();
             Steps.AddRange(ordered);
         }
-        float t = Time.realtimeSinceStartup - _start;
+        float t = Time.realtimeSinceStartup - _start - _lag;
         while (_next < Steps.Count && t >= Steps[_next].At)
         {
-            var (_, name, step) = Steps[_next++];
+            var (at, name, step) = Steps[_next++];
+            // A phase that starts late (the one before ran long or the game hitched) would otherwise fire all of its
+            // steps in one frame: push the rest of the timeline back so every phase keeps its own spacing.
+            if (name.StartsWith("phase ", StringComparison.Ordinal) && t - at > 0.5f)
+            {
+                Log($"{name} started {t - at:0.0} s late; later steps shifted");
+                _lag += t - at;
+                t = at;
+            }
             try
             {
                 step();
