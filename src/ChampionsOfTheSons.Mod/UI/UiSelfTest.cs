@@ -62,14 +62,13 @@ internal static class UiSelfTest
         {
             ("helmet", 1), ("chest_armor", 2), ("pants", 1), ("boot", 2), ("shoulder_armor", 3), ("glove", 0),
             ("amulet", 3), ("bracer", 2), ("ring", 1), ("ring", 2), ("ring", 3), ("weapon", 3), ("weapon", 1),
-            ("shield", 2), ("quiver", 1), ("spell_scroll", 2), ("material", 0),
+            ("shield", 2), ("quiver", 1), ("spell_scroll", 2),
         };
         foreach (var (type, rarity) in wanted)
         {
             var def = roller.PickBase(rarity, level, rng, d => d.Type == type);
             if (def == null) continue;
             var item = roller.RollItem(def, level, rng);
-            if (type == "material") item = item with { Amount = 3 };
             Pc.Inventory.AddToBag(item);
         }
         foreach (var id in new[] { "item.yuki_onna_strides", "item.yuki_onna_greaves" })
@@ -144,7 +143,7 @@ internal static class UiSelfTest
         SelfTest.Check("ui: tooltip built", d != null && d.Title.Length > 0 && d.Body.Length > 0, d?.Body.Replace('\n', '|') ?? "");
         SelfTest.Check("ui: tooltip has compare block", d?.Compare != null, d?.Compare?.Replace('\n', '|') ?? "none");
         var shownItem = Pc.Inventory.Get(other)!;
-        bool formatted = shownItem.Stats.Where(r => r.StatId != LootRoller.EmptySocketStat)
+        bool formatted = shownItem.Stats.Where(r => !LootRoller.IsSocketStat(r.StatId))
             .All(r => d != null && d.Body.Contains(UiText.StatValue(r.StatId, r.Value) + " " + UiText.StatName(r.StatId)));
         SelfTest.Check("ui: rolled stats formatted per definition", formatted, d?.Body.Replace('\n', '|') ?? "");
         Panel.SimulateHover(Inventory.Bag(119));

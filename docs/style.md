@@ -51,7 +51,6 @@ Names follow classic action-RPG conventions (Diablo, Path of Exile) on top of th
 - **Scrolls (spell items):** notes, pages, tapes, manuals, blueprints. Triage Notes, Burned Cult Pages, Cube Folding Manual.
 - **Quivers:** what carries the arrows. Potato Sack, Hollow Log, Humming Quiver.
 - **Sets:** a two-word evocative name that fits the origin: Blood Oath, Whiteout Regalia, The Hushed, Buried Gold, Bunker Protocol, Back Nine. Pieces share the set word.
-- **Materials:** the thing itself, with a state adjective: Uncut / Clear / Shiny Sapphire, then Humming and Cubestruck at the top.
 - **Perks:** plain verb-or-noun phrases a survivor would say. Fortified Ground, Scorched Earth, Lucky Charm. A perk with a spell prefix keeps it (`Focus: Snap Shot`). Flavor is one short line.
 - **Spells:** keep the established names; they are referenced by perks and set bonuses.
 

@@ -3952,306 +3952,6 @@
       "weaponModel": "polearm"
     },
     {
-      "id": "item.crude_feather",
-      "legacyIndex": 173,
-      "name": "Dingy Feather",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "1"
-    },
-    {
-      "id": "item.soft_feather",
-      "legacyIndex": 174,
-      "name": "Downy Feather",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "1"
-    },
-    {
-      "id": "item.ornate_feather",
-      "legacyIndex": 175,
-      "name": "Banded Feather",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "1"
-    },
-    {
-      "id": "item.wonderful_feather",
-      "legacyIndex": 176,
-      "name": "Oilslick Feather",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "1"
-    },
-    {
-      "id": "item.white_crow_s_feather",
-      "legacyIndex": 177,
-      "name": "Snowcrow Quill",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "1"
-    },
-    {
-      "id": "item.reef_shark",
-      "legacyIndex": 178,
-      "name": "Hooked Reef Tooth",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "2"
-    },
-    {
-      "id": "item.tiger_shark_tooth",
-      "legacyIndex": 179,
-      "name": "Serrated Tooth",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "2"
-    },
-    {
-      "id": "item.whale_shark_tooth",
-      "legacyIndex": 180,
-      "name": "Smooth Giant Tooth",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "2"
-    },
-    {
-      "id": "item.great_white_shark_tooth",
-      "legacyIndex": 181,
-      "name": "Hullbiter Tooth",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "2"
-    },
-    {
-      "id": "item.megalodon_s_tooth",
-      "legacyIndex": 182,
-      "name": "The Deep Fang",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "2"
-    },
-    {
-      "id": "item.uncut_sapphire",
-      "legacyIndex": 183,
-      "name": "Chalky Sapphire",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "3"
-    },
-    {
-      "id": "item.clear_sapphire",
-      "legacyIndex": 184,
-      "name": "Polished Sapphire",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "3"
-    },
-    {
-      "id": "item.shiny_sapphire",
-      "legacyIndex": 185,
-      "name": "Faceted Sapphire",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "3"
-    },
-    {
-      "id": "item.enchanted_sapphire",
-      "legacyIndex": 186,
-      "name": "Pulsing Sapphire",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "3"
-    },
-    {
-      "id": "item.celestial_sapphire",
-      "legacyIndex": 187,
-      "name": "Starhollow Sapphire",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "3"
-    },
-    {
-      "id": "item.uncut_moonstone",
-      "legacyIndex": 188,
-      "name": "Milky Moonstone",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "4"
-    },
-    {
-      "id": "item.clear_moonstone",
-      "legacyIndex": 189,
-      "name": "Ringed Moonstone",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "4"
-    },
-    {
-      "id": "item.shiny_moonstone",
-      "legacyIndex": 190,
-      "name": "Gleaming Moonstone",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "4"
-    },
-    {
-      "id": "item.enchanted_moonstone",
-      "legacyIndex": 191,
-      "name": "Waxing Moonstone",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "4"
-    },
-    {
-      "id": "item.celestial_moonstone",
-      "legacyIndex": 192,
-      "name": "Frostring Moonstone",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "4"
-    },
-    {
-      "id": "item.lead_ore",
-      "legacyIndex": 193,
-      "name": "Grimy Lead Ore",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "5"
-    },
-    {
-      "id": "item.vanadium_ore",
-      "legacyIndex": 194,
-      "name": "Hard Vanadium Ore",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "5"
-    },
-    {
-      "id": "item.titanium_ore",
-      "legacyIndex": 195,
-      "name": "Frostproof Titanium",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "5"
-    },
-    {
-      "id": "item.chromium_ore",
-      "legacyIndex": 196,
-      "name": "Mirror Chromium",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "5"
-    },
-    {
-      "id": "item.tungsten_ore",
-      "legacyIndex": 197,
-      "name": "Anvil Tungsten",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 21,
-      "statPools": [],
-      "stackSize": 100,
-      "subtype": "5"
-    },
-    {
       "id": "item.fists_of_nails",
       "legacyIndex": 199,
       "name": "Tenpenny Fists",
@@ -5087,18 +4787,6 @@
       "manual": true
     },
     {
-      "id": "item.socket_drill",
-      "legacyIndex": 237,
-      "name": "Diamondbit Drill",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
       "id": "item.moonwalkers",
       "legacyIndex": 238,
       "name": "Backslide Boots",
@@ -5920,138 +5608,6 @@
           "value": 0.4
         }
       ]
-    },
-    {
-      "id": "item.enzyme_str_34",
-      "legacyIndex": 258,
-      "name": "Ironblood Serum",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.enzyme_int_33",
-      "legacyIndex": 259,
-      "name": "Brightmind Serum",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.enzyme_agi_39",
-      "legacyIndex": 260,
-      "name": "Swiftsap Serum",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.enzyme_vit_449",
-      "legacyIndex": 261,
-      "name": "Brothvial Serum",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.stomach_acid",
-      "legacyIndex": 262,
-      "name": "Gutjuice Jar",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.elite_stomach_acid",
-      "legacyIndex": 263,
-      "name": "Gutfire Flask",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.crimson_solution",
-      "legacyIndex": 264,
-      "name": "Deepvein Elixir",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.weak_armor_hardening_mixture",
-      "legacyIndex": 265,
-      "name": "Greypaste Hardener",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.upgraded_armor_hardening_mixture",
-      "legacyIndex": 266,
-      "name": "Silverpaste Hardener",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.chaos_water",
-      "legacyIndex": 267,
-      "name": "Wriggle Water",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
-    },
-    {
-      "id": "item.upgraded_chaos_water",
-      "legacyIndex": 268,
-      "name": "Shiftwater",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumeAction": "manual"
     },
     {
       "id": "item.gun_blade",
@@ -8665,14 +8221,6 @@
         [
           "stat.armor",
           "stat.damagereduction"
-        ],
-        [
-          "stat.emptysocket",
-          null
-        ],
-        [
-          "stat.emptysocket",
-          null
         ]
       ],
       "set": "set.berserk"
@@ -8817,18 +8365,6 @@
           "stat.armor",
           "stat.damagereduction",
           "stat.allattributes"
-        ],
-        [
-          "stat.emptysocket",
-          null
-        ],
-        [
-          "stat.emptysocket",
-          null
-        ],
-        [
-          "stat.emptysocket",
-          null
         ]
       ],
       "set": "set.berserk"
@@ -8900,18 +8436,6 @@
           "stat.armor",
           "stat.damagereduction",
           "stat.allattributes"
-        ],
-        [
-          "stat.emptysocket",
-          null
-        ],
-        [
-          "stat.emptysocket",
-          null
-        ],
-        [
-          "stat.emptysocket",
-          null
         ]
       ],
       "set": "set.berserk"
@@ -8983,14 +8507,6 @@
           "stat.armor",
           "stat.damagereduction",
           "stat.allattributes"
-        ],
-        [
-          "stat.emptysocket",
-          null
-        ],
-        [
-          "stat.emptysocket",
-          null
         ]
       ],
       "set": "set.berserk"
@@ -9062,18 +8578,6 @@
           "stat.armor",
           "stat.damagereduction",
           "stat.allattributes"
-        ],
-        [
-          "stat.emptysocket",
-          null
-        ],
-        [
-          "stat.emptysocket",
-          null
-        ],
-        [
-          "stat.emptysocket",
-          null
         ]
       ],
       "set": "set.berserk"

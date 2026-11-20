@@ -2488,46 +2488,6 @@
       ]
     },
     {
-      "id": "perk.rerolling",
-      "legacyIndex": 116,
-      "name": "Scrapbench Gamble",
-      "category": "utility",
-      "cost": 0,
-      "levelReq": 5,
-      "stackable": false,
-      "x": -0.75,
-      "y": 1.1,
-      "unlockPath": [],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_crafting_reroll",
-          "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "perk.reforging",
-      "legacyIndex": 117,
-      "name": "Second Forge",
-      "category": "utility",
-      "cost": 0,
-      "levelReq": 10,
-      "stackable": false,
-      "x": -0.25,
-      "y": 1.85,
-      "unlockPath": [
-        "perk.rerolling"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_crafting_reforge",
-          "op": "enable"
-        }
-      ]
-    },
-    {
       "id": "perk.light_the_way",
       "legacyIndex": 118,
       "name": "Bright Vigil",
@@ -3967,52 +3927,6 @@
       ]
     },
     {
-      "id": "perk.polishing",
-      "legacyIndex": 180,
-      "name": "Fine Honing",
-      "category": "utility",
-      "cost": 0,
-      "levelReq": 20,
-      "stackable": false,
-      "x": -1.25,
-      "y": 1.85,
-      "unlockPath": [
-        "perk.rerolling"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_crafting_polishing",
-          "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "perk.empowering",
-      "legacyIndex": 181,
-      "name": "Tempered Gear",
-      "category": "utility",
-      "cost": 0,
-      "levelReq": 25,
-      "stackable": false,
-      "x": -0.75,
-      "y": 2.6,
-      "unlockPath": [
-        "perk.polishing",
-        "perk.reforging"
-      ],
-      "requires": [
-        "perk.polishing",
-        "perk.reforging"
-      ],
-      "effects": [
-        {
-          "stat": "perk_crafting_empowering",
-          "op": "enable"
-        }
-      ]
-    },
-    {
       "id": "perk.luck_enchantment_iii",
       "legacyIndex": 182,
       "name": "Lucky Streak",
@@ -4657,27 +4571,6 @@
           "stat": "spell_parry_attack_speed",
           "op": "add",
           "value": 2.0
-        }
-      ]
-    },
-    {
-      "id": "perk.rerolling_individual_stats",
-      "legacyIndex": 211,
-      "name": "Chisel and Flux",
-      "category": "utility",
-      "cost": 0,
-      "levelReq": 22,
-      "stackable": false,
-      "x": -1.75,
-      "y": 2.6,
-      "unlockPath": [
-        "perk.polishing"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_crafting_rerolling_single_stat",
-          "op": "enable"
         }
       ]
     },

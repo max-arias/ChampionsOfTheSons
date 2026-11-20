@@ -44,7 +44,6 @@ internal sealed class GamepadFeature : IModFeature
         {
             ("inventory", "LeftShoulder+DpadUp", "Inventory"),
             ("perks", "LeftShoulder+DpadRight", "Perks"),
-            ("crafting", "LeftShoulder+DpadDown", "Crafting"),
             ("host_settings", "LeftShoulder+DpadLeft", "Host settings"),
             ("settings", "LeftShoulder+Select", "Mod settings"),
         };
@@ -60,8 +59,6 @@ internal sealed class GamepadFeature : IModFeature
                 () => { if (!CotsUi.Inventory.CloseMenu()) CotsUi.Inventory.Close(); },
                 () => CotsUi.Inventory.PadRoot, () => CotsUi.Inventory.PadMenuRoot),
             new("perks", () => PerksFeature.Panel.IsOpen, () => PerksFeature.Panel.Toggle(), () => PerksFeature.Panel.Close(), () => PerksFeature.Panel.PadRoot),
-            new("crafting", () => Crafting.CraftingFeature.Panel.IsOpen, () => Crafting.CraftingFeature.Panel.Toggle(), () => Crafting.CraftingFeature.Panel.Close(),
-                () => Crafting.CraftingFeature.Panel.PadRoot),
             new("host_settings", () => WorldRulesFeature.Settings.IsOpen, () => { if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close(); else WorldRulesFeature.Settings.Open(); }, () => WorldRulesFeature.Settings.Close(),
                 () => WorldRulesFeature.Settings.PadRoot),
             new("settings", () => Settings.SettingsFeature.Panel.IsOpen, () => Settings.SettingsFeature.Panel.Toggle(), () => Settings.SettingsFeature.Panel.Back(),

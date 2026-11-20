@@ -42,7 +42,7 @@ public sealed record ItemInstance
     public int Amount { get; init; } = 1;
     public IReadOnlyList<RolledStat> Stats { get; init; } = Array.Empty<RolledStat>();
 
-    /// <summary>Times the item was empowered/polished etc. Kept generic for crafting.</summary>
+    /// <summary>Upgrade count. Nothing sets it since crafting was removed (COS-145); kept in saves and the net codec.</summary>
     public int Upgrades { get; init; }
 
     public bool Equals(ItemInstance? other) =>

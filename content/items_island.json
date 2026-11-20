@@ -1923,46 +1923,6 @@
       "statPools": [],
       "consumable": true,
       "legacyIndex": 10055
-    },
-    {
-      "id": "item.golden_tooth",
-      "name": "Golden Tooth",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 40,
-      "maxLevel": 70,
-      "statPools": [],
-      "legacyIndex": 10056
-    },
-    {
-      "id": "item.printer_filament_spool",
-      "name": "Printer Filament Spool",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 25,
-      "maxLevel": 55,
-      "statPools": [],
-      "legacyIndex": 10057
-    },
-    {
-      "id": "item.mutant_marrow",
-      "name": "Mutant Marrow",
-      "type": "material",
-      "rarity": 2,
-      "minLevel": 45,
-      "maxLevel": 75,
-      "statPools": [],
-      "legacyIndex": 10058
-    },
-    {
-      "id": "item.cube_shard",
-      "name": "Cube Shard",
-      "type": "material",
-      "rarity": 3,
-      "minLevel": 100,
-      "maxLevel": 130,
-      "statPools": [],
-      "legacyIndex": 10059
     }
   ]
 }

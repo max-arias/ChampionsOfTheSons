@@ -97,7 +97,7 @@ public sealed class LootRoller
     public bool IsLevelOne(ItemBaseDef d) =>
         d.Type == "material" || (d.Type == "other" && !d.StatPools.SelectMany(p => p).Any(o => o != null && _content.ItemStats.TryGetValue(o, out var s) && s.LevelPow > 0));
 
-    /// <summary>What enemies can drop. First pass: equipment only; materials and consumables stay defined but unused (COS-59).</summary>
+    /// <summary>What enemies can drop: equipment only (COS-59). Materials are gone (COS-145); the hearts come from level rewards.</summary>
     public static bool IsDroppable(ItemBaseDef d) => IsEquippable(d);
 
     /// <summary>A fresh instance of <paramref name="baseDef"/> at <paramref name="level"/>.</summary>
@@ -111,11 +111,6 @@ public sealed class LootRoller
             var option = options.Count == 0 ? null : rng.Pick(options);
             if (option == null || !_content.ItemStats.TryGetValue(option, out var def)) continue;
             stats.Add(RollStat(baseDef, slot, def, level, baseDef.Rarity, rng));
-        }
-        if (IsEquippable(baseDef) && level > 20 && rng.NextDouble() <= 0.175 && _content.ItemStats.ContainsKey(EmptySocketStat))
-        {
-            int sockets = rng.RangeInclusive(1, MaxSockets(baseDef.Type));
-            for (int i = 0; i < sockets; i++) stats.Add(new RolledStat(EmptySocketStat, 0));
         }
         return new ItemInstance { BaseId = baseDef.Id, Level = level, Rarity = (Rarity)baseDef.Rarity, Stats = stats };
     }
@@ -142,7 +137,7 @@ public sealed class LootRoller
     public static RolledStat RollStat(ItemBaseDef baseDef, int slot, ItemStatDef def, int level, int rarity, Rng rng) =>
         new(def.Id, (float)RollValue(def, level, rarity, rng, baseDef.MultiplierFor(slot, def.Id)), slot);
 
-    /// <summary>The lowest and highest value <see cref="RollValue"/> can give for a stat at a level and rarity (crafting preview).
+    /// <summary>The lowest and highest value <see cref="RollValue"/> can give for a stat at a level and rarity (item card ranges).
     /// <paramref name="multiplier"/> replaces the stat's own multiplier (slot multipliers).</summary>
     public static (double Min, double Max) ValueRange(ItemStatDef stat, int level, int rarity, double? multiplier = null)
     {
@@ -189,16 +184,11 @@ public sealed class LootRoller
         return item with { Stats = stats };
     }
 
+    /// <summary>Socket stats are gone with crafting (COS-145); old saves still carry them until the 4 → 5 migration strips them.</summary>
     public static bool IsSocketStat(string statId) => statId.StartsWith("stat.socket", StringComparison.Ordinal) || statId == EmptySocketStat;
 
     public static bool IsEquippable(ItemBaseDef d) => SlotsFor(d.Type).Count > 0;
 
-    public static int MaxSockets(string type) => type switch
-    {
-        "bracer" or "pants" or "shield" or "quiver" or "spell_scroll" => 2,
-        "chest_armor" => 3,
-        _ => 1,
-    };
 
     /// <summary>Equipment slot names an item type can go in.</summary>
     public static IReadOnlyList<string> SlotsFor(string type) => type switch

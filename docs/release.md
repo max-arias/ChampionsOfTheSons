@@ -39,7 +39,7 @@ RedLoader's schema (https://raw.githubusercontent.com/ToniMacaroni/RedLoader/mai
 From sotf-mods.com's rules (https://sotf-mods.com/content-policy, https://sotf-mods.com/developers): the description must say what the mod does, how to install it and what it requires; only RedLoader mods; credit originals; new mods are reviewed before they go public. The upload form itself needs a login and was not checked (fields, image sizes, tags).
 
 - **Name:** Champions of the Sons
-- **Short description:** RPG overhaul: enemy levels and affixes, loot with rarities and stats, perks, spells and crafting; enemies scale with the party and the game's difficulty. Co-op and dedicated servers.
+- **Short description:** RPG overhaul: enemy levels and affixes, loot with rarities and stats, perks, spells and item merging; enemies scale with the party and the game's difficulty. Co-op and dedicated servers.
 - **Description:** the first paragraph of `docs/release/README.txt`, then its Requirements, Install, Multiplayer and Keys sections.
 - **Requirements:** RedLoader 0.8.6. Every player and the dedicated server need the mod, same version.
 - **Dedicated server:** supported (install into the server's Mods folder).

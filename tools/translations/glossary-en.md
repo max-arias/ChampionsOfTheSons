@@ -16,7 +16,7 @@ Armor, Armor piercing, Critical hit (Crit) chance/damage, Headshot, Thorns, Dodg
 "Energy" is the spell resource (mana): do NOT translate it as physical "power/electricity" if the language has a better word for a magic/energy pool; "stamina" is the separate physical resource.
 
 ## Status effects and mechanics
-Bleed, Slow, Weaken, Stun, Ignite/burn, Lifesteal, Knockback, Parry, Stack(s) (a buff counter: "per stack", "up to 5 stacks"), Socket / Empty socket (gem slot in gear), Reforge/Reroll/Upgrade, Magic Find, Massacre (a kill-streak mode), Frenzy (a spell AND its stacks), Berserk (a spell and a set effect), Purge (a spell), Shield (barrier), Projectile, Volley, Spear / Thrown spear, Greatbow, Greatsword, Quiver, Locket, Bracers.
+Bleed, Slow, Weaken, Stun, Ignite/burn, Lifesteal, Knockback, Parry, Stack(s) (a buff counter: "per stack", "up to 5 stacks"), Magic Find, Massacre (a kill-streak mode), Frenzy (a spell AND its stacks), Berserk (a spell and a set effect), Purge (a spell), Shield (barrier), Projectile, Volley, Spear / Thrown spear, Greatbow, Greatsword, Quiver, Locket, Bracers.
 
 ## Tone
 Dark survival-horror with RPG swagger: terse, dry, a little sardonic in flavor/lore lines (like a veteran loot-game narrator who has seen too much). Mechanical lines (`effect`, `unique`, `bonus.N`, `description` of spells and stats) are precise and plain; flavor/lore lines may have wit. Never add explanation, never soften the humor into blandness, never make it cute.

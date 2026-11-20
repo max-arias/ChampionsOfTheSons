@@ -71,7 +71,6 @@ public class ChampionsOfTheSonsMod : SonsMod
             {
                 UI.CotsUi.Inventory?.Close();
                 Perks.PerksFeature.Panel?.Close();
-                Crafting.CraftingFeature.Panel?.Close();
                 HostRules.WorldRulesFeature.Settings?.Close();
                 // Enemies from earlier phases stay in the world: switch them off so they neither cast nor take part in this phase.
                 foreach (var enemy in Bridge.EnemyRegistry.Snapshot()) enemy.TestActive = false;

@@ -2,7 +2,6 @@ using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
-using ChampionsOfTheSons.Mod.Crafting;
 using ChampionsOfTheSons.Mod.Hud;
 using ChampionsOfTheSons.Mod.Loot;
 using ChampionsOfTheSons.Mod.UI;
@@ -12,7 +11,7 @@ using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Followups;
 
-/// <summary>COS-42/43/44/46/47/48/49 in-game checks: reward items, hurt numbers, scrap and previews, event and utility perks, unique flags.</summary>
+/// <summary>COS-42/43/44/46/47/48/49 in-game checks: reward items, hurt numbers, event and utility perks, unique flags.</summary>
 internal static class FollowupsSelfTest
 {
     private static PlayerCharacter Pc => PlayerState.Character;
@@ -25,8 +24,6 @@ internal static class FollowupsSelfTest
         SelfTest.Add(2f, "followups: level-up rewards", LevelRewards);
         SelfTest.Add(3f, "followups: level-up with a full bag", FullBagReward);
         SelfTest.Add(4f, "followups: hurt numbers", HurtNumbers);
-        SelfTest.Add(5f, "followups: scrap", Scrap);
-        SelfTest.Add(6f, "followups: previews", Previews);
         SelfTest.Add(7f, "followups: dodge perks", DodgePerks);
         SelfTest.Add(8f, "followups: adrenaline rush", Adrenaline);
         SelfTest.Add(9f, "followups: capacity perks", Capacity);
@@ -64,9 +61,9 @@ internal static class FollowupsSelfTest
             var onK = new List<string>();
             for (int i = 0; i < enabled.Count; i++)
                 foreach (var b in enabled[i].bindings)
-                    if (enabled[i].name != "crafting_key" && b.effectivePath != null && b.effectivePath.ToLowerInvariant().EndsWith("/k")) onK.Add(enabled[i].name + " " + b.effectivePath);
+                    if (!enabled[i].name.EndsWith("_key", StringComparison.Ordinal) && b.effectivePath != null && b.effectivePath.ToLowerInvariant().EndsWith("/k")) onK.Add(enabled[i].name + " " + b.effectivePath);
             SelfTest.Log($"followups: {enabled.Count} enabled input actions, bound to K: [{string.Join(", ", onK)}]");
-            SelfTest.Check("followups: crafting key K is free in the game's bindings", onK.Count == 0, string.Join(", ", onK));
+            SelfTest.Check("followups: K is free in the game's bindings (mod weapon key)", onK.Count == 0, string.Join(", ", onK));
         }
         catch (Exception e) { SelfTest.Log("followups: input scan failed " + e.Message); }
     }
@@ -121,63 +118,6 @@ internal static class FollowupsSelfTest
         var magic = hud.Numbers.LastColor;
         hud.OnPlayerHurt(30, false, DamageKind.Physical);
         SelfTest.Check("followups: magic damage is colored differently from physical", magic != hud.Numbers.LastColor && magic == DamageNumbers.MagicColor);
-    }
-
-    // ---------------------------------------------------------------- COS-47 / COS-48
-
-    /// <summary>A fixed equippable base of the rarity (a random pick can be a material without stats since the item cut).</summary>
-    private static string Equippable(int rarity, int level) =>
-        ModContent.Db.Items.Values.Where(d => LootRoller.IsEquippable(d) && d.Rarity == rarity && d.MinLevel <= level)
-            .OrderBy(d => d.Id, StringComparer.Ordinal).First().Id;
-
-    /// <summary>Scrap gives materials, which are out of the game for now (COS-59): the mode must not be offered.</summary>
-    private static void Scrap()
-    {
-        var panel = CraftingFeature.Panel;
-        panel.Open();
-        SelfTest.Check("followups: Scrap mode is not offered while drops are equipment only", !CraftingPanel.Modes.Contains(CraftMode.Scrap) && !panel.ModeButtonVisible(CraftMode.Scrap));
-        panel.Close();
-    }
-
-    private static void Previews()
-    {
-        var panel = CraftingFeature.Panel;
-        CraftingSelfTest.UnlockAll();
-        panel.Open();
-        Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        var item = TestKit.Give(Equippable(2, 40), 2, 40);
-        string key = Inventory.Bag(0);
-        panel.Clear();
-        panel.ClickBag(key);
-        var texts = new Dictionary<CraftMode, string?>();
-        foreach (var mode in CraftingPanel.Modes)
-        {
-            panel.SetMode(mode);
-            if (panel.Target == null) panel.ClickBag(key);
-            if (mode is CraftMode.Polish or CraftMode.IndividualReroll) panel.PickStat(0);
-            texts[mode] = panel.PreviewText();
-            SelfTest.Check($"followups: preview text for {mode}", !string.IsNullOrWhiteSpace(texts[mode]), texts[mode] ?? "null");
-        }
-        SelfTest.Check("followups: Empower preview names the player level", texts[CraftMode.Empower]!.Contains(Pc.Progress.Level.ToString()), texts[CraftMode.Empower]);
-        SelfTest.Check("followups: Reroll preview says the result is random", texts[CraftMode.Reroll]!.Contains("random"), texts[CraftMode.Reroll]);
-
-        // Before/after after a real craft.
-        panel.SetMode(CraftMode.Polish);
-        if (panel.Target == null) panel.ClickBag(key);
-        var current = Pc.Inventory.Get(key)!;
-        for (int i = 0; i < current.Stats.Count && panel.BeforeAfter.Length == 0; i++)
-        {
-            panel.Clear();
-            panel.ClickBag(key);
-            var ingredient = TestKit.Give(Equippable((int)current.Rarity, current.Level), (int)current.Rarity, current.Level); // at least the target's rarity
-            // The bag may hold earlier materials: click the slot the ingredient actually went to.
-            var slot = Enumerable.Range(0, LootRoller.BagSlots).Select(Inventory.Bag).FirstOrDefault(k => ReferenceEquals(Pc.Inventory.Get(k), ingredient));
-            if (slot != null) panel.ClickBag(slot);
-            panel.PickStat(i);
-            panel.DoCraft();
-        }
-        SelfTest.Check("followups: before/after shown after a craft", panel.BeforeAfter.Contains("->"), panel.BeforeAfter);
-        panel.Close();
     }
 
     // ---------------------------------------------------------------- COS-49

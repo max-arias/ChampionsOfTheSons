@@ -65,14 +65,9 @@ internal static class ItemDescriber
 
     private static void AppendStats(StringBuilder sb, ItemInstance item)
     {
-        int sockets = 0;
         foreach (var s in item.Stats)
-        {
-            if (s.StatId == LootRoller.EmptySocketStat) { sockets++; continue; }
-            sb.Append(Color(UiTheme.Stat, $"{UiText.StatValue(s.StatId, s.Value)} {UiText.StatName(s.StatId)}")).Append('\n');
-        }
-        if (sockets > 0)
-            sb.Append(Color(UiTheme.TextDim, $"{UiText.T("ui.item.socket", "Empty socket")}{(sockets > 1 ? " ×" + sockets : "")}")).Append('\n');
+            if (!LootRoller.IsSocketStat(s.StatId))
+                sb.Append(Color(UiTheme.Stat, $"{UiText.StatValue(s.StatId, s.Value)} {UiText.StatName(s.StatId)}")).Append('\n');
     }
 
     private static void AppendUnique(StringBuilder sb, ItemInstance item)
@@ -154,7 +149,7 @@ internal static class ItemDescriber
     {
         var sums = new Dictionary<string, double>();
         foreach (var s in item.Stats)
-            if (s.StatId != LootRoller.EmptySocketStat) sums[s.StatId] = sums.GetValueOrDefault(s.StatId) + s.Value;
+            if (!LootRoller.IsSocketStat(s.StatId)) sums[s.StatId] = sums.GetValueOrDefault(s.StatId) + s.Value;
         return sums;
     }
 

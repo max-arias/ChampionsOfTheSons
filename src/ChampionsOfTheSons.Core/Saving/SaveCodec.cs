@@ -22,6 +22,7 @@ public static class SaveCodec
         MarkStatSlotsUnknown, // 1 → 2 (COS-73)
         RemoveDeletedPerks,   // 2 → 3 (COS-86/COS-87)
         CollapseItemRarities, // 3 → 4 (COS-109)
+        RemoveCraftingContent, // 4 → 5 (COS-145)
     };
 
     /// <summary>3 → 4: eight rarities became four (<see cref="Rarities.FromLegacy"/>). Uniques are raised to Legendary on load,
@@ -56,6 +57,74 @@ public static class SaveCodec
     {
         if (save["perks"] is not JsonObject perks) return;
         foreach (var id in DeletedPerks) perks.Remove(id);
+    }
+
+    /// <summary>The crafting perks, removed with crafting (COS-145). They cost 0 points, so nothing is refunded.</summary>
+    public static readonly IReadOnlyList<string> CraftingPerks = new[] { "perk.rerolling", "perk.reforging", "perk.polishing", "perk.empowering", "perk.rerolling_individual_stats" };
+
+    /// <summary>Materials and upgrade items removed with crafting (COS-145): socket gems, the drill, enzymes, acids, solutions,
+    /// mixtures, waters and the island materials.</summary>
+    public static readonly IReadOnlyList<string> DeletedItems = new[]
+    {
+        "item.crude_feather",
+        "item.soft_feather",
+        "item.ornate_feather",
+        "item.wonderful_feather",
+        "item.white_crow_s_feather",
+        "item.reef_shark",
+        "item.tiger_shark_tooth",
+        "item.whale_shark_tooth",
+        "item.great_white_shark_tooth",
+        "item.megalodon_s_tooth",
+        "item.uncut_sapphire",
+        "item.clear_sapphire",
+        "item.shiny_sapphire",
+        "item.enchanted_sapphire",
+        "item.celestial_sapphire",
+        "item.uncut_moonstone",
+        "item.clear_moonstone",
+        "item.shiny_moonstone",
+        "item.enchanted_moonstone",
+        "item.celestial_moonstone",
+        "item.lead_ore",
+        "item.vanadium_ore",
+        "item.titanium_ore",
+        "item.chromium_ore",
+        "item.tungsten_ore",
+        "item.socket_drill",
+        "item.enzyme_str_34",
+        "item.enzyme_int_33",
+        "item.enzyme_agi_39",
+        "item.enzyme_vit_449",
+        "item.stomach_acid",
+        "item.elite_stomach_acid",
+        "item.crimson_solution",
+        "item.weak_armor_hardening_mixture",
+        "item.upgraded_armor_hardening_mixture",
+        "item.chaos_water",
+        "item.upgraded_chaos_water",
+        "item.golden_tooth",
+        "item.printer_filament_spool",
+        "item.mutant_marrow",
+        "item.cube_shard",
+    };
+
+    /// <summary>4 → 5: crafting, materials and sockets are gone (COS-145). Drops the crafting perks, every saved stack of a deleted
+    /// item, and socket stats (filled or empty) from the remaining items.</summary>
+    private static void RemoveCraftingContent(JsonObject save)
+    {
+        if (save["perks"] is JsonObject perks)
+            foreach (var id in CraftingPerks) perks.Remove(id);
+        if (save["slots"] is not JsonObject slots) return;
+        var deleted = new HashSet<string>(DeletedItems, StringComparer.Ordinal);
+        foreach (var key in slots.Select(kv => kv.Key).ToList())
+        {
+            if (slots[key] is not JsonObject item) continue;
+            if (item["baseId"]?.GetValue<string>() is { } baseId && deleted.Contains(baseId)) { slots.Remove(key); continue; }
+            if (item["stats"] is not JsonArray stats) continue;
+            for (int i = stats.Count - 1; i >= 0; i--)
+                if (stats[i]?["id"]?.GetValue<string>() is { } statId && Rules.LootRoller.IsSocketStat(statId)) stats.RemoveAt(i);
+        }
     }
 
     private static readonly Action<JsonObject>[] WorldMigrations =

@@ -109,18 +109,6 @@ internal static class GamepadSelfTest
         });
         SelfTest.Add(t += 1.5f, "pad: wait 2", () =>
         {
-            PadInput.Inject(PadButton.LeftShoulder, PadButton.DpadDown);
-        });
-        SelfTest.Add(t += 0.5f, "pad: crafting by binding", () =>
-        {
-            var panel = Crafting.CraftingFeature.Panel;
-            SelfTest.Check("pad: crafting opened", panel.IsOpen);
-            SelfTest.Check("pad: crafting has focusable controls", panel.PadRoot != null && PadFocus.Count(panel.PadRoot) > 5);
-            PadInput.Inject(PadButton.East);
-        });
-        SelfTest.Add(t += 0.5f, "pad: B closes crafting; spell binding casts", () =>
-        {
-            SelfTest.Check("pad: crafting closed by B", !Crafting.CraftingFeature.Panel.IsOpen);
             GamepadFeature.LastPadCast = -1;
         });
         SelfTest.Add(t += 1.5f, "pad: cast by binding", () =>
@@ -142,7 +130,6 @@ internal static class GamepadSelfTest
         if (_bookSetting.HasValue) { Config.InventoryInBook.Value = _bookSetting.Value; _bookSetting = null; }
         if (Inv.IsOpen) { Inv.CloseMenu(); Inv.Close(); }
         if (PerksFeature.Panel.IsOpen) PerksFeature.Panel.Close();
-        if (Crafting.CraftingFeature.Panel.IsOpen) Crafting.CraftingFeature.Panel.Close();
         if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close();
         PadFocus.Clear();
         PadPointer.Release();

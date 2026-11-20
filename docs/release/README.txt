@@ -1,7 +1,7 @@
 Champions of the Sons
 =====================
 An RPG overhaul for Sons of the Forest: enemy levels and elite affixes, loot with eight rarities and
-rolled stats, sets and unique items, a perk tree, 27 spells, crafting, a kill-streak XP bonus and eleven
+rolled stats, sets and unique items, a perk tree, 27 spells, item merging, a kill-streak XP bonus and eleven
 difficulty tiers from Easy to Hell. Works alone and in co-op (host, client and dedicated server).
 
 Requirements
@@ -21,8 +21,9 @@ Multiplayer
 - Dedicated server: put the same files into the server's Mods folder.
 
 Keys (change them in the RedLoader mod settings, file ChampionsOfTheSons.cfg)
-  I  inventory and character      P  perk tree        K  crafting
-  O  host settings (difficulty)   H  ping              Z X V B N M  spell slots 1-6
+  I  inventory and character      U  perk tree        K  draw weapon
+  O  host settings (extra levels) H  ping             Alt+1 to Alt+6  spell slots 1-6
+  F10  mod settings (rebind any key here)
   Gamepad: LB + D-pad opens the panels.
 
 Admin and cheat commands (host or server admin only)

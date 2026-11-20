@@ -33,12 +33,9 @@ public static class WideReachRules
         return lowest == int.MaxValue ? 0 : lowest;
     }
 
-    /// <summary>COTF's rule: a mod drop is taken if it is a material, or its rarity is at least the lowest equipped rarity.</summary>
-    public static bool Takes(ItemInstance item, ContentDb content, int lowestEquippedRarity)
-    {
-        if (content.Items.TryGetValue(item.BaseId, out var def) && def.Type == "material") return true;
-        return (int)item.Rarity >= lowestEquippedRarity;
-    }
+    /// <summary>COTF's rule: a mod drop is taken if its rarity is at least the lowest equipped rarity (COTF also always took
+    /// materials, which COTS no longer has, COS-145).</summary>
+    public static bool Takes(ItemInstance item, ContentDb content, int lowestEquippedRarity) => (int)item.Rarity >= lowestEquippedRarity;
 
     /// <summary>Whether a game item name is on the loose-pickup list.</summary>
     public static bool IsGamePickup(string? itemName) =>

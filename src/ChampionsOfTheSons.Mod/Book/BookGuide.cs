@@ -28,9 +28,6 @@ internal static class BookGuide
         ("perks", "Perks and spells",
             "Spend perk points in the perk tree ({0}). Some perks unlock spells: put them on the spell bar and cast them with the spell keys.\n\n" +
             "Spells cost energy, which is your stamina bar, and each has a cooldown."),
-        ("crafting", "Crafting",
-            "Open crafting ({0}) to reroll, reforge, polish or empower a piece of gear, using other items as ingredients that are at least as rare. " +
-            "Each mode opens with its perk.\n\nScrap gear you don't need into materials."),
         ("enemies", "Enemies",
             "Enemies match the level of the players near them. The game's difficulty adds levels and makes elites more common.\n\n" +
             "Elites, minibosses and bosses are tougher and use abilities, named on their nameplate. Look at an enemy to read more about it."),
@@ -45,7 +42,7 @@ internal static class BookGuide
         string t = UiText.T($"ui.guide.{id}.title", title);
         if (id == "keys") return (t, KeysBody(accent, faint));
         string b = UiText.T($"ui.guide.{id}.body", body);
-        string key = id switch { "perks" => "perks_key", "crafting" => "crafting_key", _ => "" };
+        string key = id switch { "perks" => "perks_key", _ => "" };
         if (key.Length > 0) b = string.Format(b, $"<color={accent}><b>{KeyNames.Short(ModKeys.Value(key))}</b></color>");
         return (t, b);
     }

@@ -65,7 +65,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Drop on kill if `U ≤ 0.1 × dropChanceMul × magicFind`, or the enemy has any ability.
 - Co-op magic find (COS-81, Max 2026-11-20): the `magicFind` used for a kill's drop chance and rarity is the sum of every player's magic find (each player's multiplier, 1 = no bonus; a missing value counts as 1; a dedicated server counts only the clients), so a group of n players without bonuses rolls with `n` (`KillCredit.TeamMagicFind`). Alone it is the player's own. Each player sends theirs to the host every 3 s; the Character page lists every player's level and magic find and the team total.
 - Count: `U[2,3]` (+`U[2,4]` with 3+ abilities) (+7 Boss / +3 Miniboss) + `clamp(⌊L/50⌋, 1, 8)`, × drop quantity, rounded.
-- Item level = player level by loot level policy; materials and "other" items whose stats do not grow with level (the respec and perk-point hearts) are level 1. The XP heart keeps its level.
+- Item level = player level by loot level policy; "other" items whose stats do not grow with level (the respec and perk-point hearts) are level 1. The XP heart keeps its level.
 - Rarity ✱ (COS-109, Max 2026-11-20): four tiers, Common 0, Magic 1, Rare 2, Legendary 3. The roll is COTF's eight-step climb below (`LootRoller.RollStep`), then folded: steps 0–1 → Common, 2 → Magic, 3–4 → Rare, 5–7 → Legendary (`Rarities.FromLegacy`), so drop pacing is unchanged. Every unique (an item with unique effects, or one of the five hand-coded uniques) is Legendary. Climb: `w = bounty / itemLevel × MF`, `mf = √MF − 1`, fresh U each check, climbing while each step passes:
   - r1: `(w > 20 and U < 0.70 + 0.45mf + 0.075d) or (d > 5 and w > 2000)`
   - r2: `w > 80 and (U < 0.50 + 0.4mf + 0.07d or (w > 2200 and d > 6))`
@@ -75,11 +75,10 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
   - r6: `w > 1440 and U < 0.18 + 0.033mf + 0.003d`, kept if `d > 3 or U < 0.05`
   - r7: `w > 5000 and U < 0.04 + 0.01mf`, kept if `d > 4 or U < 0.001`
 - Base item: uniform among that rarity's items with `minLevel ≤ level`; none → try one rarity lower.
-- ✱ First pass (COS-59): drops are equipment only. Materials and consumables stay defined in `content/` but never drop, and the crafting panel does not offer Scrap. Level-up hearts are still given.
+- ✱ Drops are equipment only (COS-59). The hearts are level-up rewards. There are no materials (COS-145).
 - Stat slots: each pool rolls one option uniformly; `null` = slot stays empty; `*` stands for every common stat (COTF IDs 1–18, 21–26, 31, 34–47, 49–57, 59–67) as separate options, so in `[named, *]` each common stat weighs as much as the named one. Every rolled stat stores its slot index (saved, synced). COTF's `rarity` field on a stat is data only: no roll gates on it.
 - Value: `v = U(min, max) × level^levelPow`; `v = min(v, cap)`; `× multiplier`; `× rarityMult(r)`; `v = min(v, cap)`. `rarityMult = 0.6, 1.0, 1.8, 4.5` (Common, Magic, Rare, Legendary; COS-109). The multiplier is the slot's (`statMultipliers` in items.json, COTF's per-slot `Multipier`; 30 items, often negative, e.g. heavy weapons roll attack speed ×−4 to ×−1.55) when set for that slot and stat, else the stat's own.
 - Carry stats (COTF 1000–1004): while worn, each adds `round(value)` to the game's carry limit of sticks, rocks, ropes, drinks (VodkaBottle, EnergyDrink) or food (Meat, Fish, EnergyBar), through the same pass as the carry perks (`Core/Rules/ItemCarry.cs`).
-- Sockets: equippable, level > 20, `U ≤ 0.175` → `U[1, max]` empty sockets (max 1 most slots; 2 bracer/pants/shield/quiver/scroll; 3 chest). COTF's gems fill a socket with a slot-dependent stat; not built yet (COS-65).
 - Inventory: 120 bag slots (COTF: a fixed 8 x 15 grid; its bag never grows with level or stats, checked 2026-11-19, COS-64); equipment: helmet, chest, pants, boots, shoulders, gloves, amulet, bracer, ring ×2, weapon, offhand (shield/quiver/scroll).
 
 ## Stats and combat
@@ -116,10 +115,6 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Resource Cost Reduction: spell cost ×0.91 per stack (data effect). Quick Silver: Blink's base cooldown −6 s before cooldown multipliers.
 - Utility perks follow the perk texts. Carry-limit perks add to the game's own per-item limit (`ItemData.MaxAmount`), per stack; daily-grant perks give items at each new in-game day, never beyond the carry limit. Items are the game's own item names (`Core/Rules/PerkEffects.cs`): bombs = TimeBomb, dynamite = C4Brick, meds = Pills, booze = VodkaBottle, snacks = EnergyBar and EnergyDrink, meat = Meat and Fish. Not done: Fuel (the game has no fuel-can item), head bombs, crafting furs into cloth (Furs to Fabric), the ammo crafting recipes (More Ammo) and the Rescue Axe recipe (Craftable Plane Axe); the recipes need recipe injection.
 - Spell-event perks (endless_stream, storm_season, endless_storm, wrath_of_the_sun, sudden_rampage, time_of_need, golden_cooldown, falter, enchant_weapon, afterburn, netherflame) are hooked to the spells (COS-49 Log).
-
-## Scrap (COS-47, new rule)
-- Equippable items only. Gives `{1, 1, 2, 4}[rarity] + level / 40` of one random material (type "material"), Legendary for a Legendary item and Rare otherwise, level 1, in one stack. A full bag drops what does not fit at the player's feet.
-- The crafting panel shows a preview per mode (what will change, ranges for Polish, the player level for Empower, "random" for Reroll/Reforge) and a before/after list once crafted.
 
 ## Active enemy abilities (COS-20; this mod's numbers except where noted)
 Host only; each runs only while the enemy is alive and active and is removed the moment it dies, goes dormant or despawns. Rules are in `Core/Rules/ActiveAbilities.cs`; damage is magic (the player's `magic_damage_taken` applies), times the enemy's damage multipliers (rain, Avenger, Sacrifice) and the host's enemy-damage rule. First cast 2-6 s after the enemy becomes active; the cooldown restarts when a cast ends. A cast needs the nearest player inside the range band. `D` = mean of the enemy's level band's Meteor damage.
@@ -203,19 +198,11 @@ Numbers marked *stat* are the original `spell_*` player stats (content/player_st
 - Snow Storm: aimed within 30 m, 8 s, radius 10 m *own*; every 0.5 s *stat* 8 *own* + 0.4 × flat *stat* (× damage mult *stat*), enemies inside move ×0.6 *own*.
 - Ball Lightning: a ball rolls forward at 6 m/s for 10 s *own*; every second enemies within 7 m take a tenth of (1220 + 75 × flat) *stat/own*.
 - Portal: a gate 3 m ahead and a linked gate where the view ray lands (up to 40 m); walking into one leaves from the other; 30 s *stat*, 1.5 s re-entry lock *own*.
-- Wide Reach (COS-85, Max 2026-11-20: it picks things up or pulls them in): an area pickup, no damage. Collects the mod's drops within 5.5 m that are materials or at least as rare as the lowest-rarity equipped item (0 when any equipment slot is empty), through the normal pickup (so co-op keeps the host's single-pickup rule), and the game's loose resource pickups on a list of game item names (`WideReachRules.GamePickups`, the game's own `PickUp.Collect`). Not while pushing a log sled. Greed casts it once a second.
+- Wide Reach (COS-85, Max 2026-11-20: it picks things up or pulls them in): an area pickup, no damage. Collects the mod's drops within 5.5 m that are at least as rare as the lowest-rarity equipped item (0 when any equipment slot is empty), through the normal pickup (so co-op keeps the host's single-pickup rule), and the game's loose resource pickups on a list of game item names (`WideReachRules.GamePickups`, the game's own `PickUp.Collect`). Not while pushing a log sled. Greed casts it once a second.
 - Bash: 30 + 1 × flat to enemies within 4.5 m in an 80° cone, knocked back 3 m, damage taken ×1.3 and speed ×0.4 for 2 s *stat*. Snap Freeze: 40 + 6.5 × flat to enemies within 12 m, speed ×0.2 for 7 s *stat*. Roaring Cheeks: 50 + 5 × flat to enemies within 30 m, speed ×0.8 for 30 s, knocked back 2 × 1.5 m *stat/own*.
 - Projectiles (fly in a line, stop at the first enemy): Firebolt 30 + 1.2 × flat then a burn of 25% of the hit per second for 4 s *own*; Magic Arrow 60 + 4.2 × flat, +1 arrow per volley-count perk *own/stat*; Seeking Arrow 30 + 1 × flat, homes on the nearest enemy for 10 s, slows ×0.9 for 4 s *stat*; Blood Infused Arrow spends 65% of current health (never the last point) and deals spent health × 5 + 0.1 × flat *stat*.
 - Black Flame (toggle): every second enemies within 6 m take 8 + 0.4 × flat *own/stat*. Multishot (toggle): a stand-in for extra arrows: every 0.75 s the nearest enemy within 30 m takes 15 + 1 × flat *own*.
 - Deviations from the original are deliberate placeholders for spells whose original behaviour needed bow/AI hooks: Multishot auto-fires instead of multiplying bow shots; Taunt speeds enemies up instead of redirecting aggro; Portal places both linked gates in one cast, where COTF placed one portal per cast and linked the last two (COS-84).
-
-## Crafting
-Ingredients: exactly N items, each of rarity ≥ the target's; one of each consumed. Targets are equipment only ✱. Each mode shows only once its perk is bought (`CraftingUnlocks`): Reroll `perk.rerolling`, Reforge `perk.reforging`, Polish `perk.polishing`, Empower `perk.empowering`, Individual reroll `perk.rerolling_individual_stats`; a mode whose perk is not in content is ungated. With none bought the panel says how to unlock crafting. Every stat row shows its value and min–max at the item's level and rarity (slot multiplier included).
-- Reroll (N=2): new stat types, values and sockets.
-- Reforge (N=3): another base of the same rarity ✱ and same item type; keeps level; new rolls.
-- Polish (N=1): re-roll one stat's value (its slot multiplier kept); a filled socket is emptied instead; an empty socket is refused and nothing is consumed.
-- Empower (N=9): equippable only; level = player level; re-roll all non-socket values.
-- Individual reroll (N=1): pick a new option from the slot the stat was rolled in (`*` counts as every common stat), other than the current stat and empty options ✱; the panel lists the possible stats.
 
 ## Buffs
 Keyed by source; re-adding a source refreshes duration; amount overwrites, accumulates or takes the max per buff kind. Negative buffs can be blocked by resist (dispel ≤ 1) or immunity (dispel ≤ 2).
@@ -246,9 +233,7 @@ Keyed by source; re-adding a source refreshes duration; amount overwrites, accum
 - Pierce chance: COTF pierced when `U > chance` (inverted). Here `U < chance`.
 - Cataclysm: COTF multiplied by `fireDamage` (0 by default). Here `× (1 + fireDamage)`.
 - Life per second: COTF also added LPS every frame. Here only per second.
-- Reforge keeps the item type (COTF could turn a ring into boots).
-- Individual reroll skips empty (null) options instead of throwing, and never rolls the current stat again.
-- Crafting targets are equipment only: COTF accepted any bag item for Reroll, Reforge and Polish, but materials and consumables have no stats to craft here and do not drop (COS-59).
+- No crafting, Scrap, materials or sockets (COS-145, Max 2026-11-20). COTF's crafting modes (Reroll, Reforge, Polish, Empower, single-stat reroll) and their perks, its socket gems and use-on-item materials (drill, enzymes, acids, solutions, mixtures, waters) and empty-socket rolls are not in COTS. Merge (COS-144) is the only way to change items. Saves from before (PlayerSave v5) drop the crafting perks (they cost 0), deleted material stacks and socket stats.
 - Stat sheet: contributions are sources, not add/subtract pairs (no drift, bools are reference-counted).
 - Deleted perks (COS-86/87, Max 2026-11-20: perks that cannot work in Sons of the Forest are deleted; saves refund the points, PlayerSave v3): `perk.charge_pushback` (Ramming Swing, heavy-attack knockback: the game gives no verified heavy-attack signal).
 - Six uniques keep this mod's own rules (Max 2026-11-20, COS-88): Healer's Blood Bag (COTF: each melee hit puts a DoT of 150% max health over 15 s on the enemy), Biting Band and Gorged Ring (COTF: +1 / +10 stamina per hit, doubled on a crit), Undying Promise (COTF: full heal, 5 s of 98% damage reduction, +35 health per second, 60 s cooldown), Hexed Pants of Mr. M (COTF: ×1.6, and 1.6 stamina regeneration), Death Pact (COTF: 6% per attack), Wind Armor (COTF: move bonus 30 s, damage and armor 10 s). Numbers as under "Unique item flags".

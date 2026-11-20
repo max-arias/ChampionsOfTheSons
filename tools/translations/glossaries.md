@@ -74,10 +74,6 @@ Ignite / burn = 点燃 / 灼烧
 Lifesteal = 生命偷取
 Knockback = 击退
 Stack(s) = 层
-Socket = 插槽
-Empty socket = 空插槽
-Reforge = 重铸
-Reroll = 重置
 Upgrade = 升级
 Massacre = 屠戮
 Shield (barrier) = 护盾
@@ -165,10 +161,6 @@ Ignite = 點燃
 Lifesteal = 吸血
 Knockback = 擊退
 Stack(s) = 層
-Socket = 插槽
-Empty Socket = 空插槽
-Reforge = 重鑄
-Reroll = 重擲
 Upgrade = 升級
 Massacre = 屠殺
 Shield (barrier) = 護盾
@@ -299,10 +291,6 @@ Ignite = sytyttää / palaminen
 Lifesteal = elämänimu
 Knockback = työntö
 Stack = kertymä
-Socket = kolo
-Empty socket = tyhjä kolo
-Reforge = uudelleentaonta
-Reroll = uudelleenarvonta
 Upgrade = päivitys
 Massacre = Verilöyly
 Shield (barrier) = kilpi
@@ -368,10 +356,6 @@ Lifesteal = Vol de vie
 Knockback = Repoussement
 Parry = Parade
 Stack(s) = cumul(s)
-Socket = Châsse
-Empty socket = Châsse vide
-Reforge = Reforger
-Reroll = Relancer
 Upgrade = Améliorer
 Massacre = Massacre
 Frenzy = Frénésie
@@ -430,7 +414,6 @@ Energy Shield = Bouclier d'énergie
 True aim = visée parfaite; Golden resolve = Détermination dorée
 Greater Cooldown Reduction = Réduction supérieure du temps de recharge
 Momentum transfer = Transfert d'élan
-Reforging = Reforge; Rerolling = Relance; Polishing = Polissage; Empowering = Renforcement
 meds = médicaments; booze = alcool; fuel can = jerrican de carburant
 damage multiplier = multiplicateur de dégâts; damage scaling = coefficient de dégâts
 debuff = effet négatif
@@ -484,9 +467,6 @@ Lifesteal = Lebensraub
 Knockback = Rückstoß
 Parry = Parade
 Stack(s) = Stapel (pro Stapel)
-Socket = Sockel (Empty Socket = Leerer Sockel)
-Reforge = Neuschmieden
-Reroll = Neu auswürfeln
 Upgrade = Aufwerten
 Massacre = Massaker
 Shield (barrier) = Schild / Barriere
@@ -545,12 +525,9 @@ Greater Cooldown Reduction = Größere Abklingzeitreduktion
 cooldown rate = Abklingtempo
 spell amplification = Zauberverstärkung
 Carry capacity = Tragkapazität
-Crafting bench tab = Reiter (z.B. Neuschmiede-Reiter)
-Reforging = Neuschmieden; Rerolling = Neu auswürfeln; Polishing = Polieren; Empowering = Ermächtigung
 flintlock = Steinschlosswaffe; molotov = Molotow; bolts = Bolzen; head bombs = Kopfbomben; flare = Leuchtfackel; meds = Medikamente; booze = Schnaps; cloth = Stoff; fuel = Treibstoff
 Magic Arrow / Seeking Arrow / Blood Infused Arrow in effects: used as names without article, e.g. "Magischer Pfeil kann kritisch treffen."
 all damage (+6% all damage) = +6% Gesamtschaden
-Socket gem instruction = In einen leeren Sockel eines Ausrüstungsteils einsetzen, um diesem Gegenstand Werte hinzuzufügen.
 Consume to ... = Verbrauchen, um ...
 cult = Kult; resort = Resort; bunker = Bunker; Hulk (enemy) = Koloss; void = Leere; cannibals = Kannibalen; tribes = Stämme
 Celestial = Himmlisch; Clear = Klar; Damaged/Broken = Beschädigt/Kaputt; pauldrons = Schulterplatten; shoulder pads = Schulterpolster; boots = Stiefel; wristguards = Armschützer
@@ -631,9 +608,6 @@ Lifesteal = furto vitale
 Knockback = respinta
 Stack(s) = cumulo / cumuli
 Charge(s) = carica / cariche
-Socket / Empty socket = Castone / Castone vuoto
-Reforge = Riforgiare
-Reroll = Rilanciare
 Upgrade = Potenziare
 Massacre = Massacro
 Shield (barrier) = scudo (barriera in Sustain Shield description)
@@ -650,7 +624,7 @@ Debuff = effetto negativo
 Spell damage = danno degli incantesimi
 Gear = equipaggiamento
 Kelvin / Virginia = Kelvin / Virginia
-Upgrade = Migliorare (Potenziare = Empower: perk "Empowering" = Potenziamento)
+Upgrade = Migliorare
 Momentum transfer (perk) = Trasferimento di Slancio
 Energy Shield (item) = Scudo Energetico
 Sanctuary = Santuario
@@ -711,10 +685,6 @@ Burn = 燃焼
 Lifesteal = ライフスティール
 Knockback = ノックバック
 Stack(s) = スタック
-Socket = ソケット
-Empty socket = 空きソケット
-Reforge = 再鍛造
-Reroll = リロール
 Upgrade = 強化
 Massacre = 虐殺
 Frenzy = 狂乱
@@ -824,10 +794,6 @@ Lifesteal = 생명력 흡수
 Knockback = 넉백
 Stack = 중첩
 Charge = 충전
-Socket = 소켓
-Empty socket = 빈 소켓
-Reforge = 재련
-Reroll = 재설정
 Upgrade = 강화
 Massacre = 학살
 Shield (barrier) = 보호막
@@ -954,8 +920,6 @@ Ignite / burn = podpalenie / podpalać
 Lifesteal = kradzież życia
 Knockback = odrzut
 Stack = stos (up to 5 stacks = do 5 stosów); charge = ładunek
-Socket = gniazdo; Empty socket = puste gniazdo
-Reforge = przekuć; Reroll = przelosować; Upgrade = ulepszenie
 Massacre = Masakra
 Shield = tarcza (also absorb shield); barrier = bariera
 Energy Shield = Tarcza Energii
@@ -966,7 +930,6 @@ Greater Cooldown Reduction = Większa Redukcja Czasu Odnowienia
 Durability = Twardość (not "wytrzymałość", reserved for stamina)
 Endurance = Wytrwałość
 Crafting bench = stół rzemieślniczy
-Empowering = Wzmacnianie; Polishing = Polerowanie; Reforging = Przekuwanie; Rerolling = Przelosowanie
 Stat = statystyka
 Yard = jard; feet = stóp; meter = metr
 Momentum transfer = Transfer Pędu
@@ -1062,7 +1025,6 @@ Critical hit damage = Критический урон
 Crit = крит
 Damage Reduction = Снижение урона
 Dodge chance = Шанс уклонения
-Empty Socket / Socket = Пустое гнездо / гнездо
 Energy = энергия (Энергия)
 Energy on hit = Энергия за удар
 Energy Per Second = Энергия в секунду
@@ -1100,8 +1062,6 @@ Ignite = поджог / поджигать
 Lifesteal = похищение здоровья
 Knockback = отбрасывание
 Stack(s) = стак(ов)
-Reforge = перековка
-Reroll = переброс
 Upgrade = улучшение
 Debuff = дебафф
 Shield = щит
@@ -1135,7 +1095,6 @@ Spell amplification = усиление заклинаний
 Blizzard (stray name) = Метель
 Shrine = алтарь
 Hulk (enemy) = громила
-Socket stat text = "Вставьте в пустое гнездо снаряжения, чтобы добавить этому предмету параметры."
 Stat (generic) = параметр
 Set piece = Часть комплекта
 Broken = Сломанный; Damaged = Повреждённый
@@ -1193,10 +1152,6 @@ Ignite = Prender fuego / incendiar
 Lifesteal = Robo de vida
 Knockback = Empuje
 Stack(s) = Acumulación(es)
-Socket = Engaste
-Empty socket = Engaste vacío
-Reforge = Reforjar
-Reroll = Relanzar
 Upgrade = Mejorar
 Massacre = Masacre
 Shield (barrier) = Barrera
@@ -1264,7 +1219,6 @@ Endurance = Fortaleza
 cult = secta; cultist = sectario
 Alexander (name) = Alexander
 pauldrons = hombreras; wristguard = muñequera; bracers = brazales; gauntlet = guantelete; greaves = grebas
-Socket it into an empty slot... = Insértalo/Insértala en un engaste vacío de una pieza de equipo para añadir estadísticas a ese objeto.
 Blizzard (perk text) = Ventisca
 Legendary rarity = rareza Legendaria
 resort = complejo (turístico)
@@ -1345,10 +1299,6 @@ Lifesteal = can çalma
 Knockback = geri itme
 Stack(s) = yığın
 Charge(s) = yük
-Socket = yuva
-Empty socket = boş yuva
-Reforge = yeniden dövme
-Reroll = yeniden zarlama
 Upgrade = yükseltme
 Massacre = Katliam
 Shield (barrier) = kalkan
@@ -1384,7 +1334,6 @@ Frame = Gövde
 Sanctuary stays Kutsal Alan ; Blizzard (perk Warmth) = Kar Fırtınası
 Spikes = Dikenler ; hulk (enemy) = Hulk
 Cult = Tarikat ; resort = tatil köyü ; bunker = sığınak
-Socket-gem line = "Bir ekipman parçasındaki boş bir yuvaya takarak o eşyaya özellik ekle."
 Consume = yiyerek / içerek ; stat (item property) = özellik
 Pauldrons = Omuzluklar ; Boots = Botlar ; Gloves = Eldivenler ; Wristguards = Bileklikler/bilek koruyucuları ; Shield (item) = Kalkan
 Pendant = Kolye ; Locket = Madalyon ; Ring = Yüzük ; Quiver = Okluk ; Mantle = Manto

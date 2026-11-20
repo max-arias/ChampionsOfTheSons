@@ -51,15 +51,13 @@ public class ItemSlotAndConsumableTests
       { "id": "max_massacre_time", "kind": "add", "default": 15 },
       { "id": "time_bonus_per_kill", "kind": "add", "default": 7.5 },
       { "id": "cooldown_rate", "kind": "mult", "default": 1 },
-      { "id": "cooldown", "kind": "mult", "default": 1 },
-      { "id": "perk_crafting_reroll", "kind": "bool", "default": 0 }
+      { "id": "cooldown", "kind": "mult", "default": 1 }
     ] }
     """;
 
     private const string Perks = """
     { "perks": [
-      { "id": "perk.tough", "name": "Tough", "category": "Defense", "cost": 1, "effects": [] },
-      { "id": "perk.rerolling", "name": "Rerolling", "category": "Utility", "cost": 0, "effects": [ { "stat": "perk_crafting_reroll", "op": "enable" } ] }
+      { "id": "perk.tough", "name": "Tough", "category": "Defense", "cost": 1, "effects": [] }
     ] }
     """;
 
@@ -69,7 +67,6 @@ public class ItemSlotAndConsumableTests
     });
 
     private LootRoller Loot => new(_db);
-    private Crafting Crafting => new(_db, Loot);
 
     [Fact]
     public void A_negative_slot_multiplier_yields_a_negative_roll_only_in_its_slot()
@@ -100,44 +97,6 @@ public class ItemSlotAndConsumableTests
         Assert.InRange(counts["stat.crit"] / (double)n, 0.47, 0.53);
         Assert.InRange(counts["stat.max_life"] / (double)n, 0.22, 0.28);
         Assert.InRange(counts["stat.damage_reduction"] / (double)n, 0.22, 0.28);
-    }
-
-    [Fact]
-    public void Individual_reroll_uses_the_stored_slot_and_works_from_a_wildcard()
-    {
-        // max_life sits in slot 0 (no alternative) and could also come from slot 1's wildcard: the stored slot decides.
-        var fromWildcard = new ItemInstance
-        {
-            BaseId = "item.mixed", Level = 10, Rarity = Rarity.Magic,
-            Stats = new[] { new RolledStat("stat.crit", 0.02f, 1), new RolledStat("stat.max_life", 20, 0) },
-        };
-        Assert.Empty(Crafting.RerollOptions(fromWildcard, 1));
-        var swapped = fromWildcard with { Stats = new[] { new RolledStat("stat.max_life", 20, 1), new RolledStat("stat.max_life", 20, 0) } };
-        Assert.Equal(new[] { "stat.crit", "stat.damage_reduction" }, Crafting.RerollOptions(swapped, 0).OrderBy(s => s));
-
-        var result = Crafting.Craft(CraftMode.IndividualReroll, swapped, new[] { swapped }, new Rng(3), statIndex: 0);
-        Assert.True(result.Ok);
-        Assert.Equal(1, result.Item!.Stats[0].Slot);
-        Assert.NotEqual("stat.max_life", result.Item.Stats[0].StatId);
-    }
-
-    [Fact]
-    public void Polish_refuses_an_empty_socket()
-    {
-        var rolled = Loot.RollItem(_db.Items["item.maul"], 30, new Rng(4));
-        var item = rolled with { Stats = rolled.Stats.Append(new RolledStat(LootRoller.EmptySocketStat, 0)).ToArray() };
-        var result = Crafting.Craft(CraftMode.Polish, item, new[] { item }, new Rng(5), statIndex: item.Stats.Count - 1);
-        Assert.Equal(CraftError.EmptySocket, result.Error);
-        Assert.Null(result.Item);
-    }
-
-    [Fact]
-    public void Polish_keeps_the_slot_multiplier()
-    {
-        var item = Loot.RollItem(_db.Items["item.maul"], 30, new Rng(6));
-        int idx = item.Stats.ToList().FindIndex(s => s.Slot == 1);
-        var result = Crafting.Craft(CraftMode.Polish, item, new[] { item }, new Rng(7), statIndex: idx);
-        Assert.True(result.Item!.Stats[idx].Value < 0);
     }
 
     [Fact]
@@ -177,16 +136,6 @@ public class ItemSlotAndConsumableTests
         var save = new PlayerSave();
         save.Slots["bag.0"] = SavedItem.From(item);
         Assert.Equal(item, SaveCodec.ReadPlayer(SaveCodec.Write(save)).Slots["bag.0"].ToItem());
-    }
-
-    [Fact]
-    public void A_mode_is_unlocked_by_its_perk_and_ungated_when_the_perk_is_not_in_content()
-    {
-        var pc = new PlayerCharacter(_db);
-        Assert.False(CraftingUnlocks.IsUnlocked(CraftMode.Reroll, pc.Perks, _db));
-        Assert.True(CraftingUnlocks.IsUnlocked(CraftMode.Reforge, pc.Perks, _db)); // perk.reforging is not in this content
-        Assert.Equal(BuyResult.Ok, pc.BuyPerk("perk.rerolling"));
-        Assert.True(CraftingUnlocks.IsUnlocked(CraftMode.Reroll, pc.Perks, _db));
     }
 
     [Fact]

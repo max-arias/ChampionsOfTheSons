@@ -126,4 +126,24 @@ public class SaveCodecTests
         pc.Load(SaveCodec.ReadPlayer(SaveCodec.Write(save)));
         Assert.Equal((Rarity)db.Items["item.ring"].Rarity, pc.Inventory.Get("bag.0")!.Rarity);
     }
+
+    [Fact]
+    public void Version_4_saves_drop_crafting_perks_materials_and_socket_stats()
+    {
+        string perk = SaveCodec.CraftingPerks[0], material = SaveCodec.DeletedItems[0];
+        var v4 = $$"""
+        { "version": 4, "level": 10, "perks": { "{{perk}}": 1, "perk.root": 1 },
+          "slots": {
+            "bag.0": { "baseId": "{{material}}", "level": 1, "rarity": 2, "amount": 7, "stats": [] },
+            "bag.1": { "baseId": "item.ring", "level": 30, "rarity": 1, "amount": 1,
+              "stats": [ { "id": "stat.max_life", "value": 40, "slot": 0 }, { "id": "stat.emptysocket", "value": 0, "slot": -1 },
+                         { "id": "stat.socket_armor", "value": 25, "slot": -1 } ] } } }
+        """;
+        var loaded = SaveCodec.ReadPlayer(v4);
+        Assert.Equal(PlayerSave.CurrentVersion, loaded.Version);
+        Assert.False(loaded.Perks.ContainsKey(perk));
+        Assert.Equal(1, loaded.Perks["perk.root"]);
+        Assert.False(loaded.Slots.ContainsKey("bag.0"));
+        Assert.Equal(new[] { "stat.max_life" }, loaded.Slots["bag.1"].Stats.Select(s => s.Id));
+    }
 }

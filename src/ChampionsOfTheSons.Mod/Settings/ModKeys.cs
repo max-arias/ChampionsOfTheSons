@@ -53,7 +53,6 @@ internal static class ModKeys
         {
             new("inventory_key", "ui.settings.key.inventory", "Inventory"),
             new("perks_key", "ui.settings.key.perks", "Perks"),
-            new("crafting_key", "ui.settings.key.crafting", "Crafting"),
             new("ping_key", "ui.settings.key.ping", "Ping"),
             new("host_settings_key", "ui.settings.key.host_settings", "Host settings"),
             new("weapon_key", "ui.settings.key.weapon", "Draw weapon"),

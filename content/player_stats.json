@@ -1500,36 +1500,6 @@
       "default": 0.0
     },
     {
-      "id": "perk_crafting_reroll",
-      "legacyName": "perk_craftingReroll",
-      "kind": "bool",
-      "default": 0.0
-    },
-    {
-      "id": "perk_crafting_reforge",
-      "legacyName": "perk_craftingReforge",
-      "kind": "bool",
-      "default": 0.0
-    },
-    {
-      "id": "perk_crafting_polishing",
-      "legacyName": "perk_craftingPolishing",
-      "kind": "bool",
-      "default": 0.0
-    },
-    {
-      "id": "perk_crafting_empowering",
-      "legacyName": "perk_craftingEmpowering",
-      "kind": "bool",
-      "default": 0.0
-    },
-    {
-      "id": "perk_crafting_rerolling_single_stat",
-      "legacyName": "perk_craftingRerollingSingleStat",
-      "kind": "bool",
-      "default": 0.0
-    },
-    {
       "id": "perk_is_shield_autocast",
       "legacyName": "perk_isShieldAutocast",
       "kind": "bool",
