@@ -2164,7 +2164,7 @@
  "ui.settings.key.settings": "模组设置",
  "ui.settings.key.spell": "法术栏位 {0}",
  "ui.settings.key.weapon": "拔出武器",
- "ui.settings.keys_hint": "点击一个按键，然后按下新键。按 Esc 取消。",
+ "ui.settings.keys_hint": "点击一个按键，然后按下新键。同时按住 Alt、Ctrl 或 Shift 可设为组合键。按 Esc 取消。",
  "ui.settings.press_key": "请按下一个键...",
  "ui.settings.reset": "重置按键",
  "ui.settings.reset_done": "按键已重置为默认。",

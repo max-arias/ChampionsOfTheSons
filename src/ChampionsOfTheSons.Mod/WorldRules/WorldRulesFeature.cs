@@ -66,7 +66,7 @@ public sealed class WorldRulesFeature : IModFeature
 
         // Close with Escape; the panels take the cursor while open.
         if (Settings.IsOpen && Input.GetKeyDown(KeyCode.Escape)) Settings.Close();
-        else if (Settings.IsOpen && HostSettingsKey.GetAction().WasPressedThisFrame()) Settings.Close();
+        else if (Settings.IsOpen && Mod.Settings.ModKeys.PressedThisFrame(HostSettingsKey)) Settings.Close();
         if (Picker.IsOpen && Input.GetKeyDown(KeyCode.Escape)) Picker.Close();
 
         if (!SelfTest.Enabled &&

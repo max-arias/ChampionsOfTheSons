@@ -17,7 +17,11 @@ internal sealed class SettingsFeature : IModFeature
 
     public void OnGameStart() => ModKeys.ApplyAll();
 
-    public void Update(float dt, bool inWorld) => Panel.Tick();
+    public void Update(float dt, bool inWorld)
+    {
+        Panel.Tick();
+        ModKeys.Tick();
+    }
 
     public void RegisterSelfTests() => SettingsSelfTest.Register();
 }

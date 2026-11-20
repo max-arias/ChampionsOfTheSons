@@ -2164,7 +2164,7 @@
  "ui.settings.key.settings": "Mod settings",
  "ui.settings.key.spell": "Spell slot {0}",
  "ui.settings.key.weapon": "Draw weapon",
- "ui.settings.keys_hint": "Click a key, then press the new one. Esc cancels.",
+ "ui.settings.keys_hint": "Click a key, then press the new one. Hold Alt, Ctrl or Shift with it for a combo. Esc cancels.",
  "ui.settings.press_key": "Press a key...",
  "ui.settings.reset": "Reset keys to defaults",
  "ui.settings.reset_done": "Keys reset to defaults.",
