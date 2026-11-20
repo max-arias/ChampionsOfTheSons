@@ -130,13 +130,31 @@ public static class EnemyPatches
                     ImpactType.Explosion => WeaponClass.Thrown,
                     _ => WeaponClass.Melee,
                 };
-                bool head = weapon == WeaponClass.Ranged && IsHead(__args.Length > 0 ? __args[0] as DamageNode : null);
-                hit = PlayerAttack.Weapon(sheet, weapon, amount, Rng, headshot: head);
-                if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + sheet.Get(CombatStatIds.ExplosionDamage)) * sheet.Get(CombatStatIds.ThrownSpearDamage) };
-                double fire = sheet.Get(StatIds.FireDamage);
+                _extraHits = 0;
+                _shot = null;
+                if (weapon == WeaponClass.Ranged)
+                {
+                    bool head = IsHead(__args.Length > 0 ? __args[0] as DamageNode : null);
+                    double distance = LocalPlayer.Transform != null ? Vector3.Distance(LocalPlayer.Transform.position, __instance.transform.position) : 0;
+                    var shot = new RangedShot(PerkHooks.ShotTracker.KindForHit(), distance, head);
+                    var ranged = RangedRules.Hit(sheet, amount, shot, Rng);
+                    hit = ranged.Hit;
+                    _extraHits = ranged.ExtraHits;
+                    _headshot = ranged.Headshot;
+                    _shot = shot;
+                }
+                else
+                {
+                    hit = PlayerAttack.Weapon(sheet, weapon, amount, Rng);
+                }
+                // Explosions (bombs, molotovs) take the explosion stat; thrown spears are projectiles and get their own multiplier.
+                if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + sheet.Get(CombatStatIds.ExplosionDamage)) };
+                if (weapon == WeaponClass.Melee) hit = hit with { Amount = hit.Amount * MeleeRules.FireDanceMultiplier(sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame")) };
+                double fire = sheet.Get(StatIds.FireDamage) + runtime.Combat.FireMark;
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };
                 hit = Followups.FollowupsFeature.OnLocalHit(hit, weapon);
                 LocalWeaponHit?.Invoke(runtime, weapon);
+                _hitWeapon = weapon;
             }
             else
             {
@@ -147,6 +165,7 @@ public static class EnemyPatches
             }
 
             amount = (float)Mitigate(runtime, EnemyRegistry.HealthOf(__instance), hit, amount, local, forced: false);
+            if (local && amount > 0 && _shot is { } landed) AfterRangedHit(runtime, hit, landed);
         }
         catch (Exception e)
         {
@@ -154,10 +173,56 @@ public static class EnemyPatches
         }
     }
 
-    /// <summary>Everything a landed player hit triggers: life/energy on hit, leech, slow, bleed, weaken, stun.</summary>
+    private static WeaponClass _hitWeapon;
+    private static RangedShot? _shot;
+    private static int _extraHits;
+    private static bool _headshot;
+
+    /// <summary>Extra hits a ranged hit brought (True Aim, Double Spears, area damage), last ranged hit (self-test).</summary>
+    public static int LastExtraHits { get; private set; }
+    public static int LastSplashes { get; private set; }
+
+    /// <summary>After a ranged hit landed: True Aim's extra hits, a second spear, and area damage around the target (COS-86).
+    /// Each goes through the forced-hit path (armor, shields, caps) and procs nothing further.</summary>
+    private static void AfterRangedHit(EnemyRuntime runtime, OutgoingHit hit, RangedShot shot)
+    {
+        var sheet = PlayerState.Character.Stats;
+        int extra = _extraHits;
+        if (Rng.Chance(RangedRules.SecondSpearChance(sheet, shot.Kind))) extra++;
+        _shot = null;
+        _extraHits = 0;
+        LastExtraHits = extra;
+        for (int i = 0; i < extra && runtime.IsActive; i++) DealForced(runtime, hit, creditPlayer: true);
+
+        LastSplashes = 0;
+        bool headshot = _headshot;
+        _headshot = false;
+        if (runtime.Actor == null) return;
+        var center = runtime.Actor.transform.position;
+        Splash(runtime, center, RangedRules.AreaSplash(sheet, hit.Amount, Rng), sheet.Get(RangedStatIds.AreaRadius), hit.ArmorPierce);
+        // Eruption Bow: a headshot splashes half its damage on enemies around the target.
+        if (headshot && sheet.IsOn(UniqueFlagIds.Eruption))
+            Splash(runtime, center, hit.Amount * UniqueTuning.EruptionFraction, UniqueTuning.EruptionRadius, hit.ArmorPierce);
+    }
+
+    private static void Splash(EnemyRuntime target, Vector3 center, double amount, double radius, double pierce)
+    {
+        if (amount <= 0 || radius <= 0) return;
+        foreach (var other in Spells.SpellWorld.EnemiesWithin(center, (float)radius))
+        {
+            if (other == target) continue;
+            DealForced(other, new OutgoingHit(amount, DamageKind.Physical, false, pierce), creditPlayer: true);
+            LastSplashes++;
+        }
+    }
+
+    /// <summary>Everything a landed player hit triggers: life/energy on hit, leech, slow, bleed, weaken, stun, stamina on hit, Smolder Mark.</summary>
     private static void OnPlayerHit(EnemyRuntime runtime, double damage)
     {
         var character = PlayerState.Character;
+        if (_hitWeapon == WeaponClass.Melee) PlayerEffects.AddEnergy(MeleeRules.StaminaOnHit(character.Stats));
+        double mark = PerkRules.SmolderMarkBonus(character.Stats, _hitWeapon != WeaponClass.Melee);
+        if (mark > 0) runtime.Combat.ApplyFireMark(mark, PerkRules.SmolderSeconds);
         var procs = PlayerHitEffects.Roll(character.Stats, damage, Rng);
         PlayerEffects.Heal(procs.Life + UniqueItems.LifeStealFraction(character.Inventory) * damage);
         PlayerEffects.AddEnergy(procs.Energy);

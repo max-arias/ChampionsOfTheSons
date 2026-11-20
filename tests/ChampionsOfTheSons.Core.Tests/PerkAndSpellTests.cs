@@ -63,6 +63,32 @@ public class PerkAndSpellTests
     }
 
     [Fact]
+    public void A_restored_perk_stays_bought_even_when_its_path_is_not_owned()
+    {
+        // COS-70: saves made before a path fix may hold a perk bought through the old (wrong) parent.
+        var tree = new PerkTree(_db);
+        tree.Restore(new Dictionary<string, int> { ["perk.branch"] = 1 }, Array.Empty<string>());
+        Assert.Equal(1, tree.TimesBought("perk.branch"));
+        Assert.Equal(8, tree.AvailablePoints(new Progress(10, 0, 0)));
+    }
+
+    [Fact]
+    public void Content_reports_perks_no_purchase_order_can_reach()
+    {
+        const string cyclic = """
+        { "perks": [
+          { "id": "perk.root", "name": "Root", "category": "defense" },
+          { "id": "perk.a", "name": "A", "category": "defense", "unlockPath": ["perk.b"] },
+          { "id": "perk.b", "name": "B", "category": "defense", "unlockPath": ["perk.a"] },
+          { "id": "perk.c", "name": "C", "category": "defense", "unlockPath": ["perk.root"], "requires": ["perk.a"] }
+        ] }
+        """;
+        var db = ContentDb.Load(new Dictionary<string, string> { ["player_stats.json"] = TestContent.PlayerStats, ["perks.json"] = cyclic });
+        Assert.Equal(new[] { "perk perk.a: not reachable from a root perk", "perk perk.b: not reachable from a root perk", "perk perk.c: not reachable from a root perk" },
+            db.Errors.Where(e => e.Contains("not reachable")));
+    }
+
+    [Fact]
     public void Stackable_perks_apply_once_per_purchase()
     {
         var tree = new PerkTree(_db);

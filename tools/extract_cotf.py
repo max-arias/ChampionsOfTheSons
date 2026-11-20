@@ -490,6 +490,9 @@ def translations():
     return {m.group(1): m.group(2).replace("\\n", " ").replace('\\"', '"') for m in pat.finditer(src)}
 
 
+PERK_ALT_ID = 151
+
+
 def perks():
     src = read("Player/Perks/PerkDatabase.cs")
     tr = translations()
@@ -541,7 +544,9 @@ def perks():
         if "canBuy" in fields:
             perk["canBuyManual"] = True
         out.append(perk)
-    by_index = {p["legacyIndex"]: p["id"] for p in out}
+    # COTF defines runtime perk 151 twice (single-player / multiplayer alternates); only one exists at
+    # runtime, so unlock references to a runtime ID above 151 point at block index ID + 1 (COS-70).
+    by_index = {i: out[i if i <= PERK_ALT_ID else i + 1]["id"] for i in range(len(out) - 1)}
     for p in out:
         p["unlockPath"] = [by_index[i] for i in p["unlockPath"] if i >= 0 and i in by_index]
         p["requires"] = [by_index[i] for i in p["requires"] if i >= 0 and i in by_index]

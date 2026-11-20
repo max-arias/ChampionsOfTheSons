@@ -1634,12 +1634,6 @@
       "default": 0.0
     },
     {
-      "id": "perk_charged_atk_knockback",
-      "legacyName": "perk_chargedAtkKnockback",
-      "kind": "bool",
-      "default": 0.0
-    },
-    {
       "id": "i_great_bow_ignites",
       "legacyName": "i_greatBowIgnites",
       "kind": "bool",

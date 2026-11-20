@@ -137,9 +137,17 @@ internal static class StatSelfTest
             EquipStats(("stat.explosiondamage", 1f));
             double d1 = HitDamage(E[5]!, 5f, ImpactType.Explosion);
             SelfTest.Check("explosion damage ×2", d0 > 0 && Math.Abs(d1 / d0 - 2) < 0.1, $"{d0:0.00} -> {d1:0.00}");
+            // COS-86: the spear stat changes thrown-spear projectile hits, not explosions.
+            Unequip();
+            PerkHooks.ShotTracker.Record(474); // CraftedSpear
+            double s0 = HitDamage(E[5]!, 5f, ImpactType.Projectile);
             EquipStats(("stat.speardamage", 0.5f));
-            double d2 = HitDamage(E[5]!, 5f, ImpactType.Explosion);
-            SelfTest.Check("thrown spear damage changes the hit", d2 > 0 && Math.Abs(d2 - d0) > 0.01 * d0, $"{d0:0.00} -> {d2:0.00}");
+            PerkHooks.ShotTracker.Record(474);
+            double d2 = HitDamage(E[5]!, 5f, ImpactType.Projectile);
+            SelfTest.Check("thrown spear damage changes a thrown spear hit", d2 > 0 && Math.Abs(d2 - s0) > 0.01 * s0, $"{s0:0.00} -> {d2:0.00}");
+            double e2 = HitDamage(E[5]!, 5f, ImpactType.Explosion);
+            SelfTest.Check("thrown spear damage leaves explosions alone", Math.Abs(e2 - d0) < 0.01 * d0, $"{d0:0.00} -> {e2:0.00}");
+            PerkHooks.ShotTracker.Reset();
         });
 
         SelfTest.Add(T0 + 8, "stats: fire damage on a burning enemy", () =>
@@ -314,5 +322,11 @@ internal static class StatSelfTest
             if (!atRight || !more || !reaches) { bad++; SelfTest.Log($"set {set.Id}: pieces {items.Count}, min {minPieces}, first {mods.Count} mods, all {all.Count} mods, reaches sheet {reaches}"); }
         }
         SelfTest.Check($"set bonuses apply at their piece counts and reach the sheet ({sets} sets)", bad == 0, $"{bad} sets off");
+
+        // COS-88: every stat a unique item or a set bonus sets has a reader, or is dropped with a reason.
+        var uniqueAndSet = Db.Items.Values.SelectMany(i => i.UniqueEffects.Select(e => (Who: i.Id, e.Stat)))
+            .Concat(Db.Sets.Values.SelectMany(st => st.Bonuses.SelectMany(b => b.Effects.Select(e => (Who: st.Id, e.Stat)))))
+            .Where(x => StatCoverage.Classify(x.Stat) == null).Select(x => $"{x.Who}->{x.Stat}").Distinct().ToList();
+        SelfTest.Check("every unique-item and set-bonus stat has a reader or is dropped with a reason", uniqueAndSet.Count == 0, string.Join("; ", uniqueAndSet.Take(12)));
     }
 }

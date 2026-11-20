@@ -86,13 +86,14 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Gargantuan/Tiny set the actor's scale; speed is the profile speed times every slow/stun/rain factor, applied to the actor's animator.
 - Player on-hit stats: life/energy on hit (× all recovery), chance to slow (×0.5 speed, 8 s), bleed (hit/20 per s, 10 s) and weaken (×1.2 damage taken, 8 s), hammer stun (`i_hammer_stun_amount` chance, `i_hammer_stun_duration` s). DoTs are pure damage (no armor) but meet steadfast caps and shields. Thorns = `(thorns + per-STR·STR + per-VIT·VIT) × thornsDmgMult` back at the enemy that hit you, ignoring `thorns_armor_piercing` of its armor. Fire damage multiplies hits on burning enemies by `1 + fireDamage`. Explosion damage multiplies thrown/explosive hits by `1 + explosionDamage`.
 - Energy is the game's stamina bar for now: max = vanilla × `MaxEnergy/100`; regeneration adds `staminaPerSecond + energyPerSecond` plus the game's own rate × (energy recovery multiplier / 2 − 1). Attack speed and attack cost scale the held melee weapon's data (and ranged fire delay); projectile speed, size and pierce scale the held ranged weapon's bullet data (pierce raises bullet weight up to ×4).
-- Unique items (new rules): Leechband (`item.vampiric_band`) 3% leech; Bloatstone Ring (`item.vampire_ring`) 6% leech and 5% max health per kill; Bloodsack Talisman (`item.lama_mega_s_blood_bag`) 1% max health per second below half health; Bloodsworn Legguards (`item.undying_promise`): a lethal hit leaves 30% health, once per 300 s; Clearpulse Heart: use to respec.
+- Unique items (new rules, kept on purpose: Max 2026-11-20, COS-88; see Deviations): Leechband (`item.vampiric_band`) 3% leech; Bloatstone Ring (`item.vampire_ring`) 6% leech and 5% max health per kill; Bloodsack Talisman (`item.lama_mega_s_blood_bag`) 1% max health per second below half health; Bloodsworn Legguards (`item.undying_promise`): a lethal hit leaves 30% health, once per 300 s; Clearpulse Heart: use to respec.
 - Dropped for now: rafts. Spell-number stats are read by the spell system (`StatCoverage.Spells`). Unique flags and `weapon_range`: see "Unique item flags" below (COS-42).
 
 ## Unique item flags (COS-42, this mod's own numbers; the item text is the spec)
 - Implemented (`Core/Rules/UniqueFlags.cs`, `Followups/`): **Scarsworn Blade** (`item.king_qruies`) adds the last physical damage taken as flat damage to melee hits. **Skullbond Pauldrons** (`item.death_pact`): each attack costs 7% of max health (never the last point) and damage is `1 + 0.05 × missing health percent`. **Ceaseless Trousers** (`item.hexed_pants_of_mr_m`): ×1.4 damage and ×1.4 stamina regeneration while moving; after 1 s standing still, 1% of max health per second drains (never lethal). **Wreckwing Cuirass** (`item.wind_armor`): a dodge heals 5% of max health and gives ×1.2 movement, ×1.35 damage and +2000 armor for 5 s. **Infinity Loop** (Everturn Pendant `item.pendant_of_perpetual_rebirth`, Voidsplit Pendant `item.destroyed_void_shard`): each melee or ranged hit takes 1 s off one random spell cooldown that is running.
 - Spell items (after COS-26): **The Hung Quiver** (`item.crossfire`): a projectile hit fires a free Magic Arrow at the target, at most once per 2 s x the cooldown stat. **Steadyhold Bracers** (`item.grip_of_sora`): Multishot cast and upkeep cost x0.8; each volley fires 4 extra projectiles at the next nearest enemies (left-over ones hit the main target). **Ashthorn Circlet** (`item.withered_crown`): one Blood Infused Arrow cast (one health cost) fires 5 arrows in a fan. **Gildspike Boots** (`item.greed`): Wide Reach casts itself once a second, free. **The Last Filament** (`item.the_spark_of_light_in_the_darkness`): a Black Hole that hit 5 or more different enemies releases a Ball Lightning from its center when it ends.
-- Dropped, with reasons: `i_archangel_bow` (needs a second player: co-op, COS-13), `i_great_bow_ignites` and `fire_duration` / `fire_tick_rate` (a test enemy could not be ignited through the game's burn API; unverifiable headless), `i_smokey_crossbow_quiver` (no verified way to tell a crossbow shot from other ranged hits), `smash_damage` (no verified heavy-attack signal; `heavy_attack_dmg` is unused for the same reason), `i_eruption_bow` (explosion effect needs visuals; headshot splash can be added once headshots are verified in play), `weapon_range` (would need collider or weapon-scale changes).
+- **Eruption Bow** (`i_eruption_bow`, COS-88): a ranged headshot splashes 50% of its damage on other enemies within 4 m.
+- Dropped, with reasons (`StatCoverage.Dropped`): `i_archangel_bow` (needs a second player: co-op, COS-13), `i_great_bow_ignites` and `fire_duration` / `fire_tick_rate` (a test enemy could not be ignited through the game's burn API; unverifiable headless), `i_smokey_crossbow_quiver` (crossbow shots can be told apart now, COS-86, but the bolt explosion has no verified hook), `smash_damage` (no verified heavy-attack signal; `heavy_attack_dmg` is unused for the same reason), `weapon_range` (would need collider or weapon-scale changes), `spell_snowstorm_max_charge` (Snow Storm has no charges yet, COS-83), `debuff_resistance` (COS-89), `perk_golden_resolve` (rule not defined yet).
 
 ## Event and utility perks (COS-49)
 - Improved Dodges: a dodge heals 5% of max health. Deployable Shield: a dodge grants a shield of 15% of max health for 8 s (Bulwark Reflex: 25%); it soaks damage before health. (New rules.)
@@ -124,7 +125,39 @@ Not synced yet: the host applies effects to its own player; track E decides how 
 
 ## Perks
 - Fields: id, name, category (MeleeOffense, RangedOffense, MagicOffense, Defense, Support, Utility), unlock path (any one of), requirements (all of), cost, level requirement, stackable (no max), tree position, effects.
-- Buy: points ≥ cost, path and requirements met, level met, not bought unless stackable. Each purchase applies the effects again. No single refund; respec unbuys all perks and spells and sets points = level + permanent bonus.
+- Buy: points ≥ cost, path and requirements met, level met, not bought unless stackable, and a perk's custom condition (`canBuyManual`): Heavy Hands needs attack speed above 110%, Slow Release projectile speed above 110%. Each purchase applies the effects again. No single refund; respec unbuys all perks and spells and sets points = level + permanent bonus.
+- Unlock paths (COS-70): COTF defines runtime perk 151 twice (single-player and multiplayer alternates; COTS ships both), so every path or requirement reference to a runtime ID above 151 means block index ID + 1. Content check fails when a perk cannot be reached from a root. Saves keep perks bought through an older path.
+- Spent points are derived from the bought perks; a perk deleted from content is removed from saves by a migration, so its points come back.
+
+### Ranged and melee perks (COS-86)
+- Weapon kind: every player projectile, thrown spears included, leaves through the game's `RangedWeapon`, which knows its item; a projectile hit within 15 s of a shot is credited to the last fired item, whose name gives the kind (bow, crossbow, firearm, slingshot, thrown spear).
+- Ranged hit: `(proj + rangedFlat) × crit × Ranged × weapon × size × (1 + metres × perMetre) × 0.75^i × headshot × True Aim`. weapon: bow `perk_bow_damage_mult`, crossbow `perk_crossbow_damage_mult`, firearm `perk_bullet_damage_mult`, thrown spear `perk_thrown_spear_damage_mult`. size: projectile size with Size Matters. Speed Matters: crit multiplier + (projectile speed − 1). metres: player to target when the hit lands.
+- Headshots: a head collider, or a rolled chance for firearms (`perk_bullet_crit_chance`, 10% base) and thrown spears (`perk_thrown_spear_crit_chance`, 5% base).
+- True Aim (perk, Bunker Protocol 5): an arrow or bolt headshot beyond 60 ft (18.3 m) deals ×1.5 and hits once more; Palelight Cuirass: beyond 120 ft (36.6 m) ×5 and two more hits. Not Seeking Arrow.
+- Spears: Piercing makes a thrown spear pierce `3 × ranged pierce + melee pierce`. Double Spears: a thrown spear that hit lands a second hit with 40% (+6% per Spears stack).
+- Ammo: Reusability, Endless Quiver and the quivers give a chance that a spent round returns to the game inventory (`RangedWeaponController.OnAmmoSpent`).
+- Area damage: with `area_damage` > 0, a ranged hit splashes `hit × area_damage` on enemies within `area_damage_radius` with `area_damage_chance` (nothing in content grants it yet).
+- Explosions take only `explosion_damage`; thrown spears take only their own multiplier.
+- Melee: Combat Regen restores 3 stamina per landed melee hit per stack. Ember Heart: while Black Flame burns, melee damage × (1 + attack speed × 1.1) and Black Flame's upkeep × attack speed. Measured Breath: while Black Flame burns, the swing speed the game gets is fixed at ×2.
+- Thorns: `(thorns + per-STR + per-VIT) × thorns mult × melee increased damage × all damage`.
+
+### Magic, defense, support and utility perks (COS-87)
+- Infinity: every cast multiplies the remaining cooldown of all six slots by 0.95. Gilded Pace: Golden Skin's base cooldown −15 s (only Golden Skin).
+- Dense Matter: enemy Black Holes do not pull the player. Warmth: inside an enemy Blizzard the player moves ×0.8 instead of ×0.55.
+- Autocast Sustain Shield: with Sustain Shield on the bar and energy at 90% or more, the shield fills by itself for 10 energy per second.
+- Smolder Mark: every landed weapon hit marks the enemy for 15 s; fire damage-over-time on it (Firebolt burn, Parry ignite) deals ×(1 + bonus), and hits on a burning enemy add the bonus to fire damage. bonus = `(1 + spellFlat/3) × Spell × (1 + fireDamage) × 0.35` (0.3 for ranged hits).
+- Light the Way: flashlight intensity × the intensity stat (+100% per stack), battery drain ÷ the battery stat.
+- Momentum Transfer: landing after 0.2 s in the air gives move speed ×1.25 for 0.5 s × jump power; Bunny Hopping ×1.6 for 0.75 s × jump power.
+
+### Spell items (COS-88)
+- Blink range = `spell_blink_range` (15 m, items add). Phase Pauldrons: Blink strikes every enemy within 1.5 m of its path for `spell_blink_damage` + `spell_blink_damage_scaling` × spell flat. Tearing Spacetime: an exit blast of `40 × movement speed + 2 × flat` within `max(2, 0.2 × distance)` m.
+- Iron horns: War Cry adds 10% of the player's armor; the greater horn also damage taken ×0.9.
+- Jagged Edge: Bash bleeds the enemy for 30% of the damage per second for the slow's duration, with `spell_bash_bleed_chance`. Bloodthirster: Bash heals and restores energy by `spell_bash_lifesteal` × damage.
+- Alexander's Shield: a hit taken triggers Parry by itself (20%) when Parry is on the bar and ready; it then cools down.
+- Purgatory: Purge gives all damage ×(1 + 3 × missing health fraction) for 10 s.
+- Frenzy items: `spell_frenzy_active_crit_chance` adds crit chance while Frenzy runs. Flame Pauldrons: Firebolt costs `spell_firebolt_energy_cost − 5` more energy. Healing Dome bracer: its cooldown runs `1 + spell_healing_dome_cooldown_rate` times as fast and costs × `spell_healing_dome_spell_cost_reduction`.
+- Mysterious Robe (and The Hushed 5): the arcane Cataclysm deals ×1.5 and slows enemies inside to ×0.2.
+- Sets: a bonus marked `perPiece` applies once per equipped piece (Whiteout Regalia 1, Blood Oath 1, as COTF).
 
 ## Spells
 - Fields: id, level requirement, energy cost, base cooldown, channeled, cast on release.
@@ -147,7 +180,7 @@ Numbers marked *stat* are the original `spell_*` player stats (content/player_st
 - Snow Storm: aimed within 30 m, 8 s, radius 10 m *own*; every 0.5 s *stat* 8 *own* + 0.4 × flat *stat* (× damage mult *stat*), enemies inside move ×0.6 *own*.
 - Ball Lightning: a ball rolls forward at 6 m/s for 10 s *own*; every second enemies within 7 m take a tenth of (1220 + 75 × flat) *stat/own*.
 - Portal: a gate 3 m ahead and a linked gate where the view ray lands (up to 40 m); walking into one leaves from the other; 30 s *stat*, 1.5 s re-entry lock *own*.
-- Wide Reach: 20 + 1 × flat to every enemy within 5.5 m in a 140° cone *own*.
+- Wide Reach (COS-85, Max 2026-11-20: it picks things up or pulls them in): an area pickup, no damage. Collects the mod's drops within 5.5 m that are materials or at least as rare as the lowest-rarity equipped item (0 when any equipment slot is empty), through the normal pickup (so co-op keeps the host's single-pickup rule), and the game's loose resource pickups on a list of game item names (`WideReachRules.GamePickups`, the game's own `PickUp.Collect`). Not while pushing a log sled. Greed casts it once a second.
 - Bash: 30 + 1 × flat to enemies within 4.5 m in an 80° cone, knocked back 3 m, damage taken ×1.3 and speed ×0.4 for 2 s *stat*. Snap Freeze: 40 + 6.5 × flat to enemies within 12 m, speed ×0.2 for 7 s *stat*. Roaring Cheeks: 50 + 5 × flat to enemies within 30 m, speed ×0.8 for 30 s, knocked back 2 × 1.5 m *stat/own*.
 - Projectiles (fly in a line, stop at the first enemy): Firebolt 30 + 1.2 × flat then a burn of 25% of the hit per second for 4 s *own*; Magic Arrow 60 + 4.2 × flat, +1 arrow per volley-count perk *own/stat*; Seeking Arrow 30 + 1 × flat, homes on the nearest enemy for 10 s, slows ×0.9 for 4 s *stat*; Blood Infused Arrow spends 65% of current health (never the last point) and deals spent health × 5 + 0.1 × flat *stat*.
 - Black Flame (toggle): every second enemies within 6 m take 8 + 0.4 × flat *own/stat*. Multishot (toggle): a stand-in for extra arrows: every 0.75 s the nearest enemy within 30 m takes 15 + 1 × flat *own*.
@@ -175,3 +208,15 @@ Keyed by source; re-adding a source refreshes duration; amount overwrites, accum
 - Individual reroll skips empty (null) options instead of throwing, and never rolls the current stat again.
 - Crafting targets are equipment only: COTF accepted any bag item for Reroll, Reforge and Polish, but materials and consumables have no stats to craft here and do not drop (COS-59).
 - Stat sheet: contributions are sources, not add/subtract pairs (no drift, bools are reference-counted).
+- Deleted perks (COS-86/87, Max 2026-11-20: perks that cannot work in Sons of the Forest are deleted; saves refund the points, PlayerSave v2): `perk.charge_pushback` (Ramming Swing, heavy-attack knockback: the game gives no verified heavy-attack signal).
+- Six uniques keep this mod's own rules (Max 2026-11-20, COS-88): Healer's Blood Bag (COTF: each melee hit puts a DoT of 150% max health over 15 s on the enemy), Biting Band and Gorged Ring (COTF: +1 / +10 stamina per hit, doubled on a crit), Undying Promise (COTF: full heal, 5 s of 98% damage reduction, +35 health per second, 60 s cooldown), Hexed Pants of Mr. M (COTF: ×1.6, and 1.6 stamina regeneration), Death Pact (COTF: 6% per attack), Wind Armor (COTF: move bonus 30 s, damage and armor 10 s). Numbers as under "Unique item flags".
+- Wide Reach: the pickup radius is this mod's 5.5 m (COTF 7.5 m).
+- Weapon kind: a projectile hit is credited to the last shot within 15 s (the game's damage call does not carry the weapon).
+- Pierce: still the bullet-weight approximation (pierce raises bullet weight up to ×4), not COTF's pass-through roll.
+- Double Spears: the second spear is an immediate extra hit on the same target, without a second projectile.
+- True Aim numbers follow the COTS texts: ×1.5 and one more hit beyond 60 ft; the cuirass ×5 and two more hits beyond 120 ft (COTF: ×10 beyond 120 m).
+- Smolder Mark raises fire damage-over-time and hits on burning enemies; COTF raised the enemy's fire bonus, which only matters while it burns.
+- Warmth: only the move slow (COTS Blizzards slow movement only and take no armor).
+- Thorns ignore `thorns_armor_piercing` as a fraction of the attacker's armor; COTF stripped a flat amount of armor instead.
+- Autocast Sustain Shield costs 10 energy per second (COTF: 10 stamina; energy is the stamina bar here).
+- This mod's numbers where COTF's are unknown: Alexander's Shield 20%, Purgatory ×(1 + 3 × missing) for 10 s, Tearing Spacetime 40 × move speed + 2 × flat within max(2 m, 20% of the distance), arcane Cataclysm ×1.5 and ×0.2 slow.

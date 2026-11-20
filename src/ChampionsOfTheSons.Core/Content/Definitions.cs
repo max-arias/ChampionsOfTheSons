@@ -210,5 +210,7 @@ public sealed class SetBonus
 {
     /// <summary>Pieces needed; every bonus with Pieces ≤ equipped count applies.</summary>
     public int Pieces { get; set; }
+    /// <summary>The bonus applies once for every equipped piece of the set, not once (COTF's per-piece set bonuses, COS-88).</summary>
+    public bool PerPiece { get; set; }
     public List<StatEffect> Effects { get; set; } = new();
 }

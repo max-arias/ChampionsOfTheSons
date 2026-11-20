@@ -133,7 +133,9 @@ internal sealed class BlizzardInstance : AuraInstance
 {
     public BlizzardInstance(EnemyRuntime e) : base(e, ActiveAbilityRules.Spec(EnemyAbility.Blizzard), new Color(0.75f, 0.9f, 1f)) { }
 
-    protected override void InsideEachFrame(Vector3 player) => AbilityForces.AddSlow(Key, ActiveAbilityRules.BlizzardSlow, 0.4f);
+    // Warmth (perk, COS-87): the local player's slow inside a Blizzard is much weaker.
+    protected override void InsideEachFrame(Vector3 player) =>
+        AbilityForces.AddSlow(Key, PlayerState.Character.Stats.IsOn(PerkStatIds.BlizzardSlowReduced) ? PerkRules.WarmBlizzardSlow : ActiveAbilityRules.BlizzardSlow, 0.4f);
 }
 
 internal sealed class RadianceInstance : AuraInstance
@@ -313,7 +315,9 @@ internal sealed class BlackHoleInstance : CastInstance
             if (dist >= Spec.Radius) continue;
             // Only the local player can be pulled (co-op: the owner applies the pull to their own character).
             var dir = (_center - (p + Vector3.up)).normalized;
-            AbilityForces.SetPull(Key, dir * (float)ActiveAbilityRules.BlackHolePull(dist, Spec.Radius), 0.5f);
+            // Dense Matter (perk, COS-87): the local player is not pulled.
+            if (!PlayerState.Character.Stats.IsOn(PerkStatIds.BlackHolePullImmune))
+                AbilityForces.SetPull(Key, dir * (float)ActiveAbilityRules.BlackHolePull(dist, Spec.Radius), 0.5f);
             if (damage && ActiveAbilityRules.InBlackHoleCore(dist, Spec.Radius))
                 AbilityDamage.HitPlayer(Enemy, EnemyAbility.BlackHole, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, EnemyAbility.BlackHole, Rng));
         }

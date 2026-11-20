@@ -250,7 +250,7 @@ public static class ItemEffects
         return counts;
     }
 
-    /// <summary>Modifiers from every set bonus whose piece count is reached.</summary>
+    /// <summary>Modifiers from every set bonus whose piece count is reached; a per-piece bonus applies once per equipped piece.</summary>
     public static List<StatModifier> SetBonuses(IEnumerable<ItemInstance> equipped, ContentDb content)
     {
         var mods = new List<StatModifier>();
@@ -259,7 +259,8 @@ public static class ItemEffects
             if (!content.Sets.TryGetValue(setId, out var set)) continue;
             foreach (var bonus in set.Bonuses)
                 if (count >= bonus.Pieces)
-                    foreach (var e in bonus.Effects) mods.Add(ToModifier(e, 0));
+                    for (int i = 0, times = bonus.PerPiece ? count : 1; i < times; i++)
+                        foreach (var e in bonus.Effects) mods.Add(ToModifier(e, 0));
         }
         return mods;
     }

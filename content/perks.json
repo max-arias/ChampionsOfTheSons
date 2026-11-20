@@ -2072,7 +2072,7 @@
       "x": 2.5,
       "y": 1.5,
       "unlockPath": [
-        "perk.firebolt_cost_reduction",
+        "perk.target_practise",
         "perk.large_caliber"
       ],
       "requires": [],
@@ -3216,7 +3216,7 @@
       "x": 1.0,
       "y": -2.25,
       "unlockPath": [
-        "perk.heaviest_blow"
+        "perk.body_strength_ii"
       ],
       "requires": [],
       "effects": [
@@ -3593,7 +3593,7 @@
       "x": 4.5,
       "y": -3.0,
       "unlockPath": [
-        "perk.speed_matters",
+        "perk.magic_arrow_devastation",
         "perk.magic_binding"
       ],
       "requires": [],
@@ -3708,7 +3708,7 @@
       "x": 4.5,
       "y": -1.5,
       "unlockPath": [
-        "perk.iron_maiden"
+        "perk.anti_magic_training"
       ],
       "requires": [],
       "effects": [
@@ -3729,7 +3729,7 @@
       "x": 5.0,
       "y": -2.25,
       "unlockPath": [
-        "perk.iron_maiden"
+        "perk.anti_magic_training"
       ],
       "requires": [],
       "effects": [
@@ -3750,7 +3750,7 @@
       "x": 0.0,
       "y": 2.25,
       "unlockPath": [
-        "perk.target_practise"
+        "perk.bullseye"
       ],
       "requires": [
         "perk.bow_specialization"
@@ -3773,7 +3773,7 @@
       "x": 3.5,
       "y": 1.5,
       "unlockPath": [
-        "perk.parry_mastery"
+        "perk.thorny_skin"
       ],
       "requires": [],
       "effects": [
@@ -3795,7 +3795,7 @@
       "x": 2.0,
       "y": 6.75,
       "unlockPath": [
-        "perk.magic_arrow_devastation"
+        "perk.nuke_conjuration"
       ],
       "requires": [],
       "effects": []
@@ -3811,7 +3811,7 @@
       "x": 3.0,
       "y": 6.75,
       "unlockPath": [
-        "perk.spikes"
+        "perk.storm_season"
       ],
       "requires": [],
       "effects": []
@@ -3827,7 +3827,7 @@
       "x": 5.0,
       "y": 3.75,
       "unlockPath": [
-        "perk.nuke_conjuration"
+        "perk.blink_wormhole"
       ],
       "requires": [],
       "effects": []
@@ -3998,11 +3998,11 @@
       "x": -0.75,
       "y": 2.6,
       "unlockPath": [
-        "perk.breathing_tehniques",
+        "perk.polishing",
         "perk.reforging"
       ],
       "requires": [
-        "perk.breathing_tehniques",
+        "perk.polishing",
         "perk.reforging"
       ],
       "effects": [
@@ -4045,7 +4045,7 @@
       "x": 5.0,
       "y": 0.75,
       "unlockPath": [
-        "perk.thorny_skin",
+        "perk.iron_maiden",
         "perk.durability_iii"
       ],
       "requires": [],
@@ -4117,7 +4117,7 @@
       "x": 3.5,
       "y": 7.5,
       "unlockPath": [
-        "perk.storm_season"
+        "perk.endless_storm"
       ],
       "requires": [],
       "effects": [
@@ -4282,7 +4282,7 @@
       "x": 3.0,
       "y": 2.25,
       "unlockPath": [
-        "perk.true_aim"
+        "perk.spikes"
       ],
       "requires": [],
       "effects": [
@@ -4304,7 +4304,7 @@
       "x": 3.5,
       "y": 3.0,
       "unlockPath": [
-        "perk.block"
+        "perk.thorny_skin_ii"
       ],
       "requires": [],
       "effects": [
@@ -4326,7 +4326,7 @@
       "x": 3.0,
       "y": -0.75,
       "unlockPath": [
-        "perk.blink_wormhole"
+        "perk.fiery_embrace"
       ],
       "requires": [],
       "effects": [
@@ -4348,7 +4348,7 @@
       "x": 4.0,
       "y": -0.75,
       "unlockPath": [
-        "perk.corrosive_skin"
+        "perk.pyromancy"
       ],
       "requires": [],
       "effects": [
@@ -4370,7 +4370,7 @@
       "x": 3.0,
       "y": 0.75,
       "unlockPath": [
-        "perk.blink_wormhole"
+        "perk.fiery_embrace"
       ],
       "requires": [],
       "effects": [
@@ -4392,7 +4392,7 @@
       "x": 4.0,
       "y": 0.75,
       "unlockPath": [
-        "perk.heat_surge"
+        "perk.flame_lifetime"
       ],
       "requires": [],
       "effects": [
@@ -4458,7 +4458,7 @@
       "x": -1.5,
       "y": 6.0,
       "unlockPath": [
-        "perk.insight_ii"
+        "perk.the_real_armageddon"
       ],
       "requires": [],
       "effects": [
@@ -4480,7 +4480,7 @@
       "x": -2.5,
       "y": 6.0,
       "unlockPath": [
-        "perk.the_real_armageddon"
+        "perk.the_big_suck"
       ],
       "requires": [],
       "effects": [
@@ -4502,7 +4502,7 @@
       "x": -2.0,
       "y": 5.25,
       "unlockPath": [
-        "perk.the_real_armageddon"
+        "perk.the_big_suck"
       ],
       "requires": [],
       "effects": [
@@ -4549,7 +4549,7 @@
         "perk.armageddon"
       ],
       "requires": [
-        "perk.thorny_skin_ii"
+        "perk.corrosive_skin"
       ],
       "effects": [
         {
@@ -4590,7 +4590,7 @@
       "x": -4.0,
       "y": -2.25,
       "unlockPath": [
-        "perk.concussive_shot"
+        "perk.rejuvenation"
       ],
       "requires": [],
       "effects": [
@@ -4628,33 +4628,12 @@
       "x": 4.5,
       "y": 0.0,
       "unlockPath": [
-        "perk.restoration"
+        "perk.falter"
       ],
       "requires": [],
       "effects": [
         {
           "stat": "spell_taunt_pull_enemies_in",
-          "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "perk.charge_pushback",
-      "legacyIndex": 209,
-      "name": "Ramming Swing",
-      "category": "melee_offense",
-      "cost": 1,
-      "levelReq": 37,
-      "stackable": false,
-      "x": 5.5,
-      "y": 0.0,
-      "unlockPath": [
-        "perk.super_charged_attack"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_charged_atk_knockback",
           "op": "enable"
         }
       ]
@@ -4692,7 +4671,7 @@
       "x": -1.75,
       "y": 2.6,
       "unlockPath": [
-        "perk.breathing_tehniques"
+        "perk.polishing"
       ],
       "requires": [],
       "effects": [
@@ -4740,7 +4719,7 @@
       "x": 5.0,
       "y": 2.25,
       "unlockPath": [
-        "perk.rerolling_individual_stats"
+        "perk.firebolt_upgrade"
       ],
       "requires": [],
       "effects": [
@@ -4811,7 +4790,7 @@
       "x": 0.5,
       "y": -1.5,
       "unlockPath": [
-        "perk.heaviest_blow"
+        "perk.body_strength_ii"
       ],
       "requires": [],
       "effects": [
@@ -4833,7 +4812,7 @@
       "x": 6.0,
       "y": 2.25,
       "unlockPath": [
-        "perk.firebolt_upgrade"
+        "perk.firebolt_upgrade_2"
       ],
       "requires": [],
       "effects": [
@@ -4877,7 +4856,7 @@
       "x": 1.0,
       "y": 2.25,
       "unlockPath": [
-        "perk.firebolt_cost_reduction"
+        "perk.target_practise"
       ],
       "requires": [],
       "effects": [
@@ -4936,7 +4915,7 @@
       "x": 4.5,
       "y": 0.0,
       "unlockPath": [
-        "perk.looting"
+        "perk.speed_matters"
       ],
       "requires": [],
       "effects": [
@@ -5069,13 +5048,7 @@
         "perk.greater_cooldown_reduction_4"
       ],
       "requires": [],
-      "effects": [
-        {
-          "stat": "cooldown",
-          "op": "mult",
-          "value": 0.85
-        }
-      ]
+      "effects": []
     },
     {
       "id": "perk.adrenaline_rush",
@@ -5088,7 +5061,7 @@
       "x": 1.5,
       "y": 3.0,
       "unlockPath": [
-        "perk.target_practise"
+        "perk.bullseye"
       ],
       "requires": [],
       "effects": []
@@ -5104,7 +5077,7 @@
       "x": 2.0,
       "y": 3.75,
       "unlockPath": [
-        "perk.golden_cooldown"
+        "perk.adrenaline_rush"
       ],
       "requires": [],
       "effects": []
@@ -5120,7 +5093,7 @@
       "x": 5.5,
       "y": -1.5,
       "unlockPath": [
-        "perk.iron_maiden"
+        "perk.anti_magic_training"
       ],
       "requires": [],
       "effects": [
@@ -5170,7 +5143,7 @@
       "x": 5.5,
       "y": 0.0,
       "unlockPath": [
-        "perk.looting"
+        "perk.speed_matters"
       ],
       "requires": [],
       "effects": [

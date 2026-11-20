@@ -46,6 +46,8 @@ internal static class SpellEffects
     };
 
     private static GameObject? _shieldFx, _flameFx;
+    private static double _warCryArmor;
+
     private static float _flameTimer, _multishotTimer;
 
     public static void ResetState()
@@ -58,7 +60,15 @@ internal static class SpellEffects
 
     private static bool WarCry()
     {
-        Buffs.Apply("war_cry", SpellTuning.WarCryDuration, SpellTuning.WarCry(Stats));
+        var mods = SpellTuning.WarCry(Stats).ToList();
+        // Iron horns (COS-88): War Cry also gives armor (10% of yours, measured before the buff); the greater horn also damage resistance.
+        if (Stats.IsOn(PerkStatIds.WarCryArmor))
+        {
+            if (!Buffs.Has("war_cry")) _warCryArmor = Stats.Get(StatIds.Armor) * PerkRules.WarCryArmorShare;
+            mods.Add(new StatModifier(StatIds.Armor, EffectOp.Add, _warCryArmor));
+        }
+        if (Stats.IsOn(PerkStatIds.WarCryResistance)) mods.Add(new StatModifier(StatIds.AllDamageTaken, EffectOp.Mult, PerkRules.WarCryDamageTaken));
+        Buffs.Apply("war_cry", SpellTuning.WarCryDuration, mods);
         SpellFx.Disc(Feet(), 3f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
         return true;
     }
@@ -134,6 +144,10 @@ internal static class SpellEffects
     {
         PlayerEffects.ClearDebuffs();
         if (Stats.IsOn("spell_purge_heal")) PlayerEffects.Heal(LocalPlayer.Vitals.Health.GetMax() * SpellTuning.PurgeHealFraction);
+        // Purgatory (COS-88): damage rises with missing health, measured as the Purge lands.
+        var health = LocalPlayer.Vitals.Health;
+        double purge = PerkRules.PurgeDamage(Stats, health.GetMax() > 0 ? health._currentValue / health.GetMax() : 1);
+        if (purge > 1) Buffs.Apply("purgatory", PerkRules.PurgeSeconds, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, purge) });
         SpellFx.Disc(Feet(), 3f, SpellFx.Heal, 1f, LocalPlayer.Transform);
         return true;
     }
@@ -226,13 +240,20 @@ internal static class SpellEffects
         var at = AimGround(50);
         float radius = S("spell_cataclysm_radius");
         var color = Stats.IsOn("spell_cataclysm_arcane") ? SpellFx.Arcane : SpellFx.Fire;
+        // Mysterious Robe (COS-88): the arcane vortex strikes harder and freezes what is inside.
+        bool arcane = Stats.IsOn(PerkStatIds.CataclysmArcane);
         AddZone(new SpellZone
         {
             Id = "cataclysm", Center = at, Radius = radius, Left = S("spell_cataclysm_duration"), Interval = (float)SpellTuning.CataclysmTick,
             Visual = SpellFx.Column(at, radius, 14f, color, 1e6f),
             Pulse = z =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, Hit(S("spell_cataclysm_damage"), S("spell_cataclysm_damage_scaling")));
+                foreach (var e in EnemiesWithin(z.Center, z.Radius))
+                {
+                    var hit = Hit(S("spell_cataclysm_damage"), S("spell_cataclysm_damage_scaling"));
+                    Strike(e, arcane ? hit with { Amount = hit.Amount * PerkRules.ArcaneCataclysmDamage } : hit);
+                    if (arcane && e.IsActive) e.Combat.ApplySlow("spell.cataclysm.arcane", PerkRules.ArcaneCataclysmSlow, 1);
+                }
             },
         });
         return true;
@@ -294,11 +315,12 @@ internal static class SpellEffects
 
     // ---------------------------------------------------------------- bursts and melee
 
+    /// <summary>Wide Reach (COS-85): collects the mod's drops in range that pass the rarity rule (through the normal pickup, so the
+    /// host's single-pickup rule holds in co-op) and the game's loose resource pickups. No damage. Not while pushing a sled.</summary>
     private static bool WideReach()
     {
         var eye = Eye;
-        foreach (var e in InCone(eye.position, eye.forward, (float)SpellTuning.WideReachRange, (float)SpellTuning.WideReachAngle))
-            Strike(e, Hit(SpellTuning.WideReachDamage, SpellTuning.WideReachScaling));
+        PerkHooks.WideReachPickup.Cast();
         SpellFx.Sphere(eye.position + eye.forward * 3f, 1.4f, SpellFx.Steel, 0.2f);
         return true;
     }
@@ -309,7 +331,9 @@ internal static class SpellEffects
         var flat = new Vector3(eye.forward.x, 0, eye.forward.z).normalized;
         foreach (var e in InCone(PlayerPos + Vector3.up, flat, (float)SpellTuning.BashRange, (float)SpellTuning.BashAngle / 2))
         {
+            if (!e.IsActive) continue;
             Strike(e, Hit(SpellTuning.BashDamage, SpellTuning.BashScaling));
+            BashItems(e);
             if (!e.IsActive) continue;
             e.Combat.ApplyWeaken("spell.bash", S("spell_bash_damage_debuff_amount"), S("spell_bash_duration"));
             e.Combat.ApplySlow("spell.bash", S("spell_bash_slow_amount"), S("spell_bash_duration"));
@@ -319,6 +343,19 @@ internal static class SpellEffects
         }
         SpellFx.Sphere(PlayerPos + flat * 2.2f + Vector3.up, 1.2f, SpellFx.Steel, 0.2f);
         return true;
+    }
+
+    /// <summary>Jagged Edge and Bloodthirster (COS-88): Bash may bleed the enemy, and heals and restores energy from the damage dealt.</summary>
+    private static void BashItems(EnemyRuntime e)
+    {
+        double dealt = EnemyPatches.LastHit?.After ?? 0;
+        if (dealt <= 0) return;
+        if (e.IsActive && UnityEngine.Random.value < S(PerkStatIds.BashBleedChance))
+            e.Combat.ApplyDot("spell.bash.bleed", DotKind.Bleed, dealt * PerkRules.BashBleedShare, S("spell_bash_duration"));
+        double leech = S(PerkStatIds.BashLifesteal) * dealt;
+        if (leech <= 0) return;
+        PlayerEffects.Heal(leech);
+        PlayerEffects.AddEnergy(leech);
     }
 
     private static bool SnapFreeze()

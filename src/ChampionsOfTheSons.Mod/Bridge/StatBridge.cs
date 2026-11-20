@@ -109,16 +109,18 @@ public sealed class StatBridge : IModFeature
         try
         {
             double speed = AttackSpeed, cost = AttackCost;
+            // Measured Breath: while Black Flame burns, the swing speed is fixed (COS-86).
+            double swing = MeleeRules.SwingSpeed(Sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame"));
             foreach (var weapon in Resources.FindObjectsOfTypeAll<MeleeWeaponController>())
             {
                 var data = weapon._meleeWeaponData;
                 if (data == null || !weapon.gameObject.activeInHierarchy) continue;
                 if (!MeleeData.TryGetValue(data.Pointer, out var orig))
                     MeleeData[data.Pointer] = orig = new MeleeOriginal(data.SwingSpeed, data.SwingSpeedTired, data.StaminaCost);
-                data.SwingSpeed = orig.Swing * (float)speed;
-                data.SwingSpeedTired = orig.SwingTired * (float)speed;
+                data.SwingSpeed = orig.Swing * (float)swing;
+                data.SwingSpeedTired = orig.SwingTired * (float)swing;
                 data.StaminaCost = orig.Cost * (float)cost;
-                LastMeleeRatio = orig.Swing > 0 ? data.SwingSpeed / orig.Swing : speed;
+                LastMeleeRatio = orig.Swing > 0 ? data.SwingSpeed / orig.Swing : swing;
             }
 
             double size = ProjectileSize, projSpeed = ProjectileSpeed, pen = ProjectilePenetration;
@@ -182,10 +184,50 @@ public static class StatCoverage
         CombatStatIds.StunImmunity, CombatStatIds.ThrownSpearDamage,
     };
 
+    /// <summary>Unique-item and set-bonus stats read by the spells, the perk hooks and the unique-flag code (COS-88): the self-test fails
+    /// for a unique or set stat that is in none of these sets.</summary>
+    public static readonly HashSet<string> Readers = new()
+    {
+        "all_damage", "all_damage_taken", "armor", "attack_speed", "attack_stamina_cost", "chance_to_bleed", "chance_to_weaken",
+        "cooldown_rate", "crit_chance", "crit_damage", "energy_recoveryper_second", "head_shot_damage", "health_on_hit",
+        "i_crossfire_quiver", "i_death_pact_enabled", "i_eruption_bow", "i_hammer_stun_amount",
+        "i_hammer_stun_duration", "i_hazard_crown", "i_hexed_pants_of_mr_m_enabled", "i_infinity_loop", "i_is_greed", "i_is_wind_armor",
+        "i_king_qruies_sword", "i_sora_bracers", "i_spark_of_light_after_dark", "melee_increased_dmg", "movement_speed",
+        "perk_bullet_crit_chance", "perk_bullet_damage_mult", "perk_crossbow_damage_mult", "perk_projectile_no_consume_chance",
+        "perk_true_aim", "perk_true_aim_upgrade", "projectile_speed", "ranged_armor_piercing", "ranged_increased_dmg",
+        "spell_bash_bleed_chance", "spell_bash_damage_debuff_amount", "spell_bash_lifesteal", "spell_berserk_attack_speed",
+        "spell_berserk_damage", "spell_berserk_duration", "spell_berserk_movement_speed", "spell_bia_health_dm_mult",
+        "spell_blackhole_duration", "spell_blackhole_radius", "spell_blink_damage", "spell_blink_do_explosion", "spell_blink_range",
+        "spell_cataclysm_arcane", "spell_cataclysm_radius", "spell_chance_to_parry_on_hit", "spell_cost", "spell_firebolt_damage_scaling",
+        "spell_firebolt_energy_cost", "spell_focus_on_atk_speed_duration", "spell_frenzy_active_crit_chance", "spell_frenzy_atk_speed",
+        "spell_frenzy_dmg", "spell_frenzy_max_stacks", "spell_healing_dome_cooldown_rate", "spell_healing_dome_spell_cost_reduction",
+        "spell_increased_dmg", "spell_magic_arrow_damage_scaling", "spell_magic_arrow_duration", "spell_magic_arrow_volley_count",
+        "spell_portal_duration", "spell_purge_damage_bonus", "spell_snap_damage_scaling", "spell_snap_freeze_duration",
+        "spell_snowstorm_damage_mult", "spell_snowstorm_hit_delay", "spell_snowstorm_pull_enemies_in", "spell_war_cry_give_armor",
+        "spell_war_cry_give_damage_resistance", "stun_immunity", "thorns", "thorns_dmg_mult", "thorns_per_vit",
+        "perk_blizzard_slow_reduced", "perk_bow_damage_mult", "perk_bunny_hop", "perk_flashlight_battery_drain", "perk_flashlight_intensity",
+        "spell_cataclysm_damage_scaling", "spell_cataclysm_duration", "spell_flare_radius", "spell_healing_dome_duration", "spell_parry_radius",
+        "spell_blink_damage_scaling",
+    };
+
     /// <summary>Kept in the data but deliberately without an in-game effect, with the reason.</summary>
     public static readonly Dictionary<string, string> Dropped = new()
     {
         [CombatStatIds.WeaponRange] = "needs per-weapon collider changes; no safe hook found",
+        ["heavy_attack_dmg"] = "no verified heavy-attack signal",
+        ["smash_damage"] = "no verified heavy-attack signal",
+        ["fire_duration"] = "a test enemy could not be ignited through the game's burn API",
+        ["fire_tick_rate"] = "a test enemy could not be ignited through the game's burn API",
+        ["i_great_bow_ignites"] = "a test enemy could not be ignited through the game's burn API",
+        ["i_archangel_bow"] = "needs a second player (co-op, COS-13)",
+        ["i_smokey_crossbow_quiver"] = "needs the crossbow bolt to explode; no verified hook (COS-86 can tell crossbow shots apart now)",
+        ["spell_snowstorm_max_charge"] = "Snow Storm has no charges yet (COS-83)",
+        ["debuff_resistance"] = "player buff and debuff rules are COS-89",
+        ["perk_golden_resolve"] = "the gold rule is not defined yet",
+        ["spell_healing_dome_reg_energy"] = "Healing Dome perks and items are COS-83",
+        ["perk_parry_anything"] = "parry perks are COS-84",
+        ["perk_multishot_projectile_count"] = "Multishot is a placeholder until COS-84",
+        ["perk_multishot_damage_pennalty"] = "Multishot is a placeholder until COS-84",
         ["perk_raft_speed_multipier"] = "rafts are a vanilla survival feature we leave alone",
     };
 
@@ -197,5 +239,6 @@ public static class StatCoverage
 
     public static string? Classify(string playerStat) =>
         Core.Contains(playerStat) ? "core" : Bridge.Contains(playerStat) ? "bridge" : Spells.Contains(playerStat) ? "spells"
+        : Readers.Contains(playerStat) ? "reader"
         : Dropped.ContainsKey(playerStat) ? "dropped" : null;
 }

@@ -7,8 +7,8 @@ namespace ChampionsOfTheSons.Core.Saving;
 /// </summary>
 public sealed class PlayerSave
 {
-    /// <summary>2: rolled stats carry their stat slot (COS-73).</summary>
-    public const int CurrentVersion = 2;
+    /// <summary>2: rolled stats carry their stat slot (COS-73). 3: deleted perks removed (COS-86/COS-87).</summary>
+    public const int CurrentVersion = 3;
 
     public int Version { get; set; } = CurrentVersion;
     public double Xp { get; set; }
