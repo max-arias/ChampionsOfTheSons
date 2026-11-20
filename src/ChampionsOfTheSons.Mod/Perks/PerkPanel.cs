@@ -596,6 +596,7 @@ internal sealed class PerkPanel
     public BuyResult Buy(string id)
     {
         var r = Pc.BuyPerk(id);
+        if (r == BuyResult.Ok) Audio.ModAudio.Play(Audio.SoundCues.PerkBought);
         _lastMessage = r == BuyResult.Ok ? $"<color={UiTheme.Good}>{UiText.T("ui.perks.bought", "Unlocked!")}</color>" : "";
         _selected = id;
         _dirty = false;
@@ -658,6 +659,7 @@ internal sealed class PerkPanel
             return false;
         }
         pc.Respec();
+        Audio.ModAudio.Play(Audio.SoundCues.Craft); // COTF used its crafting sound for respec too
         _dirty = false;
         foreach (var n in _nodes.Values) { n.Shown = null; n.ShownTimes = -1; }
         _edges.ForEach(e => e.Lit = null);

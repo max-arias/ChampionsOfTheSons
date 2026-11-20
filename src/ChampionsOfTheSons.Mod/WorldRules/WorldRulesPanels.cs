@@ -38,7 +38,7 @@ internal abstract class ModalPanel
 
     protected static SBgButtonOptions Button(string text, int size, Action click, string normal = "#2B333E", string hover = "#3C4755")
     {
-        var b = SBgButton.Text(text).FontSize(size).FontColor(UiTheme.Text).Color(C(normal), C(hover)).Notify(click);
+        var b = SBgButton.Text(text).FontSize(size).FontColor(UiTheme.Text).Color(C(normal), C(hover)).Notify(() => { Audio.ModAudio.Play(Audio.SoundCues.UiClick, 0.6f); click(); });
         b.TextObject.enableWordWrapping = false;
         return b;
     }

@@ -399,6 +399,7 @@ internal sealed class CraftingPanel
         _picked.Clear();
         _statIndex = -1;
         _messageText = $"<color={UiTheme.Good}>{UiText.T("ui.crafting.done", "Crafted!")}</color>";
+        Audio.ModAudio.Play(Audio.SoundCues.Craft);
         _dirty = false;
         Refresh();
         return result;
@@ -416,6 +417,7 @@ internal sealed class CraftingPanel
         }
         var inv = Pc.Inventory;
         inv.Remove(_target!);
+        Audio.ModAudio.Play(Audio.SoundCues.Craft);
         LastScrap = scrap.Material;
         int stack = ModContent.Db.Items.TryGetValue(scrap.Material!.BaseId, out var def) ? def.StackSize : 1;
         Loot.LootFeature.GiveOrDrop(scrap.Material, stack);

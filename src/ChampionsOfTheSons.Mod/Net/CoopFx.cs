@@ -39,6 +39,7 @@ public static class CoopFx
     public static void ShowSpell(SpellCast cast)
     {
         LastSpell = cast;
+        Audio.ModAudio.PlayAt(Audio.SoundCues.Spell(cast.SpellId), CoopSession.ToUnity(cast.Origin)); // COS-101: a teammate's cast, where they stand
         try
         {
             if (SpellFx.TryGetValue(cast.SpellId, out var draw)) draw(cast);

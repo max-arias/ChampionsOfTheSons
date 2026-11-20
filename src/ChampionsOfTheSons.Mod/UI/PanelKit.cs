@@ -27,7 +27,7 @@ internal static class PanelKit
     /// <summary>A button whose label never steals the pointer; <paramref name="text"/> auto-sizes between the given font sizes.</summary>
     public static SBgButtonOptions Button(string text, float x, float y, float w, float h, Action click, int minFont = 9, int maxFont = 16)
     {
-        var btn = SBgButton.Text(text).FontColor(UiTheme.Text).Notify(click);
+        var btn = SBgButton.Text(text).FontColor(UiTheme.Text).Notify(() => { Audio.ModAudio.Play(Audio.SoundCues.UiClick, 0.6f); click(); });
         btn.TopLeft(x, y).Size(w, h);
         btn.Color(C(UiTheme.SlotFrameEmpty), C("#3C4756"));
         var t = btn.TextObject;
