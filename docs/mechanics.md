@@ -148,7 +148,7 @@ Not synced yet: the host applies effects to its own player; track E decides how 
 - Momentum Transfer: landing after 0.2 s in the air gives move speed ×1.25 for 0.5 s × jump power; Bunny Hopping ×1.6 for 0.75 s × jump power.
 
 ### Spell items (COS-88)
-- Blink range = `spell_blink_range` (15 m, items add). Phase Pauldrons: Blink strikes every enemy within 1.5 m of its path for `spell_blink_damage` + spell flat. Tearing Spacetime: an exit blast of `40 × movement speed + 2 × flat` within `max(2, 0.2 × distance)` m.
+- Blink range = `spell_blink_range` (15 m, items add). Phase Pauldrons: Blink strikes every enemy within 1.5 m of its path for `spell_blink_damage` + `spell_blink_damage_scaling` × spell flat. Tearing Spacetime: an exit blast of `40 × movement speed + 2 × flat` within `max(2, 0.2 × distance)` m.
 - Iron horns: War Cry adds 10% of the player's armor; the greater horn also damage taken ×0.9.
 - Jagged Edge: Bash bleeds the enemy for 30% of the damage per second for the slow's duration, with `spell_bash_bleed_chance`. Bloodthirster: Bash heals and restores energy by `spell_bash_lifesteal` × damage.
 - Alexander's Shield: a hit taken triggers Parry by itself (20%) when Parry is on the bar and ready; it then cools down.

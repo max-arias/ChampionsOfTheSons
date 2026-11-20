@@ -169,7 +169,7 @@ internal static class SpellCaster
             foreach (var e in SpellWorld.ActiveEnemies().ToList())
             {
                 if (SpellWorld.DistanceToSegment(SpellWorld.Center(e), from + Vector3.up, to + Vector3.up) > 1.5f) continue;
-                SpellWorld.Strike(e, SpellWorld.Hit(passDamage, 1));
+                SpellWorld.Strike(e, SpellWorld.Hit(passDamage, stats.Get("spell_blink_damage_scaling")));
                 BlinkStruck++;
             }
         if (!stats.IsOn(PerkStatIds.BlinkExplosion)) return;

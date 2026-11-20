@@ -205,6 +205,9 @@ public static class StatCoverage
         "spell_portal_duration", "spell_purge_damage_bonus", "spell_snap_damage_scaling", "spell_snap_freeze_duration",
         "spell_snowstorm_damage_mult", "spell_snowstorm_hit_delay", "spell_snowstorm_pull_enemies_in", "spell_war_cry_give_armor",
         "spell_war_cry_give_damage_resistance", "stun_immunity", "thorns", "thorns_dmg_mult", "thorns_per_vit",
+        "perk_blizzard_slow_reduced", "perk_bow_damage_mult", "perk_bunny_hop", "perk_flashlight_battery_drain", "perk_flashlight_intensity",
+        "spell_cataclysm_damage_scaling", "spell_cataclysm_duration", "spell_flare_radius", "spell_healing_dome_duration", "spell_parry_radius",
+        "spell_blink_damage_scaling",
     };
 
     /// <summary>Kept in the data but deliberately without an in-game effect, with the reason.</summary>
@@ -221,6 +224,10 @@ public static class StatCoverage
         ["spell_snowstorm_max_charge"] = "Snow Storm has no charges yet (COS-83)",
         ["debuff_resistance"] = "player buff and debuff rules are COS-89",
         ["perk_golden_resolve"] = "the gold rule is not defined yet",
+        ["spell_healing_dome_reg_energy"] = "Healing Dome perks and items are COS-83",
+        ["perk_parry_anything"] = "parry perks are COS-84",
+        ["perk_multishot_projectile_count"] = "Multishot is a placeholder until COS-84",
+        ["perk_multishot_damage_pennalty"] = "Multishot is a placeholder until COS-84",
         ["perk_raft_speed_multipier"] = "rafts are a vanilla survival feature we leave alone",
         ["spell_blackhole_radius"] = "spell numbers: read by the spell system (COS-20/COS-25) when the spell is cast",
         ["spell_blackhole_duration"] = "spell numbers: read by the spell system",

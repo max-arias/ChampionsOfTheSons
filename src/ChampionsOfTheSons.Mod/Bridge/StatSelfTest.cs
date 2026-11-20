@@ -137,9 +137,17 @@ internal static class StatSelfTest
             EquipStats(("stat.explosiondamage", 1f));
             double d1 = HitDamage(E[5]!, 5f, ImpactType.Explosion);
             SelfTest.Check("explosion damage ×2", d0 > 0 && Math.Abs(d1 / d0 - 2) < 0.1, $"{d0:0.00} -> {d1:0.00}");
+            // COS-86: the spear stat changes thrown-spear projectile hits, not explosions.
+            Unequip();
+            PerkHooks.ShotTracker.Record(474); // CraftedSpear
+            double s0 = HitDamage(E[5]!, 5f, ImpactType.Projectile);
             EquipStats(("stat.speardamage", 0.5f));
-            double d2 = HitDamage(E[5]!, 5f, ImpactType.Explosion);
-            SelfTest.Check("thrown spear damage changes the hit", d2 > 0 && Math.Abs(d2 - d0) > 0.01 * d0, $"{d0:0.00} -> {d2:0.00}");
+            PerkHooks.ShotTracker.Record(474);
+            double d2 = HitDamage(E[5]!, 5f, ImpactType.Projectile);
+            SelfTest.Check("thrown spear damage changes a thrown spear hit", d2 > 0 && Math.Abs(d2 - s0) > 0.01 * s0, $"{s0:0.00} -> {d2:0.00}");
+            double e2 = HitDamage(E[5]!, 5f, ImpactType.Explosion);
+            SelfTest.Check("thrown spear damage leaves explosions alone", Math.Abs(e2 - d0) < 0.01 * d0, $"{d0:0.00} -> {e2:0.00}");
+            PerkHooks.ShotTracker.Reset();
         });
 
         SelfTest.Add(T0 + 8, "stats: fire damage on a burning enemy", () =>

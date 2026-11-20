@@ -15,9 +15,9 @@ public static class WideReachRules
     /// COTF's list of about 28 The Forest pickups, mapped to Sons of the Forest items that exist as loose world pickups.</summary>
     public static readonly IReadOnlyList<string> GamePickups = new[]
     {
-        "Stick", "Rock", "SmallRock", "Stone", "Rope", "Cloth", "Feather", "Leaf", "Leaves", "Arrow", "CraftedArrow",
-        "Bone", "Skull", "Aloe", "AloeVera", "Yarrow", "Fireweed", "Horsetail", "Chicory", "Devil'sClub", "Arrowleaf", "Coneflower",
-        "Pills", "Bandage", "Coins", "Battery", "DuctTape", "Wire", "CircuitBoard", "Turtle Egg", "BatteryCharged",
+        // Checked against the game's item list in the self-test (2026-11-20).
+        "Stick", "Rock", "SmallRock", "Stone", "Rope", "Cloth", "Feather", "Leaf", "CraftedArrow", "Bone", "Skull",
+        "AloeVera", "Fireweed", "Horsetail", "Chicory", "Pills", "Coins", "DuctTape", "Wire", "CircuitBoard",
     };
 
     /// <summary>The lowest rarity among the player's equipped items, or 0 when any equipment slot is empty (COTF).</summary>

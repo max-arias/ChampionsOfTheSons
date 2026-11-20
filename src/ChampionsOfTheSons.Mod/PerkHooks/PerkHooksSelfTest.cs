@@ -109,7 +109,7 @@ internal static class PerkHooksSelfTest
         ShotTracker.Record(id);
         EnemyRegistry.HealthOf(_target!)?.SetCurrentValue(1e9f);
         TestKit.Hit(_target!, (float)amount, ImpactType.Projectile);
-        return EnemyPatches.LastHit?.Before ?? 0;
+        return EnemyPatches.LastHit?.After ?? 0;
     }
 
     private static void WeaponMultiplier()
@@ -168,7 +168,7 @@ internal static class PerkHooksSelfTest
         if (_target == null) return;
         Stats(new StatModifier(PerkStatIds.BlinkDamage, EffectOp.Add, 60), new StatModifier(PerkStatIds.BlinkExplosion, EffectOp.Enable, 1));
         var from = LocalPlayer.Transform.position;
-        var to = _target.transform.position + LocalPlayer.Transform.forward * 3;
+        var to = _target.transform.position + LocalPlayer.Transform.forward * 0.5f;
         SpellCaster.BlinkItems(from, to);
         SelfTest.Check("perk hooks: Blink strikes enemies passed through and explodes at the exit", SpellCaster.BlinkStruck >= 2, SpellCaster.BlinkStruck.ToString());
         Stats();
@@ -259,7 +259,7 @@ internal static class PerkHooksSelfTest
     {
         var (found, missing) = WideReachPickup.CheckList();
         SelfTest.Log($"perk hooks: Wide Reach game pickups found [{string.Join(", ", found)}], not game items [{string.Join(", ", missing)}]");
-        SelfTest.Check("perk hooks: Wide Reach names real game items", found.Count >= 8, $"{found.Count} of {WideReachRules.GamePickups.Count}");
+        SelfTest.Check("perk hooks: Wide Reach names real game items", missing.Count == 0, $"{found.Count} of {WideReachRules.GamePickups.Count}");
 
         var bag = Pc.Inventory.Slots.Where(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal)).ToList();
         var equipped = Pc.Inventory.Equipped.ToList();
