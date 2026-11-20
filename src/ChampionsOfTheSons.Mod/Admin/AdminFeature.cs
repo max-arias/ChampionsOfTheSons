@@ -159,6 +159,7 @@ public sealed class AdminFeature : IModFeature
                 "difficulty" => SetDifficulty(args),
                 "list" => List(args),
                 "players" => Reply(true, Players()),
+                "testsave" => TestSave(source),
                 _ => Reply(false, $"unknown command '{name}'; 'cots help' lists them"),
             };
         }
@@ -185,7 +186,18 @@ public sealed class AdminFeature : IModFeature
         ("spawn <normal|elite|miniboss|boss> [actor type] [count]", "spawn enemies of that tier in front of you (actor type: Carl, Fingers, ...)"),
         ("difficulty <id | 0-10>", "set the world difficulty for everyone"),
         ("list <items|perks|spells|stats|enemies|difficulties> [filter]", "list content ids"),
+        ("testsave", "dev: save this single-player world into the self-test slot 1999999999 (COS-129)"),
     };
+
+    /// <summary>Dev (COS-129): writes the current single-player world to the self-test slot, so a fresh world on the
+    /// current game build can become the test save without touching the player's own saves.</summary>
+    private static bool TestSave(CommandSource source)
+    {
+        if (source != CommandSource.SinglePlayer)
+            return Reply(false, "testsave works only from the console in a single-player world");
+        Sons.Save.SaveGameManager.Save(Sons.Save.SaveGameType.SinglePlayer, "", 1999999999);
+        return Reply(true, "saved this world to single-player slot 1999999999 (the self-test save)");
+    }
 
     private static string Help()
     {
