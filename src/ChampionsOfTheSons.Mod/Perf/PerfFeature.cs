@@ -28,6 +28,7 @@ public sealed class PerfFeature : IModFeature
 
     public void Update(float dt, bool inWorld)
     {
+        if (PerfSelfTest.Protecting && inWorld) PerfSelfTest.Protect();
         if (Manual) return;
         bool on = LogEnabled.Value;
         if (on != _was)
