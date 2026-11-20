@@ -67,7 +67,7 @@ internal static class HudSelfTest
         var plain = WorldState.Rules with { AllowElites = false };
         var elites = WorldState.Rules with
         {
-            Difficulty = Difficulties.Hell,
+            PartyLevelOverride = Difficulties.Hell.BaseLevelMin,
             DisabledAbilities = Enum.GetValues<EnemyAbility>().Where(a => !passive.Contains(a)).ToArray(),
         };
         for (int i = 0; i < 10; i++)
@@ -90,7 +90,7 @@ internal static class HudSelfTest
 
     private static void Spawn()
     {
-        var hell = WorldState.Rules with { Difficulty = Difficulties.Hell };
+        var hell = WorldState.Rules with { PartyLevelOverride = Difficulties.Hell.BaseLevelMin };
         _a = TestKit.Spawn(VailActorTypeId.Carl, 7, -2.5f);
         _b = TestKit.Spawn(VailActorTypeId.Carl, 9, 2.5f);
         _elite = TestKit.Spawn(VailActorTypeId.Carl, 11, 0, hell);

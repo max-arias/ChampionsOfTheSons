@@ -44,14 +44,14 @@ internal static class AffixSelfTest
         var disabled = ((EnemyAbility[])Enum.GetValues(typeof(EnemyAbility))).Where(a => !only.Contains(a)).ToArray();
         return new WorldRules
         {
-            Difficulty = Difficulties.Hell,
+            PartyLevelOverride = Difficulties.Hell.BaseLevelMin,
             AllowElites = true,
             DisabledAbilities = disabled,
             EnemyDamage = 1000.0 / EnemyScaler.DamageMultiplier(301),
         };
     }
 
-    private static WorldRules Plain => new() { Difficulty = Difficulties.Easy, AllowElites = false };
+    private static WorldRules Plain => new() { PartyLevelOverride = 1, AllowElites = false };
 
     private static EnemyRuntime? Rt(VailActor? a) => EnemyRegistry.Get(a);
 

@@ -37,7 +37,7 @@ internal static class Spells2SelfTest
         // Plenty of energy so the 500-energy spells can be cast; the cost itself is checked in the Blink test.
         Pc.Stats.SetSource("test.energy", new[] { new StatModifier(StatIds.MaxEnergy, EffectOp.Add, 3000) });
         var rules = WorldState.Rules;
-        WorldState.SetRulesForTest(rules with { Difficulty = Difficulties.Easy, AllowElites = false });
+        WorldState.SetRulesForTest(rules with { PartyLevelOverride = 1, AllowElites = false });
         try
         {
             var t = LocalPlayer.Transform;

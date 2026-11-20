@@ -1,5 +1,6 @@
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Networking;
+using ChampionsOfTheSons.Core.Rules;
 
 namespace ChampionsOfTheSons.Core.Tests;
 
@@ -21,7 +22,7 @@ public class MessageCodecTests
     {
         new Hello(MessageCodec.ProtocolVersion, "0.1.0"),
         new HelloReject("Mod version mismatch: host 0.2.0, you 0.1.0"),
-        new WorldSettings("difficulty.hell", true),
+        new WorldSettings(GameMode.Hard, 5, 3, true),
         new EnemyProfileRequest(0xDEADBEEF12345678UL),
         new EnemySync(42UL, "enemy.cannibal_heavy", 250, 3, 1.5e6f, 1.2e6f, 4500f, new[] { "affix.meteor", "affix.steadfast" }, 9_000_000_000L),
         new EnemySync(43UL, "enemy.fingers", 1, 0, 100f, 100f, 0f, Array.Empty<string>(), 0),
@@ -50,7 +51,7 @@ public class MessageCodecTests
         new Announce(AnnounceKind.Left, 0u, "", 0),
         new Ping(3u, PingKind.Enemy, new Vec3(10, 20, 30), 42UL),
         new HeldWeapon(2u, "long_sword", new Vec3(1, 2, 3), 7, "item.rage"),
-        new WorldSettings("difficulty.ünïcødé", false),
+        new WorldSettings(GameMode.Custom, -4, 0, false),
         new AdminGrant(AdminAction.GiveItem, 42, "item.test_ring"),
         new AdminGrant(AdminAction.AddXp, 1.5e15, ""),
     };

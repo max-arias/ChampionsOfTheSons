@@ -41,13 +41,10 @@ public static class PlayerState
     public static void FromSave(PlayerSave save) => Character.Load(save);
 }
 
-/// <summary>World rules owned by the host (difficulty and multipliers).</summary>
+/// <summary>World rules owned by the host (the game's difficulty as read from the game, and the host's multipliers).</summary>
 public static class WorldState
 {
     public static WorldRules Rules { get; private set; } = new();
-
-    /// <summary>False until the host has picked a difficulty for this world.</summary>
-    public static bool DifficultyChosen { get; private set; }
 
     public static bool FriendlyFire { get; private set; }
 
@@ -58,27 +55,27 @@ public static class WorldState
         Changed?.Invoke();
     }
 
-    public static void SetDifficulty(DifficultyTier tier)
+    /// <summary>COS-130: the game's difficulty (the host reads it from the game, clients get it from the host). Raises <see cref="Changed"/> only when it differs.</summary>
+    public static void SetGameDifficulty(GameDifficulty game)
     {
-        Rules = Rules with { Difficulty = tier };
-        DifficultyChosen = true;
+        if (Rules.GameDifficulty == game) return;
+        Rules = Rules with { GameDifficulty = game };
         Changed?.Invoke();
     }
 
-    /// <summary>Changes the host's multipliers and switches (host settings panel). The difficulty itself goes through <see cref="SetDifficulty"/>.</summary>
+    /// <summary>Changes the host's multipliers and switches (host settings panel).</summary>
     public static void Update(Func<WorldRules, WorldRules> change) => Rules = change(Rules);
 
-    /// <summary>Raised when the difficulty or any host setting changed.</summary>
+    /// <summary>Raised when the game's difficulty or any host setting changed.</summary>
     public static event Action? Changed;
 
     public static void NotifyChanged() => Changed?.Invoke();
 
-    /// <summary>Self-tests only: swap rules without marking the difficulty as chosen.</summary>
+    /// <summary>Self-tests only: swap rules.</summary>
     public static void SetRulesForTest(WorldRules rules) => Rules = rules;
 
     public static WorldSave ToSave() => new()
     {
-        Difficulty = DifficultyChosen ? Rules.Difficulty.Id : null,
         FriendlyFire = FriendlyFire,
         DropQuantity = Rules.DropQuantity,
         DropChance = Rules.DropChance,
@@ -93,13 +90,12 @@ public static class WorldState
         MinLootRarity = Rules.MinLootRarity,
     };
 
+    /// <summary>Loads the host settings; the game's difficulty is not in the save (the game keeps its own) and stays as it is.</summary>
     public static void FromSave(WorldSave save)
     {
-        var tier = Difficulties.ById(save.Difficulty);
-        DifficultyChosen = tier != null;
         Rules = new WorldRules
         {
-            Difficulty = tier ?? Difficulties.Easy,
+            GameDifficulty = Rules.GameDifficulty,
             DropQuantity = save.DropQuantity,
             DropChance = save.DropChance,
             Xp = save.Xp,

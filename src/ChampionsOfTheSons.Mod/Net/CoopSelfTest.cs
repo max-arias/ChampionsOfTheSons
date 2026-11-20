@@ -23,13 +23,13 @@ public sealed class CoopSelfTest : IModFeature
 {
     public static bool ServerDriver { get; } = Environment.GetCommandLineArgs().Contains("--cots-coop-test");
 
-    private static string? ExpectedDifficulty
+    private static int? ExpectedExtraLevels
     {
         get
         {
             var a = Environment.GetCommandLineArgs();
-            int i = Array.IndexOf(a, "--cots-expect-difficulty");
-            return i >= 0 && i + 1 < a.Length ? a[i + 1] : null;
+            int i = Array.IndexOf(a, "--cots-expect-extra-levels");
+            return i >= 0 && i + 1 < a.Length && int.TryParse(a[i + 1], out var v) ? v : null;
         }
     }
 
@@ -170,12 +170,12 @@ public sealed class CoopSelfTest : IModFeature
 
     private static void RegisterClientSteps()
     {
-        CoopTest.Add("difficulty: client got the server's configured difficulty", () =>
+        CoopTest.Add("world settings: client got the server's extra levels and game difficulty", () =>
         {
-            var want = ExpectedDifficulty;
+            var want = ExpectedExtraLevels;
             if (want == null) return true;
-            CoopTest.Check("difficulty: client got the server's configured difficulty", WorldState.Rules.Difficulty.Id == want,
-                $"want {want}, have {WorldState.Rules.Difficulty.Id}");
+            CoopTest.Check("world settings: client got the server's configured extra enemy levels", WorldState.Rules.ExtraEnemyLevels == want,
+                $"want {want}, have {WorldState.Rules.ExtraEnemyLevels} (game difficulty {WorldState.Rules.GameDifficulty.Mode} +{WorldState.Rules.GameDifficulty.LevelOffset})");
             return true;
         });
 

@@ -90,6 +90,9 @@ public sealed class EnemyCombatState
     public bool Raining { get; set; }
     public bool UndeadUsed { get; private set; }
 
+    /// <summary>State for an enemy whose level band follows its level (<see cref="Difficulties.ForLevel"/>).</summary>
+    public EnemyCombatState(EnemyProfile profile) : this(profile, Difficulties.ForLevel(profile.Level)) { }
+
     public EnemyCombatState(EnemyProfile profile, DifficultyTier difficulty)
     {
         Profile = profile;

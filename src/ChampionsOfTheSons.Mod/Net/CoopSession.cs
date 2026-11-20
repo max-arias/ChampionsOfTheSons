@@ -57,6 +57,26 @@ public static class CoopSession
         return KillCredit.LootLevel(WorldState.Rules.LootLevel, nearby, hostLevel);
     }
 
+    /// <summary>
+    /// COS-130: the party level an enemy at <paramref name="at"/> is rolled against (<see cref="Core.Rules.EnemyLevels.PartyLevel"/>):
+    /// the host's own character (if it has a body) and every verified client, by their distance to the enemy. Without a position
+    /// every player counts as near. A dedicated server has no character of its own, so only the clients count there.
+    /// </summary>
+    public static int PartyLevelAt(Vector3? at)
+    {
+        var players = new List<(int Level, float Distance)>();
+        if (LocalPlayer.IsInWorld && LocalPlayer.Transform != null)
+            players.Add((PlayerState.Character.Progress.Level, at is { } a ? Vector3.Distance(a, LocalPlayer.Transform.position) : 0));
+        if (IsHost)
+            foreach (var c in CoopFeature.Verified)
+            {
+                float d = 0;
+                if (at is { } p && Positions.TryGetValue(c, out var pos)) d = Vector3.Distance(p, new Vector3(pos.X, pos.Y, pos.Z));
+                players.Add((LevelOf(c), d));
+            }
+        return Core.Rules.EnemyLevels.PartyLevel(players);
+    }
+
     public static void SetPosition(BoltConnection connection, Vec3 position) => Positions[connection] = position;
 
     /// <summary>Every player the host knows with a position: itself (if it has a body) and each verified client.</summary>

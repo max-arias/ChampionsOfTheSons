@@ -156,7 +156,7 @@ public sealed class AdminFeature : IModFeature
                 "god" => Toggle(AdminAction.God, args, sender, AdminState.God),
                 "nocooldowns" => Toggle(AdminAction.NoCooldowns, args, sender, AdminState.NoCooldowns),
                 "spawn" => Spawn(args, sender),
-                "difficulty" => SetDifficulty(args),
+                "extralevels" => SetExtraLevels(args),
                 "list" => List(args),
                 "players" => Reply(true, Players()),
                 "testsave" => TestSave(source),
@@ -184,8 +184,8 @@ public sealed class AdminFeature : IModFeature
         ("god [on|off] [player]", "incoming hits do no damage"),
         ("nocooldowns [on|off] [player]", "spells are always ready"),
         ("spawn <normal|elite|miniboss|boss> [actor type] [count]", "spawn enemies of that tier in front of you (actor type: Carl, Fingers, ...)"),
-        ("difficulty <id | 0-10>", "set the world difficulty for everyone"),
-        ("list <items|perks|spells|stats|enemies|difficulties> [filter]", "list content ids"),
+        ("extralevels <0-100>", "enemy levels added on top of the party level and the game's difficulty, for everyone"),
+        ("list <items|perks|spells|stats|enemies> [filter]", "list content ids"),
         ("testsave", "dev: save this single-player world into the self-test slot 1999999999 (COS-129)"),
     };
 
@@ -367,22 +367,20 @@ public sealed class AdminFeature : IModFeature
         return Reply(spawned > 0, $"spawned {spawned} {tier} {type}");
     }
 
-    private static bool SetDifficulty(string[] args)
+    /// <summary>COS-130: there is no difficulty to set; the host's extra enemy levels (as in host settings) go on top of the party level and the game's difficulty.</summary>
+    private static bool SetExtraLevels(string[] args)
     {
-        if (args.Length < 1) return Reply(false, "difficulty <id | 0-10>; 'cots list difficulties'");
-        var tier = Difficulties.ById(args[0])
-                   ?? Difficulties.ById("difficulty." + args[0].ToLowerInvariant())
-                   ?? (int.TryParse(args[0], out var i) && i >= 0 && i < Difficulties.All.Count ? Difficulties.All[i] : null)
-                   ?? Difficulties.All.FirstOrDefault(d => d.Name.Equals(args[0], StringComparison.OrdinalIgnoreCase));
-        if (tier == null) return Reply(false, $"unknown difficulty '{args[0]}'");
-        WorldState.SetDifficulty(tier);
-        CoopSession.SendToPeers(new WorldSettings(tier.Id, WorldState.FriendlyFire));
-        return Reply(true, $"difficulty set to {tier.Name} ({tier.Id}); enemies rolled from now on use it");
+        if (args.Length < 1 || !int.TryParse(args[0], out var n) || n < 0 || n > 100) return Reply(false, "extralevels <0-100>");
+        WorldState.Update(r => r with { ExtraEnemyLevels = n });
+        WorldState.NotifyChanged();
+        HostRules.WorldRulesFeature.Broadcast();
+        var game = WorldState.Rules.GameDifficulty;
+        return Reply(true, $"extra enemy levels set to {n} (game difficulty {game.Mode} adds {game.LevelOffset}); enemies rolled from now on use it");
     }
 
     private static bool List(string[] args)
     {
-        if (args.Length < 1) return Reply(false, "list <items|perks|spells|stats|enemies|difficulties> [filter]");
+        if (args.Length < 1) return Reply(false, "list <items|perks|spells|stats|enemies> [filter]");
         var db = ModContent.Db;
         IEnumerable<string> ids = args[0].ToLowerInvariant() switch
         {
@@ -391,7 +389,6 @@ public sealed class AdminFeature : IModFeature
             "spells" => db.Spells.Keys,
             "stats" => db.ItemStats.Keys,
             "enemies" => Enum.GetNames<VailActorTypeId>(),
-            "difficulties" => Difficulties.All.Select(d => $"{d.Index}: {d.Id} ({d.Name})"),
             _ => Array.Empty<string>(),
         };
         string? filter = args.Length > 1 ? args[1] : null;

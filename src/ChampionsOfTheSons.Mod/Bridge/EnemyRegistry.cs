@@ -103,11 +103,14 @@ public static class EnemyRegistry
     public static EnemyRuntime GetOrRoll(StatsManager stats, EnemyKind kind, double vanillaMaxHealth, VailActor? actor = null)
     {
         if (ByStats.TryGetValue(stats.Pointer, out var existing)) return existing;
-        var profile = EnemyScaler.Roll(kind, vanillaMaxHealth, WorldState.Rules, Rng);
+        UnityEngine.Vector3? at = null;
+        try { if (actor != null) at = actor.transform.position; }
+        catch { /* a dying actor: roll against the whole party */ }
+        var profile = EnemyScaler.Roll(kind, vanillaMaxHealth, WorldState.Rules, Net.CoopSession.PartyLevelAt(at), Rng);
         if (TestProfileOverride != null) profile = TestProfileOverride(profile);
         if (profile.Name == null && ModContent.Db != null)
             profile = profile with { Name = EnemyInfo.PickName(profile.Tier, ModContent.Db.EliteGivenIds, ModContent.Db.EliteEpithetIds, Rng) };
-        var runtime = new EnemyRuntime(kind, profile, vanillaMaxHealth, actor, new EnemyCombatState(profile, WorldState.Rules.Difficulty));
+        var runtime = new EnemyRuntime(kind, profile, vanillaMaxHealth, actor, new EnemyCombatState(profile));
         runtime.Stats = stats;
         ByStats[stats.Pointer] = runtime;
         return runtime;
@@ -117,7 +120,7 @@ public static class EnemyRegistry
     public static EnemyRuntime Mirror(StatsManager stats, EnemyKind kind, EnemyProfile profile, VailActor? actor)
     {
         if (ByStats.TryGetValue(stats.Pointer, out var existing)) return existing;
-        var runtime = new EnemyRuntime(kind, profile, profile.MaxHealth, actor, new EnemyCombatState(profile, WorldState.Rules.Difficulty))
+        var runtime = new EnemyRuntime(kind, profile, profile.MaxHealth, actor, new EnemyCombatState(profile))
         {
             Stats = stats,
             ScaleApplied = true,

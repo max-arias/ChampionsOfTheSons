@@ -1,3 +1,5 @@
+using ChampionsOfTheSons.Core.Rules;
+
 namespace ChampionsOfTheSons.Core.Networking;
 
 /// <summary>
@@ -11,7 +13,7 @@ public static class MessageCodec
     /// <see cref="SpellFxEvent"/>, <see cref="AbilityEvent"/>, <see cref="PlayerInfo"/>, <see cref="Announce"/> (COS-79/80/81);
     /// <see cref="HeldWeapon"/> carries the item's rarity and base id (COS-108).
     /// 4: items carry the four rarities 0..3 (COS-109).</remarks>
-    public const int ProtocolVersion = 4;
+    public const int ProtocolVersion = 5;
 
     public static byte[] Encode(IMessage message)
     {
@@ -21,7 +23,7 @@ public static class MessageCodec
         {
             case Hello m: w.VarInt(m.ProtocolVersion).String(m.ModVersion); break;
             case HelloReject m: w.String(m.Reason); break;
-            case WorldSettings m: w.String(m.DifficultyId).Bool(m.FriendlyFire); break;
+            case WorldSettings m: w.Byte((byte)m.Mode).VarInt(m.LevelOffset).VarInt(m.ExtraEnemyLevels).Bool(m.FriendlyFire); break;
             case EnemyProfileRequest m: w.UInt64(m.EnemyNetId); break;
             case EnemySync m:
                 w.UInt64(m.EnemyNetId).String(m.KindId).VarInt(m.Level).Byte(m.Tier)
@@ -76,7 +78,7 @@ public static class MessageCodec
         {
             MessageType.Hello => new Hello(r.VarInt(), r.String() ?? ""),
             MessageType.HelloReject => new HelloReject(r.String() ?? ""),
-            MessageType.WorldSettings => new WorldSettings(r.String() ?? "", r.Bool()),
+            MessageType.WorldSettings => new WorldSettings((GameMode)r.Byte(), r.VarInt(), r.VarInt(), r.Bool()),
             MessageType.EnemyProfileRequest => new EnemyProfileRequest(r.UInt64()),
             MessageType.EnemySync => ReadEnemySync(r),
             MessageType.EnemyHealth => new EnemyHealth(r.UInt64(), r.Float(), r.Float()),

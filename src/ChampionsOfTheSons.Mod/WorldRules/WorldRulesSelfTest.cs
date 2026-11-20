@@ -1,53 +1,59 @@
+using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Core.Saving;
-using TheForest.Utils;
-using UnityEngine.UI;
+using ChampionsOfTheSons.Mod.Bridge;
+using Sons.Ai.Vail;
 
 namespace ChampionsOfTheSons.Mod.HostRules;
 
-/// <summary>COS-11 in-game checks: the picker opens when there is no difficulty and the player is controllable, its choice is saved, host settings persist.</summary>
+/// <summary>
+/// COS-11 / COS-130 in-game checks: the game's difficulty is read from the game, enemies roll at the party level plus its offset,
+/// a client takes the host's settings, and host settings persist.
+/// </summary>
 internal static class WorldRulesSelfTest
 {
     private const float T0 = 76;
+    private static VailActor? _enemy;
+    private static int _playerLevel;
 
     public static void Register()
     {
-        SelfTest.Add(T0, "picker: appears for a world without a difficulty", () =>
+        SelfTest.Add(T0, "game difficulty: read from the game", () =>
         {
-            WorldState.FromSave(new WorldSave());
-            SelfTest.Check("a fresh world has no chosen difficulty", !WorldState.DifficultyChosen);
-            SelfTest.Log($"GameState.IsPlayerControllable = {WorldRulesFeature.PlayerControllable}");
-            SelfTest.Check("controllable host, no difficulty -> opens", WorldRulesFeature.ShouldAutoOpen(true, true, false, false, true));
-            SelfTest.Check("not while a cutscene has the player (original #13)", !WorldRulesFeature.ShouldAutoOpen(true, true, false, false, false));
-            SelfTest.Check("not once chosen, not twice, not for clients", !WorldRulesFeature.ShouldAutoOpen(true, true, true, false, true) &&
-                !WorldRulesFeature.ShouldAutoOpen(true, true, false, true, true) && !WorldRulesFeature.ShouldAutoOpen(true, false, false, false, true));
-            SelfTest.Check("in this world the real conditions agree with the player being controllable",
-                WorldRulesFeature.ShouldAutoOpen(LocalPlayer.IsInWorld, ChampionsOfTheSons.Mod.Bridge.EnemyRegistry.IsAuthority, WorldState.DifficultyChosen, false, WorldRulesFeature.PlayerControllable)
-                == WorldRulesFeature.PlayerControllable);
-            WorldRulesFeature.Picker.Open();
-            SelfTest.Check("picker is open", WorldRulesFeature.Picker.IsOpen);
+            var read = GameDifficultyReader.Read();
+            SelfTest.Log($"game difficulty: {read.Mode}, offset {read.LevelOffset}, elites {read.EliteChance:P0}");
+            SelfTest.Check("the game's mode is a known one", Enum.IsDefined(read.Mode), read.Mode.ToString());
+            WorldRulesFeature.ReadGameDifficulty();
+            SelfTest.Check("the host's rules carry the game's difficulty", WorldState.Rules.GameDifficulty == read);
+            _playerLevel = PlayerState.Character.Progress.Level;
+            _enemy = TestKit.Spawn(VailActorTypeId.Carl, 8, 0, WorldState.Rules with { AllowElites = false, ExtraEnemyLevels = 2 });
+            SelfTest.Check("spawned a cannibal", _enemy != null);
         });
 
-        SelfTest.Add(T0 + 1.5f, "picker: screenshot", () => TestKit.Screenshot("wr-01-picker"));
-
-        SelfTest.Add(T0 + 3, "picker: clicking a tier saves the choice", () =>
+        SelfTest.Add(T0 + 2, "game difficulty: enemy level follows the party", () =>
         {
-            var master = WorldRulesFeature.Picker.Buttons.First(b => b.Tier == Difficulties.All[3]).Button;
-            var button = master.Root.GetComponent<Button>();
-            SelfTest.Check("the tier button exists", button != null);
-            button?.onClick.Invoke();
-            SelfTest.Check("picker closed", !WorldRulesFeature.Picker.IsOpen);
-            SelfTest.Check("difficulty is Master", WorldState.DifficultyChosen && WorldState.Rules.Difficulty == Difficulties.All[3]);
-            var json = SaveCodec.Write(WorldState.ToSave());
-            WorldState.FromSave(new WorldSave());
-            SelfTest.Check("(reset to no difficulty)", !WorldState.DifficultyChosen);
-            WorldState.FromSave(SaveCodec.ReadWorld(json));
-            SelfTest.Check("the choice survives a save and load", WorldState.DifficultyChosen && WorldState.Rules.Difficulty.Id == "difficulty.master");
+            var e = EnemyRegistry.Get(_enemy);
+            SelfTest.Check("the cannibal has a profile", e != null);
+            if (e == null) return;
+            int center = _playerLevel + e.Kind.LevelExtra + WorldState.Rules.GameDifficulty.LevelOffset + 2;
+            SelfTest.Check("level = player level ± 1 + kind + game offset + extra levels", Math.Abs(e.Profile.Level - Math.Max(1, center)) <= 1,
+                $"player {_playerLevel}, enemy {e.Profile.Level}, expected {center} ± 1");
+            SelfTest.Check("its band follows its level", e.Combat.Difficulty == Difficulties.ForLevel(e.Profile.Level));
+            if (_enemy != null) TestKit.Kill(_enemy);
+        });
+
+        SelfTest.Add(T0 + 3, "game difficulty: a client takes the host's settings", () =>
+        {
+            var saved = WorldState.Rules;
+            WorldRulesFeature.Apply(new WorldSettings(GameMode.HardSurvival, 10, 7, false));
+            var r = WorldState.Rules;
+            SelfTest.Check("mode, offset and extra levels arrive", r.GameDifficulty.Mode == GameMode.HardSurvival && r.GameDifficulty.LevelOffset == 10 && r.ExtraEnemyLevels == 7);
+            WorldState.SetRulesForTest(saved);
         });
 
         SelfTest.Add(T0 + 4, "host settings: edit", () =>
         {
-            WorldState.Update(r => r with { EnemyHealth = 2, AllowElites = false });
+            WorldState.Update(r => r with { EnemyHealth = 2, AllowElites = false, ExtraEnemyLevels = 5 });
             WorldRulesFeature.Settings.ToggleAbility(EnemyAbility.Meteor);
             WorldRulesFeature.Settings.Open();
             SelfTest.Check("host settings open", WorldRulesFeature.Settings.IsOpen);
@@ -58,14 +64,15 @@ internal static class WorldRulesSelfTest
         SelfTest.Add(T0 + 7, "host settings: saved and restored", () =>
         {
             WorldRulesFeature.Settings.Close();
+            var game = WorldState.Rules.GameDifficulty;
             var json = SaveCodec.Write(WorldState.ToSave());
             WorldState.FromSave(new WorldSave());
             WorldState.FromSave(SaveCodec.ReadWorld(json));
             var r = WorldState.Rules;
-            SelfTest.Check("multiplier, elites switch and disabled ability survive a save and load",
-                r.EnemyHealth == 2 && !r.AllowElites && r.DisabledAbilities.Contains(EnemyAbility.Meteor) && r.Difficulty.Id == "difficulty.master");
+            SelfTest.Check("multiplier, extra levels, elites switch and disabled ability survive a save and load",
+                r.EnemyHealth == 2 && r.ExtraEnemyLevels == 5 && !r.AllowElites && r.DisabledAbilities.Contains(EnemyAbility.Meteor));
+            SelfTest.Check("the game's difficulty is kept across a world load", r.GameDifficulty == game);
             WorldState.FromSave(new WorldSave());
-            WorldState.SetDifficulty(Difficulties.Easy);
         });
     }
 }

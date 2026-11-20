@@ -109,7 +109,7 @@ internal static class EnemyHudSelfTest
     {
         var elites = WorldState.Rules with
         {
-            Difficulty = Difficulties.Hell,
+            PartyLevelOverride = Difficulties.Hell.BaseLevelMin,
             DisabledAbilities = Enum.GetValues<EnemyAbility>().Where(a => !Passive.Contains(a)).ToArray(),
         };
         _elite = TestKit.Spawn(VailActorTypeId.Carl, 7, 0, elites);

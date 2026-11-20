@@ -72,17 +72,6 @@ public class CoopRulesTests
         Assert.Empty(board.Active);
         Assert.Equal(2, expired.Count);
     }
-
-    [Fact]
-    public void Server_difficulty_comes_from_config_and_never_blocks()
-    {
-        Assert.Equal(Difficulties.Hell, ServerSettings.Resolve("difficulty.hell", out var p1));
-        Assert.Null(p1);
-        Assert.Equal(Difficulties.Hell, ServerSettings.Resolve("Hell", out _));
-        Assert.Equal(Difficulties.Easy, ServerSettings.Resolve("nonsense", out var p2));
-        Assert.NotNull(p2);
-        Assert.Equal(Difficulties.Easy, ServerSettings.Resolve("", out _));
-    }
 }
 
 public class CoopPickupTests

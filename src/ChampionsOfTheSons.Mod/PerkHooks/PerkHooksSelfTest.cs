@@ -216,7 +216,7 @@ internal static class PerkHooksSelfTest
         ActiveAbilitySystem.Reset();
         foreach (var other in EnemyRegistry.Snapshot()) other.TestActive = false;
         var disabled = ((EnemyAbility[])Enum.GetValues(typeof(EnemyAbility))).Where(a => a != only).ToArray();
-        var actor = TestKit.Spawn(VailActorTypeId.Carl, distance, 0, new WorldRules { Difficulty = Difficulties.Hell, AllowElites = true, DisabledAbilities = disabled });
+        var actor = TestKit.Spawn(VailActorTypeId.Carl, distance, 0, new WorldRules { PartyLevelOverride = Difficulties.Hell.BaseLevelMin, AllowElites = true, DisabledAbilities = disabled });
         var enemy = EnemyRegistry.Get(actor);
         if (enemy == null || !enemy.Profile.Has(only)) return null;
         enemy.TestActive = true;

@@ -12,7 +12,7 @@ param(
     # on the LAN and rejects 127.0.0.1 or the query port ("Couldn't find server by ip/port"). Empty = detect the LAN IPv4.
     [string]$JoinAddress = '',
     [string]$GameAddress = '',
-    [string]$ServerDifficulty = 'difficulty.veteran',
+    [int]$ServerExtraLevels = 3,
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
 $ErrorActionPreference = 'Stop'
@@ -45,9 +45,9 @@ try {
 
     Get-Process SonsOfTheForest, SonsOfTheForestDS -ErrorAction SilentlyContinue | Stop-Process -Force
     Start-Sleep -Seconds 2
-    # The server takes its difficulty from this file (COS-15); the client test checks it arrives.
+    # The server takes its extra enemy levels from this file (COS-15, COS-130); the client test checks they arrive.
     New-Item -ItemType Directory -Force "$ServerDir\UserData" | Out-Null
-    Set-Content "$ServerDir\UserData\ChampionsOfTheSonsServer.cfg" ("[ChampionsOfTheSonsServer]", "difficulty = `"$ServerDifficulty`"", "friendly_fire = false")
+    Set-Content "$ServerDir\UserData\ChampionsOfTheSonsServer.cfg" ("[ChampionsOfTheSonsServer]", "extra_enemy_levels = $ServerExtraLevels", "friendly_fire = false")
     Remove-Item $serverLog -ErrorAction SilentlyContinue
     Remove-Item "$ServerDir\unity.log" -ErrorAction SilentlyContinue
     $started = Get-Date
@@ -66,7 +66,7 @@ try {
     $clientStart = Get-Date
     # The game joins a dedicated server from "+connect_ds ip:port", but only reads it from Steam's launch command line,
     # which Steam fills for steam://run URLs (not for steam.exe -applaunch).
-    $launchArgs = "--cots-join $JoinAddress +connect_ds $GameAddress --cots-expect-difficulty $ServerDifficulty"
+    $launchArgs = "--cots-join $JoinAddress +connect_ds $GameAddress --cots-expect-extra-levels $ServerExtraLevels"
     $launchArgs += if ($Windowed) { ' -screen-fullscreen 0 -screen-width 640 -screen-height 360' } else { ' -batchmode' }
     Start-Process ("steam://run/1326470//" + [uri]::EscapeDataString($launchArgs) + "/")
     $done = $false
