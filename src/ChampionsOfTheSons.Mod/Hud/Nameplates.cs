@@ -12,7 +12,7 @@ using UnityEngine.UI;
 namespace ChampionsOfTheSons.Mod.Hud;
 
 /// <summary>What a nameplate shows right now, for the self-test.</summary>
-internal readonly record struct PlateInfo(bool Visible, string Name, int Level, EnemyTier Tier, float Fraction, string Affixes);
+internal readonly record struct PlateInfo(bool Visible, string Name, int Level, EnemyTier Tier, float Fraction, string Affixes, DangerRating Danger);
 
 /// <summary>
 /// Nameplates over scaled enemies, drawn as pooled uGUI elements placed from the camera projection.
@@ -53,8 +53,18 @@ internal sealed class Nameplates
     {
         public Entry Entry;
         public Vector2 Pos;
+        /// <summary>Screen pixels: the middle of the body and half its projected height (for the look-at test).</summary>
+        public Vector2 Chest;
+        public float HalfHeight;
         public float Dist, Range, Priority;
     }
+
+    /// <summary>Tally marks on the plate: one more per danger rating (COS-68).</summary>
+    private const int Marks = 5;
+    /// <summary>Seconds the crosshair has to stay on an enemy before the scanner card opens, and how long it lingers after.</summary>
+    private const float FocusDelay = 0.25f, FocusLinger = 0.6f;
+    /// <summary>The scanner only reads enemies this close.</summary>
+    private const float ScanRange = 40f;
 
     private sealed class ByPriority : IComparer<Candidate>
     {
@@ -69,6 +79,9 @@ internal sealed class Nameplates
     {
         public SContainerOptions Root = null!, BarBack = null!, Fill = null!;
         public SLabelOptions Name = null!, Affix = null!;
+        public readonly Image[] Marks = new Image[Nameplates.Marks];
+        public DangerRating Danger;
+        public int DangerForLevel = -1;
         public RectTransform Rt = null!;
         public CanvasGroup Group = null!;
         public Image FillImage = null!;
@@ -88,6 +101,13 @@ internal sealed class Nameplates
     private readonly List<Plate> _all = new();
     private Camera? _cam;
     private float _time;
+    private Entry? _focus, _scanned;
+    private float _focusHeld, _focusLastSeen;
+
+    /// <summary>The scanner card (COS-68), drawn beside the plate of the enemy under the crosshair.</summary>
+    public ScanCard Card { get; } = new();
+    /// <summary>The enemy the scanner card is showing, if any.</summary>
+    public EnemyRuntime? Scanned => _scanned?.Runtime;
 
     public int Tracked => _entries.Count;
 
@@ -111,14 +131,32 @@ internal sealed class Nameplates
             _free.Add(p);
             _all.Add(p);
         }
+        Card.Build(layer);
     }
 
     private static Plate BuildPlate()
     {
         var p = new Plate();
         p.Root = SContainer.TopLeft(0, 0).Size(PlateW, 74).Background(HudKit.C("#0A0D12AA"), EBackground.Round10);
-        p.Name = HudKit.Label("", 22, UiTheme.Text, TextAlignmentOptions.Center).TopLeft(8, 4).Size(PlateW - 16, 28);
+        p.Name = HudKit.Label("", 22, UiTheme.Text, TextAlignmentOptions.Center).TopLeft(36, 4).Size(PlateW - 72, 28);
         p.Root.Add(p.Name);
+        // Long personal names shrink instead of spilling out of the plate.
+        p.Name.TextObject.enableAutoSizing = true;
+        p.Name.TextObject.fontSizeMin = 13;
+        p.Name.TextObject.fontSizeMax = 22;
+        p.Name.TextObject.enableWordWrapping = false;
+        p.Name.TextObject.overflowMode = TextOverflowModes.Ellipsis;
+        // Danger: tally marks scratched in at the left of the name row, the last one struck across.
+        for (int i = 0; i < Marks; i++)
+        {
+            var mark = i == Marks - 1
+                ? SContainer.TopLeft(9, 17).Size(24, 3)
+                : SContainer.TopLeft(11 + i * 5, 9 + (i % 2)).Size(3, 17);
+            mark.Background(HudKit.C("#FFFFFF"), EBackground.None);
+            p.Root.Add(mark);
+            p.Marks[i] = mark.Root.GetComponent<Image>();
+            mark.RectTransform.localRotation = Quaternion.Euler(0, 0, i == Marks - 1 ? 28 : -6);
+        }
         p.BarBack = SContainer.TopLeft(20, 36).Size(PlateW - 40, 12).Background(HudKit.C(UiTheme.BarBack), EBackground.None);
         p.Root.Add(p.BarBack);
         p.Fill = SContainer.Background(HudKit.C("#C0392B"), EBackground.None);
@@ -198,6 +236,10 @@ internal sealed class Nameplates
 
     public void Clear()
     {
+        _focus = _scanned = null;
+        _forced = IntPtr.Zero;
+        TestCrosshair = null;
+        Card.Hide();
         for (int i = _entries.Count - 1; i >= 0; i--) Remove(i);
     }
 
@@ -249,12 +291,15 @@ internal sealed class Nameplates
 
             if (n == _candidates.Length) Array.Resize(ref _candidates, n * 2); // grows once to the crowd size, then reused
             float dist = Mathf.Sqrt(sqr);
+            Vector3 feet = cam.WorldToScreenPoint(pos);
             // Tiers count as metres closer, so a far elite never hides the plate of a normal enemy next to the player.
             float tierBonus = profile.Tier switch { EnemyTier.Boss => 25, EnemyTier.Miniboss => 18, EnemyTier.Elite => 10, _ => 0 };
             _candidates[n++] = new Candidate
             {
                 Entry = e,
                 Pos = new Vector2(sp.x * k, sp.y * k),
+                Chest = new Vector2((sp.x + feet.x) * 0.5f, feet.y + (sp.y - feet.y) * 0.55f),
+                HalfHeight = Mathf.Abs(sp.y - feet.y) * 0.5f,
                 Dist = dist,
                 Range = range,
                 Priority = tierBonus + (_time - e.LastHit < HitPriorityTime ? 1000 : 0) - dist,
@@ -264,6 +309,10 @@ internal sealed class Nameplates
         // Highest priority first: recently hit, then the nearest (elites, minibosses and bosses count as 10/18/25 m closer).
         Array.Sort(_candidates, 0, n, PriorityOrder);
         int placed = 0;
+        Entry? look = null;
+        float lookScore = float.MaxValue;
+        Vector2 centre = TestCrosshair ?? new Vector2(screenW * 0.5f, screenH * 0.5f);
+        int playerLevel = PlayerState.Character.Progress.Level;
         for (int i = 0; i < n; i++)
         {
             var c = _candidates[i];
@@ -289,7 +338,20 @@ internal sealed class Nameplates
                 plate.Fraction = frac;
                 HudKit.SetFill(plate.Fill, frac);
             }
+            if (plate.DangerForLevel != playerLevel) SetDanger(plate, profile, playerLevel);
             SetAffixShown(plate, placed < MaxAffixLines);
+
+            // Look-at: the crosshair is on the body (a box around its middle, never smaller than 30 px).
+            if (c.Dist <= ScanRange)
+            {
+                float dx = Mathf.Abs(c.Chest.x - centre.x), dy = Mathf.Abs(c.Chest.y - centre.y);
+                float bx = Mathf.Max(30f, c.HalfHeight * 0.45f), by = Mathf.Max(30f, c.HalfHeight * 1.05f);
+                if (dx <= bx && dy <= by)
+                {
+                    float score = dx / bx + dy / by + c.Dist * 0.01f;
+                    if (score < lookScore) { lookScore = score; look = e; }
+                }
+            }
             plate.Group.alpha = Mathf.Clamp01((c.Range - c.Dist) / (c.Range * 0.3f));
             float s = Mathf.Clamp(16f / Mathf.Max(c.Dist, 1f), 0.65f, 1f) * plate.Scale;
             plate.Rt.localScale = new Vector3(s, s, 1);
@@ -312,6 +374,43 @@ internal sealed class Nameplates
             plate.Last = rect;
             plate.Rt.anchoredPosition = new Vector2(rect.x + w / 2, rect.y);
         }
+        var forced = ForcedFocus;
+        UpdateScan(forced != null && forced.Plate != null ? forced : look, dt);
+    }
+
+    /// <summary>Self-tests only: treat this enemy as looked at (the headless camera does not aim). Null = the real look-at test.</summary>
+    private Entry? ForcedFocus => _forced != IntPtr.Zero && _bySim.TryGetValue(_forced, out var e) ? e : null;
+    private IntPtr _forced;
+
+    /// <summary>Self-tests only: where the crosshair is, in screen pixels (the headless camera cannot be aimed). Null = screen centre.</summary>
+    public Vector2? TestCrosshair { get; set; }
+
+    public void ForceFocus(VailActor? actor) => _forced = actor?.GetWorldSimActor()?.Pointer ?? IntPtr.Zero;
+
+    /// <summary>The enemy under the crosshair this frame (before the scanner delay), for the self-test.</summary>
+    public EnemyRuntime? LookedAt => _focus?.Runtime;
+
+    /// <summary>The scanner opens after the crosshair rests on an enemy for <see cref="FocusDelay"/> and lingers a moment after it leaves.</summary>
+    private void UpdateScan(Entry? look, float dt)
+    {
+        if (!Config.ShowScanner.Value) look = null;
+        if (look != _focus) { _focus = look; _focusHeld = 0; }
+        else if (look != null) _focusHeld += dt;
+        if (look != null && _focusHeld >= FocusDelay) _scanned = look;
+        if (look != null && look == _scanned) _focusLastSeen = _time;
+        if (_scanned != null && (_scanned.Plate == null || _scanned.Runtime == null || (_scanned != look && _time - _focusLastSeen > FocusLinger)))
+            _scanned = null;
+        Card.Update(_scanned?.Runtime, _scanned?.Plate?.Last ?? default, dt);
+    }
+
+    private static void SetDanger(Plate p, EnemyProfile profile, int playerLevel)
+    {
+        p.DangerForLevel = playerLevel;
+        p.Danger = EnemyInfo.Danger(profile.Tier, profile.Level, playerLevel);
+        int lit = (int)p.Danger + 1;
+        var on = HudKit.C(HudText.DangerHex(p.Danger));
+        var off = HudKit.C("#FFFFFF18");
+        for (int i = 0; i < Marks; i++) p.Marks[i].color = i < lit ? on : off;
     }
 
     private static void SetAffixShown(Plate p, bool allowed)
@@ -362,16 +461,9 @@ internal sealed class Nameplates
         p.Bound = true;
         p.Level = profile.Level;
         p.Tier = profile.Tier;
-        string kindName = profile.KindId;
-        foreach (var kind in ModContent.Db.Enemies.Values)
-        {
-            if (kind.Id != profile.KindId) continue;
-            kindName = kind.Name;
-            break;
-        }
-        kindName = UiText.T(profile.KindId + ".name", kindName);
-        string tier = profile.Tier == EnemyTier.Normal ? "" : HudText.Tier(profile.Tier) + " ";
-        p.NameText = $"{tier}{kindName}  <color=#9AA3AF>{HudText.Level} {profile.Level}</color>";
+        // Named elites show their own name; kind and tier are in the scanner card (and the color says the tier).
+        string title = HudText.PersonalName(profile) ?? HudText.KindTitle(profile);
+        p.NameText = $"{title}  <color=#9AA3AF>{HudText.Level} {profile.Level}</color>";
         p.Name.Text(p.NameText).FontColor(HudKit.TierHex(profile.Tier));
         p.AffixText = HudText.Affixes(profile.Abilities);
         p.Affix.Text(p.AffixText);
@@ -380,6 +472,7 @@ internal sealed class Nameplates
         p.FillImage.color = HudKit.C(HudKit.TierBarHex(profile.Tier));
         p.Scale = profile.Tier == EnemyTier.Boss ? 1.3f : profile.Tier == EnemyTier.Miniboss ? 1.15f : 1f;
         p.Fraction = -1;
+        p.DangerForLevel = -1;
         HudKit.Place(p.Rt, Vector2.zero, new Vector2(0.5f, 0), 0, 0);
         p.Root.Active(true);
     }
@@ -392,7 +485,7 @@ internal sealed class Nameplates
         if (sim == null || !_bySim.TryGetValue(sim.Pointer, out var e)) return null;
         Resolve(e);
         var p = e.Plate;
-        if (p == null) return new PlateInfo(false, e.Why, e.Runtime?.Profile.Level ?? 0, e.Runtime?.Profile.Tier ?? EnemyTier.Normal, 0, "");
-        return new PlateInfo(p.Bound && p.Root.Root.activeSelf, p.NameText, p.Level, p.Tier, p.Fraction, p.AffixText);
+        if (p == null) return new PlateInfo(false, e.Why, e.Runtime?.Profile.Level ?? 0, e.Runtime?.Profile.Tier ?? EnemyTier.Normal, 0, "", DangerRating.Trivial);
+        return new PlateInfo(p.Bound && p.Root.Root.activeSelf, p.NameText, p.Level, p.Tier, p.Fraction, p.AffixText, p.Danger);
     }
 }

@@ -214,3 +214,15 @@ public sealed class SetBonus
     public bool PerPiece { get; set; }
     public List<StatEffect> Effects { get; set; } = new();
 }
+
+/// <summary>One half of an elite's personal name (COS-68): a given name ("Ashjaw") or an epithet ("the Unburied").
+/// The display text is the text key <c>&lt;id&gt;.name</c>; <see cref="Name"/> is the English fallback.</summary>
+public sealed class EliteNameDef
+{
+    public string Id { get; set; } = "";
+    /// <summary>"given" or "epithet".</summary>
+    public string Part { get; set; } = "";
+    public string Name { get; set; } = "";
+
+    public const string Given = "given", Epithet = "epithet";
+}

@@ -27,6 +27,7 @@ public sealed class ContentDb
     private readonly Dictionary<string, SpellDef> _spells = new();
     private readonly Dictionary<string, SetDef> _sets = new();
     private readonly Dictionary<string, Rules.EnemyKind> _enemies = new();
+    private readonly Dictionary<string, EliteNameDef> _eliteNames = new();
     private readonly List<string> _errors = new();
 
     public IReadOnlyDictionary<string, PlayerStatDef> PlayerStats => _playerStats;
@@ -37,6 +38,11 @@ public sealed class ContentDb
     public IReadOnlyDictionary<string, SetDef> Sets => _sets;
     /// <summary>Enemy kinds keyed by the game's actor type name ("Carl", "Fingers").</summary>
     public IReadOnlyDictionary<string, Rules.EnemyKind> Enemies => _enemies;
+    /// <summary>Elite name parts by id (COS-68).</summary>
+    public IReadOnlyDictionary<string, EliteNameDef> EliteNames => _eliteNames;
+    /// <summary>Given-name ids, sorted (picks are random; the order only keeps a seeded pick repeatable).</summary>
+    public IReadOnlyList<string> EliteGivenIds { get; private set; } = Array.Empty<string>();
+    public IReadOnlyList<string> EliteEpithetIds { get; private set; } = Array.Empty<string>();
     public IReadOnlyList<string> Errors => _errors;
 
     /// <summary>Loads content from file name → JSON text (e.g. "items.json" → its text). Missing files are errors.</summary>
@@ -53,6 +59,7 @@ public sealed class ContentDb
         db.Add(files, "spells.json", "spells", db._spells, s => s.Id, optional: true);
         db.Add(files, "sets.json", "sets", db._sets, s => s.Id, optional: true);
         db.Add(files, "enemies.json", "enemies", db._enemies, e => e.ActorType, optional: true);
+        db.Add(files, "elite_names.json", "eliteNames", db._eliteNames, n => n.Id, optional: true);
         db.Validate();
         return db;
     }
@@ -62,7 +69,7 @@ public sealed class ContentDb
         Load(Directory.GetFiles(folder, "*.json").ToDictionary(f => Path.GetFileName(f), File.ReadAllText));
 
     public string Summary() =>
-        $"{_items.Count} items, {_itemStats.Count} item stats, {_playerStats.Count} player stats, {_perks.Count} perks, {_spells.Count} spells, {_sets.Count} sets, {_enemies.Count} enemy kinds, {_errors.Count} content errors";
+        $"{_items.Count} items, {_itemStats.Count} item stats, {_playerStats.Count} player stats, {_perks.Count} perks, {_spells.Count} spells, {_sets.Count} sets, {_enemies.Count} enemy kinds, {_eliteNames.Count} elite name parts, {_errors.Count} content errors";
 
     private void Add<T>(IReadOnlyDictionary<string, string> files, string file, string key, Dictionary<string, T> into, Func<T, string> id, bool optional = false)
     {
@@ -97,6 +104,19 @@ public sealed class ContentDb
 
     private void Validate()
     {
+        foreach (var n in _eliteNames.Values.ToList())
+        {
+            if (n.Part != EliteNameDef.Given && n.Part != EliteNameDef.Epithet)
+            {
+                _errors.Add($"elite name {n.Id}: part must be 'given' or 'epithet', not '{n.Part}'");
+                _eliteNames.Remove(n.Id);
+            }
+            else if (string.IsNullOrWhiteSpace(n.Name)) _errors.Add($"elite name {n.Id}: empty name");
+        }
+        EliteGivenIds = _eliteNames.Values.Where(n => n.Part == EliteNameDef.Given).Select(n => n.Id).OrderBy(i => i, StringComparer.Ordinal).ToArray();
+        EliteEpithetIds = _eliteNames.Values.Where(n => n.Part == EliteNameDef.Epithet).Select(n => n.Id).OrderBy(i => i, StringComparer.Ordinal).ToArray();
+        if (_eliteNames.Count > 0 && (EliteGivenIds.Count == 0 || EliteEpithetIds.Count == 0))
+            _errors.Add("elite_names.json: needs at least one given name and one epithet");
         foreach (var s in _itemStats.Values.ToList())
         {
             foreach (var e in s.Effects)

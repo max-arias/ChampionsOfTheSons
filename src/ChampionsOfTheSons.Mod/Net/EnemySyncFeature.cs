@@ -87,7 +87,8 @@ public sealed class EnemySyncFeature : IModFeature
         float hp = health?._currentValue ?? (float)r.Profile.MaxHealth;
         // KindId carries the actor type: content keys enemy kinds by it (several actor types share one kind id).
         return new EnemySync(netId, r.Kind.ActorType.ToString(), r.Profile.Level, (byte)r.Profile.Tier, (float)r.Profile.MaxHealth, hp,
-            (float)r.Profile.Armor, r.Profile.Abilities.Select(a => a.ToString()).ToList(), (long)r.Profile.Bounty);
+            (float)r.Profile.Armor, r.Profile.Abilities.Select(a => a.ToString()).ToList(), (long)r.Profile.Bounty,
+            (float)r.Profile.DamageMult, r.Profile.Name?.GivenId ?? "", r.Profile.Name?.EpithetId ?? "");
     }
 
     public void Update(float dt, bool inWorld)
@@ -177,6 +178,8 @@ public sealed class EnemySyncFeature : IModFeature
             MaxHealth = sync.MaxHealth,
             Armor = sync.Armor,
             Bounty = sync.Bounty,
+            DamageMult = sync.DamageMult,
+            Name = sync.NameGivenId.Length > 0 && sync.NameEpithetId.Length > 0 ? new EliteName(sync.NameGivenId, sync.NameEpithetId) : null,
         };
         var runtime = EnemyRegistry.Mirror(stats, kind, profile, actor);
         runtime.ActorLive = true;
@@ -221,7 +224,12 @@ public sealed class EnemySyncFeature : IModFeature
                 if (ReceivedProfiles.TryGetValue(h.EnemyNetId, out var known))
                 {
                     ReceivedProfiles[h.EnemyNetId] = known with { Health = h.Health, Armor = h.Armor };
-                    if (Mirrors.TryGetValue(h.EnemyNetId, out var mirror)) ApplyHealth(mirror, known.MaxHealth, h.Health);
+                    if (Mirrors.TryGetValue(h.EnemyNetId, out var mirror))
+                    {
+                        ApplyHealth(mirror, known.MaxHealth, h.Health);
+                        // The host sends armor after reduction; the scanner shows how much was stripped.
+                        mirror.ArmorReduction = System.Math.Max(0, mirror.Profile.Armor - h.Armor);
+                    }
                 }
                 break;
         }

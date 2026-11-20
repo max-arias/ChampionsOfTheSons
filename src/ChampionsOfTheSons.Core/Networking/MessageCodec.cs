@@ -6,6 +6,7 @@ namespace ChampionsOfTheSons.Core.Networking;
 /// </summary>
 public static class MessageCodec
 {
+    /// <remarks>2: <see cref="EnemySync"/> carries the damage multiplier and the elite name (COS-68).</remarks>
     public const int ProtocolVersion = 2;
 
     public static byte[] Encode(IMessage message)
@@ -24,6 +25,7 @@ public static class MessageCodec
                 w.VarUInt((uint)m.AffixIds.Count);
                 foreach (var a in m.AffixIds) w.String(a);
                 WriteLong(w, m.Bounty);
+                w.Float(m.DamageMult).String(m.NameGivenId).String(m.NameEpithetId);
                 break;
             case EnemyHealth m: w.UInt64(m.EnemyNetId).Float(m.Health).Float(m.Armor); break;
             case Hit m: w.UInt64(m.EnemyNetId).Float(m.Amount).Byte((byte)m.Flags).Float(m.ArmorPierce); break;
@@ -89,7 +91,9 @@ public static class MessageCodec
         var affixes = new string[count];
         for (int i = 0; i < count; i++) affixes[i] = r.String() ?? "";
         long bounty = ReadLong(r);
-        return new EnemySync(id, kind, level, tier, maxHp, hp, armor, affixes, bounty);
+        float dmg = r.Float();
+        string given = r.String() ?? "", epithet = r.String() ?? "";
+        return new EnemySync(id, kind, level, tier, maxHp, hp, armor, affixes, bounty, dmg, given, epithet);
     }
 
     private static void WriteLong(PacketWriter w, long v) => w.UInt64(unchecked((ulong)v));

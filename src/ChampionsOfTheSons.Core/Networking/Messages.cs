@@ -56,7 +56,8 @@ public sealed record EnemyProfileRequest(ulong EnemyNetId) : IMessage
     public MessageType Type => MessageType.EnemyProfileRequest;
 }
 
-/// <summary>Host → clients: the rolled profile of one enemy.</summary>
+/// <summary>Host → clients: the rolled profile of one enemy. Protocol 2 added the damage multiplier and the elite name ids
+/// (empty strings: no name) for the scanner and nameplates (COS-68).</summary>
 public sealed record EnemySync(
     ulong EnemyNetId,
     string KindId,
@@ -66,14 +67,18 @@ public sealed record EnemySync(
     float Health,
     float Armor,
     IReadOnlyList<string> AffixIds,
-    long Bounty) : IMessage
+    long Bounty,
+    float DamageMult = 0,
+    string NameGivenId = "",
+    string NameEpithetId = "") : IMessage
 {
     public MessageType Type => MessageType.EnemySync;
 
     public bool Equals(EnemySync? other) =>
         other is not null && EnemyNetId == other.EnemyNetId && KindId == other.KindId && Level == other.Level &&
         Tier == other.Tier && MaxHealth.Equals(other.MaxHealth) && Health.Equals(other.Health) &&
-        Armor.Equals(other.Armor) && Bounty == other.Bounty && AffixIds.SequenceEqual(other.AffixIds);
+        Armor.Equals(other.Armor) && Bounty == other.Bounty && AffixIds.SequenceEqual(other.AffixIds) &&
+        DamageMult.Equals(other.DamageMult) && NameGivenId == other.NameGivenId && NameEpithetId == other.NameEpithetId;
 
     public override int GetHashCode() => HashCode.Combine(EnemyNetId, KindId, Level, Tier);
 }

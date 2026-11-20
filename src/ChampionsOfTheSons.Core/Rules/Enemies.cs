@@ -70,6 +70,8 @@ public sealed record EnemyProfile
     public double Speed { get; init; } = 1;
     public double Scale { get; init; } = 1;
     public double Bounty { get; init; }
+    /// <summary>Personal name of an elite, miniboss or boss (COS-68); null for normal enemies.</summary>
+    public EliteName? Name { get; init; }
 
     /// <summary>Max fraction of max health one hit can remove; 1 = uncapped.</summary>
     public double HitCap => Abilities.Contains(EnemyAbility.BossSteadfast) ? 0.01
