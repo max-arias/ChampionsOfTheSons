@@ -9,3 +9,6 @@ Icons made by Lorc (http://lorcblog.blogspot.com), Delapouite (http://delapouite
 DarkZaitzev, Faithtoken, Willdabeast, Irongamer, Kier Heyl, SeregaCthtuf, Caro Asercion, Carl Olsen, Felbrigg,
 Lord Berandas, Quoting, Catsu, Zeromancer (CC0), Andy Meneely, John Colburn and other game-icons.net contributors.
 The per-entry source icon is listed in `tools/icons/mapping.json` (`<author>/<icon>`).
+
+`ui.book_tab.png` (our guide-book tab): "Sparkles" by Delapouite (https://game-icons.net/1x1/delapouite/sparkles.html),
+CC BY 3.0; changes: black glyph on a white field with a black frame, laid out like the game's own tab icons.

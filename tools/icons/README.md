@@ -30,8 +30,11 @@ python -I tools/icons/generate_icons.py match                       # rebuild ma
 python -I tools/icons/generate_icons.py render                      # new icons only (resumable)
 python -I tools/icons/generate_icons.py render --force --only item.broken_flip_flops   # one icon
 python -I tools/icons/generate_icons.py render --force              # all (about a minute)
+python -I tools/icons/generate_icons.py booktab                     # the guide-book tab face (ui.book_tab.png)
 python -I tools/icons/contact_sheet.py "$env:TEMP\cots-icons-sheets"   # per-category sheets with name + source icon
 ```
+
+`booktab` renders `content/icons/ui.book_tab.png`, the face of our guide-book tab (COS-131): `BOOK_TAB_ICON` in the game's tab-icon layout (black frame, white field, flat black glyph), not the item style.
 
 New content entries: run `match` then `render`. Replace one icon: add `"<id>": "<icon-slug>"` to `overrides.json`, then `match` and `render --force --only <id>`.
 
