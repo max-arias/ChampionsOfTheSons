@@ -4639,27 +4639,6 @@
       ]
     },
     {
-      "id": "perk.charge_pushback",
-      "legacyIndex": 209,
-      "name": "Ramming Swing",
-      "category": "melee_offense",
-      "cost": 1,
-      "levelReq": 37,
-      "stackable": false,
-      "x": 5.5,
-      "y": 0.0,
-      "unlockPath": [
-        "perk.super_charged_attack"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_charged_atk_knockback",
-          "op": "enable"
-        }
-      ]
-    },
-    {
       "id": "perk.instant_riposte",
       "legacyIndex": 210,
       "name": "Quick Retort",
@@ -5069,13 +5048,7 @@
         "perk.greater_cooldown_reduction_4"
       ],
       "requires": [],
-      "effects": [
-        {
-          "stat": "cooldown",
-          "op": "mult",
-          "value": 0.85
-        }
-      ]
+      "effects": []
     },
     {
       "id": "perk.adrenaline_rush",

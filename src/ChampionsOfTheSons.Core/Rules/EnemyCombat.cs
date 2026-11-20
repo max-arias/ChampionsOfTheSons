@@ -79,6 +79,7 @@ public sealed class EnemyCombatState
     private double _stunLeft;
     private double _shieldLeft, _shieldCooldownLeft;
     private double _buffLeft, _buffMult = 1;
+    private double _fireMark, _fireMarkLeft;
     private double _furyLeft;
     private int _furyStacks;
 
@@ -186,6 +187,17 @@ public sealed class EnemyCombatState
         return true;
     }
 
+    /// <summary>Smolder Mark (COS-87): fire damage-over-time ticks on this enemy deal ×(1 + bonus) while the mark lasts. Re-marking refreshes it and keeps the larger bonus.</summary>
+    public void ApplyFireMark(double bonus, double seconds)
+    {
+        if (bonus <= 0 || seconds <= 0) return;
+        _fireMark = _fireMarkLeft > 0 ? Math.Max(_fireMark, bonus) : bonus;
+        _fireMarkLeft = Math.Max(_fireMarkLeft, seconds);
+    }
+
+    /// <summary>Current Smolder Mark bonus on fire damage (0 when unmarked).</summary>
+    public double FireMark => _fireMarkLeft > 0 ? _fireMark : 0;
+
     /// <summary>A damage-over-time: <paramref name="perSecond"/> every 1 s for ceil(duration) ticks. Re-applying a source refreshes it.</summary>
     public void ApplyDot(string source, DotKind kind, double perSecond, double seconds)
     {
@@ -244,6 +256,7 @@ public sealed class EnemyCombatState
         _shieldLeft = Math.Max(0, _shieldLeft - dt);
         _shieldCooldownLeft = Math.Max(0, _shieldCooldownLeft - dt);
         _buffLeft = Math.Max(0, _buffLeft - dt);
+        _fireMarkLeft = Math.Max(0, _fireMarkLeft - dt);
         if (_furyLeft > 0 && (_furyLeft -= dt) <= 0) _furyStacks = 0;
         Expire(_slows, dt);
         Expire(_weakens, dt);
@@ -257,7 +270,8 @@ public sealed class EnemyCombatState
             {
                 dot.Phase -= 1;
                 dot.TicksLeft--;
-                (due ??= new()).Add(new DotTick(source, dot.Kind, dot.PerSecond));
+                double tick = dot.Kind == DotKind.Fire ? dot.PerSecond * (1 + FireMark) : dot.PerSecond;
+                (due ??= new()).Add(new DotTick(source, dot.Kind, tick));
             }
             if (dot.TicksLeft <= 0) (finished ??= new()).Add(source);
         }
@@ -305,8 +319,8 @@ public static class PlayerHitEffects
             slow, bleed, damageDealt / AbilityTuning.BleedDivisor, weaken, stun);
     }
 
-    /// <summary>Damage reflected to a melee attacker: (thorns + per-STR + per-VIT) × thorns multiplier.</summary>
+    /// <summary>Damage reflected to a melee attacker: (thorns + per-STR + per-VIT) × thorns multiplier × melee and all-damage multipliers (COTF).</summary>
     public static double Thorns(StatSheet s) =>
         Math.Max(0, s.Get(StatIds.Thorns) + s.Get(CombatStatIds.ThornsPerStrength) * s.Get(StatIds.Strength) + s.Get(CombatStatIds.ThornsPerVit) * s.Get(StatIds.Vitality))
-        * s.Get(CombatStatIds.ThornsDmgMult);
+        * s.Get(CombatStatIds.ThornsDmgMult) * s.Get(StatIds.MeleeIncreasedDmg) * s.Get(StatIds.AllDamage);
 }

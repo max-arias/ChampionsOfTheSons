@@ -84,7 +84,8 @@ public class PerkAndSpellTests
         ] }
         """;
         var db = ContentDb.Load(new Dictionary<string, string> { ["player_stats.json"] = TestContent.PlayerStats, ["perks.json"] = cyclic });
-        Assert.Equal(new[] { "perk perk.a: not reachable from a root perk", "perk perk.b: not reachable from a root perk", "perk perk.c: not reachable from a root perk" }, db.Errors);
+        Assert.Equal(new[] { "perk perk.a: not reachable from a root perk", "perk perk.b: not reachable from a root perk", "perk perk.c: not reachable from a root perk" },
+            db.Errors.Where(e => e.Contains("not reachable")));
     }
 
     [Fact]

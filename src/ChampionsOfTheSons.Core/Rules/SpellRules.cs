@@ -15,7 +15,6 @@ public static class SpellTuning
     public const double FrenzyDuration = 20;
     public const double TauntDuration = 8, TauntArmor = 100;
     public const double PortalMaxRange = 40, PortalReenterLock = 1.5, PortalRadius = 1.5;
-    public const double WideReachRange = 5.5, WideReachAngle = 70, WideReachDamage = 20, WideReachScaling = 1;
     public const double FireboltDamage = 30, FireboltBurnSeconds = 4, FireboltBurnFraction = 0.25, ProjectileSpeed = 40;
     public const double MagicArrowDamage = 60, MagicArrowRange = 70, MagicArrowSpeed = 70;
     public const double SeekingArrowDamage = 30, SeekingArrowScaling = 1, SeekingArrowSpeed = 30, SeekingArrowRange = 40;
@@ -63,12 +62,20 @@ public static class SpellTuning
         new StatModifier(StatIds.HeadShotDamage, EffectOp.Mult, 1 + s.Get("spell_focus_on_hs")),
     };
 
-    /// <summary>Frenzy with <paramref name="stacks"/> stacks: +2% attack speed and +7.5% damage each (stats).</summary>
-    public static StatModifier[] Frenzy(StatSheet s, int stacks) => stacks <= 0 ? Array.Empty<StatModifier>() : new[]
+    /// <summary>Frenzy with <paramref name="stacks"/> stacks: +2% attack speed and +7.5% damage each (stats); while active, the
+    /// crit chance items add (<c>spell_frenzy_active_crit_chance</c>, COS-88).</summary>
+    public static StatModifier[] Frenzy(StatSheet s, int stacks)
     {
-        new StatModifier(StatIds.AllDamage, EffectOp.Mult, 1 + stacks * s.Get("spell_frenzy_dmg")),
-        new StatModifier(StatIds.AttackSpeed, EffectOp.Mult, 1 + stacks * s.Get("spell_frenzy_atk_speed")),
-    };
+        var mods = new List<StatModifier>();
+        if (stacks > 0)
+        {
+            mods.Add(new StatModifier(StatIds.AllDamage, EffectOp.Mult, 1 + stacks * s.Get("spell_frenzy_dmg")));
+            mods.Add(new StatModifier(StatIds.AttackSpeed, EffectOp.Mult, 1 + stacks * s.Get("spell_frenzy_atk_speed")));
+        }
+        double crit = s.Get(PerkStatIds.FrenzyCrit);
+        if (crit > 0) mods.Add(new StatModifier(StatIds.CritChance, EffectOp.Add, crit));
+        return mods.ToArray();
+    }
 
     public static StatModifier[] Taunt() => new[] { new StatModifier(StatIds.Armor, EffectOp.Add, TauntArmor) };
 

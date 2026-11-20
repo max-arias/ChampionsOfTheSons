@@ -7,7 +7,8 @@ namespace ChampionsOfTheSons.Core.Saving;
 /// </summary>
 public sealed class PlayerSave
 {
-    public const int CurrentVersion = 1;
+    /// <summary>2: deleted perks removed (COS-86/COS-87).</summary>
+    public const int CurrentVersion = 2;
 
     public int Version { get; set; } = CurrentVersion;
     public double Xp { get; set; }

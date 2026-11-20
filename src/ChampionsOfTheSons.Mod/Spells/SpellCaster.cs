@@ -144,10 +144,43 @@ internal static class SpellCaster
         var cam = Camera.main != null ? Camera.main.transform : player;
         // Cast from the eyes so the sphere starts clear of our own collider, along the view direction.
         var eye = cam.position;
-        var feet = BlinkTarget(eye, cam.forward, BlinkRange, eye.y - player.position.y);
+        var stats = PlayerState.Character.Stats;
+        // Blink range is the spell_blink_range stat (15 m; items add to it), times the player's range factor (COS-88, COS-85).
+        float range = (float)RangeRules.Scaled(stats, stats.Get(PerkStatIds.BlinkRange) > 0 ? stats.Get(PerkStatIds.BlinkRange) : BlinkRange);
+        var start = player.position;
+        var feet = BlinkTarget(eye, cam.forward, range, eye.y - player.position.y);
 
         TeleportPlayer(feet);
+        BlinkItems(start, feet);
         return true;
+    }
+
+    /// <summary>Enemies struck by the last Blink (self-test).</summary>
+    public static int BlinkStruck { get; private set; }
+
+    /// <summary>Phase Pauldrons: every enemy passed through takes <c>spell_blink_damage</c>; Tearing Spacetime: an explosion at the exit,
+    /// damage scaling with movement speed and radius with the distance blinked (COS-88).</summary>
+    public static void BlinkItems(Vector3 from, Vector3 to)
+    {
+        var stats = PlayerState.Character.Stats;
+        BlinkStruck = 0;
+        double passDamage = stats.Get(PerkStatIds.BlinkDamage);
+        if (passDamage > 0)
+            foreach (var e in SpellWorld.ActiveEnemies().ToList())
+            {
+                if (SpellWorld.DistanceToSegment(SpellWorld.Center(e), from + Vector3.up, to + Vector3.up) > 1.5f) continue;
+                SpellWorld.Strike(e, SpellWorld.Hit(passDamage, 1));
+                BlinkStruck++;
+            }
+        if (!stats.IsOn(PerkStatIds.BlinkExplosion)) return;
+        float radius = Mathf.Max((float)PerkRules.BlinkExplosionMinRadius, Vector3.Distance(from, to) * (float)PerkRules.BlinkExplosionRadiusShare);
+        radius = (float)RangeRules.Scaled(stats, radius);
+        double damage = PerkRules.BlinkExplosionDamage * Math.Max(0.1, stats.Get(StatIds.MovementSpeed));
+        foreach (var e in SpellWorld.EnemiesWithin(to, radius))
+        {
+            SpellWorld.Strike(e, SpellWorld.Hit(damage, PerkRules.BlinkExplosionScaling));
+            BlinkStruck++;
+        }
     }
 
     /// <summary>Moves the player's feet to a point without the character controller fighting it.</summary>

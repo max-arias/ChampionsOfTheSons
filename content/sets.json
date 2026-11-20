@@ -6,6 +6,7 @@
       "bonuses": [
         {
           "pieces": 1,
+          "perPiece": true,
           "effects": [
             {
               "stat": "spell_snowstorm_damage_mult",
@@ -56,6 +57,7 @@
       "bonuses": [
         {
           "pieces": 1,
+          "perPiece": true,
           "effects": [
             {
               "stat": "weapon_range",

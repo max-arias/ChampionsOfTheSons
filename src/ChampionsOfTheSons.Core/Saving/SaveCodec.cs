@@ -17,7 +17,23 @@ public static class SaveCodec
     };
 
     /// <summary>Migrations for <see cref="PlayerSave"/>: index i upgrades version i+1 → i+2 (in place).</summary>
-    private static readonly Action<JsonObject>[] PlayerMigrations = Array.Empty<Action<JsonObject>>();
+    private static readonly Action<JsonObject>[] PlayerMigrations =
+    {
+        RemoveDeletedPerks, // 1 → 2 (COS-86/COS-87)
+    };
+
+    /// <summary>Perks deleted from the tree because they cannot work in Sons of the Forest (docs/mechanics.md Deviations).
+    /// A save that bought one drops it; spent points are derived from the bought perks, so the points come back.</summary>
+    public static readonly IReadOnlyList<string> DeletedPerks = new[]
+    {
+        "perk.charge_pushback", // needs a heavy-attack signal the game does not give
+    };
+
+    private static void RemoveDeletedPerks(JsonObject save)
+    {
+        if (save["perks"] is not JsonObject perks) return;
+        foreach (var id in DeletedPerks) perks.Remove(id);
+    }
 
     private static readonly Action<JsonObject>[] WorldMigrations = Array.Empty<Action<JsonObject>>();
 

@@ -314,5 +314,11 @@ internal static class StatSelfTest
             if (!atRight || !more || !reaches) { bad++; SelfTest.Log($"set {set.Id}: pieces {items.Count}, min {minPieces}, first {mods.Count} mods, all {all.Count} mods, reaches sheet {reaches}"); }
         }
         SelfTest.Check($"set bonuses apply at their piece counts and reach the sheet ({sets} sets)", bad == 0, $"{bad} sets off");
+
+        // COS-88: every stat a unique item or a set bonus sets has a reader, or is dropped with a reason.
+        var uniqueAndSet = Db.Items.Values.SelectMany(i => i.UniqueEffects.Select(e => (Who: i.Id, e.Stat)))
+            .Concat(Db.Sets.Values.SelectMany(st => st.Bonuses.SelectMany(b => b.Effects.Select(e => (Who: st.Id, e.Stat)))))
+            .Where(x => StatCoverage.Classify(x.Stat) == null).Select(x => $"{x.Who}->{x.Stat}").Distinct().ToList();
+        SelfTest.Check("every unique-item and set-bonus stat has a reader or is dropped with a reason", uniqueAndSet.Count == 0, string.Join("; ", uniqueAndSet.Take(12)));
     }
 }

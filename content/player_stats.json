@@ -1634,12 +1634,6 @@
       "default": 0.0
     },
     {
-      "id": "perk_charged_atk_knockback",
-      "legacyName": "perk_chargedAtkKnockback",
-      "kind": "bool",
-      "default": 0.0
-    },
-    {
       "id": "i_great_bow_ignites",
       "legacyName": "i_greatBowIgnites",
       "kind": "bool",
@@ -1775,6 +1769,12 @@
       "legacyName": "perk_blockNonPhysical",
       "kind": "bool",
       "default": 0.0
+    },
+    {
+      "id": "range_mult",
+      "kind": "mult",
+      "default": 1.0,
+      "percent": true
     }
   ]
 }

@@ -315,7 +315,7 @@ internal static class Spells2SelfTest
             var foe = Put(Foe(), SpellWorld.Eye.position + SpellWorld.Eye.forward * 3);
             float before = Hp(foe);
             if (!Ok("spell.wide_reach")) return;
-            SelfTest.Check("spells2: Wide Reach hits what is in front", Hp(foe) < before, $"{before:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: Wide Reach is a pickup and deals no damage (COS-85)", Math.Abs(Hp(foe) - before) < 0.01, $"{before:0.#} -> {Hp(foe):0.#}");
         });
         Case("bash", () =>
         {

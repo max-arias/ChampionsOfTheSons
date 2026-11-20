@@ -76,4 +76,22 @@ public class SaveCodecTests
         Assert.Equal(2, loaded.Level);
         Assert.Equal(PlayerSave.CurrentVersion, loaded.Version);
     }
+
+    [Fact]
+    public void Version_1_saves_drop_deleted_perks_and_get_their_points_back()
+    {
+        string deleted = SaveCodec.DeletedPerks[0];
+        var v1 = $"{{\"version\":1,\"level\":10,\"perks\":{{\"{deleted}\":1,\"perk.root\":1}}}}";
+        var loaded = SaveCodec.ReadPlayer(v1);
+        Assert.Equal(PlayerSave.CurrentVersion, loaded.Version);
+        Assert.False(loaded.Perks.ContainsKey(deleted));
+        Assert.Equal(1, loaded.Perks["perk.root"]);
+
+        const string perks = """
+        { "perks": [ { "id": "perk.root", "name": "Root", "category": "defense", "cost": 1 } ] }
+        """;
+        var tree = new Rules.PerkTree(TestContent.Create(new() { ["perks.json"] = perks }));
+        tree.Restore(loaded.Perks, loaded.UnlockedSpells);
+        Assert.Equal(9, tree.AvailablePoints(new Rules.Progress(loaded.Level, 0, loaded.BonusPerkPoints)));
+    }
 }

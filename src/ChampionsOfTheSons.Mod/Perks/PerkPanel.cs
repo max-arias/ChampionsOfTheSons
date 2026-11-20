@@ -370,7 +370,7 @@ internal sealed class PerkPanel
     public BuyResult? HoldStep(string? id, bool held, float dt)
     {
         if (!held) { _holdLatched = null; ResetHold(); return null; }
-        if (id == null || id == _holdLatched || !_nodes.ContainsKey(id) || Pc.Perks.CanBuy(id, Pc.Progress) != BuyResult.Ok) { ResetHold(); return null; }
+        if (id == null || id == _holdLatched || !_nodes.ContainsKey(id) || Pc.CanBuyPerk(id) != BuyResult.Ok) { ResetHold(); return null; }
         if (id != _holdId) { ResetHold(); _holdId = id; }
         _holdTime += dt;
         var node = _nodes[id];
@@ -425,7 +425,7 @@ internal sealed class PerkPanel
     {
         var pc = Pc;
         if (pc.Perks.TimesBought(id) > 0) return PerkState.Bought;
-        return StateFor(pc.Perks.CanBuy(id, pc.Progress));
+        return StateFor(pc.CanBuyPerk(id));
     }
 
     private static PerkState StateFor(BuyResult r) => r switch
@@ -470,7 +470,7 @@ internal sealed class PerkPanel
         {
             if (node.Def.Category.ToString() != tab) continue;
             int times = pc.Perks.TimesBought(node.Def.Id);
-            var state = times > 0 ? PerkState.Bought : StateFor(pc.Perks.CanBuy(node.Def.Id, pc.Progress));
+            var state = times > 0 ? PerkState.Bought : StateFor(pc.CanBuyPerk(node.Def.Id));
             if (node.Shown == state && node.ShownTimes == times) continue;
             node.Shown = state;
             node.ShownTimes = times;
@@ -549,7 +549,7 @@ internal sealed class PerkPanel
         if (!ModContent.Db.Perks.TryGetValue(id, out var perk)) return;
         var pc = Pc;
         int times = pc.Perks.TimesBought(id);
-        var result = pc.Perks.CanBuy(id, pc.Progress);
+        var result = pc.CanBuyPerk(id);
         _dName.Text(ShortName(perk) + (times > 0 ? $" <color={UiTheme.Gold}>×{times}</color>" : ""));
         _dMeta.Text($"{CategoryName(perk.Category)}  ·  {UiText.T("ui.perks.cost", "Cost")} {perk.Cost}  ·  {UiText.T("ui.sheet.level", "Level")} {perk.LevelReq}" +
                     (perk.Stackable ? $"  ·  {UiText.T("ui.perks.stackable", "Stackable")}" : ""));

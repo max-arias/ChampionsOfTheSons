@@ -122,7 +122,9 @@ public sealed class PlayerCharacter
         {
             CooldownReduction = id => PerkTuning.CooldownReduction(Perks, id),
             CooldownScale = id => PerkTuning.CooldownScale(Perks, id),
-            CostScale = (id, stats) => id == "spell.multishot" && stats.IsOn(UniqueFlagIds.Sora) ? UniqueTuning.SoraCostScale : 1,
+            CostScale = (id, stats) => (id == "spell.multishot" && stats.IsOn(UniqueFlagIds.Sora) ? UniqueTuning.SoraCostScale : 1) * PerkRules.CostScale(id, stats),
+            CostAdd = PerkRules.CostAdd,
+            CooldownRateScale = PerkRules.CooldownRate,
         };
         Stats = new StatSheet(content);
         Inventory.Changed += RebuildEquipment;
@@ -159,9 +161,12 @@ public sealed class PlayerCharacter
         Massacre.Reset();
     }
 
+    /// <summary>Whether a perk can be bought now, including the custom conditions of canBuyManual perks.</summary>
+    public BuyResult CanBuyPerk(string perkId) => Perks.CanBuy(perkId, Progress, perk => PerkRules.ManualBuyCheck(perk, Stats));
+
     public BuyResult BuyPerk(string perkId)
     {
-        var r = Perks.Buy(perkId, Progress);
+        var r = Perks.Buy(perkId, Progress, perk => PerkRules.ManualBuyCheck(perk, Stats));
         if (r == BuyResult.Ok) Stats.SetSource("perks", Perks.Modifiers());
         return r;
     }

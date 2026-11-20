@@ -55,6 +55,7 @@ public static class PerkTuning
         ("perk.endless_storm", "spell.ball_lightning", 25.0),
         ("perk.wrath_of_the_sun", "spell.sun_flare", 20.0),
         ("perk.sudden_rampage", "spell.berserk", 90.0),
+        ("perk.golden_cooldown", "spell.golden_skin", PerkRules.GoldenSkinCut),
     };
 
     /// <summary>Time of Need: Healing Dome and Purge cooldowns x0.5.</summary>

@@ -39,10 +39,18 @@ public sealed class SpellBook
     /// <summary>Factor on a spell's energy cost and upkeep from items (Grip of Sora on Multishot).</summary>
     public Func<string, StatSheet, double>? CostScale { get; set; }
 
-    /// <summary>What casting or one second of upkeep of a spell costs, after <see cref="CostScale"/>.</summary>
+    /// <summary>Energy added to a spell's base cost by items and perks (Flame Pauldrons on Firebolt), before the cost multipliers.</summary>
+    public Func<string, StatSheet, double>? CostAdd { get; set; }
+
+    /// <summary>Factor on one spell's cooldown rate (the Healing Dome bracer).</summary>
+    public Func<string, StatSheet, double>? CooldownRateScale { get; set; }
+
+    /// <summary>What casting or one second of upkeep of a spell costs, after <see cref="CostAdd"/> and <see cref="CostScale"/>.</summary>
     public SpellCost CostOf(string spellId, StatSheet stats)
     {
-        var c = Cost(_content.Spells[spellId], stats);
+        var def = _content.Spells[spellId];
+        double add = CostAdd?.Invoke(spellId, stats) ?? 0;
+        var c = Cost(add == 0 ? def : new SpellDef { Id = def.Id, EnergyCost = Math.Max(0, def.EnergyCost + add) }, stats);
         double k = CostScale?.Invoke(spellId, stats) ?? 1;
         return new SpellCost(c.Energy * k, c.Stamina * k);
     }
@@ -86,8 +94,21 @@ public sealed class SpellBook
         {
             if (_loadout[i] is not string id || _ready[i] >= 1) continue;
             double cd = CooldownOf(id, stats);
-            _ready[i] = cd <= 0 ? 1 : Math.Min(1, _ready[i] + dt * rate / cd);
+            double r = rate * (CooldownRateScale?.Invoke(id, stats) ?? 1);
+            _ready[i] = cd <= 0 ? 1 : Math.Min(1, _ready[i] + dt * r / cd);
         }
+    }
+
+    /// <summary>Multiplies the remaining cooldown of every slot by <paramref name="factor"/> (Infinity: ×0.95 on each cast).</summary>
+    public void ScaleRemainingCooldowns(double factor)
+    {
+        for (int i = 0; i < Slots; i++)
+            if (_loadout[i] != null && _ready[i] < 1) _ready[i] = 1 - (1 - _ready[i]) * Math.Clamp(factor, 0, 1);
+    }
+
+    private void OnCast(StatSheet stats)
+    {
+        if (stats.IsOn(PerkStatIds.Infinity)) ScaleRemainingCooldowns(PerkRules.InfinityFactor);
     }
 
     /// <summary>Takes <paramref name="seconds"/> off the remaining cooldown of one random spell that is cooling down (Infinity Loop). False if none is.</summary>
@@ -129,12 +150,14 @@ public sealed class SpellBook
             if (!IsReady(slot)) return CastResult.OnCooldown;
             if (energy < CostOf(id, stats).Energy) return CastResult.NotEnoughEnergy;
             _active[slot] = true;
+            OnCast(stats);
             return CastResult.Ok;
         }
         if (!IsReady(slot)) return CastResult.OnCooldown;
         cost = CostOf(id, stats);
         if (energy < cost.Energy) return CastResult.NotEnoughEnergy;
         _ready[slot] = 0;
+        OnCast(stats);
         return CastResult.Ok;
     }
 
