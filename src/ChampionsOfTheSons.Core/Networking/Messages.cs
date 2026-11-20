@@ -1,3 +1,5 @@
+using ChampionsOfTheSons.Core.Rules;
+
 namespace ChampionsOfTheSons.Core.Networking;
 
 /// <summary>
@@ -50,8 +52,8 @@ public sealed record HelloReject(string Reason) : IMessage
     public MessageType Type => MessageType.HelloReject;
 }
 
-/// <summary>Host → clients: world settings that the host owns.</summary>
-public sealed record WorldSettings(string DifficultyId, bool FriendlyFire) : IMessage
+/// <summary>Host → clients: world settings that the host owns (COS-130: the game's difficulty as the host reads it, and its extra levels).</summary>
+public sealed record WorldSettings(GameMode Mode, int LevelOffset, int ExtraEnemyLevels, bool FriendlyFire) : IMessage
 {
     public MessageType Type => MessageType.WorldSettings;
 }

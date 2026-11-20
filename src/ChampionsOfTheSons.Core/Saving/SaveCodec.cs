@@ -61,7 +61,15 @@ public static class SaveCodec
     private static readonly Action<JsonObject>[] WorldMigrations =
     {
         CollapseMinLootRarity, // 1 → 2 (COS-109)
+        DropDifficultyTier, // 2 → 3 (COS-130)
     };
+
+    /// <summary>
+    /// COS-130: worlds no longer store a difficulty tier; enemy levels follow the party and the game's difficulty. The old tier is
+    /// dropped, not turned into extra levels: its fixed levels do not translate into an offset over the party (a Master world's
+    /// level 30-39 enemies are what a level-30 party now meets anyway). The host's own extra levels are kept.
+    /// </summary>
+    private static void DropDifficultyTier(JsonObject save) => save.Remove("difficulty");
 
     private static void CollapseMinLootRarity(JsonObject save)
     {

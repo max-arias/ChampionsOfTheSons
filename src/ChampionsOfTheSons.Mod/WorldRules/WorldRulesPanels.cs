@@ -7,7 +7,7 @@ using static SUI.SUI;
 
 namespace ChampionsOfTheSons.Mod.HostRules;
 
-/// <summary>Base for the two modal panels: a dimmed full-screen root with a centered window and a title.</summary>
+/// <summary>Base for the modal panels: a dimmed full-screen root with a centered window and a title.</summary>
 internal abstract class ModalPanel
 {
     protected SPanelOptions Root = null!;
@@ -54,53 +54,7 @@ internal abstract class ModalPanel
     protected abstract void Refresh();
 }
 
-/// <summary>
-/// Shown once for a world whose host has not picked a difficulty. Never opens by itself unless the player is controllable
-/// (the original opened it over cutscenes and the ending): see <see cref="WorldRulesFeature.ShouldAutoOpen"/>.
-/// </summary>
-internal sealed class DifficultyPicker : ModalPanel
-{
-    public const string PanelId = "cots-difficulty-picker";
-    private const float W = 980, H = 720;
-
-    private readonly List<(DifficultyTier Tier, SBgButtonOptions Button)> _buttons = new();
-
-    /// <summary>Raised with the tier the host chose.</summary>
-    public event Action<DifficultyTier>? Chosen;
-
-    public IReadOnlyList<(DifficultyTier Tier, SBgButtonOptions Button)> Buttons => _buttons;
-
-    public void Build()
-    {
-        BuildShell(PanelId, W, H, UiText.T("ui.worldrules.picker.title", "Choose your difficulty"));
-        Window.Add(Label(UiText.T("ui.worldrules.picker.hint", "This sets enemy levels for the whole world. The host can change it later in host settings."),
-            18, UiTheme.TextDim, TextAlignmentOptions.TopLeft).TopLeft(28, 64).Size(W - 56, 52));
-
-        const float cellW = 440, cellH = 66, gap = 14;
-        for (int i = 0; i < Difficulties.All.Count; i++)
-        {
-            var tier = Difficulties.All[i];
-            float x = 28 + i % 2 * (cellW + gap), y = 128 + i / 2 * (cellH + gap);
-            string name = UiText.T("ui.worldrules.difficulty." + tier.Id.Substring("difficulty.".Length), tier.Name);
-            string levels = tier.BaseLevelMin == tier.BaseLevelMax ? $"Lv {tier.BaseLevelMin}" : $"Lv {tier.BaseLevelMin}-{tier.BaseLevelMax}";
-            var captured = tier;
-            var btn = Button($"{name}   <color={UiTheme.TextDim}>{levels}</color>", 24, () => Choose(captured));
-            btn.TopLeft(x, y).Size(cellW, cellH);
-            Window.Add(btn);
-            _buttons.Add((tier, btn));
-        }
-    }
-
-    public void Choose(DifficultyTier tier)
-    {
-        Close();
-        Chosen?.Invoke(tier);
-    }
-
-    protected override void Refresh() { }
-}
-
-/// <summary>Host settings: difficulty, the multipliers, elites on/off and which abilities may roll. Edits apply at once and are saved with the world.</summary>
+/// <summary>Host settings: the game's difficulty (read only, COS-130), the multipliers, elites on/off and which abilities may roll. Edits apply at once and are saved with the world.</summary>
 internal sealed class HostSettingsPanel : ModalPanel
 {
     public const string PanelId = "cots-host-settings";
@@ -130,12 +84,10 @@ internal sealed class HostSettingsPanel : ModalPanel
         BuildShell(PanelId, W, H, UiText.T("ui.worldrules.host.title", "Host settings"));
         Window.Add(Button("X", 24, Close, "#2B333E", "#4A3036").TopLeft(W - 64, 16).Size(40, 40));
 
-        // difficulty
-        Window.Add(Label(UiText.T("ui.worldrules.row.difficulty", "Difficulty"), 20, UiTheme.Text, TextAlignmentOptions.MidlineLeft).TopLeft(28, 76).Size(300, 36));
-        Window.Add(Button("<", 22, () => StepDifficulty(-1)).TopLeft(330, 76).Size(40, 36));
-        _difficulty = Label("", 20, UiTheme.Gold, TextAlignmentOptions.Midline);
-        Window.Add(_difficulty.TopLeft(374, 76).Size(190, 36));
-        Window.Add(Button(">", 22, () => StepDifficulty(1)).TopLeft(568, 76).Size(40, 36));
+        // the game's difficulty: read from the game, not editable here (COS-130)
+        Window.Add(Label(UiText.T("ui.worldrules.row.game_difficulty", "Game difficulty"), 20, UiTheme.Text, TextAlignmentOptions.MidlineLeft).TopLeft(28, 76).Size(300, 36));
+        _difficulty = Label("", 18, UiTheme.Gold, TextAlignmentOptions.MidlineLeft);
+        Window.Add(_difficulty.TopLeft(330, 76).Size(290, 36));
 
         // multipliers
         for (int i = 0; i < Rows.Length; i++)
@@ -154,6 +106,9 @@ internal sealed class HostSettingsPanel : ModalPanel
         Window.Add(Label(UiText.T("ui.worldrules.row.elites", "Elite enemies"), 20, UiTheme.Text, TextAlignmentOptions.MidlineLeft).TopLeft(28, elitesY).Size(300, 36));
         _elites = Button("", 20, ToggleElites);
         Window.Add(_elites.TopLeft(330, elitesY).Size(278, 36));
+        Window.Add(Label(UiText.T("ui.worldrules.level_hint",
+                "Enemy levels follow the level of the players near them. The game's difficulty adds levels and elites; extra levels add more on top."),
+            17, UiTheme.TextDim, TextAlignmentOptions.TopLeft).TopLeft(28, elitesY + 56).Size(580, 90));
 
         // abilities
         Window.Add(Label(UiText.T("ui.worldrules.abilities.title", "Enemy abilities (click to switch off or on)"), 20, UiTheme.Gold, TextAlignmentOptions.MidlineLeft)
@@ -170,6 +125,21 @@ internal sealed class HostSettingsPanel : ModalPanel
         }
     }
 
+    /// <summary>"Hard: +5 levels, 15% elites".</summary>
+    public static string GameDifficultyText(GameDifficulty game)
+    {
+        string mode = UiText.T("ui.worldrules.mode." + ModeKey(game.Mode), Spaced(game.Mode.ToString()));
+        string levels = (game.LevelOffset >= 0 ? "+" : "") + game.LevelOffset;
+        int elites = (int)Math.Round(game.EliteChance * 100);
+        return string.Format(UiText.T("ui.worldrules.mode.format", "{0}: {1} levels, {2}% elites"), mode, levels, elites);
+    }
+
+    private static string ModeKey(GameMode mode) => mode switch
+    {
+        GameMode.HardSurvival => "hard_survival",
+        _ => mode.ToString().ToLowerInvariant(),
+    };
+
     public static string AbilityName(EnemyAbility a) => UiText.T("ui.worldrules.ability." + a.ToString().ToLowerInvariant(), Spaced(a.ToString()));
 
     private static string Spaced(string pascal)
@@ -181,13 +151,6 @@ internal sealed class HostSettingsPanel : ModalPanel
             sb.Append(c);
         }
         return sb.ToString();
-    }
-
-    private void StepDifficulty(int delta)
-    {
-        int i = Math.Clamp(WorldState.Rules.Difficulty.Index + delta, 0, Difficulties.All.Count - 1);
-        WorldState.SetDifficulty(Difficulties.All[i]);
-        Refresh();
     }
 
     private void Nudge(Row row, int direction)
@@ -224,9 +187,7 @@ internal sealed class HostSettingsPanel : ModalPanel
     protected override void Refresh()
     {
         var rules = WorldState.Rules;
-        _difficulty.Text(WorldState.DifficultyChosen
-            ? UiText.T("ui.worldrules.difficulty." + rules.Difficulty.Id.Substring("difficulty.".Length), rules.Difficulty.Name)
-            : UiText.T("ui.worldrules.not_chosen", "not chosen"));
+        _difficulty.Text(GameDifficultyText(rules.GameDifficulty));
         for (int i = 0; i < Rows.Length; i++)
         {
             double v = Rows[i].Get(rules);

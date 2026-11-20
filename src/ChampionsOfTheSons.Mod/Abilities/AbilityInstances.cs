@@ -133,7 +133,7 @@ internal abstract class AuraInstance : AbilityInstance
         _phase += dt;
         if (_phase < Spec.TickSeconds) return;
         _phase -= (float)Spec.TickSeconds;
-        if (inside) AbilityDamage.HitPlayer(Enemy, Spec.Ability, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, Spec.Ability, Rng));
+        if (inside) AbilityDamage.HitPlayer(Enemy, Spec.Ability, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, Spec.Ability, Rng));
     }
 
     public override void Dispose()
@@ -288,7 +288,7 @@ internal sealed class MeteorInstance : CastInstance
         Flash(new Color(1f, 0.55f, 0.1f), _spot + Vector3.up, (float)Spec.Radius, 0.5f);
         foreach (var p in AbilityTargets.Positions())
             if (AbilityTargets.Flat(p, _spot) <= Spec.Radius && Mathf.Abs(p.y - _spot.y) < 5)
-                AbilityDamage.HitPlayer(Enemy, EnemyAbility.Meteor, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, EnemyAbility.Meteor, Rng));
+                AbilityDamage.HitPlayer(Enemy, EnemyAbility.Meteor, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, EnemyAbility.Meteor, Rng));
         return true;
     }
 
@@ -355,7 +355,7 @@ internal sealed class LaserInstance : CastInstance
             _tick = (float)Spec.TickSeconds;
             foreach (var p in AbilityTargets.Positions())
                 if (ActiveAbilityRules.BeamHits(Num(p + Vector3.up), Num(Chest), Num(_to), Spec.Radius))
-                    AbilityDamage.HitPlayer(Enemy, EnemyAbility.Laser, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, EnemyAbility.Laser, Rng));
+                    AbilityDamage.HitPlayer(Enemy, EnemyAbility.Laser, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, EnemyAbility.Laser, Rng));
         }
         return false;
     }
@@ -403,7 +403,7 @@ internal sealed class BlackHoleInstance : CastInstance
             if (!PlayerState.Character.Stats.IsOn(PerkStatIds.BlackHolePullImmune))
                 AbilityForces.SetPull(Key, dir * (float)ActiveAbilityRules.BlackHolePull(dist, Spec.Radius), 0.5f);
             if (damage && ActiveAbilityRules.InBlackHoleCore(dist, Spec.Radius))
-                AbilityDamage.HitPlayer(Enemy, EnemyAbility.BlackHole, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, EnemyAbility.BlackHole, Rng));
+                AbilityDamage.HitPlayer(Enemy, EnemyAbility.BlackHole, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, EnemyAbility.BlackHole, Rng));
         }
         return false;
     }
@@ -459,7 +459,7 @@ internal sealed class FlareInstance : CastInstance
             AbilityVisuals.AddLight(_orb, new Color(1f, 0.95f, 0.75f), 45, 400);
             foreach (var p in AbilityTargets.Positions())
                 if (AbilityTargets.Flat(p, _burst) <= Spec.Radius)
-                    AbilityDamage.HitPlayer(Enemy, EnemyAbility.Flare, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, EnemyAbility.Flare, Rng));
+                    AbilityDamage.HitPlayer(Enemy, EnemyAbility.Flare, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, EnemyAbility.Flare, Rng));
         }
         return T >= Spec.Windup + Spec.Duration;
     }
@@ -507,7 +507,7 @@ internal sealed class CataclysmInstance : CastInstance
         {
             if (AbilityTargets.Flat(p, EnemyPos) > Spec.Radius || Mathf.Abs(p.y - EnemyPos.y) > 8) continue;
             if (_arcane) AbilityForces.AddSlow(Key, ActiveAbilityRules.ArcaneSlow, 0.4f);
-            if (damage) AbilityDamage.HitPlayer(Enemy, Spec.Ability, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, Spec.Ability, Rng));
+            if (damage) AbilityDamage.HitPlayer(Enemy, Spec.Ability, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, Spec.Ability, Rng));
         }
         return false;
     }
@@ -672,7 +672,7 @@ internal sealed class TrapperInstance : CastInstance
             {
                 if (AbilityTargets.Flat(p, trap.Pos) > Spec.Radius || Mathf.Abs(p.y - trap.Pos.y) > 2) continue;
                 PlayerEffects.Stun(ActiveAbilityRules.TrapRootSeconds);
-                AbilityDamage.HitPlayer(Enemy, EnemyAbility.Trapper, ActiveAbilityRules.Damage(WorldState.Rules.Difficulty, EnemyAbility.Trapper, Rng));
+                AbilityDamage.HitPlayer(Enemy, EnemyAbility.Trapper, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, EnemyAbility.Trapper, Rng));
                 DropTrap(i);
                 break;
             }

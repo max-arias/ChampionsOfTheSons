@@ -105,6 +105,6 @@ public class ChampionsOfTheSonsMod : SonsMod
         EnsureInitialized();
         Bridge.PlayerBridge.Reset();
         Features.Each("OnGameStart", f => f.OnGameStart());
-        RLog.Msg($"Champions of the Sons: game started (difficulty {WorldState.Rules.Difficulty.Name}, level {PlayerState.Character.Progress.Level})");
+        RLog.Msg($"Champions of the Sons: game started (game difficulty {WorldState.Rules.GameDifficulty.Mode}, level {PlayerState.Character.Progress.Level})");
     }
 }

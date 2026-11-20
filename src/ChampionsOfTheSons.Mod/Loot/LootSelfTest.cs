@@ -109,7 +109,7 @@ internal static class LootSelfTest
     private static void BossDrops()
     {
         // A synthetic level-300 boss on Hell: many drops, high rarities.
-        var rules = _savedRules! with { Difficulty = Difficulties.Hell, DropChance = 1000 };
+        var rules = _savedRules! with { PartyLevelOverride = Difficulties.Hell.BaseLevelMin, DropChance = 1000 };
         var boss = new EnemyProfile
         {
             KindId = "test", Level = 300, Tier = EnemyTier.Boss, Bounty = 5e7,

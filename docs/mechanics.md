@@ -1,6 +1,6 @@
 # Mechanics
 
-The rules Champions of the Sons implements. Numbers and formulas come from reading the original Champions of the Forest (COTF) source (2026-11-18); the code here is new. `U(a,b)` is a uniform roll, `L` a level, `d` the difficulty index 0..10. **Deviations** from COTF are listed at the end and marked ✱ inline.
+The rules Champions of the Sons implements. Numbers and formulas come from reading the original Champions of the Forest (COTF) source (2026-11-18); the code here is new. `U(a,b)` is a uniform roll, `L` a level, `d` the index 0..10 of an enemy's level band (see Difficulty). **Deviations** from COTF are listed at the end and marked ✱ inline.
 
 ## Progression
 - XP to next level: `goal(L) = round(0.8L⁴ + L³ + 2L² + 20L + 4e^(L/3.3) + 1.36^(L−5))`; from L 138 the goal is 5e18 (practical cap).
@@ -15,8 +15,22 @@ The rules Champions of the Sons implements. Numbers and formulas come from readi
 - When the timer runs out: grant `pending × mult(kills)`; reset.
 - `mult`: <3→1, 3→1.1, 4→1.25, 5→1.5, 6–9→1.75, 10–11→2.3, 12–15→3, 16–19→5, 20–24→8.5, 25–29→16, 30–39→22.5, 40–49→35, 50–64→50, 65–74→100, 75–99→250, ≥100→1000.
 
-## Difficulty (11 tiers)
-| d | Name | Base enemy level | Armor factor `⌊d/2⌋+1` | Shielding CD | Meteor dmg | Laser dmg |
+## Difficulty (COS-130) ✱
+No difficulty is picked. Enemy levels follow the players (see Enemies), and the game's own difficulty, which the host reads from the game (`GameSetupManager` mode and, for Custom, its enemy sliders) and sends to clients, adds levels and elites:
+
+| Game difficulty | Level offset | Elite chance |
+|---|---|---|
+| Peaceful | −2 | 8% |
+| Normal, Creative | 0 | 10% |
+| Hard | +5 | 15% |
+| Hard Survival | +10 | 20% |
+| Custom | each of enemy health, damage, armour, aggression: Low −1, Normal 0, High +2.5; sum rounded (all High = +10) | by offset |
+
+Elite chance = `clamp(0.10 + 0.01 × offset, 0.05, 0.25)` (`GameDifficulty`, `Core/Rules/Difficulty.cs`).
+
+COTF's 11 tiers stay as **level bands**: an enemy's band `d` is the highest one whose base level its level reaches (`Difficulties.ForLevel`), and gives the per-band numbers below (armor factor, Shielding cooldown, Meteor and Laser damage, elite ability count, ability gating, loot rarity roll).
+
+| d | Name | Band from level (COTF base level) | Armor factor `⌊d/2⌋+1` | Shielding CD | Meteor dmg | Laser dmg |
 |---|---|---|---|---|---|---|
 |0|Easy|1–3|1|60|40–49|30–39|
 |1|Veteran|10–13|1|55|100–149|85–104|
@@ -30,15 +44,15 @@ The rules Champions of the Sons implements. Numbers and formulas come from readi
 |9|Challenge VI|200|5|15|65000|164636|
 |10|Hell|300|6|15|75000|224636|
 
-Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels, enemy damage/health/armor/speed; allow elites; loot level policy (highest/average/lowest/closest/host); minimum loot rarity. No day-based scaling.
+Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels (also `extra_enemy_levels` in a dedicated server's config), enemy damage/health/armor/speed; allow elites; loot level policy (highest/average/lowest/closest/host); minimum loot rarity. No day-based scaling.
 
 ## Enemies
-- Level: `ceil(base(d) + kindExtra + extraLevels)`. kindExtra comes from content per enemy kind (COTF: normal 1, leader 2, pale 2, painted 3, creepy 2, boss-type 6, baby 0).
+- Level ✱ (COS-130): `max(1, party + U[−1,1] + kindExtra + gameOffset + extraLevels)`. `party` is the average level of the players within 150 m of the enemy when it is rolled, rounded up (nobody in range: all players; a dedicated server counts only clients; `EnemyLevels.PartyLevel`). kindExtra comes from content per enemy kind (COTF: normal 1, leader 2, pale 2, painted 3, creepy 2, boss-type 6, baby 0). gameOffset is the game difficulty's (table above). The band `d` used below is the enemy's own (`Difficulties.ForLevel(L)`).
 - Damage multiplier: `L < 65 ? e^⌊L/6⌋ + L : (L−60)^2.6 × 600`.
 - Armor: `⌊U(L^2.43/3 + 1, L^2.43·2/3 + 20) × armorMul⌋ × (⌊d/2⌋+1)`.
 - HP: `(√vanillaHP + 45) × L^2.38 × 0.2 × 2^((L−50)/32) × healthMul`.
 - Speed: `(0.94 + L/170) × speedMul`.
-- Tier: elite if `(U < 0.1 or kind is a boss type or d = Hell) and elites allowed`. Elite ability count: 2 at d ≤ 1, `U[3,6]` at d ≥ 2, 10 for boss types. Boss if `n ≥ 6 and U < 0.1` ✱, Miniboss if `n > 4 and U < 0.25`, else Elite. Non-normal tiers: armor ×2; HP ×5 Elite, ×10 Miniboss, ×20 Boss ✱; scale ×1.1/1.15/1.2. Boss adds Boss Steadfast, Miniboss adds Elite Steadfast.
+- Tier: elite if `(U < eliteChance or kind is a boss type or d = Hell) and elites allowed`, eliteChance from the game difficulty ✱ (COTF: 0.1). Elite ability count: 2 at d ≤ 1, `U[3,6]` at d ≥ 2, 10 for boss types. Boss if `n ≥ 6 and U < 0.1` ✱, Miniboss if `n > 4 and U < 0.25`, else Elite. Non-normal tiers: armor ×2; HP ×5 Elite, ×10 Miniboss, ×20 Boss ✱; scale ×1.1/1.15/1.2. Boss adds Boss Steadfast, Miniboss adds Elite Steadfast.
 - Abilities: n distinct picks; only one steadfast; Tiny/Gargantuan exclusive; Meteor, Black Hole and Cataclysms need d ≥ 3; Undead only on kinds that allow it.
 - Bounty (kill XP): `b = maxHP^0.8 × 0.8 × L^0.25 + 100`; `×n` if n > 1; `× max(1, L/20)`; `× xpMul`. Co-op: each player within 80 m of the kill gets `b × (1 + 0.2 × (n − 1)) / n` for n such players (`Enemies.KillXpShare`).
 - Armor reduction: `DR(a) = (max(a,0)/(max(a,0)+500))²`. Physical damage `× dmgTakenMult × (1 − DR(armor − armorReduction))`; magic uses DR/1.5; pure ignores armor. Armor pierce adds to `armorReduction` (capped at armor). COTF's fire ticks also reduce armor; not built here (COS-90).
@@ -82,7 +96,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 
 ## Passive abilities and effects in game (this mod's numbers where COTF's are unknown)
 - Abilities and debuffs only advance while the enemy is alive and active (COTF bug #43). Active spell-like abilities register an `IAbilityHandler` (`Bridge/EnemyAbilities.cs`).
-- Shielding: the first hit while ready is absorbed and raises a 3 s immunity, then it recharges for the difficulty's cooldown. Undead: the first lethal hit leaves half health. Juggernaut: ignores slow, stun and knockdown. Basher: the player's movement stops for 1 s (unless `stun_immunity`). Poisonous: `hit × √(damageMult/10)/10` damage per second for 6 s on the player. Rain Empowerment: damage ×5, armor ×5, speed ×2 while it rains.
+- Shielding: the first hit while ready is absorbed and raises a 3 s immunity, then it recharges for its level band's cooldown. Undead: the first lethal hit leaves half health. Juggernaut: ignores slow, stun and knockdown. Basher: the player's movement stops for 1 s (unless `stun_immunity`). Poisonous: `hit × √(damageMult/10)/10` damage per second for 6 s on the player. Rain Empowerment: damage ×5, armor ×5, speed ×2 while it rains.
 - Avenger: each enemy dying within 30 m adds a stack (max 5, 20 s): +25% damage and +10% speed per stack. Sacrifice: on death, enemies within 25 m heal 30% of max health and deal ×1.5 damage for 15 s. (New rules.)
 - Gargantuan/Tiny set the actor's scale; speed is the profile speed times every slow/stun/rain factor, applied to the actor's animator.
 - Player on-hit stats: life/energy on hit (× all recovery), chance to slow (×0.5 speed, 8 s), bleed (hit/20 per s, 10 s) and weaken (×1.2 damage taken, 8 s), hammer stun (`i_hammer_stun_amount` chance, `i_hammer_stun_duration` s). DoTs are pure damage (no armor) but meet steadfast caps and shields. Thorns = `(thorns + per-STR·STR + per-VIT·VIT) × thornsDmgMult` back at the enemy that hit you, ignoring `thorns_armor_piercing` of its armor. Fire damage multiplies hits on burning enemies by `1 + fireDamage`. Explosion damage multiplies thrown/explosive hits by `1 + explosionDamage`.
@@ -108,11 +122,11 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - The crafting panel shows a preview per mode (what will change, ranges for Polish, the player level for Empower, "random" for Reroll/Reforge) and a before/after list once crafted.
 
 ## Active enemy abilities (COS-20; this mod's numbers except where noted)
-Host only; each runs only while the enemy is alive and active and is removed the moment it dies, goes dormant or despawns. Rules are in `Core/Rules/ActiveAbilities.cs`; damage is magic (the player's `magic_damage_taken` applies), times the enemy's damage multipliers (rain, Avenger, Sacrifice) and the host's enemy-damage rule. First cast 2-6 s after the enemy becomes active; the cooldown restarts when a cast ends. A cast needs the nearest player inside the range band. `D` = mean of the difficulty's Meteor damage.
+Host only; each runs only while the enemy is alive and active and is removed the moment it dies, goes dormant or despawns. Rules are in `Core/Rules/ActiveAbilities.cs`; damage is magic (the player's `magic_damage_taken` applies), times the enemy's damage multipliers (rain, Avenger, Sacrifice) and the host's enemy-damage rule. First cast 2-6 s after the enemy becomes active; the cooldown restarts when a cast ends. A cast needs the nearest player inside the range band. `D` = mean of the enemy's level band's Meteor damage.
 | Ability | Cooldown | Range | Telegraph | Effect |
 |---|---|---|---|---|
-| Meteor | 14 s | 0-45 m | 2 s ring (r 4 m) on the player's spot | Impact damage = difficulty Meteor roll (table above); `perk_meteor_damage_taken` applies |
-| Laser | 10 s | 3-35 m | 1.5 s thin line tracking the player | 1 s beam locked on where the player was, half-width 0.8 m, hits every 0.5 s for the difficulty Laser roll |
+| Meteor | 14 s | 0-45 m | 2 s ring (r 4 m) on the player's spot | Impact damage = the band's Meteor roll (Difficulty table); `perk_meteor_damage_taken` applies |
+| Laser | 10 s | 3-35 m | 1.5 s thin line tracking the player | 1 s beam locked on where the player was, half-width 0.8 m, hits every 0.5 s for the band's Laser roll |
 | Black Hole | 28 s | 5-35 m | 1 s marker | 6 s well (r 12 m) on the player's spot; pull 2 m/s at the rim to 9 m/s at the centre; core (r 3 m) deals 0.05·D per s |
 | Blizzard | always | aura r 15 m | none | player speed ×0.55 inside, 0.02·D per s |
 | Radiance | always | aura r 10 m | none | 0.04·D per s |
@@ -224,6 +238,7 @@ Keyed by source; re-adding a source refreshes duration; amount overwrites, accum
 - Damage numbers: every hit on an enemy that lands on the host (its own hits, damage over time, spells, thorns, and other players' hits) is shown to the clients within 80 m, under the damage-number setting. Not shown: numbers for damage other players take.
 
 ## Deviations from COTF (deliberate)
+- No difficulty picker (COS-130, Max 2026-11-20): COTF's host picked one of 11 tiers that fixed enemy levels for the world. Here enemy levels follow the party's level and the game's own difficulty adds levels and elite chance; the tiers only remain as level bands for their per-band numbers. Worlds saved with a tier (WorldSave v2) drop it on load and keep the host's extra levels: a tier's fixed levels do not translate into an offset over the party.
 - Four rarities instead of eight (COS-109, Max 2026-11-20): Common, Magic, Rare, Legendary; every unique is Legendary. The roll keeps COTF's eight-step climb and folds its result. Value multipliers are averaged per tier (Legendary ×4.5, between COTF's ×3.4 and ×5.6), so the old Primal tier rolls about 20% lower and the old Legendary tier about 30% higher; the XP heart gives ×4.5 instead of ×3.4. Old saves are remapped on load.
 - Vanilla floors: enemy max health is at least the game's own value, and enemy damage to the player is at least the game's own hit. COTF's curves were tuned for The Forest's numbers; in Sons of the Forest they made low-level enemies far weaker than vanilla (seen in the 2026-11-18 self-test: a level-2 cannibal had 20 HP vs 100 vanilla).
 - Boss tier: COTF requires n > 6 abilities, which only its Megan could reach, and gives Bosses ×2 HP (less than Miniboss ×10). Here Boss needs n ≥ 6 and has ×20 HP.

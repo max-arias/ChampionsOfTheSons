@@ -354,7 +354,7 @@ internal static class FollowupsSelfTest
         SelfTest.Check("followups: Grip of Sora: Multishot costs 20% less", without > 0 && Math.Abs(withSora / without - UniqueTuning.SoraCostScale) < 0.001, $"{without:0.##} -> {withSora:0.##}");
 
         Flags(UniqueFlagIds.Crossfire);
-        var target = TestKit.Spawn(distance: 8, rules: new WorldRules { Difficulty = Difficulties.Easy, AllowElites = false });
+        var target = TestKit.Spawn(distance: 8, rules: new WorldRules { PartyLevelOverride = 1, AllowElites = false });
         var rt = TestKit.Profile(target);
         int fired = Spells.SpellEffects.CrossfireArrows;
         if (rt != null)

@@ -26,18 +26,76 @@ public class EnemyScalerTests
         Assert.Equal(30, EnemyScaler.DamageToPlayer(weak, 30), 6);
     }
 
-    [Fact]
-    public void Higher_difficulty_gives_higher_levels()
+    [Theory]
+    [InlineData(1, GameMode.Normal, 0)]
+    [InlineData(20, GameMode.Hard, 0)]
+    [InlineData(80, GameMode.HardSurvival, 7)]
+    [InlineData(1, GameMode.Peaceful, 0)]
+    public void Enemy_level_is_the_party_level_plus_the_game_difficulty_and_extra_levels(int party, GameMode mode, int extra)
     {
         var rng = new Rng(1);
-        int previousMax = 0;
-        foreach (var d in Difficulties.All)
+        var game = GameDifficulty.For(mode);
+        var rules = new WorldRules { GameDifficulty = game, ExtraEnemyLevels = extra };
+        int center = party + Cannibal.LevelExtra + game.LevelOffset + extra;
+        var levels = Enumerable.Range(0, 200).Select(_ => EnemyScaler.RollLevel(Cannibal, rules, party, rng)).ToList();
+        Assert.All(levels, l => Assert.InRange(l, Math.Max(1, center - 1), Math.Max(1, center + 1)));
+        if (center > 2) Assert.Equal(3, levels.Distinct().Count());
+        Assert.All(Enumerable.Range(0, 50).Select(_ => EnemyScaler.RollLevel(Cannibal, rules with { PartyLevelOverride = 200 }, party, rng)),
+            l => Assert.True(l >= 200 + Cannibal.LevelExtra + game.LevelOffset + extra - 1));
+    }
+
+    [Fact]
+    public void Harder_game_modes_add_levels_and_elites()
+    {
+        var ladder = new[] { GameMode.Peaceful, GameMode.Normal, GameMode.Hard, GameMode.HardSurvival }.Select(m => GameDifficulty.For(m)).ToList();
+        for (int i = 1; i < ladder.Count; i++)
         {
-            var levels = Enumerable.Range(0, 50).Select(_ => EnemyScaler.RollLevel(Cannibal, new WorldRules { Difficulty = d }, rng)).ToList();
-            Assert.True(levels.Min() >= previousMax, $"{d.Name} overlaps the tier below");
-            Assert.All(levels, l => Assert.InRange(l, d.BaseLevelMin + 1, d.BaseLevelMax + 1));
-            previousMax = levels.Max();
+            Assert.True(ladder[i].LevelOffset > ladder[i - 1].LevelOffset);
+            Assert.True(ladder[i].EliteChance > ladder[i - 1].EliteChance);
         }
+        Assert.Equal(GameDifficulty.For(GameMode.Normal).LevelOffset, GameDifficulty.For(GameMode.Creative).LevelOffset);
+    }
+
+    [Fact]
+    public void Custom_game_offset_comes_from_the_enemy_sliders()
+    {
+        Assert.Equal(GameDifficulty.Normal.LevelOffset, GameDifficulty.For(GameMode.Custom).LevelOffset);
+        var allHigh = GameDifficulty.For(GameMode.Custom, GameSlider.High, GameSlider.High, GameSlider.High, GameSlider.High);
+        Assert.Equal(GameDifficulty.For(GameMode.HardSurvival).LevelOffset, allHigh.LevelOffset);
+        var allLow = GameDifficulty.For(GameMode.Custom, GameSlider.Low, GameSlider.Low, GameSlider.Low, GameSlider.Low);
+        Assert.True(allLow.LevelOffset < 0);
+        Assert.True(allLow.EliteChance < GameDifficulty.Normal.EliteChance);
+        var oneHigh = GameDifficulty.For(GameMode.Custom, damage: GameSlider.High);
+        Assert.InRange(oneHigh.LevelOffset, 1, allHigh.LevelOffset - 1);
+        // The elite chance stays a sensible probability at any offset.
+        Assert.InRange(new GameDifficulty(GameMode.Custom, 500).EliteChance, 0.05, 0.25);
+        Assert.InRange(new GameDifficulty(GameMode.Custom, -500).EliteChance, 0.05, 0.25);
+    }
+
+    [Fact]
+    public void Party_level_is_the_rounded_up_average_of_players_near_the_enemy()
+    {
+        var players = new List<(int, float)> { (10, 5), (21, 100), (90, EnemyLevels.PartyRange + 1) };
+        Assert.Equal(16, EnemyLevels.PartyLevel(players));
+        Assert.Equal(40, EnemyLevels.PartyLevel(new List<(int, float)> { (30, 900), (50, 1000) }));
+        Assert.Equal(7, EnemyLevels.PartyLevel(new List<(int, float)> { (7, 0) }));
+        Assert.Equal(1, EnemyLevels.PartyLevel(new List<(int, float)>()));
+    }
+
+    [Fact]
+    public void An_enemy_band_follows_its_level()
+    {
+        Assert.Equal(Difficulties.Easy, Difficulties.ForLevel(1));
+        Assert.Equal(Difficulties.Easy, Difficulties.ForLevel(-5));
+        for (int i = 1; i < Difficulties.All.Count; i++)
+        {
+            var d = Difficulties.All[i];
+            Assert.Equal(d, Difficulties.ForLevel(d.BaseLevelMin));
+            Assert.Equal(Difficulties.All[i - 1], Difficulties.ForLevel(d.BaseLevelMin - 1));
+        }
+        Assert.Equal(Difficulties.Hell, Difficulties.ForLevel(5000));
+        var rolled = EnemyScaler.Roll(Cannibal, 100, new WorldRules { PartyLevelOverride = 35, AllowElites = false }, 1, new Rng(9));
+        Assert.Equal(Difficulties.ForLevel(rolled.Level), new EnemyCombatState(rolled).Difficulty);
     }
 
     [Theory]
@@ -48,25 +106,25 @@ public class EnemyScalerTests
     public void A_forced_tier_overrides_the_roll(EnemyTier tier)
     {
         var rng = new Rng(3);
-        var rules = new WorldRules { Difficulty = Difficulties.Hell, ForcedTier = tier };
+        var rules = new WorldRules { PartyLevelOverride = 300, ForcedTier = tier };
         for (int i = 0; i < 50; i++)
         {
-            var p = EnemyScaler.Roll(Cannibal, 100, rules, rng);
+            var p = EnemyScaler.Roll(Cannibal, 100, rules, 1, rng);
             Assert.Equal(tier, p.Tier);
             Assert.Equal(tier == EnemyTier.Normal, p.Abilities.Count == 0);
         }
     }
 
     [Fact]
-    public void Hell_makes_every_enemy_elite_unless_elites_are_off()
+    public void Hell_level_enemies_are_all_elite_unless_elites_are_off()
     {
         var rng = new Rng(2);
-        var hell = new WorldRules { Difficulty = Difficulties.Hell };
+        var hell = new WorldRules { PartyLevelOverride = Difficulties.Hell.BaseLevelMin };
         for (int i = 0; i < 100; i++)
-            Assert.NotEqual(EnemyTier.Normal, EnemyScaler.Roll(Cannibal, 100, hell, rng).Tier);
+            Assert.NotEqual(EnemyTier.Normal, EnemyScaler.Roll(Cannibal, 100, hell, 1, rng).Tier);
         var noElites = hell with { AllowElites = false };
         for (int i = 0; i < 100; i++)
-            Assert.Equal(EnemyTier.Normal, EnemyScaler.Roll(Cannibal, 100, noElites, rng).Tier);
+            Assert.Equal(EnemyTier.Normal, EnemyScaler.Roll(Cannibal, 100, noElites, 1, rng).Tier);
     }
 
     [Fact]
@@ -89,8 +147,8 @@ public class EnemyScalerTests
     public void Bosses_are_reachable_and_tougher_than_minibosses()
     {
         var rng = new Rng(4);
-        var rules = new WorldRules { Difficulty = Difficulties.All[6] };
-        var rolls = Enumerable.Range(0, 3000).Select(_ => EnemyScaler.Roll(Boss, 100, rules, rng)).ToList();
+        var rules = new WorldRules { PartyLevelOverride = Difficulties.All[6].BaseLevelMin };
+        var rolls = Enumerable.Range(0, 3000).Select(_ => EnemyScaler.Roll(Boss, 100, rules, 1, rng)).ToList();
         Assert.Contains(rolls, r => r.Tier == EnemyTier.Boss);
         var boss = rolls.First(r => r.Tier == EnemyTier.Boss);
         Assert.Equal(0.01, boss.HitCap);

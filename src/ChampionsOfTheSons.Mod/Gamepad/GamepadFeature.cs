@@ -64,8 +64,6 @@ internal sealed class GamepadFeature : IModFeature
                 () => Crafting.CraftingFeature.Panel.PadRoot),
             new("host_settings", () => WorldRulesFeature.Settings.IsOpen, () => { if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close(); else WorldRulesFeature.Settings.Open(); }, () => WorldRulesFeature.Settings.Close(),
                 () => WorldRulesFeature.Settings.PadRoot),
-            new("picker", () => WorldRulesFeature.Picker.IsOpen, () => { if (WorldRulesFeature.Picker.IsOpen) WorldRulesFeature.Picker.Close(); else WorldRulesFeature.Picker.Open(); }, () => WorldRulesFeature.Picker.Close(),
-                () => WorldRulesFeature.Picker.PadRoot),
             new("settings", () => Settings.SettingsFeature.Panel.IsOpen, () => Settings.SettingsFeature.Panel.Toggle(), () => Settings.SettingsFeature.Panel.Back(),
                 () => Settings.SettingsFeature.Panel.PadRoot),
         };

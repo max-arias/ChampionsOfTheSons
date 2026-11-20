@@ -90,13 +90,14 @@ public sealed class CoopFeature : IModFeature
                 }
                 Verified.Add(from);
                 EnemySyncFeature.ResendAll(); // a late joiner gets every enemy that already exists (COS-79)
-                CotsNetEvent.Instance.SendTo(new WorldSettings(WorldState.Rules.Difficulty.Id, WorldState.FriendlyFire), from);
-                RLog.Msg($"{Tag} host: accepted {from.RemoteEndPoint}, sent WorldSettings ({WorldState.Rules.Difficulty.Id})");
+                var settings = HostRules.WorldRulesFeature.CurrentSettings();
+                CotsNetEvent.Instance.SendTo(settings, from);
+                RLog.Msg($"{Tag} host: accepted {from.RemoteEndPoint}, sent WorldSettings ({settings.Mode} +{settings.LevelOffset}, extra {settings.ExtraEnemyLevels})");
                 break;
             case WorldSettings ws when !IsHost:
-                if (!Accepted) CoopTest.Check("handshake: host accepted the client", true, $"difficulty {ws.DifficultyId}");
+                if (!Accepted) CoopTest.Check("handshake: host accepted the client", true, $"game difficulty {ws.Mode} +{ws.LevelOffset}");
                 Accepted = true;
-                RLog.Msg($"{Tag} client: host accepted us; WorldSettings difficulty={ws.DifficultyId} friendlyFire={ws.FriendlyFire}");
+                RLog.Msg($"{Tag} client: host accepted us; WorldSettings mode={ws.Mode} offset={ws.LevelOffset} extraLevels={ws.ExtraEnemyLevels} friendlyFire={ws.FriendlyFire}");
                 break;
             case HelloReject rej when !IsHost:
                 RejectReason = rej.Reason;

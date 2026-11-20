@@ -36,7 +36,7 @@ internal static class ActiveAbilitiesSelfTest
     private static WorldRules Rules(EnemyAbility only)
     {
         var disabled = ((EnemyAbility[])Enum.GetValues(typeof(EnemyAbility))).Where(a => a != only).ToArray();
-        return new WorldRules { Difficulty = Difficulties.Hell, AllowElites = true, DisabledAbilities = disabled };
+        return new WorldRules { PartyLevelOverride = Difficulties.Hell.BaseLevelMin, AllowElites = true, DisabledAbilities = disabled };
     }
 
     private const float Dt = 0.25f;

@@ -131,23 +131,6 @@ internal static class GamepadSelfTest
         SelfTest.Add(t += 0.5f, "pad: spell binding fired", () =>
         {
             SelfTest.Check("pad: RightShoulder+East casts slot 2", GamepadFeature.LastPadCast == 1, GamepadFeature.LastPadCast.ToString());
-            WorldState.FromSave(new WorldSave());
-            WorldRulesFeature.Picker.Open();
-        });
-        SelfTest.Add(t += 0.5f, "pad: difficulty picker by pad", () =>
-        {
-            var picker = WorldRulesFeature.Picker;
-            SelfTest.Check("pad: picker open", picker.IsOpen);
-            var master = picker.Buttons.First(b => b.Tier == Difficulties.All[3]).Button.Root;
-            SelfTest.Log($"pad: picker focusables {PadFocus.Count(picker.PadRoot!)}");
-            SelfTest.Check("pad: picker tier is focusable", PadFocus.FocusOn(picker.PadRoot!, master));
-            PadInput.Inject(PadButton.South);
-        });
-        SelfTest.Add(t += 0.5f, "pad: picker choice made", () =>
-        {
-            SelfTest.Check("pad: picker closed by confirm", !WorldRulesFeature.Picker.IsOpen);
-            SelfTest.Check("pad: Master chosen", WorldState.DifficultyChosen && WorldState.Rules.Difficulty == Difficulties.All[3]);
-            WorldState.FromSave(new WorldSave());
             CloseAll();
         });
     }
@@ -161,7 +144,6 @@ internal static class GamepadSelfTest
         if (PerksFeature.Panel.IsOpen) PerksFeature.Panel.Close();
         if (Crafting.CraftingFeature.Panel.IsOpen) Crafting.CraftingFeature.Panel.Close();
         if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close();
-        if (WorldRulesFeature.Picker.IsOpen) WorldRulesFeature.Picker.Close();
         PadFocus.Clear();
         PadPointer.Release();
     }

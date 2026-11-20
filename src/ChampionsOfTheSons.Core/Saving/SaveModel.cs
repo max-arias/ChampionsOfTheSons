@@ -68,12 +68,9 @@ public sealed class SavedStat
 /// <summary>World-wide settings, stored in the world save and owned by the host.</summary>
 public sealed class WorldSave
 {
-    public const int CurrentVersion = 2;
+    public const int CurrentVersion = 3;
 
     public int Version { get; set; } = CurrentVersion;
-
-    /// <summary>Difficulty tier ID from content; null until the host picks one.</summary>
-    public string? Difficulty { get; set; }
 
     public bool FriendlyFire { get; set; }
 

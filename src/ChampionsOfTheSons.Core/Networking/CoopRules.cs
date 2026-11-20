@@ -113,21 +113,6 @@ public sealed class PingBoard
     public void Clear() => _byPlayer.Clear();
 }
 
-/// <summary>Host settings a dedicated server reads from its config file.</summary>
-public static class ServerSettings
-{
-    /// <summary>The configured tier, or Easy with <paramref name="problem"/> set when the id is unknown (the server never waits for a choice).</summary>
-    public static DifficultyTier Resolve(string? difficultyId, out string? problem)
-    {
-        problem = null;
-        if (string.IsNullOrWhiteSpace(difficultyId)) return Difficulties.Easy;
-        var tier = Difficulties.ById(difficultyId.Trim()) ?? Difficulties.All.FirstOrDefault(d => string.Equals(d.Name, difficultyId.Trim(), StringComparison.OrdinalIgnoreCase));
-        if (tier != null) return tier;
-        problem = $"Unknown difficulty '{difficultyId}'. Valid: {string.Join(", ", Difficulties.All.Select(d => d.Id))}. Using Easy.";
-        return Difficulties.Easy;
-    }
-}
-
 /// <summary>Host side of a remote pickup: whoever asks first gets the drop, everyone after gets nothing.</summary>
 public static class PickupArbiter
 {

@@ -48,7 +48,7 @@ internal static class StatSelfTest
     private static void Unequip() => Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
 
     private static VailActor? Spawn(int i) => E[i] = TestKit.Spawn(distance: 7 + i / 5 * 3, sideways: (i % 5 - 2) * 3.5f,
-        rules: new WorldRules { Difficulty = Difficulties.Easy, AllowElites = false });
+        rules: new WorldRules { PartyLevelOverride = 1, AllowElites = false });
 
     private static double HitDamage(VailActor actor, float amount, ImpactType type = ImpactType.Melee, DamageNode? node = null)
     {

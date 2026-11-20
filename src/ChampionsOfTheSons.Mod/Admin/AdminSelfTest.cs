@@ -60,9 +60,10 @@ internal static class AdminSelfTest
             _bosses = EnemyRegistry.Snapshot().Count(e => e.Profile.Tier == EnemyTier.Boss);
             SelfTest.Check("admin: spawn boss", Run("spawn boss Carl 1"), AdminFeature.LastReply);
 
-            var before = WorldState.Rules.Difficulty;
-            SelfTest.Check("admin: difficulty by index", Run("difficulty 3") && WorldState.Rules.Difficulty == Difficulties.All[3], AdminFeature.LastReply);
-            WorldState.SetRulesForTest(WorldState.Rules with { Difficulty = before });
+            int before = WorldState.Rules.ExtraEnemyLevels;
+            SelfTest.Check("admin: extra levels", Run("extralevels 4") && WorldState.Rules.ExtraEnemyLevels == 4, AdminFeature.LastReply);
+            SelfTest.Check("admin: extra levels out of range refused", !Run("extralevels 500") && WorldState.Rules.ExtraEnemyLevels == 4, AdminFeature.LastReply);
+            WorldState.SetRulesForTest(WorldState.Rules with { ExtraEnemyLevels = before });
 
             var console = TheForest.DebugConsole.GetInstance();
             if (console == null) SelfTest.Log("admin: no debug console instance; game-console path not checked");

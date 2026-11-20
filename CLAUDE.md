@@ -5,7 +5,7 @@ RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, 
 ## Layout
 - `src/ChampionsOfTheSons.Core` — pure .NET 6 library: rules (`Rules/`), content definitions and loading (`Content/`), save model (`Saving/`), net protocol (`Networking/`), seeded RNG. No Unity, Il2Cpp or game references, ever. Everything game-agnostic goes here.
 - `src/ChampionsOfTheSons.Mod` — the RedLoader mod: game bridge (Harmony patches), UI (SUI), gamepad layer (`Gamepad/`), spells and effects. Compiles the Core sources in, so the mod ships as one DLL. Content JSON is embedded.
-- `content/` — item, item-stat, player-stat, perk, spell, set and enemy definitions plus `text/` tables (JSON, stable string IDs). Difficulty tiers and buffs are in code (`Core/Rules/Difficulty.cs`, `SpellBuffs.cs`). Embedded in the mod, copied next to the tests.
+- `content/` — item, item-stat, player-stat, perk, spell, set and enemy definitions plus `text/` tables (JSON, stable string IDs). Level bands, the game-difficulty rule and buffs are in code (`Core/Rules/Difficulty.cs`, `SpellBuffs.cs`). Embedded in the mod, copied next to the tests.
 - `tests/ChampionsOfTheSons.Core.Tests` — xUnit tests for the rules core, save model and net protocol only.
 - `docs/mechanics.md` — the rules and formulas we implement (taken from the original mod's behavior).
 - `unity/CotsBundles` — Unity 2022.2.16f1 HDRP project for the mod's asset bundle (`tools/build-bundles.ps1`, docs/asset-bundles.md).
@@ -30,7 +30,7 @@ RPG overhaul mod for Sons of the Forest (RedLoader 0.8.6, .NET 6, IL2CPP, HDRP, 
 ## Rules
 - Core code must not reference Unity or game types; the bridge converts.
 - Content IDs are stable strings; never derive IDs from order. Saves must keep loading: bump the save version and add a migration for any format change.
-- Host is authoritative for enemies, drops and difficulty. A client computes its own outgoing hits; the host applies defense.
+- Host is authoritative for enemies, drops and the game difficulty it reads. A client computes its own outgoing hits; the host applies defense.
 - Content stays fantasy and RPG: nothing political or religious, no real-world people, slogans or brands (names, text, icons).
 - Do not copy code or lore/description text from the original Champions of the Forest repo (it has no license). Mechanics and numbers are fine.
 - Tests: rules, save migrations and codec round-trips. No tests that restate content values.

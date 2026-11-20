@@ -48,9 +48,20 @@ public class SaveCodecTests
     [Fact]
     public void World_save_round_trips()
     {
-        var loaded = SaveCodec.ReadWorld(SaveCodec.Write(new WorldSave { Difficulty = "difficulty.hell", FriendlyFire = true }));
-        Assert.Equal("difficulty.hell", loaded.Difficulty);
+        var loaded = SaveCodec.ReadWorld(SaveCodec.Write(new WorldSave { ExtraEnemyLevels = 4, FriendlyFire = true }));
+        Assert.Equal(4, loaded.ExtraEnemyLevels);
         Assert.True(loaded.FriendlyFire);
+    }
+
+    [Fact]
+    public void Version_2_worlds_drop_their_difficulty_tier_and_keep_the_host_settings()
+    {
+        var world = SaveCodec.ReadWorld("{\"version\":2,\"difficulty\":\"difficulty.master\",\"extraEnemyLevels\":7,\"xp\":2,\"friendlyFire\":true}");
+        Assert.Equal(WorldSave.CurrentVersion, world.Version);
+        Assert.Equal(7, world.ExtraEnemyLevels);
+        Assert.Equal(2, world.Xp);
+        Assert.True(world.FriendlyFire);
+        Assert.DoesNotContain("difficulty", SaveCodec.Write(world));
     }
 
     [Fact]

@@ -123,7 +123,7 @@ public sealed class LootFeature : IModFeature
         int count = LootRoller.DropCount(enemy, rules, Rng);
         for (int i = 0; i < count; i++)
         {
-            var item = Roller.RollDrop(enemy.Bounty, level, mf, rules.Difficulty.Index, Rng, rules.MinLootRarity);
+            var item = Roller.RollDrop(enemy.Bounty, level, mf, Difficulties.ForLevel(enemy.Level).Index, Rng, rules.MinLootRarity);
             if (item != null) result.Add(item);
         }
         return result;

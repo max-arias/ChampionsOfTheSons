@@ -1,6 +1,7 @@
 // Headless XP pacing and kill-time simulation (COS-60, COS-28). Uses the real Core rules: enemy rolls, armor,
 // steadfast caps, player hits, loot rarity and item rolls, perks, massacre and the XP curve. Everything the game
 // would decide (kill pace, weapon damage, enemy mix) is an assumption listed in Assumptions and printed with the tables.
+// COS-130: enemies roll at the player's level plus the game difficulty's offset; one run per game difficulty.
 //
 //   dotnet run --project tools/PacingSim -c Release -- [content folder] [--profile hunting|casual] [--seeds N] [--xp X]
 using System.Globalization;
@@ -35,50 +36,55 @@ Console.WriteLine($"# Pacing simulation ({a.Name}, {seeds} seeds, host XP x{a.Xp
 Console.WriteLine(a.Describe());
 
 int[] marks = { 10, 25, 50, 75, 100, 125 };
+var modes = new[] { GameMode.Peaceful, GameMode.Normal, GameMode.Hard, GameMode.HardSurvival }.Select(m => GameDifficulty.For(m)).ToList();
+Console.WriteLine("\nEnemies roll at the player's level (COS-130): level = player +-1 + kind extra + game offset; elite chance by game difficulty.");
 
-// 1. Staying on one difficulty from level 1.
-Console.WriteLine("\n## 1. One difficulty from level 1: hours to reach a level (median of seeds; '-' = not within " + a.MaxHours + " h)");
-Console.WriteLine("| d | Difficulty | Enemy lvl | " + string.Join(" | ", marks.Select(m => "L" + m)) + " | Level at 10 h | Level at 50 h | Player >= enemy lvl at |");
-Console.WriteLine("|---|---|---|" + string.Concat(marks.Select(_ => "---|")) + "---|---|---|");
-foreach (var d in Difficulties.All)
+// 1. Leveling from level 1 on each game difficulty.
+Console.WriteLine("\n## 1. Hours to reach a level from level 1 (median of seeds; '-' = not within " + a.MaxHours + " h)");
+Console.WriteLine("| Game difficulty | Offset | Elites | " + string.Join(" | ", marks.Select(m => "L" + m)) + " | Level at 10 h | Level at 50 h |");
+Console.WriteLine("|---|---|---|" + string.Concat(marks.Select(_ => "---|")) + "---|---|");
+var runsByMode = new Dictionary<GameMode, List<RunResult>>();
+foreach (var g in modes)
 {
-    var runs = Enumerable.Range(0, seeds).Select(s => new Sim(content, a, (ulong)(1000 + s)).RunFixed(d)).ToList();
+    var runs = Enumerable.Range(0, seeds).Select(s => new Sim(content, a, (ulong)(1000 + s), g).Run()).ToList();
+    runsByMode[g.Mode] = runs;
     string Med(Func<RunResult, double?> f)
     {
         var v = runs.Select(f).Select(x => x ?? double.PositiveInfinity).OrderBy(x => x).ToList();
         double m = v[v.Count / 2];
         return double.IsInfinity(m) ? "-" : Hours(m);
     }
-    int enemyLvl = d.BaseLevelMin + 1;
-    Console.WriteLine($"| {d.Index} | {d.Name} | {d.BaseLevelMin + 1}-{d.BaseLevelMax + 1} | " +
-        string.Join(" | ", marks.Select(m => Med(r => r.HoursTo(m)))) +
-        $" | {runs.Select(r => r.LevelAt(10)).OrderBy(x => x).ElementAt(seeds / 2)} | {runs.Select(r => r.LevelAt(50)).OrderBy(x => x).ElementAt(seeds / 2)} | {Med(r => r.HoursTo(enemyLvl))} |");
+    Console.WriteLine($"| {g.Mode} | {g.LevelOffset:+0;-0;0} | {g.EliteChance:P0} | " + string.Join(" | ", marks.Select(m => Med(r => r.HoursTo(m)))) +
+        $" | {runs.Select(r => r.LevelAt(10)).OrderBy(x => x).ElementAt(seeds / 2)} | {runs.Select(r => r.LevelAt(50)).OrderBy(x => x).ElementAt(seeds / 2)} |");
 }
 
-// 2. Ladder: the player always plays the difficulty with the best XP per hour that is still survivable.
-Console.WriteLine($"\n## 2. Ladder: best XP/hour among survivable difficulties (a normal enemy needs >= {a.MinHitsToDie} hits to kill the player)");
-var ladders = Enumerable.Range(0, seeds).Select(s => new Sim(content, a, (ulong)(2000 + s)).RunLadder()).ToList();
-var ladder = ladders.OrderBy(r => r.HoursTo(50) ?? double.MaxValue).ThenByDescending(r => r.LevelAt(a.MaxHours)).ElementAt(seeds / 2);
-Console.WriteLine("| Hours | Level | Difficulty | Enemy lvl | Kills/h | Normal kill s | Hits to die |");
-Console.WriteLine("|---|---|---|---|---|---|---|");
-foreach (var snap in ladder.Snapshots)
-    Console.WriteLine($"| {snap.Hours:0.#} | {snap.Level} | {snap.Difficulty} | {snap.EnemyLevel} | {snap.KillsPerHour:0} | {snap.NormalKillSeconds:0.#} | {snap.HitsToDie:0.#} |");
-Console.WriteLine("\nLadder hours to level (median seed): " + string.Join(", ", marks.Select(m => $"L{m} {(ladder.HoursTo(m) is double h ? Hours(h) : "-")}")));
-Console.WriteLine("Difficulty first played at: " + string.Join(", ", ladder.Entered.Select(kv => $"{kv.Key} {Hours(kv.Value)} (L{ladder.LevelWhenEntered[kv.Key]})")));
-
-// 3. Kill times by tier, player at the difficulty's enemy level (capped at 130), geared and perked for it.
-Console.WriteLine("\n## 3. Kill time by tier (seconds), player at the enemy level of the difficulty (max 130), kit rolled on that difficulty");
-Console.WriteLine("| d | Difficulty | Player lvl | Normal | Elite | Miniboss | Boss | Normal hits to die | XP per normal kill | Goal(L) | Normal kills per level |");
-Console.WriteLine("|---|---|---|---|---|---|---|---|---|---|---|");
-foreach (var d in Difficulties.All)
+// 2. How a run feels over time (median seed), Normal and Hard Survival.
+foreach (var mode in new[] { GameMode.Normal, GameMode.HardSurvival })
 {
-    int lvl = Math.Min(130, d.BaseLevelMin + 1);
-    var sim = new Sim(content, a, 3000);
-    sim.SetUp(lvl, d);
-    var t = sim.KillTimesByTier(d);
-    double xp = sim.MeanBounty(d, EnemyTier.Normal) * sim.Pc.Stats.Get(StatIds.ExpGain);
-    double goal = XpCurve.Goal(lvl);
-    Console.WriteLine($"| {d.Index} | {d.Name} | {lvl} | {Sec(t[EnemyTier.Normal])} | {Sec(t[EnemyTier.Elite])} | {Sec(t[EnemyTier.Miniboss])} | {Sec(t[EnemyTier.Boss])} | {sim.HitsToDie(d):0.#} | {xp:N0} | {goal:N0} | {goal / xp:0.#} |");
+    var run = runsByMode[mode].OrderBy(r => r.HoursTo(50) ?? double.MaxValue).ElementAt(seeds / 2);
+    Console.WriteLine($"\n## 2. {mode}: a run over time (median seed)");
+    Console.WriteLine("| Hours | Level | Enemy lvl | Kills/h | Normal kill s | Hits to die |");
+    Console.WriteLine("|---|---|---|---|---|---|");
+    foreach (var snap in run.Snapshots)
+        Console.WriteLine($"| {snap.Hours:0.#} | {snap.Level} | {snap.EnemyLevel} | {snap.KillsPerHour:0} | {snap.NormalKillSeconds:0.#} | {snap.HitsToDie:0.#} |");
+}
+
+// 3. Kill times by tier at set player levels, geared and perked for that level.
+int[] levels = { 1, 10, 25, 50, 75, 100, 130 };
+foreach (var g in modes.Where(m => m.Mode is GameMode.Normal or GameMode.HardSurvival))
+{
+    Console.WriteLine($"\n## 3. {g.Mode}: kill time by tier (seconds) at a player level, kit rolled at that level");
+    Console.WriteLine("| Player lvl | Enemy lvl | Normal | Elite | Miniboss | Boss | Normal hits to die | XP per normal kill | Goal(L) | Normal kills per level |");
+    Console.WriteLine("|---|---|---|---|---|---|---|---|---|---|");
+    foreach (int lvl in levels)
+    {
+        var sim = new Sim(content, a, 3000, g);
+        sim.SetUp(lvl);
+        var t = sim.KillTimesByTier();
+        double xp = sim.MeanBounty(EnemyTier.Normal) * sim.Pc.Stats.Get(StatIds.ExpGain);
+        double goal = XpCurve.Goal(lvl);
+        Console.WriteLine($"| {lvl} | {sim.EnemyLevel} | {Sec(t[EnemyTier.Normal])} | {Sec(t[EnemyTier.Elite])} | {Sec(t[EnemyTier.Miniboss])} | {Sec(t[EnemyTier.Boss])} | {sim.HitsToDie():0.#} | {xp:N0} | {goal:N0} | {goal / xp:0.#} |");
+    }
 }
 return 0;
 
@@ -122,19 +128,17 @@ sealed record Assumptions
 
     public string Describe() =>
         $"Assumptions: melee weapon {WeaponDamage} per swing every {SwingSeconds} s; groups of {GroupMin}-{GroupMax} enemies, {SecondsBetweenGroups} s between groups; " +
-        $"vanilla enemy hit {VanillaEnemyHit}; kit = best of {KitCandidates} drops per slot (rarity from the loot roll of the difficulty's normal enemies), refreshed every {KitEveryLevels} levels; " +
+        $"vanilla enemy hit {VanillaEnemyHit}; kit = best of {KitCandidates} drops per slot (rarity from the loot roll of normal enemies at the player's level), refreshed every {KitEveryLevels} levels; " +
         "perks bought greedily for damage x sqrt(effective health); spells, ranged, headshots, crafting and non-kill XP not modelled; no deaths.";
 }
 
-sealed record Snapshot(double Hours, int Level, string Difficulty, int EnemyLevel, double KillsPerHour, double NormalKillSeconds, double HitsToDie);
+sealed record Snapshot(double Hours, int Level, int EnemyLevel, double KillsPerHour, double NormalKillSeconds, double HitsToDie);
 
 sealed class RunResult
 {
     public readonly SortedDictionary<int, double> FirstHourAtLevel = new();
     public readonly List<(double Hours, int Level)> Track = new();
     public readonly List<Snapshot> Snapshots = new();
-    public readonly Dictionary<string, double> Entered = new();
-    public readonly Dictionary<string, int> LevelWhenEntered = new();
     public double? HoursTo(int level) => FirstHourAtLevel.TryGetValue(level, out var h) ? h : null;
     public int LevelAt(double hours) => Track.LastOrDefault(t => t.Hours <= hours).Level;
 }
@@ -150,10 +154,11 @@ sealed class Sim
     public PlayerCharacter Pc { get; private set; }
     private double _seconds;
     private int _lastKitLevel = -1;
-    private DifficultyTier? _kitDifficulty;
+    private readonly GameDifficulty _game;
 
-    public Sim(ContentDb content, Assumptions a, ulong seed)
+    public Sim(ContentDb content, Assumptions a, ulong seed, GameDifficulty game)
     {
+        _game = game;
         _content = content;
         _a = a;
         _rng = new Rng(seed * 2654435761UL + 17);
@@ -164,80 +169,33 @@ sealed class Sim
         Pc = new PlayerCharacter(content);
     }
 
-    private WorldRules Rules(DifficultyTier d) => new() { Difficulty = d, Xp = _a.XpMul };
+    private WorldRules Rules => new() { GameDifficulty = _game, Xp = _a.XpMul };
     private double Hours => _seconds / 3600;
+    private int Party => Pc.Progress.Level;
+    /// <summary>A normal enemy kind's (level extra 1) middle level at the current player level.</summary>
+    public int EnemyLevel => Math.Max(1, Party + 1 + _game.LevelOffset);
+    private DifficultyTier Band => Difficulties.ForLevel(EnemyLevel);
 
-    public RunResult RunFixed(DifficultyTier d)
-    {
-        var r = new RunResult();
-        Record(r);
-        while (Hours < _a.MaxHours && Pc.Progress.Level < 130)
-        {
-            Refresh(d);
-            FightGroup(d);
-            Record(r);
-        }
-        return r;
-    }
-
-    public RunResult RunLadder()
+    public RunResult Run()
     {
         var r = new RunResult();
         Record(r);
         double nextSnap = 0;
-        DifficultyTier? current = null;
-        double nextChoice = 0;
         while (Hours < _a.MaxHours && Pc.Progress.Level < 130)
         {
-            if (current == null || Hours >= nextChoice)
-            {
-                current = ChooseDifficulty();
-                nextChoice = Hours + 0.5;
-                if (!r.Entered.ContainsKey(current.Name)) { r.Entered[current.Name] = Hours; r.LevelWhenEntered[current.Name] = Pc.Progress.Level; }
-            }
-            Refresh(current);
+            Refresh();
             if (Hours >= nextSnap)
             {
-                double kt = MeanKillSeconds(current, EnemyTier.Normal, 40);
+                double kt = MeanKillSeconds(EnemyTier.Normal, 40);
                 double perGroup = (_a.GroupMin + _a.GroupMax) / 2.0;
                 double kph = 3600 / (kt + _a.SecondsBetweenGroups / perGroup);
-                r.Snapshots.Add(new Snapshot(Hours, Pc.Progress.Level, current.Name, current.BaseLevelMin + 1, kph, kt, HitsToDie(current)));
+                r.Snapshots.Add(new Snapshot(Hours, Pc.Progress.Level, EnemyLevel, kph, kt, HitsToDie()));
                 nextSnap = nextSnap switch { < 1 => nextSnap + 0.25, < 5 => nextSnap + 1, < 20 => nextSnap + 5, < 100 => nextSnap + 10, _ => nextSnap + 25 };
             }
-            FightGroup(current);
+            FightGroup();
             Record(r);
         }
         return r;
-    }
-
-    /// <summary>Expected XP per hour on each difficulty with the current kit, among those that are survivable.</summary>
-    private DifficultyTier ChooseDifficulty()
-    {
-        DifficultyTier best = Difficulties.Easy;
-        double bestRate = -1;
-        foreach (var d in Difficulties.All)
-        {
-            var saved = (_lastKitLevel, _kitDifficulty);
-            var savedSlots = Pc.Inventory.Slots.ToList();
-            ForceKit(d);
-            if (d.Index > 0 && HitsToDie(d) < _a.MinHitsToDie) { RestoreKit(savedSlots, saved); continue; }
-            double kt = MeanKillSeconds(d, EnemyTier.Normal, 30);
-            double xp = MeanBounty(d, EnemyTier.Normal);
-            double perGroup = (_a.GroupMin + _a.GroupMax) / 2.0;
-            double rate = xp * Massacre.Multiplier((int)perGroup) / (kt + _a.SecondsBetweenGroups / perGroup);
-            if (kt > 120) rate = 0;
-            if (rate > bestRate) { bestRate = rate; best = d; }
-            RestoreKit(savedSlots, saved);
-        }
-        return best;
-    }
-
-    private void ForceKit(DifficultyTier d) { _lastKitLevel = -1; Refresh(d); }
-
-    private void RestoreKit(List<KeyValuePair<string, ItemInstance>> slots, (int, DifficultyTier?) saved)
-    {
-        Pc.Inventory.Restore(slots);
-        (_lastKitLevel, _kitDifficulty) = saved;
     }
 
     private void Record(RunResult r)
@@ -247,37 +205,36 @@ sealed class Sim
         if (r.Track.Count == 0 || r.Track[^1].Level != l) r.Track.Add((Hours, l));
     }
 
-    /// <summary>Puts the character at a level with perks and a kit for a difficulty (table 3).</summary>
-    public void SetUp(int level, DifficultyTier d)
+    /// <summary>Puts the character at a level with perks and a kit for it (table 3).</summary>
+    public void SetUp(int level)
     {
         Pc = new PlayerCharacter(_content);
         Pc.Load(new PlayerSave { Level = level });
         _lastKitLevel = -1;
-        Refresh(d);
+        Refresh();
     }
 
-    private void Refresh(DifficultyTier d)
+    private void Refresh()
     {
         int l = Pc.Progress.Level;
-        if (_lastKitLevel >= 0 && l < _lastKitLevel + _a.KitEveryLevels && _kitDifficulty == d) return;
+        if (_lastKitLevel >= 0 && l < _lastKitLevel + _a.KitEveryLevels) return;
         _lastKitLevel = l;
-        _kitDifficulty = d;
-        BuyPerks(d);
-        RollKit(d);
+        BuyPerks();
+        RollKit();
     }
 
     // ---- fighting ----
 
     private (EnemyKind Kind, double Hp) PickKind() => _kinds[_rng.PickWeighted(_weights)];
 
-    private void FightGroup(DifficultyTier d)
+    private void FightGroup()
     {
         int n = _rng.RangeInclusive(_a.GroupMin, _a.GroupMax);
-        var rules = Rules(d);
+        var rules = Rules;
         for (int i = 0; i < n; i++)
         {
             var (kind, hp) = PickKind();
-            var p = EnemyScaler.Roll(kind, hp, rules, _rng);
+            var p = EnemyScaler.Roll(kind, hp, rules, Party, _rng);
             double t = KillSeconds(p, out bool killed);
             Advance(t);
             if (killed) Pc.OnKill(p.Bounty);
@@ -314,25 +271,25 @@ sealed class Sim
         return hits * SwingSeconds;
     }
 
-    private EnemyProfile? RollTier(DifficultyTier d, EnemyTier tier)
+    private EnemyProfile? RollTier(EnemyTier tier)
     {
-        var rules = Rules(d);
+        var rules = Rules;
         for (int i = 0; i < 20000; i++)
         {
             var (kind, hp) = PickKind();
-            var p = EnemyScaler.Roll(kind, hp, rules, _rng);
+            var p = EnemyScaler.Roll(kind, hp, rules, Party, _rng);
             if (p.Tier == tier) return p;
         }
         return null;
     }
 
-    public double MeanKillSeconds(DifficultyTier d, EnemyTier tier, int samples)
+    public double MeanKillSeconds(EnemyTier tier, int samples)
     {
         double sum = 0;
         int n = 0;
         for (int i = 0; i < samples; i++)
         {
-            var p = RollTier(d, tier);
+            var p = RollTier(tier);
             if (p == null) continue;
             sum += KillSeconds(p, out _);
             n++;
@@ -340,31 +297,31 @@ sealed class Sim
         return n == 0 ? double.NaN : sum / n;
     }
 
-    public double MeanBounty(DifficultyTier d, EnemyTier tier)
+    public double MeanBounty(EnemyTier tier)
     {
         double sum = 0;
-        for (int i = 0; i < 200; i++) sum += RollTier(d, tier)?.Bounty ?? 0;
+        for (int i = 0; i < 200; i++) sum += RollTier(tier)?.Bounty ?? 0;
         return sum / 200;
     }
 
-    public Dictionary<EnemyTier, double?> KillTimesByTier(DifficultyTier d) =>
+    public Dictionary<EnemyTier, double?> KillTimesByTier() =>
         Enum.GetValues<EnemyTier>().ToDictionary(t => t, t =>
         {
-            double v = MeanKillSeconds(d, t, t == EnemyTier.Normal ? 60 : 20);
+            double v = MeanKillSeconds(t, t == EnemyTier.Normal ? 60 : 20);
             return double.IsNaN(v) ? (double?)null : v;
         });
 
-    /// <summary>Hits from an average normal enemy of the difficulty that kill the player (armor, dodge, block).</summary>
-    public double HitsToDie(DifficultyTier d)
+    /// <summary>Hits from an average normal enemy at the player's level that kill the player (armor, dodge, block).</summary>
+    public double HitsToDie()
     {
-        var rules = Rules(d);
+        var rules = Rules;
         double sum = 0;
         const int n = 100;
         var s = Pc.Stats;
         for (int i = 0; i < n; i++)
         {
             var (kind, hp) = PickKind();
-            var p = EnemyScaler.Roll(kind, hp, rules, _rng);
+            var p = EnemyScaler.Roll(kind, hp, rules, Party, _rng);
             if (p.Tier != EnemyTier.Normal) { i--; continue; }
             double raw = EnemyScaler.DamageToPlayer(p, _a.VanillaEnemyHit);
             double taken = Math.Max(1, raw * s.Get(StatIds.AllDamageTaken) * (1 - ArmorMath.Reduction(s.Get(StatIds.Armor))) - s.Get(StatIds.Block));
@@ -375,18 +332,19 @@ sealed class Sim
 
     // ---- character building ----
 
-    private double MeanArmor(DifficultyTier d)
+    private double MeanArmor()
     {
-        int lvl = d.BaseLevelMin + 1;
+        var d = Band;
+        int lvl = EnemyLevel;
         double p = Math.Pow(lvl, 2.43);
         return (p / 3 + 1 + p * 2 / 3 + 20) / 2 * d.ArmorFactor;
     }
 
     /// <summary>Damage per second against a typical armored enemy times the square root of effective health.</summary>
-    private double Score(DifficultyTier d)
+    private double Score()
     {
         var s = Pc.Stats;
-        double armor = Math.Max(0, MeanArmor(d) - Derived.MeleeArmorPierce(s));
+        double armor = Math.Max(0, MeanArmor() - Derived.MeleeArmorPierce(s));
         double hit = (_a.WeaponDamage + s.Get(StatIds.MeleeFlatDmg)) * Derived.MeleeMultiplier(s)
                      * (1 + Math.Clamp(s.Get(StatIds.CritChance), 0, 1) * s.Get(StatIds.CritDamage)) * (1 - ArmorMath.Reduction(armor));
         double dps = hit * Math.Max(0.1, s.Get(StatIds.AttackSpeed));
@@ -395,12 +353,12 @@ sealed class Sim
         return dps * Math.Sqrt(Math.Max(1, ehp)) * (1 + 0.5 * (s.Get(StatIds.ExpGain) - 1));
     }
 
-    private void BuyPerks(DifficultyTier d)
+    private void BuyPerks()
     {
         var perks = Pc.Content.Perks.Values.Where(p => !p.Manual).OrderBy(p => p.LegacyIndex).ToList();
         while (Pc.Perks.AvailablePoints(Pc.Progress) > 0)
         {
-            double baseScore = Score(d);
+            double baseScore = Score();
             PerkDef? best = null;
             double bestGain = 0;
             foreach (var p in perks)
@@ -410,7 +368,7 @@ sealed class Sim
                 Pc.Perks.Buy(p.Id, Pc.Progress);
                 Pc.Stats.SetSource("perks", Pc.Perks.Modifiers());
                 // Gain per point; perks that only open the path still count a little so the tree is explored.
-                double gain = (Score(d) - baseScore) / baseScore / p.Cost + 1e-6 / p.Cost;
+                double gain = (Score() - baseScore) / baseScore / p.Cost + 1e-6 / p.Cost;
                 Pc.Perks.Restore(before, Pc.Perks.UnlockedSpells.ToList());
                 Pc.Stats.SetSource("perks", Pc.Perks.Modifiers());
                 if (gain > bestGain) { bestGain = gain; best = p; }
@@ -420,27 +378,27 @@ sealed class Sim
         }
     }
 
-    /// <summary>Per slot: the best of N drops rolled at the player's level with the difficulty's rarity roll.</summary>
-    private void RollKit(DifficultyTier d)
+    /// <summary>Per slot: the best of N drops rolled at the player's level with the rarity roll of enemies at that level.</summary>
+    private void RollKit()
     {
         int level = Pc.Progress.Level;
-        double worth = MeanBounty(d, EnemyTier.Normal);
+        double worth = MeanBounty(EnemyTier.Normal);
         double mf = Math.Max(0.1, Pc.Stats.Get(StatIds.MagicFind));
         var slots = Pc.Inventory.Slots.Where(kv => kv.Key.StartsWith("equip.", StringComparison.Ordinal)).ToDictionary(kv => kv.Key, kv => kv.Value);
         foreach (var slot in LootRoller.EquipSlots)
         {
             ItemInstance? best = slots.GetValueOrDefault(slot);
             Pc.Inventory.Restore(slots);
-            double bestScore = Score(d);
+            double bestScore = Score();
             for (int i = 0; i < _a.KitCandidates; i++)
             {
-                int rarity = LootRoller.RollRarity(worth, level, mf, d.Index, _rng);
+                int rarity = LootRoller.RollRarity(worth, level, mf, Band.Index, _rng);
                 var def = _loot.PickBase(rarity, level, _rng, b => LootRoller.SlotsFor(b.Type).Contains(slot));
                 if (def == null) continue;
                 var item = _loot.RollItem(def, level, _rng);
                 slots[slot] = item;
                 Pc.Inventory.Restore(slots);
-                double sc = Score(d);
+                double sc = Score();
                 if (sc > bestScore) { bestScore = sc; best = item; }
             }
             if (best != null) slots[slot] = best; else slots.Remove(slot);

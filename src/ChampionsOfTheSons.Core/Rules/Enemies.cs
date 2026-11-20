@@ -48,7 +48,7 @@ public sealed record EnemyKind
     public string Name { get; init; } = "";
     /// <summary>The game's actor type name (SotF VailActorTypeId, e.g. "Carl", "Fingers").</summary>
     public string ActorType { get; init; } = "";
-    /// <summary>Levels added on top of the difficulty's base level (COTF: normal 1, leader 2, painted 3...).</summary>
+    /// <summary>Levels added on top of the party level (COTF: normal 1, leader 2, painted 3...).</summary>
     public int LevelExtra { get; init; } = 1;
     /// <summary>Always elite with 10 abilities (COTF's Megan; in SotF the story bosses).</summary>
     public bool BossType { get; init; }
@@ -82,7 +82,7 @@ public sealed record EnemyProfile
     public bool Has(EnemyAbility a) => Abilities.Contains(a);
 }
 
-/// <summary>Rolls enemy profiles from kind, difficulty and host rules.</summary>
+/// <summary>Rolls enemy profiles from kind, party level, the game's difficulty and host rules.</summary>
 public static class EnemyScaler
 {
     private static readonly EnemyAbility[] AllAbilities = (EnemyAbility[])Enum.GetValues(typeof(EnemyAbility));
@@ -92,11 +92,14 @@ public static class EnemyScaler
     /// <summary>Abilities that need difficulty Master (d ≥ 3) or higher. Radiance added per the original's issue #31.</summary>
     private static readonly EnemyAbility[] MasterOnly = { EnemyAbility.Meteor, EnemyAbility.BlackHole, EnemyAbility.ArcaneCataclysm, EnemyAbility.FireCataclysm, EnemyAbility.Radiance };
 
-    public static int RollLevel(EnemyKind kind, WorldRules rules, Rng rng)
+    /// <summary>
+    /// COS-130: <c>party ± 1 + kind extra + game-difficulty offset + host extra levels</c>, at least 1. <paramref name="partyLevel"/>
+    /// comes from <see cref="EnemyLevels.PartyLevel"/> (or <see cref="WorldRules.PartyLevelOverride"/>).
+    /// </summary>
+    public static int RollLevel(EnemyKind kind, WorldRules rules, int partyLevel, Rng rng)
     {
-        var d = rules.Difficulty;
-        int baseLevel = rng.RangeInclusive(d.BaseLevelMin, d.BaseLevelMax);
-        return Math.Max(1, baseLevel + kind.LevelExtra + rules.ExtraEnemyLevels);
+        int party = Math.Max(1, rules.PartyLevelOverride ?? partyLevel);
+        return Math.Max(1, party + rng.RangeInclusive(-1, 1) + kind.LevelExtra + rules.GameDifficulty.LevelOffset + rules.ExtraEnemyLevels);
     }
 
     public static double DamageMultiplier(int level) =>
@@ -121,13 +124,14 @@ public static class EnemyScaler
         return b * xpMul;
     }
 
-    public static EnemyProfile Roll(EnemyKind kind, double vanillaHealth, WorldRules rules, Rng rng)
+    public static EnemyProfile Roll(EnemyKind kind, double vanillaHealth, WorldRules rules, int partyLevel, Rng rng)
     {
-        var d = rules.Difficulty;
-        int level = RollLevel(kind, rules, rng);
+        int level = RollLevel(kind, rules, partyLevel, rng);
+        var d = Difficulties.ForLevel(level);
 
         var forced = rules.ForcedTier;
-        bool elite = forced is { } f ? f != EnemyTier.Normal : rules.AllowElites && kind.CanBeElite && (rng.Chance(0.1) || kind.BossType || d.IsHell);
+        bool elite = forced is { } f ? f != EnemyTier.Normal
+            : rules.AllowElites && kind.CanBeElite && (rng.Chance(rules.GameDifficulty.EliteChance) || kind.BossType || d.IsHell);
         var tier = EnemyTier.Normal;
         var abilities = new List<EnemyAbility>();
         if (elite)
