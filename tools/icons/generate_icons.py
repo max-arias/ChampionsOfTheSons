@@ -4,6 +4,7 @@
   python -I tools/icons/generate_icons.py fetch            # download the SVG set into tools/icons/cache/
   python -I tools/icons/generate_icons.py match            # (re)build tools/icons/mapping.json
   python -I tools/icons/generate_icons.py render [--force] [--only ID ...]
+  python -I tools/icons/generate_icons.py booktab          # content/icons/ui.book_tab.png (guide-book tab face)
 
 Matching is automatic (keywords from the entry name + type), then overridden by
 tools/icons/overrides.json ({"item.some_id": "author/icon-slug"}). Rendering is
@@ -267,14 +268,35 @@ def save(arr, path):
     im.save(path, optimize=True)
 
 
+BOOK_TAB_ICON = "delapouite/sparkles"
+
+
+def render_book_tab():
+    """content/icons/ui.book_tab.png: our guide-book tab face, in the layout of the game's own tab icons
+    (256 px, black 14 px frame, white field, flat black glyph about 184 px wide; measured from TactiTabRafts)."""
+    import numpy as np
+    from PIL import Image
+    size, frame, glyph = 256, 14, 184
+    a = np.full((size, size), 255, np.uint8)
+    a[:frame, :] = a[-frame:, :] = 0
+    a[:, :frame] = a[:, -frame:] = 0
+    m = np.array(glyph_mask(BOOK_TAB_ICON, glyph), np.float32) / 255
+    o = (size - glyph) // 2
+    a[o:o + glyph, o:o + glyph] = (a[o:o + glyph, o:o + glyph] * (1 - m)).astype(np.uint8)
+    Image.fromarray(a, "L").convert("RGBA").save(OUT / "ui.book_tab.png", optimize=True)
+    print("rendered ui.book_tab from", BOOK_TAB_ICON)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["fetch", "match", "render"])
+    ap.add_argument("cmd", choices=["fetch", "match", "render", "booktab"])
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--only", nargs="*")
     a = ap.parse_args()
     if a.cmd == "fetch":
         return fetch()
+    if a.cmd == "booktab":
+        return render_book_tab()
     ents = load_entries()
     ov = HERE / "overrides.json"
     overrides = json.load(open(ov, encoding="utf8")) if ov.exists() else {}

@@ -70,8 +70,59 @@ internal static class BookSelfTest
         SelfTest.Add(27f, "book: shot character 3", () => TestKit.Screenshot("book-character-3"));
         SelfTest.Add(27.3f, "book: game tab gives the page back", GamePage);
         SelfTest.Add(28f, "book: shot game page", () => TestKit.Screenshot("book-game-page"));
-        SelfTest.Add(28.3f, "book: close", () => BookHost.Close());
-        SelfTest.Add(29.8f, "book: closed and cleanup", Cleanup);
+        SelfTest.Add(28.3f, "book: tab idle", TabIdle);
+        SelfTest.Add(28.5f, "book: shot tab idle", () => TestKit.Screenshot("book-tab-idle"));
+        SelfTest.Add(28.6f, "book: cursor on our tab", () => SetCursor(BookTabs.ScreenCenter(BookTab.Gear)));
+        SelfTest.Add(29.4f, "book: our tab slides out on hover", TabHovered);
+        SelfTest.Add(29.5f, "book: shot tab hover", () => TestKit.Screenshot("book-tab-hover"));
+        SelfTest.Add(29.6f, "book: cursor on the game's tab above, which slides out", () =>
+        {
+            _neighbourIdle = BookTabs.NeighbourSlideOffset();
+            SetCursor(BookTabs.NeighbourScreenCenter());
+            BookTabs.SlideNeighbourForTest(true);
+        });
+        SelfTest.Add(30.4f, "book: the neighbour's hover leaves our tab", NeighbourHovered);
+        SelfTest.Add(30.5f, "book: shot neighbour hover", () => TestKit.Screenshot("book-tab-neighbour-hover"));
+        SelfTest.Add(30.7f, "book: the game's tab back", () => BookTabs.SlideNeighbourForTest(false));
+        SelfTest.Add(30.8f, "book: close", () => BookHost.Close());
+        SelfTest.Add(32.3f, "book: closed and cleanup", Cleanup);
+    }
+
+    private static (Vector3 Face, Vector3 Root) _tabIdle;
+    private static float _neighbourIdle;
+
+    private static void SetCursor(Vector2 screen)
+    {
+        if (BookHost.Book != null) BookHost.Book._mouseScreenPosition = screen;
+    }
+
+    // COS-131: our tab slides out on its own hover only, with the game's slide animation, and the hover of the game's
+    // tab above it no longer moves it (it used to sit inside that tab's animated part).
+    private static void TabIdle()
+    {
+        SetCursor(new Vector2(5, 5));
+        BookTabs.Tick(new Vector2(5, 5));
+        _tabIdle = BookTabs.Pose(BookTab.Gear);
+        SelfTest.Check("book: our tab rests while not hovered and the game's page shows", !BookTabs.SlidOut(BookTab.Gear) && BookHost.Tab == BookTab.None,
+            $"slid {BookTabs.SlidOut(BookTab.Gear)}, tab {BookHost.Tab}, pose {_tabIdle}");
+    }
+
+    private static void TabHovered()
+    {
+        var pose = BookTabs.Pose(BookTab.Gear);
+        float moved = (pose.Face - _tabIdle.Face).magnitude;
+        SelfTest.Check("book: hovering our tab slides it out", BookTabs.Hovered == BookTab.Gear && BookTabs.SlidOut(BookTab.Gear) && moved > 0.0005f && BookTabs.OutlineShown(BookTab.Gear),
+            $"hovered {BookTabs.Hovered}, slid {BookTabs.SlidOut(BookTab.Gear)}, face moved {moved:F4}, outline {BookTabs.OutlineShown(BookTab.Gear)}");
+    }
+
+    private static void NeighbourHovered()
+    {
+        var pose = BookTabs.Pose(BookTab.Gear);
+        float face = (pose.Face - _tabIdle.Face).magnitude, root = (pose.Root - _tabIdle.Root).magnitude;
+        float neighbour = Mathf.Abs(BookTabs.NeighbourSlideOffset() - _neighbourIdle);
+        SelfTest.Check("book: the game's tab above slid out for the check", neighbour > 0.0005f, $"neighbour slid {BookTabs.NeighbourSlidOut}, moved {neighbour:F4}");
+        SelfTest.Check("book: the game's tab above sliding out leaves ours in place", BookTabs.Hovered == BookTab.None && !BookTabs.SlidOut(BookTab.Gear) && !BookTabs.OutlineShown(BookTab.Gear) && face < 0.0002f && root < 0.0002f,
+            $"hovered {BookTabs.Hovered}, slid {BookTabs.SlidOut(BookTab.Gear)}, face off {face:F4}, root off {root:F4}");
     }
 
     private static void Setup()

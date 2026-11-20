@@ -74,6 +74,7 @@ public sealed class BookFeature : IModFeature
     internal static void Handle(BookInput input)
     {
         var screen = input.Screen;
+        BookTabs.Tick(screen);
         // Our tab works from any page, the game's too.
         if (input.Press)
         {
