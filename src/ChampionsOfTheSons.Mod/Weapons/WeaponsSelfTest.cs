@@ -34,8 +34,9 @@ internal static class WeaponsSelfTest
             TestKit.Unpause();
             int id = GameItems.Find("Machete", 359);
             var inv = LocalPlayer.Inventory;
-            if (inv.AmountOf(id, true, false) == 0) inv.AddItem(id, 1, true, false, null);
-            SelfTest.Check("weapons: machete equipped", inv.TryEquip(id, false, true, false), $"item {id}");
+            bool equipped = TestKit.EquipGameItem(id);
+            if (!equipped) SelfTest.Log("weapons: equip refused; " + GameInventoryDiag(inv, id));
+            SelfTest.Check("weapons: machete equipped", equipped, $"item {id}");
         });
         SelfTest.Add(5f, "weapons: game weapon", () =>
         {
@@ -80,9 +81,9 @@ internal static class WeaponsSelfTest
                 Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
                 EquipItem(itemId, typeId);
                 int id = GameItems.Find(gameName, -1);
-                var inv = LocalPlayer.Inventory;
-                if (id >= 0 && inv.AmountOf(id, true, false) == 0) inv.AddItem(id, 1, true, false, null);
-                SelfTest.Check($"weapons: draw key equips {gameName}", WeaponsFeature.DrawBase(), $"item {id}");
+                TestKit.EnsureGameItem(id);
+                TestKit.FreeHands();
+                SelfTest.Check($"weapons: draw key equips {gameName}", WeaponsFeature.DrawBase(), $"item {id}; " + GameInventoryDiag(LocalPlayer.Inventory, id));
             });
             SelfTest.Add(t + 4f, $"weapons: {typeId} on", () =>
             {
@@ -100,6 +101,8 @@ internal static class WeaponsSelfTest
         {
             Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
             EquipItem("item.rusty_polearm", "polearm");
+            TestKit.EnsureGameItem(GameItems.Find("CraftedSpear", 474));
+            TestKit.FreeHands();
             SelfTest.Check("weapons: draw key equips CraftedSpear again", WeaponsFeature.DrawBase());
         });
         SelfTest.Add(t + 3f, "weapons: polearm try throw", () =>
@@ -138,6 +141,28 @@ internal static class WeaponsSelfTest
             SelfTest.Check("weapons: game model restored", restored);
             SelfTest.Check("weapons: projectile drop back on", ProjectileDrop.Drop != false, $"drop {ProjectileDrop.Drop}");
         });
+    }
+
+    /// <summary>COS-129 diagnosis: what the game's inventory says about an item and the hand slots.</summary>
+    internal static string GameInventoryDiag(TheForest.Items.Inventory.PlayerInventory inv, int id)
+    {
+        var sb = new StringBuilder();
+        try
+        {
+            sb.Append($"amount {inv.AmountOf(id, true, false)} (max {inv.GetMaxAmountOf(id)}), right hand ok {inv.CanEquipItemInRightHand(id)}, left ok {inv.CanEquipItemInLeftHand(id)}");
+            foreach (var slot in Enum.GetValues(typeof(EquipmentSlot)).Cast<EquipmentSlot>())
+                if (inv.IsSlotLocked(slot)) sb.Append($", {slot} LOCKED");
+            sb.Append($", view {inv.CurrentView}, enabled {inv.enabled}/{inv.gameObject.activeInHierarchy}");
+            var heldOnly = inv.HeldOnlyItemController?.TryCast<Il2CppSystem.Object>();
+            sb.Append($", right {inv.RightHandItem?._itemID.ToString() ?? "-"}, left {inv.LeftHandItem?._itemID.ToString() ?? "-"}, heldOnly {(heldOnly == null ? "-" : heldOnly.GetIl2CppType().Name)}");
+            sb.Append($", inWater {LocalPlayer.InWater}, midAction {LocalPlayer.IsInMidAction}, inInventory {LocalPlayer.IsInInventory}, toggleBlocked {inv.IsInventoryToggleBlocked()}");
+            sb.Append($", pos {LocalPlayer.Transform.position}");
+        }
+        catch (Exception e)
+        {
+            sb.Append(" diag failed: " + e.Message);
+        }
+        return sb.ToString();
     }
 
     internal static void EquipItem(string itemId, string typeId, Rarity rarity = Rarity.Rare)
