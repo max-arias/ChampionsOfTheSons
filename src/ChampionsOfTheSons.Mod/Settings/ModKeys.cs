@@ -45,6 +45,7 @@ internal static class ModKeys
             new("crafting_key", "ui.settings.key.crafting", "Crafting"),
             new("ping_key", "ui.settings.key.ping", "Ping"),
             new("host_settings_key", "ui.settings.key.host_settings", "Host settings"),
+            new("weapon_key", "ui.settings.key.weapon", "Draw weapon"),
             new("settings_key", "ui.settings.key.settings", "Mod settings"),
         };
         for (int i = 0; i < SpellBook.Slots; i++) list.Add(new($"spell_slot_{i + 1}", "ui.settings.key.spell", "Spell slot {0}"));

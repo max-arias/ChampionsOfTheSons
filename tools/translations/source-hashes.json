@@ -2012,6 +2012,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -2160,6 +2161,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -2312,8 +2314,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "es": {
   "difficulty.challenge1": "89786dcd",
@@ -4328,6 +4329,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -4476,6 +4478,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -4628,8 +4631,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "fi": {
   "difficulty.challenge1": "89786dcd",
@@ -6644,6 +6646,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -6792,6 +6795,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -6944,8 +6948,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "fr": {
   "difficulty.challenge1": "89786dcd",
@@ -8960,6 +8963,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -9108,6 +9112,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -9260,8 +9265,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "it": {
   "difficulty.challenge1": "89786dcd",
@@ -11276,6 +11280,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -11424,6 +11429,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -11576,8 +11582,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "ja": {
   "difficulty.challenge1": "89786dcd",
@@ -13592,6 +13597,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -13740,6 +13746,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -13892,8 +13899,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "ko": {
   "difficulty.challenge1": "89786dcd",
@@ -15908,6 +15914,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -16056,6 +16063,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -16208,8 +16216,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "pl": {
   "difficulty.challenge1": "89786dcd",
@@ -18224,6 +18231,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -18372,6 +18380,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -18524,8 +18533,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "ru": {
   "difficulty.challenge1": "89786dcd",
@@ -20540,6 +20548,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -20688,6 +20697,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -20840,8 +20850,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "tr": {
   "difficulty.challenge1": "89786dcd",
@@ -22856,6 +22865,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -23004,6 +23014,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -23156,8 +23167,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "zh-Hans": {
   "difficulty.challenge1": "89786dcd",
@@ -25172,6 +25182,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -25320,6 +25331,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -25472,8 +25484,7 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  },
  "zh-Hant": {
   "difficulty.challenge1": "89786dcd",
@@ -27488,6 +27499,7 @@
   "ui.crafting.rarity_low": "c234267b",
   "ui.crafting.target": "ecdda59a",
   "ui.crafting.title": "ea78b34d",
+  "ui.death.title": "ee8ac18e",
   "ui.elites.format": "b245f581",
   "ui.equipment.title": "36155d48",
   "ui.followups.before_after": "389da5ea",
@@ -27636,6 +27648,7 @@
   "ui.settings.key.ping": "6b68e979",
   "ui.settings.key.settings": "f7320a39",
   "ui.settings.key.spell": "dc92b63c",
+  "ui.settings.key.weapon": "e52ea7cb",
   "ui.settings.keys_hint": "5dc882b4",
   "ui.settings.press_key": "74ddb069",
   "ui.settings.reset": "b427e28f",
@@ -27788,7 +27801,6 @@
   "ui.worldrules.row.enemy_health": "9e040a49",
   "ui.worldrules.row.enemy_speed": "d8582756",
   "ui.worldrules.row.extra_levels": "0c7435c3",
-  "ui.worldrules.row.xp": "5b5aafe6",
-  "ui.death.title": "ee8ac18e"
+  "ui.worldrules.row.xp": "5b5aafe6"
  }
 }

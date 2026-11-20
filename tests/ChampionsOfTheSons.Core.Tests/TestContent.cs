@@ -47,7 +47,7 @@ public static class TestContent
         if (overrides != null)
             foreach (var (k, v) in overrides) files[k] = v;
         var db = ContentDb.Load(files);
-        Assert.Empty(db.Errors);
+        Assert.True(db.Errors.Count == 0, string.Join("\n", db.Errors));
         return db;
     }
 }

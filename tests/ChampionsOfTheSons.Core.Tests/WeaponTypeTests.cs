@@ -6,14 +6,19 @@ namespace ChampionsOfTheSons.Core.Tests;
 public class WeaponTypeTests
 {
     private const string Stats = """
-    { "playerStats": [ { "id": "i_hammer_stun", "kind": "bool", "default": 0 } ] }
+    { "playerStats": [ { "id": "i_hammer_stun", "kind": "bool", "default": 0 }, { "id": "max_health", "kind": "add", "default": 0 } ] }
+    """;
+
+    private const string ItemStats = """
+    { "itemStats": [ { "id": "stat.max_life", "name": "Maximum Life", "min": 1, "max": 2, "combine": "sum", "rarity": 0,
+      "effects": [ { "stat": "max_health", "op": "add" } ] } ] }
     """;
 
     private const string Items = """
     { "items": [
-      { "id": "item.sword", "name": "Sword", "type": "weapon", "weaponModel": "long_sword", "statPools": [] },
-      { "id": "item.bow", "name": "Bow", "type": "weapon", "weaponModel": "greatbow", "statPools": [] },
-      { "id": "item.club", "name": "Club", "type": "weapon", "statPools": [] }
+      { "id": "item.sword", "name": "Sword", "type": "weapon", "weaponModel": "long_sword", "statPools": [ ["stat.max_life"] ] },
+      { "id": "item.bow", "name": "Bow", "type": "weapon", "weaponModel": "greatbow", "statPools": [ ["stat.max_life"] ] },
+      { "id": "item.club", "name": "Club", "type": "weapon", "statPools": [ ["stat.max_life"] ] }
     ] }
     """;
 
@@ -27,7 +32,7 @@ public class WeaponTypeTests
 
     private static ContentDb Db(string? items = null) => ContentDb.Load(new Dictionary<string, string>
     {
-        ["player_stats.json"] = Stats, ["item_stats.json"] = """{ "itemStats": [] }""", ["items.json"] = items ?? Items, ["weapon_types.json"] = Types,
+        ["player_stats.json"] = Stats, ["item_stats.json"] = ItemStats, ["items.json"] = items ?? Items, ["weapon_types.json"] = Types,
     });
 
     private static Inventory Wielding(ContentDb db, string baseId)
@@ -81,7 +86,7 @@ public class WeaponTypeTests
     [Fact]
     public void Unknown_weapon_type_on_an_item_is_a_content_error()
     {
-        var db = Db("""{ "items": [ { "id": "item.x", "name": "X", "type": "weapon", "weaponModel": "nunchaku", "statPools": [] } ] }""");
+        var db = Db("""{ "items": [ { "id": "item.x", "name": "X", "type": "weapon", "weaponModel": "nunchaku", "statPools": [ ["stat.max_life"] ] } ] }""");
         Assert.Contains(db.Errors, e => e.Contains("nunchaku"));
     }
 }

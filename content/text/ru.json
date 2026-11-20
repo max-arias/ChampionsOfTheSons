@@ -2160,6 +2160,7 @@
  "ui.settings.key.ping": "Метка",
  "ui.settings.key.settings": "Настройки мода",
  "ui.settings.key.spell": "Ячейка заклинания {0}",
+ "ui.settings.key.weapon": "Достать оружие",
  "ui.settings.keys_hint": "Нажмите на клавишу, затем нажмите новую. Esc — отмена.",
  "ui.settings.press_key": "Нажмите клавишу...",
  "ui.settings.reset": "Сбросить клавиши",

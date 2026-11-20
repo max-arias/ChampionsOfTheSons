@@ -43,8 +43,8 @@ public class PerkRulesTests
 
     private const string Items = """
     { "items": [
-      { "id": "item.ring", "name": "Ring", "type": "ring", "rarity": 2, "set": "set.storm", "statPools": [] },
-      { "id": "item.boots", "name": "Boots", "type": "boot", "rarity": 2, "set": "set.storm", "statPools": [] },
+      { "id": "item.ring", "name": "Ring", "type": "ring", "rarity": 2, "set": "set.storm", "statPools": [ ["stat.max_life"] ] },
+      { "id": "item.boots", "name": "Boots", "type": "boot", "rarity": 2, "set": "set.storm", "statPools": [ ["stat.max_life"] ] },
       { "id": "item.dust", "name": "Dust", "type": "material", "rarity": 1, "statPools": [] }
     ] }
     """;

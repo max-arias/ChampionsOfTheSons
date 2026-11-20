@@ -2160,6 +2160,7 @@
  "ui.settings.key.ping": "Marcar",
  "ui.settings.key.settings": "Ajustes del mod",
  "ui.settings.key.spell": "Espacio de hechizo {0}",
+ "ui.settings.key.weapon": "Desenfundar arma",
  "ui.settings.keys_hint": "Haz clic en una tecla y pulsa la nueva. Esc cancela.",
  "ui.settings.press_key": "Pulsa una tecla...",
  "ui.settings.reset": "Restablecer teclas",
