@@ -15,7 +15,7 @@ public sealed class BookFeature : IModFeature
 
     public void Init()
     {
-        BookCard.Build();
+        // The card is built the first time it shows (in the world): built at the main menu, its graphics threw.
         BookHost.TabShown += BookPages.Show;
     }
 

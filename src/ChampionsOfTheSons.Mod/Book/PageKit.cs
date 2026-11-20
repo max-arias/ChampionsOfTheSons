@@ -36,7 +36,9 @@ internal static class PageKit
 
     public static Color Hex(string hex) => ColorUtility.TryParseHtmlString(hex, out var c) ? c : Color.magenta;
 
-    public static string HexOf(Color c) => "#" + ColorUtility.ToHtmlStringRGB(c);
+    /// <summary>"#RRGGBB" (ColorUtility.ToHtmlStringRGB is stripped from the game build).</summary>
+    public static string HexOf(Color c) =>
+        $"#{(int)Mathf.Round(Mathf.Clamp01(c.r) * 255):X2}{(int)Mathf.Round(Mathf.Clamp01(c.g) * 255):X2}{(int)Mathf.Round(Mathf.Clamp01(c.b) * 255):X2}";
 
     /// <summary>A child rectangle at page pixels (x, y from the top-left) of <paramref name="parent"/>'s page space.</summary>
     public static RectTransform Rect(Transform parent, string name, float x, float y, float w, float h)

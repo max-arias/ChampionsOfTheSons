@@ -40,6 +40,7 @@ internal static class BookHost
     private static readonly List<GameObject> Hidden = new();
     private static BookTab _pending;
     private static float _pendingSince;
+    private static bool _ready;
 
     /// <summary>The page canvas content (page pixels, origin top-left), built once.</summary>
     public static RectTransform? Page { get; private set; }
@@ -88,11 +89,14 @@ internal static class BookHost
             if (_pending != BookTab.None && Time.realtimeSinceStartup - _pendingSince > 5) _pending = BookTab.None;
             return;
         }
-        if (_pending != BookTab.None && Time.realtimeSinceStartup - _pendingSince > 0.6f)
+        // Set up right away (no waiting for the raise animation, so our page never pops in): the page axes are a
+        // property of the book mesh, not of its pose.
+        if (!_ready || _pageRenderer == null) Setup();
+        if (_pending != BookTab.None)
         {
             var t = _pending;
-            _pending = BookTab.None;
             ShowModPage(t);
+            if (Tab == t) _pending = BookTab.None; // else the page material is not there yet: try next frame
         }
         if (ModPageActive && _pageMat != null && _rt != null && _pageMat.GetTexture(TexProp) != _rt) _pageMat.SetTexture(TexProp, _rt);
     }
@@ -101,18 +105,32 @@ internal static class BookHost
     {
         if (book == null || book == _book) return;
         _book = book;
-        _pageMat = book._pageMaterial;
-        _pageRenderer = book.GetComponentsInChildren<Renderer>(true).FirstOrDefault(r => r.gameObject.name == book._pageRendererName);
-        PageAxes();
-        BookTabs.Attach(book);
+        _ready = false;
         Tab = BookTab.None;
+    }
+
+    /// <summary>Once the book is up in the hand: its page material, page axes and our tabs (they need the final pose).</summary>
+    private static void Setup()
+    {
+        if (_book == null) return;
+        _pageMat ??= _book._pageMaterial;
+        string pageName = string.IsNullOrEmpty(_book._pageRendererName) ? "Page" : _book._pageRendererName;
+        _pageRenderer = _book.GetComponentsInChildren<Renderer>(true).FirstOrDefault(r => r.gameObject.name == pageName);
+        if (_pageRenderer == null) return; // the book builds its meshes a frame or two after it is enabled
+        _ready = true;
+        PageAxes();
+        BookTabs.Attach(_book, PageUpWorld, PageRightWorld);
+        LogState($"set up: page material {(_pageMat != null)}, page renderer {(_pageRenderer != null)}, tabs {BookTabs.Tabs.Count}");
     }
 
     // ------------------------------------------------------------------ pages
 
     public static void ShowModPage(BookTab tab)
     {
-        if (Book == null || _pageMat == null) return;
+        if (Book == null) return;
+        if (!_ready) Setup();
+        if (_pageMat == null) _pageMat = _book!._pageMaterial;
+        if (_pageMat == null) { _pending = tab; _pendingSince = Time.realtimeSinceStartup; return; }
         EnsureRig();
         if (Tab == BookTab.None)
         {
@@ -204,23 +222,26 @@ internal static class BookHost
 
     // ------------------------------------------------------------------ cursor
 
+    /// <summary>
+    /// The page mesh's axes, measured in COS-62: page right = -local x, page up = +local y, out of the page = local z.
+    /// They belong to the mesh, so they hold in any pose (the book can be set up before it is raised).
+    /// </summary>
     private static void PageAxes()
     {
         var mesh = _pageRenderer?.GetComponent<MeshFilter>()?.sharedMesh;
-        var cam = Camera.main;
-        if (_pageRenderer == null || mesh == null || cam == null) return;
+        if (_pageRenderer == null || mesh == null) return;
         _pageLocal = mesh.bounds;
-        var size = _pageLocal.size;
-        _nAxis = size.x <= size.y && size.x <= size.z ? 0 : size.y <= size.z ? 1 : 2;
-        var inPlane = new[] { 0, 1, 2 }.Where(a => a != _nAxis).ToArray();
-        var t = _pageRenderer.transform;
-        Vector3 Dir(int a) => t.TransformDirection(a == 0 ? Vector3.right : a == 1 ? Vector3.up : Vector3.forward);
-        float r0 = Vector3.Dot(Dir(inPlane[0]), cam.transform.right), r1 = Vector3.Dot(Dir(inPlane[1]), cam.transform.right);
-        _uAxis = Mathf.Abs(r0) >= Mathf.Abs(r1) ? inPlane[0] : inPlane[1];
-        _vAxis = _uAxis == inPlane[0] ? inPlane[1] : inPlane[0];
-        _uSign = Mathf.Sign(Vector3.Dot(Dir(_uAxis), cam.transform.right));
-        _vSign = Mathf.Sign(Vector3.Dot(Dir(_vAxis), cam.transform.up));
+        _nAxis = 2;
+        _uAxis = 0;
+        _uSign = -1;
+        _vAxis = 1;
+        _vSign = 1;
     }
+
+    /// <summary>"Up" on the page in world space (towards the title).</summary>
+    public static Vector3 PageRightWorld => _pageRenderer != null ? _pageRenderer.transform.TransformDirection(Vector3.right) * _uSign : Vector3.right;
+
+    public static Vector3 PageUpWorld => _pageRenderer != null ? _pageRenderer.transform.TransformDirection(Vector3.up) * _vSign : Vector3.up;
 
     /// <summary>The book's virtual cursor in screen pixels (moves with mouse and pad).</summary>
     public static Vector2 CursorScreen => Book != null ? Book._mouseScreenPosition : Vector2.zero;

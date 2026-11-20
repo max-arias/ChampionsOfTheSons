@@ -28,7 +28,7 @@ internal static class BookTabs
 
     public static IReadOnlyDictionary<BookTab, Renderer> Tabs => Ours;
 
-    public static void Attach(BlueprintBookController book)
+    public static void Attach(BlueprintBookController book, Vector3 pageUp, Vector3 pageRight)
     {
         _book = book;
         Ours.Clear();
@@ -38,12 +38,13 @@ internal static class BookTabs
             var cam = Camera.main;
             var tabs = book.GetComponentsInChildren<Renderer>(false).Where(r => r.gameObject.name == "TactiPadTab").ToList();
             if (cam == null || tabs.Count < 2) { RLog.Warning($"Champions of the Sons book: {tabs.Count} game tabs, no tabs added"); return; }
-            tabs = tabs.OrderBy(r => Vector3.Dot(r.bounds.center, cam.transform.up)).ToList();
+            // Lowest tab along the page's own up axis, so the book's pose (still raising or not) does not matter.
+            tabs = tabs.OrderBy(r => Vector3.Dot(r.bounds.center, pageUp)).ToList();
             var lowest = tabs[0];
             var next = tabs.Skip(1).FirstOrDefault(t => Vector3.Distance(t.bounds.center, lowest.bounds.center) > 0.005f) ?? tabs[1];
             var step = lowest.bounds.center - next.bounds.center;
-            // Slide out sideways a little when selected, like the game's active tab.
-            _slideOut = cam.transform.right * 0.004f;
+            // Slide out sideways a little when selected, like the game's active tab (page right = -local x of the page).
+            _slideOut = pageRight.normalized * 0.004f;
             for (int i = 0; i < Defs.Length; i++)
             {
                 var d = Defs[i];

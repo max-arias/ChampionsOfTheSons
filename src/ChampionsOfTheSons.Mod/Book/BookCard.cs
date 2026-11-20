@@ -20,7 +20,6 @@ internal static class BookCard
 
     private static SPanelOptions _root = null!;
     private static SContainerOptions _card = null!;
-    private static SImageOptions _icon = null!;
     private static SLabelOptions _title = null!, _sub = null!, _body = null!, _compare = null!;
     private static SContainerOptions _divider = null!, _actions = null!;
     private static SBgButtonOptions _equip = null!, _drop = null!, _destroy = null!;
@@ -28,7 +27,7 @@ internal static class BookCard
     private static string? _shownKey;
 
     public static string? ShownKey => _shownKey;
-    public static bool ActionsVisible => _built && _actions.Root.activeSelf;
+    public static bool ActionsVisible => _built && !_hidden && _actions.Root.activeSelf;
     public static string Text => _built ? _title.TextObject.text + "\n" + _body.TextObject.text : "";
 
     public static void Build()
@@ -39,10 +38,10 @@ internal static class BookCard
         _card = SContainer.TopLeft(0, 0).Size(W, 10).Background(PageKit.Hex("#5A4636"), EBackground.None).Vertical(0, "EC").Padding(3).AutoSize("XP");
         var inner = SContainer.Background(PageKit.Hex("#14120FF2"), EBackground.None).Vertical(5, "EC").Padding(16, 16, 12, 14);
         _card.Add(inner);
-        _icon = IconView.Create().PWidth(72).PHeight(72);
+        // No icon here: the item's icon is on its page slot (a RawImage on this card threw inside uGUI).
         _title = Label(22).PWidth(10).FlexWidth(1);
         var header = SContainer.Horizontal(10, "CC");
-        header.Add(_icon).Add(_title);
+        header.Add(_title);
         _sub = Label(16);
         _body = Label(17);
         _divider = SContainer.Background(PageKit.Hex("#5A4636"), EBackground.None).PHeight(1);
@@ -54,8 +53,19 @@ internal static class BookCard
         _actions.Add(_equip).Add(_drop).Add(_destroy);
         inner.Add(header).Add(_sub).Add(_body).Add(_divider).Add(_compare).Add(_actions);
         foreach (var img in _root.Root.GetComponentsInChildren<Image>(true)) img.raycastTarget = false;
-        _root.Active(false);
+        // The card stays active and hides by moving off screen: toggling it (and its RawImage icon) before its
+        // graphics ever initialised threw inside uGUI.
+        _hidden = true;
+        _card.RectTransform.anchoredPosition = OffScreen;
+        _root.Active(true); // panels start inactive; the card hides by moving off screen instead
     }
+
+    public static string Debug => _built ? $"root active {_root.Root.activeInHierarchy}, pos {_card.RectTransform.anchoredPosition}, size {_card.RectTransform.rect.size}" : "not built";
+
+    private static readonly Vector2 OffScreen = new(-5000, 5000);
+    private static bool _hidden;
+
+    public static bool Visible => _built && !_hidden;
 
     private static SLabelOptions Label(int size)
     {
@@ -68,15 +78,32 @@ internal static class BookCard
     private static SBgButtonOptions Button() =>
         SBgButton.Text("").FontSize(18).FontColor("#EFE7D6").Color(PageKit.Hex("#5A4636"), PageKit.Hex("#7A5E48")).PHeight(42).FlexWidth(1);
 
+    private static void On(GameObject go, bool on) { if (go.activeSelf != on) go.SetActive(on); }
+
     public static void Hide()
     {
         _shownKey = null;
         _destroyArmed = false;
-        if (_built && _root.Root.activeSelf) _root.Active(false);
+        if (_built && !_hidden) { _hidden = true; _card.RectTransform.anchoredPosition = OffScreen; }
     }
 
     /// <summary>Shows an item (slot key) or a stat row ("row.id"). <paramref name="pinned"/>: the selected item, with actions.</summary>
     public static void Show(string key, bool pinned)
+    {
+        try
+        {
+            ShowInner(key, pinned);
+        }
+        catch (Exception e)
+        {
+            if (!_warned) RedLoader.RLog.Error($"Champions of the Sons book card: {e}");
+            _warned = true;
+        }
+    }
+
+    private static bool _warned;
+
+    private static void ShowInner(string key, bool pinned)
     {
         Build();
         if (key != _shownKey) _destroyArmed = false;
@@ -86,30 +113,27 @@ internal static class BookCard
         {
             var row = SheetData.Build(pc).FirstOrDefault(r => r.Id == key.Substring(4));
             if (row.Id == null) { Hide(); return; }
-            IconView.Show(_icon, null);
-            _icon.Active(false);
             _title.Text($"<b>{row.Label}</b>  <color={UiTheme.Gold}>{row.Value}</color>");
-            _sub.Active(false);
+            On(_sub.Root, false);
             _body.Text(row.Tip);
-            _divider.Active(false);
-            _compare.Active(false);
-            _actions.Active(false);
+            On(_divider.Root, false);
+            On(_compare.Root, false);
+            On(_actions.Root, false);
         }
         else
         {
             var item = pc.Inventory.Get(key);
             if (item == null) { Hide(); return; }
             var d = ItemDescriber.Describe(item, pc, key);
-            _icon.Active(IconView.Show(_icon, item.BaseId));
             _title.Text(d.Title);
-            _sub.Active(true);
+            On(_sub.Root, true);
             _sub.Text(d.Subtitle);
             _body.Text(d.Body);
             bool cmp = !string.IsNullOrEmpty(d.Compare);
-            _divider.Active(cmp);
-            _compare.Active(cmp);
+            On(_divider.Root, cmp);
+            On(_compare.Root, cmp);
             if (cmp) _compare.Text(d.Compare!);
-            _actions.Active(pinned);
+            On(_actions.Root, pinned);
             if (pinned)
             {
                 bool equipped = key.StartsWith("equip.", StringComparison.Ordinal);
@@ -118,7 +142,7 @@ internal static class BookCard
                 _destroy.Text(_destroyArmed ? UiText.T("ui.book.destroy_confirm", "Again to destroy") : UiText.T("ui.inventory.menu.destroy", "Destroy"));
             }
         }
-        if (!_root.Root.activeSelf) _root.Active(true);
+        _hidden = false;
         LayoutRebuilder.ForceRebuildLayoutImmediate(_card.RectTransform);
         Place();
     }

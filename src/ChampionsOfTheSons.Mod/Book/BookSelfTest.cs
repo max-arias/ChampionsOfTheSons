@@ -160,7 +160,7 @@ internal static class BookSelfTest
         SelfTest.Check("book: the card shows the selected item with actions", BookCard.ShownKey == Inventory.Bag(0) && BookCard.ActionsVisible,
             $"shown {BookCard.ShownKey}, actions {BookCard.ActionsVisible}");
         var page = BookHost.PageScreenRect();
-        SelfTest.Log($"book: page on screen {page}, card text {BookCard.Text.Length} chars");
+        SelfTest.Log($"book: page on screen {page}, card text {BookCard.Text.Length} chars, {BookCard.Debug}");
     }
 
     private static void EquipFromCard()
