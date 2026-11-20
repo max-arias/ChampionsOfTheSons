@@ -31,12 +31,19 @@ public sealed class DeathFeature : IModFeature
         _wasDead = dead;
     }
 
+    /// <summary>
+    /// The game's death flag, or (single player, which has no downed state) health at zero: the game sets its flag from a
+    /// death routine that can lag behind. In co-op a player at zero health may only be downed, which is not a death.
+    /// </summary>
     private static bool IsDeadNow()
     {
         try
         {
             var stats = LocalPlayer.Stats;
-            return stats != null && stats.IsDead();
+            if (stats == null) return false;
+            if (stats.IsDead()) return true;
+            var health = LocalPlayer.Vitals?.Health;
+            return !Net.CoopSession.Active && LocalPlayer.IsInWorld && health != null && health._currentValue <= 0;
         }
         catch
         {

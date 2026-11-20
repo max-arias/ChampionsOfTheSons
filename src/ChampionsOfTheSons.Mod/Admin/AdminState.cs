@@ -30,6 +30,9 @@ public static class AdminState
     public static void Update()
     {
         if (NoCooldowns) PlayerState.Character.Spells.ReadyAll();
+        // Hits are zeroed in PlayerBridge; some game damage (seen 1 s after a hit, fall, fire) bypasses PlayerStats.Hit, so health is held at max too.
+        var health = God ? LocalPlayer.Vitals?.Health : null;
+        if (health != null && health._currentValue > 0 && health._currentValue < health.GetMax()) health.SetCurrentValue(health.GetMax());
     }
 
     /// <summary>Applies a grant to the local character and returns what happened, for the console reply.</summary>

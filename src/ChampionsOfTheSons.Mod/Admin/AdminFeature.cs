@@ -59,7 +59,14 @@ public sealed class AdminFeature : IModFeature
         }
     }
 
-    public void OnGameStart() => AdminState.Reset();
+    private static bool _consoleRegistered;
+
+    public void OnGameStart()
+    {
+        AdminState.Reset();
+        // The game's debug console may not exist yet when the SDK initializes: try again once the world is up.
+        if (!_consoleRegistered && !ServerConfig.IsDedicatedServer && !ServerConfig.OnDedicatedServer) RegisterLocalConsole();
+    }
 
     public void Update(float dt, bool inWorld)
     {
@@ -79,11 +86,13 @@ public sealed class AdminFeature : IModFeature
                 return;
             }
             method.Invoke(ChampionsOfTheSonsMod.Instance, new object[] { "cots", (Func<string, bool>)OnLocalConsole });
+            _consoleRegistered = true;
             RLog.Msg($"{Tag} console command 'cots' registered (type 'cots help')");
         }
         catch (Exception e)
         {
-            RLog.Warning($"{Tag} console command not registered: {e.Message}");
+            var inner = e is TargetInvocationException { InnerException: { } ie } ? ie : e;
+            RLog.Warning($"{Tag} console command not registered yet: {inner.GetType().Name}: {inner.Message}");
         }
     }
 

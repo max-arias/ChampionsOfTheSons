@@ -50,8 +50,9 @@ internal static class DeathSelfTest
             _xpBefore = Pc.Progress.Xp;
             _levelBefore = Pc.Progress.Level;
             _deathsBefore = DeathFeature.Deaths;
-            LocalPlayer.Stats.KillPlayer();
-            SelfTest.Log($"death: KillPlayer called; dead now = {LocalPlayer.Stats.IsDead()}");
+            // A lethal hit through the game's damage path (KillPlayer's routine does not advance at time scale 0).
+            LocalPlayer.Stats.Hit(LocalPlayer.Vitals.Health.GetMax() * 10);
+            SelfTest.Log($"death: lethal hit; health {LocalPlayer.Vitals.Health._currentValue:0.0}, game dead flag {LocalPlayer.Stats.IsDead()}, downed {LocalPlayer.Stats.PlayerIsDowned}");
         });
 
         SelfTest.Add(T0 + 4, "death: penalty after the game's death", () =>

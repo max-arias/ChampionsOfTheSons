@@ -37,18 +37,22 @@ internal static class AdminSelfTest
             Run("nocooldowns off");
             SelfTest.Check("admin: list items with a filter", Run("list items ring") && AdminFeature.LastReply.Contains("ring"));
             TestKit.Unpause();
-            Run("god on");
+            SelfTest.Check("admin: god on", Run("god on") && AdminState.God, AdminFeature.LastReply);
             var health = LocalPlayer.Vitals.Health;
             health.SetCurrentValue(health.GetMax());
             _hp = health._currentValue;
             LocalPlayer.Stats.Hit(40f);
+            SelfTest.Check("admin: god mode takes no damage", health._currentValue >= _hp - 0.01f && PlayerBridge.LastIncoming is { After: 0 },
+                $"{_hp:0.0} -> {health._currentValue:0.0}, last incoming {PlayerBridge.LastIncoming}");
         });
 
         SelfTest.Add(T0 + 1, "admin: god mode, heal, spawn, difficulty, console", () =>
         {
             var health = LocalPlayer.Vitals.Health;
-            SelfTest.Check("admin: god mode takes no damage", health._currentValue >= _hp - 0.01f, $"{_hp:0.0} -> {health._currentValue:0.0}");
+            SelfTest.Check("admin: god mode still at full health 1 s later", health._currentValue >= health.GetMax() - 0.01f,
+                $"health {health._currentValue:0.0} / max {health.GetMax():0.0}, last incoming {PlayerBridge.LastIncoming}");
             Run("god off");
+            _hp = health._currentValue;
             LocalPlayer.Stats.Hit(20f);
             SelfTest.Check("admin: hits land again with god off", health._currentValue < _hp, $"{_hp:0.0} -> {health._currentValue:0.0}");
             SelfTest.Check("admin: heal", Run("heal") && health._currentValue >= health.GetMax() - 0.5f, AdminFeature.LastReply);

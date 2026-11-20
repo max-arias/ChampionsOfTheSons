@@ -59,6 +59,7 @@ public static class PlayerBridge
             if (damage <= 0) return;
             if (Admin.AdminState.God)
             {
+                LastIncoming = (damage, 0, false);
                 damage = 0;
                 return;
             }
