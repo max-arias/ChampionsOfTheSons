@@ -1780,7 +1780,7 @@
  "spell.taunt.name": "嘲諷",
  "spell.war_cry.description": "一聲傳遍 50 m 的咆哮，鼓舞你與附近的盟友：持續期間攻擊速度提高 20%，傷害提高 20%。85 能量，冷卻 180 s。",
  "spell.war_cry.name": "戰吼",
- "spell.wide_reach.description": "撿起 7.5 m 內掉落的戰利品：材料一律撿起，其他物品只要稀有度不低於你最差的已裝備物品即可，另外還有散落的樹枝、石頭、草藥等。你的範圍加成會擴大它。推雪橇時無法使用。10 能量，冷卻 0.4 s。",
+ "spell.wide_reach.description": "撿起 5.5 m 內掉落的戰利品：材料一律撿起，其他物品只要稀有度不低於你最差的已裝備物品即可，另外還有散落的樹枝、石頭、草藥等。推雪橇時無法使用。10 能量，冷卻 0.4 s。",
  "spell.wide_reach.name": "延伸觸及",
  "stat.agility.name": "敏捷",
  "stat.allattributes.name": "全屬性",

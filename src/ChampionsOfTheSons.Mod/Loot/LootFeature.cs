@@ -191,7 +191,7 @@ public sealed class LootFeature : IModFeature
                 if (dist > RearmDistance) NoAutoPickup.Remove(d.Id);
                 continue;
             }
-            if (dist <= RangeRules.Scaled(PlayerState.Character.Stats, PickupRadius)) Pickup(d.Id);
+            if (dist <= PickupRadius) Pickup(d.Id);
         }
     }
 

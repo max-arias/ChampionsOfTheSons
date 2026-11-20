@@ -15,7 +15,7 @@ internal static class WideReachPickup
     public static int LastDrops { get; private set; }
     public static int LastGamePickups { get; private set; }
 
-    public static float Radius => (float)RangeRules.Scaled(PlayerState.Character.Stats, WideReachRules.Radius);
+    public static float Radius => (float)WideReachRules.Radius;
 
     public static void Cast()
     {

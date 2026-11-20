@@ -145,8 +145,8 @@ internal static class SpellCaster
         // Cast from the eyes so the sphere starts clear of our own collider, along the view direction.
         var eye = cam.position;
         var stats = PlayerState.Character.Stats;
-        // Blink range is the spell_blink_range stat (15 m; items add to it), times the player's range factor (COS-88, COS-85).
-        float range = (float)RangeRules.Scaled(stats, stats.Get(PerkStatIds.BlinkRange) > 0 ? stats.Get(PerkStatIds.BlinkRange) : BlinkRange);
+        // Blink range is the spell_blink_range stat (15 m; items add to it) (COS-88).
+        float range = (float)(stats.Get(PerkStatIds.BlinkRange) > 0 ? stats.Get(PerkStatIds.BlinkRange) : BlinkRange);
         var start = player.position;
         var feet = BlinkTarget(eye, cam.forward, range, eye.y - player.position.y);
 
@@ -174,7 +174,6 @@ internal static class SpellCaster
             }
         if (!stats.IsOn(PerkStatIds.BlinkExplosion)) return;
         float radius = Mathf.Max((float)PerkRules.BlinkExplosionMinRadius, Vector3.Distance(from, to) * (float)PerkRules.BlinkExplosionRadiusShare);
-        radius = (float)RangeRules.Scaled(stats, radius);
         double damage = PerkRules.BlinkExplosionDamage * Math.Max(0.1, stats.Get(StatIds.MovementSpeed));
         foreach (var e in SpellWorld.EnemiesWithin(to, radius))
         {

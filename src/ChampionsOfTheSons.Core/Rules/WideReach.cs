@@ -3,13 +3,13 @@ using ChampionsOfTheSons.Core.Content;
 namespace ChampionsOfTheSons.Core.Rules;
 
 /// <summary>
-/// Wide Reach (COS-85): an area pickup, not a damage cone. A cast collects the mod's drops within <see cref="Radius"/> m
-/// (times the player's range factor) that pass the rarity rule, and the game's small loose resource pickups in the same radius.
+/// Wide Reach (COS-85, Max 2026-11-20: "pick up things or pull them towards you"): an area pickup, not a damage cone. A cast collects
+/// the mod's drops within <see cref="Radius"/> m that pass the rarity rule, and the game's small loose resource pickups in the same radius.
 /// </summary>
 public static class WideReachRules
 {
-    /// <summary>Pickup radius in metres before the range factor (COTF).</summary>
-    public const double Radius = 7.5;
+    /// <summary>Pickup radius in metres: this mod's Wide Reach radius (COTF used 7.5 m).</summary>
+    public const double Radius = 5.5;
 
     /// <summary>The game's small loose pickups Wide Reach also collects, by the game's item name (case-insensitive, whole name).
     /// COTF's list of about 28 The Forest pickups, mapped to Sons of the Forest items that exist as loose world pickups.</summary>

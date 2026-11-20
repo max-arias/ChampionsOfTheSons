@@ -1780,7 +1780,7 @@
  "spell.taunt.name": "Provocazione",
  "spell.war_cry.description": "Un ruggito che attraversa 50 m e rinfranca te e gli alleati vicini: 20% di velocità d'attacco e 20% di danni in più per tutta la durata. 85 energia, ricarica 180 s.",
  "spell.war_cry.name": "Grido di Guerra",
- "spell.wide_reach.description": "Raccoglie il bottino caduto entro 7.5 m: sempre i materiali, gli altri oggetti se sono rari almeno quanto il tuo pezzo equipaggiato peggiore, più rami, pietre, erbe e simili sparsi a terra. I tuoi bonus di portata lo allargano. Non mentre spingi una slitta. 10 energia, ricarica 0.4 s.",
+ "spell.wide_reach.description": "Raccoglie il bottino caduto entro 5.5 m: sempre i materiali, gli altri oggetti se sono rari almeno quanto il tuo pezzo equipaggiato peggiore, più rami, pietre, erbe e simili sparsi a terra. Non mentre spingi una slitta. 10 energia, ricarica 0.4 s.",
  "spell.wide_reach.name": "Portata Estesa",
  "stat.agility.name": "Agilità",
  "stat.allattributes.name": "Tutti gli attributi",

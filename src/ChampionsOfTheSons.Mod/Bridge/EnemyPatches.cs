@@ -199,10 +199,10 @@ public static class EnemyPatches
         _headshot = false;
         if (runtime.Actor == null) return;
         var center = runtime.Actor.transform.position;
-        Splash(runtime, center, RangedRules.AreaSplash(sheet, hit.Amount, Rng), RangeRules.Scaled(sheet, sheet.Get(RangedStatIds.AreaRadius)), hit.ArmorPierce);
+        Splash(runtime, center, RangedRules.AreaSplash(sheet, hit.Amount, Rng), sheet.Get(RangedStatIds.AreaRadius), hit.ArmorPierce);
         // Eruption Bow: a headshot splashes half its damage on enemies around the target.
         if (headshot && sheet.IsOn(UniqueFlagIds.Eruption))
-            Splash(runtime, center, hit.Amount * UniqueTuning.EruptionFraction, RangeRules.Scaled(sheet, UniqueTuning.EruptionRadius), hit.ArmorPierce);
+            Splash(runtime, center, hit.Amount * UniqueTuning.EruptionFraction, UniqueTuning.EruptionRadius, hit.ArmorPierce);
     }
 
     private static void Splash(EnemyRuntime target, Vector3 center, double amount, double radius, double pierce)

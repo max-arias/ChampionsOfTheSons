@@ -267,17 +267,13 @@ internal static class PerkHooksSelfTest
         Loot.LootFeature.ClearAll();
         var t = LocalPlayer.Transform;
         var item = new LootRoller(ModContent.Db).RollItem(ModContent.Db.Items.Values.First(d => d.Rarity == 1 && LootRoller.SlotsFor(d.Type).Count > 0), 10, new Core.Rng(7));
-        var near = Loot.LootFeature.SpawnAt(item, t.position + t.forward * 5f);
+        var near = Loot.LootFeature.SpawnAt(item, t.position + t.forward * 4f);
         var far = Loot.LootFeature.SpawnAt(item with { }, t.position + t.forward * 20f);
         WideReachPickup.Cast();
         bool inBag = Pc.Inventory.Slots.Values.Any(i => i.BaseId == item.BaseId);
-        SelfTest.Check("perk hooks: Wide Reach puts a drop 5 m away in the bag and leaves one 20 m away", inBag && Loot.LootFeature.Ground.Get(near.Id) == null && Loot.LootFeature.Ground.Get(far.Id) != null,
+        SelfTest.Check("perk hooks: Wide Reach puts a drop 4 m away in the bag and leaves one 20 m away", inBag && Loot.LootFeature.Ground.Get(near.Id) == null && Loot.LootFeature.Ground.Get(far.Id) != null,
             $"drops {WideReachPickup.LastDrops}, game pickups {WideReachPickup.LastGamePickups}");
 
-        Stats(new StatModifier(RangeRules.RangeMult, EffectOp.Mult, 3));
-        WideReachPickup.Cast();
-        SelfTest.Check("perk hooks: the range factor widens Wide Reach", Loot.LootFeature.Ground.Get(far.Id) == null, $"radius {WideReachPickup.Radius:0.#} m");
-        Stats();
         Loot.LootFeature.ClearAll();
         Pc.Inventory.Restore(bag.Concat(equipped));
     }

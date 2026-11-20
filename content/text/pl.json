@@ -1780,7 +1780,7 @@
  "spell.taunt.name": "Prowokacja",
  "spell.war_cry.description": "Ryk niosący się na 50 m, który mobilizuje ciebie i pobliskich sojuszników: 20% więcej szybkości ataku i 20% więcej obrażeń przez czas trwania. 85 energii, odnowienie 180 s.",
  "spell.war_cry.name": "Okrzyk Wojenny",
- "spell.wide_reach.description": "Zbiera upuszczone łupy w promieniu 7.5 m: materiały zawsze, inne przedmioty, jeśli są co najmniej tak rzadkie jak twój najsłabszy założony element, a także leżące patyki, kamienie, zioła i podobne. Premie do zasięgu go powiększają. Nie działa podczas pchania sań. 10 energii, odnowienie 0.4 s.",
+ "spell.wide_reach.description": "Zbiera upuszczone łupy w promieniu 5.5 m: materiały zawsze, inne przedmioty, jeśli są co najmniej tak rzadkie jak twój najsłabszy założony element, a także leżące patyki, kamienie, zioła i podobne. Nie działa podczas pchania sań. 10 energii, odnowienie 0.4 s.",
  "spell.wide_reach.name": "Szeroki Zasięg",
  "stat.agility.name": "Zręczność",
  "stat.allattributes.name": "Wszystkie atrybuty",

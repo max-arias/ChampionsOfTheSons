@@ -1780,7 +1780,7 @@
  "spell.taunt.name": "Härnäys",
  "spell.war_cry.description": "Karjaisu 50 m päähän kokoaa sinut ja lähellä olevat liittolaiset: 20% enemmän hyökkäysnopeutta ja 20% enemmän vahinkoa koko keston ajan. 85 energiaa, 180 s latausaika.",
  "spell.war_cry.name": "Sotahuuto",
- "spell.wide_reach.description": "Kerää pudonneen saaliin 7.5 m säteellä: materiaalit aina, muut esineet jos ne ovat vähintään yhtä harvinaisia kuin heikoin varusteesi, sekä irtonaiset oksat, kivet, yrtit ja muut vastaavat. Kantamabonuksesi laajentavat sitä. Ei toimi rekeä työntäessä. 10 energiaa, latausaika 0.4 s.",
+ "spell.wide_reach.description": "Kerää pudonneen saaliin 5.5 m säteellä: materiaalit aina, muut esineet jos ne ovat vähintään yhtä harvinaisia kuin heikoin varusteesi, sekä irtonaiset oksat, kivet, yrtit ja muut vastaavat. Ei toimi rekeä työntäessä. 10 energiaa, latausaika 0.4 s.",
  "spell.wide_reach.name": "Laaja ulottuma",
  "stat.agility.name": "Ketteryys",
  "stat.allattributes.name": "Kaikki ominaisuudet",

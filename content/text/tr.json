@@ -1780,7 +1780,7 @@
  "spell.taunt.name": "Kışkırtma",
  "spell.war_cry.description": "50 m boyunca yankılanan, seni ve yakındaki müttefikleri coşturan bir kükreme: süre boyunca 20% daha fazla saldırı hızı ve 20% daha fazla hasar. 85 enerji, 180 s bekleme süresi.",
  "spell.war_cry.name": "Savaş Narası",
- "spell.wide_reach.description": "7.5 m içindeki düşmüş ganimeti toplar: malzemeleri her zaman, diğer eşyaları ise en zayıf kuşanılmış parçan kadar nadirse; ayrıca yerdeki dalları, taşları, otları ve benzerlerini de. Menzil bonusların alanı genişletir. Kızak iterken çalışmaz. 10 enerji, 0.4 s bekleme süresi.",
+ "spell.wide_reach.description": "5.5 m içindeki düşmüş ganimeti toplar: malzemeleri her zaman, diğer eşyaları ise en zayıf kuşanılmış parçan kadar nadirse; ayrıca yerdeki dalları, taşları, otları ve benzerlerini de. Kızak iterken çalışmaz. 10 enerji, 0.4 s bekleme süresi.",
  "spell.wide_reach.name": "Geniş Erişim",
  "stat.agility.name": "Çeviklik",
  "stat.allattributes.name": "Tüm özellikler",

@@ -24,7 +24,7 @@ public class PerkRulesTests
         Stat("perk_true_aim", "bool", 0), Stat("perk_true_aim_upgrade", "bool", 0), Stat("perk_dance_of_firegod", "bool", 0),
         Stat("perk_dance_of_firegod_atk_cap", "bool", 0), Stat("perk_fire_dmg_increase_on_hit", "bool", 0), Stat("perk_infinity_magic", "bool", 0),
         Stat("spell_firebolt_energy_cost", "add", 5), Stat("spell_healing_dome_cooldown_rate", "add", 0), Stat("spell_healing_dome_spell_cost_reduction", "add", 1),
-        Stat("range_mult", "mult", 1), Stat("all_damage_taken", "mult", 1),
+        Stat("all_damage_taken", "mult", 1),
     }) + "] }";
 
     private const string Spells = """
@@ -265,10 +265,4 @@ public class PerkRulesTests
         Assert.True(WideReachRules.Takes(new ItemInstance { BaseId = "item.boots", Rarity = Rarity.Epic }, Db, lowest));
     }
 
-    [Fact]
-    public void Range_factor_scales_every_range()
-    {
-        Assert.Equal(7.5, RangeRules.Scaled(Sheet(), WideReachRules.Radius), 6);
-        Assert.Equal(15, RangeRules.Scaled(Sheet(new StatModifier("range_mult", EffectOp.Mult, 2)), WideReachRules.Radius), 6);
-    }
 }

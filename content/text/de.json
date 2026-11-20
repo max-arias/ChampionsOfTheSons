@@ -1780,7 +1780,7 @@
  "spell.taunt.name": "Spott",
  "spell.war_cry.description": "Ein Gebrüll über 50 m, das dich und Verbündete in der Nähe aufpeitscht: 20% mehr Angriffstempo und 20% mehr Schaden für die Dauer. 85 Energie, 180 s Abklingzeit.",
  "spell.war_cry.name": "Kriegsschrei",
- "spell.wide_reach.description": "Sammelt fallen gelassene Beute im Umkreis von 7.5 m ein: Materialien immer, andere Gegenstände, wenn sie mindestens so selten sind wie dein schwächstes ausgerüstetes Teil, dazu herumliegende Stöcke, Steine, Kräuter und Ähnliches. Deine Reichweitenboni vergrößern den Umkreis. Nicht beim Schieben eines Schlittens. 10 Energie, 0.4 s Abklingzeit.",
+ "spell.wide_reach.description": "Sammelt fallen gelassene Beute im Umkreis von 5.5 m ein: Materialien immer, andere Gegenstände, wenn sie mindestens so selten sind wie dein schwächstes ausgerüstetes Teil, dazu herumliegende Stöcke, Steine, Kräuter und Ähnliches. Nicht beim Schieben eines Schlittens. 10 Energie, 0.4 s Abklingzeit.",
  "spell.wide_reach.name": "Große Reichweite",
  "stat.agility.name": "Geschicklichkeit",
  "stat.allattributes.name": "Alle Attribute",

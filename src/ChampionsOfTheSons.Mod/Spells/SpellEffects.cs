@@ -48,8 +48,6 @@ internal static class SpellEffects
     private static GameObject? _shieldFx, _flameFx;
     private static double _warCryArmor;
 
-    /// <summary>A range or radius in metres after the player's range factor (Wide Reach, COS-85).</summary>
-    private static float R(float metres) => (float)RangeRules.Scaled(Stats, metres);
     private static float _flameTimer, _multishotTimer;
 
     public static void ResetState()
@@ -110,7 +108,7 @@ internal static class SpellEffects
         float speed = S("spell_taunt_speed_change");
         // Falter (perk): the taunted slow down instead of rushing the taunter.
         if (Has(PerkEffectIds.Falter)) speed = (float)PerkTuning.FalterSpeed;
-        foreach (var e in EnemiesWithin(PlayerPos, R(30)))
+        foreach (var e in EnemiesWithin(PlayerPos, 30))
             e.Combat.ApplySlow("spell.taunt", speed > 0 ? speed : 2, SpellTuning.TauntDuration); // above 1: they rush the taunter
         SpellFx.Disc(Feet(), 30f, SpellFx.Blood, 0.6f);
         return true;
@@ -126,7 +124,7 @@ internal static class SpellEffects
     /// <summary>An incoming hit was parried: strike back around the player, heal and refund energy, buff attack speed.</summary>
     public static void Riposte()
     {
-        float radius = R(S("spell_parry_radius"));
+        float radius = S("spell_parry_radius");
         foreach (var e in EnemiesWithin(PlayerPos, radius))
         {
             Strike(e, Hit(S("spell_parry_damage"), S("spell_parry_damage_scaling")));
@@ -159,7 +157,7 @@ internal static class SpellEffects
     private static bool HealingDome()
     {
         var at = Feet();
-        float radius = R((float)SpellTuning.HealingDomeRadius);
+        float radius = (float)SpellTuning.HealingDomeRadius;
         float interval = 0.5f;
         AddZone(new SpellZone
         {
@@ -176,8 +174,8 @@ internal static class SpellEffects
 
     private static bool SunFlare()
     {
-        var at = AimGround(R(30));
-        float radius = R(S("spell_flare_radius"));
+        var at = AimGround(30);
+        float radius = S("spell_flare_radius");
         foreach (var e in EnemiesWithin(at, radius)) Strike(e, Hit(S("spell_flare_damage"), S("spell_flare_damage_scaling")));
         AddZone(new SpellZone
         {
@@ -197,8 +195,8 @@ internal static class SpellEffects
 
     private static bool BlackHole()
     {
-        var at = AimGround(R(40)) + Vector3.up * 1.5f;
-        float radius = R(S("spell_blackhole_radius")), pull = S("spell_blackhole_pullforce") / (float)SpellTuning.BlackHolePullDivisor;
+        var at = AimGround(40) + Vector3.up * 1.5f;
+        float radius = S("spell_blackhole_radius"), pull = S("spell_blackhole_pullforce") / (float)SpellTuning.BlackHolePullDivisor;
         var core = SpellFx.Sphere(at, 1.5f, SpellFx.Dark, 1e6f);
         var caught = new HashSet<EnemyRuntime>();
         AddZone(new SpellZone
@@ -239,8 +237,8 @@ internal static class SpellEffects
 
     private static bool Cataclysm()
     {
-        var at = AimGround(R(50));
-        float radius = R(S("spell_cataclysm_radius"));
+        var at = AimGround(50);
+        float radius = S("spell_cataclysm_radius");
         var color = Stats.IsOn("spell_cataclysm_arcane") ? SpellFx.Arcane : SpellFx.Fire;
         // Mysterious Robe (COS-88): the arcane vortex strikes harder and freezes what is inside.
         bool arcane = Stats.IsOn(PerkStatIds.CataclysmArcane);
@@ -263,8 +261,8 @@ internal static class SpellEffects
 
     private static bool SnowStorm()
     {
-        var at = AimGround(R(30));
-        float radius = R((float)SpellTuning.SnowStormRadius);
+        var at = AimGround(30);
+        float radius = (float)SpellTuning.SnowStormRadius;
         float interval = Math.Max(0.1f, S("spell_snowstorm_hit_delay"));
         AddZone(new SpellZone
         {
@@ -301,7 +299,7 @@ internal static class SpellEffects
         var ball = SpellFx.Sphere(start, 0.8f, SpellFx.Storm, 1e6f);
         AddZone(new SpellZone
         {
-            Id = "ball_lightning", Center = start, Radius = R((float)SpellTuning.BallLightningRadius), Left = (float)SpellTuning.BallLightningSeconds,
+            Id = "ball_lightning", Center = start, Radius = (float)SpellTuning.BallLightningRadius, Left = (float)SpellTuning.BallLightningSeconds,
             Interval = (float)SpellTuning.BallLightningTick, Visual = ball,
             Frame = (z, dt) =>
             {
@@ -331,8 +329,9 @@ internal static class SpellEffects
     {
         var eye = Eye;
         var flat = new Vector3(eye.forward.x, 0, eye.forward.z).normalized;
-        foreach (var e in InCone(PlayerPos + Vector3.up, flat, R((float)SpellTuning.BashRange), (float)SpellTuning.BashAngle / 2))
+        foreach (var e in InCone(PlayerPos + Vector3.up, flat, (float)SpellTuning.BashRange, (float)SpellTuning.BashAngle / 2))
         {
+            if (!e.IsActive) continue;
             Strike(e, Hit(SpellTuning.BashDamage, SpellTuning.BashScaling));
             BashItems(e);
             if (!e.IsActive) continue;
@@ -361,7 +360,7 @@ internal static class SpellEffects
 
     private static bool SnapFreeze()
     {
-        float dist = R(S("spell_snap_freeze_dist"));
+        float dist = S("spell_snap_freeze_dist");
         foreach (var e in EnemiesWithin(PlayerPos, dist))
         {
             Strike(e, Hit(SpellTuning.SnapFreezeDamage, S("spell_snap_damage_scaling")));
@@ -373,7 +372,7 @@ internal static class SpellEffects
 
     private static bool RoaringCheeks()
     {
-        float radius = R(S("spell_fart_radius"));
+        float radius = S("spell_fart_radius");
         foreach (var e in EnemiesWithin(PlayerPos, radius))
         {
             Strike(e, Hit(S("spell_fart_base_dmg"), S("spell_fart_damage_scaling")));
@@ -400,7 +399,7 @@ internal static class SpellEffects
         var eye = Eye;
         AddBolt(new SpellBolt
         {
-            Id = "firebolt", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.ProjectileSpeed, Range = R(60), Radius = 1f,
+            Id = "firebolt", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.ProjectileSpeed, Range = 60, Radius = 1f,
             Visual = SpellFx.Sphere(eye.position + eye.forward, 0.3f, SpellFx.Fire, 1e6f),
             OnHit = (b, e) =>
             {
@@ -430,7 +429,7 @@ internal static class SpellEffects
         {
             AddBolt(new SpellBolt
             {
-                Id = "magic_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = R((float)SpellTuning.MagicArrowRange), Radius = 1f,
+                Id = "magic_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f,
                 Visual = SpellFx.Sphere(from + dir, 0.25f, SpellFx.Arcane, 1e6f),
                 OnHit = (b, e) =>
                 {
@@ -476,7 +475,7 @@ internal static class SpellEffects
     private static bool SeekingArrow()
     {
         var eye = Eye;
-        var target = Nearest(eye.position, R((float)SpellTuning.SeekingArrowRange), e => Vector3.Angle(eye.forward, Center(e) - eye.position) < 60);
+        var target = Nearest(eye.position, (float)SpellTuning.SeekingArrowRange, e => Vector3.Angle(eye.forward, Center(e) - eye.position) < 60);
         AddBolt(new SpellBolt
         {
             Id = "seeking_arrow", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.SeekingArrowSpeed,
@@ -517,7 +516,7 @@ internal static class SpellEffects
     {
         AddBolt(new SpellBolt
         {
-            Id = "blood_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.BloodArrowSpeed, Range = R((float)SpellTuning.BloodArrowRange), Radius = 1f,
+            Id = "blood_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.BloodArrowSpeed, Range = (float)SpellTuning.BloodArrowRange, Radius = 1f,
             Visual = SpellFx.Sphere(from + dir, 0.3f, SpellFx.Blood, 1e6f),
             OnHit = (b, e) =>
             {
@@ -588,7 +587,7 @@ internal static class SpellEffects
                     _flameTimer -= (float)SpellTuning.BlackFlameTick;
                     double flame = SpellTuning.BlackFlameDamage * (Has(PerkEffectIds.Netherflame) ? PerkTuning.NetherflameDamage : 1);
                     bool afterburn = Has(PerkEffectIds.Afterburn);
-                    foreach (var e in EnemiesWithin(PlayerPos, R((float)SpellTuning.BlackFlameRadius)))
+                    foreach (var e in EnemiesWithin(PlayerPos, (float)SpellTuning.BlackFlameRadius))
                     {
                         Strike(e, Hit(flame, S("spell_black_flame_damage_scaling")));
                         if (afterburn && UnityEngine.Random.value < PerkTuning.AfterburnChance)
@@ -601,14 +600,14 @@ internal static class SpellEffects
                 while (_multishotTimer >= SpellTuning.MultishotInterval)
                 {
                     _multishotTimer -= (float)SpellTuning.MultishotInterval;
-                    var target = Nearest(PlayerPos, R((float)SpellTuning.MultishotRange));
+                    var target = Nearest(PlayerPos, (float)SpellTuning.MultishotRange);
                     if (target == null) break;
                     Strike(target, Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling));
                     SpellFx.Sphere(Center(target), 0.5f, SpellFx.Steel, 0.2f);
                     // Grip of Sora: extra projectiles go to the next nearest enemies, the rest to the main target.
                     if (Stats.IsOn(UniqueFlagIds.Sora))
                     {
-                        var others = EnemiesWithin(PlayerPos, R((float)SpellTuning.MultishotRange)).Where(e => e != target)
+                        var others = EnemiesWithin(PlayerPos, (float)SpellTuning.MultishotRange).Where(e => e != target)
                             .OrderBy(e => (Center(e) - PlayerPos).sqrMagnitude).Take(UniqueTuning.SoraExtraProjectiles).ToList();
                         for (int k = 0; k < UniqueTuning.SoraExtraProjectiles; k++)
                             Strike(k < others.Count ? others[k] : target, Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling));

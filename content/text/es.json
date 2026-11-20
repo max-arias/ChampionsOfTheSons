@@ -1780,7 +1780,7 @@
  "spell.taunt.name": "Provocación",
  "spell.war_cry.description": "Un bramido que se oye a 50 m y enardece a ti y a los aliados cercanos: 20% más de velocidad de ataque y 20% más de daño mientras dure. 85 de energía, 180 s de enfriamiento.",
  "spell.war_cry.name": "Grito de guerra",
- "spell.wide_reach.description": "Recoge el botín caído en un radio de 7.5 m: los materiales siempre, los demás objetos si son al menos tan raros como tu pieza equipada más débil, además de palos, piedras, hierbas y similares sueltos. Tus bonificaciones de alcance lo amplían. No funciona mientras empujas un trineo. 10 de energía, 0.4 s de reutilización.",
+ "spell.wide_reach.description": "Recoge el botín caído en un radio de 5.5 m: los materiales siempre, los demás objetos si son al menos tan raros como tu pieza equipada más débil, además de palos, piedras, hierbas y similares sueltos. No funciona mientras empujas un trineo. 10 de energía, 0.4 s de reutilización.",
  "spell.wide_reach.name": "Alcance amplio",
  "stat.agility.name": "Agilidad",
  "stat.allattributes.name": "Todos los atributos",

@@ -1780,7 +1780,7 @@
  "spell.taunt.name": "Taunt",
  "spell.war_cry.description": "A bellow across 50 m that rallies you and nearby allies: 20% more attack speed and 20% more damage for the duration. 85 energy, 180 s cooldown.",
  "spell.war_cry.name": "War Cry",
- "spell.wide_reach.description": "Gathers dropped loot within 7.5 m: materials always, other items if they are at least as rare as your worst equipped piece, plus loose sticks, stones, herbs and similar. Your range bonuses widen it. Not while pushing a sled. 10 energy, 0.4 s cooldown.",
+ "spell.wide_reach.description": "Gathers dropped loot within 5.5 m: materials always, other items if they are at least as rare as your worst equipped piece, plus loose sticks, stones, herbs and similar. Not while pushing a sled. 10 energy, 0.4 s cooldown.",
  "spell.wide_reach.name": "Wide Reach",
  "stat.agility.name": "Agility",
  "stat.allattributes.name": "All attributes",
