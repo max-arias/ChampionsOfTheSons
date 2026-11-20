@@ -1945,6 +1945,7 @@
  "ui.crafting.rarity_low": "材料必須是相同或更高的稀有度。",
  "ui.crafting.target": "物品",
  "ui.crafting.title": "製作",
+ "ui.death.title": "你死了",
  "ui.equipment.title": "裝備",
  "ui.followups.before_after": "之前 -> 之後",
  "ui.followups.daily": "新的一天：{0}",

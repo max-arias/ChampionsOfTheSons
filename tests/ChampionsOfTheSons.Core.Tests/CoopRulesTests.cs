@@ -103,3 +103,28 @@ public class CoopPickupTests
         Assert.True(ground.Remove(77));
     }
 }
+
+public class AdminAccessTests
+{
+    [Theory]
+    [InlineData(CommandSource.SinglePlayer, true)]
+    [InlineData(CommandSource.Host, true)]
+    [InlineData(CommandSource.ServerAdmin, true)]
+    [InlineData(CommandSource.Client, false)]
+    [InlineData(CommandSource.ServerPlayer, false)]
+    public void Only_the_host_and_server_admins_may_run_commands(CommandSource source, bool allowed)
+    {
+        Assert.Equal(allowed, AdminAccess.MayRun(source, commandsEnabled: true));
+        Assert.False(AdminAccess.MayRun(source, commandsEnabled: false));
+    }
+
+    [Fact]
+    public void Parse_drops_the_cots_prefix_and_defaults_to_help()
+    {
+        var (name, args) = AdminAccess.Parse("cots XP 500 2");
+        Assert.Equal("xp", name);
+        Assert.Equal(new[] { "500", "2" }, args);
+        Assert.Equal("help", AdminAccess.Parse("cots").Name);
+        Assert.Equal("give", AdminAccess.Parse("  give item.x ").Name);
+    }
+}

@@ -1945,6 +1945,7 @@
  "ui.crafting.rarity_low": "Los ingredientes deben ser de la misma rareza o superior.",
  "ui.crafting.target": "Objeto",
  "ui.crafting.title": "Fabricación",
+ "ui.death.title": "Has muerto",
  "ui.equipment.title": "Equipo",
  "ui.followups.before_after": "Antes -> después",
  "ui.followups.daily": "Un nuevo día: {0}",

@@ -1945,6 +1945,7 @@
  "ui.crafting.rarity_low": "Malzemeler aynı veya daha yüksek nadirlikte olmalı.",
  "ui.crafting.target": "Eşya",
  "ui.crafting.title": "Üretim",
+ "ui.death.title": "Öldün",
  "ui.equipment.title": "Ekipman",
  "ui.followups.before_after": "Önce -> sonra",
  "ui.followups.daily": "Yeni bir gün: {0}",

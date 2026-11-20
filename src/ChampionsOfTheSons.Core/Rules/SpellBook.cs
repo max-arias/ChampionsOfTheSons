@@ -13,7 +13,11 @@ public enum CastResult
 }
 
 /// <summary>Energy and stamina a cast takes.</summary>
-public readonly record struct SpellCost(double Energy, double Stamina);
+public readonly record struct SpellCost(double Energy, double Stamina)
+{
+    /// <summary>Both parts: energy and stamina are one bar (COS-94), so a cast needs all of it.</summary>
+    public double Total => Energy + Stamina;
+}
 
 /// <summary>Spell bar (6 slots), cooldowns and costs.</summary>
 public sealed class SpellBook
@@ -90,6 +94,12 @@ public sealed class SpellBook
         }
     }
 
+    /// <summary>Admin "nocooldowns": every slotted spell is ready now.</summary>
+    public void ReadyAll()
+    {
+        for (int i = 0; i < Slots; i++) _ready[i] = 1;
+    }
+
     /// <summary>Takes <paramref name="seconds"/> off the remaining cooldown of one random spell that is cooling down (Infinity Loop). False if none is.</summary>
     public bool ReduceRandomCooldown(double seconds, StatSheet stats, Rng rng)
     {
@@ -127,13 +137,13 @@ public sealed class SpellBook
                 return CastResult.Stopped;
             }
             if (!IsReady(slot)) return CastResult.OnCooldown;
-            if (energy < CostOf(id, stats).Energy) return CastResult.NotEnoughEnergy;
+            if (energy < CostOf(id, stats).Total) return CastResult.NotEnoughEnergy;
             _active[slot] = true;
             return CastResult.Ok;
         }
         if (!IsReady(slot)) return CastResult.OnCooldown;
         cost = CostOf(id, stats);
-        if (energy < cost.Energy) return CastResult.NotEnoughEnergy;
+        if (energy < cost.Total) return CastResult.NotEnoughEnergy;
         _ready[slot] = 0;
         return CastResult.Ok;
     }

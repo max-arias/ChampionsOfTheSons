@@ -7,7 +7,7 @@ The rules Champions of the Sons implements. Numbers and formulas come from readi
 - Gaining XP: `xp += amount × expGain`; while `xp ≥ goal(L)`: `xp −= goal`, level up.
 - Level up: +1 mutation (perk) point; STR/AGI/VIT/INT base = `1 + A(L)` with `A(1)=1, A(x)=A(x−1)+round(√x)`.
 - Reward items: every 10th level a Untainted Heart (respec); levels 25, 45, 65… a Greater Mutated Heart (+1 permanent perk point).
-- Death: current-level XP resets to 0, pending massacre XP is lost; no level loss.
+- Death ✱ (COS-76): the base game's death (no item drops, the game's downed and respawn rules). On top, `xpLost = min(0.5 × xp, 0.1 × goal(L))` of the XP into the current level is lost and pending massacre XP is lost; never a level or perk point. Spell buffs, running spells and debuffs end. Each player's own client watches its own death (host, clients, single player alike).
 
 ## Massacre (kill streak)
 - On kill: `kills++`, `pending += xp`. Timer: if 0 → `maxMassacreTime` (15 s), else `clamp(timer + 7.5, 1, maxMassacreTime)`.
@@ -83,7 +83,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Avenger: each enemy dying within 30 m adds a stack (max 5, 20 s): +25% damage and +10% speed per stack. Sacrifice: on death, enemies within 25 m heal 30% of max health and deal ×1.5 damage for 15 s. (New rules.)
 - Gargantuan/Tiny set the actor's scale; speed is the profile speed times every slow/stun/rain factor, applied to the actor's animator.
 - Player on-hit stats: life/energy on hit (× all recovery), chance to slow (×0.5 speed, 8 s), bleed (hit/20 per s, 10 s) and weaken (×1.2 damage taken, 8 s), hammer stun (`i_hammer_stun_amount` chance, `i_hammer_stun_duration` s). DoTs are pure damage (no armor) but meet steadfast caps and shields. Thorns = `(thorns + per-STR·STR + per-VIT·VIT) × thornsDmgMult` back at the enemy that hit you, ignoring `thorns_armor_piercing` of its armor. Fire damage multiplies hits on burning enemies by `1 + fireDamage`. Explosion damage multiplies thrown/explosive hits by `1 + explosionDamage`.
-- Energy is the game's stamina bar for now: max = vanilla × `MaxEnergy/100`; regeneration adds `staminaPerSecond + energyPerSecond` plus the game's own rate × (energy recovery multiplier / 2 − 1). Attack speed and attack cost scale the held melee weapon's data (and ranged fire delay); projectile speed, size and pierce scale the held ranged weapon's bullet data (pierce raises bullet weight up to ×4).
+- Energy is the game's stamina bar ✱ (COS-94): max = vanilla × `MaxEnergy/100`; regeneration adds `staminaPerSecond + energyPerSecond` plus the game's own rate × (energy recovery multiplier / 2 − 1). Attack speed and attack cost scale the held melee weapon's data (and ranged fire delay); projectile speed, size and pierce scale the held ranged weapon's bullet data (pierce raises bullet weight up to ×4).
 - Unique items (new rules): Biting Band 3% leech; Gorged Ring 6% leech and 5% max health per kill; Healer's Blood Bag 1% max health per second below half health; Undying Promise: a lethal hit leaves 30% health, once per 300 s; Untainted Heart: use to respec.
 - Dropped for now: rafts and spell numbers (read by the spell system). Unique flags and `weapon_range`: see "Unique item flags" below (COS-42).
 
@@ -172,3 +172,5 @@ Keyed by source; re-adding a source refreshes duration; amount overwrites, accum
 - Reforge keeps the item type (COTF could turn a ring into boots).
 - Individual reroll skips empty (null) options instead of throwing.
 - Stat sheet: contributions are sources, not add/subtract pairs (no drift, bools are reference-counted).
+- Death (COS-76): COTF reset the whole level bar on respawn; here a death costs half the bar, at most a tenth of the level's goal. COTF's host options "item drops on death" and "instant death when downed" are left out: death is the base game's.
+- One energy bar (COS-94): COTF had energy and stamina as two pools. Here energy is the game's stamina, refilling the way stamina does, plus our sources: energy per second, stamina per second, energy and stamina on hit (one sum), Parry, Healing Dome with Humming Ground (5% of max energy per second × all recovery). A spell needs its whole cost (energy and stamina parts) in the bar. "Spell Cost to Stamina" only moved cost between the two pools, so it no longer rolls on items (old items keep it, without effect); the Sinew Channel perk has the same no-op effect until the perk pass decides.

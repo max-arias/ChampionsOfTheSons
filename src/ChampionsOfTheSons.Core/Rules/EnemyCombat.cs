@@ -301,7 +301,7 @@ public static class PlayerHitEffects
             ? s.Get(CombatStatIds.HammerStunDuration) : 0;
         return new Procs(
             s.Get(StatIds.HealthOnHit) * s.Get(StatIds.AllRecoveryMult),
-            s.Get(StatIds.EnergyOnHit) * s.Get(StatIds.AllRecoveryMult),
+            (s.Get(StatIds.EnergyOnHit) + s.Get(StatIds.StaminaOnHit)) * s.Get(StatIds.AllRecoveryMult),
             slow, bleed, damageDealt / AbilityTuning.BleedDivisor, weaken, stun);
     }
 

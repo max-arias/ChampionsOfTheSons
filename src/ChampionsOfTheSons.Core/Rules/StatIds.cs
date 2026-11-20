@@ -38,6 +38,8 @@ public static class StatIds
     public const string ChanceToWeaken = "chance_to_weaken";
     public const string HealthOnHit = "health_on_hit";
     public const string EnergyOnHit = "energy_on_hit";
+    /// <summary>Same pool as energy (one bar, COS-94): adds to energy on hit.</summary>
+    public const string StaminaOnHit = "stamina_on_hit";
     public const string PierceChance = "projectile_pierce_chance";
 
     public const string Armor = "armor";

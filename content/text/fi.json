@@ -1945,6 +1945,7 @@
  "ui.crafting.rarity_low": "Ainesten on oltava vähintään yhtä harvinaisia.",
  "ui.crafting.target": "Esine",
  "ui.crafting.title": "Valmistus",
+ "ui.death.title": "Kuolit",
  "ui.equipment.title": "Varusteet",
  "ui.followups.before_after": "Ennen -> jälkeen",
  "ui.followups.daily": "Uusi päivä: {0}",

@@ -57,6 +57,11 @@ public static class PlayerBridge
         try
         {
             if (damage <= 0) return;
+            if (Admin.AdminState.God)
+            {
+                damage = 0;
+                return;
+            }
             var kind = isDemonic ? DamageKind.Magic : DamageKind.Physical;
             var character = PlayerState.Character;
             var result = PlayerDefense.Incoming(character.Stats, damage, kind, Rng);

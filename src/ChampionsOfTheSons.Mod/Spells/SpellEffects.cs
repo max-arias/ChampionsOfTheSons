@@ -153,6 +153,7 @@ internal static class SpellEffects
             {
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
                 PlayerEffects.Heal(SpellTuning.HealingDomeHeal(LocalPlayer.Vitals.Health.GetMax(), Stats) * z.Interval);
+                PlayerEffects.AddEnergy(SpellTuning.HealingDomeEnergy(Derived.MaxEnergy(Stats), Stats) * z.Interval); // Humming Ground (COS-94)
             },
         });
         return true;

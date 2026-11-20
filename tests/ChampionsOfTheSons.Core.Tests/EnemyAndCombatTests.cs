@@ -40,6 +40,23 @@ public class EnemyScalerTests
         }
     }
 
+    [Theory]
+    [InlineData(EnemyTier.Normal)]
+    [InlineData(EnemyTier.Elite)]
+    [InlineData(EnemyTier.Miniboss)]
+    [InlineData(EnemyTier.Boss)]
+    public void A_forced_tier_overrides_the_roll(EnemyTier tier)
+    {
+        var rng = new Rng(3);
+        var rules = new WorldRules { Difficulty = Difficulties.Hell, ForcedTier = tier };
+        for (int i = 0; i < 50; i++)
+        {
+            var p = EnemyScaler.Roll(Cannibal, 100, rules, rng);
+            Assert.Equal(tier, p.Tier);
+            Assert.Equal(tier == EnemyTier.Normal, p.Abilities.Count == 0);
+        }
+    }
+
     [Fact]
     public void Hell_makes_every_enemy_elite_unless_elites_are_off()
     {

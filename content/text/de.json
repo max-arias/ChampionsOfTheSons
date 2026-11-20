@@ -1945,6 +1945,7 @@
  "ui.crafting.rarity_low": "Zutaten müssen gleiche oder höhere Seltenheit haben.",
  "ui.crafting.target": "Gegenstand",
  "ui.crafting.title": "Handwerk",
+ "ui.death.title": "Du bist gestorben",
  "ui.equipment.title": "Ausrüstung",
  "ui.followups.before_after": "Vorher -> nachher",
  "ui.followups.daily": "Ein neuer Tag: {0}",
