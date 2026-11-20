@@ -107,7 +107,7 @@ public sealed class EnemySyncFeature : IModFeature
         EnemyRegistry.ResolveActors();
         int sent = 0;
         var live = new HashSet<ulong>();
-        foreach (var r in EnemyRegistry.Snapshot())
+        foreach (var r in EnemyRegistry.Live) // only enemies in the scene have a net id (COS-132: was every tracked enemy)
         {
             if (sent >= MaxPerTick) break;
             ulong id = NetIdOf(r.Actor);
@@ -246,7 +246,7 @@ public sealed class EnemySyncFeature : IModFeature
         switch (message)
         {
             case EnemyProfileRequest req when CoopSession.IsHost:
-                var runtime = EnemyRegistry.Snapshot().FirstOrDefault(r => NetIdOf(r.Actor) == req.EnemyNetId);
+                var runtime = EnemyRegistry.Live.FirstOrDefault(r => NetIdOf(r.Actor) == req.EnemyNetId);
                 if (runtime != null) CotsNetEvent.Instance.SendTo(Describe(runtime, req.EnemyNetId), from);
                 break;
             case EnemySync s when !CoopSession.IsHost:

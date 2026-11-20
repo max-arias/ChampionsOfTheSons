@@ -39,7 +39,27 @@ public static class Features
                 || t == typeof(Bridge.EnemyAbilityFeature) || t == typeof(Abilities.ActiveAbilitiesFeature))
             .OrderBy(t => t.FullName, StringComparer.Ordinal);
         foreach (var t in types) All.Add((IModFeature)Activator.CreateInstance(t)!);
+        UpdateSlots = All.Select(f => Perf.Perf.Register(f.GetType().Name + ".Update", true)).ToArray();
         RLog.Msg($"Champions of the Sons features: {string.Join(", ", All.Select(f => f.GetType().Name))}");
+    }
+
+    private static int[] UpdateSlots = Array.Empty<int>();
+
+    /// <summary>Every feature's Update, each timed when the profiler is on (COS-132).</summary>
+    public static void UpdateAll(float dt, bool inWorld)
+    {
+        for (int i = 0; i < All.Count; i++)
+        {
+            using var probe = Perf.Perf.Scope(UpdateSlots[i]);
+            try
+            {
+                All[i].Update(dt, inWorld);
+            }
+            catch (Exception e)
+            {
+                RLog.Error($"Champions of the Sons: {All[i].GetType().Name}.Update failed: {e}");
+            }
+        }
     }
 
     public static void Each(string what, Action<IModFeature> action)

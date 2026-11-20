@@ -107,10 +107,13 @@ public sealed class CoopHits : IModFeature
         if (CoopTest.Enabled) RLog.Msg($"{CoopTestJoin.Tag} client: sent Hit {hit.Amount:F0} to enemy {enemyNetId}");
     }
 
+    private static readonly int PerfBeforeReceivedDamage = Perf.Perf.Register("Hook.CoopReceivedDamage");
+
     [HarmonyPatch(typeof(VailActor), nameof(VailActor.ReceivedDamage))]
     [HarmonyPrefix]
     private static void BeforeReceivedDamage(VailActor __instance, ImpactType impactType, MonoBehaviourStimuli sourceStimuli, ref float amount, bool fromPlayer)
     {
+        using var perf = Perf.Perf.Scope(PerfBeforeReceivedDamage);
         try
         {
             if (amount <= 0 || !fromPlayer || !CoopSession.Active) return;
@@ -172,7 +175,7 @@ public sealed class CoopHits : IModFeature
 
     private static void ApplyRemoteHit(uint playerId, Hit hit, BoltConnection from)
     {
-        var runtime = EnemyRegistry.Snapshot().FirstOrDefault(r => EnemySyncFeature.NetIdOf(r.Actor) == hit.EnemyNetId);
+        var runtime = EnemyRegistry.Live.FirstOrDefault(r => EnemySyncFeature.NetIdOf(r.Actor) == hit.EnemyNetId);
         if (runtime == null) return;
         // Clamp what a client may claim: finite, non-negative.
         float amount = float.IsFinite(hit.Amount) ? Mathf.Max(0, hit.Amount) : 0;

@@ -32,6 +32,14 @@ public static class EnemyAbilities
     public static void Register(IAbilityHandler handler) => Handlers.Add(handler);
 
     internal static IEnumerable<IAbilityHandler> For(EnemyRuntime enemy) => Handlers.Where(h => enemy.Profile.Has(h.Ability));
+
+    /// <summary>Every frame per active enemy: a plain loop (no LINQ iterator per enemy per frame).</summary>
+    internal static void Tick(EnemyRuntime enemy, float dt)
+    {
+        if (enemy.Profile.Abilities.Count == 0) return;
+        for (int i = 0; i < Handlers.Count; i++)
+            if (enemy.Profile.Has(Handlers[i].Ability)) Handlers[i].OnTick(enemy, dt);
+    }
 }
 
 /// <summary>
@@ -77,7 +85,7 @@ public sealed class EnemyAbilityFeature : IModFeature
             Vector3? at = dead.LastPosition;
             if (at != null)
             {
-                foreach (var other in EnemyRegistry.Snapshot())
+                foreach (var other in EnemyRegistry.Live)
                 {
                     if (other == dead || !other.IsActive) continue;
                     float dist = Vector3.Distance(other.Actor!.transform.position, at.Value);
@@ -110,14 +118,14 @@ public sealed class EnemyAbilityFeature : IModFeature
     /// <summary>One frame of the host loop. Self-tests call it to step enemy time themselves (the headless game runs with time scale 0).</summary>
     public static void Step(float dt)
     {
-        if (!EnemyRegistry.IsAuthority) return;
-
+        // Clients need the live list too (nearest attacker, spell targets), so it is refreshed before the authority check.
         _resolveTimer -= dt;
-        if (_resolveTimer <= 0)
+        if (_resolveTimer <= 0 || EnemyRegistry.Dirty)
         {
             _resolveTimer = 0.25f;
             EnemyRegistry.ResolveActors();
         }
+        if (!EnemyRegistry.IsAuthority) return;
 
         _weatherTimer -= dt;
         if (_weatherTimer <= 0)
@@ -133,7 +141,8 @@ public sealed class EnemyAbilityFeature : IModFeature
             }
         }
 
-        foreach (var enemy in EnemyRegistry.Snapshot())
+        // Only enemies active in the scene: Tick does nothing for the rest (thousands in the world simulation).
+        foreach (var enemy in EnemyRegistry.Live)
         {
             bool active = enemy.IsActive;
             if (active) enemy.LastPosition = enemy.Actor!.transform.position;
@@ -151,7 +160,7 @@ public sealed class EnemyAbilityFeature : IModFeature
             if (!enemy.IsActive) continue;
 
             ApplySpeed(enemy);
-            foreach (var h in EnemyAbilities.For(enemy)) h.OnTick(enemy, dt);
+            EnemyAbilities.Tick(enemy, dt);
         }
         Abilities.ActiveAbilitySystem.Sweep(dt);
     }

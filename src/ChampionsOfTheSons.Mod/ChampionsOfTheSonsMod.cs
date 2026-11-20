@@ -18,16 +18,20 @@ public class ChampionsOfTheSonsMod : SonsMod
         OnUpdateCallback = OnUpdate;
     }
 
+    private static readonly int PlayerBridgeSlot = Perf.Perf.Register("PlayerBridge.Update", true);
+    private static readonly int CharacterTickSlot = Perf.Perf.Register("Character.Tick", true);
+
     private static void OnUpdate()
     {
         float dt = UnityEngine.Time.deltaTime;
         bool inWorld = TheForest.Utils.LocalPlayer.IsInWorld;
         if (inWorld)
         {
-            Bridge.PlayerBridge.Update(dt);
-            PlayerState.Character.Tick(dt);
+            using (Perf.Perf.Scope(PlayerBridgeSlot)) Bridge.PlayerBridge.Update(dt);
+            using (Perf.Perf.Scope(CharacterTickSlot)) PlayerState.Character.Tick(dt);
         }
-        Features.Each("Update", f => f.Update(dt, inWorld));
+        Features.UpdateAll(dt, inWorld);
+        Perf.Perf.EndFrame(UnityEngine.Time.unscaledDeltaTime);
         SelfTest.Update();
     }
 

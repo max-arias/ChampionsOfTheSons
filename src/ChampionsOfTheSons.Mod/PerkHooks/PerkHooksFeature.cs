@@ -35,6 +35,8 @@ public sealed class PerkHooksFeature : IModFeature
     public static void Reset()
     {
         Lights.Clear();
+        OwnLights.Clear();
+        _lightSearch = 0;
         ShotTracker.Reset();
         ShieldAutocasting = false;
         _wasGrounded = true;
@@ -112,11 +114,32 @@ public sealed class PerkHooksFeature : IModFeature
 
     // ---------------------------------------------------------------- Light the Way
 
+    private static readonly int PerfLights = Perf.Perf.Register("  PerkHooks.ApplyFlashlights");
+
+    private static readonly List<FlashlightController> OwnLights = new();
+    private static float _lightSearch;
+
     private static void ApplyFlashlights()
     {
+        using var perf = Perf.Perf.Scope(PerfLights);
         var (intensity, drain) = PerkRules.Flashlight(Pc.Stats);
         AppliedLight = (intensity, drain);
-        foreach (var light in Resources.FindObjectsOfTypeAll<FlashlightController>())
+        // The game's flashlight (FlashlightHeld) is its own root object, not under the player, so finding it takes a scan of every
+        // object (~65-80 ms). Scan once and keep it; scan again (at most every 30 s) only while none is cached or one was destroyed
+        // (COS-132: was twice a second). The factors are applied to the cached list.
+        _lightSearch -= 0.5f;
+        if (_lightSearch <= 0 && (OwnLights.Count == 0 || OwnLights.Exists(l => l == null)))
+        {
+            _lightSearch = 30f;
+            OwnLights.Clear();
+            foreach (var l in Resources.FindObjectsOfTypeAll<FlashlightController>())
+            {
+                if (l == null) continue;
+                if (!Lights.ContainsKey(l.Pointer)) RLog.Msg($"Champions of the Sons: flashlight {l.name} under {(l.transform.root != null ? l.transform.root.name : "-")}");
+                OwnLights.Add(l);
+            }
+        }
+        foreach (var light in OwnLights)
         {
             if (light == null) continue;
             if (!Lights.TryGetValue(light.Pointer, out var orig))

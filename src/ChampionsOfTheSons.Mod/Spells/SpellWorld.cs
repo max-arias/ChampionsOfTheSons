@@ -108,7 +108,7 @@ internal static class SpellWorld
 
     public static Vector3 Center(EnemyRuntime e) => e.Actor!.transform.position + Vector3.up;
 
-    public static IEnumerable<EnemyRuntime> ActiveEnemies() => EnemyRegistry.Snapshot().Where(e => e.IsActive && e.Actor != null);
+    public static IEnumerable<EnemyRuntime> ActiveEnemies() => EnemyRegistry.Live.Where(e => e.IsActive && e.Actor != null).ToList();
 
     public static List<EnemyRuntime> EnemiesWithin(Vector3 center, float radius) =>
         ActiveEnemies().Where(e => Vector3.Distance(Center(e), center) <= radius + 0.5f).ToList();
