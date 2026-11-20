@@ -278,6 +278,7 @@ public static class EnemyPatches
             __result._originalRawDamage = scaled;
             __result._remainingRawDamage *= factor;
             PlayerEffects.LastAttacker = (runtime, Time.time);
+            if (Net.CoopSelfTest.ServerDriver) RLog.Msg($"{Net.CoopTestJoin.Tag} host: enemy melee impact scaled {scaled / factor:F1} -> {scaled:F1}");
         }
         catch (Exception e)
         {

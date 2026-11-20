@@ -1,3 +1,4 @@
+using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Mod.Visuals;
 using UnityEngine;
 
@@ -23,6 +24,7 @@ internal static class SpellFx
         public float Left;
         public Transform? Follow;
         public Vector3 Offset;
+        public Vector3 Velocity;
     }
 
     private static readonly List<Item> Items = new();
@@ -42,14 +44,16 @@ internal static class SpellFx
     {
         if (look == Look.Auto)
             look = seconds <= BurstSeconds && follow == null ? Look.Burst : follow != null ? Look.Bubble : radius <= 1f ? Look.Orb : Look.Bubble;
-        return Fx(look, pos, radius, 0, color, seconds, follow) ?? Make(PrimitiveType.Sphere, pos, Vector3.one * radius * 2, color, seconds, follow);
+        var go = Fx(look, pos, radius, 0, color, seconds, follow) ?? Make(PrimitiveType.Sphere, pos, Vector3.one * radius * 2, color, seconds, follow);
+        return Record(go, FxKind.Sphere, look, pos, radius, 0, color, seconds, follow != null, Vector3.zero);
     }
 
     /// <summary>A flat disc lying on the ground, <paramref name="radius"/> across to its edge.</summary>
     public static GameObject Disc(Vector3 pos, float radius, Color color, float seconds, Transform? follow = null, Look look = Look.Auto)
     {
         if (look == Look.Auto) look = seconds <= BurstSeconds ? Look.Burst : Look.Ring;
-        return Fx(look, pos, radius, 0, color, seconds, follow) ?? Make(PrimitiveType.Cylinder, pos, new Vector3(radius * 2, 0.04f, radius * 2), color, seconds, follow);
+        var go = Fx(look, pos, radius, 0, color, seconds, follow) ?? Make(PrimitiveType.Cylinder, pos, new Vector3(radius * 2, 0.04f, radius * 2), color, seconds, follow);
+        return Record(go, FxKind.Disc, look, pos, radius, 0, color, seconds, follow != null, Vector3.zero);
     }
 
     public static GameObject Column(Vector3 pos, float radius, float height, Color color, float seconds)
@@ -58,20 +62,54 @@ internal static class SpellFx
         if (go != null)
         {
             FxKit.AddLight(go, color, radius * 3 + 6, 60, offset: Vector3.up * 0.3f);
-            return Track(go, seconds, null);
+            Track(go, seconds, null);
         }
-        return Make(PrimitiveType.Cylinder, pos + Vector3.up * height / 2, new Vector3(radius * 2, height / 2, radius * 2), color, seconds, null);
+        else
+        {
+            go = Make(PrimitiveType.Cylinder, pos + Vector3.up * height / 2, new Vector3(radius * 2, height / 2, radius * 2), color, seconds, null);
+        }
+        return Record(go, FxKind.Column, Look.Auto, pos, radius, height, color, seconds, false, Vector3.zero);
     }
 
     /// <summary>A standing portal facing <paramref name="facing"/> (its 1 m radius ring stands on the ground); a column without the bundle.</summary>
     public static GameObject Portal(Vector3 pos, Vector3 facing, Color color, float seconds)
     {
+        var context = Spells.SpellNet.Context;
+        Spells.SpellNet.Context = null; // the fallback column is part of this portal, not a shape of its own
         var go = FxKit.Spawn(FxKit.Portal, pos, 1f, color);
-        if (go == null) return Column(pos, 0.9f, 2.4f, color, seconds);
-        facing.y = 0;
-        if (facing.sqrMagnitude > 1e-4f) go.transform.rotation = Quaternion.LookRotation(facing.normalized);
-        FxKit.AddLight(go, color, 6, 40, offset: Vector3.up * 1.1f);
-        return Track(go, seconds, null);
+        if (go == null)
+        {
+            go = Column(pos, 0.9f, 2.4f, color, seconds);
+        }
+        else
+        {
+            facing.y = 0;
+            if (facing.sqrMagnitude > 1e-4f) go.transform.rotation = Quaternion.LookRotation(facing.normalized);
+            FxKit.AddLight(go, color, 6, 40, offset: Vector3.up * 1.1f);
+            Track(go, seconds, null);
+        }
+        Spells.SpellNet.Context = context;
+        return Record(go, FxKind.Portal, Look.Auto, pos, 1f, 0, color, seconds, false, facing);
+    }
+
+    /// <summary>COS-80: hands a visual the local caster drew to the cast sync (no-op outside a cast).</summary>
+    private static GameObject Record(GameObject go, FxKind kind, Look look, Vector3 pos, float radius, float height, Color color, float seconds,
+        bool follow, Vector3 facing)
+    {
+        if (Spells.SpellNet.Context == null) return go;
+        uint rgb = ((uint)Mathf.Clamp(Mathf.RoundToInt(color.r * 255), 0, 255) << 16) | ((uint)Mathf.Clamp(Mathf.RoundToInt(color.g * 255), 0, 255) << 8) |
+                   (uint)Mathf.Clamp(Mathf.RoundToInt(color.b * 255), 0, 255);
+        var v = new Vec3(pos.x, pos.y, pos.z);
+        Spells.SpellNet.Recorded(go, new FxShape(kind, (byte)look, v, radius, height, rgb, seconds, follow, default, new Vec3(facing.x, facing.y, facing.z)));
+        return go;
+    }
+
+    /// <summary>Makes a visual fly (a teammate's bolt or Ball Lightning, drawn from the caster's numbers).</summary>
+    public static void SetVelocity(GameObject? go, Vector3 velocity)
+    {
+        if (go == null) return;
+        var it = Items.FirstOrDefault(x => x.Go == go);
+        if (it != null) it.Velocity = velocity;
     }
 
     /// <summary>The bundled effect for <paramref name="look"/>, tracked like a primitive; null without the bundle.</summary>
@@ -181,6 +219,7 @@ internal static class SpellFx
         if (go == null) return;
         int i = Items.FindIndex(x => x.Go == go);
         if (i >= 0) Items.RemoveAt(i);
+        Spells.SpellNet.Removed(go);
         UnityEngine.Object.Destroy(go);
     }
 
@@ -195,8 +234,10 @@ internal static class SpellFx
                 continue;
             }
             if (it.Follow != null) it.Go.transform.position = it.Follow.position + it.Offset;
+            else if (it.Velocity != Vector3.zero) it.Go.transform.position += it.Velocity * dt;
             it.Left -= dt;
             if (it.Left > 0) continue;
+            Spells.SpellNet.Expired(it.Go);
             UnityEngine.Object.Destroy(it.Go);
             Items.RemoveAt(i);
         }

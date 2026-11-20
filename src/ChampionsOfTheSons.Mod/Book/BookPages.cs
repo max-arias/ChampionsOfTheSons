@@ -350,7 +350,8 @@ internal static class BookPages
                 + $"{UiText.T("ui.sheet.max_health", "Max health")} <b>{Derived.MaxHealth(st).ToString("N0", inv)}</b>    "
                 + $"{UiText.T("ui.sheet.melee_damage", "Melee damage")} <b>x{Derived.MeleeMultiplier(st).ToString("0.00", inv)}</b>";
             var sets = InventoryActions.SetBonusText(PageKit.HexOf(PageKit.TitleBar), PageKit.HexOf(PageKit.Good), PageKit.HexOf(PageKit.InkFaint));
-            _sets.text = sets.Length == 0 ? $"<color={PageKit.HexOf(PageKit.InkFaint)}>{UiText.T("ui.sets.none", "No set pieces equipped.")}</color>" : sets;
+            _sets.text = (sets.Length == 0 ? $"<color={PageKit.HexOf(PageKit.InkFaint)}>{UiText.T("ui.sets.none", "No set pieces equipped.")}</color>" : sets)
+                + SheetData.PartyText(PageKit.HexOf(PageKit.TitleBar), PageKit.HexOf(PageKit.InkFaint));
         }
         const float rowH = 36, top = Header + 116;
         while (Rows.Count < rows.Count)

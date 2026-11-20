@@ -20,6 +20,9 @@ public enum SpellCastOutcome
 /// <summary>A cast, as a clear event a later co-op sync can send: which spell, from where, along what direction, at what aim point.</summary>
 public readonly record struct SpellCastInfo(string SpellId, Vector3 Origin, Vector3 Direction, Vector3 Aim);
 
+/// <summary>A successful cast as sent to teammates (COS-80): the cast id, whether it switched a toggle on, and what it drew.</summary>
+public sealed record SpellCastSync(string SpellId, uint CastId, bool ToggledOn, List<ChampionsOfTheSons.Core.Networking.FxShape> Shapes);
+
 /// <summary>
 /// Casting: costs, cooldown (<see cref="SpellBook.TryCast"/>) and the in-game effect per spell id.
 /// Energy is the game's own stamina bar scaled to the character's max energy: a cast takes the spell's
@@ -36,6 +39,9 @@ internal static class SpellCaster
 
     /// <summary>Raised after every successful cast (or switch-on of a channeled/toggle spell), with where and how it was cast.</summary>
     public static event Action<SpellCastInfo>? Casted;
+
+    /// <summary>The last successful cast's sync data (COS-80; the co-op layer sends it).</summary>
+    public static SpellCastSync? LastSync { get; private set; }
 
     public static string LastMessage { get; private set; } = "";
 
@@ -87,6 +93,7 @@ internal static class SpellCaster
         }
 
         Spend(cost.Energy + cost.Stamina);
+        uint castId = SpellNet.BeginCast();
         try
         {
             effect();
@@ -95,6 +102,10 @@ internal static class SpellCaster
         {
             RLog.Error($"Champions of the Sons: spell {id} failed: {e}");
         }
+        var shapes = SpellNet.EndCast(castId);
+        bool toggledOn = pc.Spells.IsActive(slot);
+        if (toggledOn) SpellNet.ToggleOn(id, castId);
+        LastSync = new SpellCastSync(id, castId, toggledOn, shapes);
         try
         {
             var eye = SpellWorld.Eye;

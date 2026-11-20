@@ -88,7 +88,7 @@ public sealed class EnemySyncFeature : IModFeature
         // KindId carries the actor type: content keys enemy kinds by it (several actor types share one kind id).
         return new EnemySync(netId, r.Kind.ActorType.ToString(), r.Profile.Level, (byte)r.Profile.Tier, (float)r.Profile.MaxHealth, hp,
             (float)r.Profile.Armor, r.Profile.Abilities.Select(a => a.ToString()).ToList(), (long)r.Profile.Bounty,
-            (float)r.Profile.DamageMult, r.Profile.Name?.GivenId ?? "", r.Profile.Name?.EpithetId ?? "");
+            (float)r.Profile.DamageMult, r.Profile.Name?.GivenId ?? "", r.Profile.Name?.EpithetId ?? "", (float)r.Profile.Scale);
     }
 
     public void Update(float dt, bool inWorld)
@@ -133,7 +133,8 @@ public sealed class EnemySyncFeature : IModFeature
         foreach (var gone in Announced.Keys.Where(k => !live.Contains(k)).ToList()) Announced.Remove(gone);
     }
 
-    /// <summary>A client just passed the handshake: announce every enemy again.</summary>
+    /// <summary>A client just passed the handshake: announce every enemy again, so a late joiner gets the profiles of enemies that
+    /// already exist (COS-79).</summary>
     public static void ResendAll() => Announced.Clear();
 
     // ---------------------------------------------------------------- client
@@ -141,14 +142,34 @@ public sealed class EnemySyncFeature : IModFeature
     private static void ClientTick(float dt)
     {
         _clientTimer -= dt;
-        if (_clientTimer > 0 || Pending.Count == 0) return;
+        if (_clientTimer > 0) return;
         _clientTimer = 0.5f;
+        KeepScale();
         foreach (var (id, sync) in Pending.ToList())
         {
             bool ok;
             try { ok = TryApply(sync); }
             catch (Exception e) { RLog.Error($"{CoopTestJoin.Tag} client: mirroring enemy {id} failed: {e.Message}"); ok = false; }
             if (ok) Pending.Remove(id);
+        }
+    }
+
+    /// <summary>The game resets an actor's scale when it activates it, so the host's scale is put back on every mirror (COS-79).</summary>
+    private static void KeepScale()
+    {
+        foreach (var (id, mirror) in Mirrors.ToList())
+        {
+            try
+            {
+                var actor = mirror.Actor;
+                if (actor == null || !actor.gameObject.activeInHierarchy) continue;
+                float want = (float)mirror.Profile.Scale;
+                if (Mathf.Abs(want - 1) > 0.001f && Mathf.Abs(actor.GetScaleMult() - want) > 0.01f) actor.SetScaleMult(want);
+            }
+            catch
+            {
+                Mirrors.Remove(id);
+            }
         }
     }
 
@@ -179,10 +200,12 @@ public sealed class EnemySyncFeature : IModFeature
             Armor = sync.Armor,
             Bounty = sync.Bounty,
             DamageMult = sync.DamageMult,
+            Scale = sync.Scale > 0 && float.IsFinite(sync.Scale) ? sync.Scale : 1,
             Name = sync.NameGivenId.Length > 0 && sync.NameEpithetId.Length > 0 ? new EliteName(sync.NameGivenId, sync.NameEpithetId) : null,
         };
         var runtime = EnemyRegistry.Mirror(stats, kind, profile, actor);
         runtime.ActorLive = true;
+        if (System.Math.Abs(profile.Scale - 1) > 0.001) actor.SetScaleMult((float)profile.Scale);
         Mirrors[sync.EnemyNetId] = runtime;
         ApplyHealth(runtime, sync.MaxHealth, sync.Health);
         return true;
@@ -195,6 +218,9 @@ public sealed class EnemySyncFeature : IModFeature
         health.SetMax(max);
         health.SetCurrentValue(current);
     }
+
+    /// <summary>Co-op test: forget the received profiles (not the mirrors), as if this client had just joined.</summary>
+    internal static void ForgetReceived() => ReceivedProfiles.Clear();
 
     /// <summary>Asks the host for an enemy's profile (a client that sees an enemy it knows nothing about).</summary>
     public static void Request(ulong netId)

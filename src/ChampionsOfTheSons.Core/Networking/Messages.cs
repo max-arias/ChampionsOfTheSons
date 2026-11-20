@@ -26,6 +26,10 @@ public enum MessageType : byte
     Ping = 40,
     AdminGrant = 50,
     HeldWeapon = 51,
+    SpellFxEvent = 52,
+    AbilityEvent = 53,
+    PlayerInfo = 54,
+    Announce = 55,
 }
 
 public interface IMessage
@@ -59,7 +63,7 @@ public sealed record EnemyProfileRequest(ulong EnemyNetId) : IMessage
 }
 
 /// <summary>Host → clients: the rolled profile of one enemy. Protocol 2 added the damage multiplier and the elite name ids
-/// (empty strings: no name) for the scanner and nameplates (COS-68).</summary>
+/// (empty strings: no name) for the scanner and nameplates (COS-68); protocol 3 the model scale (COS-79).</summary>
 public sealed record EnemySync(
     ulong EnemyNetId,
     string KindId,
@@ -72,7 +76,8 @@ public sealed record EnemySync(
     long Bounty,
     float DamageMult = 0,
     string NameGivenId = "",
-    string NameEpithetId = "") : IMessage
+    string NameEpithetId = "",
+    float Scale = 1) : IMessage
 {
     public MessageType Type => MessageType.EnemySync;
 
@@ -80,7 +85,8 @@ public sealed record EnemySync(
         other is not null && EnemyNetId == other.EnemyNetId && KindId == other.KindId && Level == other.Level &&
         Tier == other.Tier && MaxHealth.Equals(other.MaxHealth) && Health.Equals(other.Health) &&
         Armor.Equals(other.Armor) && Bounty == other.Bounty && AffixIds.SequenceEqual(other.AffixIds) &&
-        DamageMult.Equals(other.DamageMult) && NameGivenId == other.NameGivenId && NameEpithetId == other.NameEpithetId;
+        DamageMult.Equals(other.DamageMult) && NameGivenId == other.NameGivenId && NameEpithetId == other.NameEpithetId &&
+        Scale.Equals(other.Scale);
 
     public override int GetHashCode() => HashCode.Combine(EnemyNetId, KindId, Level, Tier);
 }
@@ -139,10 +145,78 @@ public sealed record DropRemoved(uint DropId) : IMessage
     public MessageType Type => MessageType.DropRemoved;
 }
 
-/// <summary>Caster → everyone: play this spell's visuals. <paramref name="Seed"/> keeps random visuals identical.</summary>
-public sealed record SpellCast(uint PlayerId, string SpellId, Vec3 Origin, Vec3 Direction, ulong Seed) : IMessage
+/// <summary>What a <see cref="SpellCast"/> is: a one-off cast, or a toggle spell switching on or off.</summary>
+public enum SpellCastMode : byte
+{
+    Cast = 0,
+    On = 1,
+    Off = 2,
+}
+
+/// <summary>The shape a <see cref="FxShape"/> draws (the caster's spell visual layer has these four).</summary>
+public enum FxKind : byte
+{
+    Sphere = 0,
+    Disc = 1,
+    Column = 2,
+    Portal = 3,
+}
+
+/// <summary>
+/// One spell visual exactly as the caster drew it (COS-80): kind and look, where, how big, which colour (0xRRGGBB), for how
+/// long. <paramref name="Follow"/>: it rides on the caster's body. <paramref name="Velocity"/>: it flies (bolts, Ball Lightning).
+/// <paramref name="Facing"/>: which way a portal looks. <paramref name="Look"/> is the caster's look enum as a byte.
+/// </summary>
+public readonly record struct FxShape(
+    FxKind Kind,
+    byte Look,
+    Vec3 Position,
+    float Radius,
+    float Height,
+    uint Rgb,
+    float Seconds,
+    bool Follow,
+    Vec3 Velocity,
+    Vec3 Facing);
+
+/// <summary>Caster → everyone: a spell cast, with every visual it drew (COS-80) so receivers show the same thing at the same
+/// place, size and duration. <paramref name="CastId"/> numbers the caster's casts, so a later <see cref="SpellFxEvent"/> can stop
+/// or add to this cast's visuals. A toggle spell sends <see cref="SpellCastMode.On"/> and later <see cref="SpellCastMode.Off"/>.
+/// Protocol 3 added the mode, cast id and shapes.</summary>
+public sealed record SpellCast(
+    uint PlayerId,
+    string SpellId,
+    Vec3 Origin,
+    Vec3 Direction,
+    ulong Seed,
+    SpellCastMode Mode = SpellCastMode.Cast,
+    uint CastId = 0,
+    IReadOnlyList<FxShape>? Shapes = null) : IMessage
 {
     public MessageType Type => MessageType.SpellCast;
+
+    public IReadOnlyList<FxShape> AllShapes => Shapes ?? Array.Empty<FxShape>();
+
+    public bool Equals(SpellCast? other) =>
+        other is not null && PlayerId == other.PlayerId && SpellId == other.SpellId && Origin == other.Origin &&
+        Direction == other.Direction && Seed == other.Seed && Mode == other.Mode && CastId == other.CastId &&
+        AllShapes.SequenceEqual(other.AllShapes);
+
+    public override int GetHashCode() => HashCode.Combine(PlayerId, SpellId, CastId);
+}
+
+/// <summary>Caster → everyone: later visuals of a running cast (COS-80). <paramref name="Stop"/> lists indices of the cast's
+/// shapes that end now (a bolt hit something), <paramref name="At"/> is where the first of them ended; <paramref name="Shapes"/>
+/// are new visuals (an impact), numbered after the ones the cast already has.</summary>
+public sealed record SpellFxEvent(uint PlayerId, uint CastId, IReadOnlyList<byte> Stop, Vec3 At, IReadOnlyList<FxShape> Shapes) : IMessage
+{
+    public MessageType Type => MessageType.SpellFxEvent;
+
+    public bool Equals(SpellFxEvent? other) =>
+        other is not null && PlayerId == other.PlayerId && CastId == other.CastId && At == other.At &&
+        Stop.SequenceEqual(other.Stop) && Shapes.SequenceEqual(other.Shapes);
+
+    public override int GetHashCode() => HashCode.Combine(PlayerId, CastId);
 }
 
 public enum PingKind : byte
@@ -207,4 +281,43 @@ public sealed record AdminGrant(AdminAction Action, double Amount, string Arg) :
 public sealed record HeldWeapon(uint PlayerId, string TypeId, Vec3 Position) : IMessage
 {
     public MessageType Type => MessageType.HeldWeapon;
+}
+
+/// <summary>Stage of an enemy ability cast in an <see cref="AbilityEvent"/>.</summary>
+public enum AbilityPhase : byte
+{
+    /// <summary>The cast starts at <c>Point</c> (the target's position).</summary>
+    Begin = 0,
+    /// <summary>A Laser locked its aim: the beam ends at <c>Point</c>.</summary>
+    Lock = 1,
+}
+
+/// <summary>Host → each client: an enemy's active ability started (COS-79). Each machine plays the cast and resolves its effect
+/// (damage, slow, root, pull) on its own player. <paramref name="Ability"/> is the ability's enum name, <paramref name="Seed"/>
+/// places random parts (traps) the same everywhere, <paramref name="TargetIsYou"/> says the receiver is the one aimed at.</summary>
+public sealed record AbilityEvent(ulong EnemyNetId, string Ability, AbilityPhase Phase, Vec3 Point, ulong Seed, bool TargetIsYou) : IMessage
+{
+    public MessageType Type => MessageType.AbilityEvent;
+}
+
+/// <summary>Player → everyone (the host relays with <paramref name="PlayerId"/> set), every few seconds: name, level, magic
+/// find and position, for the party list, name tags and team magic find (COS-81).</summary>
+public sealed record PlayerInfo(uint PlayerId, string Name, int Level, float MagicFind, Vec3 Position) : IMessage
+{
+    public MessageType Type => MessageType.PlayerInfo;
+}
+
+public enum AnnounceKind : byte
+{
+    Joined = 1,
+    Left = 2,
+    Died = 3,
+    LevelUp = 4,
+}
+
+/// <summary>A system line for every player (COS-81): someone joined, left, died or reached a level. Players send their own
+/// deaths and level-ups to the host, which relays; joins and leaves come from the host.</summary>
+public sealed record Announce(AnnounceKind Kind, uint PlayerId, string Name, int Level) : IMessage
+{
+    public MessageType Type => MessageType.Announce;
 }

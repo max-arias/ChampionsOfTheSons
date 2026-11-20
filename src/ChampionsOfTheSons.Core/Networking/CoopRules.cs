@@ -33,6 +33,23 @@ public static class KillCredit
     /// <summary>XP each recipient gets (all recipients get the same amount).</summary>
     public static double ShareFor(double bounty, int recipients) => EnemyScaler.KillXpShare(bounty, recipients);
 
+    /// <summary>
+    /// Magic find used for a kill's drops in co-op (COS-81, Max's decision): the sum of every player's magic find. A player's
+    /// value is their multiplier (1 = no bonus); a missing or broken value counts as 1, so each player adds at least their base.
+    /// With no players (a dedicated server before anyone joined) it is 1.
+    /// </summary>
+    public static double TeamMagicFind(IEnumerable<double> perPlayer)
+    {
+        double sum = 0;
+        int n = 0;
+        foreach (var mf in perPlayer)
+        {
+            sum += double.IsFinite(mf) && mf > 0 ? mf : 1;
+            n++;
+        }
+        return n == 0 ? 1 : sum;
+    }
+
     private static float Sq(float v) => v * v;
 }
 

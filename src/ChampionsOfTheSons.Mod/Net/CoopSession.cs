@@ -26,8 +26,16 @@ public static class CoopSession
 
     public static BoltConnection? ByPlayerId(uint id) => Peers.FirstOrDefault(c => IdOf(c) == id);
 
+    /// <summary>Host: a verified client left (before its state is forgotten).</summary>
+    public static event Action<BoltConnection>? Left;
+
     public static void Forget(BoltConnection connection)
     {
+        if (CoopFeature.Verified.Contains(connection))
+        {
+            try { Left?.Invoke(connection); }
+            catch (Exception e) { RLog.Warning($"{CoopTestJoin.Tag} leave handler failed: {e.Message}"); }
+        }
         Positions.Remove(connection);
         Levels.Remove(connection);
         CoopFeature.Verified.Remove(connection);

@@ -23,6 +23,9 @@ internal sealed class ActiveHandler : IAbilityHandler
 
     public AbilityInstance? InstanceOf(EnemyRuntime enemy) => _live.GetValueOrDefault(enemy);
 
+    /// <summary>A fresh instance of this ability for an enemy (client replicas, COS-79).</summary>
+    public AbilityInstance Create(EnemyRuntime enemy) => _create(enemy);
+
     public void OnTick(EnemyRuntime enemy, float dt)
     {
         // Self-tests: only enemies a test declared active cast, so random elites spawned by other phases stay quiet.
@@ -102,12 +105,15 @@ internal static class ActiveAbilitySystem
 
     public static ActiveHandler For(EnemyAbility ability) => Handlers.First(h => h.Ability == ability);
 
+    public static ActiveHandler? Find(EnemyAbility ability) => Handlers.FirstOrDefault(h => h.Ability == ability);
+
     /// <summary>Unity objects the enemy's abilities currently own (0 once it died or went dormant).</summary>
     public static int ObjectCount(EnemyRuntime enemy) => Handlers.Sum(h => h.InstanceOf(enemy)?.ObjectCount ?? 0);
 
     public static void Reset()
     {
         foreach (var h in Handlers) h.Clear();
+        AbilityReplicas.Clear();
         AbilityForces.Reset();
         AbilityDamage.Reset();
     }
@@ -115,12 +121,21 @@ internal static class ActiveAbilitySystem
 
 /// <summary>
 /// COS-20: the active enemy affixes — Meteor, Laser, Black Hole, Blizzard, Radiance, Flare, Cataclysms, Warp, Chains, Trapper.
-/// Rules and numbers live in Core (<see cref="ActiveAbilityRules"/>); this is the placeholder-visual game side, host only.
+/// Rules and numbers live in Core (<see cref="ActiveAbilityRules"/>); this is the game side. The host (also a dedicated server)
+/// runs the casts; in co-op each client plays a copy of every cast it is told about (<see cref="AbilityReplicas"/>, COS-79).
 /// </summary>
 public sealed class ActiveAbilitiesFeature : IModFeature
 {
+    public void OnGameStart() => AbilityReplicas.Clear();
+
+    public void Update(float dt, bool inWorld)
+    {
+        if (inWorld && Net.CoopSession.IsClient) AbilityReplicas.Tick(dt);
+    }
+
     public void Init()
     {
+        AbilityReplicas.Init();
         ActiveAbilitySystem.Register(new ActiveHandler(EnemyAbility.Meteor, e => new MeteorInstance(e)));
         ActiveAbilitySystem.Register(new ActiveHandler(EnemyAbility.Laser, e => new LaserInstance(e)));
         ActiveAbilitySystem.Register(new ActiveHandler(EnemyAbility.BlackHole, e => new BlackHoleInstance(e)));

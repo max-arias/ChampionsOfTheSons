@@ -7,8 +7,8 @@ namespace ChampionsOfTheSons.Mod.Net;
 
 /// <summary>
 /// What other players do, shown locally: damage numbers for their hits (COS-44) and the visuals of their spell casts (COS-51).
-/// Spells draw through <see cref="Register"/>: the spells track registers a richer effect per spell id; any cast without one gets
-/// a short flash at the caster so teammates always see that something happened.
+/// A cast carries the visuals the caster drew (COS-80); the spells feature draws them (<see cref="DrawCast"/>, unset on a
+/// dedicated server, which draws nothing). A cast with no visuals gets a short flash at the caster.
 /// </summary>
 public static class CoopFx
 {
@@ -21,6 +21,19 @@ public static class CoopFx
     public static int DamageShownCount { get; private set; }
 
     public static void Register(string spellId, Action<SpellCast> draw) => SpellFx[spellId] = draw;
+
+    /// <summary>Draws a teammate's cast from its shapes (set by the spells feature).</summary>
+    public static Action<SpellCast>? DrawCast { get; set; }
+
+    /// <summary>Draws a teammate's later visuals or stops (set by the spells feature).</summary>
+    public static Action<SpellFxEvent>? DrawUpdate { get; set; }
+
+    public static void ShowUpdate(SpellFxEvent ev)
+    {
+        if (ServerConfig.OnDedicatedServer || DrawUpdate == null) return;
+        try { DrawUpdate(ev); }
+        catch (Exception e) { RLog.Warning($"{CoopTestJoin.Tag} spell update failed: {e.Message}"); }
+    }
 
     public static void ShowDamage(Vector3 world, float amount, bool crit)
     {
@@ -39,11 +52,14 @@ public static class CoopFx
     public static void ShowSpell(SpellCast cast)
     {
         LastSpell = cast;
-        Audio.ModAudio.PlayAt(Audio.SoundCues.Spell(cast.SpellId), CoopSession.ToUnity(cast.Origin)); // COS-101: a teammate's cast, where they stand
+        if (ServerConfig.OnDedicatedServer) return; // nothing is shown or played on a dedicated server
+        if (cast.Mode != SpellCastMode.Off)
+            Audio.ModAudio.PlayAt(Audio.SoundCues.Spell(cast.SpellId), CoopSession.ToUnity(cast.Origin)); // COS-101: a teammate's cast, where they stand
         try
         {
             if (SpellFx.TryGetValue(cast.SpellId, out var draw)) draw(cast);
-            else Flash(CoopSession.ToUnity(cast.Origin), new Color(0.5f, 0.7f, 1f));
+            else if ((cast.AllShapes.Count > 0 || cast.Mode == SpellCastMode.Off) && DrawCast != null) DrawCast(cast);
+            else if (cast.Mode != SpellCastMode.Off) Flash(CoopSession.ToUnity(cast.Origin), new Color(0.5f, 0.7f, 1f));
             if (cast.SpellId == "spell.blink") Flash(CoopSession.ToUnity(cast.Origin) + CoopSession.ToUnity(cast.Direction), new Color(0.7f, 0.5f, 1f));
         }
         catch (Exception e)

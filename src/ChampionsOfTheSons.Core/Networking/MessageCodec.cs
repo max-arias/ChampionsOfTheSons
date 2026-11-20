@@ -6,8 +6,10 @@ namespace ChampionsOfTheSons.Core.Networking;
 /// </summary>
 public static class MessageCodec
 {
-    /// <remarks>2: <see cref="EnemySync"/> carries the damage multiplier and the elite name (COS-68).</remarks>
-    public const int ProtocolVersion = 2;
+    /// <remarks>2: <see cref="EnemySync"/> carries the damage multiplier and the elite name (COS-68).
+    /// 3: <see cref="EnemySync"/> carries the scale; <see cref="SpellCast"/> its mode, cast id and visuals; new
+    /// <see cref="SpellFxEvent"/>, <see cref="AbilityEvent"/>, <see cref="PlayerInfo"/>, <see cref="Announce"/> (COS-79/80/81).</remarks>
+    public const int ProtocolVersion = 3;
 
     public static byte[] Encode(IMessage message)
     {
@@ -25,7 +27,7 @@ public static class MessageCodec
                 w.VarUInt((uint)m.AffixIds.Count);
                 foreach (var a in m.AffixIds) w.String(a);
                 WriteLong(w, m.Bounty);
-                w.Float(m.DamageMult).String(m.NameGivenId).String(m.NameEpithetId);
+                w.Float(m.DamageMult).String(m.NameGivenId).String(m.NameEpithetId).Float(m.Scale);
                 break;
             case EnemyHealth m: w.UInt64(m.EnemyNetId).Float(m.Health).Float(m.Armor); break;
             case Hit m: w.UInt64(m.EnemyNetId).Float(m.Amount).Byte((byte)m.Flags).Float(m.ArmorPierce); break;
@@ -41,8 +43,20 @@ public static class MessageCodec
                 w.VarUInt(m.PlayerId).String(m.SpellId);
                 WriteVec(w, m.Origin);
                 WriteVec(w, m.Direction);
-                w.UInt64(m.Seed);
+                w.UInt64(m.Seed).Byte((byte)m.Mode).VarUInt(m.CastId);
+                WriteShapes(w, m.AllShapes);
                 break;
+            case SpellFxEvent m:
+                w.VarUInt(m.PlayerId).VarUInt(m.CastId);
+                if (m.Stop.Count > MaxShapes) throw new ArgumentException($"At most {MaxShapes} stops per message");
+                w.VarUInt((uint)m.Stop.Count);
+                foreach (var b in m.Stop) w.Byte(b);
+                WriteVec(w, m.At);
+                WriteShapes(w, m.Shapes);
+                break;
+            case AbilityEvent m: w.UInt64(m.EnemyNetId).String(m.Ability).Byte((byte)m.Phase); WriteVec(w, m.Point); w.UInt64(m.Seed).Bool(m.TargetIsYou); break;
+            case PlayerInfo m: w.VarUInt(m.PlayerId).String(m.Name).VarInt(m.Level).Float(m.MagicFind); WriteVec(w, m.Position); break;
+            case Announce m: w.Byte((byte)m.Kind).VarUInt(m.PlayerId).String(m.Name).VarInt(m.Level); break;
             case Ping m: w.VarUInt(m.PlayerId).Byte((byte)m.Kind); WriteVec(w, m.Position); w.UInt64(m.TargetId); break;
             case AdminGrant m: w.Byte((byte)m.Action).UInt64(unchecked((ulong)BitConverter.DoubleToInt64Bits(m.Amount))).String(m.Arg); break;
             case HeldWeapon m: w.VarUInt(m.PlayerId).String(m.TypeId); WriteVec(w, m.Position); break;
@@ -73,7 +87,11 @@ public static class MessageCodec
             MessageType.PickupRequest => new PickupRequest(r.VarUInt()),
             MessageType.PickupGranted => new PickupGranted(r.VarUInt(), ReadItem(r)),
             MessageType.DropRemoved => new DropRemoved(r.VarUInt()),
-            MessageType.SpellCast => new SpellCast(r.VarUInt(), r.String() ?? "", ReadVec(r), ReadVec(r), r.UInt64()),
+            MessageType.SpellCast => new SpellCast(r.VarUInt(), r.String() ?? "", ReadVec(r), ReadVec(r), r.UInt64(), (SpellCastMode)r.Byte(), r.VarUInt(), ReadShapes(r)),
+            MessageType.SpellFxEvent => ReadSpellFxEvent(r),
+            MessageType.AbilityEvent => new AbilityEvent(r.UInt64(), r.String() ?? "", (AbilityPhase)r.Byte(), ReadVec(r), r.UInt64(), r.Bool()),
+            MessageType.PlayerInfo => new PlayerInfo(r.VarUInt(), r.String() ?? "", r.VarInt(), r.Float(), ReadVec(r)),
+            MessageType.Announce => new Announce((AnnounceKind)r.Byte(), r.VarUInt(), r.String() ?? "", r.VarInt()),
             MessageType.Ping => new Ping(r.VarUInt(), (PingKind)r.Byte(), ReadVec(r), r.UInt64()),
             MessageType.AdminGrant => new AdminGrant((AdminAction)r.Byte(), BitConverter.Int64BitsToDouble(unchecked((long)r.UInt64())), r.String() ?? ""),
             MessageType.HeldWeapon => new HeldWeapon(r.VarUInt(), r.String() ?? "", ReadVec(r)),
@@ -97,7 +115,46 @@ public static class MessageCodec
         long bounty = ReadLong(r);
         float dmg = r.Float();
         string given = r.String() ?? "", epithet = r.String() ?? "";
-        return new EnemySync(id, kind, level, tier, maxHp, hp, armor, affixes, bounty, dmg, given, epithet);
+        float scale = r.Float();
+        return new EnemySync(id, kind, level, tier, maxHp, hp, armor, affixes, bounty, dmg, given, epithet, scale);
+    }
+
+    private static SpellFxEvent ReadSpellFxEvent(PacketReader r)
+    {
+        uint player = r.VarUInt(), castId = r.VarUInt();
+        uint count = r.VarUInt();
+        if (count > MaxShapes) throw new PacketException("Too many stopped shapes");
+        var stop = new byte[count];
+        for (int i = 0; i < count; i++) stop[i] = r.Byte();
+        var at = ReadVec(r);
+        return new SpellFxEvent(player, castId, stop, at, ReadShapes(r));
+    }
+
+    /// <summary>Most shapes (or stops) one cast or update may carry; a cast draws a handful.</summary>
+    public const int MaxShapes = 64;
+
+    private static void WriteShapes(PacketWriter w, IReadOnlyList<FxShape> shapes)
+    {
+        if (shapes.Count > MaxShapes) throw new ArgumentException($"At most {MaxShapes} shapes per message");
+        w.VarUInt((uint)shapes.Count);
+        foreach (var s in shapes)
+        {
+            w.Byte((byte)s.Kind).Byte(s.Look);
+            WriteVec(w, s.Position);
+            w.Float(s.Radius).Float(s.Height).VarUInt(s.Rgb).Float(s.Seconds).Bool(s.Follow);
+            WriteVec(w, s.Velocity);
+            WriteVec(w, s.Facing);
+        }
+    }
+
+    private static FxShape[] ReadShapes(PacketReader r)
+    {
+        uint count = r.VarUInt();
+        if (count > MaxShapes) throw new PacketException("Too many shapes");
+        var shapes = new FxShape[count];
+        for (int i = 0; i < count; i++)
+            shapes[i] = new FxShape((FxKind)r.Byte(), r.Byte(), ReadVec(r), r.Float(), r.Float(), r.VarUInt(), r.Float(), r.Bool(), ReadVec(r), ReadVec(r));
+        return shapes;
     }
 
     private static void WriteLong(PacketWriter w, long v) => w.UInt64(unchecked((ulong)v));

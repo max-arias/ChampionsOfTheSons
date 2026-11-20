@@ -189,7 +189,11 @@ public sealed class CoopExtras : IModFeature
         {
             if (__result != Spells.SpellCastOutcome.Cast || _castSpell == null || !CoopSession.Active || !LocalPlayer.IsInWorld) return;
             var cam = LocalPlayer.MainCam != null ? LocalPlayer.MainCam.transform : LocalPlayer.Transform;
-            SendSpell(_castSpell, LocalPlayer.Transform.position, cam.forward);
+            var sync = Spells.SpellCaster.LastSync;
+            if (sync != null && sync.SpellId == _castSpell)
+                SendSpell(_castSpell, LocalPlayer.Transform.position, cam.forward, sync.ToggledOn ? SpellCastMode.On : SpellCastMode.Cast, sync.CastId, sync.Shapes);
+            else
+                SendSpell(_castSpell, LocalPlayer.Transform.position, cam.forward);
         }
         catch (Exception e)
         {
@@ -197,9 +201,11 @@ public sealed class CoopExtras : IModFeature
         }
     }
 
-    public static void SendSpell(string spellId, Vector3 origin, Vector3 direction)
+    public static void SendSpell(string spellId, Vector3 origin, Vector3 direction, SpellCastMode mode = SpellCastMode.Cast, uint castId = 0,
+        IReadOnlyList<FxShape>? shapes = null)
     {
-        var cast = new SpellCast(CoopSession.HostId, spellId, CoopSession.ToVec(origin), CoopSession.ToVec(direction), (ulong)Environment.TickCount64);
+        var cast = new SpellCast(CoopSession.HostId, spellId, CoopSession.ToVec(origin), CoopSession.ToVec(direction), (ulong)Environment.TickCount64,
+            mode, castId, shapes ?? Array.Empty<FxShape>());
         CoopSession.Broadcast(cast);
     }
 
@@ -236,7 +242,16 @@ public sealed class CoopExtras : IModFeature
                     break;
                 case SpellCast cast when CoopSession.IsClient:
                     CoopFx.ShowSpell(cast);
-                    RLog.Msg($"{CoopTestJoin.Tag} client: saw player {cast.PlayerId} cast {cast.SpellId}");
+                    RLog.Msg($"{CoopTestJoin.Tag} client: saw player {cast.PlayerId} cast {cast.SpellId} ({cast.Mode}, {cast.AllShapes.Count} visual(s))");
+                    break;
+
+                case SpellFxEvent ev when CoopSession.IsHost && CoopFeature.Verified.Contains(from):
+                    var re = ev with { PlayerId = CoopSession.IdOf(from) };
+                    CoopSession.SendToPeers(re, except: from);
+                    CoopFx.ShowUpdate(re);
+                    break;
+                case SpellFxEvent ev when CoopSession.IsClient:
+                    CoopFx.ShowUpdate(ev);
                     break;
             }
         }

@@ -45,14 +45,14 @@ internal static class SpellEffects
         ["spell.parry"] = ParryCast,
     };
 
-    private static GameObject? _shieldFx, _flameFx;
+    private static GameObject? _shieldFx, _flameFx, _multishotFx;
     private static double _warCryArmor;
 
     private static float _flameTimer, _multishotTimer;
 
     public static void ResetState()
     {
-        _shieldFx = _flameFx = null;
+        _shieldFx = _flameFx = _multishotFx = null;
         _flameTimer = _multishotTimer = 0;
     }
 
@@ -312,6 +312,8 @@ internal static class SpellEffects
                 foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, SpellTuning.BallLightningZap(Stats, Rng.FromTime()));
             },
         });
+        // Teammates fly their copy along the same line for the same time, so it ends at the same place (COS-80).
+        SpellNet.NoteMotion(ball, (float)SpellTuning.BallLightningSeconds, dir * (float)SpellTuning.BallLightningSpeed);
     }
 
     // ---------------------------------------------------------------- bursts and melee
@@ -555,14 +557,21 @@ internal static class SpellEffects
     private static bool StartMultishot()
     {
         _multishotTimer = 0;
+        // A ring at the feet while it runs, so teammates see it on and off (COS-80).
+        _multishotFx = SpellFx.Disc(Feet(), 1.2f, SpellFx.Steel, 1e6f, LocalPlayer.Transform, SpellFx.Look.Ring);
         return true;
     }
 
     /// <summary>A channeled or toggle spell in <paramref name="slot"/> was switched off or ran out of energy.</summary>
     public static void Stopped(int slot)
     {
+        if (Pc.Spells.Loadout[slot] is string stoppedId) SpellNet.ToggleOff(stoppedId);
         switch (Pc.Spells.Loadout[slot])
         {
+            case "spell.multishot":
+                SpellFx.Remove(_multishotFx);
+                _multishotFx = null;
+                break;
             case "spell.sustain_shield":
                 Shield.Channeling = false;
                 SpellFx.Remove(_shieldFx);

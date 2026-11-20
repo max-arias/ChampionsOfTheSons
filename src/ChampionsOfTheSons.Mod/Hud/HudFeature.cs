@@ -18,6 +18,7 @@ public sealed class HudFeature : IModFeature
     internal Nameplates Plates { get; } = new();
     internal DamageNumbers Numbers { get; } = new();
     internal ProgressHud Progress { get; } = new();
+    internal PartyHud Party { get; } = new();
 
     /// <summary>Whether the HUD layer (nameplates, XP bar, banners) is drawn this frame.</summary>
     internal bool Shown => _built && _root.Root.activeSelf;
@@ -31,6 +32,7 @@ public sealed class HudFeature : IModFeature
         Plates.Build(layer);
         Numbers.Build(layer);
         Progress.Build(layer);
+        Party.Build(layer);
         HudKit.NoRaycast(_root.Root);
         _built = true;
 
@@ -53,6 +55,7 @@ public sealed class HudFeature : IModFeature
         Plates.Update(dt, Config.ShowNameplates.Value);
         Numbers.Update(dt, Config.ShowDamageNumbers.Value);
         Progress.Update(dt, true);
+        Party.Update(dt, true);
     }
 
     public void OnGameStart()

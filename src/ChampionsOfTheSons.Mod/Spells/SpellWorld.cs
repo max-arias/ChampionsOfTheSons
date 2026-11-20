@@ -17,6 +17,8 @@ internal sealed class SpellZone
     public Action<SpellZone, float>? Frame;
     public Action<SpellZone>? End;
     public GameObject? Visual;
+    /// <summary>The cast that made it (COS-80): visuals drawn by its pulses belong to that cast.</summary>
+    public uint? CastId;
 }
 
 /// <summary>A flying spell: moves in a line (or homes on a target), hits enemies it touches and ends on impact, range or time.</summary>
@@ -29,6 +31,8 @@ internal sealed class SpellBolt
     public EnemyRuntime? Target;
     public Action<SpellBolt, EnemyRuntime>? OnHit;
     public GameObject? Visual;
+    /// <summary>The cast that made it (COS-80).</summary>
+    public uint? CastId;
     public readonly HashSet<EnemyRuntime> Hit = new();
     internal float Travelled;
     internal bool Done;
@@ -148,6 +152,8 @@ internal static class SpellWorld
     public static SpellZone AddZone(SpellZone z)
     {
         z.Next = z.Interval;
+        z.CastId = SpellNet.Context;
+        SpellNet.NoteMotion(z.Visual, z.Left, Vector3.zero); // the zone, not the visual's placeholder lifetime, decides how long it shows
         Zones.Add(z);
         return z;
     }
@@ -155,6 +161,8 @@ internal static class SpellWorld
     public static SpellBolt AddBolt(SpellBolt b)
     {
         b.Dir.Normalize();
+        b.CastId = SpellNet.Context;
+        SpellNet.NoteMotion(b.Visual, Mathf.Min(b.Life, b.Speed > 0 ? b.Range / b.Speed : b.Life), b.Dir * b.Speed);
         Bolts.Add(b);
         return b;
     }
@@ -178,12 +186,17 @@ internal static class SpellWorld
             foreach (int slot in sustain.Stopped) SpellEffects.Stopped(slot);
             for (int slot = 0; slot < SpellBook.Slots; slot++)
                 if (pc.Spells.IsActive(slot) && pc.Spells.Loadout[slot] is string id)
+                {
+                    SpellNet.Context = SpellNet.ToggleCast(id);
                     SpellEffects.Sustained(id, dt);
+                    SpellNet.Context = null;
+                }
         }
 
         for (int i = Zones.Count - 1; i >= 0; i--)
         {
             var z = Zones[i];
+            SpellNet.Context = z.CastId;
             z.Frame?.Invoke(z, dt);
             z.Left -= dt;
             z.Next -= dt;
@@ -195,19 +208,25 @@ internal static class SpellWorld
             }
             if (z.Left > 0) continue;
             z.End?.Invoke(z);
+            SpellNet.Context = null;
+            SpellNet.Expired(z.Visual); // ran its time: the others' copy ends on its own
             SpellFx.Remove(z.Visual);
             Zones.RemoveAt(i);
         }
+        SpellNet.Context = null;
 
         for (int i = Bolts.Count - 1; i >= 0; i--)
         {
+            SpellNet.Context = Bolts[i].CastId;
             StepBolt(Bolts[i], dt);
+            SpellNet.Context = null;
             if (!Bolts[i].Done) continue;
             SpellFx.Remove(Bolts[i].Visual);
             Bolts.RemoveAt(i);
         }
 
         SpellPortals.Step(dt);
+        SpellNet.Flush();
     }
 
     private static void StepBolt(SpellBolt b, float dt)
@@ -268,6 +287,7 @@ internal static class SpellWorld
         Frenzy.Reset();
         SpellPortals.Reset();
         SpellEffects.ResetState();
+        SpellNet.Reset();
         SpellFx.Clear();
     }
 }

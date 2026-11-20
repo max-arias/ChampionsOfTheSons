@@ -37,6 +37,7 @@ internal sealed class SpellsFeature : IModFeature
     public void Init()
     {
         SpellKeys.Init();
+        SpellNet.Init();
         new SpellBar().Build();
         Bridge.EnemyPatches.EnemyHit += (_, enemy, damage, _) =>
         {
