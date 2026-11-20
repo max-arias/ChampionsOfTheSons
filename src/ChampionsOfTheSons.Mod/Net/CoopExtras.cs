@@ -43,7 +43,7 @@ public sealed class CoopExtras : IModFeature
         CotsNetEvent.Received += OnNet;
         Pings.Added += OnPingAdded;
         Pings.Expired += OnPingExpired;
-        _pingKey = Config.Category.CreateKeybindEntry("ping_key", "v", "Ping", "Ping what you are looking at: every player sees the marker.");
+        _pingKey = Config.Category.CreateKeybindEntry("ping_key", "h", "Ping", "Ping what you are looking at: every player sees the marker.");
         _pingKey.SetScope(needsPlayerControllable: true);
         _pingKey.Notify(PingLookedAt);
     }

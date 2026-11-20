@@ -22,7 +22,7 @@ Multiplayer
 
 Keys (change them in the RedLoader mod settings, file ChampionsOfTheSons.cfg)
   I  inventory and character      P  perk tree        K  crafting
-  O  host settings (difficulty)   V  ping              Z X V B N M  spell slots 1-6
+  O  host settings (difficulty)   H  ping              Z X V B N M  spell slots 1-6
   Gamepad: LB + D-pad opens the panels.
 
 Saves
