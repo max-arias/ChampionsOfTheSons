@@ -18,6 +18,7 @@ public sealed class LootRoller
     private readonly ContentDb _content;
     private readonly ItemStatDef[] _commonStats;
     private readonly Dictionary<int, ItemBaseDef[]> _byRarity;
+    private readonly Dictionary<(string, int), IReadOnlyList<string?>> _expanded = new();
 
     public LootRoller(ContentDb content)
     {
@@ -86,19 +87,25 @@ public sealed class LootRoller
 
     public static bool IsMaterialOrOther(ItemBaseDef d) => d.Type is "material" or "other";
 
+    /// <summary>Rolled at level 1 whatever the drop level: materials, and "other" items whose stats do not grow with level
+    /// (COTF: materials and the two hearts). The XP heart keeps its level, since its XP is 30 × level³.</summary>
+    public bool IsLevelOne(ItemBaseDef d) =>
+        d.Type == "material" || (d.Type == "other" && !d.StatPools.SelectMany(p => p).Any(o => o != null && _content.ItemStats.TryGetValue(o, out var s) && s.LevelPow > 0));
+
     /// <summary>What enemies can drop. First pass: equipment only; materials and consumables stay defined but unused (COS-59).</summary>
     public static bool IsDroppable(ItemBaseDef d) => IsEquippable(d);
 
     /// <summary>A fresh instance of <paramref name="baseDef"/> at <paramref name="level"/>.</summary>
     public ItemInstance RollItem(ItemBaseDef baseDef, int level, Rng rng)
     {
-        if (IsMaterialOrOther(baseDef)) level = 1;
+        if (IsLevelOne(baseDef)) level = 1;
         var stats = new List<RolledStat>();
-        foreach (var pool in baseDef.StatPools)
+        for (int slot = 0; slot < baseDef.StatPools.Count; slot++)
         {
-            var option = pool.Count == 0 ? null : rng.Pick(pool);
-            var def = ResolveOption(option, rng);
-            if (def != null) stats.Add(new RolledStat(def.Id, (float)RollValue(def, level, baseDef.Rarity, rng)));
+            var options = SlotOptions(baseDef, slot);
+            var option = options.Count == 0 ? null : rng.Pick(options);
+            if (option == null || !_content.ItemStats.TryGetValue(option, out var def)) continue;
+            stats.Add(RollStat(baseDef, slot, def, level, baseDef.Rarity, rng));
         }
         if (IsEquippable(baseDef) && level > 20 && rng.NextDouble() <= 0.175 && _content.ItemStats.ContainsKey(EmptySocketStat))
         {
@@ -108,38 +115,76 @@ public sealed class LootRoller
         return new ItemInstance { BaseId = baseDef.Id, Level = level, Rarity = (Rarity)baseDef.Rarity, Stats = stats };
     }
 
-    private ItemStatDef? ResolveOption(string? option, Rng rng)
+    /// <summary>
+    /// The options of one stat slot as COTF rolls them: "*" is replaced by every common stat, so each common stat weighs as
+    /// much as a named option (in [named, *] the named stat is one pick in 1 + common-stat count). null = the slot may stay empty.
+    /// </summary>
+    public IReadOnlyList<string?> SlotOptions(ItemBaseDef baseDef, int slot)
     {
-        if (option == null) return null;
-        if (option == ItemBaseDef.AnyStat) return _commonStats.Length == 0 ? null : rng.Pick(_commonStats);
-        return _content.ItemStats.TryGetValue(option, out var def) ? def : null;
-    }
-
-    /// <summary>The lowest and highest value <see cref="RollValue"/> can give for a stat at a level and rarity (crafting preview).</summary>
-    public static (double Min, double Max) ValueRange(ItemStatDef stat, int level, int rarity)
-    {
-        double Value(double u)
+        if (slot < 0 || slot >= baseDef.StatPools.Count) return Array.Empty<string?>();
+        if (_expanded.TryGetValue((baseDef.Id, slot), out var cached)) return cached;
+        var list = new List<string?>();
+        foreach (var option in baseDef.StatPools[slot])
         {
-            double v = u * Math.Pow(Math.Max(1, level), stat.LevelPow);
-            if (stat.Cap is double cap) v = Math.Min(v, cap);
-            v *= stat.Multiplier;
-            v *= RarityMultiplier[Math.Clamp(rarity, 0, 7)];
-            if (stat.Cap is double cap2) v = Math.Min(v, cap2);
-            return v;
+            if (option == ItemBaseDef.AnyStat) list.AddRange(_commonStats.Select(s => (string?)s.Id));
+            else list.Add(option);
         }
-        return (Value(stat.Min), Value(stat.Max));
+        _expanded[(baseDef.Id, slot)] = list;
+        return list;
     }
 
-    /// <summary>v = U(min,max) × level^pow, capped, × stat multiplier × rarity multiplier, capped again.</summary>
-    public static double RollValue(ItemStatDef stat, int level, int rarity, Rng rng)
+    /// <summary>A fresh value for <paramref name="def"/> rolled in slot <paramref name="slot"/> of <paramref name="baseDef"/> (its slot multiplier applies).</summary>
+    public static RolledStat RollStat(ItemBaseDef baseDef, int slot, ItemStatDef def, int level, int rarity, Rng rng) =>
+        new(def.Id, (float)RollValue(def, level, rarity, rng, baseDef.MultiplierFor(slot, def.Id)), slot);
+
+    /// <summary>The lowest and highest value <see cref="RollValue"/> can give for a stat at a level and rarity (crafting preview).
+    /// <paramref name="multiplier"/> replaces the stat's own multiplier (slot multipliers).</summary>
+    public static (double Min, double Max) ValueRange(ItemStatDef stat, int level, int rarity, double? multiplier = null)
     {
-        double v = rng.Range((float)stat.Min, (float)stat.Max) * Math.Pow(Math.Max(1, level), stat.LevelPow);
+        double a = Scale(stat, stat.Min, level, rarity, multiplier), b = Scale(stat, stat.Max, level, rarity, multiplier);
+        return (Math.Min(a, b), Math.Max(a, b));
+    }
+
+    /// <summary>v = U(min,max) × level^pow, capped, × multiplier (the slot's, else the stat's) × rarity multiplier, capped again.</summary>
+    public static double RollValue(ItemStatDef stat, int level, int rarity, Rng rng, double? multiplier = null) =>
+        Scale(stat, rng.Range((float)stat.Min, (float)stat.Max), level, rarity, multiplier);
+
+    private static double Scale(ItemStatDef stat, double u, int level, int rarity, double? multiplier)
+    {
+        double v = u * Math.Pow(Math.Max(1, level), stat.LevelPow);
         if (stat.Cap is double cap) v = Math.Min(v, cap);
-        v *= stat.Multiplier;
+        v *= multiplier ?? stat.Multiplier;
         v *= RarityMultiplier[Math.Clamp(rarity, 0, 7)];
         if (stat.Cap is double cap2) v = Math.Min(v, cap2);
         return v;
     }
+
+    /// <summary>
+    /// Gives every pool stat without a known slot (old saves, slot -1) the first free slot that offers it. Sockets keep -1.
+    /// Stats no slot offers keep -1 (they can still be polished, not individually rerolled).
+    /// </summary>
+    public ItemInstance InferSlots(ItemInstance item)
+    {
+        if (item.Stats.All(s => s.Slot >= 0 || IsSocketStat(s.StatId))) return item;
+        if (!_content.Items.TryGetValue(item.BaseId, out var baseDef)) return item;
+        var used = new HashSet<int>(item.Stats.Where(s => s.Slot >= 0).Select(s => s.Slot));
+        var stats = item.Stats.ToList();
+        for (int i = 0; i < stats.Count; i++)
+        {
+            var s = stats[i];
+            if (s.Slot >= 0 || IsSocketStat(s.StatId)) continue;
+            for (int slot = 0; slot < baseDef.StatPools.Count; slot++)
+            {
+                if (used.Contains(slot) || !SlotOptions(baseDef, slot).Contains(s.StatId)) continue;
+                stats[i] = s with { Slot = slot };
+                used.Add(slot);
+                break;
+            }
+        }
+        return item with { Stats = stats };
+    }
+
+    public static bool IsSocketStat(string statId) => statId.StartsWith("stat.socket", StringComparison.Ordinal) || statId == EmptySocketStat;
 
     public static bool IsEquippable(ItemBaseDef d) => SlotsFor(d.Type).Count > 0;
 

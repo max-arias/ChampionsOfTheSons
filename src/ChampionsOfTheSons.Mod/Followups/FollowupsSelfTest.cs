@@ -142,6 +142,7 @@ internal static class FollowupsSelfTest
     private static void Previews()
     {
         var panel = CraftingFeature.Panel;
+        CraftingSelfTest.UnlockAll();
         panel.Open();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
         var item = TestKit.Give(Equippable(4, 40), 4, 40);

@@ -7,7 +7,8 @@ namespace ChampionsOfTheSons.Core.Saving;
 /// </summary>
 public sealed class PlayerSave
 {
-    public const int CurrentVersion = 1;
+    /// <summary>2: rolled stats carry their stat slot (COS-73).</summary>
+    public const int CurrentVersion = 2;
 
     public int Version { get; set; } = CurrentVersion;
     public double Xp { get; set; }
@@ -42,7 +43,7 @@ public sealed class SavedItem
         Rarity = (int)item.Rarity,
         Amount = item.Amount,
         Upgrades = item.Upgrades,
-        Stats = item.Stats.Select(s => new SavedStat { Id = s.StatId, Value = s.Value }).ToList(),
+        Stats = item.Stats.Select(s => new SavedStat { Id = s.StatId, Value = s.Value, Slot = s.Slot }).ToList(),
     };
 
     public ItemInstance ToItem() => new()
@@ -52,7 +53,7 @@ public sealed class SavedItem
         Rarity = (Rarity)Rarity,
         Amount = Amount,
         Upgrades = Upgrades,
-        Stats = Stats.Select(s => new RolledStat(s.Id, s.Value)).ToArray(),
+        Stats = Stats.Select(s => new RolledStat(s.Id, s.Value, s.Slot)).ToArray(),
     };
 }
 
@@ -60,6 +61,8 @@ public sealed class SavedStat
 {
     public string Id { get; set; } = "";
     public float Value { get; set; }
+    /// <summary>Index of the base item's stat pool the stat was rolled from; -1 for sockets or not known (inferred on load).</summary>
+    public int Slot { get; set; } = -1;
 }
 
 /// <summary>World-wide settings, stored in the world save and owned by the host.</summary>

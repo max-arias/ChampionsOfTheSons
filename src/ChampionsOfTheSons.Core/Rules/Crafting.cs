@@ -23,6 +23,31 @@ public enum CraftError
     NothingToReroll,
     NoAlternativeBase,
     NoMaterial,
+    /// <summary>Polish on an empty socket: nothing to change, so nothing is consumed.</summary>
+    EmptySocket,
+}
+
+/// <summary>
+/// Which perk unlocks each crafting mode (COTF: each mode's free perk; the crafting column shows once any is owned).
+/// A mode whose perk is not in content is ungated, so deleting a perk never locks a mode for good.
+/// </summary>
+public static class CraftingUnlocks
+{
+    public static string? PerkFor(CraftMode mode) => mode switch
+    {
+        CraftMode.Reroll => "perk.rerolling",
+        CraftMode.Reforge => "perk.reforging",
+        CraftMode.Polish => "perk.polishing",
+        CraftMode.Empower => "perk.empowering",
+        CraftMode.IndividualReroll => "perk.rerolling_individual_stats",
+        _ => null,
+    };
+
+    public static bool IsUnlocked(CraftMode mode, PerkTree perks, ContentDb content)
+    {
+        var id = PerkFor(mode);
+        return id == null || !content.Perks.ContainsKey(id) || perks.TimesBought(id) > 0;
+    }
 }
 
 /// <summary>What scrapping an item gives: one stack of a material.</summary>
@@ -85,6 +110,7 @@ public sealed class Crafting
         if (ingredients.Count != IngredientCount(mode)) return Fail(CraftError.WrongIngredientCount);
         if (ingredients.Any(i => i.Rarity < target.Rarity)) return Fail(CraftError.IngredientRarityTooLow);
         if (!_content.Items.TryGetValue(target.BaseId, out var baseDef)) return Fail(CraftError.NothingToReroll);
+        target = _loot.InferSlots(target);
 
         switch (mode)
         {
@@ -108,6 +134,7 @@ public sealed class Crafting
             {
                 if (statIndex < 0 || statIndex >= target.Stats.Count) return Fail(CraftError.BadStatIndex);
                 var stat = target.Stats[statIndex];
+                if (stat.StatId == LootRoller.EmptySocketStat) return Fail(CraftError.EmptySocket);
                 var stats = target.Stats.ToList();
                 if (IsSocket(stat.StatId))
                 {
@@ -116,7 +143,7 @@ public sealed class Crafting
                 else
                 {
                     if (!_content.ItemStats.TryGetValue(stat.StatId, out var def)) return Fail(CraftError.NothingToReroll);
-                    stats[statIndex] = stat with { Value = (float)LootRoller.RollValue(def, target.Level, (int)target.Rarity, rng) };
+                    stats[statIndex] = stat with { Value = Reroll(baseDef, stat, def, target.Level, target.Rarity, rng) };
                 }
                 return Done(target with { Stats = stats });
             }
@@ -128,27 +155,54 @@ public sealed class Crafting
                 var stats = target.Stats.Select(s =>
                     IsSocket(s.StatId) || !_content.ItemStats.TryGetValue(s.StatId, out var def)
                         ? s
-                        : s with { Value = (float)LootRoller.RollValue(def, level, (int)target.Rarity, rng) }).ToList();
+                        : s with { Value = Reroll(baseDef, s, def, level, target.Rarity, rng) }).ToList();
                 return Done(target with { Level = level, Stats = stats, Upgrades = target.Upgrades + 1 });
             }
 
             case CraftMode.IndividualReroll:
             {
                 if (statIndex < 0 || statIndex >= target.Stats.Count) return Fail(CraftError.BadStatIndex);
-                var current = target.Stats[statIndex].StatId;
-                var pool = baseDef.StatPools.FirstOrDefault(p => p.Contains(current));
-                var options = pool?.Where(o => o != null && o != ItemBaseDef.AnyStat && o != current && _content.ItemStats.ContainsKey(o)).Select(o => o!).ToList();
-                if (options == null || options.Count == 0) return Fail(CraftError.NothingToReroll);
+                var item = target;
+                var current = item.Stats[statIndex];
+                var options = RerollOptions(item, statIndex, distinct: false);
+                if (options.Count == 0) return Fail(CraftError.NothingToReroll);
                 var def = _content.ItemStats[rng.Pick(options)];
-                var stats = target.Stats.ToList();
-                stats[statIndex] = new RolledStat(def.Id, (float)LootRoller.RollValue(def, target.Level, (int)target.Rarity, rng));
-                return Done(target with { Stats = stats });
+                var stats = item.Stats.ToList();
+                stats[statIndex] = LootRoller.RollStat(baseDef, current.Slot, def, item.Level, (int)item.Rarity, rng);
+                return Done(item with { Stats = stats });
             }
         }
         return Fail(CraftError.NothingToReroll);
     }
 
-    private static bool IsSocket(string statId) => statId.StartsWith("stat.socket", StringComparison.Ordinal) || statId == LootRoller.EmptySocketStat;
+    /// <summary>
+    /// What Individual reroll can turn stat <paramref name="statIndex"/> into: the other options of the slot it was rolled in
+    /// ("*" counts as every common stat, so with <paramref name="distinct"/> false each entry is one equal-weight pick).
+    /// Empty options and the current stat are left out ✱. Empty for sockets and stats with no known slot.
+    /// </summary>
+    public IReadOnlyList<string> RerollOptions(ItemInstance item, int statIndex, bool distinct = true)
+    {
+        if (statIndex < 0 || statIndex >= item.Stats.Count) return Array.Empty<string>();
+        if (!_content.Items.TryGetValue(item.BaseId, out var baseDef)) return Array.Empty<string>();
+        var stat = _loot.InferSlots(item).Stats[statIndex];
+        if (stat.Slot < 0 || IsSocket(stat.StatId)) return Array.Empty<string>();
+        var options = _loot.SlotOptions(baseDef, stat.Slot)
+            .Where(o => o != null && o != stat.StatId && _content.ItemStats.ContainsKey(o)).Select(o => o!);
+        return (distinct ? options.Distinct() : options).ToList();
+    }
+
+    /// <summary>The value range of a rolled stat at the item's level and rarity, with its slot multiplier.</summary>
+    public (double Min, double Max)? Range(ItemInstance item, RolledStat stat)
+    {
+        if (IsSocket(stat.StatId) || !_content.ItemStats.TryGetValue(stat.StatId, out var def)) return null;
+        double? mult = _content.Items.TryGetValue(item.BaseId, out var baseDef) ? baseDef.MultiplierFor(stat.Slot, stat.StatId) : null;
+        return LootRoller.ValueRange(def, item.Level, (int)item.Rarity, mult);
+    }
+
+    private static float Reroll(ItemBaseDef baseDef, RolledStat stat, ItemStatDef def, int level, Rarity rarity, Rng rng) =>
+        (float)LootRoller.RollValue(def, level, (int)rarity, rng, baseDef.MultiplierFor(stat.Slot, stat.StatId));
+
+    private static bool IsSocket(string statId) => LootRoller.IsSocketStat(statId);
 
     private static CraftResult Done(ItemInstance item) => new(item, CraftError.None);
 

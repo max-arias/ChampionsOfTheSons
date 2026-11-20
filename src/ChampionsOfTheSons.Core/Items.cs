@@ -13,8 +13,9 @@ public enum Rarity
     Primal = 7,
 }
 
-/// <summary>One rolled stat on an item instance.</summary>
-public sealed record RolledStat(string StatId, float Value);
+/// <summary>One rolled stat on an item instance. <paramref name="Slot"/> is the index of the base item's stat pool it came from
+/// (-1 for sockets and for stats whose slot is not known yet; see <see cref="Rules.StatSlots.Infer"/>).</summary>
+public sealed record RolledStat(string StatId, float Value, int Slot = -1);
 
 /// <summary>
 /// A concrete item: a base definition plus its rolled level, rarity and stats.

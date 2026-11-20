@@ -6,7 +6,7 @@ namespace ChampionsOfTheSons.Core.Networking;
 /// </summary>
 public static class MessageCodec
 {
-    public const int ProtocolVersion = 1;
+    public const int ProtocolVersion = 2;
 
     public static byte[] Encode(IMessage message)
     {
@@ -104,7 +104,7 @@ public static class MessageCodec
     {
         w.String(item.BaseId).VarInt(item.Level).Byte((byte)item.Rarity).VarInt(item.Amount).VarInt(item.Upgrades);
         w.VarUInt((uint)item.Stats.Count);
-        foreach (var s in item.Stats) w.String(s.StatId).Float(s.Value);
+        foreach (var s in item.Stats) w.String(s.StatId).Float(s.Value).VarInt(s.Slot);
     }
 
     private static ItemInstance ReadItem(PacketReader r)
@@ -117,7 +117,7 @@ public static class MessageCodec
         uint count = r.VarUInt();
         if (count > 64) throw new PacketException("Too many item stats");
         var stats = new RolledStat[count];
-        for (int i = 0; i < count; i++) stats[i] = new RolledStat(r.String() ?? "", r.Float());
+        for (int i = 0; i < count; i++) stats[i] = new RolledStat(r.String() ?? "", r.Float(), r.VarInt());
         return new ItemInstance { BaseId = baseId, Level = level, Rarity = rarity, Amount = amount, Upgrades = upgrades, Stats = stats };
     }
 }
