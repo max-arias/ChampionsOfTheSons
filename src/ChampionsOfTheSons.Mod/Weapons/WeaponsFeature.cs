@@ -23,6 +23,10 @@ public sealed class WeaponsFeature : IModFeature
             "Draw a game weapon your equipped weapon item can be built on (its model and rules then apply).");
         _key.SetScope(needsPlayerControllable: true);
         _key.Notify(() => DrawBase());
+        Bridge.EnemyPatches.LocalWeaponHit += (_, weapon) =>
+        {
+            if (weapon == WeaponClass.Melee) WeaponFx.LocalHit();
+        };
     }
 
     /// <summary>Equips the first game weapon from the equipped type's base list that the player owns. False if none.</summary>

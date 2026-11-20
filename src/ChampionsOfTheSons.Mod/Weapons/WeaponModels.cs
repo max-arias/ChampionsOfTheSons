@@ -1,5 +1,6 @@
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
+using ChampionsOfTheSons.Mod.Audio;
 using RedLoader;
 using Sons.Weapon;
 using UnityEngine;
@@ -23,6 +24,7 @@ internal sealed class WeaponSkin
 
     private readonly List<Renderer> _hidden = new();
     private readonly List<(BoxCollider Box, Vector3 Size, Vector3 Center)> _boxes = new();
+    private readonly List<(weaponInfo Info, bool NoTreeCut)> _treeFlags = new();
 
     public WeaponSkin(Transform holder, WeaponTypeDef type)
     {
@@ -32,33 +34,86 @@ internal sealed class WeaponSkin
 
     public bool Alive => Holder != null && Model != null;
 
+    /// <summary>Swing trail at the tip (null: the bundle has no trail prefab or the type has none).</summary>
+    public TrailRenderer? Trail { get; private set; }
+    private float _trailUntil;
+
+    /// <summary>Swing events seen and whether the trail was ever lit (self-tests).</summary>
+    public int Swings { get; private set; }
+    public bool TrailLit { get; private set; }
+
+    /// <summary>Pointers of the game weapon controllers under the holder (the swing and shot hooks match on them).</summary>
+    public readonly HashSet<IntPtr> Controllers = new();
+
     public void Apply(bool stretchReach)
     {
+        foreach (var c in Holder.GetComponentsInChildren<MeleeWeaponController>(true)) Controllers.Add(c.Pointer);
+        foreach (var c in Holder.GetComponentsInChildren<RangedWeaponController>(true)) Controllers.Add(c.Pointer);
+        WeaponFx.Skins.Add(this);
         HideGameRenderers();
         Model = BuildModel(Type, out var source);
         Source = source;
+        // Measured while the model still sits at the world origin: its bounds are its own-space bounds.
+        var b = Bounds(Model);
         var t = Model.transform;
         t.SetParent(Holder, false);
         Model.name = ModelName;
         bool bow = Type.Base == WeaponBase.Bow;
-        if (bow)
-        {
-            // Bows: limbs along model X, string behind the grip (model -Z); the game's bows have limbs along Y and
-            // shoot along +Z. Map model Z → holder Z and model Y (thickness) → holder X.
-            t.localRotation = Quaternion.LookRotation(new Vector3(0, 0, 1), new Vector3(1, 0, 0));
-        }
-        else
-        {
-            // Our melee models point their blade along +Y with the grip at the origin; the game's held weapons point
-            // along +Z with the flat of the blade facing ±X. Map model Y → holder Z and model X (blade width) → holder Y.
-            t.localRotation = Quaternion.LookRotation(new Vector3(1, 0, 0), new Vector3(0, 0, 1));
-        }
-        float meshLen = ModelLength(Model, bow);
+        // Melee models point their head along +Y with the flat facing +Z; the game's held weapons point along +Z with the
+        // flat facing X. Bows have their limbs along X and shoot along Z, like the game's. Model Y -> holder Z, model Z -> X.
+        // A bow prefab's limbs run along its longest side: X (mapped onto the game bow's Y) or already Y.
+        bool limbsX = b.size.x >= b.size.y;
+        var rot = !bow ? Quaternion.LookRotation(new Vector3(1, 0, 0), new Vector3(0, 0, 1))
+            : limbsX ? Quaternion.LookRotation(new Vector3(0, 0, 1), new Vector3(1, 0, 0)) : Quaternion.identity;
+        t.localRotation = rot;
         float holderScale = Mathf.Max(1e-4f, Holder.lossyScale.z);
-        float s = meshLen > 0 ? (float)Type.Length / (meshLen * holderScale) : 1;
+        float len = bow ? Mathf.Max(b.size.x, b.size.y) : b.size.y;
+        float s = len > 1e-4f ? (float)Type.Length / (len * holderScale) : 1;
         t.localScale = Vector3.one * s;
-        t.localPosition = bow ? Vector3.zero : new Vector3(0, 0, -(float)Type.Grip * s);
+        // The hand (holder origin) holds the model Grip metres up from the end of the handle (bows: from the grip centre).
+        var anchor = bow ? b.center : new Vector3(b.center.x, b.min.y, b.center.z);
+        t.localPosition = new Vector3(0, 0, -(float)Type.Grip / holderScale) - rot * (anchor * s);
+        if (Type.TrailWidth > 0 && !bow) AddTrail(new Vector3(b.center.x, b.max.y - 0.08f * b.size.y, b.center.z));
         if (stretchReach) StretchReach((float)WeaponTypes.ReachFactor(Type));
+        if (!WeaponTypes.CanCutTrees(Type))
+            foreach (var info in Holder.GetComponentsInChildren<weaponInfo>(true))
+            {
+                _treeFlags.Add((info, info.noTreeCut));
+                info.noTreeCut = true;
+            }
+    }
+
+    /// <summary>Turns the trail on for a swing (the game's swing event), for about one swing's length.</summary>
+    public void OnSwing(float seconds)
+    {
+        Swings++;
+        if (Trail == null) return;
+        TrailLit = true;
+        _trailUntil = Time.time + seconds;
+        Trail.emitting = true;
+    }
+
+    private void AddTrail(Vector3 tip)
+    {
+        var at = new GameObject("cots-trail-tip").transform;
+        at.SetParent(Model!.transform, false);
+        at.localPosition = tip;
+        var fx = Bundles.CotsBundle.Spawn("Fx_WeaponTrail", at);
+        Trail = fx != null ? fx.GetComponent<TrailRenderer>() : null;
+        if (Trail == null) return;
+        Trail.widthMultiplier = (float)Type.TrailWidth;
+        Trail.emitting = false;
+        Trail.Clear();
+    }
+
+    /// <summary>Combined renderer bounds in world space (the model's own space while it sits at the origin).</summary>
+    private static Bounds Bounds(GameObject go)
+    {
+        var rs = go.GetComponentsInChildren<Renderer>(true);
+        if (rs.Length == 0) return new Bounds(Vector3.zero, Vector3.one);
+        var b = rs[0].bounds;
+        foreach (var r in rs) b.Encapsulate(r.bounds);
+        return b;
     }
 
     /// <summary>Per frame: the game re-enables renderers on some events (blood, plating): keep them off.</summary>
@@ -66,6 +121,7 @@ internal sealed class WeaponSkin
     {
         foreach (var r in _hidden)
             if (r != null && r.enabled) r.enabled = false;
+        if (Trail != null && Trail.emitting && Time.time > _trailUntil) Trail.emitting = false;
     }
 
     /// <summary>A few times a second: hide renderers the game added after we attached (a spear spawns its mesh late).</summary>
@@ -76,12 +132,16 @@ internal sealed class WeaponSkin
 
     public void Remove()
     {
+        WeaponFx.Skins.Remove(this);
         foreach (var r in _hidden)
             if (r != null) r.enabled = true;
         _hidden.Clear();
         foreach (var (box, size, center) in _boxes)
             if (box != null) { box.size = size; box.center = center; }
         _boxes.Clear();
+        foreach (var (info, flag) in _treeFlags)
+            if (info != null) info.noTreeCut = flag;
+        _treeFlags.Clear();
         if (Model != null)
         {
             Model.SetActive(false); // Destroy waits for the end of the frame
@@ -89,6 +149,7 @@ internal sealed class WeaponSkin
             UnityEngine.Object.Destroy(Model);
         }
         Model = null;
+        Trail = null;
     }
 
     private void HideGameRenderers()
@@ -131,15 +192,6 @@ internal sealed class WeaponSkin
         return false;
     }
 
-    /// <summary>Model length in model units: along +Y for melee models, across the limbs (X) for bows.</summary>
-    private static float ModelLength(GameObject model, bool bow)
-    {
-        var mf = model.GetComponentInChildren<MeshFilter>();
-        if (mf == null || mf.sharedMesh == null) return 1;
-        var size = mf.sharedMesh.bounds.size;
-        return bow ? size.x : size.y;
-    }
-
     private static GameObject BuildModel(WeaponTypeDef type, out string source)
     {
         var holder = new GameObject("cots-weapon-tmp");
@@ -152,21 +204,11 @@ internal sealed class WeaponSkin
             return prefab;
         }
         UnityEngine.Object.Destroy(holder);
-        var lit = Shader.Find("HDRP/Lit");
-        if (type.StandIn != null && lit != null)
-        {
-            var standIn = GltfStandIn.Create(type.StandIn, lit);
-            if (standIn != null)
-            {
-                source = "standin:" + type.StandIn;
-                return standIn;
-            }
-        }
         source = "primitive";
         return Primitive(type);
     }
 
-    /// <summary>A plain blade: a flat box along +Y on a short handle, for builds without the bundle or stand-ins.</summary>
+    /// <summary>A plain blade: a flat box along +Y on a short handle, for builds without the bundle.</summary>
     private static GameObject Primitive(WeaponTypeDef type)
     {
         var root = new GameObject("cots-weapon-primitive");
@@ -174,12 +216,12 @@ internal sealed class WeaponSkin
         UnityEngine.Object.Destroy(blade.GetComponent<Collider>());
         blade.transform.SetParent(root.transform, false);
         blade.transform.localScale = new Vector3(0.08f, 0.8f, 0.015f);
-        blade.transform.localPosition = new Vector3(0, 0.45f, 0);
+        blade.transform.localPosition = new Vector3(0, 0.5f, 0);
         var grip = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         UnityEngine.Object.Destroy(grip.GetComponent<Collider>());
         grip.transform.SetParent(root.transform, false);
         grip.transform.localScale = new Vector3(0.035f, 0.1f, 0.035f);
-        grip.transform.localPosition = new Vector3(0, -0.05f, 0);
+        grip.transform.localPosition = new Vector3(0, 0.1f, 0);
         return root;
     }
 }
@@ -208,9 +250,12 @@ internal static class WeaponModels
         get
         {
             if (Active?.Damage is not double d || Base == null) return 1;
+            // Melee weapons carry their damage in their weapon data; the spear has none, only its hit script's damage.
             var data = Base._meleeWeaponData;
-            if (data == null) return 1;
-            if (!GameDamage.TryGetValue(data.Pointer, out var game)) GameDamage[data.Pointer] = game = data.Damage;
+            var info = Base._weaponInfo;
+            IntPtr key = data != null ? data.Pointer : info != null ? info.Pointer : IntPtr.Zero;
+            if (key == IntPtr.Zero) return 1;
+            if (!GameDamage.TryGetValue(key, out var game)) GameDamage[key] = game = data != null ? data.Damage : info!._weaponDamage;
             return game > 0 ? d / game : 1;
         }
     }
@@ -258,6 +303,7 @@ internal static class WeaponModels
         _local?.Keep();
 
         var active = _local != null ? type : null;
+        ProjectileDrop.SetDrop(!(active?.NoGravity ?? false));
         Base = active != null && held != null ? held.GetComponent<MeleeWeaponController>() : null;
         if (active != Active)
         {
@@ -268,9 +314,90 @@ internal static class WeaponModels
 
     public static void Reset()
     {
+        ProjectileDrop.SetDrop(true);
         _local?.Remove();
         _local = null;
         Active = null;
         Base = null;
+    }
+}
+
+/// <summary>
+/// The game's projectile gravity switch (COS-93 greatbow: arrows fly straight). Arrows are simulated by the ballistics
+/// handler, whose settings asset has one global "bullet drop" flag, so it is off only while the local player holds a
+/// no-gravity type; other projectiles in flight at that moment fly straight too.
+/// </summary>
+internal static class ProjectileDrop
+{
+    private static global::Ballistics.BallisticSettings? _settings;
+    private static bool? _original;
+
+    /// <summary>Whether projectiles drop right now (null: no ballistics handler found yet).</summary>
+    public static bool? Drop => Settings()?.BulletDrop;
+
+    public static void SetDrop(bool drop)
+    {
+        if (drop && _original == null) return; // never switched: nothing to put back
+        try
+        {
+            var settings = Settings();
+            if (settings == null) return;
+            _original ??= settings.BulletDrop;
+            bool want = drop ? _original.Value : false;
+            if (settings.BulletDrop != want) settings.BulletDrop = want;
+        }
+        catch (Exception e)
+        {
+            RLog.Error($"Champions of the Sons: projectile drop switch failed: {e}");
+            _settings = null;
+        }
+    }
+
+    private static global::Ballistics.BallisticSettings? Settings()
+    {
+        if (_settings != null) return _settings;
+        var handler = UnityEngine.Object.FindObjectOfType<global::Ballistics.BulletHandler>();
+        _settings = handler != null ? handler.GetSettings() : null;
+        return _settings;
+    }
+}
+
+/// <summary>
+/// Per-type swing and hit sounds and the swing trail, driven by the game's own swing and shot events. The event hooks
+/// compare only object pointers: IL2CPP can fold identical methods, so a hook may also run for unrelated objects.
+/// </summary>
+internal static class WeaponFx
+{
+    public const float SoundRange = 25f;
+
+    /// <summary>All weapon skins in the world: the local one and remote players' (co-op).</summary>
+    public static readonly List<WeaponSkin> Skins = new();
+
+    public static WeaponSkin? SkinOf(IntPtr controller)
+    {
+        foreach (var s in Skins)
+            if (s.Controllers.Contains(controller)) return s;
+        return null;
+    }
+
+    public static void Swing(IntPtr controller)
+    {
+        var skin = SkinOf(controller);
+        if (skin == null || skin.Holder == null) return;
+        // About one swing: the game's swing animation is near 0.45 s at normal speed.
+        skin.OnSwing(0.45f / (float)Math.Max(0.3, skin.Type.SwingSpeed));
+        ModAudio.PlayAt(skin.Type.SwingSound, skin.Holder.position, SoundRange, 0.8f, (float)skin.Type.SoundPitch);
+        LastSwingCue = ModAudio.LastCue;
+    }
+
+    /// <summary>The cue the last swing event left playing (self-tests).</summary>
+    public static string? LastSwingCue { get; private set; }
+
+    /// <summary>The local player's melee hit on an enemy.</summary>
+    public static void LocalHit()
+    {
+        var skin = WeaponModels.LocalSkin;
+        if (skin?.Holder != null && skin.Type.Base != WeaponBase.Bow)
+            ModAudio.PlayAt(skin.Type.HitSound, skin.Holder.position, SoundRange, 0.9f, (float)skin.Type.SoundPitch);
     }
 }

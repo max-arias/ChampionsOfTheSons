@@ -35,6 +35,12 @@ CLIPS = {
     "cast_warp": ("Rune_activate_–_Anci_#4", None),
     "cast_physical": ("Heavy_weapon_whoosh,_#3", None),
     "impact_metal": ("Shield_block_–_Metal_#1", None),
+    # weapon types (COS-93)
+    "swing_blade": ("Sword_swing_–_Fast_m_#4", None),
+    "swing_heavy": ("Heavy_weapon_whoosh,_#4", None),
+    "hit_blade": ("Sword_hit_flesh_–_Me_#1", None),
+    "hit_heavy": ("Axe_hit_armor_–_Deep_#1", None),
+    "bow_shot": ("Bow_and_arrow_shot_–_#3", None),
     "trap_set": ("Lever_pull_–_Mechani_#1", None),
     "loop_wind": ("Forest_ambience_–_Wi_#1", None),
     "loop_fire": ("Torch_fire_–_Small_f_#1", None),

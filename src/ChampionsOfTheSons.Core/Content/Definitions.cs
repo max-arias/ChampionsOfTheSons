@@ -257,6 +257,8 @@ public sealed class WeaponTypeDef
     /// <summary>Length multiplier of the game weapon's hit volume.</summary>
     public double Reach { get; set; } = 1;
     public bool CutsTrees { get; set; } = true;
+    /// <summary>Spear types: whether the game's throw (aim, then attack) is allowed.</summary>
+    public bool CanThrow { get; set; } = true;
     /// <summary>With the hammer stun stat: every hit slows the enemy to this speed (0 = no slow) ...</summary>
     public double StunSlow { get; set; }
     /// <summary>... for this many seconds.</summary>
@@ -267,17 +269,23 @@ public sealed class WeaponTypeDef
     public double RangedDamageMult { get; set; } = 1;
     public double ProjectileForce { get; set; } = 1;
     public bool NoGravity { get; set; }
-    /// <summary>Draw and reload speed multiplier.</summary>
+    /// <summary>Draw speed multiplier: below 1 the bow needs longer between shots.</summary>
     public double DrawSpeed { get; set; } = 1;
 
     // ---- model
-    /// <summary>Bundle prefab name (COS-5). Its grip is at the origin and its blade points along +Y.</summary>
+    /// <summary>Bundle prefab name (COS-5): real size, origin at the end of the grip (bows: grip centre), +Y toward the head.</summary>
     public string Model { get; set; } = "";
-    /// <summary>Development stand-in model (a glTF file name) used while the bundle has no prefab.</summary>
-    public string? StandIn { get; set; }
     /// <summary>Length of the model in hand, in metres.</summary>
     public double Length { get; set; } = 1;
-    /// <summary>Where the hand holds the model, in model units along +Y (0 = the origin).</summary>
+    /// <summary>Where the hand holds the model: metres from the end of the grip (bows: offset from the grip centre).</summary>
     public double Grip { get; set; }
+    /// <summary>Width of the swing trail at the tip, in metres (0 = no trail).</summary>
+    public double TrailWidth { get; set; }
+
+    // ---- sound (cue names of the mod's audio layer)
+    public string? SwingSound { get; set; }
+    public string? HitSound { get; set; }
+    /// <summary>Pitch of the type's swing, hit and shot sounds (heavier weapons sound lower).</summary>
+    public double SoundPitch { get; set; } = 1;
 }
 

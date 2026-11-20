@@ -85,9 +85,42 @@ public static class CotsFxPrefabs
         Flame();
         Glyph();
         Gas();
+        WeaponTrail();
     }
 
     // ---- prefabs ----
+
+    /// <summary>
+    /// The swing trail of a held weapon type (COS-93): a TrailRenderer the mod parents to the weapon tip, switches on while
+    /// the tip moves fast and widens per type. Not emitting by default; width 1 (the mod sets widthMultiplier).
+    /// </summary>
+    private static void WeaponTrail()
+    {
+        var swipe = CotsGen.Tex("FxSwipe", 128, (u, v) =>
+        {
+            // u runs along the trail (0 = at the blade), v across it: bright core near the blade edge, fading behind.
+            float across = Mathf.Exp(-Mathf.Pow((v - 0.6f) / 0.28f, 2));
+            float along = Mathf.Pow(1 - u, 1.5f);
+            return White(Mathf.Clamp01(across * along * 1.2f));
+        });
+        var go = new GameObject("Fx_WeaponTrail");
+        var trail = go.AddComponent<TrailRenderer>();
+        trail.sharedMaterial = CotsGen.Fx("FxWeaponTrailMat", swipe, new Color(0.85f, 0.9f, 1f, 0.7f), 1.4f);
+        trail.time = 0.16f;
+        trail.minVertexDistance = 0.03f;
+        trail.widthMultiplier = 1f;
+        trail.widthCurve = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 0.15f));
+        trail.textureMode = LineTextureMode.Stretch;
+        trail.alignment = LineAlignment.View;
+        trail.emitting = false;
+        trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        trail.receiveShadows = false;
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
+            new[] { new GradientAlphaKey(0.8f, 0), new GradientAlphaKey(0, 1) });
+        trail.colorGradient = g;
+        CotsGen.SavePrefab(go);
+    }
 
     /// <summary>A lasting ground area or telegraph: faint fill, bright pulsing edge, motes rising from the edge.</summary>
     private static void Ring()
