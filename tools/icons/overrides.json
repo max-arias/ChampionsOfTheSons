@@ -319,5 +319,6 @@
  "perk.turbo": "speed-boat",
  "perk.health_regen": "sewing-string",
  "perk.time_of_need": "heart-plus",
- "perk.counter_strike": "coins"
+ "perk.counter_strike": "coins",
+ "item.manhole_cover_shield": "bordered-shield"
 }

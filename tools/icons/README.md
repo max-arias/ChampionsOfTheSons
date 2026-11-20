@@ -16,7 +16,7 @@ AI generation (local ComfyUI, Z-Image Turbo) was dropped. Icons are recolored **
 - `overrides.json`: hand picks (`id -> icon slug`), win over the automatic match. Edit this to fix a bad icon.
 - Matching: keywords from the entry name and type (e.g. a weapon must match a weapon icon), synonyms, a penalty for reusing
   an icon, deterministic tie-break. Items must match their type. A few icons are banned (`BANNED`).
-- Look: white glyph -> vertical gradient in the rarity color (0..7: grey, green, blue, yellow, purple, orange, red, magenta),
+- Look: white glyph -> vertical gradient in the rarity color (Common grey, Magic blue, Rare yellow, Legendary orange: the colours of the old tiers they mostly came from),
   dark outline, glow growing with rarity. Perks/spells/sets get a category color and a dark disc.
   Rendered at 512 px, downscaled to 128, palette-quantized (256 colors) to keep the files small.
 

@@ -9123,6 +9123,226 @@
           "value": -0.4
         }
       ]
+    },
+    {
+      "id": "item.sinewlaced_boots",
+      "name": "Sinewlaced Boots",
+      "type": "boot",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.movementspeed"
+        ],
+        [
+          "stat.agility",
+          "stat.vitality",
+          "stat.lesserstrength"
+        ],
+        [
+          "stat.armor",
+          "stat.thorns",
+          "stat.jumppower",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.bonebound_bracer",
+      "name": "Bonebound Bracer",
+      "type": "bracer",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.strength",
+          "stat.agility",
+          "stat.vitality",
+          "stat.intelligence"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.attackspeed",
+          "stat.lifeonhit",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.pelt_shoulderguard",
+      "name": "Pelt Shoulderguard",
+      "type": "shoulder_armor",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.maximumlife",
+          "stat.maximumenergy",
+          "stat.lifepersecond",
+          "stat.staminapersecond"
+        ],
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.strength",
+          "stat.agility",
+          "stat.vitality",
+          "stat.intelligence",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.charcoal_cave_notes",
+      "name": "Charcoal Cave Notes",
+      "type": "spell_scroll",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.spellcostreduction",
+          "stat.basespelldamage",
+          "stat.cooldownreduction"
+        ],
+        [
+          "stat.intelligence",
+          "stat.maximumenergy",
+          "stat.energypersecond"
+        ],
+        [
+          "*",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.bunker_flak_vest",
+      "name": "Bunker Flak Vest",
+      "type": "chest_armor",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.strength",
+          "stat.agility",
+          "stat.vitality",
+          "stat.intelligence"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.damagereduction",
+          "stat.resistancetomagic"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.steelweave_gloves",
+      "name": "Steelweave Gloves",
+      "type": "glove",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.attackspeed",
+          "stat.criticalhitchance"
+        ],
+        [
+          "stat.strength",
+          "stat.agility",
+          "stat.intelligence"
+        ],
+        [
+          "stat.armor",
+          "stat.lifeonhit",
+          "stat.meleedamageincrease",
+          "stat.rangeddamageincrease"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.ammo_can_quiver",
+      "name": "Ammo Can Quiver",
+      "type": "quiver",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.baserangeddamage"
+        ],
+        [
+          "stat.rangeddamageincrease",
+          "stat.agility",
+          "stat.rangedarmorpiercing"
+        ],
+        [
+          "stat.attackspeed",
+          "stat.headshotdamage",
+          "stat.projectilespeed"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.manhole_cover_shield",
+      "name": "Manhole Cover Shield",
+      "type": "shield",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.block"
+        ],
+        [
+          "stat.armor",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality",
+          "stat.thorns"
+        ],
+        [
+          "*"
+        ],
+        [
+          "*",
+          null
+        ]
+      ]
     }
   ]
 }

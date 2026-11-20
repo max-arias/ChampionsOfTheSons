@@ -162,12 +162,19 @@ def match(ents, overrides):
 
 
 RARITY = ["#b9b9b9", "#5fd05f", "#4aa3ff", "#ecd84a", "#b266ff", "#ff8c2e", "#ff3d3d", "#ff55dd"]
+# Content has four rarities since COS-109 (Common, Magic, Rare, Legendary); icons keep the look of the old tier each one
+# mostly came from, so new icons match the ones rendered before the collapse.
+TIER = [0, 2, 3, 5]
+
+
+def tier(e):
+    return TIER[min(3, e["rarity"])]
 CAT = {"melee_offense": "#e8603c", "ranged_offense": "#8ac24a", "magic_offense": "#9a6bff", "defense": "#5aa0e8",
        "support": "#4ed6a0", "utility": "#e8c25a", "spell": "#5ad8ff", "set": "#ffd24a"}
 
 
 def tint(e):
-    return RARITY[min(7, e["rarity"])] if e["kind"] == "item" else CAT.get(e["type"], "#cccccc")
+    return RARITY[tier(e)] if e["kind"] == "item" else CAT.get(e["type"], "#cccccc")
 
 
 def hex2rgb(h):
@@ -225,7 +232,7 @@ def render_one(e, key):
     a = c
     an = np.asarray(a, np.float32) / 255
     base = np.array(hex2rgb(tint(e)), np.float32)
-    r = min(7, e["rarity"]) if e["kind"] == "item" else 3
+    r = tier(e) if e["kind"] == "item" else 3
     h, w = an.shape
     yy = np.linspace(0, 1, h)[:, None, None]
     light = np.minimum(255, base + 70)
