@@ -137,7 +137,7 @@ public static class EnemyPatches
                     bool head = IsHead(__args.Length > 0 ? __args[0] as DamageNode : null);
                     double distance = LocalPlayer.Transform != null ? Vector3.Distance(LocalPlayer.Transform.position, __instance.transform.position) : 0;
                     var shot = new RangedShot(PerkHooks.ShotTracker.KindForHit(), distance, head);
-                    var ranged = RangedRules.Hit(sheet, amount, shot, Rng);
+                    var ranged = RangedRules.Hit(sheet, WeaponTypes.RangedBaseDamage(Weapons.WeaponModels.Active, amount), shot, Rng);
                     hit = ranged.Hit;
                     _extraHits = ranged.ExtraHits;
                     _headshot = ranged.Headshot;
@@ -145,7 +145,9 @@ public static class EnemyPatches
                 }
                 else
                 {
-                    hit = PlayerAttack.Weapon(sheet, weapon, amount, Rng);
+                    // Weapon types (COS-93): the type's melee damage factor.
+                    double baseDamage = weapon == WeaponClass.Melee ? amount * Weapons.WeaponModels.MeleeDamageFactor : amount;
+                    hit = PlayerAttack.Weapon(sheet, weapon, baseDamage, Rng);
                 }
                 // Explosions (bombs, molotovs) take the explosion stat; thrown spears are projectiles and get their own multiplier.
                 if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + sheet.Get(CombatStatIds.ExplosionDamage)) };
@@ -231,6 +233,7 @@ public static class EnemyPatches
         if (procs.Bleed) combat.ApplyDot("player.bleed", DotKind.Bleed, procs.BleedPerSecond, AbilityTuning.BleedSeconds);
         if (procs.Weaken) combat.ApplyWeaken("player.weaken", AbilityTuning.WeakenMult, AbilityTuning.WeakenSeconds);
         if (procs.StunSeconds > 0) combat.ApplyStun(procs.StunSeconds);
+        if (WeaponTypes.HitSlow(Weapons.WeaponModels.Active, character.Stats) is { } hammer) combat.ApplySlow("weapon.hammer", hammer.SpeedMult, hammer.Seconds);
     }
 
     [HarmonyPatch(typeof(VailWorldSimulation), nameof(VailWorldSimulation.OnActorDied))]

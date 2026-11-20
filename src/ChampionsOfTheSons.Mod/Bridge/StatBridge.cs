@@ -108,13 +108,15 @@ public sealed class StatBridge : IModFeature
     {
         try
         {
-            double speed = AttackSpeed, cost = AttackCost;
             // Measured Breath: while Black Flame burns, the swing speed is fixed (COS-86).
-            double swing = MeleeRules.SwingSpeed(Sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame"));
+            double baseSwing = MeleeRules.SwingSpeed(Sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame"));
             foreach (var weapon in Resources.FindObjectsOfTypeAll<MeleeWeaponController>())
             {
                 var data = weapon._meleeWeaponData;
                 if (data == null || !weapon.gameObject.activeInHierarchy) continue;
+                // The weapon type built on this game weapon scales it too (COS-93).
+                var type = Weapons.WeaponModels.Base == weapon ? Weapons.WeaponModels.Active : null;
+                double swing = baseSwing * WeaponTypes.SwingSpeedFactor(type), cost = AttackCost * WeaponTypes.StaminaCostFactor(type);
                 if (!MeleeData.TryGetValue(data.Pointer, out var orig))
                     MeleeData[data.Pointer] = orig = new MeleeOriginal(data.SwingSpeed, data.SwingSpeedTired, data.StaminaCost);
                 data.SwingSpeed = orig.Swing * (float)swing;
@@ -123,7 +125,10 @@ public sealed class StatBridge : IModFeature
                 LastMeleeRatio = orig.Swing > 0 ? data.SwingSpeed / orig.Swing : swing;
             }
 
-            double size = ProjectileSize, projSpeed = ProjectileSpeed, pen = ProjectilePenetration;
+            double speed = AttackSpeed;
+            var bowType = Weapons.WeaponModels.Active;
+            double force = bowType?.Base == Core.Content.WeaponBase.Bow ? bowType.ProjectileForce : 1; // greatbow, COS-93
+            double size = ProjectileSize, projSpeed = ProjectileSpeed * force, pen = ProjectilePenetration;
             foreach (var weapon in Resources.FindObjectsOfTypeAll<RangedWeapon>())
             {
                 var info = weapon.bulletInfo;

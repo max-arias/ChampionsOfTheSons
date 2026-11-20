@@ -1,0 +1,123 @@
+using Bolt;
+using ChampionsOfTheSons.Core.Networking;
+using ChampionsOfTheSons.Mod.Weapons;
+using RedLoader;
+using TheForest.Utils;
+using UnityEngine;
+
+namespace ChampionsOfTheSons.Mod.Net;
+
+/// <summary>
+/// Weapon types in co-op (COS-93): every player tells the others which type is in their hand; receivers find that
+/// player's body (the held weapon nearest to the reported position) and put the same model on its held game weapon.
+/// In the Net namespace so a dedicated server, which runs no Weapons feature, still relays.
+/// </summary>
+public sealed class CoopWeapons : IModFeature
+{
+    /// <summary>Resend interval while a type is held: keeps late joiners and the position current.</summary>
+    private const float Resend = 2f;
+    /// <summary>A remote held weapon farther than this from the reported position is someone else's.</summary>
+    private const float MatchRadius = 4f;
+
+    private sealed class Remote
+    {
+        public string TypeId = "";
+        public Vector3 Position;
+        public float Seen;
+        public WeaponSkin? Skin;
+    }
+
+    private static readonly Dictionary<uint, Remote> Players = new();
+    private static float _sendTimer, _matchTimer;
+    private static string _sentType = "";
+
+    /// <summary>Self-tests and logs: remote players currently showing a model.</summary>
+    public static int RemoteModels => Players.Values.Count(p => p.Skin?.Alive == true);
+
+    public void Init() => CotsNetEvent.Received += OnNet;
+
+    public void OnGameStart()
+    {
+        foreach (var p in Players.Values) p.Skin?.Remove();
+        Players.Clear();
+        _sentType = "";
+    }
+
+    public void Update(float dt, bool inWorld)
+    {
+        if (!CoopSession.Active || !inWorld || LocalPlayer.Transform == null) return;
+        string type = WeaponModels.Active?.Id ?? "";
+        _sendTimer -= dt;
+        if (type != _sentType || (type != "" && _sendTimer <= 0))
+        {
+            _sendTimer = Resend;
+            _sentType = type;
+            CoopSession.Broadcast(new HeldWeapon(0, type, CoopSession.ToVec(LocalPlayer.Transform.position)));
+        }
+        _matchTimer -= dt;
+        if (_matchTimer <= 0)
+        {
+            _matchTimer = 0.5f;
+            MatchRemotes();
+            foreach (var p in Players.Values) p.Skin?.Rescan();
+        }
+        foreach (var p in Players.Values) p.Skin?.Keep();
+    }
+
+    private static void OnNet(IMessage message, BoltConnection from)
+    {
+        if (message is not HeldWeapon held) return;
+        try
+        {
+            if (CoopSession.IsHost)
+            {
+                if (!CoopFeature.Verified.Contains(from)) return;
+                held = held with { PlayerId = CoopSession.IdOf(from) };
+                CoopSession.SendToPeers(held, except: from);
+            }
+            if (!Players.TryGetValue(held.PlayerId, out var p)) Players[held.PlayerId] = p = new Remote();
+            p.TypeId = held.TypeId;
+            p.Position = CoopSession.ToUnity(held.Position);
+            p.Seen = Time.realtimeSinceStartup;
+        }
+        catch (Exception e)
+        {
+            RLog.Error($"{CoopTestJoin.Tag} held weapon handler failed: {e}");
+        }
+    }
+
+    /// <summary>Puts on, swaps or removes each remote player's model. No-op on a dedicated server (no bodies to dress).</summary>
+    private static void MatchRemotes()
+    {
+        if (Players.Count == 0) return;
+        var candidates = HeldWeapons.Remote().ToList();
+        foreach (var (id, p) in Players)
+        {
+            ModContent.Db.WeaponTypes.TryGetValue(p.TypeId, out var type);
+            if (type != null && Time.realtimeSinceStartup - p.Seen > Resend * 3) type = null; // stale: they left or crashed
+            HeldWeapons.Held? best = null;
+            float bestDist = MatchRadius;
+            if (type != null)
+                foreach (var c in candidates)
+                {
+                    if (!Core.Rules.WeaponTypes.Fits(type, c.Kind)) continue;
+                    float d = Vector3.Distance(c.Holder.position, p.Position);
+                    if (d < bestDist) { bestDist = d; best = c; }
+                }
+
+            var skin = p.Skin;
+            if (skin != null && (!skin.Alive || best == null || skin.Holder != best.Value.Holder || skin.Type != type))
+            {
+                if (skin.Holder != null) skin.Remove();
+                p.Skin = null;
+            }
+            if (p.Skin == null && best != null && type != null)
+            {
+                p.Skin = new WeaponSkin(best.Value.Holder, type);
+                // Reach stays the wielder's business: their own client computes their hits.
+                p.Skin.Apply(stretchReach: false);
+                RLog.Msg($"{CoopTestJoin.Tag} player {id} shows {type.Id} on {best.Value.Holder.name} ({p.Skin.Source})");
+            }
+        }
+    }
+}
