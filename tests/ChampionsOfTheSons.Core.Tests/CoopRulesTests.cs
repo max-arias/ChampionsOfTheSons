@@ -24,6 +24,17 @@ public class CoopRulesTests
     }
 
     [Fact]
+    public void Team_magic_find_is_the_sum_over_players()
+    {
+        Assert.Equal(1.0, KillCredit.TeamMagicFind(Array.Empty<double>()));
+        Assert.Equal(1.5, KillCredit.TeamMagicFind(new[] { 1.5 }));
+        Assert.Equal(3.7, KillCredit.TeamMagicFind(new[] { 1.5, 1.2, 1.0 }), 9);
+        // A broken report counts as the base 1, never as zero or a negative.
+        Assert.Equal(2.5, KillCredit.TeamMagicFind(new[] { 1.5, double.NaN }), 9);
+        Assert.Equal(2.0, KillCredit.TeamMagicFind(new[] { 1.0, -4 }), 9);
+    }
+
+    [Fact]
     public void Loot_level_follows_the_policy()
     {
         var near = new[] { (10, 30f), (50, 5f), (30, 12f) };

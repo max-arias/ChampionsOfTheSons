@@ -115,9 +115,8 @@ public sealed class LootFeature : IModFeature
     public static List<ItemInstance> RollForKill(EnemyProfile enemy, WorldRules rules)
     {
         var result = new List<ItemInstance>();
-        var stats = PlayerState.Character.Stats;
-        double mf = stats.Get(StatIds.MagicFind);
-        if (mf <= 0) mf = 1;
+        // Co-op: the sum of every player's magic find (COS-81); alone: the player's own.
+        double mf = Net.CoopParty.TeamMagicFind();
         if (!LootRoller.ShouldDrop(enemy, rules, mf, Rng)) return result;
         int level = PlayerState.Character.Progress.Level;
         if (Net.CoopSession.IsHost && Net.CoopFeature.Verified.Count > 0) level = Net.CoopSession.LootLevel(level); // co-op: the host's loot-level policy over all players

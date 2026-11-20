@@ -8,6 +8,7 @@ using RedLoader;
 using Sons.Ai.Vail;
 using Sons.Ai.Vail.StimuliTypes;
 using Sons.Weapon;
+using TheForest.Utils;
 using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Net;
@@ -33,7 +34,40 @@ public sealed class CoopHits : IModFeature
     /// <summary>Self-tests: the last hit message the host applied.</summary>
     public static (uint Player, ulong Enemy, double Landed)? LastApplied { get; private set; }
 
-    public void Init() => CotsNetEvent.Received += OnNet;
+    public void Init()
+    {
+        CotsNetEvent.Received += OnNet;
+        EnemyPatches.EnemyHit += OnHostDamage;
+    }
+
+    /// <summary>True while the host applies a client's hit (that one is shown to the others by <see cref="ApplyRemoteHit"/>).</summary>
+    private static bool _applyingRemote;
+
+    /// <summary>Damage numbers the host sent for its own hits, damage over time and spells (COS-81, co-op test).</summary>
+    public static int HostNumbersSent { get; private set; }
+
+    /// <summary>Host: every other hit that lands on an enemy (the host's own swings and spells, bleed and burn ticks, thorns)
+    /// is shown to the clients too, so everyone sees every hit (COS-81).</summary>
+    private static void OnHostDamage(VailActor actor, EnemyRuntime runtime, double damage, bool crit)
+    {
+        try
+        {
+            if (_applyingRemote || damage <= 0.5 || !CoopSession.IsHost || CoopFeature.Verified.Count == 0) return;
+            ulong id = EnemySyncFeature.NetIdOf(actor);
+            if (id == 0) return;
+            Vector3 pos = runtime.LastPosition ?? actor.transform.position;
+            pos += Vector3.up * 1.7f * Mathf.Max(0.5f, (float)runtime.Profile.Scale);
+            var flags = crit ? HitFlags.Crit : HitFlags.None;
+            if (EnemyPatches.LastHitKind == DamageKind.Magic) flags |= HitFlags.Magic;
+            else if (EnemyPatches.LastHitKind == DamageKind.Pure) flags |= HitFlags.Pure;
+            CoopSession.SendToPeers(new DamageShown(CoopSession.HostId, id, CoopSession.ToVec(pos), (float)damage, flags));
+            HostNumbersSent++;
+        }
+        catch (Exception e)
+        {
+            RLog.Warning($"{CoopTestJoin.Tag} damage number broadcast failed: {e.Message}");
+        }
+    }
 
     // ---------------------------------------------------------------- client: outgoing hits
 
@@ -120,7 +154,10 @@ public sealed class CoopHits : IModFeature
                     CoopSession.SetLevel(from, pos.Level);
                     break;
                 case DamageShown shown when CoopSession.IsClient:
-                    CoopFx.ShowDamage(CoopSession.ToUnity(shown.Position), shown.Amount, (shown.Flags & HitFlags.Crit) != 0);
+                    // Only hits near this player (COS-81); the setting is checked where the number is drawn.
+                    var at = CoopSession.ToUnity(shown.Position);
+                    if (LocalPlayer.Transform == null || Vector3.Distance(at, LocalPlayer.Transform.position) <= DamageNumberRange)
+                        CoopFx.ShowDamage(at, shown.Amount, (shown.Flags & HitFlags.Crit) != 0);
                     break;
             }
         }
@@ -129,6 +166,9 @@ public sealed class CoopHits : IModFeature
             RLog.Error($"{CoopTestJoin.Tag} net handler failed: {e}");
         }
     }
+
+    /// <summary>Teammates' and the host's hits farther than this from the local player show no number.</summary>
+    private const float DamageNumberRange = 80f;
 
     private static void ApplyRemoteHit(uint playerId, Hit hit, BoltConnection from)
     {
@@ -141,7 +181,9 @@ public sealed class CoopHits : IModFeature
         var outgoing = new OutgoingHit(amount, kind, (hit.Flags & HitFlags.Crit) != 0, System.Math.Max(0, hit.ArmorPierce));
         LastHitter[hit.EnemyNetId] = playerId;
         double before = runtime.Stats == null ? 0 : EnemyRegistry.Health(runtime.Stats)?._currentValue ?? 0;
-        EnemyPatches.DealForced(runtime, outgoing, creditPlayer: false);
+        _applyingRemote = true;
+        try { EnemyPatches.DealForced(runtime, outgoing, creditPlayer: false); }
+        finally { _applyingRemote = false; }
         double after = runtime.Stats == null ? 0 : EnemyRegistry.Health(runtime.Stats)?._currentValue ?? 0;
         double landed = before - after;
         LastApplied = (playerId, hit.EnemyNetId, landed);

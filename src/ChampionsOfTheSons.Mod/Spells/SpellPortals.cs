@@ -32,11 +32,23 @@ internal static class SpellPortals
         var pair = new Pair { A = a, B = b, Left = seconds };
         pair.VisualA = Gate(a);
         pair.VisualB = Gate(b);
+        SpellNet.NoteMotion(pair.VisualA, seconds, Vector3.zero);
+        SpellNet.NoteMotion(pair.VisualB, seconds, Vector3.zero);
         Pairs.Add(pair);
         _lock = 0.5f;
         LastOpened = (a, b);
         return (a, b);
     }
+
+    /// <summary>A teammate's Portal (COS-80): the same pair, drawn from their cast, carries the local player too.</summary>
+    public static void OpenShared(Vector3 a, Vector3 b, float seconds, GameObject? visualA, GameObject? visualB)
+    {
+        Pairs.Add(new Pair { A = a, B = b, Left = seconds, VisualA = visualA, VisualB = visualB });
+        SharedOpened++;
+    }
+
+    /// <summary>Teammates' portal pairs opened here (co-op test).</summary>
+    public static int SharedOpened { get; private set; }
 
     private static GameObject Gate(Vector3 at)
     {

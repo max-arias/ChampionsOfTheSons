@@ -25,6 +25,10 @@ internal abstract class AbilityInstance : IDisposable
     }
 
     protected EnemyRuntime Enemy { get; }
+
+    /// <summary>A client's copy of a host enemy's ability (COS-79): it never starts a cast itself, never moves the enemy, and
+    /// resolves effects on the client's own player only.</summary>
+    public bool Replica { get; set; }
     protected ActiveAbilitySpec Spec { get; }
     protected string Key => $"{Spec.Ability}:{RuntimeHelpers.GetHashCode(Enemy)}";
     protected Vector3 EnemyPos => Enemy.Actor!.transform.position;
@@ -159,8 +163,10 @@ internal sealed class RadianceInstance : AuraInstance
 }
 
 /// <summary>
-/// A cast: wait out the cooldown, pick a target in range, then run <see cref="Begin"/> → <see cref="Advance"/> until it finishes.
-/// The cooldown restarts when the cast ends, and does not run while casting.
+/// A cast: wait out the cooldown, pick a target in range (the nearest player, host or client), then run <see cref="Begin"/> →
+/// <see cref="Advance"/> until it finishes. The cooldown restarts when the cast ends, and does not run while casting.
+/// In co-op the host tells every client (<see cref="AbilityNet"/>); a client's <see cref="AbilityInstance.Replica"/> plays the
+/// same cast from <see cref="StartReplica"/>, so everyone sees it at the same place and each player is hit by their own copy.
 /// </summary>
 internal abstract class CastInstance : AbilityInstance
 {
@@ -168,6 +174,15 @@ internal abstract class CastInstance : AbilityInstance
     private bool _casting;
     private bool _impactSounded;
     protected float T;
+
+    /// <summary>Random parts of this cast (trap spots), seeded so every machine rolls the same.</summary>
+    protected Rng CastRng = Rng;
+
+    /// <summary>The player aimed at is the one on this machine (root and tracking only bind the target).</summary>
+    protected bool TargetIsLocal = true;
+
+    /// <summary>Host: the id of the player aimed at (to follow them during the wind-up).</summary>
+    protected uint TargetId = AbilityTargets.LocalId;
 
     /// <summary>Where the cast lands, for its impact sound (COS-101); the enemy's chest unless the cast picks a spot.</summary>
     protected virtual Vector3 ImpactPoint => Chest;
@@ -184,19 +199,49 @@ internal abstract class CastInstance : AbilityInstance
     /// <summary>The cast is over (finished or cut short): hide what it showed.</summary>
     protected virtual void Finish() { }
 
+    /// <summary>A replica got the host's locked aim point (Laser).</summary>
+    public virtual void OnLock(Vector3 point) { }
+
+    /// <summary>Where the target is now: the host follows the player it aimed at, a replica only follows its own player.</summary>
+    protected Vector3? TargetNow()
+    {
+        if (!Replica) return AbilityTargets.PositionOf(TargetId);
+        return TargetIsLocal ? AbilityTargets.Nearest(EnemyPos) : null;
+    }
+
+    /// <summary>Client: play the host's cast from its start (cut short a copy still running).</summary>
+    public void StartReplica(Vector3 target, bool targetIsLocal, ulong seed)
+    {
+        if (_casting) Finish();
+        TargetIsLocal = targetIsLocal;
+        CastRng = new Rng(seed);
+        StartCast(target);
+    }
+
+    private void StartCast(Vector3 target)
+    {
+        _casting = true;
+        T = 0;
+        AbilityDamage.NoteFired(Enemy, Spec.Ability);
+        Begin(target);
+        _impactSounded = false;
+        Audio.ModAudio.PlayAt(Audio.SoundCues.Telegraph(Spec.Ability), EnemyPos, 50f);
+    }
+
     protected override void Step(float dt)
     {
         if (!_casting)
         {
+            if (Replica) return; // a copy only casts when the host says so
             if (!_clock.Tick(dt)) return;
-            if (AbilityTargets.Nearest(EnemyPos) is not { } target) return;
-            if (!ActiveAbilityRules.InRange(Spec, Vector3.Distance(target, EnemyPos))) return;
-            _casting = true;
-            T = 0;
-            AbilityDamage.NoteFired(Enemy, Spec.Ability);
-            Begin(target);
-            _impactSounded = false;
-            Audio.ModAudio.PlayAt(Audio.SoundCues.Telegraph(Spec.Ability), EnemyPos, 50f);
+            if (AbilityTargets.NearestTarget(EnemyPos) is not { } target) return;
+            if (!ActiveAbilityRules.InRange(Spec, Vector3.Distance(target.Position, EnemyPos))) return;
+            TargetId = target.Id;
+            TargetIsLocal = target.Id == AbilityTargets.LocalId && AbilityTargets.PlayerAlive;
+            ulong seed = (ulong)Rng.Range(1, int.MaxValue);
+            CastRng = new Rng(seed);
+            StartCast(target.Position);
+            AbilityNet.SendBegin(Enemy, Spec.Ability, target.Position, seed, target.Id);
         }
         T += dt;
         if (!_impactSounded && T >= Spec.Windup)
@@ -207,7 +252,7 @@ internal abstract class CastInstance : AbilityInstance
         if (!Advance(dt)) return;
         _casting = false;
         Finish();
-        _clock.Fire(Spec.Cooldown);
+        if (!Replica) _clock.Fire(Spec.Cooldown);
     }
 }
 
@@ -273,6 +318,13 @@ internal sealed class LaserInstance : CastInstance
         _beam = Track(AbilityVisuals.Make(PrimitiveType.Cylinder, new Color(1f, 0.1f, 0.1f), Chest, new Vector3(0.05f, 1, 0.05f), "cots-ability-laser"));
     }
 
+    /// <summary>The host's beam end wins over the copy's own guess.</summary>
+    public override void OnLock(Vector3 point)
+    {
+        _locked = true;
+        _to = point;
+    }
+
     private Vector3 Extend(Vector3 aim)
     {
         var dir = (aim - Chest).normalized;
@@ -283,8 +335,8 @@ internal sealed class LaserInstance : CastInstance
     {
         if (T < Spec.Windup)
         {
-            // Charging: a thin line follows the player.
-            if (AbilityTargets.Nearest(EnemyPos) is { } p) _aim = p + Vector3.up;
+            // Charging: a thin line follows the player it aims at.
+            if (TargetNow() is { } p) _aim = p + Vector3.up;
             _to = Extend(_aim);
             if (_beam != null) AbilityVisuals.Stretch(_beam, Chest, _to, 0.05f);
             return false;
@@ -293,6 +345,7 @@ internal sealed class LaserInstance : CastInstance
         {
             _locked = true;
             _to = Extend(_aim);
+            if (!Replica) AbilityNet.SendLock(Enemy, Spec.Ability, _to);
         }
         if (T >= Spec.Windup + Spec.Duration) return true;
         if (_beam != null) AbilityVisuals.Stretch(_beam, Chest, _to, 0.4f);
@@ -488,13 +541,17 @@ internal sealed class WarpInstance : CastInstance
         if (_orb != null) _orb.transform.localScale = Vector3.one * (0.5f + 2f * T / (float)Spec.Windup);
         if (T < Spec.Windup) return false;
         var from = EnemyPos;
-        if (AbilityTargets.Nearest(from) is { } now) _target = now;
+        if (TargetNow() is { } now) _target = now;
         var land = ActiveAbilityRules.LandingPoint(new System.Numerics.Vector3(from.x, from.y, from.z),
             new System.Numerics.Vector3(_target.x, _target.y, _target.z), ActiveAbilityRules.WarpLandingDistance);
         var dest = new Vector3(land.X, _target.y, land.Z);
         Flash(new Color(0.7f, 0.3f, 1f), from + Vector3.up, 1.5f, 0.4f);
-        Enemy.Actor!.transform.position = dest;
-        Enemy.LastPosition = dest;
+        if (!Replica)
+        {
+            // The host moves the enemy; clients see the move through the game's own sync.
+            Enemy.Actor!.transform.position = dest;
+            Enemy.LastPosition = dest;
+        }
         Flash(new Color(0.7f, 0.3f, 1f), dest + Vector3.up, 1.5f, 0.4f);
         Warps++;
         AbilityDamage.NoteEffect(Enemy, EnemyAbility.Warp);
@@ -526,14 +583,14 @@ internal sealed class ChainsInstance : CastInstance
 
     protected override bool Advance(float dt)
     {
-        if (AbilityTargets.Nearest(EnemyPos) is { } p) _end = p + Vector3.up;
+        if (TargetNow() is { } p) _end = p + Vector3.up;
         if (_chain != null) AbilityVisuals.Stretch(_chain, Chest, _end, _bound ? 0.18f : 0.06f);
         if (T < Spec.Windup) return false;
         if (!_bound)
         {
             _bound = true;
             // Still in reach when the chain closes: the player is rooted (stun immunity refuses it).
-            if (Vector3.Distance(_end, Chest) <= Spec.MaxRange + 5 && PlayerEffects.Stun(ActiveAbilityRules.ChainsRootSeconds))
+            if (TargetIsLocal && Vector3.Distance(_end, Chest) <= Spec.MaxRange + 5 && PlayerEffects.Stun(ActiveAbilityRules.ChainsRootSeconds))
                 AbilityDamage.NoteEffect(Enemy, EnemyAbility.Chains);
         }
         return T >= Spec.Windup + Spec.Duration;
@@ -574,8 +631,8 @@ internal sealed class TrapperInstance : CastInstance
             var pos = target;
             if (i > 0)
             {
-                float a = Rng.Range(0f, 6.283f);
-                float r = Rng.Range(2f, (float)ActiveAbilityRules.TrapSpread);
+                float a = CastRng.Range(0f, 6.283f);
+                float r = CastRng.Range(2f, (float)ActiveAbilityRules.TrapSpread);
                 pos += new Vector3(Mathf.Cos(a) * r, 0, Mathf.Sin(a) * r);
             }
             _traps.Add(new Trap { Pos = pos, Go = Track(AbilityVisuals.Disc(new Color(0.5f, 0.45f, 0.1f), pos, (float)Spec.Radius, "cots-ability-trap")) });

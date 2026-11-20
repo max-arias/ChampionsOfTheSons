@@ -15,6 +15,8 @@ public class MessageCodecTests
         Stats = new[] { new RolledStat("stat.max_health", 120.5f), new RolledStat("stat.crit_chance", 0.07f) },
     };
 
+    private static readonly FxShape Shape = new(FxKind.Disc, 6, new Vec3(1, 2, 3), 7.5f, 0, 0xFF8040u, 12f, false, new Vec3(0, 0, 30), new Vec3(1, 0, 0));
+
     public static TheoryData<IMessage> AllMessages() => new()
     {
         new Hello(MessageCodec.ProtocolVersion, "0.1.0"),
@@ -24,6 +26,7 @@ public class MessageCodecTests
         new EnemySync(42UL, "enemy.cannibal_heavy", 250, 3, 1.5e6f, 1.2e6f, 4500f, new[] { "affix.meteor", "affix.steadfast" }, 9_000_000_000L),
         new EnemySync(43UL, "enemy.fingers", 1, 0, 100f, 100f, 0f, Array.Empty<string>(), 0),
         new EnemySync(44UL, "Carl", 77, 1, 9e5f, 4e5f, 1200f, new[] { "Meteor" }, 123_456L, 3.4e4f, "elite_name.ashjaw", "elite_name.unburied"),
+        new EnemySync(45UL, "Carl", 77, 4, 9e5f, 4e5f, 1200f, new[] { "Gargantuan" }, 1L, 1f, "", "", 1.9f),
         new EnemyHealth(42UL, 99.5f, 12f),
         new Hit(42UL, 12345.678f, HitFlags.Crit | HitFlags.Melee, 300f),
         new XpGranted(-5),
@@ -36,6 +39,15 @@ public class MessageCodecTests
         new PickupGranted(uint.MaxValue, SampleItem),
         new DropRemoved(7u),
         new SpellCast(3u, "spell.blink", new Vec3(0, 1, 2), new Vec3(0, 0, 1), 123456789UL),
+        new SpellCast(3u, "spell.black_hole", new Vec3(0, 1, 2), new Vec3(0, 0, 1), 5UL, SpellCastMode.Cast, 17u, new[] { Shape, Shape with { Kind = FxKind.Sphere, Follow = true } }),
+        new SpellCast(0u, "spell.black_flame", new Vec3(0, 1, 2), new Vec3(0, 0, 1), 5UL, SpellCastMode.Off, uint.MaxValue, Array.Empty<FxShape>()),
+        new SpellFxEvent(3u, 17u, new byte[] { 0, 2 }, new Vec3(4, 5, 6), new[] { Shape }),
+        new SpellFxEvent(3u, 18u, Array.Empty<byte>(), new Vec3(0, 0, 0), Array.Empty<FxShape>()),
+        new AbilityEvent(42UL, "Laser", AbilityPhase.Lock, new Vec3(1, 2, 3), ulong.MaxValue, true),
+        new AbilityEvent(43UL, "Meteor", AbilityPhase.Begin, new Vec3(-1, 0, 9), 7UL, false),
+        new PlayerInfo(2u, "Wanderer ünï", 87, 2.35f, new Vec3(1, 2, 3)),
+        new Announce(AnnounceKind.LevelUp, 2u, "Wanderer", 88),
+        new Announce(AnnounceKind.Left, 0u, "", 0),
         new Ping(3u, PingKind.Enemy, new Vec3(10, 20, 30), 42UL),
         new HeldWeapon(2u, "long_sword", new Vec3(1, 2, 3)),
         new WorldSettings("difficulty.ünïcødé", false),

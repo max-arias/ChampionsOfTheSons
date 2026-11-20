@@ -63,9 +63,10 @@ public sealed class CoopFeature : IModFeature
         }
     }
 
-    /// <summary>Host: forget clients that left.</summary>
-    private static void PruneGone()
+    /// <summary>Host: forget clients that left (the party feature calls this every few seconds).</summary>
+    internal static void PruneGone()
     {
+        if (!IsHost || Verified.Count == 0) return;
         var alive = new HashSet<BoltConnection>(ConnectionComparer.Instance);
         var it = BoltNetwork.clients.GetEnumerator();
         var nonGeneric = it.Cast<Il2CppSystem.Collections.IEnumerator>();
@@ -88,6 +89,7 @@ public sealed class CoopFeature : IModFeature
                     return;
                 }
                 Verified.Add(from);
+                EnemySyncFeature.ResendAll(); // a late joiner gets every enemy that already exists (COS-79)
                 CotsNetEvent.Instance.SendTo(new WorldSettings(WorldState.Rules.Difficulty.Id, WorldState.FriendlyFire), from);
                 RLog.Msg($"{Tag} host: accepted {from.RemoteEndPoint}, sent WorldSettings ({WorldState.Rules.Difficulty.Id})");
                 break;

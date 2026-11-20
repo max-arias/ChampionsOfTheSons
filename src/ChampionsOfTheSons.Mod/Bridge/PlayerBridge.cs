@@ -64,6 +64,8 @@ public static class PlayerBridge
                 return;
             }
             var kind = isDemonic ? DamageKind.Magic : DamageKind.Physical;
+            if (Net.CoopTest.Enabled) RLog.Msg($"{Net.CoopTestJoin.Tag} client: took a {kind} hit of {damage:F1} before defense");
+            ScaleClientMelee(ref damage, kind);
             var character = PlayerState.Character;
             var result = PlayerDefense.Incoming(character.Stats, damage, kind, Rng);
             double final = result.Damage;
@@ -71,7 +73,7 @@ public static class PlayerBridge
             else final = Followups.FollowupsFeature.OnIncoming(final, kind);
             if (!result.Dodged && final > 0)
             {
-                OnEnemyHitPlayer(character, final);
+                OnEnemyHitPlayer(character, final, kind);
                 var health = LocalPlayer.Vitals?.Health;
                 // Undying Promise: a lethal hit leaves 30% health instead, once per cooldown.
                 if (health != null && PlayerEffects.Undying.TryTrigger(character.Inventory, health._currentValue, final))
@@ -91,10 +93,13 @@ public static class PlayerBridge
     }
 
     /// <summary>What the enemy that just hit us does besides damage: Basher stun, Poisonous, and our thorns back at it.</summary>
-    private static void OnEnemyHitPlayer(PlayerCharacter character, double damageTaken)
+    private static void OnEnemyHitPlayer(PlayerCharacter character, double damageTaken, DamageKind kind)
     {
-        if (PlayerEffects.LastAttacker is not { } last || Time.time - last.Time > 0.75f) return;
-        var enemy = last.Enemy;
+        var enemy = PlayerEffects.LastAttacker is { } last && Time.time - last.Time <= 0.75f ? last.Enemy : null;
+        // Co-op client: the host ran the enemy's swing, so no hook here saw it; the nearest host enemy in reach is the attacker,
+        // and its Basher stun and Poisonous apply to this player (COS-79).
+        if (enemy == null && kind == DamageKind.Physical && Net.CoopSession.IsClient) enemy = NearestEnemy(MeleeReach);
+        if (enemy == null) return;
         PlayerEffects.LastAttacker = null;
         PlayerEffects.Stun(EnemyHitEffects.StunSeconds(enemy.Profile));
         PlayerEffects.AddPoison(EnemyHitEffects.PoisonPerSecond(enemy.Profile, damageTaken), AbilityTuning.PoisonSeconds);
@@ -104,6 +109,45 @@ public static class PlayerBridge
             double pierce = enemy.Profile.Armor * Math.Clamp(character.Stats.Get("thorns_armor_piercing"), 0, 1);
             EnemyPatches.DealForced(enemy, new OutgoingHit(thorns, DamageKind.Physical, false, pierce), creditPlayer: true);
         }
+    }
+
+    /// <summary>
+    /// Co-op client (COS-79): the game hands a client's player the enemy's vanilla swing damage, and no impact hook sees it there,
+    /// so the nearest host enemy in reach scales it by its synced profile (the same rule as on the host). It is then the attacker
+    /// for Basher and Poisonous.
+    /// </summary>
+    private static void ScaleClientMelee(ref float damage, DamageKind kind)
+    {
+        if (kind != DamageKind.Physical || !Net.CoopSession.IsClient) return;
+        if (PlayerEffects.LastAttacker is { } last && Time.time - last.Time <= 0.75f) return; // an impact hook already scaled it
+        var enemy = NearestEnemy(MeleeReach);
+        if (enemy == null) return;
+        float scaled = (float)EnemyScaler.DamageToPlayer(enemy.Profile, damage, enemy.Combat.DamageDealtMultiplier);
+        if (Net.CoopTest.Enabled) RLog.Msg($"{Net.CoopTestJoin.Tag} client: enemy swing scaled {damage:F1} -> {scaled:F1} by level {enemy.Profile.Level}");
+        LastClientMeleeScaled = (damage, scaled);
+        damage = scaled;
+        PlayerEffects.LastAttacker = (enemy, Time.time);
+    }
+
+    /// <summary>Co-op test: the last enemy swing a client scaled (raw, scaled).</summary>
+    public static (double Raw, double Scaled)? LastClientMeleeScaled { get; private set; }
+
+    /// <summary>How far an enemy's swing reaches a player, for finding who hit a co-op client.</summary>
+    private const float MeleeReach = 4.5f;
+
+    private static EnemyRuntime? NearestEnemy(float range)
+    {
+        if (LocalPlayer.Transform == null) return null;
+        var me = LocalPlayer.Transform.position;
+        EnemyRuntime? best = null;
+        float bestDist = range;
+        foreach (var e in EnemyRegistry.Snapshot())
+        {
+            if (!e.IsActive) continue;
+            float d = Vector3.Distance(e.Actor!.transform.position, me);
+            if (d <= bestDist) { bestDist = d; best = e; }
+        }
+        return best;
     }
 
     [HarmonyPatch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.GetTargetVelocity))]

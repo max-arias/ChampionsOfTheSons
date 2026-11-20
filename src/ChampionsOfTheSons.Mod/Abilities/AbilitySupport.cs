@@ -9,13 +9,17 @@ using UnityEngine;
 namespace ChampionsOfTheSons.Mod.Abilities;
 
 /// <summary>
-/// Who an enemy's active ability can target. Only the local player for now (the host's); co-op (track E) extends
-/// <see cref="Positions"/> with the remote players so every ability picks up the other targets without changes.
+/// Who an enemy's active ability can target (COS-79). The host picks the nearest of every player it knows (itself and each
+/// client, <see cref="Candidates"/>); the effects of a cast are resolved on each machine for its own player
+/// (<see cref="Positions"/> is only the local player), so a client is hit by the copy of the cast its own game plays.
 /// </summary>
 internal static class AbilityTargets
 {
     /// <summary>Self-tests: pretend the player stands here (null = the real player).</summary>
     public static Vector3? TestPosition { get; set; }
+
+    /// <summary>The local player's id in co-op target lists (the host's own player; a client never targets).</summary>
+    public const uint LocalId = Net.CoopSession.HostId;
 
     public static bool PlayerAlive
     {
@@ -32,25 +36,45 @@ internal static class AbilityTargets
         }
     }
 
+    /// <summary>The local player, if alive: the only player whose effects this machine resolves.</summary>
     public static IEnumerable<Vector3> Positions()
     {
         if (PlayerAlive) yield return TestPosition ?? LocalPlayer.Transform.position;
     }
 
-    public static Vector3? Nearest(Vector3 from)
+    /// <summary>Every player an ability may aim at: the local player and, on a co-op host, each client at its last reported position.</summary>
+    public static IEnumerable<(uint Id, Vector3 Position)> Candidates()
     {
-        Vector3? best = null;
+        foreach (var p in Positions()) yield return (LocalId, p);
+        if (!Net.CoopSession.IsHost) yield break;
+        foreach (var (id, pos) in Net.CoopSession.Players())
+            if (id != Net.CoopSession.HostId) yield return (id, Net.CoopSession.ToUnity(pos));
+    }
+
+    public static (uint Id, Vector3 Position)? NearestTarget(Vector3 from)
+    {
+        (uint, Vector3)? best = null;
         float bestDist = float.MaxValue;
-        foreach (var p in Positions())
+        foreach (var c in Candidates())
         {
-            float d = Vector3.Distance(p, from);
+            float d = Vector3.Distance(c.Position, from);
             if (d < bestDist)
             {
                 bestDist = d;
-                best = p;
+                best = c;
             }
         }
         return best;
+    }
+
+    public static Vector3? Nearest(Vector3 from) => NearestTarget(from)?.Position;
+
+    /// <summary>Where the player with this id is now (null once they are gone).</summary>
+    public static Vector3? PositionOf(uint id)
+    {
+        foreach (var c in Candidates())
+            if (c.Id == id) return c.Position;
+        return null;
     }
 
     public static float Flat(Vector3 a, Vector3 b) => new Vector2(a.x - b.x, a.z - b.z).magnitude;
@@ -62,6 +86,9 @@ internal static class AbilityDamage
     private static readonly Dictionary<(EnemyRuntime, EnemyAbility), int> Fired = new();
     private static readonly Dictionary<(EnemyRuntime, EnemyAbility), int> Hits = new();
     private static readonly Dictionary<(EnemyRuntime, EnemyAbility), double> Dealt = new();
+
+    /// <summary>Ability hits the local player took (co-op test: a client hit by its copy of a host enemy's cast).</summary>
+    public static int PlayerHits { get; private set; }
 
     public static int FiredCount(EnemyRuntime e, EnemyAbility a) => Fired.GetValueOrDefault((e, a));
     public static int HitCount(EnemyRuntime e, EnemyAbility a) => Hits.GetValueOrDefault((e, a));
@@ -97,6 +124,7 @@ internal static class AbilityDamage
             Dealt[(enemy, ability)] = DamageDealt(enemy, ability) + dmg;
         }
         if (dmg <= 0) return;
+        PlayerHits++;
         try
         {
             LocalPlayer.Stats.Hit((float)dmg, isDemonic: true);
@@ -238,6 +266,14 @@ internal static class AbilityVisuals
 
     public static GameObject Make(PrimitiveType type, Color color, Vector3 position, Vector3 scale, string name = "cots-ability")
     {
+        if (Net.ServerConfig.OnDedicatedServer)
+        {
+            // Nothing is drawn on a dedicated server: an empty object keeps the ability code's bookkeeping the same.
+            var empty = new GameObject(name);
+            empty.transform.position = position;
+            empty.transform.localScale = scale;
+            return empty;
+        }
         if (Visuals.FxKit.Available && FxFor(name, type) is { } fx)
         {
             var inner = Visuals.FxKit.Spawn(fx.Fx, position, Vector3.one, fx.Tint ?? Visuals.FxKit.Glow(color));
@@ -279,8 +315,9 @@ internal static class AbilityVisuals
                 r.material.mainTextureScale = new Vector2(1, len / Mathf.Max(width * 1.6f, 0.05f)); // one link per ~1.6 widths
     }
 
-    public static Light AddLight(GameObject go, Color color, float range, float intensity)
+    public static Light? AddLight(GameObject go, Color color, float range, float intensity)
     {
+        if (Net.ServerConfig.OnDedicatedServer) return null;
         var light = go.AddComponent<Light>();
         light.type = LightType.Point;
         light.color = color;

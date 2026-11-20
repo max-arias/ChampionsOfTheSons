@@ -97,6 +97,28 @@ internal static class SheetData
         return rows;
     }
 
+    /// <summary>COS-81: the party list for the Character page in co-op: every player's level and magic find, and the team
+    /// magic find the host rolls drops with. Empty outside co-op.</summary>
+    public static string PartyText(string headHex, string faintHex)
+    {
+        if (!Net.CoopSession.Active) return "";
+        var sb = new System.Text.StringBuilder();
+        sb.Append($"\n\n<color={headHex}><b>{UiText.T("ui.coop.party", "Party").ToUpperInvariant()}</b></color>");
+        string lv = UiText.T("ui.hud.level", "Lv");
+        string mfLabel = UiText.T("ui.sheet.magic_find", "Magic find");
+        void Line(string name, int level, double mf) =>
+            sb.Append($"\n{name}  <b>{lv} {level}</b>  <color={faintHex}>{mfLabel} {Pct(mf - 1, 0, signed: true)}</color>");
+        Line(Net.CoopParty.LocalName, PlayerState.Character.Progress.Level, Net.CoopParty.LocalMagicFind);
+        double team = Net.CoopParty.LocalMagicFind;
+        foreach (var m in Net.CoopParty.Others)
+        {
+            Line(m.Name, m.Level, m.MagicFind);
+            team += m.MagicFind > 0 ? m.MagicFind : 1;
+        }
+        sb.Append($"\n<color={faintHex}>{UiText.T("ui.coop.team_magic_find", "Team magic find (drops)")}: {Pct(team - 1, 0, signed: true)}</color>");
+        return sb.ToString();
+    }
+
     private static string Int(double v) => Math.Round(v, MidpointRounding.AwayFromZero).ToString("N0", CultureInfo.InvariantCulture);
 
     /// <summary>Fixed digits with trailing zeros trimmed ("12.50" -> "12.5", "10.0" -> "10").</summary>

@@ -35,6 +35,9 @@ public sealed class CoopSelfTest : IModFeature
 
     // server state
     private static int _stage;
+
+    /// <summary>The server half's stage (later checks start after the last one).</summary>
+    internal static int Stage => _stage;
     private static float _stageAt;
     private static VailActor? _enemy;
     private static GroundDrop? _drop;
@@ -290,6 +293,8 @@ public sealed class CoopSelfTest : IModFeature
             CoopTest.Check("aura: teammate's buff applied then ended after the pulses stopped", true);
             return true;
         }, 30);
+
+        CoopSyncSelfTest.RegisterClientSteps(); // wave 5 sync checks (COS-79/80/81), before the version check ends the run
 
         CoopTest.Add("version check: a wrong version is refused", () =>
         {

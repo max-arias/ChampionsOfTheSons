@@ -49,6 +49,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 
 ## Loot
 - Drop on kill if `U ≤ 0.1 × dropChanceMul × magicFind`, or the enemy has any ability.
+- Co-op magic find (COS-81, Max 2026-11-20): the `magicFind` used for a kill's drop chance and rarity is the sum of every player's magic find (each player's multiplier, 1 = no bonus; a missing value counts as 1; a dedicated server counts only the clients), so a group of n players without bonuses rolls with `n` (`KillCredit.TeamMagicFind`). Alone it is the player's own. Each player sends theirs to the host every 3 s; the Character page lists every player's level and magic find and the team total.
 - Count: `U[2,3]` (+`U[2,4]` with 3+ abilities) (+7 Boss / +3 Miniboss) + `clamp(⌊L/50⌋, 1, 8)`, × drop quantity, rounded.
 - Item level = player level by loot level policy; materials and "other" items whose stats do not grow with level (the respec and perk-point hearts) are level 1. The XP heart keeps its level.
 - Rarity: `w = bounty / itemLevel × MF`, `mf = √MF − 1`, fresh U each check, climbing while each step passes:
@@ -121,7 +122,7 @@ Host only; each runs only while the enemy is alive and active and is removed the
 | Warp | 12 s | 15-60 m | 0.75 s | the enemy appears 5 m from the player on its own side |
 | Chains | 15 s | 4-25 m | 1 s tether | roots the player 2.5 s (refused by `stun_immunity`) |
 | Trapper | 18 s | 4-28 m | 1.5 s | 3 snares (r 2.5 m; one under the player, two within 6 m) wait 20 s (max 9 live); stepping on one roots 3 s and deals 0.2·D |
-Not synced yet: the host applies effects to its own player; track E decides how remote players are targeted (`AbilityTargets.Positions`) and receive pull/root.
+Co-op (COS-79): the host (a dedicated server too) runs every enemy's casts and aims each at the nearest player it knows, host or client (clients at their last reported position). Each cast is sent to every client (`AbilityEvent`: the target spot, a seed for the trap spots, and whether that client is the target; a Laser also sends its locked beam end). Each machine plays the cast and resolves its effects on its own player only: damage (with the enemy's synced damage multiplier, then the player's own defenses), slows, the Black Hole pull, the Chains root (only on the player aimed at) and traps. Auras (Blizzard, Radiance) run on every client for each enemy that has one. Warp moves the enemy on the host only. A client hit by an enemy swing takes Basher stun and Poisonous from the nearest host enemy within 4.5 m. Clients show the enemy's synced scale; a client that joins late gets every existing enemy's profile again.
 
 ## Enemy scanner, danger and names (COS-68, COS-67; new rules, our own design)
 - Danger (`Core/Rules/EnemyInfo.cs`): the level gap against the local player in steps of `max(3, playerLevel / 10)` levels: more than 2 steps below Trivial, up to 1 step above Even, up to 3 steps above Tough, beyond Dangerous; Elite and Miniboss +1, Boss +2, capped at Deadly. Nameplates show it as 1-5 tally marks (last one struck across), grey to red.
@@ -172,6 +173,8 @@ Not synced yet: the host applies effects to its own player; track E decides how 
 - Cost: energy part `cost × spellCostEnergyCost × spellCost`, stamina part `cost × (1 − spellCostEnergyCost) × spellCost`; channeled per second.
 - 27 spells (level / energy / cooldown s): Black Hole 20/350/140, Healing Dome 6/80/70, Blink 3/25/14, Sun Flare 10/100/70, Sustain Shield 8/50 per s, Wide Reach 2/10/0.4, Black Flame 21/25/2.5, War Cry 14/85/180, Portal 12/90/60, Magic Arrow 27/100/20, Multishot 40/30/12, Golden Skin 35/65/160, Purge 7/40/16, Snap Freeze 20/220/40, Berserk 25/10/200, Ball Lightning 44/350/100, Bash 17/25/25, Frenzy 1/0/40, Seeking Arrow 27/50/5, Focus 4/40/20, Parry 8/35/60, Cataclysm 50/500/300, Blood Infused Arrow 11/75/8, Roaring Cheeks 55/400/360, Taunt 9/40/45, Firebolt 6/45/20, Snow Storm 9/120/20. Damage formulas per spell are in COS-25/COS-26.
 
+Co-op (COS-80): a cast is sent with every visual it drew (kind and look, place, size, colour, lifetime, whether it rides on the caster, how it flies), and later visuals and early ends (a bolt hit, a toggle switched off) follow, so teammates see the same effect at the same place, size and duration. Toggle spells (Black Flame, Multishot, Sustain Shield) show on and off on the caster. A teammate's Portal pair also carries the local player. Ball Lightning flies the same line for the same time everywhere, so it ends at the same place. Damage, buffs and debuffs stay with the caster's machine (client spell damage on host enemies: COS-13; teammate heals and buffs: COS-23). A homing Seeking Arrow flies straight on other machines until the caster's copy ends it.
+
 ### Spell effects (COS-26)
 Numbers marked *stat* are the original `spell_*` player stats (content/player_stats.json), so perks that change them change the spell. Numbers marked *own* are this mod's (the original text is not available) and live in `SpellTuning` (Core/Rules/SpellRules.cs). Spell hit = `(base + spellFlatDmg × scaling) × Spell` magic damage through the enemy hit path (armor, shields, caps, Undead); it credits the player but does not trigger on-hit procs.
 - Channeled and toggle spells: a cast switches them on if the energy covers one second of upkeep (and they are ready); they then cost their energy cost every second and switch off when the energy runs out or when cast again. Switching off starts the cooldown. (Holding a key is not detected: a second press is the release.)
@@ -210,6 +213,11 @@ Keyed by source; re-adding a source refreshes duration; amount overwrites, accum
 - Greatbow: shot base damage `(game + flat) × mult`, projectile speed × `projectileForce`.
 - Hammer: with `i_hammer_stun`, every hit slows the enemy to 25% speed for 0.4 s (COTF rule). The stun chance from `i_hammer_stun_amount` stays as before on any melee weapon (deviation below).
 - Numbers are this mod's own, scaled to the game's weapons: long sword 20 dmg, swing ×0.85, stamina ×1.3, reach ×1.3; great sword 28, ×0.7, ×1.8, ×1.6; hammer 18, ×0.55, ×2.5, ×1.4; axe 13, ×1.15, ×0.8, ×0.9; polearm 24, reach ×2; greatbow +15 then ×1.4, force ×1.1.
+
+## Co-op party (COS-81)
+- Every player's name, level and magic find reach every player (every 3 s and on a level change). Other players carry a "name [LvN]" tag; the Character page (third page) lists the party.
+- System lines at the left of the HUD for every player: someone joined (with level), left, died, or reached a level.
+- Damage numbers: every hit on an enemy that lands on the host (its own hits, damage over time, spells, thorns, and other players' hits) is shown to the clients within 80 m, under the damage-number setting. Not shown: numbers for damage other players take.
 
 ## Deviations from COTF (deliberate)
 - Vanilla floors: enemy max health is at least the game's own value, and enemy damage to the player is at least the game's own hit. COTF's curves were tuned for The Forest's numbers; in Sons of the Forest they made low-level enemies far weaker than vanilla (seen in the 2026-11-18 self-test: a level-2 cannibal had 20 HP vs 100 vanilla).
