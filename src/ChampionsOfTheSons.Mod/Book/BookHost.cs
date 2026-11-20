@@ -81,7 +81,14 @@ internal static class BookHost
         if (_book == null || _book.gameObject == null)
         {
             _book = null;
-            if (_pending != BookTab.None || Time.frameCount % 15 == 0) Attach(UnityEngine.Object.FindObjectOfType<BlueprintBookController>());
+            // The player's own (possibly stowed) book, found once; the scene-wide search only while a tab is waiting to open
+            // (COS-132: a scene search every 15 frames cost ~65 ms each while the book was put away).
+            if (_pending != BookTab.None || Time.frameCount % 15 == 0)
+            {
+                var book = LocalPlayer.Transform != null ? LocalPlayer.Transform.GetComponentInChildren<BlueprintBookController>(true) : null;
+                if (book == null && _pending != BookTab.None) book = UnityEngine.Object.FindObjectOfType<BlueprintBookController>();
+                Attach(book);
+            }
         }
         if (Book == null)
         {
