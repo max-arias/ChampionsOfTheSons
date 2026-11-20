@@ -135,7 +135,7 @@ internal static class LootSelfTest
             LootFeature.SpawnAt(roller.RollItem(def, 30, rng), pos);
             n++;
         }
-        SelfTest.Check("loot: spawned a row of rarities", n >= 6, $"{n}");
+        SelfTest.Check("loot: spawned a row of rarities", n == Rarities.Max + 1, $"{n}");
         CheckVisuals("row");
         var colors = LootVisuals.All.Values.Select(v => ColorRarity(v.Color)).Distinct().Count();
         SelfTest.Check("loot: several rarity colors present", colors >= 3, $"{colors}");
