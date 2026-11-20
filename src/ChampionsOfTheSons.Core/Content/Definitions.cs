@@ -192,3 +192,58 @@ public sealed class SetBonus
     public int Pieces { get; set; }
     public List<StatEffect> Effects { get; set; } = new();
 }
+
+/// <summary>What a weapon type is built on: which of the game's held weapons carries its model and animations.</summary>
+public enum WeaponBase
+{
+    /// <summary>Any one-handed game melee weapon (machete, axes, katana, club...).</summary>
+    Melee,
+    /// <summary>A game spear.</summary>
+    Spear,
+    /// <summary>A game bow.</summary>
+    Bow,
+}
+
+/// <summary>
+/// A weapon type (COS-93): the rules and model a weapon item brings when it is equipped and a fitting game weapon is
+/// held. Items name it with <see cref="ItemBaseDef.WeaponModel"/>. Multipliers apply to the held game weapon's values.
+/// </summary>
+public sealed class WeaponTypeDef
+{
+    public string Id { get; set; } = "";
+    public WeaponBase Base { get; set; }
+    /// <summary>Game item names the equip key tries, in order (the first one the player owns is drawn).</summary>
+    public List<string> BaseItems { get; set; } = new();
+
+    // ---- melee
+    /// <summary>The type's own base hit damage, replacing the game weapon's (null = keep the game weapon's).</summary>
+    public double? Damage { get; set; }
+    public double SwingSpeed { get; set; } = 1;
+    public double StaminaCost { get; set; } = 1;
+    /// <summary>Length multiplier of the game weapon's hit volume.</summary>
+    public double Reach { get; set; } = 1;
+    public bool CutsTrees { get; set; } = true;
+    /// <summary>With the hammer stun stat: every hit slows the enemy to this speed (0 = no slow) ...</summary>
+    public double StunSlow { get; set; }
+    /// <summary>... for this many seconds.</summary>
+    public double StunSlowSeconds { get; set; }
+
+    // ---- bow
+    public double RangedFlatDamage { get; set; }
+    public double RangedDamageMult { get; set; } = 1;
+    public double ProjectileForce { get; set; } = 1;
+    public bool NoGravity { get; set; }
+    /// <summary>Draw and reload speed multiplier.</summary>
+    public double DrawSpeed { get; set; } = 1;
+
+    // ---- model
+    /// <summary>Bundle prefab name (COS-5). Its grip is at the origin and its blade points along +Y.</summary>
+    public string Model { get; set; } = "";
+    /// <summary>Development stand-in model (a glTF file name) used while the bundle has no prefab.</summary>
+    public string? StandIn { get; set; }
+    /// <summary>Length of the model in hand, in metres.</summary>
+    public double Length { get; set; } = 1;
+    /// <summary>Where the hand holds the model, in model units along +Y (0 = the origin).</summary>
+    public double Grip { get; set; }
+}
+

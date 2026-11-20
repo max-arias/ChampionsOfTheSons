@@ -131,7 +131,10 @@ public static class EnemyPatches
                     _ => WeaponClass.Melee,
                 };
                 bool head = weapon == WeaponClass.Ranged && IsHead(__args.Length > 0 ? __args[0] as DamageNode : null);
-                hit = PlayerAttack.Weapon(sheet, weapon, amount, Rng, headshot: head);
+                // Weapon types (COS-93): the type's melee damage, or the greatbow's flat and multiplier on bow shots.
+                double baseDamage = weapon == WeaponClass.Melee ? amount * Weapons.WeaponModels.MeleeDamageFactor
+                    : weapon == WeaponClass.Ranged ? WeaponTypes.RangedBaseDamage(Weapons.WeaponModels.Active, amount) : amount;
+                hit = PlayerAttack.Weapon(sheet, weapon, baseDamage, Rng, headshot: head);
                 if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + sheet.Get(CombatStatIds.ExplosionDamage)) * sheet.Get(CombatStatIds.ThrownSpearDamage) };
                 double fire = sheet.Get(StatIds.FireDamage);
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };
@@ -166,6 +169,7 @@ public static class EnemyPatches
         if (procs.Bleed) combat.ApplyDot("player.bleed", DotKind.Bleed, procs.BleedPerSecond, AbilityTuning.BleedSeconds);
         if (procs.Weaken) combat.ApplyWeaken("player.weaken", AbilityTuning.WeakenMult, AbilityTuning.WeakenSeconds);
         if (procs.StunSeconds > 0) combat.ApplyStun(procs.StunSeconds);
+        if (WeaponTypes.HitSlow(Weapons.WeaponModels.Active, character.Stats) is { } hammer) combat.ApplySlow("weapon.hammer", hammer.SpeedMult, hammer.Seconds);
     }
 
     [HarmonyPatch(typeof(VailWorldSimulation), nameof(VailWorldSimulation.OnActorDied))]

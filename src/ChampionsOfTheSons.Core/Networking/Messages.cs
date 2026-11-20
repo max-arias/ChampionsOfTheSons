@@ -24,6 +24,7 @@ public enum MessageType : byte
     SpellCast = 30,
     AuraPulse = 31,
     Ping = 40,
+    HeldWeapon = 50,
 }
 
 public interface IMessage
@@ -170,4 +171,11 @@ public sealed record AuraPulse(uint PlayerId, string BuffId, Vec3 Origin, float 
 public sealed record PlayerPos(Vec3 Position, int Level) : IMessage
 {
     public MessageType Type => MessageType.PlayerPos;
+}
+
+/// <summary>Player → everyone, on change and every few seconds while set: the weapon type in my hand ("" = none), and where
+/// I am, so receivers can find my body and show the model on my held game weapon (COS-93).</summary>
+public sealed record HeldWeapon(uint PlayerId, string TypeId, Vec3 Position) : IMessage
+{
+    public MessageType Type => MessageType.HeldWeapon;
 }

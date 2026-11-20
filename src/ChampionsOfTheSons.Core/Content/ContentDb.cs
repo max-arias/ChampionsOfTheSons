@@ -26,6 +26,7 @@ public sealed class ContentDb
     private readonly Dictionary<string, SpellDef> _spells = new();
     private readonly Dictionary<string, SetDef> _sets = new();
     private readonly Dictionary<string, Rules.EnemyKind> _enemies = new();
+    private readonly Dictionary<string, WeaponTypeDef> _weaponTypes = new();
     private readonly List<string> _errors = new();
 
     public IReadOnlyDictionary<string, PlayerStatDef> PlayerStats => _playerStats;
@@ -36,6 +37,8 @@ public sealed class ContentDb
     public IReadOnlyDictionary<string, SetDef> Sets => _sets;
     /// <summary>Enemy kinds keyed by the game's actor type name ("Carl", "Fingers").</summary>
     public IReadOnlyDictionary<string, Rules.EnemyKind> Enemies => _enemies;
+    /// <summary>Weapon types keyed by id ("long_sword"), named by items' weaponModel (COS-93).</summary>
+    public IReadOnlyDictionary<string, WeaponTypeDef> WeaponTypes => _weaponTypes;
     public IReadOnlyList<string> Errors => _errors;
 
     /// <summary>Loads content from file name → JSON text (e.g. "items.json" → its text). Missing files are errors.</summary>
@@ -52,6 +55,7 @@ public sealed class ContentDb
         db.Add(files, "spells.json", "spells", db._spells, s => s.Id, optional: true);
         db.Add(files, "sets.json", "sets", db._sets, s => s.Id, optional: true);
         db.Add(files, "enemies.json", "enemies", db._enemies, e => e.ActorType, optional: true);
+        db.Add(files, "weapon_types.json", "weaponTypes", db._weaponTypes, w => w.Id, optional: true);
         db.Validate();
         return db;
     }
@@ -115,6 +119,14 @@ public sealed class ContentDb
             }
             foreach (var e in item.UniqueEffects)
                 if (!_playerStats.ContainsKey(e.Stat)) _errors.Add($"item {item.Id}: unknown player stat '{e.Stat}'");
+        }
+        if (_weaponTypes.Count > 0)
+            foreach (var item in _items.Values)
+                if (item.WeaponModel != null && !_weaponTypes.ContainsKey(item.WeaponModel)) _errors.Add($"item {item.Id}: unknown weapon type '{item.WeaponModel}'");
+        foreach (var w in _weaponTypes.Values)
+        {
+            if (w.SwingSpeed <= 0 || w.Reach <= 0 || w.StaminaCost < 0 || w.Length <= 0) _errors.Add($"weapon type {w.Id}: swing speed, reach and length must be > 0");
+            if (w.StunSlow is < 0 or > 1) _errors.Add($"weapon type {w.Id}: stunSlow must be in 0..1");
         }
         foreach (var set in _sets.Values)
             foreach (var bonus in set.Bonuses)

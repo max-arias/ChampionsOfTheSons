@@ -6,7 +6,7 @@ namespace ChampionsOfTheSons.Core.Networking;
 /// </summary>
 public static class MessageCodec
 {
-    public const int ProtocolVersion = 1;
+    public const int ProtocolVersion = 2;
 
     public static byte[] Encode(IMessage message)
     {
@@ -42,6 +42,7 @@ public static class MessageCodec
                 w.UInt64(m.Seed);
                 break;
             case Ping m: w.VarUInt(m.PlayerId).Byte((byte)m.Kind); WriteVec(w, m.Position); w.UInt64(m.TargetId); break;
+            case HeldWeapon m: w.VarUInt(m.PlayerId).String(m.TypeId); WriteVec(w, m.Position); break;
             default: throw new ArgumentException($"No encoding for {message.GetType().Name}");
         }
         return w.ToArray();
@@ -71,6 +72,7 @@ public static class MessageCodec
             MessageType.DropRemoved => new DropRemoved(r.VarUInt()),
             MessageType.SpellCast => new SpellCast(r.VarUInt(), r.String() ?? "", ReadVec(r), ReadVec(r), r.UInt64()),
             MessageType.Ping => new Ping(r.VarUInt(), (PingKind)r.Byte(), ReadVec(r), r.UInt64()),
+            MessageType.HeldWeapon => new HeldWeapon(r.VarUInt(), r.String() ?? "", ReadVec(r)),
             _ => throw new PacketException($"Unknown message type {(byte)type}"),
         };
         if (!r.AtEnd) throw new PacketException($"Trailing bytes after {type}");

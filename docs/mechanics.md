@@ -162,6 +162,14 @@ Ingredients: exactly N items, each of rarity ≥ the target's; one of each consu
 ## Buffs
 Keyed by source; re-adding a source refreshes duration; amount overwrites, accumulates or takes the max per buff kind. Negative buffs can be blocked by resist (dispel ≤ 1) or immunity (dispel ≤ 2).
 
+## Weapon types (COS-93)
+- A weapon item's `weaponModel` names a type in `content/weapon_types.json`. The type applies while the item is in the weapon slot and the player holds a game weapon it fits: `melee` types on one-handed melee weapons (machete, katana, axes, club, knife, putter), `polearm` on the crafted spear, `greatbow` on the crafted or tactical bow. The draw key (default L) equips the first owned game weapon from the type's `baseItems`.
+- While it applies, the game weapon's mesh is hidden and the type's model sits in the same hand (the game weapon keeps its animations, hit logic and sounds). Other players see the model: each player broadcasts the type in hand, receivers dress the held weapon nearest to the reported position.
+- Melee: the type's `damage` replaces the game weapon's own damage (factor `damage / game damage`, machete = 14); swing speed and stamina cost multiply the game values (on top of attack speed and attack cost); `reach` lengthens the weapon's hit box.
+- Greatbow: shot base damage `(game + flat) × mult`, projectile speed × `projectileForce`.
+- Hammer: with `i_hammer_stun`, every hit slows the enemy to 25% speed for 0.4 s (COTF rule). The stun chance from `i_hammer_stun_amount` stays as before on any melee weapon (deviation below).
+- Numbers are this mod's own, scaled to the game's weapons: long sword 20 dmg, swing ×0.85, stamina ×1.3, reach ×1.3; great sword 28, ×0.7, ×1.8, ×1.6; hammer 18, ×0.55, ×2.5, ×1.4; axe 13, ×1.15, ×0.8, ×0.9; polearm 24, reach ×2; greatbow +15 then ×1.4, force ×1.1.
+
 ## Deviations from COTF (deliberate)
 - Vanilla floors: enemy max health is at least the game's own value, and enemy damage to the player is at least the game's own hit. COTF's curves were tuned for The Forest's numbers; in Sons of the Forest they made low-level enemies far weaker than vanilla (seen in the 2026-11-18 self-test: a level-2 cannibal had 20 HP vs 100 vanilla).
 - Boss tier: COTF requires n > 6 abilities, which only its Megan could reach, and gives Bosses ×2 HP (less than Miniboss ×10). Here Boss needs n ≥ 6 and has ×20 HP.
@@ -172,3 +180,4 @@ Keyed by source; re-adding a source refreshes duration; amount overwrites, accum
 - Reforge keeps the item type (COTF could turn a ring into boots).
 - Individual reroll skips empty (null) options instead of throwing.
 - Stat sheet: contributions are sources, not add/subtract pairs (no drift, bools are reference-counted).
+- Weapon types (COS-93): types sit on any fitting game weapon the player owns instead of a key that swaps onto a fixed vanilla weapon; numbers are relative to the game's weapons. Not yet: "cannot cut trees", no arrow drop and slower draw for the greatbow, polearm not throwable, polearm damage and swing factors (the spear has no melee weapon data), swing trails and per-type sounds. The hammer stun chance on any melee weapon is kept as a COTS extra.

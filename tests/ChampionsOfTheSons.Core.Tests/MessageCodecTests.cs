@@ -36,6 +36,7 @@ public class MessageCodecTests
         new DropRemoved(7u),
         new SpellCast(3u, "spell.blink", new Vec3(0, 1, 2), new Vec3(0, 0, 1), 123456789UL),
         new Ping(3u, PingKind.Enemy, new Vec3(10, 20, 30), 42UL),
+        new HeldWeapon(2u, "long_sword", new Vec3(1, 2, 3)),
         new WorldSettings("difficulty.ünïcødé", false),
     };
 
