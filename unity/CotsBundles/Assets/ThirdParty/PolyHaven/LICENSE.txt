@@ -1,0 +1,8 @@
+Textures from Poly Haven (https://polyhaven.com), CC0 1.0 Universal (public domain): https://polyhaven.com/license
+Downscaled here to 512 px JPEG; the bundle builder composes the HDRP maps from them (COS-111).
+
+metal_plate_02   https://polyhaven.com/a/metal_plate_02    (blades and weapon heads)
+rusty_metal_04   https://polyhaven.com/a/rusty_metal_04    (dark metal fittings)
+rough_wood       https://polyhaven.com/a/rough_wood        (hafts, bows, shields)
+brown_leather    https://polyhaven.com/a/brown_leather     (grip wraps)
+wood_table_worn  https://polyhaven.com/a/wood_table_worn   (bone and pale parts)

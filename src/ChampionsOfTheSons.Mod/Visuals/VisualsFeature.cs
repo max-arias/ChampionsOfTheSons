@@ -71,13 +71,75 @@ public sealed class VisualsFeature : IModFeature
         SelfTest.Add(10f, "visuals: measure many", FrameMeter.Start);
         SelfTest.Add(10.5f, "visuals: shot many", () => TestKit.Screenshot("visuals-03-many"));
         SelfTest.Add(12.5f, "visuals: frame cost", FrameCost);
+
+        // Worn-steel weapons (COS-111) under the game's own light: held-size weapons and the drops, by day and at dusk.
+        SelfTest.Add(13f, "visuals: weapons by day", ShowWeapons);
+        SelfTest.Add(14.5f, "visuals: shot weapons by day", () => TestKit.Screenshot("visuals-04-weapons-day"));
+        SelfTest.Add(15f, "visuals: dusk", () => SetHour(17, 35));
+        SelfTest.Add(16f, "visuals: weapons at dusk", ShowWeapons);
+        SelfTest.Add(18f, "visuals: shot weapons at dusk", () => TestKit.Screenshot("visuals-05-weapons-dusk"));
+        SelfTest.Add(18.5f, "visuals: drops at dusk", () => ShowDrops(light: false));
+        SelfTest.Add(20f, "visuals: shot drops at dusk", () => TestKit.Screenshot("visuals-06-drops-dusk"));
+        SelfTest.Add(20.5f, "visuals: restore time", () =>
+        {
+            Cleanup();
+            if (_savedHour >= 0) SetHour(_savedHour, _savedMinute);
+        });
+    }
+
+    private static readonly string[] WeaponModels =
+        { "Weapon_Sword", "Weapon_GreatSword", "Weapon_Axe", "Weapon_Hammer", "Weapon_Spear", "Weapon_Bow", "Weapon_Polearm", "Weapon_GreatAxe", "Weapon_GreatHammer" };
+
+    /// <summary>The held-weapon models at real size, standing in a row in front of the camera, turned three-quarters.</summary>
+    private void ShowWeapons()
+    {
+        Cleanup();
+        var cam = Cam;
+        if (!CotsBundle.Loaded || cam == null) return;
+        var fwd = Flat(cam.forward);
+        var right = Vector3.Cross(Vector3.up, fwd);
+        int missing = 0;
+        for (int i = 0; i < WeaponModels.Length; i++)
+        {
+            var holder = new GameObject("cots-visuals-test");
+            holder.transform.position = cam.position + fwd * 2.6f + right * ((i - 4) * 0.42f) + Vector3.down * 1.0f;
+            holder.transform.rotation = Quaternion.LookRotation(fwd) * Quaternion.Euler(-10, -35, 0);
+            if (CotsBundle.Spawn(WeaponModels[i], holder.transform) == null) missing++;
+            _shown.Add(holder);
+        }
+        SelfTest.Check("visuals: every held-weapon model loads", missing == 0, $"{missing} of {WeaponModels.Length} missing");
+    }
+
+    private int _savedHour = -1, _savedMinute;
+
+    /// <summary>Sets the time of day (TimeOfDayHolder.SetDirectTime); remembers the first time it replaced.</summary>
+    private void SetHour(int hour, int minute)
+    {
+        try
+        {
+            var now = Sons.Environment.TimeOfDayHolder.GetTimeOfDay();
+            if (_savedHour < 0)
+            {
+                _savedHour = now.Hours;
+                _savedMinute = now.Minutes;
+            }
+            Sons.Environment.TimeOfDayHolder.SetDirectTime(new Sons.Environment.TimeOfDay(now.Days, hour, minute, 0, 0), true, 0f, null, true);
+            var after = Sons.Environment.TimeOfDayHolder.GetTimeOfDay();
+            SelfTest.Log($"visuals: time {now.Hours:D2}:{now.Minutes:D2} -> {after.Hours:D2}:{after.Minutes:D2}");
+        }
+        catch (Exception e)
+        {
+            SelfTest.Log("visuals: could not set the time: " + e.Message);
+        }
     }
 
     private (float ms, int frames) _baseline;
 
     private static Transform? Cam => LocalPlayer.MainCam != null ? LocalPlayer.MainCam.transform : Camera.main?.transform;
 
-    private void ShowDrops()
+    private void ShowDrops() => ShowDrops(light: true);
+
+    private void ShowDrops(bool light)
     {
         Cleanup();
         var cam = Cam;
@@ -106,13 +168,16 @@ public sealed class VisualsFeature : IModFeature
             }
             _shown.Add(holder);
         }
-        var l = new GameObject("cots-visuals-light");
-        l.transform.position = cam.position + fwd * 2f + Vector3.up;
-        var light = l.AddComponent<Light>();
-        light.type = LightType.Point;
-        light.range = 8;
-        light.intensity = 60;
-        _shown.Add(l);
+        if (light)
+        {
+            var l = new GameObject("cots-visuals-light");
+            l.transform.position = cam.position + fwd * 2f + Vector3.up;
+            var pl = l.AddComponent<Light>();
+            pl.type = LightType.Point;
+            pl.range = 8;
+            pl.intensity = 60;
+            _shown.Add(l);
+        }
         SelfTest.Check("visuals: every drop model loads", missing == 0, $"{missing} of {n} missing");
         SelfTest.Check("visuals: drop materials are HDRP/Lit and supported", pink == 0, $"{pink} renderers wrong");
     }

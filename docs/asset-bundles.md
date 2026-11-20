@@ -32,10 +32,10 @@ Editor scripts (`unity/CotsBundles/Assets/Editor`): `CotsBundleBuilder` (pipelin
 
 | Prefab | Where | Fallback |
 |---|---|---|
-| `Drop_Sword`, `Drop_GreatSword`, `Drop_Axe`, `Drop_Hammer`, `Drop_Bow`, `Drop_Polearm`, `Drop_Shield`, `Drop_Quiver`, `Drop_Scroll` (key), `Drop_Armor` (chest), `Drop_Jewelry` (coin), `Drop_Material` (small chest), `Drop_Consumable` (flask): grey metal, centred on the origin (COS-63) | ground drops, `Loot/LootVisuals.DropPrefabFor` (by weapon model, then item type) | `LootMarker` |
+| `Drop_Sword`, `Drop_GreatSword`, `Drop_Axe`, `Drop_Hammer`, `Drop_Bow`, `Drop_Polearm`, `Drop_Shield`, `Drop_Quiver`, `Drop_Scroll` (key), `Drop_Armor` (chest), `Drop_Jewelry` (coin), `Drop_Material` (small chest), `Drop_Consumable` (flask): worn steel, leather and wood (Poly Haven CC0 textures on box-projected UVs in metres, COS-111), centred on the origin (COS-63) | ground drops, `Loot/LootVisuals.DropPrefabFor` (by weapon model, then item type) | `LootMarker` |
 | `LootMarker` (faceted crystal, HDRP/Lit, tinted `_BaseColor` by rarity) | ground drops without a model | primitive cube |
 | `LootSparkle` (rising sparks, Cots/Fx additive, start color by rarity) | ground drops | none |
-| `Weapon_Sword`, `Weapon_GreatSword`, `Weapon_Axe`, `Weapon_GreatAxe`, `Weapon_Hammer`, `Weapon_GreatHammer`, `Weapon_Spear`, `Weapon_Polearm`, `Weapon_Bow`: real size, origin at the grip end (bow: grip centre), +Y toward the blade or head | custom weapons (COS-93) | - |
+| `Weapon_Sword`, `Weapon_GreatSword`, `Weapon_Axe`, `Weapon_GreatAxe`, `Weapon_Hammer`, `Weapon_GreatHammer`, `Weapon_Spear`, `Weapon_Polearm`, `Weapon_Bow`: real size, origin at the grip end (bow: grip centre), +Y toward the blade or head; same worn-steel materials as the drops (COS-111), emissive left free for the glow (COS-108) | custom weapons (COS-93) | - |
 | `Fx_Ring`, `Fx_Burst`, `Fx_Orb`, `Fx_Bubble`, `Fx_Dome`, `Fx_Column`, `Fx_BlackHole`, `Fx_Snow`, `Fx_Portal`, `Fx_Beam`, `Fx_Chain`, `Fx_Flame`, `Fx_Glyph`, `Fx_Gas`: white, unit size (radius 1 m; beams, chains and columns 0..1 along +Y), tinted and scaled by the mod (COS-102) | spells (`Spells/SpellFx.cs`), enemy abilities (`AbilityVisuals` in `Abilities/AbilitySupport.cs`), player states (`Visuals/PlayerStateFx.cs`), co-op flashes | the old primitives |
 
 The setting `reduce_heavy_effects` (`Visuals/VisualsFeature.cs`) hides the hand flames and glyphs, halves particle emission and drops non-essential effect lights. Effect lights are capped at 12.
