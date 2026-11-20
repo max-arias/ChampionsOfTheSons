@@ -33,6 +33,20 @@ public static class SelfTest
 
     public static void Log(string msg) => RLog.Msg($"{Tag} {msg}");
 
+    /// <summary>Set by a step that really wants the player to die (the death test). Otherwise lethal hits are held and a nearly dead
+    /// player is healed, so one test cannot leave the rest of the run "not in world" (COS-138).</summary>
+    public static bool AllowDeath { get; set; }
+
+    private static void KeepAlive()
+    {
+        if (AllowDeath || !LocalPlayer.IsInWorld) return;
+        var h = LocalPlayer.Vitals?.Health;
+        // An absolute floor: test stat boosts raise our max far above what the game lets health reach.
+        if (h == null || h._currentValue <= 0 || h._currentValue >= Math.Min(10f, h.GetMax() * 0.05f)) return;
+        Log($"self-test: player nearly dead ({h._currentValue:0}), healed");
+        h.SetCurrentValue(h.GetMax());
+    }
+
     public static void Check(string name, bool ok, string detail = "")
     {
         if (!ok) _failures++;
@@ -77,6 +91,7 @@ public static class SelfTest
     /// <summary>Called every frame by the mod while enabled.</summary>
     public static void Update()
     {
+        if (Enabled) KeepAlive();
         if (!Enabled) return;
         if (Time.realtimeSinceStartup - LaunchTime > Timeout)
         {

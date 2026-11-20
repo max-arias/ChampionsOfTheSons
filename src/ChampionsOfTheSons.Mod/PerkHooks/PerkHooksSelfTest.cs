@@ -226,6 +226,9 @@ internal static class PerkHooksSelfTest
     private static void PullImmunity()
     {
         Pc.Stats.SetSource("test.tank", new[] { new StatModifier(StatIds.MaxHealth, EffectOp.Add, 1e8) });
+        // God mode too: the tank stat reaches the game's health only on the next stat sync, and a fresh level-1 test save
+        // (COS-129) died to the Black Hole before it did, leaving every later phase "not in world".
+        Admin.AdminState.Apply(new ChampionsOfTheSons.Core.Networking.AdminGrant(ChampionsOfTheSons.Core.Networking.AdminAction.God, 1, ""));
         var enemy = AbilityEnemy(EnemyAbility.BlackHole, 14);
         if (enemy == null) { SelfTest.Check("perk hooks: Black Hole enemy", false); return; }
         Stats(new StatModifier(PerkStatIds.BlackHolePullImmune, EffectOp.Enable, 1));
@@ -251,6 +254,7 @@ internal static class PerkHooksSelfTest
         enemy.TestActive = false;
         ActiveAbilitySystem.Reset();
         Pc.Stats.RemoveSource("test.tank");
+        Admin.AdminState.Apply(new ChampionsOfTheSons.Core.Networking.AdminGrant(ChampionsOfTheSons.Core.Networking.AdminAction.God, 0, ""));
     }
 
     // ---------------------------------------------------------------- COS-85

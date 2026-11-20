@@ -120,19 +120,26 @@ internal static class SpellCaster
 
     // ---------------------------------------------------------------- Blink
 
-    /// <summary>Where the player's feet land when blinking from eyes at <paramref name="origin"/> along <paramref name="dir"/>: up to the range,
-    /// stopping short of obstacles, and never below the ground.</summary>
+    /// <summary>Where the player's feet land when blinking from eyes at <paramref name="origin"/> along <paramref name="dir"/> (Max 2026-11-20:
+    /// where they point, on the ground when they can). Aiming at the ground or another walkable surface within range lands standing on it;
+    /// aiming at a wall stops short of it and drops to the ground just below if it is close; aiming at open air goes to that point in the
+    /// air, never below the ground.</summary>
     public static Vector3 BlinkTarget(Vector3 origin, Vector3 dir, float range, float eyeHeight)
     {
         dir.Normalize();
-        var dest = origin + dir * range;
-        const float radius = 0.4f, margin = 0.5f;
+        const float radius = 0.4f, margin = 0.5f, walkable = 0.6f, stepDown = 3f;
         if (Physics.SphereCast(origin, radius, dir, out var hit, range, ~0, QueryTriggerInteraction.Ignore))
-            dest = origin + dir * Mathf.Max(0, hit.distance - margin);
+        {
+            if (hit.normal.y >= walkable) return hit.point + Vector3.up * 0.1f;
+            var stop = origin + dir * Mathf.Max(0, hit.distance - margin);
+            var feetAtWall = stop - Vector3.up * eyeHeight;
+            if (GroundY(stop + Vector3.up * 0.5f) is float wallGround)
+                feetAtWall.y = feetAtWall.y - wallGround <= stepDown ? wallGround + 0.1f : Mathf.Max(feetAtWall.y, wallGround + 0.1f);
+            return feetAtWall;
+        }
 
-        // Stay on the ground: look straight down from above the destination.
-        var feet = dest - Vector3.up * eyeHeight;
-        if (GroundY(dest + Vector3.up * 3f) is float gy) feet.y = Mathf.Max(feet.y, gy + 0.1f);
+        var feet = origin + dir * range - Vector3.up * eyeHeight;
+        if (GroundY(feet + Vector3.up * (eyeHeight + 3f)) is float gy) feet.y = Mathf.Max(feet.y, gy + 0.1f);
         return feet;
     }
 

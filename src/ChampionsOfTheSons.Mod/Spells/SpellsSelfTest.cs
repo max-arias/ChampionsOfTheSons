@@ -12,6 +12,9 @@ internal static class SpellsSelfTest
 
     public static void Register()
     {
+        // Blink lifts and drops the player; on a fresh level-1 test save (COS-129) the fall killed them and every later phase
+        // ran "not in world". God mode covers the Blink steps only (Spells2 checks healing, which god mode would mask).
+        SelfTest.Add(49.9f, "spells: god mode for Blink", () => ChampionsOfTheSons.Mod.Admin.AdminState.Apply(new ChampionsOfTheSons.Core.Networking.AdminGrant(ChampionsOfTheSons.Core.Networking.AdminAction.God, 1, "")));
         SelfTest.Add(50f, "spells: unlock and slot Blink", Setup);
         SelfTest.Add(50.5f, "spells: bar shows the slot", BarShows);
         SelfTest.Add(51f, "spells: blink range in open air", OpenAirRange);
@@ -19,6 +22,7 @@ internal static class SpellsSelfTest
         SelfTest.Add(53f, "spells: shot bar on cooldown", () => TestKit.Screenshot("30-spellbar-cooldown"));
         SelfTest.Add(53.5f, "spells: refusals", Refusals);
         SelfTest.Add(54.5f, "spells: persists in the save", SaveRoundTrip);
+        SelfTest.Add(57f, "spells: god mode off", () => ChampionsOfTheSons.Mod.Admin.AdminState.Apply(new ChampionsOfTheSons.Core.Networking.AdminGrant(ChampionsOfTheSons.Core.Networking.AdminAction.God, 0, "")));
     }
 
     private static void Setup()

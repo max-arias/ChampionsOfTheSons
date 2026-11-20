@@ -45,6 +45,7 @@ internal static class DeathSelfTest
                 return;
             }
             TestKit.Unpause();
+            SelfTest.AllowDeath = true; // this step is meant to kill the player
             Pc.SetLevel(8);
             Pc.AddXp(XpCurve.Goal(8) * 0.5);
             _xpBefore = Pc.Progress.Xp;

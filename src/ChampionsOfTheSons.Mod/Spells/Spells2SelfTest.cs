@@ -36,6 +36,8 @@ internal static class Spells2SelfTest
         SpellWorld.Reset();
         // Plenty of energy so the 500-energy spells can be cast; the cost itself is checked in the Blink test.
         Pc.Stats.SetSource("test.energy", new[] { new StatModifier(StatIds.MaxEnergy, EffectOp.Add, 3000) });
+        // A fresh test save (COS-129) has a 100-health character; spell costs and test hits killed it mid-phase. Plenty of health too.
+        Pc.Stats.SetSource("test.tank", new[] { new StatModifier(StatIds.MaxHealth, EffectOp.Add, 1e5) });
         var rules = WorldState.Rules;
         WorldState.SetRulesForTest(rules with { PartyLevelOverride = 1, AllowElites = false });
         try
@@ -136,6 +138,8 @@ internal static class Spells2SelfTest
 
     private static void RunAll()
     {
+        var hp = LocalPlayer.Vitals.Health;
+        hp.SetCurrentValue(hp.GetMax());
         SpellCaster.Casted += _ => _castEvents++;
         SelfTest.Check("spells2: every spell in the content has an effect", ModContent.Db.Spells.Keys.All(SpellCaster.IsImplemented),
             string.Join(", ", ModContent.Db.Spells.Keys.Where(k => !SpellCaster.IsImplemented(k))));

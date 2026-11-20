@@ -85,6 +85,13 @@ public static class PlayerBridge
                     final = 0;
                 }
             }
+            // Self-tests never kill the test character unless a step asks for it: a death leaves every later phase "not in world"
+            // (COS-138; the fresh COS-129 save has a 100-health character).
+            if (SelfTest.Enabled && !SelfTest.AllowDeath && LocalPlayer.Vitals?.Health is { } h && final >= h._currentValue)
+            {
+                SelfTest.Log($"self-test: lethal hit of {final:0} held to leave 1 health");
+                final = Math.Max(0, h._currentValue - 1);
+            }
             LastIncoming = (damage, final, result.Dodged);
             damage = (float)final;
             PlayerHurt?.Invoke(final, result.Dodged, kind);
