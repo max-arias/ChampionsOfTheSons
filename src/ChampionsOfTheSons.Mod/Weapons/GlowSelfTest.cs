@@ -26,10 +26,7 @@ internal static class GlowSelfTest
         SelfTest.Add(t, "glow: draw machete", () =>
         {
             PlayerState.Character.Inventory.Remove(WeaponTypes.WeaponSlot);
-            int id = GameItems.Find("Machete", 359);
-            var inv = LocalPlayer.Inventory;
-            if (inv.AmountOf(id, true, false) == 0) inv.AddItem(id, 1, true, false, null);
-            SelfTest.Check("glow: machete in hand", inv.TryEquip(id, false, true, false));
+            SelfTest.Check("glow: machete in hand", TestKit.EquipGameItem(GameItems.Find("Machete", 359)));
         });
         t += 6f; // the draw animation takes several seconds on a loaded machine
 
@@ -53,8 +50,8 @@ internal static class GlowSelfTest
                 SelfTest.Check($"glow: {rarity} shows the {level} look", skin != null && skin.Look.Level == level && Count(skin.Model, "cots-glow-edge") > 0
                     && Count(skin.Model, "cots-glow-light") == (extras ? 1 : 0) && Count(skin.Model, "cots-glow-wisp") == (extras ? 1 : 0), Describe(skin));
                 if (extras)
-                    SelfTest.Check("glow: legendary trail brighter", skin!.Trail != null && skin.Trail.widthMultiplier > (float)skin.Type.TrailWidth * 1.2f,
-                        skin.Trail == null ? "no trail" : $"width {skin.Trail.widthMultiplier:0.000}");
+                    SelfTest.Check("glow: legendary trail brighter", skin?.Trail != null && skin.Trail.widthMultiplier > (float)skin.Type.TrailWidth * 1.2f,
+                        skin == null ? "no skin" : skin.Trail == null ? "no trail" : $"width {skin.Trail.widthMultiplier:0.000}");
             });
             SelfTest.Add(t + 1.3f, $"glow: {level} screenshot", () => TestKit.Screenshot("glow-" + level.ToString().ToLowerInvariant()));
             t += 1.8f;

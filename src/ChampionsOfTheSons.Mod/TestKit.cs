@@ -59,6 +59,37 @@ public static class TestKit
 
     public static EnemyRuntime? Profile(VailActor? actor) => EnemyRegistry.Get(actor);
 
+    /// <summary>
+    /// Puts one of the game's items (by item id) into the player's inventory if it is not there yet. Self-tests must not
+    /// depend on what the test save happens to own (COS-129: the fresh save owns no weapons).
+    /// </summary>
+    public static bool EnsureGameItem(int itemId)
+    {
+        var inv = LocalPlayer.Inventory;
+        return inv != null && (inv.AmountOf(itemId, true, false) > 0 || inv.AddItem(itemId, 1, true, false, null));
+    }
+
+    /// <summary>
+    /// Empties the hands for an equip: the game refuses to equip a weapon while a held-only item (something carried in the
+    /// hands without being in the inventory, as earlier test phases can leave behind) is in hand (COS-129).
+    /// </summary>
+    public static void FreeHands()
+    {
+        var inv = LocalPlayer.Inventory;
+        if (inv != null && inv.HeldOnlyItemController != null) inv.StashHeldItems(false, true);
+    }
+
+    /// <summary>Owns and holds one of the game's items: adds it if needed, frees the hands, equips it. False if the game refused.</summary>
+    public static bool EquipGameItem(int itemId)
+    {
+        var inv = LocalPlayer.Inventory;
+        if (inv == null || !EnsureGameItem(itemId)) return false;
+        FreeHands();
+        if (inv.TryEquip(itemId, false, true, false)) return true;
+        inv.StashHeldItems(false, true); // whatever else is in hand
+        return inv.TryEquip(itemId, false, true, false);
+    }
+
     /// <summary>Rolls an item into the bag. Null base id = random item of the given rarity.</summary>
     public static ItemInstance Give(string? baseId = null, int rarity = 2, int level = 20)
     {
