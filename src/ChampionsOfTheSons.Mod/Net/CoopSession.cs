@@ -82,7 +82,8 @@ public static class CoopSession
         if (!IsHost) return;
         foreach (var c in Peers)
         {
-            if (c == except) continue;
+            // By the native connection: interop wraps the same peer in a new object each time (see ConnectionComparer).
+            if (except != null && ConnectionComparer.Instance.Equals(c, except)) continue;
             try { CotsNetEvent.Instance.SendTo(message, c); }
             catch (Exception e) { RLog.Warning($"{CoopTestJoin.Tag} send {message.Type} failed: {e.Message}"); }
         }

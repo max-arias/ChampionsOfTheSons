@@ -270,7 +270,8 @@ public static class EnemyPatches
     {
         try
         {
-            if (!EnemyRegistry.IsAuthority || __result == null) return;
+            // Also on a co-op client: its own player's hits are resolved there, and the mirror carries the host's profile (COS-79).
+            if (__result == null) return;
             var runtime = EnemyRegistry.Get(__instance._ownerActor);
             if (runtime == null || !runtime.IsActive) return;
             float scaled = (float)EnemyScaler.DamageToPlayer(runtime.Profile, __result._originalRawDamage, runtime.Combat.DamageDealtMultiplier);
@@ -278,7 +279,8 @@ public static class EnemyPatches
             __result._originalRawDamage = scaled;
             __result._remainingRawDamage *= factor;
             PlayerEffects.LastAttacker = (runtime, Time.time);
-            if (Net.CoopSelfTest.ServerDriver) RLog.Msg($"{Net.CoopTestJoin.Tag} host: enemy melee impact scaled {scaled / factor:F1} -> {scaled:F1}");
+            if (Net.CoopSelfTest.ServerDriver || Net.CoopTest.Enabled)
+                RLog.Msg($"{Net.CoopTestJoin.Tag} {(EnemyRegistry.IsAuthority ? "host" : "client")}: enemy melee impact scaled {scaled / factor:F1} -> {scaled:F1}");
         }
         catch (Exception e)
         {

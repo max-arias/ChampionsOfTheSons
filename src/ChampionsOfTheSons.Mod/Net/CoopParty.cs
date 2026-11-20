@@ -33,6 +33,7 @@ public sealed class CoopParty : IModFeature
     private static readonly HashSet<uint> Announced = new();
     private static float _sendTimer, _pruneTimer;
     private static int _sentLevel;
+    private static bool _pruneWarned;
 
     /// <summary>A system line arrived (or the host made one): the HUD shows it.</summary>
     public static event Action<Announce>? Line;
@@ -100,7 +101,11 @@ public sealed class CoopParty : IModFeature
             if (_pruneTimer <= 0)
             {
                 _pruneTimer = 2f;
-                CoopFeature.PruneGone();
+                try { CoopFeature.PruneGone(); }
+                catch (Exception e)
+                {
+                    if (!_pruneWarned) { _pruneWarned = true; RLog.Warning($"{CoopTestJoin.Tag} leave check failed: {e.Message}"); }
+                }
             }
         }
         if (!inWorld || LocalPlayer.Transform == null || ServerConfig.OnDedicatedServer) return;

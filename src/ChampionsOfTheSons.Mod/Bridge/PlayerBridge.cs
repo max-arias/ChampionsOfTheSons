@@ -65,6 +65,7 @@ public static class PlayerBridge
             }
             var kind = isDemonic ? DamageKind.Magic : DamageKind.Physical;
             if (Net.CoopTest.Enabled) RLog.Msg($"{Net.CoopTestJoin.Tag} client: took a {kind} hit of {damage:F1} before defense");
+            ScaleClientMelee(ref damage, kind);
             var character = PlayerState.Character;
             var result = PlayerDefense.Incoming(character.Stats, damage, kind, Rng);
             double final = result.Damage;
@@ -109,6 +110,27 @@ public static class PlayerBridge
             EnemyPatches.DealForced(enemy, new OutgoingHit(thorns, DamageKind.Physical, false, pierce), creditPlayer: true);
         }
     }
+
+    /// <summary>
+    /// Co-op client (COS-79): the game hands a client's player the enemy's vanilla swing damage, and no impact hook sees it there,
+    /// so the nearest host enemy in reach scales it by its synced profile (the same rule as on the host). It is then the attacker
+    /// for Basher and Poisonous.
+    /// </summary>
+    private static void ScaleClientMelee(ref float damage, DamageKind kind)
+    {
+        if (kind != DamageKind.Physical || !Net.CoopSession.IsClient) return;
+        if (PlayerEffects.LastAttacker is { } last && Time.time - last.Time <= 0.75f) return; // an impact hook already scaled it
+        var enemy = NearestEnemy(MeleeReach);
+        if (enemy == null) return;
+        float scaled = (float)EnemyScaler.DamageToPlayer(enemy.Profile, damage, enemy.Combat.DamageDealtMultiplier);
+        if (Net.CoopTest.Enabled) RLog.Msg($"{Net.CoopTestJoin.Tag} client: enemy swing scaled {damage:F1} -> {scaled:F1} by level {enemy.Profile.Level}");
+        LastClientMeleeScaled = (damage, scaled);
+        damage = scaled;
+        PlayerEffects.LastAttacker = (enemy, Time.time);
+    }
+
+    /// <summary>Co-op test: the last enemy swing a client scaled (raw, scaled).</summary>
+    public static (double Raw, double Scaled)? LastClientMeleeScaled { get; private set; }
 
     /// <summary>How far an enemy's swing reaches a player, for finding who hit a co-op client.</summary>
     private const float MeleeReach = 4.5f;

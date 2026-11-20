@@ -98,7 +98,8 @@ internal static class AbilityReplicas
         foreach (var key in Live.Keys.ToList())
         {
             var i = Live[key];
-            if (!key.Enemy.IsActive)
+            // Gone from the registry (died, or mirrored again under a new stats object): its copy goes too.
+            if (!key.Enemy.IsActive || EnemyRegistry.Get(key.Enemy.Stats) != key.Enemy)
             {
                 Dispose(i);
                 Live.Remove(key);
@@ -131,7 +132,11 @@ internal static class AbilityReplicas
         {
             if (!Enum.TryParse<EnemyAbility>(ev.Ability, out var ability)) return;
             var enemy = EnemyRegistry.Get(EnemySyncFeature.ActorOf(ev.EnemyNetId));
-            if (enemy == null || !enemy.IsActive) return;
+            if (enemy == null || !enemy.IsActive)
+            {
+                if (CoopTest.Enabled) RLog.Msg($"{CoopTestJoin.Tag} client: {ev.Ability} of enemy {ev.EnemyNetId} skipped: {(enemy == null ? "no mirror" : "not active")}");
+                return;
+            }
             if (GetOrCreate(enemy, ability) is not CastInstance cast) return;
             var point = CoopSession.ToUnity(ev.Point);
             if (ev.Phase == AbilityPhase.Lock)

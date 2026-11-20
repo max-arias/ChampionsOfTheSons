@@ -103,7 +103,8 @@ public sealed class EnemyAbilityFeature : IModFeature
 
     public void Update(float dt, bool inWorld)
     {
-        if (inWorld) Step(dt);
+        // A dedicated server has no player in the world, but owns the enemies: it steps them too (COS-79).
+        if (inWorld || Net.ServerConfig.OnDedicatedServer) Step(dt);
     }
 
     /// <summary>One frame of the host loop. Self-tests call it to step enemy time themselves (the headless game runs with time scale 0).</summary>

@@ -154,13 +154,24 @@ public sealed class EnemySyncFeature : IModFeature
         }
     }
 
-    /// <summary>The game resets an actor's scale when it activates it, so the host's scale is put back on every mirror (COS-79).</summary>
+    /// <summary>The game resets an actor's scale when it activates it, so the host's scale is put back on every mirror (COS-79).
+    /// An enemy whose live actor now has another stats object than its mirror is mirrored again (the old entry is dropped).</summary>
     private static void KeepScale()
     {
         foreach (var (id, mirror) in Mirrors.ToList())
         {
             try
             {
+                var live = ActorOf(id);
+                var liveStats = live?.GetStatsManager()?.GetStatsManager();
+                if (liveStats != null && mirror.Stats != null && liveStats.Pointer != mirror.Stats.Pointer && ReceivedProfiles.TryGetValue(id, out var again))
+                {
+                    if (CoopTest.Enabled) RLog.Msg($"{CoopTestJoin.Tag} client: enemy {id} changed its stats object: mirrored again");
+                    EnemyRegistry.Remove(mirror.Stats);
+                    Mirrors.Remove(id);
+                    Pending[id] = again;
+                    continue;
+                }
                 var actor = mirror.Actor;
                 if (actor == null || !actor.gameObject.activeInHierarchy) continue;
                 float want = (float)mirror.Profile.Scale;

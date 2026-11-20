@@ -15,7 +15,7 @@ namespace ChampionsOfTheSons.Mod.Net;
 /// enemy with Meteor (a projectile), Blizzard (an aura) and Chains (a root) and a scale of 1.6 next to the client, hits it with
 /// the host's own damage, sends a teammate's info and a level-up line, and echoes the client's spell casts back as another
 /// player's. The client checks it plays and is hit by the casts, sees the scale, the numbers, the party data, gets the enemy
-/// profiles again after a rejoin (late join), and draws a teammate's Black Hole, Portal (usable) and Black Flame on and off.
+/// profiles again after a rejoin (late join), and draws a teammate's Healing Dome, Portal (usable) and Black Flame on and off.
 /// </summary>
 public sealed class CoopSyncSelfTest : IModFeature
 {
@@ -27,6 +27,7 @@ public sealed class CoopSyncSelfTest : IModFeature
     private static float _stageAt;
     private static VailActor? _enemy;
     private static bool _hooked;
+    private static float _resent;
 
     public void Init()
     {
@@ -109,8 +110,13 @@ public sealed class CoopSyncSelfTest : IModFeature
                 RLog.Msg($"{CoopTestJoin.Tag} server: host damage numbers sent {CoopHits.HostNumbersSent}");
                 Next(now);
                 break;
-            case 2: // let it cast for a while
-                if (now - _stageAt < 50) break;
+            case 2: // let it cast for a while (the client's ability, party and late-join steps run meanwhile)
+                if (now - _resent > 3)
+                {
+                    _resent = now;
+                    CoopSession.SendToPeers(new PlayerInfo(TestPeer, "Test Peer", 12, 1.5f, CoopSession.ToVec(at + new Vector3(3, 0, 3))));
+                }
+                if (now - _stageAt < 110) break;
                 RLog.Msg($"{CoopTestJoin.Tag} server: ability casts sent {Abilities.AbilityNet.Sent}");
                 var dead = EnemyRegistry.Get(_enemy);
                 if (dead != null) EnemyPatches.DealForced(dead, new OutgoingHit(1e12, DamageKind.Pure, false, 0), creditPlayer: false);
@@ -129,7 +135,7 @@ public sealed class CoopSyncSelfTest : IModFeature
 
     private static float _wait = -1;
     private static bool _rooted;
-    private static int _castState;
+    private static int _castState, _joinState;
     private static int _shapesBefore;
 
     /// <summary>Called by <see cref="CoopSelfTest"/> before its last (version check) step.</summary>
@@ -145,7 +151,9 @@ public sealed class CoopSyncSelfTest : IModFeature
             if (PlayerEffects.Stunned) _rooted = true;
             var started = Abilities.AbilityReplicas.Started;
             bool meteor = started.GetValueOrDefault(EnemyAbility.Meteor) > 0, chains = started.GetValueOrDefault(EnemyAbility.Chains) > 0;
-            if (!(meteor && chains && _rooted) && Time.realtimeSinceStartup - _wait < 55) return false;
+            // The headless client runs slow frames, so game time (casts) lags the real clock: also wait for a copy to land a hit.
+            bool hit = Abilities.AbilityDamage.PlayerHits > 0;
+            if (!(meteor && chains && _rooted && hit) && Time.realtimeSinceStartup - _wait < 55) return false;
             CoopTest.Check("abilities: Meteor (projectile) plays on the client", meteor, $"{started.GetValueOrDefault(EnemyAbility.Meteor)} cast(s)");
             CoopTest.Check("abilities: Chains roots the client", chains && _rooted, $"{started.GetValueOrDefault(EnemyAbility.Chains)} cast(s), rooted {_rooted}");
             return true;
@@ -153,6 +161,9 @@ public sealed class CoopSyncSelfTest : IModFeature
 
         CoopTest.Add("abilities: the aura copy hurts the client", () =>
         {
+            // Enemy swings land only when the AI decides to attack: reported when one did, not required.
+            if (PlayerBridge.LastClientMeleeScaled is { } m)
+                CoopTest.Check("melee: an enemy swing on the client is scaled by the host profile", m.Scaled >= m.Raw, $"{m.Raw:F1} -> {m.Scaled:F1}");
             CoopTest.Check("abilities: Blizzard aura runs on the client and hits its player",
                 Abilities.AbilityReplicas.AurasRun > 0 && Abilities.AbilityDamage.PlayerHits > 0,
                 $"auras {Abilities.AbilityReplicas.AurasRun}, ability hits on me {Abilities.AbilityDamage.PlayerHits}");
@@ -185,17 +196,16 @@ public sealed class CoopSyncSelfTest : IModFeature
 
         CoopTest.Add("late join: enemy profiles arrive again after a rejoin", () =>
         {
-            if (_castState == 0)
+            if (_joinState == 0)
             {
                 EnemySyncFeature.ForgetReceived();
                 CoopSession.SendToHost(new Hello(MessageCodec.ProtocolVersion, CoopFeature.ModVersion));
                 _wait = Time.realtimeSinceStartup;
-                _castState = 1;
+                _joinState = 1;
                 return false;
             }
             if (EnemySyncFeature.Received.Count == 0) return false;
             CoopTest.Check("late join: the host resends existing enemies' profiles", true, $"{EnemySyncFeature.Received.Count} profile(s) after the rejoin");
-            _castState = 0;
             return true;
         }, 20);
 
@@ -206,8 +216,8 @@ public sealed class CoopSyncSelfTest : IModFeature
             {
                 case 0:
                     _shapesBefore = Spells.SpellNetTest.RemoteShapesDrawn;
-                    Cast(0, "spell.black_hole");
-                    CoopTest.Check("spells: Black Hole cast carries its visuals", Spells.SpellNetTest.LastShapes("spell.black_hole") > 0, $"{Spells.SpellNetTest.LastShapes("spell.black_hole")} shape(s)");
+                    Cast(0, "spell.healing_dome");
+                    CoopTest.Check("spells: Healing Dome cast carries its visuals", Spells.SpellNetTest.LastShapes("spell.healing_dome") > 0, $"{Spells.SpellNetTest.LastShapes("spell.healing_dome")} shape(s)");
                     Cast(1, "spell.portal");
                     CoopTest.Check("spells: Portal cast carries both gates", Spells.SpellNetTest.LastPortals() == 2, $"{Spells.SpellNetTest.LastPortals()} gate(s)");
                     Cast(2, "spell.black_flame");
