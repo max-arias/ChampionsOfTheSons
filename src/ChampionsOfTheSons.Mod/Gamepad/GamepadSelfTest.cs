@@ -20,6 +20,13 @@ internal static class GamepadSelfTest
     {
         SelfTest.PhaseReset += CloseAll;
         float t = 0;
+        // These checks drive the screen panels; the inventory binding opens the guide book by default (COS-59).
+        SelfTest.Add(t += 0.2f, "pad: unpause, screen inventory", () =>
+        {
+            TestKit.Unpause();
+            _bookSetting = Config.InventoryInBook.Value;
+            Config.InventoryInBook.Value = false;
+        });
         SelfTest.Add(t += 0.5f, "pad: binding opens the inventory", () =>
         {
             var def = ModContent.Db.Items.Values.First(d => d.Type == "ring" && d.Rarity >= 1 && d.Rarity <= 3);
@@ -145,8 +152,11 @@ internal static class GamepadSelfTest
         });
     }
 
+    private static bool? _bookSetting;
+
     private static void CloseAll()
     {
+        if (_bookSetting.HasValue) { Config.InventoryInBook.Value = _bookSetting.Value; _bookSetting = null; }
         if (Inv.IsOpen) { Inv.CloseMenu(); Inv.Close(); }
         if (PerksFeature.Panel.IsOpen) PerksFeature.Panel.Close();
         if (Crafting.CraftingFeature.Panel.IsOpen) Crafting.CraftingFeature.Panel.Close();

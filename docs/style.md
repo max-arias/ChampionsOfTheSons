@@ -77,6 +77,6 @@ Names follow classic action-RPG conventions (Diablo, Path of Exile) on top of th
 - Equipment, bag and character live on the game's own guide book: the real book in hand, our page drawn into its page texture, one mod tab under the game's tab column, and Gear / Bag / Character as sub-tabs in the page's title bar (`src/ChampionsOfTheSons.Mod/Book/`). The screen panel stays as a fallback (`inventory_in_book` setting).
 - Page look follows the game's guide book, a little darker: cream paper `#D9CFB8`, slot shade `#C9BEA4`, ink `#2A2622`, brown title bar `#5A4636` with paper-colored open tab, red selection `#B8322A`.
 - Slots: ruled squares, a rarity tape tab in the corner (muted: `#9A968C`, `#6E8B4E`, `#4F7FA6`, `#C9982A`, `#7A4A82`, `#D9622B`, `#9E2B2B`, `#6A52C8` for Common to Primal), level top right, `xN` bottom right. Rarity never glows.
-- Keep clear of the spiral (left ~46 px of the page) and the thumb (bottom-left ~92 px): pagers and buttons sit bottom right.
+- Keep clear of the spiral (left ~62 px of the page) and the thumb (bottom-left ~92 px): pagers and buttons sit bottom right.
 - Item details and actions go in a dark card beside the book on the screen, never on the page.
 - Our tab icon is a flat off-white glyph on a dark square, like the game's tab icons, not the colored item icon.

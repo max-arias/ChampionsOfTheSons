@@ -27,7 +27,7 @@ internal static class BookSelfTest
 
     public static void Register()
     {
-        SelfTest.Add(0.5f, "book: unpause", Unpause);
+        SelfTest.Add(0.5f, "book: unpause", TestKit.Unpause);
         SelfTest.Add(1f, "book: setup", Setup);
         SelfTest.Add(1.5f, "book: kill for drops", Kill);
         SelfTest.Add(5f, "book: drops are gear", CheckDrops);
@@ -72,13 +72,6 @@ internal static class BookSelfTest
         SelfTest.Add(28f, "book: shot game page", () => TestKit.Screenshot("book-game-page"));
         SelfTest.Add(28.3f, "book: close", () => BookHost.Close());
         SelfTest.Add(29.8f, "book: closed and cleanup", Cleanup);
-    }
-
-    private static void Unpause()
-    {
-        // The test save is an early-access save: the game shows a warning over the pause menu and stays paused.
-        foreach (var w in UnityEngine.Object.FindObjectsOfType<Sons.Gui.VersionUpgrade.ShowLegacySaveWarning>()) w.gameObject.SetActive(false);
-        Sons.Gui.PauseMenu._instance?.Close();
     }
 
     private static void Setup()

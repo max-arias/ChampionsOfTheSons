@@ -7,6 +7,7 @@ using SUI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using ChampionsOfTheSons.Mod.Pad;
 using static ChampionsOfTheSons.Mod.UI.PanelKit;
 using static SUI.SUI;
 
@@ -23,7 +24,8 @@ public enum PerkState
 /// <summary>
 /// The perk window: one tab per perk category laid out by the perks' own x/y with unlock-path lines, plus a spell book tab.
 /// A detail pane on the right follows the hovered node (or the clicked one) and holds the Buy button.
-/// Respec consumes a Untainted Heart from the bag.
+/// Holding the mouse button or pad A on an available node for <see cref="HoldSeconds"/> buys it (COS-53); each node shows
+/// its cost in the corner. Respec consumes a Untainted Heart from the bag and needs a second click to confirm.
 /// </summary>
 internal sealed class PerkPanel
 {
@@ -48,6 +50,8 @@ internal sealed class PerkPanel
         public SBgButtonOptions Button = null!;
         public SImageOptions? Icon;
         public SLabelOptions Count = null!;
+        public SContainerOptions Cost = null!;
+        public SContainerOptions Fill = null!;
         public float X, Y, Size; // window coordinates, top-left origin
         public PerkState? Shown;
         public int ShownTimes = -1;
@@ -97,6 +101,19 @@ internal sealed class PerkPanel
     private int _lastToggleFrame = -1;
     private string _lastMessage = "";
 
+    /// <summary>How long a node must be held to buy it.</summary>
+    public const float HoldSeconds = 0.6f;
+    /// <summary>A second Respec click within this many seconds confirms.</summary>
+    public const float RespecConfirmSeconds = 5f;
+    private string? _holdId, _holdLatched;
+    private float _holdTime;
+    private bool _respecArmed;
+    private float _respecArmedAt;
+
+    /// <summary>The perk being held and how far (0..1), for the self-test.</summary>
+    public (string? Id, float Fraction) Hold => (_holdId, Mathf.Clamp01(_holdTime / HoldSeconds));
+    public bool RespecArmed => _respecArmed;
+
     public bool IsOpen => _root != null && _root.Root.activeSelf;
     public GameObject? PadRoot => _root?.Root;
     public string CurrentTab => _tab;
@@ -127,7 +144,7 @@ internal sealed class PerkPanel
         _window.Add(_points);
         _respecNote = Label("", 16, UiTheme.TextDim, TextAlignmentOptions.MidlineRight).TopLeft(860, 14).Size(380, 44);
         _window.Add(_respecNote);
-        _respec = Button(UiText.T("ui.perks.respec", "Respec"), WinW - 64 - 16 - 150, 16, 150, 40, () => TryRespec(), 12, 18);
+        _respec = Button(UiText.T("ui.perks.respec", "Respec"), WinW - 64 - 16 - 200, 16, 200, 40, () => RespecClick(), 12, 18);
         _window.Add(_respec);
         _window.Add(SBgButton.Text("X").FontSize(24).FontColor(UiTheme.Text).Color(C("#2B333E"), C("#4A3036")).Notify(Close)
             .TopLeft(WinW - 64, 16).Size(40, 40));
@@ -182,7 +199,8 @@ internal sealed class PerkPanel
         double minX = perks.Min(p => p.X), maxX = perks.Max(p => p.X), minY = perks.Min(p => p.Y), maxY = perks.Max(p => p.Y);
         double spanX = Math.Max(1, maxX - minX), spanY = Math.Max(1, maxY - minY);
         float unit = (float)Math.Min(Math.Min((TreeW - 2 * TreePad - 60) / spanX, (BodyH - 2 * TreePad - 60) / spanY), 96);
-        float size = Mathf.Clamp(unit * 0.74f, 34, 66);
+        // Nodes as large as the spacing allows (COS-53: bigger icons), leaving a fifth of the step as a gap.
+        float size = Mathf.Clamp(unit * 0.8f, 36, 76);
         float offX = (float)((TreeW - spanX * unit) / 2), offY = (float)((BodyH - spanY * unit) / 2);
 
         Vector2 Center(PerkDef p) => new(offX + (float)((p.X - minX) * unit), offY + (float)((p.Y - minY) * unit));
@@ -213,12 +231,21 @@ internal sealed class PerkPanel
             btn.Add(icon);
             if (IconView.Show(icon, p.Id)) btn.Text("");
             else icon = null;
-            var count = Label("", 12, UiTheme.Gold, TextAlignmentOptions.BottomRight).Anchor(AnchorType.Fill);
+            var count = Label("", 13, UiTheme.Gold, TextAlignmentOptions.BottomRight).Anchor(AnchorType.Fill);
             count.TextObject.margin = new Vector4(2, 2, 4, 1);
             btn.Add(count);
+            // Cost in the top-left corner, on a dark tab so it reads over the icon.
+            var cost = SContainer.TopLeft(0, 0).Size(18, 17).Background(C("#000000B0"), EBackground.None);
+            cost.Add(Label(p.Cost.ToString(), 13, UiTheme.Text, TextAlignmentOptions.Center).Anchor(AnchorType.Fill));
+            btn.Add(cost);
+            // Hold-to-buy progress along the bottom edge.
+            var fill = SContainer.TopLeft(0, size - 6).Size(0, 6).Background(C("#5BD75B"), EBackground.None);
+            btn.Add(fill);
+            foreach (var g in fill.Root.GetComponentsInChildren<Graphic>(true)) g.raycastTarget = false;
+            foreach (var g in cost.Root.GetComponentsInChildren<Graphic>(true)) g.raycastTarget = false;
             area.Add(btn);
             _hoverIds[btn.Root.GetInstanceID()] = id;
-            _nodes[id] = new Node { Def = p, Button = btn, Icon = icon, Count = count, X = TreeX + c.x - size / 2, Y = BodyTop + c.y - size / 2, Size = size };
+            _nodes[id] = new Node { Def = p, Button = btn, Icon = icon, Count = count, Cost = cost, Fill = fill, X = TreeX + c.x - size / 2, Y = BodyTop + c.y - size / 2, Size = size };
         }
         area.Active(false);
     }
@@ -297,6 +324,9 @@ internal sealed class PerkPanel
     public void Close()
     {
         _hover = null;
+        ResetHold();
+        _holdLatched = null;
+        DisarmRespec();
         _root.Active(false);
     }
 
@@ -326,6 +356,37 @@ internal sealed class PerkPanel
             _hover = hovered;
             RefreshDetail();
         }
+        if (!_useSimulatedHover) HoldStep(_hover, Input.GetMouseButton(0) || PadInput.Held(PadButton.South), Time.unscaledDeltaTime);
+        if (_respecArmed && Time.unscaledTime - _respecArmedAt > RespecConfirmSeconds) DisarmRespec();
+    }
+
+    // ------------------------------------------------------------------ hold to buy
+
+    /// <summary>
+    /// One frame of hold-to-buy: while <paramref name="held"/> stays on the same available perk the node fills; at
+    /// <see cref="HoldSeconds"/> it is bought. The button must be let go before the next buy (stackable perks too).
+    /// Returns the buy result on the frame it buys, else null.
+    /// </summary>
+    public BuyResult? HoldStep(string? id, bool held, float dt)
+    {
+        if (!held) { _holdLatched = null; ResetHold(); return null; }
+        if (id == null || id == _holdLatched || !_nodes.ContainsKey(id) || Pc.Perks.CanBuy(id, Pc.Progress) != BuyResult.Ok) { ResetHold(); return null; }
+        if (id != _holdId) { ResetHold(); _holdId = id; }
+        _holdTime += dt;
+        var node = _nodes[id];
+        node.Fill.Size(node.Size * Mathf.Clamp01(_holdTime / HoldSeconds), 6);
+        if (_holdTime < HoldSeconds) return null;
+        var r = Buy(id);
+        ResetHold();
+        _holdLatched = id;
+        return r;
+    }
+
+    private void ResetHold()
+    {
+        if (_holdId != null && _nodes.TryGetValue(_holdId, out var n)) n.Fill.Size(0, 6);
+        _holdId = null;
+        _holdTime = 0;
     }
 
     public void SimulateHover(string? id)
@@ -418,6 +479,7 @@ internal sealed class PerkPanel
             node.Button.TextObject.color = C(state == PerkState.Locked ? UiTheme.TextFaint : UiTheme.Text);
             if (node.Icon != null) node.Icon.ImageObject.color = state == PerkState.Locked ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
             node.Count.Text(times > 1 || (times == 1 && node.Def.Stackable) ? "×" + times : "");
+            node.Cost.Active(times == 0 || node.Def.Stackable);
         }
         foreach (var e in _edges)
         {
@@ -557,6 +619,31 @@ internal sealed class PerkPanel
         _dirty = false;
         Refresh();
         return ok;
+    }
+
+    /// <summary>The Respec button: the first click arms it (the label asks to confirm), a second click within
+    /// <see cref="RespecConfirmSeconds"/> respecs. Returns "nothing", "armed", "done" or "refused".</summary>
+    public string RespecClick()
+    {
+        if (Pc.Perks.SpentPoints == 0) { DisarmRespec(); return "nothing"; }
+        if (!_respecArmed)
+        {
+            _respecArmed = true;
+            _respecArmedAt = Time.unscaledTime;
+            _respec.Text(UiText.T("ui.perks.respec_confirm", "Click to confirm"));
+            _respec.Color(C("#8E2424"), C("#B03A3A"));
+            return "armed";
+        }
+        DisarmRespec();
+        return TryRespec() ? "done" : "refused";
+    }
+
+    private void DisarmRespec()
+    {
+        if (!_respecArmed) return;
+        _respecArmed = false;
+        _respec.Text(UiText.T("ui.perks.respec", "Respec"));
+        _dirty = true;
     }
 
     /// <summary>Respec: consumes one Untainted Heart and refunds every perk and spell. False when there is no heart or nothing to refund.</summary>

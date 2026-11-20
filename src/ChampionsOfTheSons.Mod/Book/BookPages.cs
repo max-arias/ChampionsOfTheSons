@@ -31,7 +31,7 @@ internal static class BookPages
     public static int BagPages => Math.Max(1, (BagKeys().Count + BagPerPage - 1) / BagPerPage);
     private const float Header = 80;
     /// <summary>Page margins: the spiral covers the left edge and the thumb the bottom left (COS-59 screenshots).</summary>
-    private const float Left = 46, Right = 16, Bottom = 92;
+    private const float Left = 62, Right = 16, Bottom = 92;
     private const float PagerY = PageKit.H - Bottom - 50, PagerH = 44;
     private const float NextX = PageKit.W - Right - 56, PrevX = NextX - 56 - 90, SortX = PrevX - 124;
     private const float XpW = PageKit.W - Left - Right;

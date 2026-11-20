@@ -13,6 +13,16 @@ public static class TestKit
 {
     private static readonly Rng Rng = new(12345);
 
+    /// <summary>
+    /// The test save is an early-access save: the game opens a "Game Loaded" warning over the pause menu and stays
+    /// paused, so bindings that need a controllable player do nothing until it is closed (COS-62).
+    /// </summary>
+    public static void Unpause()
+    {
+        foreach (var w in UnityEngine.Object.FindObjectsOfType<Sons.Gui.VersionUpgrade.ShowLegacySaveWarning>()) w.gameObject.SetActive(false);
+        Sons.Gui.PauseMenu._instance?.Close();
+    }
+
     /// <summary>Spawns an enemy <paramref name="distance"/> m in front of the player, optionally under temporary rules.</summary>
     public static VailActor? Spawn(VailActorTypeId type = VailActorTypeId.Carl, float distance = 6, float sideways = 0, WorldRules? rules = null)
     {

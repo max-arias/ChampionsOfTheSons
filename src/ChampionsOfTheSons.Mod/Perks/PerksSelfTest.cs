@@ -18,6 +18,7 @@ internal static class PerksSelfTest
         SelfTest.Add(20f, "perks: fresh character + level up", LevelUp);
         SelfTest.Add(20.5f, "perks: open panel", OpenPanel);
         SelfTest.Add(21f, "perks: buy perks, stats change", BuyPerks);
+        SelfTest.Add(21.5f, "perks: hold to buy", HoldToBuy);
         SelfTest.Add(22f, "perks: states, hit-test, detail", StatesAndHover);
         SelfTest.Add(23f, "perks: shot melee", () => TestKit.Screenshot("10-perks-melee"));
         SelfTest.Add(23.5f, "perks: tabs", Tabs);
@@ -83,6 +84,35 @@ internal static class PerksSelfTest
         if (locked != null) SelfTest.Check("perks: locked perk refused", Panel.Buy(locked.Id) == BuyResult.PathLocked);
     }
 
+    /// <summary>Holding on an available node fills it and buys at <see cref="PerkPanel.HoldSeconds"/>; a held button
+    /// does not buy again until released; locked perks never fill.</summary>
+    private static void HoldToBuy()
+    {
+        var p = ModContent.Db.Perks.Values.Where(x => Pc.Perks.CanBuy(x.Id, Pc.Progress) == BuyResult.Ok)
+            .OrderByDescending(x => x.Stackable).ThenBy(x => x.Category).ThenBy(x => x.Y).First();
+        Panel.ShowTab(p.Category.ToString());
+        int pointsBefore = Pc.Perks.AvailablePoints(Pc.Progress), times = Pc.Perks.TimesBought(p.Id);
+        float half = PerkPanel.HoldSeconds / 2;
+        var r1 = Panel.HoldStep(p.Id, true, half);
+        var hold = Panel.Hold;
+        SelfTest.Check("perks: a short hold only fills the node", r1 == null && hold.Id == p.Id && hold.Fraction > 0.4f && Pc.Perks.TimesBought(p.Id) == times, $"{r1}, {hold}");
+        var r2 = Panel.HoldStep(p.Id, true, half + 0.01f);
+        SelfTest.Check("perks: holding long enough buys", r2 == BuyResult.Ok && Pc.Perks.TimesBought(p.Id) == times + 1 && Pc.Perks.AvailablePoints(Pc.Progress) == pointsBefore - p.Cost,
+            $"{p.Id}: {r2}, x{Pc.Perks.TimesBought(p.Id)}");
+        var r3 = Panel.HoldStep(p.Id, true, PerkPanel.HoldSeconds * 2);
+        SelfTest.Check("perks: keeping the button held does not buy again", r3 == null && Pc.Perks.TimesBought(p.Id) == times + 1, $"{r3}");
+        Panel.HoldStep(p.Id, false, 0);
+        Bought.Add(p.Id);
+        var locked = ModContent.Db.Perks.Values.FirstOrDefault(x => Pc.Perks.CanBuy(x.Id, Pc.Progress) == BuyResult.PathLocked);
+        if (locked != null)
+        {
+            var r4 = Panel.HoldStep(locked.Id, true, PerkPanel.HoldSeconds * 2);
+            SelfTest.Check("perks: holding a locked perk does nothing", r4 == null && Panel.Hold.Id == null, $"{r4}");
+            Panel.HoldStep(locked.Id, false, 0);
+        }
+        Panel.ShowTab(PerkCategory.MeleeOffense.ToString());
+    }
+
     private static void StatesAndHover()
     {
         var states = ModContent.Db.Perks.Keys.Select(Panel.StateOf).Distinct().ToList();
@@ -143,7 +173,9 @@ internal static class PerksSelfTest
         TestKit.Give(PerkPanel.HeartOfPurity, 4, 1);
         SelfTest.Check("perks: heart in bag", PanelKit.Count(Pc.Inventory, PerkPanel.HeartOfPurity) == 1);
         double before = Pc.Stats.Get(ModContent.Db.Perks[Bought[0]].Effects[0].Stat);
-        bool ok = Panel.TryRespec();
+        string first = Panel.RespecClick();
+        SelfTest.Check("perks: the first Respec click only asks to confirm", first == "armed" && Panel.RespecArmed && Pc.Perks.SpentPoints == spent, first);
+        bool ok = Panel.RespecClick() == "done";
         double after = Pc.Stats.Get(ModContent.Db.Perks[Bought[0]].Effects[0].Stat);
         SelfTest.Check("perks: respec refunds everything", ok && Pc.Perks.SpentPoints == 0 && Pc.Perks.Bought.Count == 0 && Pc.Spells.Loadout.All(s => s == null),
             $"spent {Pc.Perks.SpentPoints}");
