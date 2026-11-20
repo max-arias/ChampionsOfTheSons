@@ -148,7 +148,7 @@ internal static class SpellEffects
         var health = LocalPlayer.Vitals.Health;
         double purge = PerkRules.PurgeDamage(Stats, health.GetMax() > 0 ? health._currentValue / health.GetMax() : 1);
         if (purge > 1) Buffs.Apply("purgatory", PerkRules.PurgeSeconds, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, purge) });
-        SpellFx.Disc(Feet(), 3f, SpellFx.Heal, 1f, LocalPlayer.Transform);
+        SpellFx.Disc(Feet(), 3f, SpellFx.Heal, 1f, LocalPlayer.Transform, SpellFx.Look.Glyph);
         return true;
     }
 
@@ -162,7 +162,7 @@ internal static class SpellEffects
         AddZone(new SpellZone
         {
             Id = "healing_dome", Center = at, Radius = radius, Left = S("spell_healing_dome_duration"), Interval = interval,
-            Visual = SpellFx.Disc(at, radius, SpellFx.Heal, 1e6f),
+            Visual = SpellFx.Disc(at, radius, SpellFx.Heal, 1e6f, look: SpellFx.Look.Dome),
             Pulse = z =>
             {
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
@@ -181,7 +181,7 @@ internal static class SpellEffects
         AddZone(new SpellZone
         {
             Id = "sun_flare", Center = at, Radius = radius, Left = S("spell_flare_duration"), Interval = (float)SpellTuning.SunFlareTick,
-            Visual = SpellFx.Disc(at, radius, SpellFx.Holy, 1e6f),
+            Visual = SpellFx.Disc(at, radius, SpellFx.Holy, 1e6f, look: SpellFx.Look.SunFlare),
             Pulse = z =>
             {
                 foreach (var e in EnemiesWithin(z.Center, z.Radius)) e.Combat.ApplySlow("spell.flare", S("spell_flare_slow"), 2);
@@ -198,7 +198,7 @@ internal static class SpellEffects
     {
         var at = AimGround(40) + Vector3.up * 1.5f;
         float radius = S("spell_blackhole_radius"), pull = S("spell_blackhole_pullforce") / (float)SpellTuning.BlackHolePullDivisor;
-        var core = SpellFx.Sphere(at, 1.5f, SpellFx.Dark, 1e6f);
+        var core = SpellFx.Sphere(at, 1.5f, SpellFx.Dark, 1e6f, look: SpellFx.Look.BlackHole);
         var caught = new HashSet<EnemyRuntime>();
         AddZone(new SpellZone
         {
@@ -268,7 +268,7 @@ internal static class SpellEffects
         AddZone(new SpellZone
         {
             Id = "snow_storm", Center = at, Radius = radius, Left = (float)SpellTuning.SnowStormSeconds, Interval = interval,
-            Visual = SpellFx.Disc(at, radius, SpellFx.Ice, 1e6f),
+            Visual = SpellFx.Disc(at, radius, SpellFx.Ice, 1e6f, look: SpellFx.Look.Snow),
             Pulse = z =>
             {
                 foreach (var e in EnemiesWithin(z.Center, z.Radius))
@@ -383,7 +383,7 @@ internal static class SpellEffects
             away.y = 0;
             Push(e, away.normalized * S("spell_fart_knockback") * (float)SpellTuning.RoarKnockbackScale);
         }
-        SpellFx.Disc(Feet(), radius, SpellFx.Dark, 1f);
+        SpellFx.Disc(Feet(), radius, SpellFx.Dark, 1f, look: SpellFx.Look.Gas);
         return true;
     }
 

@@ -1,0 +1,237 @@
+using ChampionsOfTheSons.Mod.Bundles;
+using ChampionsOfTheSons.Mod.Spells;
+using RedLoader;
+using TheForest.Utils;
+using UnityEngine;
+
+namespace ChampionsOfTheSons.Mod.Visuals;
+
+/// <summary>
+/// Bundled visuals (COS-63, COS-102): the "reduce heavy effects" setting, effects for the player's toggles and long buffs
+/// (Black Flame and Multishot at the hand, Berserk and Golden Skin at the feet), and the self-tests that show every drop
+/// model and effect on screen and measure the frame cost of many effects.
+/// </summary>
+public sealed class VisualsFeature : IModFeature
+{
+    private static ConfigEntry<bool>? _reduce;
+
+    /// <summary>Hides hand flames and glyphs, halves particles and drops non-essential lights. Track B's settings overlay shows it.</summary>
+    public static bool ReduceHeavyEffects => _reduce?.Value ?? false;
+
+    public static void SetReduceHeavyEffects(bool on)
+    {
+        if (_reduce != null) _reduce.Value = on;
+    }
+
+    public void Init()
+    {
+        _reduce = Config.Category.CreateEntry("reduce_heavy_effects", false, "Reduce heavy effects",
+            "Hide hand flames and glyphs, halve spell particles and use fewer effect lights.");
+    }
+
+    public void Update(float dt, bool inWorld)
+    {
+        if (!inWorld)
+        {
+            PlayerStateFx.Clear();
+            return;
+        }
+        PlayerStateFx.Update();
+        FrameMeter.Sample(Time.unscaledDeltaTime);
+    }
+
+    // ---------------------------------------------------------------- self-tests
+
+    private readonly List<GameObject> _shown = new();
+
+    public void RegisterSelfTests()
+    {
+        // The test save opens a "Game Loaded" modal over a blurred pause menu: close both before the screenshots.
+        SelfTest.Add(0.3f, "visuals: unpause", () =>
+        {
+            UI.UiCapture.DismissDialogs();
+            TestKit.Unpause();
+        });
+        SelfTest.Add(1f, "visuals: drop models", ShowDrops);
+        SelfTest.Add(3f, "visuals: shot drops", () => TestKit.Screenshot("visuals-01-drops"));
+        SelfTest.Add(3.5f, "visuals: effects", ShowEffects);
+        SelfTest.Add(5.5f, "visuals: shot effects", () => TestKit.Screenshot("visuals-02-effects"));
+        SelfTest.Add(6f, "visuals: reduced", Reduced);
+        SelfTest.Add(6.5f, "visuals: baseline frames", () =>
+        {
+            Cleanup();
+            FrameMeter.Start();
+        });
+        SelfTest.Add(9f, "visuals: many effects", () =>
+        {
+            _baseline = FrameMeter.Stop();
+            SpawnMany(60);
+        });
+        // Measure from a second after the spawn: the frame that instantiates 60 prefabs is a one-off hitch.
+        SelfTest.Add(10f, "visuals: measure many", FrameMeter.Start);
+        SelfTest.Add(10.5f, "visuals: shot many", () => TestKit.Screenshot("visuals-03-many"));
+        SelfTest.Add(12.5f, "visuals: frame cost", FrameCost);
+    }
+
+    private (float ms, int frames) _baseline;
+
+    private static Transform? Cam => LocalPlayer.MainCam != null ? LocalPlayer.MainCam.transform : Camera.main?.transform;
+
+    private void ShowDrops()
+    {
+        Cleanup();
+        var cam = Cam;
+        if (!CotsBundle.Loaded || cam == null)
+        {
+            SelfTest.Log("visuals: skipped, " + (cam == null ? "no camera" : CotsBundle.Problem));
+            return;
+        }
+        var fwd = Flat(cam.forward);
+        var right = Vector3.Cross(Vector3.up, fwd);
+        int n = Loot.LootVisuals.DropPrefabs.Length, missing = 0, pink = 0;
+        for (int i = 0; i < n; i++)
+        {
+            string name = Loot.LootVisuals.DropPrefabs[i];
+            int row = i / 7, col = i % 7;
+            var pos = cam.position + fwd * (3.2f + row * 1.4f) + right * ((col - 3) * 0.75f) + Vector3.down * (1.1f - row * 0.2f);
+            var holder = new GameObject("cots-visuals-test");
+            holder.transform.position = pos;
+            var go = CotsBundle.Spawn(name, holder.transform);
+            if (go == null) missing++;
+            else
+            {
+                go.transform.localScale = Vector3.one * 0.55f;
+                foreach (var r in go.GetComponentsInChildren<Renderer>())
+                    if (r.sharedMaterial == null || r.sharedMaterial.shader == null || !r.sharedMaterial.shader.isSupported || r.sharedMaterial.shader.name != "HDRP/Lit") pink++;
+            }
+            _shown.Add(holder);
+        }
+        var l = new GameObject("cots-visuals-light");
+        l.transform.position = cam.position + fwd * 2f + Vector3.up;
+        var light = l.AddComponent<Light>();
+        light.type = LightType.Point;
+        light.range = 8;
+        light.intensity = 60;
+        _shown.Add(l);
+        SelfTest.Check("visuals: every drop model loads", missing == 0, $"{missing} of {n} missing");
+        SelfTest.Check("visuals: drop materials are HDRP/Lit and supported", pink == 0, $"{pink} renderers wrong");
+    }
+
+    private void ShowEffects()
+    {
+        Cleanup();
+        var cam = Cam;
+        if (!CotsBundle.Loaded || cam == null) return;
+        var fwd = Flat(cam.forward);
+        var right = Vector3.Cross(Vector3.up, fwd);
+        var ground = cam.position + Vector3.down * 1.6f;
+        Color[] tints = { SpellFx.Holy, SpellFx.Fire, SpellFx.Arcane, SpellFx.Ice, SpellFx.Heal, SpellFx.Storm, SpellFx.Blood };
+        int missing = 0, broken = 0;
+        for (int i = 0; i < FxKit.All.Length; i++)
+        {
+            string name = FxKit.All[i];
+            int row = i / 5, col = i % 5;
+            var pos = ground + fwd * (6f + row * 4.5f) + right * ((col - 2) * 3f);
+            var scale = name is FxKit.Beam or FxKit.Chain ? new Vector3(0.25f, 3, 0.25f) : name is FxKit.Column or FxKit.Snow ? new Vector3(1, 3, 1) : Vector3.one;
+            var go = FxKit.Spawn(name, pos, scale, tints[i % tints.Length]);
+            if (go == null)
+            {
+                missing++;
+                continue;
+            }
+            foreach (var r in go.GetComponentsInChildren<Renderer>())
+                if (r.sharedMaterial == null || !r.sharedMaterial.shader.isSupported) broken++;
+            _shown.Add(go);
+        }
+        SelfTest.Check("visuals: every effect loads", missing == 0, $"{missing} of {FxKit.All.Length} missing");
+        SelfTest.Check("visuals: effect shaders supported", broken == 0, $"{broken} renderers with unsupported shaders");
+    }
+
+    private void Reduced()
+    {
+        if (!CotsBundle.Loaded) return;
+        bool was = ReduceHeavyEffects;
+        SetReduceHeavyEffects(true);
+        var flame = FxKit.Spawn(FxKit.Flame, Vector3.zero, 1, Color.white);
+        var ring = FxKit.Spawn(FxKit.Ring, Vector3.zero, 1, Color.white);
+        SetReduceHeavyEffects(was);
+        SelfTest.Check("visuals: reduced hides decorative effects", flame == null && ring != null, $"flame {(flame == null ? "hidden" : "shown")}, ring {(ring != null ? "shown" : "missing")}");
+        if (flame != null) UnityEngine.Object.Destroy(flame);
+        if (ring != null) UnityEngine.Object.Destroy(ring);
+    }
+
+    private void SpawnMany(int count)
+    {
+        var cam = Cam;
+        if (!CotsBundle.Loaded || cam == null) return;
+        var fwd = Flat(cam.forward);
+        var right = Vector3.Cross(Vector3.up, fwd);
+        var ground = cam.position + Vector3.down * 1.6f;
+        for (int i = 0; i < count; i++)
+        {
+            string name = FxKit.All[i % FxKit.All.Length];
+            var pos = ground + fwd * (5f + (i / 10) * 3f) + right * ((i % 10 - 4.5f) * 2.2f);
+            var scale = name is FxKit.Beam or FxKit.Chain ? new Vector3(0.25f, 3, 0.25f) : name is FxKit.Column or FxKit.Snow ? new Vector3(1, 3, 1) : Vector3.one;
+            var go = FxKit.Spawn(name, pos, scale, SpellFx.Fire);
+            if (go == null) continue;
+            if (i % 5 == 0) FxKit.AddLight(go, SpellFx.Fire, 6, 40);
+            _shown.Add(go);
+        }
+    }
+
+    private void FrameCost()
+    {
+        var many = FrameMeter.Stop();
+        int particles = 0;
+        foreach (var go in _shown)
+            if (go != null)
+                foreach (var ps in go.GetComponentsInChildren<ParticleSystem>()) particles += ps.particleCount;
+        SelfTest.Log($"visuals: frame cost: baseline {_baseline.ms:F2} ms over {_baseline.frames} frames, with {_shown.Count} effects ({particles} particles) {many.ms:F2} ms over {many.frames} frames");
+        // A loose bound: catches a runaway effect (thousands of particles, a light per particle), not GPU noise.
+        if (_baseline.frames > 10 && many.frames > 10)
+            SelfTest.Check("visuals: many effects cost under 6 ms a frame", many.ms - _baseline.ms < 6f, $"+{many.ms - _baseline.ms:F2} ms");
+        else SelfTest.Log("visuals: frame cost not measured (too few frames rendered)");
+        Cleanup();
+    }
+
+    private void Cleanup()
+    {
+        foreach (var go in _shown)
+            if (go != null) UnityEngine.Object.Destroy(go);
+        _shown.Clear();
+    }
+
+    private static Vector3 Flat(Vector3 v)
+    {
+        v.y = 0;
+        return v.sqrMagnitude < 1e-4f ? Vector3.forward : v.normalized;
+    }
+
+    /// <summary>Average frame time between <see cref="Start"/> and <see cref="Stop"/> (the self-test's frame-cost check).</summary>
+    private static class FrameMeter
+    {
+        private static bool _on;
+        private static float _sum;
+        private static int _frames;
+
+        public static void Start()
+        {
+            _on = true;
+            _sum = 0;
+            _frames = 0;
+        }
+
+        public static void Sample(float dt)
+        {
+            if (!_on) return;
+            _sum += dt;
+            _frames++;
+        }
+
+        public static (float ms, int frames) Stop()
+        {
+            _on = false;
+            return (_frames == 0 ? 0 : _sum / _frames * 1000f, _frames);
+        }
+    }
+}

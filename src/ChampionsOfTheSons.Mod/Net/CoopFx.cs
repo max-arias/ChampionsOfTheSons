@@ -52,9 +52,15 @@ public static class CoopFx
         }
     }
 
-    /// <summary>A small light sphere that fades out: the fallback visual.</summary>
+    /// <summary>A small burst (the bundled effect, COS-102) or a light sphere that fades out: the fallback visual.</summary>
     public static void Flash(Vector3 at, Color color, float seconds = 0.6f)
     {
+        var fx = Visuals.FxKit.Spawn(Visuals.FxKit.Burst, at, 0.8f, color);
+        if (fx != null)
+        {
+            UnityEngine.Object.Destroy(fx, Math.Max(seconds, 0.7f));
+            return;
+        }
         var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         go.name = "CotsCoopFlash";
         var col = go.GetComponent<Collider>();

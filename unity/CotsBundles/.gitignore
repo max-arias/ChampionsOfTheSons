@@ -5,3 +5,10 @@ obj/
 UserSettings/
 *.csproj
 *.sln
+# Generated on every bundle build (tools/build-bundles.ps1): prefabs, HDRP pipeline asset and HDRP default resources.
+Assets/Cots/Generated/
+Assets/Cots/Generated.meta
+Assets/Settings/
+Assets/Settings.meta
+Assets/HDRPDefaultResources/
+Assets/HDRPDefaultResources.meta

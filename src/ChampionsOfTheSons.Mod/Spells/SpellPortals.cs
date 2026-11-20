@@ -40,7 +40,8 @@ internal static class SpellPortals
 
     private static GameObject Gate(Vector3 at)
     {
-        var go = SpellFx.Column(at, 0.9f, 2.4f, SpellFx.Arcane, 1e6f);
+        // Face the caster, so the swirl is seen front-on when the pair opens.
+        var go = SpellFx.Portal(at, SpellWorld.PlayerPos - at, SpellFx.Arcane, 1e6f);
         return go;
     }
 
