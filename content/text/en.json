@@ -1376,7 +1376,7 @@
  "perk.near_death_arrow.effect": "Blood infused arrow costs 25% more health to convert into damage.",
  "perk.near_death_arrow.flavor": "Spend the blood, win the fight.",
  "perk.near_death_arrow.name": "Desperate Draw",
- "perk.near_death_experience.effect": "Once every 5 minutes, fatal damage instead restores you to full health and grants 10 seconds of debuff immunity.",
+ "perk.near_death_experience.effect": "Once every 5 minutes, fatal damage instead restores you to full health. For 10 seconds you take 90% less damage, cannot be stunned and regenerate health and stamina quickly.",
  "perk.near_death_experience.flavor": "Not today, death.",
  "perk.near_death_experience.name": "Last Breath",
  "perk.netherflame.effect": "Black flames deal double damage.",

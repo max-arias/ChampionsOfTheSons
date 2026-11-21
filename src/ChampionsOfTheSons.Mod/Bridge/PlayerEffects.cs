@@ -21,6 +21,7 @@ public static class PlayerEffects
     private static readonly List<Poison> Poisons = new();
 
     public static readonly UndyingPromiseState Undying = new();
+    public static readonly NearDeathState NearDeath = new();
 
     /// <summary>The enemy whose melee attack was last built, and when: the hit that follows is attributed to it.</summary>
     public static (EnemyRuntime Enemy, float Time)? LastAttacker { get; set; }
@@ -65,6 +66,7 @@ public static class PlayerEffects
         _stunLeft = 0;
         Poisons.Clear();
         Undying.Reset();
+        NearDeath.Reset();
         LastAttacker = null;
     }
 
@@ -74,6 +76,10 @@ public static class PlayerEffects
         if (vitals == null) return;
         _stunLeft = Mathf.Max(0, _stunLeft - dt);
         Undying.Tick(dt);
+        bool wasLocked = !NearDeath.Ready;
+        NearDeath.Tick(dt);
+        if (wasLocked && NearDeath.Ready && PlayerState.Character.Stats.IsOn(NearDeathState.PerkFlag))
+            Loot.LootFeature.Message(UI.UiText.T("ui.perks.near_death.ready", "Last Breath is ready again."));
 
         for (int i = Poisons.Count - 1; i >= 0; i--)
         {

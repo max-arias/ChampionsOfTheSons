@@ -78,8 +78,17 @@ public static class PlayerBridge
             {
                 OnEnemyHitPlayer(character, final, kind);
                 var health = LocalPlayer.Vitals?.Health;
+                // Near Death Experience (COS-105): a lethal hit restores full health and starts its 10 s of protection.
+                if (health != null && PlayerEffects.NearDeath.TryTrigger(character.Stats.IsOn(NearDeathState.PerkFlag), health._currentValue, final))
+                {
+                    health.SetCurrentValue(health.GetMax());
+                    final = 0;
+                    Spells.SpellWorld.Buffs.Apply("near_death", NearDeathState.Seconds, NearDeathState.Buff());
+                    Loot.LootFeature.Message(string.Format(UI.UiText.T("ui.perks.near_death.triggered", "Last Breath: back from the brink. Ready again in {0} min."),
+                        (int)(NearDeathState.Cooldown / 60)));
+                }
                 // Undying Promise: a lethal hit leaves 30% health instead, once per cooldown.
-                if (health != null && PlayerEffects.Undying.TryTrigger(character.Inventory, health._currentValue, final))
+                else if (health != null && PlayerEffects.Undying.TryTrigger(character.Inventory, health._currentValue, final))
                 {
                     health.SetCurrentValue(health.GetMax() * (float)UniqueItems.UndyingHealth);
                     final = 0;

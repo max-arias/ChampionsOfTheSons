@@ -1,0 +1,4 @@
+{
+ "ui.perks.near_death.ready": "Last Breath is ready again.",
+ "ui.perks.near_death.triggered": "Last Breath: back from the brink. Ready again in {0} min."
+}
