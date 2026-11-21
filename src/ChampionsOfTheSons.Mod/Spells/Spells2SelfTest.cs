@@ -262,8 +262,7 @@ internal static class Spells2SelfTest
             SelfTest.Check("spells2: Healing Dome zone exists", SpellWorld.ZoneCount == 1);
             Advance(2);
             SelfTest.Check("spells2: Healing Dome heals the player inside", health._currentValue > before + 3, $"{before:0.#} -> {health._currentValue:0.#}");
-            Advance(11);
-            // Perks that act while the player is inside: damage up, damage taken down, stun and debuff immunity.
+            // Perks that act while the player is inside (the dome lasts 10 s: checked at 2-3 s): damage up, damage taken down, stun and debuff immunity.
             SelfTest.Check("spells2: Healing Dome perks give nothing without the perks", !SpellWorld.Buffs.Has("healing_dome") && !PlayerDebuffs.Buffs.Has(PlayerDebuffs.DebuffImmune));
             Pc.Stats.SetSource("test.dome", new[]
             {
@@ -276,7 +275,7 @@ internal static class Spells2SelfTest
                 SpellWorld.Buffs.Has("healing_dome") && Stat(StatIds.AllDamageTaken) < 0.5, $"taken x{Stat(StatIds.AllDamageTaken):0.##}");
             SelfTest.Check("spells2: Healing Dome gives stun and debuff immunity while inside",
                 PlayerDebuffs.Buffs.Has(PlayerDebuffs.StunImmune) && PlayerDebuffs.Buffs.Has(PlayerDebuffs.DebuffImmune));
-            Advance(11);
+            Advance(10);
             Pc.Stats.RemoveSource("test.dome");
             SelfTest.Check("spells2: Healing Dome ends", SpellWorld.ZoneCount == 0);
         });
