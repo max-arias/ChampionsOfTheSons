@@ -89,8 +89,7 @@ public sealed class LootFeature : IModFeature
     {
         if (!inWorld) return;
         Ground.Tick(dt);
-        LootVisuals.Spin(dt);
-        LootVisuals.Fade(Ground);
+        LootVisuals.Animate(Ground);
         TryPickups();
     }
 

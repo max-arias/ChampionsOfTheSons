@@ -6,13 +6,15 @@ using UnityEngine;
 namespace ChampionsOfTheSons.Mod.Loot;
 
 /// <summary>
-/// World objects for ground drops: a grey-metal model of the item's type from the asset bundle (COS-63; a rarity-tinted
-/// gem when the bundle or model is missing), rising sparks, a vertical beam and a light in the rarity's colour.
+/// World objects for ground drops (Max 2026-11-21: keep it simple): the item type's model from the asset bundle lying on the
+/// ground (COS-63; a rarity-tinted gem when the bundle or model is missing), a ring in the rarity's colour around it, and for
+/// Rare and Legendary a short line rising from the ring over and over. No name plate. Near the end of its lifetime it blinks.
 /// </summary>
 internal static class LootVisuals
 {
     internal sealed class Visual
     {
+        public int Id;
         public GameObject Root = null!;
         public Transform Gem = null!;
         public Color Color;
@@ -20,6 +22,10 @@ internal static class LootVisuals
         public Vector3 Position;
         /// <summary>The root's scale when created (the fade shrinks from it).</summary>
         public float Scale = 1;
+        public LineRenderer? Ring;
+        public Transform? Pulse;
+        public float PulseHeight, PulsePeriod = 1, PulsePhase;
+        public bool Shown = true;
     }
 
     private static readonly Dictionary<int, Visual> ById = new();
@@ -35,7 +41,7 @@ internal static class LootVisuals
         Destroy(drop.Id);
         var pos = new Vector3(drop.X, drop.Y, drop.Z);
         var color = ColorOf(drop.Item.Rarity);
-        // Size and beam grow with rarity on the old 0..7 scale, so a Legendary drop is as big as a Primal one was (COS-109).
+        // Size grows with rarity on the old 0..7 scale, so a Legendary drop is as big as a Primal one was (COS-109).
         float rarity = (int)drop.Item.Rarity * 7f / Rarities.Max;
         const float DropScale = 0.9f; // Max (2026-11-20): drops 10% smaller
 
@@ -51,7 +57,8 @@ internal static class LootVisuals
             gem.transform.localPosition = new Vector3(0, 0.6f, 0);
             gem.transform.localScale = Vector3.one * (DropScale * (1f + 0.05f * rarity));
             gem.transform.localRotation = Quaternion.Euler(0, (drop.Id * 47) % 360, 0);
-            // Top-rarity and unique weapons glow on the ground as in hand (COS-108); the drop has its own light.
+            LieOnGround(gem.transform, pos.y, tip: true);
+            // Top-rarity and unique weapons glow on the ground as in hand (COS-108).
             Weapons.WeaponGlowFx.Apply(gem, Weapons.GlowLook.For(drop.Item), light: false);
         }
         if (gem == null) gem = Bundles.CotsBundle.Spawn(Bundles.CotsBundle.LootMarker, root.transform);
@@ -60,6 +67,7 @@ internal static class LootVisuals
             Tint(gem, color);
             gem.transform.localPosition = new Vector3(0, 0.4f, 0);
             gem.transform.localScale = Vector3.one * (DropScale * (1f + 0.1f * rarity));
+            LieOnGround(gem.transform, pos.y, tip: false);
         }
         else if (gem == null)
         {
@@ -67,36 +75,89 @@ internal static class LootVisuals
             Prepare(gem, root.transform, color);
             gem.transform.localPosition = new Vector3(0, 0.4f, 0);
             gem.transform.localScale = Vector3.one * (DropScale * (0.22f + 0.03f * rarity));
-            gem.transform.localRotation = Quaternion.Euler(35, 45, 0);
+            gem.transform.localRotation = Quaternion.Euler(0, 45, 0);
+            LieOnGround(gem.transform, pos.y, tip: false);
         }
-        var sparkle = Bundles.CotsBundle.Spawn(Bundles.CotsBundle.LootSparkle, root.transform);
-        if (sparkle != null)
+        var v = new Visual { Id = drop.Id, Root = root, Gem = gem.transform, Color = color, Rarity = drop.Item.Rarity, Position = pos };
+        v.Ring = Ring(root.transform, pos, color);
+        // Rare and Legendary only: a short line that keeps rising from the ring (Max 2026-11-21).
+        if (drop.Item.Rarity >= Rarity.Rare)
         {
-            sparkle.transform.localPosition = new Vector3(0, 0.4f, 0);
-            foreach (var ps in sparkle.GetComponentsInChildren<ParticleSystem>())
-            {
-                var main = ps.main;
-                main.startColor = new ParticleSystem.MinMaxGradient(color);
-            }
+            var pulse = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            Prepare(pulse, root.transform, color);
+            v.Pulse = pulse.transform;
+            v.PulseHeight = drop.Item.Rarity == Rarity.Legendary ? 3.2f : 2.2f;
+            v.PulsePeriod = drop.Item.Rarity == Rarity.Legendary ? 0.9f : 1.2f;
+            v.PulsePhase = (drop.Id * 0.37f) % 1f;
         }
-
-        float length = 3f + 0.6f * rarity;
-        var beam = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        Prepare(beam, root.transform, color);
-        beam.transform.localScale = new Vector3(0.09f, length / 2f, 0.09f); // a cylinder is 2 m tall at scale 1
-        beam.transform.localPosition = new Vector3(0, length / 2f, 0);
-
-        var lightObj = new GameObject("light");
-        lightObj.transform.SetParent(root.transform, false);
-        lightObj.transform.localPosition = new Vector3(0, 0.8f, 0);
-        var light = lightObj.AddComponent<Light>();
-        light.type = LightType.Point;
-        light.color = color;
-        light.range = 5;
-        light.intensity = 40;
-
-        ById[drop.Id] = new Visual { Root = root, Gem = gem.transform, Color = color, Rarity = drop.Item.Rarity, Position = pos };
+        ById[drop.Id] = v;
+        Animate(v, 0, null);
     }
+
+    /// <summary>Sets a drop's lowest point on the ground; with <paramref name="tip"/>, a long upright model (a sword, a bow) is first laid on its side.</summary>
+    private static void LieOnGround(Transform model, float groundY, bool tip)
+    {
+        if (Bounds(model) is not { } b) return;
+        if (tip && b.size.y > b.size.x && b.size.y > b.size.z) model.localRotation = Quaternion.Euler(90, model.localEulerAngles.y, 0);
+        if (Bounds(model) is { } after) model.position += Vector3.up * (groundY + 0.02f - after.min.y);
+    }
+
+    private static Bounds? Bounds(Transform t)
+    {
+        Bounds? all = null;
+        foreach (var r in t.GetComponentsInChildren<Renderer>())
+        {
+            if (r is ParticleSystemRenderer || !r.enabled) continue;
+            if (all is { } a) { a.Encapsulate(r.bounds); all = a; }
+            else all = r.bounds;
+        }
+        return all;
+    }
+
+    /// <summary>The rarity ring around the drop, its points set on the ground so it follows slopes.</summary>
+    private static LineRenderer? Ring(Transform parent, Vector3 center, Color color)
+    {
+        var go = new GameObject("ring");
+        go.transform.SetParent(parent, false);
+        var line = go.AddComponent<LineRenderer>();
+        if (line == null) return null;
+        const int Points = 28;
+        line.useWorldSpace = true;
+        line.loop = true;
+        line.positionCount = Points;
+        line.widthMultiplier = 0.045f;
+        line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        line.receiveShadows = false;
+        var unlit = FindUnlit();
+        var mat = unlit != null ? new Material(unlit) : line.material;
+        mat.SetColor("_UnlitColor", color);
+        mat.color = color;
+        line.material = mat;
+        line.startColor = line.endColor = color;
+        for (int i = 0; i < Points; i++)
+        {
+            float a = i * Mathf.PI * 2f / Points;
+            var p = center + new Vector3(Mathf.Cos(a) * RingRadius, 0, Mathf.Sin(a) * RingRadius);
+            p.y = GroundNear(p, center.y) + 0.04f;
+            line.SetPosition(i, p);
+        }
+        return line;
+    }
+
+    public const float RingRadius = 0.55f;
+
+    /// <summary>The ground height at <paramref name="p"/> closest to <paramref name="y"/> (the drop's own ground), within half a metre.</summary>
+    private static float GroundNear(Vector3 p, float y)
+    {
+        float best = y, bestDist = 0.5f;
+        foreach (var h in Physics.RaycastAll(new Vector3(p.x, y + 0.5f, p.z), Vector3.down, 1f, ~0, QueryTriggerInteraction.Ignore))
+        {
+            float d = Mathf.Abs(h.point.y - y);
+            if (d < bestDist) { best = h.point.y; bestDist = d; }
+        }
+        return best;
+    }
+
 
     /// <summary>Every drop model prefab (self-tests).</summary>
     public static readonly string[] DropPrefabs =
@@ -144,22 +205,47 @@ internal static class LootVisuals
     /// <summary>Seconds over which a drop shrinks away before it despawns (COS-96).</summary>
     public const float FadeSeconds = 2f;
 
-    /// <summary>Shrinks drops in their last <see cref="FadeSeconds"/>, so they fade out instead of popping away.</summary>
-    public static void Fade(GroundLoot ground)
+    /// <summary>Seconds before despawning when a drop starts to blink (Max 2026-11-21: it blinks, faster and dimmer as it runs out).</summary>
+    public const float BlinkSeconds = 20f;
+
+    /// <summary>Whether a drop with <paramref name="remaining"/> seconds left is shown at <paramref name="time"/>: always until the last
+    /// <see cref="BlinkSeconds"/>, then on and off, the blink getting faster (1 s to 0.15 s) and the visible part shorter (75% to 35%).</summary>
+    public static bool BlinkOn(double remaining, float time)
     {
-        foreach (var (id, v) in ById)
-        {
-            if (v.Root == null) continue;
-            var drop = ground.Get(id);
-            if (drop == null || drop.Remaining >= FadeSeconds) continue;
-            v.Root.transform.localScale = Vector3.one * Mathf.Max(0.05f, (float)drop.Remaining / FadeSeconds) * v.Scale;
-        }
+        if (remaining >= BlinkSeconds) return true;
+        float left = Mathf.Clamp01((float)remaining / BlinkSeconds);
+        float period = Mathf.Lerp(0.15f, 1f, left);
+        float on = Mathf.Lerp(0.35f, 0.75f, left);
+        return time / period % 1f < on;
     }
 
-    public static void Spin(float dt)
+    /// <summary>Per frame: the rising line, the expiry blink and the last-seconds shrink.</summary>
+    public static void Animate(GroundLoot ground)
     {
-        foreach (var v in ById.Values)
-            if (v.Gem != null) v.Gem.Rotate(0, 90 * dt, 0, Space.World);
+        foreach (var v in ById.Values) Animate(v, Time.time, ground.Get(v.Id));
+    }
+
+    private static void Animate(Visual v, float time, GroundDrop? drop)
+    {
+        if (v.Root == null) return;
+        if (v.Pulse != null)
+        {
+            float t = (time / v.PulsePeriod + v.PulsePhase) % 1f;
+            const float Length = 0.55f;
+            float y = 0.05f + t * v.PulseHeight;
+            float width = Mathf.Lerp(0.05f, 0.015f, t);
+            v.Pulse.localScale = new Vector3(width, Length / 2f, width);
+            v.Pulse.position = v.Position + Vector3.up * (y + Length / 2f);
+        }
+        if (drop == null) return;
+        bool shown = BlinkOn(drop.Remaining, time);
+        if (shown != v.Shown)
+        {
+            v.Shown = shown;
+            foreach (var r in v.Root.GetComponentsInChildren<Renderer>(true)) r.enabled = shown;
+        }
+        if (drop.Remaining < FadeSeconds)
+            v.Root.transform.localScale = Vector3.one * Mathf.Max(0.05f, (float)drop.Remaining / FadeSeconds) * v.Scale;
     }
 
     /// <summary>Rarity color on a bundled mesh (HDRP/Lit "_BaseColor", other shaders "_Color").</summary>

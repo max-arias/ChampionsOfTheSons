@@ -28,7 +28,7 @@ internal static class LootSelfTest
         SelfTest.Add(T0 + 0.5f, "loot: kill drops", KillForDrops);
         SelfTest.Add(T0 + 4, "loot: kill result", KillResult);
         SelfTest.Add(T0 + 5, "loot: boss drops", BossDrops);
-        SelfTest.Add(T0 + 6.5f, "loot: shot beams", () => TestKit.Screenshot("loot-01-beams"));
+        SelfTest.Add(T0 + 6.5f, "loot: shot drops", () => TestKit.Screenshot("loot-01-drops"));
         SelfTest.Add(T0 + 8, "loot: walk over", WalkOver);
         SelfTest.Add(T0 + 10, "loot: walk over result", WalkOverResult);
         SelfTest.Add(T0 + 11, "loot: full bag", FullBag);
@@ -103,7 +103,12 @@ internal static class LootSelfTest
     {
         SelfTest.Check($"loot: {what}: one world object per drop", LootVisuals.All.Count == Ground.Count, $"{LootVisuals.All.Count}/{Ground.Count}");
         var bad = Ground.All.Where(d => !LootVisuals.All.TryGetValue(d.Id, out var v) || ColorRarity(v.Color) != d.Item.Rarity).Select(d => d.Item.Rarity.ToString()).ToList();
-        SelfTest.Check($"loot: {what}: beam color matches rarity", bad.Count == 0, string.Join(",", bad));
+        SelfTest.Check($"loot: {what}: ring color matches rarity", bad.Count == 0, string.Join(",", bad));
+        var look = Ground.All.Where(d => !LootVisuals.All.TryGetValue(d.Id, out var v) || v.Ring == null || (v.Pulse != null) != (d.Item.Rarity >= Rarity.Rare))
+            .Select(d => d.Item.Rarity.ToString()).ToList();
+        SelfTest.Check($"loot: {what}: every drop has a ring, only Rare and Legendary a rising line", look.Count == 0, string.Join(",", look));
+        bool blink = LootVisuals.BlinkOn(LootVisuals.BlinkSeconds + 1, 0.9f) && !LootVisuals.BlinkOn(1, 0.1f) && LootVisuals.BlinkOn(1, 0.03f);
+        SelfTest.Check($"loot: {what}: shown steady until the blink, then blinking fast near the end", blink);
     }
 
     private static void BossDrops()
@@ -157,6 +162,8 @@ internal static class LootSelfTest
         Teleport(_home);
     }
 
+    private static string _targetBase = "";
+
     private static void FullBag()
     {
         Teleport(_home);
@@ -166,6 +173,7 @@ internal static class LootSelfTest
         var item = new ItemInstance { BaseId = ModContent.Db.Items.Keys.First(), Level = 5 };
         var drop = LootFeature.SpawnAt(item, Player);
         _target = drop.Id;
+        _targetBase = item.BaseId;
     }
 
     private static void FullBagResult()
@@ -181,7 +189,8 @@ internal static class LootSelfTest
 
     private static void FreeSlotResult()
     {
-        SelfTest.Check("loot: drop is picked up once a slot is free", Ground.Get(_target) == null && Pc.Inventory.Get("bag.0") != null);
+        // The item may go to a free equipment slot (a quiver) instead of the freed bag slot.
+        SelfTest.Check("loot: drop is picked up once a slot is free", Ground.Get(_target) == null && Pc.Inventory.Slots.Values.Any(i => i.BaseId == _targetBase), _targetBase);
         LootFeature.ClearAll();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
     }
