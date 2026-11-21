@@ -36,7 +36,12 @@ public static class PlayerState
 
     public static PlayerCharacter Character => _character ??= new PlayerCharacter(ModContent.Db);
 
-    public static PlayerSave ToSave() => Character.ToSave();
+    public static PlayerSave ToSave()
+    {
+        var save = Character.ToSave();
+        Saves.SaveExtrasFeature.Capture(save);
+        return save;
+    }
 
     public static void FromSave(PlayerSave save) => Character.Load(save);
 }

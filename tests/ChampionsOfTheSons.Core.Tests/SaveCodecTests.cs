@@ -39,6 +39,34 @@ public class SaveCodecTests
     }
 
     [Fact]
+    public void Health_carried_items_and_save_time_round_trip_and_default_to_not_saved_in_v6()
+    {
+        var save = SamplePlayer();
+        save.HealthFraction = 0.5;
+        save.CarriedItems[392] = 14;
+        save.SavedAt = 1_800_000_000;
+        var loaded = SaveCodec.ReadPlayer(SaveCodec.Write(save));
+        Assert.Equal(0.5, loaded.HealthFraction);
+        Assert.Equal(14, loaded.CarriedItems[392]);
+        Assert.Equal(1_800_000_000, loaded.SavedAt);
+
+        var old = SaveCodec.ReadPlayer("{\"version\":6,\"level\":7,\"lastGrantDay\":3}");
+        Assert.Equal(PlayerSave.CurrentVersion, old.Version);
+        Assert.Equal(-1, old.HealthFraction);
+        Assert.Empty(old.CarriedItems);
+        Assert.Equal(3, old.LastGrantDay);
+    }
+
+    [Fact]
+    public void A_client_loads_its_own_backup_only_when_it_is_newer_than_the_host_save()
+    {
+        var host = new PlayerSave { Level = 5, SavedAt = 100 };
+        Assert.Same(host, ClientBackup.Pick(host, null));
+        Assert.Same(host, ClientBackup.Pick(host, new PlayerSave { Level = 6, SavedAt = 100 }));
+        Assert.Equal(6, ClientBackup.Pick(host, new PlayerSave { Level = 6, SavedAt = 101 }).Level);
+    }
+
+    [Fact]
     public void Items_with_unknown_content_ids_are_kept()
     {
         var loaded = SaveCodec.ReadPlayer(SaveCodec.Write(SamplePlayer()));

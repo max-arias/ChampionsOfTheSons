@@ -22,7 +22,9 @@ public sealed class PlayerProgressSaveable : ICustomSaveable<SaveBlob>
     {
         try
         {
-            PlayerState.FromSave(SaveCodec.ReadPlayer(obj.Json));
+            var save = SaveExtrasFeature.PickForClient(SaveCodec.ReadPlayer(obj.Json));
+            PlayerState.FromSave(save);
+            SaveExtrasFeature.Loaded(save);
         }
         catch (SaveFormatException e)
         {

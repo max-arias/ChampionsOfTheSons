@@ -30,6 +30,9 @@ public sealed class FollowupsFeature : IModFeature
     /// <summary>Original carry limits of items we raised, by item id.</summary>
     private static readonly Dictionary<int, int> BaseMax = new();
 
+    /// <summary>Game items whose carry limit the mod has raised this session (their counts are saved, COS-100).</summary>
+    internal static IReadOnlyCollection<int> RaisedItems => BaseMax.Keys;
+
     public void Init() { }
 
     public void OnGameStart()

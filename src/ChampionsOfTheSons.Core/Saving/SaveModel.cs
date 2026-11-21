@@ -9,8 +9,8 @@ public sealed class PlayerSave
 {
     /// <summary>2: rolled stats carry their stat slot (COS-73). 3: deleted perks removed (COS-86/COS-87). 4: four rarities (COS-109).
     /// 5: crafting perks, materials and socket stats removed (COS-145). 6: the last daily-grant day (COS-100); the island
-    /// foods removed (COS-147).</summary>
-    public const int CurrentVersion = 6;
+    /// foods removed (COS-147). 7: health fraction, carried game items above their limit, save time (COS-100).</summary>
+    public const int CurrentVersion = 7;
 
     public int Version { get; set; } = CurrentVersion;
     public double Xp { get; set; }
@@ -30,6 +30,17 @@ public sealed class PlayerSave
 
     /// <summary>The game day on which daily-grant perks last paid out; -1 = none yet (COS-100).</summary>
     public int LastGrantDay { get; set; } = -1;
+
+    /// <summary>Health as a share of the modded max health at save time; -1 = not saved. Restored once stats are rebuilt after a load,
+    /// so a max health raised by the mod does not come back capped at the game's own (COS-100).</summary>
+    public double HealthFraction { get; set; } = -1;
+
+    /// <summary>Game item id → count carried, for items whose carry limit the mod raises (perks, worn carry stats). The game trims
+    /// anything over its own limit while loading; the missing part is given back after load (COS-100, COTF issues #12, #23).</summary>
+    public Dictionary<int, int> CarriedItems { get; set; } = new();
+
+    /// <summary>Unix seconds when this save was written; 0 = unknown. A co-op client keeps a local copy and loads whichever is newer.</summary>
+    public long SavedAt { get; set; }
 }
 
 public sealed class SavedItem
