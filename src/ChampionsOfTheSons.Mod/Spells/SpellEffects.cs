@@ -43,6 +43,7 @@ internal static class SpellEffects
         ["spell.firebolt"] = Firebolt,
         ["spell.snow_storm"] = SnowStorm,
         ["spell.parry"] = ParryCast,
+        ["spell.flicker_strike"] = () => FlickerRun.Start(FlickerRun.Reachable()),
     };
 
     private static GameObject? _shieldFx, _flameFx, _multishotFx;

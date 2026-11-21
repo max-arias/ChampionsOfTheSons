@@ -177,6 +177,7 @@ internal static class SpellWorld
     public static void Step(float dt)
     {
         SpellFx.Step(dt);
+        FlickerRun.Step(dt);
         var pc = Pc;
         Buffs.Tick(dt);
         Parry.Tick(dt);

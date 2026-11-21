@@ -31,7 +31,7 @@ public static class PlayerEffects
 
     public static bool Stun(double seconds)
     {
-        if (seconds <= 0 || PlayerState.Character.Stats.Get(CombatStatIds.StunImmunity) > 0) return false;
+        if (seconds <= 0 || PlayerState.Character.Stats.Get(CombatStatIds.StunImmunity) > 0 || Spells.FlickerRun.Untouchable) return false;
         seconds = SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds);
         _stunLeft = Mathf.Max(_stunLeft, (float)seconds);
         return true;

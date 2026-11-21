@@ -15,6 +15,8 @@ public enum SpellCastOutcome
     NotInWorld,
     /// <summary>A channeled or toggle spell that was running has been switched off.</summary>
     Stopped,
+    /// <summary>The spell needs a target and none is in reach: nothing is spent (Flicker Strike, COS-141).</summary>
+    NoTarget,
 }
 
 /// <summary>A cast, as a clear event a later co-op sync can send: which spell, from where, along what direction, at what aim point.</summary>
@@ -85,6 +87,13 @@ internal static class SpellCaster
         {
             LastMessage = "not implemented yet";
             return SpellCastOutcome.NotImplemented;
+        }
+
+        // Flicker Strike with no reachable enemy (or one already running): no cost, no cooldown (COS-141).
+        if (id == "spell.flicker_strike" && (FlickerRun.Running || FlickerRun.Reachable().Count == 0))
+        {
+            LastMessage = UI.UiText.T("ui.spells.no_targets", "No enemy in reach");
+            return SpellCastOutcome.NoTarget;
         }
 
         var result = pc.Spells.TryCast(slot, Energy, pc.Stats, out var cost);

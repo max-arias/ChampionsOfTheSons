@@ -90,6 +90,7 @@ public static class CotsFxPrefabs
         TierAura();
         TierEmbers();
         TierShimmer();
+        TierPower();
     }
 
     // ---- enemy tier effects (COS-110): white, tinted and sized per tier by the mod ----
@@ -155,6 +156,86 @@ public static class CotsFxPrefabs
         var go = new GameObject("Fx_TierShimmer");
         CotsGen.Child(go, "haze", _cylinder, CotsGen.Fx("FxTierShimmer", _noise, new Color(1, 1, 1, 0.18f), 0.6f, fresnel: 1.2f, fresnelInvert: true,
             scroll: new Vector2(0.05f, -0.45f), fadeEnds: true));
+        CotsGen.SavePrefab(go);
+    }
+
+    /// <summary>
+    /// Fx_TierPower (COS-110, Max: "floating particles going around the bosses, like a power-up"): unit scale = a body of about
+    /// 2 m at its feet. Three systems in world space so they trail a moving body: "flames", stretched streaks rising up a
+    /// cylinder shell around the body and swirling as they go; "orbit", sparks circling the waist; "rise", fast motes shooting
+    /// up from a ground ring. The mod tints it in the tier colour and sets each rate per tier (miniboss lighter than boss).
+    /// </summary>
+    private static void TierPower()
+    {
+        var go = new GameObject("Fx_TierPower");
+
+        var flames = Particles(Sub(go, "flames"), CotsGen.Fx("FxTierPowerFlame", SoftDot(), Color.white, 3.6f), ParticleSystemRenderMode.Stretch);
+        Steady(flames, 70, 0.9f, 0.18f);
+        var fm = flames.main;
+        fm.simulationSpace = ParticleSystemSimulationSpace.World;
+        fm.startSize = new ParticleSystem.MinMaxCurve(0.08f, 0.22f);
+        fm.maxParticles = 260;
+        var fr = flames.GetComponent<ParticleSystemRenderer>();
+        fr.velocityScale = 0.12f;
+        fr.lengthScale = 2.2f;
+        var fs = flames.shape;
+        fs.enabled = true;
+        fs.shapeType = ParticleSystemShapeType.Cone;
+        fs.angle = 4f;
+        fs.radius = 0.75f;
+        fs.radiusThickness = 0.15f;
+        fs.rotation = new Vector3(-90, 0, 0);
+        var fv = flames.velocityOverLifetime;
+        fv.enabled = true;
+        fv.space = ParticleSystemSimulationSpace.Local;
+        fv.x = new ParticleSystem.MinMaxCurve(0f, 0f); fv.z = new ParticleSystem.MinMaxCurve(0f, 0f); // one curve mode on all axes
+        fv.y = new ParticleSystem.MinMaxCurve(2.4f, 3.4f);
+        fv.orbitalY = 2.2f;
+        fv.radial = 0.15f;
+        Shrink(flames);
+        FadeInOut(flames);
+
+        var orbit = Particles(Sub(go, "orbit"), CotsGen.Fx("FxTierPowerSpark", SoftDot(), Color.white, 4.5f));
+        orbit.transform.localPosition = new Vector3(0, 1.0f, 0);
+        Steady(orbit, 24, 2.4f, 0.07f);
+        var om = orbit.main;
+        om.simulationSpace = ParticleSystemSimulationSpace.Local; // circles with the body
+        om.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.11f);
+        om.maxParticles = 120;
+        var os = orbit.shape;
+        os.enabled = true;
+        os.shapeType = ParticleSystemShapeType.Circle;
+        os.radius = 1.05f;
+        os.radiusThickness = 0.1f;
+        os.rotation = new Vector3(90, 0, 0);
+        var ov = orbit.velocityOverLifetime;
+        ov.enabled = true;
+        ov.space = ParticleSystemSimulationSpace.Local;
+        ov.x = new ParticleSystem.MinMaxCurve(0f, 0f); ov.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+        ov.y = new ParticleSystem.MinMaxCurve(-0.35f, 0.6f);
+        ov.orbitalY = 2.8f;
+        var onz = orbit.noise;
+        onz.enabled = true;
+        onz.strength = 0.12f;
+        onz.frequency = 1.5f;
+        FadeInOut(orbit);
+
+        var rise = Particles(Sub(go, "rise"), CotsGen.Fx("FxTierPowerRise", SoftDot(), Color.white, 3.0f), ParticleSystemRenderMode.Stretch);
+        Steady(rise, 18, 0.7f, 0.05f);
+        var rm = rise.main;
+        rm.simulationSpace = ParticleSystemSimulationSpace.World;
+        rm.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.07f);
+        rm.maxParticles = 80;
+        rise.GetComponent<ParticleSystemRenderer>().velocityScale = 0.08f;
+        var rs = rise.shape;
+        rs.enabled = true;
+        rs.shapeType = ParticleSystemShapeType.Circle;
+        rs.radius = 1.3f;
+        rs.radiusThickness = 0.4f;
+        rs.rotation = new Vector3(90, 0, 0);
+        Velocity(rise, new Vector3(0, 5.5f, 0));
+        FadeOut(rise);
+
         CotsGen.SavePrefab(go);
     }
 

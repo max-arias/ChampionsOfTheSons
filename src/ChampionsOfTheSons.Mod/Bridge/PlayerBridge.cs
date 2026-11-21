@@ -60,7 +60,7 @@ public static class PlayerBridge
         try
         {
             if (damage <= 0) return;
-            if (Admin.AdminState.God)
+            if (Admin.AdminState.God || Spells.FlickerRun.Untouchable) // Flicker Strike: untouchable during the run (COS-141)
             {
                 LastIncoming = (damage, 0, false);
                 damage = 0;

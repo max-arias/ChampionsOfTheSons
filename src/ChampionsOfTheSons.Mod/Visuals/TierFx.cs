@@ -16,7 +16,7 @@ namespace ChampionsOfTheSons.Mod.Visuals;
 /// </summary>
 public sealed class TierFxFeature : IModFeature
 {
-    public const string Aura = "Fx_TierAura", Embers = "Fx_TierEmbers", Shimmer = "Fx_TierShimmer";
+    public const string Aura = "Fx_TierAura", Embers = "Fx_TierEmbers", Shimmer = "Fx_TierShimmer", Power = "Fx_TierPower";
     public const float Range = 60f, ScanInterval = 0.5f;
     public const int MaxAttached = 16;
 
@@ -125,6 +125,21 @@ public sealed class TierFxFeature : IModFeature
             {
                 if (tier == EnemyTier.Boss) SetRate(embers, "embers", 30);
                 a.Parts.Add(embers);
+            }
+        }
+        // The power-up aura (Max, COS-110): flames swirling up the body, sparks circling the waist, motes shooting up.
+        if (tier >= EnemyTier.Miniboss)
+        {
+            bool boss = tier == EnemyTier.Boss;
+            float body = Mathf.Max(0.8f, (float)r.Profile.Scale);
+            var power = FxKit.Spawn(Power, pos, Vector3.one * body, boss ? color : Color.Lerp(color, Color.white, 0.15f), t);
+            if (power != null)
+            {
+                float k = FxKit.Reduced ? 0.35f : 1f;
+                SetRate(power, "flames", (boss ? 70 : 28) * k);
+                SetRate(power, "orbit", (boss ? 24 : 12) * k);
+                SetRate(power, "rise", boss && !FxKit.Reduced ? 18 : 0);
+                a.Parts.Add(power);
             }
         }
         if (tier == EnemyTier.Boss && !FxKit.Reduced)
