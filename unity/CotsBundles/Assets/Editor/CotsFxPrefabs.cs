@@ -87,6 +87,75 @@ public static class CotsFxPrefabs
         Gas();
         WeaponTrail();
         WeaponGlow();
+        TierAura();
+        TierEmbers();
+        TierShimmer();
+    }
+
+    // ---- enemy tier effects (COS-110): white, tinted and sized per tier by the mod ----
+
+    /// <summary>
+    /// Fx_TierAura, radius 1, lying at the enemy's feet: a faint filled disc, a pulsing edge ring and motes drifting up from the rim.
+    /// Elites, minibosses and bosses share it in their tier colour; the mod sets the motes' rate per tier.
+    /// </summary>
+    private static void TierAura()
+    {
+        var go = new GameObject("Fx_TierAura");
+        CotsGen.Child(go, "fill", _disc, CotsGen.Fx("FxTierAuraFill", _fill, new Color(1, 1, 1, 0.22f), 1.2f, additive: false), new Vector3(0, 0.03f, 0));
+        CotsGen.Child(go, "edge", _disc, CotsGen.Fx("FxTierAuraEdge", _ring, Color.white, 2.6f, pulse: 0.45f), new Vector3(0, 0.05f, 0));
+        var motes = Particles(Sub(go, "motes"), CotsGen.Fx("FxTierMotes", SoftDot(), Color.white, 2.2f));
+        Steady(motes, 10, 2.2f, 0.07f);
+        var m = motes.main;
+        m.simulationSpace = ParticleSystemSimulationSpace.World;
+        m.startSize = new ParticleSystem.MinMaxCurve(0.04f, 0.09f);
+        m.maxParticles = 120;
+        var sh = motes.shape;
+        sh.enabled = true;
+        sh.shapeType = ParticleSystemShapeType.Circle;
+        sh.radius = 0.9f;
+        sh.radiusThickness = 0.3f;
+        sh.rotation = new Vector3(90, 0, 0);
+        Velocity(motes, new Vector3(0, 0.55f, 0));
+        var noise = motes.noise;
+        noise.enabled = true;
+        noise.strength = 0.2f;
+        noise.frequency = 0.6f;
+        FadeInOut(motes);
+        CotsGen.SavePrefab(go);
+    }
+
+    /// <summary>Fx_TierEmbers, radius 1 sphere: embers rising off a body (shoulders for a miniboss, the whole frame for a boss).</summary>
+    private static void TierEmbers()
+    {
+        var go = new GameObject("Fx_TierEmbers");
+        var embers = Particles(Sub(go, "embers"), CotsGen.Fx("FxTierEmbers", SoftDot(), Color.white, 3.2f));
+        Steady(embers, 16, 1.4f, 0.06f);
+        var m = embers.main;
+        m.simulationSpace = ParticleSystemSimulationSpace.World;
+        m.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.08f);
+        m.maxParticles = 160;
+        var sh = embers.shape;
+        sh.enabled = true;
+        sh.shapeType = ParticleSystemShapeType.Sphere;
+        sh.radius = 1f;
+        sh.radiusThickness = 0.5f;
+        Velocity(embers, new Vector3(0, 0.9f, 0));
+        var noise = embers.noise;
+        noise.enabled = true;
+        noise.strength = 0.35f;
+        noise.frequency = 1.2f;
+        Shrink(embers);
+        FadeInOut(embers);
+        CotsGen.SavePrefab(go);
+    }
+
+    /// <summary>Fx_TierShimmer, a 0..1 column along +Y, radius 1: faint scrolling noise that reads as heat haze around a boss.</summary>
+    private static void TierShimmer()
+    {
+        var go = new GameObject("Fx_TierShimmer");
+        CotsGen.Child(go, "haze", _cylinder, CotsGen.Fx("FxTierShimmer", _noise, new Color(1, 1, 1, 0.18f), 0.6f, fresnel: 1.2f, fresnelInvert: true,
+            scroll: new Vector2(0.05f, -0.45f), fadeEnds: true));
+        CotsGen.SavePrefab(go);
     }
 
     // ---- prefabs ----

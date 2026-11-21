@@ -37,6 +37,9 @@ public sealed class EnemyHudFeature : IModFeature
     private readonly List<EnemyRuntime> _drop = new();
 
     internal IReadOnlyList<BossBar> Bars => _bars;
+
+    /// <summary>A boss newly engages the local player (its bar appears); the tier effects burst on it (COS-110).</summary>
+    public static event Action<EnemyRuntime>? BossEngaged;
     internal int VisibleBars => _bars.Count(b => b.Visible);
     /// <summary>Whether the boss bar layer is drawn this frame (it hides with the HUD).</summary>
     internal bool LayerShown => _built && _root.Root.activeSelf;
@@ -102,7 +105,11 @@ public sealed class EnemyHudFeature : IModFeature
             if (!Alive(r)) continue;
             float dist = Distance(r, player);
             bool hitRecently = _lastHit.TryGetValue(r, out var hitAt) && _time - hitAt < HitMemory;
-            if (dist <= EngageRange && (hitRecently || Aware(r))) _engagedAt[r] = _time;
+            if (dist <= EngageRange && (hitRecently || Aware(r)))
+            {
+                if (!_engagedAt.ContainsKey(r)) BossEngaged?.Invoke(r);
+                _engagedAt[r] = _time;
+            }
         }
 
         _order.Clear();
