@@ -113,9 +113,11 @@ internal static class SpellCaster
         Spend(cost.Energy + cost.Stamina);
         Refund.Add(cost.Energy + cost.Stamina, pc.Stats.Get(StatIds.SpellCostRefund));
         uint castId = SpellNet.BeginCast();
+        SpellEffects.CooldownShare = 1;
         try
         {
             effect();
+            if (SpellEffects.CooldownShare < 1) pc.Spells.SetRemainingCooldown(slot, SpellEffects.CooldownShare);
         }
         catch (Exception e)
         {
@@ -195,20 +197,21 @@ internal static class SpellCaster
     /// <summary>Enemies struck by the last Blink (self-test).</summary>
     public static int BlinkStruck { get; private set; }
 
-    /// <summary>Phase Pauldrons: every enemy passed through takes <c>spell_blink_damage</c>; Tearing Spacetime: an explosion at the exit,
-    /// damage scaling with movement speed and radius with the distance blinked (COS-88).</summary>
+    /// <summary>Every enemy passed through takes <c>spell_blink_damage</c> (0 without Phase Pauldrons) plus the spell power x3 and falls (a short
+    /// stun); Tearing Spacetime: an explosion at the exit, damage scaling with movement speed and radius with the distance blinked (COS-88).</summary>
     public static void BlinkItems(Vector3 from, Vector3 to)
     {
         var stats = PlayerState.Character.Stats;
         BlinkStruck = 0;
         double passDamage = stats.Get(PerkStatIds.BlinkDamage);
-        if (passDamage > 0)
-            foreach (var e in SpellWorld.ActiveEnemies().ToList())
-            {
-                if (SpellWorld.DistanceToSegment(SpellWorld.Center(e), from + Vector3.up, to + Vector3.up) > 1.5f) continue;
-                SpellWorld.Strike(e, SpellWorld.Hit(passDamage, stats.Get("spell_blink_damage_scaling")));
-                BlinkStruck++;
-            }
+        foreach (var e in SpellWorld.ActiveEnemies().ToList())
+        {
+            if (SpellWorld.DistanceToSegment(SpellWorld.Center(e), from + Vector3.up, to + Vector3.up) > 1.5f) continue;
+            var hit = SpellWorld.Hit(passDamage, stats.Get("spell_blink_damage_scaling"));
+            if (hit.Amount > 0) SpellWorld.Strike(e, hit);
+            if (e.IsActive) e.Combat.ApplyStun(SpellTuning.BlinkFallSeconds);
+            BlinkStruck++;
+        }
         if (!stats.IsOn(PerkStatIds.BlinkExplosion)) return;
         float radius = Mathf.Max((float)PerkRules.BlinkExplosionMinRadius, Vector3.Distance(from, to) * (float)PerkRules.BlinkExplosionRadiusShare);
         double damage = PerkRules.BlinkExplosionDamage * Math.Max(0.1, stats.Get(StatIds.MovementSpeed));

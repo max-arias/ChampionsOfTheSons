@@ -12,9 +12,6 @@ namespace ChampionsOfTheSons.Mod.Spells;
 /// </summary>
 internal static class TeamSpells
 {
-    /// <summary>How far War Cry and Purge reach teammates (the dome and the flare use their own zone radius).</summary>
-    public const float WarCryRadius = 20f, PurgeRadius = 20f;
-
     public static bool Apply(AuraPulse p)
     {
         var buffs = SpellWorld.Buffs;
@@ -26,20 +23,31 @@ internal static class TeamSpells
                 {
                     new StatModifier(StatIds.AllDamage, EffectOp.Mult, Math.Max(1, p.Amount)),
                     new StatModifier(StatIds.AttackSpeed, EffectOp.Mult, Math.Max(1, p.Amount2)),
+                    new StatModifier(StatIds.MovementSpeed, EffectOp.Mult, Math.Max(1, p.Amount2)),
                 });
                 return true;
             case "spell.purge":
                 PlayerEffects.ClearDebuffs();
-                if (p.Amount > 0) PlayerEffects.Heal(maxHealth * Math.Clamp(p.Amount, 0, 1));
+                buffs.Apply("team.purge_immunity", SpellTuning.PurgeImmunitySeconds, SpellTuning.PurgeImmunity());
+                if (p.Amount > 0 && LocalPlayer.Vitals?.Health is { } health)
+                {
+                    var (hp, energy) = SpellTuning.PurgeHeal(health._currentValue, health.GetMax(), SpellCaster.Energy, SpellCaster.MaxEnergy);
+                    PlayerEffects.Heal(hp);
+                    PlayerEffects.AddEnergy(energy);
+                }
                 return true;
             case "spell.healing_dome":
-                // Amount: share of max health per second; Amount2: share of max energy per second; Seconds: the pulse interval.
+                // Amount: share of the caster's max health per second; Amount2: share of max energy per second; Seconds: the pulse interval.
                 PlayerEffects.Heal(maxHealth * Math.Clamp(p.Amount, 0, 1) * p.Seconds);
                 if (p.Amount2 > 0) PlayerEffects.AddEnergy(Derived.MaxEnergy(PlayerState.Character.Stats) * Math.Clamp(p.Amount2, 0, 1) * p.Seconds);
                 return true;
             case "spell.sun_flare":
                 PlayerEffects.Heal(Math.Max(0, p.Amount));
-                buffs.Apply("team.flare_boost", 2, SpellTuning.Speed(Math.Max(1, p.Amount2)));
+                buffs.Apply("team.flare_boost", 1, new[]
+                {
+                    new StatModifier(StatIds.MovementSpeed, EffectOp.Mult, Math.Max(1, p.Amount2)),
+                    new StatModifier(StatIds.AllDamageTaken, EffectOp.Mult, SpellTuning.SunFlareResistance),
+                });
                 return true;
             default:
                 return false;
