@@ -1545,7 +1545,7 @@
  "perk.time_of_need.effect": "Healing Dome and Purge cooldowns are reduced by 50%.",
  "perk.time_of_need.flavor": "Help arrives sooner than it should.",
  "perk.time_of_need.name": "Hasty Rescue",
- "perk.transmutation.effect": "15% of spell costs are paid from stamina instead of energy.",
+ "perk.transmutation.effect": "15% of each spell's energy cost comes back over 3 seconds.",
  "perk.transmutation.flavor": "Let the legs pay for the magic.",
  "perk.transmutation.name": "Sinew Channel",
  "perk.transporter.effect": "Lets you use your raft on land, turning it into a wooden hovercraft.",

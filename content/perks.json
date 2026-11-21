@@ -341,9 +341,9 @@
       "requires": [],
       "effects": [
         {
-          "stat": "spell_cost_energy_cost",
-          "op": "mult",
-          "value": 0.85
+          "stat": "spell_cost_refund",
+          "op": "add",
+          "value": 0.15
         }
       ]
     },

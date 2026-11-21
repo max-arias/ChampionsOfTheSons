@@ -27,6 +27,13 @@ public sealed class LootRoller
         _byRarity = content.Items.Values.GroupBy(i => i.Rarity).ToDictionary(g => g.Key, g => g.OrderBy(i => i.LegacyIndex).ToArray());
     }
 
+    /// <summary>The XP heart (Deadspite Heart): its Use grants 30 × level³ × rarity multiplier XP.</summary>
+    public const string XpHeart = "item.lesser_mutated_heart";
+
+    /// <summary>COS-123 (Max 2026-11-20): bosses always drop an XP heart, minibosses one time in four; other enemies never.</summary>
+    public static bool DropsXpHeart(EnemyTier tier, Rng rng) =>
+        tier == EnemyTier.Boss || (tier == EnemyTier.Miniboss && rng.NextDouble() < 0.25);
+
     /// <summary>Does this kill drop anything? Enemies with abilities always drop.</summary>
     public static bool ShouldDrop(EnemyProfile enemy, WorldRules rules, double magicFind, Rng rng) =>
         enemy.Abilities.Count > 0 || rng.NextDouble() <= 0.1 * rules.DropChance * magicFind;

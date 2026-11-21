@@ -117,6 +117,7 @@ internal static class LootSelfTest
         };
         var items = LootFeature.RollForKill(boss, rules);
         SelfTest.Check("loot: boss rolls many drops", items.Count >= 9, $"{items.Count}");
+        SelfTest.Check("loot: a boss drops an XP heart (COS-123)", items.Any(i => i.BaseId == LootRoller.XpHeart));
         int maxRarity = items.Select(i => (int)i.Rarity).DefaultIfEmpty(0).Max();
         SelfTest.Check("loot: boss drops reach high rarity", maxRarity >= (int)Rarity.Rare, $"max rarity {maxRarity}");
         SelfTest.Check("loot: item level follows the player", items.All(i => ModContent.Db.Items.TryGetValue(i.BaseId, out var d) && LootRoller.IsMaterialOrOther(d) || i.Level == Pc.Progress.Level),

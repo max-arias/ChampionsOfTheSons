@@ -485,6 +485,12 @@
       "percent": true
     },
     {
+      "id": "spell_cost_refund",
+      "kind": "add",
+      "default": 0.0,
+      "percent": true
+    },
+    {
       "id": "spell_cost",
       "legacyName": "spellCost",
       "kind": "mult",

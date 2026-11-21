@@ -118,9 +118,11 @@ public sealed class LootFeature : IModFeature
         var result = new List<ItemInstance>();
         // Co-op: the sum of every player's magic find (COS-81); alone: the player's own.
         double mf = Net.CoopParty.TeamMagicFind();
-        if (!LootRoller.ShouldDrop(enemy, rules, mf, Rng)) return result;
         int level = PlayerState.Character.Progress.Level;
         if (Net.CoopSession.IsHost && Net.CoopFeature.Verified.Count > 0) level = Net.CoopSession.LootLevel(level); // co-op: the host's loot-level policy over all players
+        if (LootRoller.DropsXpHeart(enemy.Tier, Rng) && ModContent.Db.Items.TryGetValue(LootRoller.XpHeart, out var heart))
+            result.Add(Roller.RollItem(heart, level, Rng));
+        if (!LootRoller.ShouldDrop(enemy, rules, mf, Rng)) return result;
         int count = LootRoller.DropCount(enemy, rules, Rng);
         for (int i = 0; i < count; i++)
         {

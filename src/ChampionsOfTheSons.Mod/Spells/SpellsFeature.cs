@@ -46,7 +46,11 @@ internal sealed class SpellsFeature : IModFeature
         Bridge.EnemyPatches.LocalWeaponHit += SpellEffects.OnWeaponHit;
     }
 
-    public void OnGameStart() => SpellWorld.Reset();
+    public void OnGameStart()
+    {
+        SpellWorld.Reset();
+        SpellCaster.Refund.Clear();
+    }
 
     public void Update(float dt, bool inWorld)
     {
@@ -54,6 +58,8 @@ internal sealed class SpellsFeature : IModFeature
         {
             SpellWorld.Step(dt);
             SpellEffects.ItemTick(dt);
+            double back = SpellCaster.Refund.Tick(dt);
+            if (back > 0) SpellCaster.Gain(back);
         }
         var bar = SpellBar.Instance;
         if (bar == null) return;

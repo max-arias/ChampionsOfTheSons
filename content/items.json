@@ -7053,13 +7053,6 @@
           null
         ]
       ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.strength",
-          "multiplier": -0.3
-        }
-      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -7271,13 +7264,6 @@
           "*",
           null
         ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.strength",
-          "multiplier": -0.3
-        }
       ],
       "uniqueEffects": [
         {
@@ -7503,13 +7489,6 @@
           null
         ]
       ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.strength",
-          "multiplier": -0.3
-        }
-      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -7726,13 +7705,6 @@
           null
         ]
       ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.strength",
-          "multiplier": -0.3
-        }
-      ],
       "uniqueEffects": [
         {
           "stat": "all_damage",
@@ -7944,13 +7916,6 @@
           "*",
           null
         ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.strength",
-          "multiplier": -0.3
-        }
       ],
       "uniqueEffects": [
         {

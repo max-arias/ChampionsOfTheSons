@@ -61,10 +61,16 @@ internal static class SpellCaster
 
     public static double MaxEnergy => Derived.MaxEnergy(PlayerState.Character.Stats);
 
+    /// <summary>Sinew Channel's energy coming back after casts (COS-128).</summary>
+    internal static readonly EnergyRefund Refund = new();
+
+    /// <summary>Gives energy back (the opposite of <see cref="Spend"/>).</summary>
+    internal static void Gain(double amount) => Spend(-amount);
+
     internal static void Spend(double amount)
     {
         var s = LocalPlayer.Vitals?.Stamina;
-        if (s == null || amount <= 0) return;
+        if (s == null || amount == 0) return;
         float max = s.GetMax();
         s.SetCurrentValue(Mathf.Clamp(s._currentValue - (float)(amount / MaxEnergy) * max, 0, max));
     }
@@ -93,6 +99,7 @@ internal static class SpellCaster
         }
 
         Spend(cost.Energy + cost.Stamina);
+        Refund.Add(cost.Energy + cost.Stamina, pc.Stats.Get(StatIds.SpellCostRefund));
         uint castId = SpellNet.BeginCast();
         try
         {

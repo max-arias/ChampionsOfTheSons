@@ -60,6 +60,8 @@ public static class StatIds
 
     public const string SpellCost = "spell_cost";
     public const string SpellCostEnergyCost = "spell_cost_energy_cost";
+    /// <summary>Share of a cast's cost that comes back over 3 s (Sinew Channel, COS-128).</summary>
+    public const string SpellCostRefund = "spell_cost_refund";
     public const string Cooldown = "cooldown";
     public const string CooldownRate = "cooldown_rate";
 

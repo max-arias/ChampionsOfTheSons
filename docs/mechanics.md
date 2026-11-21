@@ -74,6 +74,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
   - r5: `w > 720 and U < 0.26 + 0.085mf + 0.02d`, kept if `d > 2 or U < 0.01`
   - r6: `w > 1440 and U < 0.18 + 0.033mf + 0.003d`, kept if `d > 3 or U < 0.05`
   - r7: `w > 5000 and U < 0.04 + 0.01mf`, kept if `d > 4 or U < 0.001`
+- XP heart (COS-123, Max 2026-11-20): a Boss always drops one Deadspite Heart, a Miniboss one time in four (`LootRoller.DropsXpHeart`), on top of its normal drops, at the loot item level. Normal enemies and elites never drop it.
 - Base item: uniform among that rarity's items with `minLevel ≤ level`; none → try one rarity lower.
 - ✱ Drops are equipment only (COS-59). The hearts are level-up rewards. There are no materials (COS-145).
 - Stat slots: each pool rolls one option uniformly; `null` = slot stays empty; `*` stands for every common stat (COTF IDs 1–18, 21–26, 31, 34–47, 49–57, 59–67) as separate options, so in `[named, *]` each common stat weighs as much as the named one. Every rolled stat stores its slot index (saved, synced). COTF's `rarity` field on a stat is data only: no roll gates on it.
@@ -240,6 +241,8 @@ Keyed by source; re-adding a source refreshes duration; amount overwrites, accum
 - Pierce chance: COTF pierced when `U > chance` (inverted). Here `U < chance`.
 - Cataclysm: COTF multiplied by `fireDamage` (0 by default). Here `× (1 + fireDamage)`.
 - Life per second: COTF also added LPS every frame. Here only per second.
+- Sinew Channel (`perk.transmutation`, COS-128, Max 2026-11-20): 15% of each cast's energy cost comes back over 3 s (`EnergyRefund`). COTF moved 15% of spell costs to stamina; COTS has one energy/stamina bar (COS-94), so that did nothing.
+- The five +all-damage items (Gauzewraps, Gutstitch Vest and three more; COS-124) roll Strength normally. COTF put a ×−0.3 multiplier on option 0 of their `[*, ...]` slot, which after expanding `*` is Strength: an indexing slip, dropped here.
 - No crafting, Scrap, materials or sockets (COS-145, Max 2026-11-20). COTF's crafting modes (Reroll, Reforge, Polish, Empower, single-stat reroll) and their perks, its socket gems and use-on-item materials (drill, enzymes, acids, solutions, mixtures, waters) and empty-socket rolls are not in COTS. Merge (COS-144) is the only way to change items. Saves from before (PlayerSave v5) drop the crafting perks (they cost 0), deleted material stacks and socket stats.
 - Stat sheet: contributions are sources, not add/subtract pairs (no drift, bools are reference-counted).
 - Deleted perks (COS-86/87, Max 2026-11-20: perks that cannot work in Sons of the Forest are deleted; saves refund the points, PlayerSave v3): `perk.charge_pushback` (Ramming Swing, heavy-attack knockback: the game gives no verified heavy-attack signal).
