@@ -65,7 +65,7 @@ internal static class PlayerStateFx
         }
     }
 
-    private static bool ToggleOn(string spellId)
+    public static bool ToggleOn(string spellId)
     {
         var book = PlayerState.Character.Spells;
         for (int i = 0; i < book.Loadout.Count; i++)

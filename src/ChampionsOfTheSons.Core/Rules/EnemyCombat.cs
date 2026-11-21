@@ -259,6 +259,12 @@ public sealed class EnemyCombatState
         return true;
     }
 
+    /// <summary>Shielding's shield is up right now (COS-106 tint).</summary>
+    public bool ShieldUp => _shieldLeft > 0;
+
+    /// <summary>Self-test: raises the shield as a first hit would.</summary>
+    public void ForceShieldForTest() => _shieldLeft = AbilityTuning.ShieldSeconds;
+
     /// <summary>Undead: the first lethal hit leaves the enemy at half health instead.</summary>
     public bool TryUndeadRevive()
     {

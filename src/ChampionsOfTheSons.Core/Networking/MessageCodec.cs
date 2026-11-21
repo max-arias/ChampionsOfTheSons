@@ -44,6 +44,9 @@ public static class MessageCodec
             case EnemyEffectNet m: w.UInt64(m.EnemyNetId).Byte((byte)m.Kind).String(m.Source).Float(m.Amount).Float(m.Seconds).Byte((byte)m.Dot); break;
             case EnemyPush m: w.UInt64(m.EnemyNetId); WriteVec(w, m.Delta); break;
             case EnemyAware m: w.UInt64(m.EnemyNetId).Bool(m.Aware); break;
+            case EnemyState m: w.UInt64(m.EnemyNetId).Byte((byte)m.Flags); break;
+            case FlatXpGranted m: WriteLong(w, m.Amount); break;
+            case PlayerStateNet m: w.VarUInt(m.PlayerId).Byte((byte)m.Flags); WriteVec(w, m.Position); break;
             case PlayerPos m: WriteVec(w, m.Position); w.VarInt(m.Level); break;
             case DamageShown m: w.VarUInt(m.PlayerId).UInt64(m.EnemyNetId); WriteVec(w, m.Position); w.Float(m.Amount).Byte((byte)m.Flags); break;
             case AuraPulse m: w.VarUInt(m.PlayerId).String(m.BuffId); WriteVec(w, m.Origin); w.Float(m.Radius).Float(m.Seconds).Float(m.Amount).Float(m.Amount2); break;
@@ -95,6 +98,9 @@ public static class MessageCodec
             MessageType.EnemyEffectNet => new EnemyEffectNet(r.UInt64(), (EnemyEffectKind)r.Byte(), r.String() ?? "", r.Float(), r.Float(), (DotKind)r.Byte()),
             MessageType.EnemyPush => new EnemyPush(r.UInt64(), ReadVec(r)),
             MessageType.EnemyAware => new EnemyAware(r.UInt64(), r.Bool()),
+            MessageType.EnemyState => new EnemyState(r.UInt64(), (EnemyStateFlags)r.Byte()),
+            MessageType.FlatXpGranted => new FlatXpGranted(ReadLong(r)),
+            MessageType.PlayerStateNet => new PlayerStateNet(r.VarUInt(), (PlayerStateFlags)r.Byte(), ReadVec(r)),
             MessageType.PlayerPos => new PlayerPos(ReadVec(r), r.VarInt()),
             MessageType.DamageShown => new DamageShown(r.VarUInt(), r.UInt64(), ReadVec(r), r.Float(), (HitFlags)r.Byte()),
             MessageType.AuraPulse => new AuraPulse(r.VarUInt(), r.String() ?? "", ReadVec(r), r.Float(), r.Float(), r.Float(), r.Float()),

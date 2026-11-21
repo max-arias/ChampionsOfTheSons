@@ -26,6 +26,8 @@ public enum MessageType : byte
     PickupGranted = 22,
     DropRemoved = 23,
     DropRequest = 24,
+    EnemyState = 25,
+    FlatXpGranted = 26,
     SpellCast = 30,
     AuraPulse = 31,
     Ping = 40,
@@ -35,6 +37,7 @@ public enum MessageType : byte
     AbilityEvent = 53,
     PlayerInfo = 54,
     Announce = 55,
+    PlayerStateNet = 56,
 }
 
 public interface IMessage
@@ -118,6 +121,45 @@ public sealed record DropRequest(ItemInstance Item, Vec3 Position, DropSource So
 public sealed record EnemyAware(ulong EnemyNetId, bool Aware) : IMessage
 {
     public MessageType Type => MessageType.EnemyAware;
+}
+
+[Flags]
+public enum EnemyStateFlags : byte
+{
+    None = 0,
+    /// <summary>Shielding's shield is up (dark tint).</summary>
+    ShieldUp = 1,
+    /// <summary>Undead came back once (green tint).</summary>
+    Revived = 2,
+}
+
+/// <summary>Host → clients: an enemy's visible state changed (COS-106). Sent on change; late joiners get it with the next change.</summary>
+public sealed record EnemyState(ulong EnemyNetId, EnemyStateFlags Flags) : IMessage
+{
+    public MessageType Type => MessageType.EnemyState;
+}
+
+/// <summary>Host → a client: XP that skips the kill streak (felled tree, COS-75).</summary>
+public sealed record FlatXpGranted(long Amount) : IMessage
+{
+    public MessageType Type => MessageType.FlatXpGranted;
+}
+
+[Flags]
+public enum PlayerStateFlags : byte
+{
+    None = 0,
+    BlackFlame = 1,
+    Multishot = 2,
+    Berserk = 4,
+    GoldenSkin = 8,
+}
+
+/// <summary>Player → everyone (relayed by the host): the toggles and long buffs others should see on that player (COS-106).
+/// Sent on change and every few seconds while any is on, with the player's position for placing the effect.</summary>
+public sealed record PlayerStateNet(uint PlayerId, PlayerStateFlags Flags, Vec3 Position) : IMessage
+{
+    public MessageType Type => MessageType.PlayerStateNet;
 }
 
 /// <summary>Client → host: a debuff the client's hit or spell put on a host-owned enemy (COS-13).</summary>
