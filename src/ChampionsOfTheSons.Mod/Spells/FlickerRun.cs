@@ -39,20 +39,37 @@ internal static class FlickerRun
     public static List<EnemyRuntime> Reachable()
     {
         var eye = Eye.position;
-        var near = EnemiesWithin(PlayerPos, FlickerStrikeRules.Range).Where(e => e.Actor != null && InSight(eye, e)).ToList();
+        var inRange = EnemiesWithin(PlayerPos, FlickerStrikeRules.Range).Where(e => e.Actor != null).ToList();
+        var near = inRange.Where(e => InSight(eye, e)).ToList();
+        LastReach = (inRange.Count, near.Count);
         var route = FlickerStrikeRules.Route(ToNum(PlayerPos), near.Select(e => ToNum(Center(e))).ToList());
         return route.Select(i => near[i]).ToList();
     }
 
     private static System.Numerics.Vector3 ToNum(Vector3 v) => new(v.x, v.y, v.z);
 
+    /// <summary>Nothing of the world (terrain, rocks, buildings) between the eye and the enemy. The player's own colliders and
+    /// enemies (this one or others in the way) do not block.</summary>
     private static bool InSight(Vector3 eye, EnemyRuntime e)
     {
         var to = Center(e);
-        if (!Physics.Linecast(eye, to, out var hit)) return true;
-        // The first thing hit belongs to the enemy itself (its body or a child collider): in sight.
-        return hit.transform != null && e.Actor != null && hit.transform.IsChildOf(e.Actor.transform);
+        var dir = to - eye;
+        float dist = dir.magnitude;
+        if (dist < 0.5f) return true;
+        foreach (var hit in Physics.RaycastAll(eye, dir / dist, dist).OrderBy(h => h.distance))
+        {
+            var t = hit.transform;
+            if (t == null) continue;
+            if (LocalPlayer.Transform != null && t.IsChildOf(LocalPlayer.Transform)) continue;
+            if (t.GetComponentInParent<Sons.Ai.Vail.VailActor>() != null) continue; // an enemy's body (this one or another)
+            if (hit.distance >= dist - 1f) return true; // something right at the enemy
+            return false;
+        }
+        return true;
     }
+
+    /// <summary>Self-test: enemies in range and in sight at the last check.</summary>
+    public static (int InRange, int InSight) LastReach { get; private set; }
 
     /// <summary>Starts a run on the given route (already checked non-empty by the cast's precondition).</summary>
     public static bool Start(List<EnemyRuntime> route)

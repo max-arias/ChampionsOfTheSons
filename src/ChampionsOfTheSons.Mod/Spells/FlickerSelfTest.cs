@@ -61,7 +61,7 @@ internal static class FlickerSelfTest
             if (EnemyRegistry.Get(e) is { } r && r.Stats != null && EnemyRegistry.Health(r.Stats) is { } h) HealthBefore[e] = h._currentValue;
         var outcome = CastSpell();
         SelfTest.Check("flicker: the cast starts a run over the reachable enemies", outcome == SpellCastOutcome.Cast && FlickerRun.Running && FlickerRun.LastTargets >= 1,
-            $"{outcome}, {FlickerRun.LastTargets} target(s)");
+            $"{outcome}, {FlickerRun.LastTargets} target(s); in range {FlickerRun.LastReach.InRange}, in sight {FlickerRun.LastReach.InSight}");
     }
 
     private static void Payoff()
