@@ -12,3 +12,6 @@ The per-entry source icon is listed in `tools/icons/mapping.json` (`<author>/<ic
 
 `ui.book_tab.png` (our guide-book tab): "Sparkles" by Delapouite (https://game-icons.net/1x1/delapouite/sparkles.html),
 CC BY 3.0; changes: black glyph on a white field with a black frame, laid out like the game's own tab icons.
+
+`ui.hud.*.png` (the action bar's bone, hide and glyph pieces, COS-151) are our own, generated procedurally by
+`tools/hud_art.py`; the glyphs are invented marks, not letters of any real alphabet.

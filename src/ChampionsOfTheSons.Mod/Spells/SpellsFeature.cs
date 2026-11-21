@@ -31,14 +31,13 @@ internal static class SpellKeys
     }
 }
 
-/// <summary>The spell bar and spell casting.</summary>
+/// <summary>Spell casting; the spell slots are drawn by the action bar (COS-151).</summary>
 internal sealed class SpellsFeature : IModFeature
 {
     public void Init()
     {
         SpellKeys.Init();
         SpellNet.Init();
-        new SpellBar().Build();
         Bridge.EnemyPatches.EnemyHit += (_, enemy, damage, _) =>
         {
             if (damage > 0) SpellEffects.OnPlayerHit(enemy);
@@ -61,11 +60,6 @@ internal sealed class SpellsFeature : IModFeature
             double back = SpellCaster.Refund.Tick(dt);
             if (back > 0) SpellCaster.Gain(back);
         }
-        var bar = SpellBar.Instance;
-        if (bar == null) return;
-        bool show = inWorld && !UI.CotsUi.AnyPanelOpen;
-        bar.SetVisible(show);
-        if (show) bar.Refresh();
     }
 
     public void RegisterSelfTests()

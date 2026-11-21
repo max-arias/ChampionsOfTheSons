@@ -1,169 +1,131 @@
 using ChampionsOfTheSons.Core.Rules;
-using ChampionsOfTheSons.Mod.Icons;
+using ChampionsOfTheSons.Mod.ActionBar;
+using ChampionsOfTheSons.Mod.Hud;
 using ChampionsOfTheSons.Mod.UI;
 using SUI;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using static ChampionsOfTheSons.Mod.UI.PanelKit;
 using static SUI.SUI;
 
 namespace ChampionsOfTheSons.Mod.Spells;
 
-/// <summary>The spell bar HUD: 6 slots with hotkey, spell name and a cooldown overlay, and an energy bar under them.</summary>
+/// <summary>
+/// The spell group in the middle of the action bar (COS-151): 6 slots with icon, key, cooldown ash and a rune glow when castable
+/// (red-tinted icon when energy is short), and the energy channel under them. Built and shown by <see cref="ActionBar.ActionBar"/>.
+/// </summary>
 internal sealed class SpellBar
 {
-    public const string PanelId = "cots-spellbar";
-    private const float Cell = 68, Gap = 8;
-    private const float BarW = SpellBook.Slots * Cell + (SpellBook.Slots - 1) * Gap;
-    /// <summary>Width of the slot row and energy bar; the XP bar below uses the same width so the two line up.</summary>
-    public const float Width = BarW;
-    /// <summary>Bottom edge of the spell bar above the screen bottom: just over the XP bar (see ProgressHud).</summary>
-    public const float Bottom = 44;
+    public const float Cell = 64, Gap = 6;
+    public const float Width = SpellBook.Slots * Cell + (SpellBook.Slots - 1) * Gap;
+    public const float ChannelH = 22;
+    public const float Height = Cell + 6 + ChannelH;
 
-    private sealed class Slot
-    {
-        public SContainerOptions Frame = null!, Cooldown = null!;
-        public SImageOptions Icon = null!;
-        public SLabelOptions Key = null!, Name = null!, Remaining = null!;
-        public string? ShownSpell;
-        public string ShownKey = "";
-        public bool? ShownReady;
-    }
-
-    private readonly Slot[] _slots = new Slot[SpellBook.Slots];
-    private SPanelOptions _root = null!;
+    private readonly BarSlot[] _slots = new BarSlot[SpellBook.Slots];
+    private readonly string?[] _shownSpell = new string?[SpellBook.Slots];
+    private readonly string[] _shownKey = new string[SpellBook.Slots];
+    private readonly string[] _shownRemaining = new string[SpellBook.Slots];
     private SContainerOptions _energyFill = null!;
     private SLabelOptions _energyText = null!;
+    private string _energyShown = "";
+    private GameObject _visibleRoot = null!;
 
     public static SpellBar Instance { get; private set; } = null!;
 
-    public bool Visible => _root.Root.activeSelf;
+    public bool Visible => _visibleRoot != null && _visibleRoot.activeSelf;
 
     public string SlotLabel(int i) => _slots[i].Name.TextObject.text;
     public string SlotKeyLabel(int i) => _slots[i].Key.TextObject.text;
-    public string SlotRemaining(int i) => _slots[i].Remaining.TextObject.text;
-    public float CooldownOverlayFraction(int i) => _slots[i].Cooldown.RectTransform.anchorMax.y;
+    public string SlotRemaining(int i) => _slots[i].Center.TextObject.text;
+    public float CooldownOverlayFraction(int i) => _slots[i].CooldownFraction;
+    public string SlotGlow(int i) => _slots[i].GlowHex;
+    public string EnergyText => _energyText.TextObject.text;
 
-    public void Build()
+    /// <summary>Builds the group at (x, y) inside <paramref name="parent"/>; <paramref name="visibleRoot"/> is the action bar's panel.</summary>
+    public void Build(SContainerOptions parent, float x, float y, GameObject visibleRoot)
     {
         Instance = this;
-        _root = RegisterNewPanel(PanelId, enableInput: false);
-        var bar = SContainer.Anchor(AnchorType.BottomCenter).Pivot(0.5f, 0f).Size(BarW + 24, Cell + 54).Position(0, Bottom);
-        _root.Add(bar);
-
+        _visibleRoot = visibleRoot;
         for (int i = 0; i < SpellBook.Slots; i++)
         {
-            var s = new Slot();
-            float x = 12 + i * (Cell + Gap);
-            s.Frame = SContainer.TopLeft(x, 6).Size(Cell, Cell).Background(C(UiTheme.SlotFrameEmpty), EBackground.Round10);
-            bar.Add(s.Frame);
-            var inner = SContainer.Anchor(AnchorType.Fill).Margin(2f).Background(C("#0B0E12E8"), EBackground.None);
-            s.Frame.Add(inner);
-            s.Icon = IconView.Create().Anchor(AnchorType.Fill);
-            inner.Add(s.Icon);
-            s.Name = Label("", 13, UiTheme.Text, TextAlignmentOptions.Center, wrap: true).Anchor(AnchorType.Fill);
-            s.Name.TextObject.margin = new Vector4(4, 14, 4, 4);
-            s.Name.TextObject.enableAutoSizing = true;
-            s.Name.TextObject.fontSizeMin = 8;
-            s.Name.TextObject.fontSizeMax = 14;
-            s.Name.TextObject.overflowMode = TextOverflowModes.Truncate;
-            inner.Add(s.Name);
-
-            // Cooldown overlay drains downward: anchored to the top, its height is the remaining fraction.
-            s.Cooldown = SContainer.Background(C("#000000B0"), EBackground.None);
-            inner.Add(s.Cooldown);
-            s.Cooldown.Root.GetComponent<Image>().raycastTarget = false;
-
-            s.Remaining = Label("", 20, UiTheme.Text, TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
-            inner.Add(s.Remaining);
-            s.Key = Label("", 13, UiTheme.Gold, TextAlignmentOptions.TopLeft).Anchor(AnchorType.Fill);
-            s.Key.TextObject.margin = new Vector4(5, 2, 2, 2);
-            inner.Add(s.Key);
-            SetOverlay(s, 0);
-            _slots[i] = s;
+            _slots[i] = new BarSlot(parent, x + i * (Cell + Gap), y, Cell, 44);
+            _shownKey[i] = "";
+            _shownRemaining[i] = "";
         }
 
-        var back = SContainer.TopLeft(12, 6 + Cell + 10).Size(BarW, 16).Background(C(UiTheme.BarBack), EBackground.None);
-        bar.Add(back);
-        _energyFill = SContainer.Background(C("#4D9DFF"), EBackground.None);
-        back.Add(_energyFill);
-        _energyFill.Root.GetComponent<Image>().raycastTarget = false;
-        _energyText = Label("", 13, UiTheme.Text, TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
-        back.Add(_energyText);
-        _root.Active(false);
-    }
-
-    private static void SetOverlay(Slot s, float remainingFraction)
-    {
-        var rt = s.Cooldown.RectTransform;
-        rt.anchorMin = new Vector2(0, 1 - Mathf.Clamp01(remainingFraction));
-        rt.anchorMax = new Vector2(1, 1);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-        s.Cooldown.Root.SetActive(remainingFraction > 0.001f);
-    }
-
-    public void SetVisible(bool v)
-    {
-        if (_root.Root.activeSelf != v) _root.Active(v);
+        // Energy: a bone channel whose carved groove holds the fill (groove inset matches tools/hud_art.py bar_channel at this scale).
+        const float scale = ChannelH / 40f;
+        var channel = HudArt.Piece(HudArt.BarChannel, scale, UiTheme.BoneDark).TopLeft(x, y + Cell + 6).Size(Width, ChannelH);
+        parent.Add(channel);
+        var groove = SContainer.TopLeft(22 * scale, 11 * scale).Size(Width - 44 * scale, ChannelH - 22 * scale);
+        channel.Add(groove);
+        _energyFill = HudArt.Piece(HudArt.BarFill, 0.5f, UiTheme.EnergyFill, UiTheme.EnergyFill);
+        groove.Add(_energyFill);
+        _energyText = HudKit.Label("", 11, UiTheme.Bone, TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
+        _energyText.TextObject.fontStyle = FontStyles.Bold;
+        BarSlot.Outline(_energyText, 0.3f);
+        channel.Add(_energyText);
+        HudKit.NoRaycast(channel.Root);
     }
 
     public void Refresh()
     {
         var pc = PlayerState.Character;
+        double energy = SpellCaster.Energy;
         for (int i = 0; i < SpellBook.Slots; i++)
         {
             var s = _slots[i];
             var id = pc.Spells.Loadout[i];
-            if (id != s.ShownSpell)
+            if (id != _shownSpell[i])
             {
-                s.ShownSpell = id;
+                _shownSpell[i] = id;
                 s.Name.Text(id == null ? "" : ModContent.Text.Get(id + ".name", ModContent.Db.Spells[id].Name));
-                s.Name.Active(!IconView.Show(s.Icon, id)); // the icon replaces the name text when there is one
-                s.ShownReady = null;
+                s.Name.Active(!s.ShowContentIcon(id)); // the icon replaces the name text when there is one
             }
             string key = SpellKeys.Label(i);
-            if (key != s.ShownKey)
+            if (key != _shownKey[i])
             {
-                s.ShownKey = key;
+                _shownKey[i] = key;
                 s.Key.Text(key);
             }
 
+            string remaining = "";
             if (id == null)
             {
-                SetOverlay(s, 0);
-                s.Remaining.Text("");
-                if (s.ShownReady != true) { s.ShownReady = true; s.Frame.Root.GetComponent<Image>().color = C(UiTheme.SlotFrameEmpty); }
-                continue;
-            }
-            double progress = pc.Spells.CooldownProgress(i);
-            bool ready = progress >= 1;
-            SetOverlay(s, (float)(1 - progress));
-            if (ready)
-            {
-                s.Remaining.Text("");
+                s.SetCooldown(0);
+                s.SetGlow(null);
+                s.SetPlateDim(true);
             }
             else
             {
-                double cd = pc.Spells.CooldownOf(id, pc.Stats);
-                double rate = Math.Max(0.0001, pc.Stats.Get(StatIds.CooldownRate));
-                s.Remaining.Text(Math.Ceiling((1 - progress) * cd / rate).ToString("0"));
+                s.SetPlateDim(false);
+                double progress = pc.Spells.CooldownProgress(i);
+                bool ready = progress >= 1;
+                s.SetCooldown((float)(1 - progress));
+                bool affordable = pc.Spells.IsActive(i) || energy >= pc.Spells.CostOf(id, pc.Stats).Total;
+                if (!ready)
+                {
+                    double cd = pc.Spells.CooldownOf(id, pc.Stats);
+                    double rate = Math.Max(0.0001, pc.Stats.Get(StatIds.CooldownRate));
+                    remaining = Math.Ceiling((1 - progress) * cd / rate).ToString("0");
+                }
+                s.SetIconColor(affordable ? "#FFFFFF" : UiTheme.Starved);
+                s.SetGlow(pc.Spells.IsActive(i) ? UiTheme.EmberGlow : ready && affordable ? UiTheme.RuneGlow : null);
             }
-            if (s.ShownReady != ready)
+            if (remaining != _shownRemaining[i])
             {
-                s.ShownReady = ready;
-                s.Frame.Root.GetComponent<Image>().color = C(ready ? "#B8923A" : UiTheme.SlotFrameEmpty);
+                _shownRemaining[i] = remaining;
+                s.Center.Text(remaining);
             }
         }
 
         double max = Math.Max(1, SpellCaster.MaxEnergy);
-        double cur = Math.Clamp(SpellCaster.Energy, 0, max);
-        var rt = _energyFill.RectTransform;
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = new Vector2((float)(cur / max), 1);
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-        _energyText.Text($"{cur:0} / {max:0}");
+        double cur = Math.Clamp(energy, 0, max);
+        HudKit.SetFill(_energyFill, (float)(cur / max));
+        string text = $"{cur:0} / {max:0}";
+        if (text != _energyShown)
+        {
+            _energyShown = text;
+            _energyText.Text(text);
+        }
     }
 }

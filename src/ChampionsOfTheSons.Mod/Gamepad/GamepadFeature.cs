@@ -24,6 +24,15 @@ internal sealed class GamepadFeature : IModFeature
     };
 
     private static ConfigEntry<string>[] _spellEntries = Array.Empty<ConfigEntry<string>>();
+
+    // COS-151: the action bar's weapon and consumable groups. The game binds the whole plain d-pad in the world, so these are chords.
+    private static readonly (string Name, string Binding, string Title, string Help, Action Run)[] BarActions =
+    {
+        ("next_weapon", "RightShoulder+DpadUp", "next weapon", "Pad buttons that equip the next weapon on the action bar's weapon keys.", () => ActionBar.ActionBarFeature.Bar.NextWeapon()),
+        ("use_consumable", "RightShoulder+DpadDown", "use consumable", "Pad buttons that use the picked item on the action bar's consumable keys.", () => ActionBar.ActionBarFeature.Bar.UseConsumable()),
+        ("next_consumable", "LeftShoulder+DpadDown", "next consumable", "Pad buttons that pick the next item on the action bar's consumable keys.", () => ActionBar.ActionBarFeature.Bar.NextConsumable()),
+    };
+    private static ConfigEntry<string>[] _barEntries = Array.Empty<ConfigEntry<string>>();
     private static readonly Dictionary<string, ConfigEntry<string>> PanelEntries = new();
     private static readonly Dictionary<string, PadBinding?> Parsed = new();
 
@@ -33,6 +42,9 @@ internal sealed class GamepadFeature : IModFeature
 
     /// <summary>The spell slot the last pad binding cast (-1: none yet).</summary>
     internal static int LastPadCast { get; set; } = -1;
+
+    /// <summary>The action bar pad action that ran last ("next_weapon", ...), for tests.</summary>
+    internal static string LastBarAction { get; set; } = "";
 
     internal static IReadOnlyList<PadPanel> Panels => _panels;
     internal static PadPanel? OpenPanel => _panels.FirstOrDefault(p => p.IsOpen());
@@ -52,6 +64,8 @@ internal sealed class GamepadFeature : IModFeature
         _spellEntries = new ConfigEntry<string>[SpellBook.Slots];
         for (int i = 0; i < SpellBook.Slots; i++)
             _spellEntries[i] = cat.CreateEntry($"pad_spell_{i + 1}", SpellDefaults[Math.Min(i, SpellDefaults.Length - 1)], $"Gamepad: spell slot {i + 1}", $"Pad buttons that cast the spell in slot {i + 1}.");
+
+        _barEntries = BarActions.Select(a => cat.CreateEntry($"pad_{a.Name}", a.Binding, $"Gamepad: {a.Title}", a.Help)).ToArray();
 
         _panels = new List<PadPanel>
         {
@@ -118,6 +132,16 @@ internal sealed class GamepadFeature : IModFeature
             {
                 LastPadCast = i;
                 SpellCaster.Cast(i);
+                return;
+            }
+        }
+        for (int i = 0; i < _barEntries.Length; i++)
+        {
+            var b = Binding(_barEntries[i], BarActions[i].Binding);
+            if (b != null && PadInput.IsTriggered(b))
+            {
+                LastBarAction = BarActions[i].Name;
+                BarActions[i].Run();
                 return;
             }
         }

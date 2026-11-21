@@ -34,4 +34,18 @@ internal static class UiTheme
     public const string Divider = "#2B333E";
     public const string BarBack = "#232A33";
     public const string TooltipInner = "#0D1015F7";
+
+    // Rune & bone action bar (COS-151). Fallbacks when the ui.hud.* art is missing, and the tints laid over it.
+    public const string Bone = "#E8DCC0";
+    public const string BoneDark = "#7A6246";
+    public const string Hide = "#2A1B12";
+    public const string Ink = "#2A1A10";
+    public const string Ash = "#0A0604C8";
+    public const string RuneGlow = "#7FDCFFB0";
+    public const string EmberGlow = "#FF9A3CE0";
+    public const string PickGlow = "#FFF1C890";
+    public const string Starved = "#FF8070";
+    public const string EnergyFill = "#6F8FE8";
+    public const string BoneTint = "#D2C5AA";
+    public const string XpFill = "#E3B341";
 }

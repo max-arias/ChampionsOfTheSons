@@ -70,8 +70,9 @@ internal sealed class Banner
 /// <summary>The XP bar along the bottom edge, the level-up banner and the massacre counter and payout banner.</summary>
 internal sealed class ProgressHud
 {
-    // Same width as the spell bar's slot row and energy bar, centered under it; the level label sits to the left of the bar.
-    private const float BarW = Spells.SpellBar.Width;
+    // Same width as the action bar's slot groups, centered under it; the level disc sits on the strap's left end (COS-151).
+    private const float BarW = ActionBar.ActionBar.InnerWidth;
+    private const float XpBottom = 6;
 
     private static PlayerCharacter Pc => PlayerState.Character;
 
@@ -118,21 +119,29 @@ internal sealed class ProgressHud
 
     private void BuildXpBar(SContainerOptions layer)
     {
-        _xpRoot = SContainer.TopLeft(0, 0).Size(BarW, 34);
-        // On a dark backing like the bars, so it stays readable over snow and sky.
-        var levelBack = SContainer.TopLeft(-88, 4).Size(80, 26).Background(HudKit.C("#0A0D12D0"), EBackground.Round10);
-        _xpLevel = HudKit.Label("", 20, UiTheme.Gold, TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
+        // COS-151: a stitched leather strap under the action bar with a carved bone disc for the level at its left end.
+        const float h = 24, scale = h / 40f, disc = 54;
+        _xpRoot = SContainer.TopLeft(0, 0).Size(BarW, h);
+        var strap = ActionBar.HudArt.Piece(ActionBar.HudArt.BarStrap, scale, "#2A1B12E0").Anchor(AnchorType.Fill);
+        _xpRoot.Add(strap);
+        // The recess inside the strap (tools/hud_art.py bar_strap) holds the fill.
+        var recess = SContainer.TopLeft(18 * scale + disc / 2, 12 * scale).Size(BarW - 36 * scale - disc / 2, h - 24 * scale);
+        strap.Add(recess);
+        _xpFill = ActionBar.HudArt.Piece(ActionBar.HudArt.BarFill, 0.5f, UiTheme.XpFill, UiTheme.XpFill);
+        recess.Add(_xpFill);
+        _xpText = HudKit.Label("", 12, UiTheme.Bone, TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
+        _xpText.TextObject.fontStyle = FontStyles.Bold;
+        ActionBar.BarSlot.Outline(_xpText, 0.3f);
+        strap.Add(_xpText);
+        var levelBack = ActionBar.HudArt.Piece(ActionBar.HudArt.LevelDisc, disc / 128f, "#0A0D12D0").TopLeft(-disc / 2, (h - disc) / 2).Size(disc, disc);
+        _xpLevel = HudKit.Label("", 18, UiTheme.Gold, TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
+        _xpLevel.TextObject.fontStyle = FontStyles.Bold;
+        ActionBar.BarSlot.Outline(_xpLevel, 0.25f);
         levelBack.Add(_xpLevel);
-        var back = SContainer.TopLeft(0, 8).Size(BarW, 18).Background(HudKit.C("#0A0D12D0"), EBackground.Round10);
-        _xpFill = SContainer.Background(HudKit.C("#E3B341"), EBackground.None);
-        back.Add(_xpFill);
-        _xpText = HudKit.Label("", 13, "#FFFFFF", TextAlignmentOptions.Center).Anchor(AnchorType.Fill);
-        back.Add(_xpText);
         _xpRoot.Add(levelBack);
-        _xpRoot.Add(back);
         layer.Add(_xpRoot);
         HudKit.NoRaycast(_xpRoot.Root);
-        HudKit.Place(_xpRoot.RectTransform, new Vector2(0.5f, 0), new Vector2(0.5f, 0), 0, 8);
+        HudKit.Place(_xpRoot.RectTransform, new Vector2(0.5f, 0), new Vector2(0.5f, 0), 0, XpBottom);
         HudKit.SetFill(_xpFill, 0);
     }
 
@@ -224,7 +233,7 @@ internal sealed class ProgressHud
         long xp = (long)p.Xp;
         if (p.Level != _shownLevel || xp != _shownXp)
         {
-            if (p.Level != _shownLevel) _xpLevel.Text($"{UiText.T("ui.hud.level", "Lv")} {p.Level}");
+            if (p.Level != _shownLevel) _xpLevel.Text($"<size=9>{UiText.T("ui.hud.level", "Lv")}</size>\n{p.Level}");
             _xpText.Text($"{HudKit.Grouped(p.Xp)} / {HudKit.Grouped(goal)} XP");
             _targetFraction = (float)Math.Clamp(p.Xp / goal, 0, 1);
             if (p.Level != _shownLevel) _shownFraction = _targetFraction; // no sweep across a level change

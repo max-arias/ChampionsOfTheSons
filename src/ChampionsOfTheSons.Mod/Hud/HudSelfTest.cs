@@ -33,7 +33,7 @@ internal static class HudSelfTest
         SelfTest.Add(T0 + 10.1f, "hud: shot notices", () => TestKit.Screenshot("hud-03-notices"));
         SelfTest.Add(T0 + 11f, "hud: cleanup", () =>
         {
-            Hud.Progress.LiftXpBar(8);
+            Hud.Progress.LiftXpBar(6);
             Cleanup();
         });
         SelfTest.Add(T0 + 12f, "hud: open sheet", () => UI.CotsUi.Inventory.Open());
