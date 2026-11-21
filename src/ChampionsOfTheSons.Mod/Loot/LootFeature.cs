@@ -27,7 +27,7 @@ public sealed class LootFeature : IModFeature
     private static readonly Rng Rng = Rng.FromTime();
     private static LootRoller? _roller;
     private static readonly ConditionalWeakTable<EnemyRuntime, object> LastPos = new();
-    private static readonly HashSet<int> NoAutoPickup = new();
+    internal static readonly HashSet<int> NoAutoPickup = new();
     private static readonly Dictionary<int, float> FullBagMessageAt = new();
 
     private static LootRoller Roller => _roller ??= new LootRoller(ModContent.Db);
@@ -70,8 +70,12 @@ public sealed class LootFeature : IModFeature
         if (PlayerState.Character.Inventory.AddToBag(item, stackSize, out var rest) || rest == null) return;
         if (LocalPlayer.IsInWorld)
         {
-            var drop = SpawnScattered(rest, PlayerPosition(), 0.8f, 1.5f, DropSource.Overflow);
-            NoAutoPickup.Add(drop.Id);
+            if (Net.CoopLoot.RequestDrop(rest, PlayerPosition() + Vector3.forward * 1.2f, DropSource.Overflow)) { }
+            else
+            {
+                var drop = SpawnScattered(rest, PlayerPosition(), 0.8f, 1.5f, DropSource.Overflow);
+                NoAutoPickup.Add(drop.Id);
+            }
         }
         else Ground.Add(rest, 0, 0, 0, stackSize, DropSource.Overflow);
         Message(UI.UiText.T("ui.loot.bag_full", "Your bag is full."));
@@ -146,7 +150,7 @@ public sealed class LootFeature : IModFeature
         return Ground.Add(item, pos.x, pos.y, pos.z, stack, source);
     }
 
-    private static Vector3 SnapToGround(Vector3 pos)
+    internal static Vector3 SnapToGround(Vector3 pos)
     {
         // The lowest surface just around pos: the first hit from above can be a player or corpse collider.
         var hits = Physics.RaycastAll(pos + Vector3.up * 2f, Vector3.down, 6f);
@@ -168,6 +172,8 @@ public sealed class LootFeature : IModFeature
         if (inv.Get(slot) == null || LocalPlayer.Transform == null) return null;
         var item = inv.Remove(slot)!;
         var t = LocalPlayer.Transform;
+        // Co-op client: the host makes the drop, so everyone sees it (COS-14); it arrives as a mirror.
+        if (Net.CoopLoot.RequestDrop(item, t.position + t.forward * ThrowDistance, DropSource.Thrown)) return null;
         var drop = SpawnAt(item, t.position + t.forward * ThrowDistance, DropSource.Thrown);
         NoAutoPickup.Add(drop.Id);
         return drop;

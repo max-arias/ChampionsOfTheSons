@@ -147,6 +147,7 @@ internal static class SpellWorld
     {
         if (!e.IsActive || delta == Vector3.zero) return;
         e.Actor!.transform.position += delta;
+        if (Net.CoopHits.ForwardsToHost) Net.CoopHits.ForwardPush(e, delta); // the host's enemy moves too (COS-13)
     }
 
     public static SpellZone AddZone(SpellZone z)

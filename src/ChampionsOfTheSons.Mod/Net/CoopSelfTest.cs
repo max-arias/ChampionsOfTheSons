@@ -225,6 +225,28 @@ public sealed class CoopSelfTest : IModFeature
             }
         }, 20);
 
+        CoopTest.Add("client spell: a spell hit and a slow reach the host's enemy (COS-13)", () =>
+        {
+            if (_spellState == 0)
+            {
+                var mirror = EnemyRegistry.Live.FirstOrDefault(r => EnemySyncFeature.NetIdOf(r.Actor) == _enemyId);
+                if (mirror == null) { CoopTest.Check("client spell: the enemy's mirror exists", false); return true; }
+                _h0 = Health(_enemyId);
+                _sentBefore = CoopHits.Forwarded;
+                Spells.SpellWorld.Strike(mirror, new OutgoingHit(300, DamageKind.Magic, false, 0));
+                mirror.Combat.ApplySlow("coop.test_slow", 0.5, 5);
+                _wait = Time.realtimeSinceStartup;
+                _spellState = 1;
+                return false;
+            }
+            if (Time.realtimeSinceStartup - _wait < 1.5f) return false;
+            float h = Health(_enemyId);
+            CoopTest.Check("client spell: the spell hit went to the host", CoopHits.Forwarded > _sentBefore, $"{CoopHits.Forwarded - _sentBefore} forwarded");
+            CoopTest.Check("client spell: the host's enemy lost health from it", h < _h0, $"{_h0:F0} -> {h:F0}");
+            CoopTest.Check("client spell: the slow went to the host", CoopHits.EffectsForwarded > 0, $"{CoopHits.EffectsForwarded} effect(s)");
+            return true;
+        }, 20);
+
         CoopTest.Add("kill: client finishes the enemy and gets XP", () =>
         {
             float hp = Health(_enemyId);
@@ -311,6 +333,7 @@ public sealed class CoopSelfTest : IModFeature
     }
 
     private static bool _pingSeen, _auraSeen, _badHelloSent;
+    private static int _spellState, _sentBefore;
     private static int _hitState;
     private static float _h0, _h1;
 }

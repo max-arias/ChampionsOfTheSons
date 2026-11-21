@@ -19,10 +19,13 @@ public enum MessageType : byte
     XpGranted = 14,
     DamageShown = 15,
     PlayerPos = 16,
+    EnemyEffectNet = 17,
+    EnemyPush = 18,
     DropSpawned = 20,
     PickupRequest = 21,
     PickupGranted = 22,
     DropRemoved = 23,
+    DropRequest = 24,
     SpellCast = 30,
     AuraPulse = 31,
     Ping = 40,
@@ -109,6 +112,24 @@ public enum HitFlags : byte
     Melee = 8,
     Ranged = 16,
     Thrown = 32,
+}
+
+/// <summary>Client → host: the client threw an item out of its bag (or its bag overflowed); the host makes the drop for everyone (COS-14).</summary>
+public sealed record DropRequest(ItemInstance Item, Vec3 Position, DropSource Source) : IMessage
+{
+    public MessageType Type => MessageType.DropRequest;
+}
+
+/// <summary>Client → host: a debuff the client's hit or spell put on a host-owned enemy (COS-13).</summary>
+public sealed record EnemyEffectNet(ulong EnemyNetId, EnemyEffectKind Kind, string Source, float Amount, float Seconds, DotKind Dot) : IMessage
+{
+    public MessageType Type => MessageType.EnemyEffectNet;
+}
+
+/// <summary>Client → host: a spell moved a host-owned enemy (pull, knockback) by <paramref name="Delta"/> (COS-13).</summary>
+public sealed record EnemyPush(ulong EnemyNetId, Vec3 Delta) : IMessage
+{
+    public MessageType Type => MessageType.EnemyPush;
 }
 
 /// <summary>Client → host: an outgoing hit computed from the attacker's own stat sheet. The host applies defense.</summary>

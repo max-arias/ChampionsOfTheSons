@@ -12,8 +12,12 @@ public static class MessageCodec
     /// 3: <see cref="EnemySync"/> carries the scale; <see cref="SpellCast"/> its mode, cast id and visuals; new
     /// <see cref="SpellFxEvent"/>, <see cref="AbilityEvent"/>, <see cref="PlayerInfo"/>, <see cref="Announce"/> (COS-79/80/81);
     /// <see cref="HeldWeapon"/> carries the item's rarity and base id (COS-108).
-    /// 4: items carry the four rarities 0..3 (COS-109).</remarks>
-    public const int ProtocolVersion = 6;
+    /// 4: items carry the four rarities 0..3 (COS-109).
+    /// 5: <see cref="WorldSettings"/> carries the game mode, level offset and extra levels (COS-130).
+    /// 6: <see cref="DropSpawned"/> carries the remaining lifetime (COS-96).
+    /// 7: new <see cref="EnemyEffectNet"/> and <see cref="EnemyPush"/>: client debuffs and pushes reach host enemies (COS-13);
+    /// new <see cref="DropRequest"/>: a client's thrown items reach everyone (COS-14).</remarks>
+    public const int ProtocolVersion = 7;
 
     public static byte[] Encode(IMessage message)
     {
@@ -36,6 +40,8 @@ public static class MessageCodec
             case EnemyHealth m: w.UInt64(m.EnemyNetId).Float(m.Health).Float(m.Armor); break;
             case Hit m: w.UInt64(m.EnemyNetId).Float(m.Amount).Byte((byte)m.Flags).Float(m.ArmorPierce); break;
             case XpGranted m: WriteLong(w, m.Amount); break;
+            case EnemyEffectNet m: w.UInt64(m.EnemyNetId).Byte((byte)m.Kind).String(m.Source).Float(m.Amount).Float(m.Seconds).Byte((byte)m.Dot); break;
+            case EnemyPush m: w.UInt64(m.EnemyNetId); WriteVec(w, m.Delta); break;
             case PlayerPos m: WriteVec(w, m.Position); w.VarInt(m.Level); break;
             case DamageShown m: w.VarUInt(m.PlayerId).UInt64(m.EnemyNetId); WriteVec(w, m.Position); w.Float(m.Amount).Byte((byte)m.Flags); break;
             case AuraPulse m: w.VarUInt(m.PlayerId).String(m.BuffId); WriteVec(w, m.Origin); w.Float(m.Radius).Float(m.Seconds); break;
@@ -43,6 +49,7 @@ public static class MessageCodec
             case PickupRequest m: w.VarUInt(m.DropId); break;
             case PickupGranted m: w.VarUInt(m.DropId); WriteItem(w, m.Item); break;
             case DropRemoved m: w.VarUInt(m.DropId); break;
+            case DropRequest m: WriteItem(w, m.Item); WriteVec(w, m.Position); w.Byte((byte)m.Source); break;
             case SpellCast m:
                 w.VarUInt(m.PlayerId).String(m.SpellId);
                 WriteVec(w, m.Origin);
@@ -84,12 +91,15 @@ public static class MessageCodec
             MessageType.EnemyHealth => new EnemyHealth(r.UInt64(), r.Float(), r.Float()),
             MessageType.Hit => new Hit(r.UInt64(), r.Float(), (HitFlags)r.Byte(), r.Float()),
             MessageType.XpGranted => new XpGranted(ReadLong(r)),
+            MessageType.EnemyEffectNet => new EnemyEffectNet(r.UInt64(), (EnemyEffectKind)r.Byte(), r.String() ?? "", r.Float(), r.Float(), (DotKind)r.Byte()),
+            MessageType.EnemyPush => new EnemyPush(r.UInt64(), ReadVec(r)),
             MessageType.PlayerPos => new PlayerPos(ReadVec(r), r.VarInt()),
             MessageType.DamageShown => new DamageShown(r.VarUInt(), r.UInt64(), ReadVec(r), r.Float(), (HitFlags)r.Byte()),
             MessageType.AuraPulse => new AuraPulse(r.VarUInt(), r.String() ?? "", ReadVec(r), r.Float(), r.Float()),
             MessageType.DropSpawned => new DropSpawned(r.VarUInt(), ReadItem(r), ReadVec(r), r.Float()),
             MessageType.PickupRequest => new PickupRequest(r.VarUInt()),
             MessageType.PickupGranted => new PickupGranted(r.VarUInt(), ReadItem(r)),
+            MessageType.DropRequest => new DropRequest(ReadItem(r), ReadVec(r), (DropSource)r.Byte()),
             MessageType.DropRemoved => new DropRemoved(r.VarUInt()),
             MessageType.SpellCast => new SpellCast(r.VarUInt(), r.String() ?? "", ReadVec(r), ReadVec(r), r.UInt64(), (SpellCastMode)r.Byte(), r.VarUInt(), ReadShapes(r)),
             MessageType.SpellFxEvent => ReadSpellFxEvent(r),

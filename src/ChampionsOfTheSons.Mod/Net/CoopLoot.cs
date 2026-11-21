@@ -39,7 +39,38 @@ public sealed class CoopLoot : IModFeature
         };
     }
 
-    public void OnGameStart() => Asked.Clear();
+    public void OnGameStart()
+    {
+        Asked.Clear();
+        PendingThrows.Clear();
+    }
+
+    /// <summary>Where this client recently asked the host for a drop: the mirror that lands there is not walked over at once.</summary>
+    private static readonly List<(Vector3 Pos, float At)> PendingThrows = new();
+
+    /// <summary>Drops the client asked the host for (co-op test checks).</summary>
+    public static int DropsRequested { get; private set; }
+
+    /// <summary>Co-op client: asks the host to make a drop for everyone (COS-14). False when not a client: drop locally.</summary>
+    public static bool RequestDrop(ItemInstance item, Vector3 pos, DropSource source)
+    {
+        if (!CoopSession.IsClient || !CoopFeature.Accepted) return false;
+        pos = LootFeature.SnapToGround(pos);
+        PendingThrows.Add((pos, Time.realtimeSinceStartup));
+        CoopSession.SendToHost(new DropRequest(item, CoopSession.ToVec(pos), source));
+        DropsRequested++;
+        return true;
+    }
+
+    private static void MarkOwnThrow(int id, Vector3 at)
+    {
+        float now = Time.realtimeSinceStartup;
+        PendingThrows.RemoveAll(p => now - p.At > 10f);
+        int i = PendingThrows.FindIndex(p => new Vector2(p.Pos.x - at.x, p.Pos.z - at.z).magnitude < 1.5f);
+        if (i < 0) return;
+        PendingThrows.RemoveAt(i);
+        LootFeature.NoAutoPickup.Add(id);
+    }
 
     /// <summary>A client just passed the handshake: send it everything on the ground.</summary>
     public static void SendAllTo(BoltConnection connection)
@@ -73,12 +104,20 @@ public sealed class CoopLoot : IModFeature
                 case DropSpawned ds when CoopSession.IsClient:
                     int stack = ModContent.Db.Items.TryGetValue(ds.Item.BaseId, out var def) ? def.StackSize : 1;
                     LootFeature.Ground.Mirror((int)ds.DropId, ds.Item, ds.Position.X, ds.Position.Y, ds.Position.Z, stack, ds.Remaining);
+                    MarkOwnThrow((int)ds.DropId, new Vector3(ds.Position.X, ds.Position.Y, ds.Position.Z));
                     MirroredCount = LootFeature.Ground.Count;
                     break;
                 case DropRemoved dr when CoopSession.IsClient:
                     LootFeature.Ground.Remove((int)dr.DropId);
                     Asked.Remove((int)dr.DropId);
                     MirroredCount = LootFeature.Ground.Count;
+                    break;
+                case DropRequest dq when CoopSession.IsHost && CoopFeature.Verified.Contains(from):
+                    var at = CoopSession.ToUnity(dq.Position);
+                    // A throw lands next to the thrower: refuse drops far from where the client last said it was.
+                    if (CoopSession.TryPosition(from, out var p) && Vector3.Distance(CoopSession.ToUnity(p), at) > 12f) break;
+                    var made = LootFeature.SpawnAt(dq.Item, at, dq.Source == DropSource.Overflow ? DropSource.Overflow : DropSource.Thrown);
+                    RLog.Msg($"{CoopTestJoin.Tag} host: player {CoopSession.IdOf(from)} dropped {dq.Item.BaseId} as drop {made.Id}");
                     break;
                 case PickupReq req when CoopSession.IsHost && CoopFeature.Verified.Contains(from):
                     OnPickupRequest(req, from);
@@ -114,7 +153,7 @@ public sealed class CoopLoot : IModFeature
         {
             // The bag filled up between the request and the answer: the rest drops at our feet (local only).
             LootFeature.Message(UI.UiText.T("ui.loot.bag_full", "Your bag is full."));
-            if (rest != null && TheForest.Utils.LocalPlayer.IsInWorld) LootFeature.SpawnAt(rest, TheForest.Utils.LocalPlayer.Transform.position, DropSource.Overflow);
+            if (rest != null && TheForest.Utils.LocalPlayer.IsInWorld) RequestDrop(rest, TheForest.Utils.LocalPlayer.Transform.position, DropSource.Overflow);
         }
         RLog.Msg($"{CoopTestJoin.Tag} client: picked up {grant.Item.BaseId} (granted by the host)");
         CoopTest.Check("loot: client was granted the pickup", true, grant.Item.BaseId);

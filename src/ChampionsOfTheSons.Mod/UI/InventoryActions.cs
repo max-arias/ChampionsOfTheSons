@@ -46,7 +46,12 @@ internal static class InventoryActions
         return true;
     }
 
-    public static bool Drop(string key) => LootFeature.DropFromInventory(key) != null;
+    public static bool Drop(string key)
+    {
+        bool had = PlayerState.Character.Inventory.Get(key) != null;
+        // A co-op client hands the drop to the host and gets no local drop back: the item leaving the bag is the success.
+        return LootFeature.DropFromInventory(key) != null || (had && PlayerState.Character.Inventory.Get(key) == null);
+    }
 
     public static bool Destroy(string key) => LootFeature.Destroy(key);
 

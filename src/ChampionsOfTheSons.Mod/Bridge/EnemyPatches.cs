@@ -69,6 +69,14 @@ public static class EnemyPatches
     {
         var health = runtime.Stats == null ? null : EnemyRegistry.Health(runtime.Stats);
         if (health == null || health._currentValue <= 0) return;
+        if (Net.CoopHits.ForwardsToHost)
+        {
+            // Co-op client: the enemy is the host's. Our spell, thorn and splash damage goes there (COS-13); the local
+            // estimate only drives our own number. The host's health sync moves the mirror.
+            Mitigate(runtime, health, hit, hit.Amount, creditPlayer, forced: true);
+            Net.CoopHits.Forward(runtime, hit, Core.Networking.HitFlags.None);
+            return;
+        }
         double damage = Mitigate(runtime, health, hit, hit.Amount, creditPlayer, forced: true);
         if (damage <= 0) return;
         float left = health._currentValue - (float)damage;
@@ -119,13 +127,15 @@ public static class EnemyPatches
         using var perf = Perf.Perf.Scope(PerfBeforeReceivedDamage);
         try
         {
-            if (!EnemyRegistry.IsAuthority || amount <= 0) return;
+            bool client = Net.CoopHits.ForwardsToHost;
+            if ((!EnemyRegistry.IsAuthority && !client) || amount <= 0) return;
             var runtime = EnemyRegistry.Get(__instance);
             if (runtime == null) return;
             runtime.Actor = __instance;
 
             bool local;
             OutgoingHit hit;
+            if (client && !(fromPlayer && IsLocalPlayer(sourceStimuli))) return; // the host owns every other hit on its enemies
             if (fromPlayer && IsLocalPlayer(sourceStimuli))
             {
                 local = true;
@@ -174,6 +184,13 @@ public static class EnemyPatches
 
             amount = (float)Mitigate(runtime, EnemyRegistry.HealthOf(__instance), hit, amount, local, forced: false);
             if (local && amount > 0 && _shot is { } landed) AfterRangedHit(runtime, hit, landed);
+            if (client)
+            {
+                // The same pipeline as the host's own hits (melee factor, fire, follow-ups, headshots, procs, extra hits);
+                // the hit itself goes to the host, which applies defense and owns health (COS-13).
+                Net.CoopHits.Forward(runtime, hit, Net.CoopHits.WeaponFlag(_hitWeapon));
+                amount = 0;
+            }
         }
         catch (Exception e)
         {
