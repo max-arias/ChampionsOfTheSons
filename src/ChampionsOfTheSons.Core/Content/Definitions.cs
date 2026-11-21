@@ -264,6 +264,23 @@ public enum WeaponBase
 }
 
 /// <summary>
+/// XP and loot for killing one of the game's animals (COS-75; COTF's numbers mapped onto Sons of the Forest's animals, new
+/// ones by size). Keyed by the game's actor type name ("Rabbit", "Deer").
+/// </summary>
+public sealed class AnimalDef
+{
+    public string Actor { get; set; } = "";
+    public double XpMin { get; set; }
+    public double XpMax { get; set; }
+    /// <summary>Every player gets the full XP (sharks), instead of the kill-XP share of the players nearby.</summary>
+    public bool Everyone { get; set; }
+    /// <summary>Chance of drops; null = the default rule (50% for an animal worth more than 82 XP).</summary>
+    public double? DropChance { get; set; }
+    /// <summary>The worth each drop is rolled at; empty = one drop at the XP rolled.</summary>
+    public List<double> DropWorths { get; set; } = new();
+}
+
+/// <summary>
 /// A weapon type (COS-93): the rules and model a weapon item brings when it is equipped and a fitting game weapon is
 /// held. Items name it with <see cref="ItemBaseDef.WeaponModel"/>. Multipliers apply to the held game weapon's values.
 /// </summary>

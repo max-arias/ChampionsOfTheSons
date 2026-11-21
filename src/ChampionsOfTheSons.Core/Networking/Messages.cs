@@ -139,8 +139,9 @@ public sealed record EnemyState(ulong EnemyNetId, EnemyStateFlags Flags) : IMess
     public MessageType Type => MessageType.EnemyState;
 }
 
-/// <summary>Host → a client: XP that skips the kill streak (felled tree, COS-75).</summary>
-public sealed record FlatXpGranted(long Amount) : IMessage
+/// <summary>Player → everyone (relayed by the host): XP that skips the kill streak, for every player (a felled tree, COS-75).
+/// <paramref name="Source"/> is where it happened, so a player whose own game also saw it does not count it twice.</summary>
+public sealed record FlatXpGranted(long Amount, Vec3 Source) : IMessage
 {
     public MessageType Type => MessageType.FlatXpGranted;
 }

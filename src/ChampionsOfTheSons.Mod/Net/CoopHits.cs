@@ -280,6 +280,32 @@ public sealed class CoopHits : IModFeature
     /// Pays kill XP: every player in range of the kill gets <see cref="KillCredit.ShareFor"/>. Returns the host's own share
     /// (0 when the host's player is out of range). Without co-op the local player gets the whole bounty, as before.
     /// </summary>
+    /// <summary>Kill XP of something that is not a tracked enemy (an animal, COS-75): the same share rule at a position.
+    /// Returns the host's own share; alone, all of it.</summary>
+    public static double DistributeXpAt(double xp, Vector3 at)
+    {
+        if (!CoopSession.IsHost || CoopFeature.Verified.Count == 0) return xp;
+        var players = CoopSession.Players();
+        var inRange = KillCredit.Recipients(players, CoopSession.ToVec(at));
+        if (inRange.Count == 0) inRange = players.Select(p => p.Id).ToList();
+        double share = KillCredit.ShareFor(xp, inRange.Count);
+        foreach (var id in inRange)
+        {
+            if (id == CoopSession.HostId) continue;
+            var conn = CoopSession.ByPlayerId(id);
+            if (conn != null) CotsNetEvent.Instance.SendTo(new XpGranted((long)share), conn);
+        }
+        return inRange.Contains(CoopSession.HostId) ? share : 0;
+    }
+
+    /// <summary>Kill XP every player gets in full (a shark, COS-75). Returns the host's own (all of it).</summary>
+    public static double GiveEveryone(double xp)
+    {
+        if (CoopSession.IsHost)
+            foreach (var conn in CoopFeature.Verified) CotsNetEvent.Instance.SendTo(new XpGranted((long)xp), conn);
+        return xp;
+    }
+
     public static double DistributeKillXp(EnemyRuntime runtime)
     {
         if (!CoopSession.IsHost || CoopFeature.Verified.Count == 0) return EnemyScaler.KillXpShare(runtime.Profile.Bounty, 1);

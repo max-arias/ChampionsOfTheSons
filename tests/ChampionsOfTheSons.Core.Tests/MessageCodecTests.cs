@@ -35,7 +35,7 @@ public class MessageCodecTests
         new EnemyPush(42UL, new Vec3(-1.5f, 0, 3)),
         new EnemyAware(42UL, true),
         new EnemyState(42UL, EnemyStateFlags.ShieldUp | EnemyStateFlags.Revived),
-        new FlatXpGranted(30L),
+        new FlatXpGranted(30L, new Vec3(5, 6, 7)),
         new PlayerStateNet(2u, PlayerStateFlags.GoldenSkin | PlayerStateFlags.BlackFlame, new Vec3(1, 2, 3)),
         new PlayerPos(new Vec3(1.5f, 2, -3), 42),
         new DamageShown(2u, 42UL, new Vec3(1, 2, 3), 777.5f, HitFlags.Crit | HitFlags.Ranged),

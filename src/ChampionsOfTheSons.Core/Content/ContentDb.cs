@@ -30,6 +30,7 @@ public sealed class ContentDb
     private readonly Dictionary<string, Rules.EnemyKind> _enemies = new();
     private readonly Dictionary<string, EliteNameDef> _eliteNames = new();
     private readonly Dictionary<string, WeaponTypeDef> _weaponTypes = new();
+    private readonly Dictionary<string, AnimalDef> _animals = new();
     private readonly List<string> _errors = new();
 
     public IReadOnlyDictionary<string, PlayerStatDef> PlayerStats => _playerStats;
@@ -49,6 +50,8 @@ public sealed class ContentDb
     public IReadOnlyList<string> EliteEpithetIds { get; private set; } = Array.Empty<string>();
     /// <summary>Weapon types keyed by id ("long_sword"), named by items' weaponModel (COS-93).</summary>
     public IReadOnlyDictionary<string, WeaponTypeDef> WeaponTypes => _weaponTypes;
+    /// <summary>Animals keyed by the game's actor type name (COS-75).</summary>
+    public IReadOnlyDictionary<string, AnimalDef> Animals => _animals;
     public IReadOnlyList<string> Errors => _errors;
 
     /// <summary>Loads content from file name → JSON text (e.g. "items.json" → its text). Missing files are errors.</summary>
@@ -68,6 +71,7 @@ public sealed class ContentDb
         db.Add(files, "enemies.json", "enemies", db._enemies, e => e.ActorType, optional: true);
         db.Add(files, "elite_names.json", "eliteNames", db._eliteNames, n => n.Id, optional: true);
         db.Add(files, "weapon_types.json", "weaponTypes", db._weaponTypes, w => w.Id, optional: true);
+        db.Add(files, "animals.json", "animals", db._animals, a => a.Actor, optional: true);
         db.Validate();
         return db;
     }
@@ -153,6 +157,12 @@ public sealed class ContentDb
                 _errors.Add($"item {item.Id}: equippable item with no stat pools");
             foreach (var e in item.UniqueEffects)
                 if (!_playerStats.ContainsKey(e.Stat)) _errors.Add($"item {item.Id}: unknown player stat '{e.Stat}'");
+        }
+        foreach (var a in _animals.Values)
+        {
+            if (a.XpMin < 0 || a.XpMax < a.XpMin) _errors.Add($"animal {a.Actor}: xp range {a.XpMin}-{a.XpMax}");
+            if (a.DropChance is < 0 or > 1) _errors.Add($"animal {a.Actor}: drop chance {a.DropChance}");
+            if (a.DropWorths.Any(w => w <= 0)) _errors.Add($"animal {a.Actor}: drop worth must be positive");
         }
         if (_weaponTypes.Count > 0)
             foreach (var item in _items.Values)

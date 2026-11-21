@@ -145,6 +145,15 @@ public sealed class LootFeature : IModFeature
         return result;
     }
 
+    /// <summary>One item rolled at a worth (an animal's drop, COS-75), at the loot level and magic find a kill would use.</summary>
+    public static ItemInstance? RollAtWorth(double worth)
+    {
+        double mf = Net.CoopParty.TeamMagicFind();
+        int level = PlayerState.Character.Progress.Level;
+        if (Net.CoopSession.IsHost && Net.CoopFeature.Verified.Count > 0) level = Net.CoopSession.LootLevel(level);
+        return Roller.RollDrop(worth, level, mf, Difficulties.ForLevel(level).Index, Rng, WorldState.Rules.MinLootRarity);
+    }
+
     public static GroundDrop SpawnScattered(ItemInstance item, Vector3 around, float minRadius = 0.6f, float maxRadius = 1.8f, DropSource source = DropSource.Enemy)
     {
         float angle = (float)(Rng.NextDouble() * Math.PI * 2);

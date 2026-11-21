@@ -1,0 +1,104 @@
+{
+  "animals": [
+    {
+      "actor": "Rabbit",
+      "xpMin": 45,
+      "xpMax": 59
+    },
+    {
+      "actor": "Squirrel",
+      "xpMin": 70,
+      "xpMax": 74
+    },
+    {
+      "actor": "Salmon",
+      "xpMin": 30,
+      "xpMax": 44
+    },
+    {
+      "actor": "Seagull",
+      "xpMin": 30,
+      "xpMax": 44
+    },
+    {
+      "actor": "Duck",
+      "xpMin": 30,
+      "xpMax": 44
+    },
+    {
+      "actor": "Bluebird",
+      "xpMin": 30,
+      "xpMax": 44
+    },
+    {
+      "actor": "Hummingbird",
+      "xpMin": 30,
+      "xpMax": 44
+    },
+    {
+      "actor": "Bat",
+      "xpMin": 30,
+      "xpMax": 44
+    },
+    {
+      "actor": "Eagle",
+      "xpMin": 75,
+      "xpMax": 84
+    },
+    {
+      "actor": "Deer",
+      "xpMin": 75,
+      "xpMax": 84
+    },
+    {
+      "actor": "Turtle",
+      "xpMin": 100,
+      "xpMax": 109
+    },
+    {
+      "actor": "LandTurtle",
+      "xpMin": 100,
+      "xpMax": 109
+    },
+    {
+      "actor": "Raccoon",
+      "xpMin": 200,
+      "xpMax": 249
+    },
+    {
+      "actor": "Skunk",
+      "xpMin": 150,
+      "xpMax": 199
+    },
+    {
+      "actor": "Moose",
+      "xpMin": 350,
+      "xpMax": 449
+    },
+    {
+      "actor": "Shark",
+      "xpMin": 1500,
+      "xpMax": 1500,
+      "everyone": true,
+      "dropChance": 1.0,
+      "dropWorths": [
+        270,
+        310,
+        370
+      ]
+    },
+    {
+      "actor": "KillerWhale",
+      "xpMin": 2500,
+      "xpMax": 2500,
+      "everyone": true,
+      "dropChance": 1.0,
+      "dropWorths": [
+        310,
+        370,
+        430,
+        490
+      ]
+    }
+  ]
+}

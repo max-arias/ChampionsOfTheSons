@@ -265,7 +265,11 @@ public static class EnemyPatches
             var stats = deadActor.StatManager;
             var runtime = EnemyRegistry.Get(stats);
             if (SelfTest.Enabled) SelfTest.Log($"OnActorDied {deadActor.TypeId} killedByPlayer={killedByPlayer} tracked={runtime != null}");
-            if (runtime == null) return;
+            if (runtime == null)
+            {
+                World.WorldXpFeature.OnActorDied(deadActor, killedByPlayer); // animals (COS-75)
+                return;
+            }
             EnemyRegistry.Remove(stats);
             EnemyAbilityFeature.OnEnemyDied(runtime);
             // The game's flag misses some player kills (e.g. deaths finished by its own state machine); our hook saw the last hit.
