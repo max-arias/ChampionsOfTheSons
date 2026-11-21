@@ -17,14 +17,18 @@ public static class Config
     private static readonly string[] OldSpellDefaults = { "z", "x", "v", "b", "n", "m" };
     private const string OldPerksDefault = "p", PerksDefault = "u";
 
+    /// <summary>COS-107: the weapon key moved off L (the game's Lighter) to K, free since crafting was removed (COS-145).</summary>
+    private const string OldWeaponDefault = "l", WeaponDefault = "k";
+
     /// <summary>Bump when a default key changes again and add the move to <see cref="MigrateKeys"/>.</summary>
-    private const int KeysVersion = 2;
+    private const int KeysVersion = 3;
 
     public static ConfigCategory Category { get; private set; } = null!;
 
     public static KeybindConfigEntry InventoryKey { get; private set; } = null!;
     public static KeybindConfigEntry PerksKey { get; private set; } = null!;
     public static KeybindConfigEntry SettingsKey { get; private set; } = null!;
+    public static KeybindConfigEntry WeaponKey { get; private set; } = null!;
     public static KeybindConfigEntry[] SpellKeys { get; } = new KeybindConfigEntry[SpellBook.Slots];
     public static ConfigEntry<bool> ShowNameplates { get; private set; } = null!;
     public static ConfigEntry<bool> ShowDamageNumbers { get; private set; } = null!;
@@ -49,6 +53,10 @@ public static class Config
 
         SettingsKey = Category.CreateKeybindEntry("settings_key", "f10", "Mod settings", "Open the Champions settings (keys, sound).");
         SettingsKey.SetScope(needsPlayerControllable: true);
+
+        WeaponKey = Category.CreateKeybindEntry("weapon_key", WeaponDefault, "Draw weapon",
+            "Draw a game weapon your equipped weapon item can be built on (its model and rules then apply).");
+        WeaponKey.SetScope(needsPlayerControllable: true);
 
         for (int i = 0; i < SpellBook.Slots; i++)
         {
@@ -93,6 +101,7 @@ public static class Config
             for (int i = 0; i < SpellBook.Slots; i++) moves.Add((SpellKeys[i], V1SpellDefaults[i], SpellDefaults[i]));
             moved += Move(moves);
         }
+        if (from < 3) moved += Move(new List<(KeybindConfigEntry Entry, string Old, string New)> { (WeaponKey, OldWeaponDefault, WeaponDefault) });
         _keysVersion.Value = KeysVersion;
         try { Category.SaveToFile(false); } catch (Exception e) { RLog.Warning($"Champions of the Sons: could not save keys: {e.Message}"); }
         if (moved > 0) RLog.Msg($"Champions of the Sons: moved {moved} keys to the new defaults (keys version {from} -> {KeysVersion})");

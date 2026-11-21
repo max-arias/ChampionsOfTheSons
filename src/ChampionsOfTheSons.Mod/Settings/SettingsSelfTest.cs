@@ -50,10 +50,10 @@ internal static class SettingsSelfTest
 
     private static void Defaults()
     {
-        foreach (var id in new[] { "perks_key", "settings_key" }.Concat(Enumerable.Range(1, SpellBook.Slots).Select(i => $"spell_slot_{i}")))
+        foreach (var id in new[] { "inventory_key", "perks_key", "settings_key", "weapon_key" }.Concat(Enumerable.Range(1, SpellBook.Slots).Select(i => $"spell_slot_{i}")))
         {
             var d = ModKeys.Default(id);
-            var game = ModKeys.GameClashes(d);
+            var game = ModKeys.GameClashes(d, id);
             SelfTest.Check($"settings: default {id}={d} is no game key", game.Count == 0, string.Join(", ", game));
         }
         SelfTest.Check("settings: spell defaults are Alt+1..Alt+6", Enumerable.Range(1, SpellBook.Slots).All(i => ModKeys.Default($"spell_slot_{i}") == $"alt+{i}"),

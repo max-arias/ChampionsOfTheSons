@@ -19,9 +19,7 @@ public sealed class WeaponsFeature : IModFeature
 
     public void Init()
     {
-        _key = Config.Category.CreateKeybindEntry("weapon_key", "l", "Draw weapon",
-            "Draw a game weapon your equipped weapon item can be built on (its model and rules then apply).");
-        _key.SetScope(needsPlayerControllable: true);
+        _key = Config.WeaponKey; // created in Config so the key move (COS-107) can reach it
         _key.Notify(() => DrawBase());
         Bridge.EnemyPatches.LocalWeaponHit += (_, weapon) =>
         {
