@@ -42,6 +42,8 @@ public sealed class CoopSyncSelfTest : IModFeature
     public void OnGameStart()
     {
         _stage = 0;
+        _lateDropPlaced = false;
+        _eliteState = 0;
         _enemy = null;
     }
 
@@ -90,17 +92,10 @@ public sealed class CoopSyncSelfTest : IModFeature
                 {
                     Abilities = new List<EnemyAbility> { EnemyAbility.Meteor, EnemyAbility.Blizzard, EnemyAbility.Chains },
                     Scale = TestScale,
-                    Tier = EnemyTier.Elite, // the client draws the tier effect from the synced tier (COS-146)
                 };
                 try
                 {
                     _enemy = ActorTools.Spawn(VailActorTypeId.Carl, at + new Vector3(10, 0, 0));
-                    // A long-lived drop out of pickup reach, for the client's late-join check (COS-146).
-                    var gift = TestKit.Give(null, 1, 10);
-                    var giftSlot = PlayerState.Character.Inventory.Slots.First(kv => ReferenceEquals(kv.Value, gift)).Key;
-                    PlayerState.Character.Inventory.Remove(giftSlot);
-                    var lateDrop = LootFeature.SpawnAt(gift, at + new Vector3(0, 0, 40), DropSource.Overflow);
-                    RLog.Msg($"{CoopTestJoin.Tag} server: late-join drop {lateDrop.Id}, {lateDrop.Remaining:F0} s left");
                     RLog.Msg($"{CoopTestJoin.Tag} server: spawned the ability enemy {(_enemy == null ? "FAILED" : "at " + _enemy.transform.position)}");
                 }
                 catch (Exception e)
@@ -119,6 +114,35 @@ public sealed class CoopSyncSelfTest : IModFeature
                 Next(now);
                 break;
             case 2: // let it cast for a while (the client's ability, party and late-join steps run meanwhile)
+                // A long-lived drop out of pickup reach for the client's late-join check (COS-146); placed once the client's
+                // loot steps are done, so they never pick it by mistake.
+                // An elite to the side for the client's tier-effect check (COS-146): the client draws it from the synced tier.
+                if (_eliteState == 0 && now - _stageAt > 4)
+                {
+                    _eliteState = 1;
+                    EnemyRegistry.TestProfileOverride = p => p with { Tier = EnemyTier.Elite, Abilities = Array.Empty<EnemyAbility>() };
+                    try { ActorTools.Spawn(VailActorTypeId.Carl, at + new Vector3(-12, 0, 6)); }
+                    catch (Exception e) { RLog.Error($"{CoopTestJoin.Tag} server: elite spawn failed: {e.Message}"); }
+                }
+                else if (_eliteState == 1 && now - _stageAt > 8)
+                {
+                    _eliteState = 2;
+                    EnemyRegistry.TestProfileOverride = null;
+                }
+                if (!_lateDropPlaced && now - _stageAt > 20)
+                {
+                    _lateDropPlaced = true;
+                    try
+                    {
+                        var gift = new LootRoller(ModContent.Db).RollItem(ModContent.Db.Items.Values.First(d => LootRoller.IsEquippable(d) && d.Rarity == 1), 10, new ChampionsOfTheSons.Core.Rng(7));
+                        var lateDrop = LootFeature.SpawnAt(gift, at + new Vector3(0, 0, 40), DropSource.Overflow);
+                        RLog.Msg($"{CoopTestJoin.Tag} server: late-join drop {lateDrop.Id}, {lateDrop.Remaining:F0} s left");
+                    }
+                    catch (Exception e)
+                    {
+                        RLog.Error($"{CoopTestJoin.Tag} server: late-join drop failed: {e.Message}");
+                    }
+                }
                 if (now - _resent > 3)
                 {
                     _resent = now;
@@ -146,6 +170,8 @@ public sealed class CoopSyncSelfTest : IModFeature
     private static float _wait = -1;
     private static bool _rooted;
     private static int _castState, _joinState;
+    private static bool _lateDropPlaced;
+    private static int _eliteState;
     private static Dictionary<int, double> _dropsBefore = new();
     private static int _shapesBefore;
 

@@ -104,6 +104,9 @@ public sealed class CoopSelfTest : IModFeature
                 if (now - _stageAt < 3) break;
                 try
                 {
+                    // A plain, sturdy target: since COS-130 enemies roll at the party level, so a level-1 test client met a
+                    // 110-health enemy that its first 200 hit killed and every later hit check had no target.
+                    EnemyRegistry.TestProfileOverride = p => p with { Tier = EnemyTier.Normal, Abilities = Array.Empty<EnemyAbility>(), MaxHealth = System.Math.Max(p.MaxHealth, 20000) };
                     _enemy = ActorTools.Spawn(VailActorTypeId.Carl, at + new Vector3(8, 0, 0));
                     RLog.Msg($"{CoopTestJoin.Tag} server: spawned enemy {(_enemy == null ? "FAILED" : "at " + _enemy.transform.position)}");
                 }
@@ -115,6 +118,7 @@ public sealed class CoopSelfTest : IModFeature
                 break;
             case 1: // report the enemy the host rolled
                 if (now - _stageAt < 2) break;
+                EnemyRegistry.TestProfileOverride = null;
                 var rt = EnemyRegistry.Get(_enemy);
                 if (rt != null)
                     RLog.Msg($"{CoopTestJoin.Tag} server: enemy net id {EnemySyncFeature.NetIdOf(_enemy)} level {rt.Profile.Level} tier {rt.Profile.Tier} maxHealth {rt.Profile.MaxHealth:F0}");
