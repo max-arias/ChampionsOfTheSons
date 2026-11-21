@@ -113,12 +113,18 @@ public sealed class StateTintsFeature : IModFeature
     }
 
     private static MaterialPropertyBlock? _block;
-    private static readonly int BaseColor = Shader.PropertyToID("_BaseColor"), PlainColor = Shader.PropertyToID("_Color");
+    // Looked up on first use: a Unity call in a static initializer runs when the feature is discovered and crashed the game.
+    private static int _baseColor = -1, _plainColor = -1;
 
     /// <summary>Multiplies every renderer's base colour (a property block, so the shared materials stay untouched); null clears.</summary>
     public static void Tint(GameObject root, Color? tint)
     {
         _block ??= new MaterialPropertyBlock();
+        if (_baseColor < 0)
+        {
+            _baseColor = Shader.PropertyToID("_BaseColor");
+            _plainColor = Shader.PropertyToID("_Color");
+        }
         foreach (var r in root.GetComponentsInChildren<Renderer>(true)) // inactive LODs too
         {
             if (r == null || r is ParticleSystemRenderer || r.sharedMaterial == null) continue;
@@ -130,8 +136,8 @@ public sealed class StateTintsFeature : IModFeature
             }
             _block.Clear();
             var m = r.sharedMaterial;
-            if (m.HasProperty(BaseColor)) _block.SetColor(BaseColor, m.GetColor(BaseColor) * tint.Value);
-            if (m.HasProperty(PlainColor)) _block.SetColor(PlainColor, m.GetColor(PlainColor) * tint.Value);
+            if (m.HasProperty(_baseColor)) _block.SetColor(_baseColor, m.GetColor(_baseColor) * tint.Value);
+            if (m.HasProperty(_plainColor)) _block.SetColor(_plainColor, m.GetColor(_plainColor) * tint.Value);
             r.SetPropertyBlock(_block);
         }
     }

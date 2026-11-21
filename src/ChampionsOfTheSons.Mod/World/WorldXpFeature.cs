@@ -110,7 +110,7 @@ public sealed class WorldXpFeature : IModFeature
 
     // ---------------------------------------------------------------- bushes
 
-    private static readonly Regex BushName = new("(?i)bush|shrub|sapling|fern|plant|leaf|leaves|brush", RegexOptions.Compiled);
+    private static readonly Regex BushName = new("(?i)bush|shrub|sapling|fern|plant|leaf|leaves|brush");
     private static readonly HashSet<string> NamesLogged = new();
 
     /// <summary>Whether a breakable is a bush or sapling (by its name: the game has no bush type of its own).</summary>
