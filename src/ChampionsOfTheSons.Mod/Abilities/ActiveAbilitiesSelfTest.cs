@@ -128,6 +128,21 @@ internal static class ActiveAbilitiesSelfTest
             case EnemyAbility.Blizzard:
                 AdvanceUntil(() => AbilityForces.SlowsOf(enemy) > 0, 2);
                 SelfTest.Check("Blizzard: the player is slowed", AbilityForces.SlowsOf(enemy) > 0 && AbilityForces.SpeedMultiplier < 1, AbilityForces.SpeedMultiplier.ToString("0.00"));
+                SelfTest.Check("Blizzard: attack speed x0.8 while inside (COS-90)", Math.Abs(PlayerDebuffs.Buffs.Product(PlayerDebuffs.AttackSlow) - ActiveAbilityRules.BlizzardAttackSlow) < 1e-6,
+                    PlayerDebuffs.Buffs.Product(PlayerDebuffs.AttackSlow).ToString("0.00"));
+                break;
+            case EnemyAbility.Radiance:
+                SelfTest.Check("Radiance: damage dealt x0.85 while inside (COS-90)", Math.Abs(PlayerDebuffs.Buffs.Product(PlayerDebuffs.DamageDown) - ActiveAbilityRules.RadianceDamageDown) < 1e-6,
+                    PlayerDebuffs.Buffs.Product(PlayerDebuffs.DamageDown).ToString("0.00"));
+                break;
+            case EnemyAbility.Meteor:
+                SelfTest.Check("Meteor: the hit corrodes armor (COS-90)", PlayerDebuffs.Buffs.Has(PlayerDebuffs.ArmorCorruption)
+                    && Math.Abs(PlayerDebuffs.LostArmor - PlayerState.Character.Stats.Get(StatIds.Armor) * ActiveAbilityRules.MeteorCorrosionShare * AbilityDamage.HitCount(enemy, a)) < 1e-6,
+                    $"lost {PlayerDebuffs.LostArmor:0.##}");
+                break;
+            case EnemyAbility.Laser:
+                SelfTest.Check("Laser: attack speed x0.7 and damage x0.8 (COS-90)", Math.Abs(PlayerDebuffs.Buffs.Product(PlayerDebuffs.AttackSlow) - ActiveAbilityRules.LaserAttackSlow) < 1e-6
+                    && Math.Abs(PlayerDebuffs.Buffs.Product(PlayerDebuffs.DamageDown) - ActiveAbilityRules.LaserDamageDown) < 1e-6);
                 break;
             case EnemyAbility.ArcaneCataclysm:
                 SelfTest.Check("Arcane Cataclysm: the player is slowed", AbilityForces.SlowsOf(enemy) > 0, AbilityForces.SpeedMultiplier.ToString("0.00"));
@@ -158,6 +173,9 @@ internal static class ActiveAbilitiesSelfTest
         Run(0.5f);
         SelfTest.Check($"{a}: inactive enemy removes its effects", ActiveAbilitySystem.ObjectCount(enemy) == 0, ActiveAbilitySystem.ObjectCount(enemy).ToString());
         SelfTest.Check($"{a}: inactive enemy leaves no slow or pull", AbilityForces.SlowsOf(enemy) == 0 && AbilityForces.PullOf(enemy) == Vector3.zero);
+        SelfTest.Check($"{a}: inactive enemy frees its cast gate (COS-90)", !enemy.Combat.Gate.Busy);
+        if (a is EnemyAbility.Blizzard or EnemyAbility.Radiance)
+            SelfTest.Check($"{a}: inactive aura leaves no debuff on the player (COS-90)", AbilityForces.DebuffsOf(enemy) == 0, AbilityForces.DebuffsOf(enemy).ToString());
         int fired = AbilityDamage.FiredCount(enemy, a), hits = AbilityDamage.HitCount(enemy, a);
         Run(9);
         SelfTest.Check($"{a}: inactive enemy never casts or hits", AbilityDamage.FiredCount(enemy, a) == fired && AbilityDamage.HitCount(enemy, a) == hits,

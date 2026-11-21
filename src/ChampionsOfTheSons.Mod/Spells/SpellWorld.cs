@@ -149,6 +149,46 @@ internal static class SpellWorld
         if (Net.CoopHits.ForwardsToHost) Net.CoopHits.ForwardPush(e, delta); // the host's enemy moves too (COS-13)
     }
 
+    /// <summary>
+    /// Knockback (COS-90): the enemy slides the way a push goes, fast at first and slowing to a stop, instead of jumping.
+    /// Juggernaut takes none. A co-op client's knockback goes to the host at once (its enemy moves there as a whole jump).
+    /// </summary>
+    public static void Knock(EnemyRuntime e, Vector3 delta)
+    {
+        if (!e.IsActive || delta == Vector3.zero || e.Combat.CcImmune) return;
+        if (Net.CoopHits.ForwardsToHost)
+        {
+            Push(e, delta);
+            return;
+        }
+        Slides.Add((e, delta));
+    }
+
+    /// <summary>Knockbacks still sliding: the enemy and the distance left to go.</summary>
+    private static readonly List<(EnemyRuntime Enemy, Vector3 Left)> Slides = new();
+
+    /// <summary>How fast a knockback slows: the share of the remaining distance covered per second is <c>1 - e^-rate</c>.</summary>
+    private const float SlideRate = 7f;
+
+    /// <summary>Self-tests: knockbacks still sliding.</summary>
+    internal static int SlidingCount => Slides.Count;
+
+    private static void StepSlides(float dt)
+    {
+        for (int i = Slides.Count - 1; i >= 0; i--)
+        {
+            var (e, left) = Slides[i];
+            if (!e.IsActive || left.sqrMagnitude < 0.0025f)
+            {
+                Slides.RemoveAt(i);
+                continue;
+            }
+            var step = left * (1 - Mathf.Exp(-SlideRate * dt));
+            e.Actor!.transform.position += step;
+            Slides[i] = (e, left - step);
+        }
+    }
+
     public static SpellZone AddZone(SpellZone z)
     {
         z.Next = z.Interval;
@@ -223,6 +263,7 @@ internal static class SpellWorld
             Bolts.RemoveAt(i);
         }
 
+        StepSlides(dt);
         SpellPortals.Step(dt);
         SpellNet.Flush();
     }
@@ -286,6 +327,7 @@ internal static class SpellWorld
         Frenzy.Reset();
         SpellHits.Reset();
         SpellPortals.Reset();
+        Slides.Clear();
         SpellEffects.ResetState();
         SpellNet.Reset();
         SpellFx.Clear();

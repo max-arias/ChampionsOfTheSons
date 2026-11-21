@@ -102,4 +102,33 @@ public class ActiveAbilityTests
         var same = ActiveAbilityRules.LandingPoint(new Vector3(0, 0, 0), new Vector3(0, 0, 0), 5); // on top of the player: still defined
         Assert.Equal(5, new Vector3(same.X, 0, same.Z).Length(), 3);
     }
+
+    [Fact]
+    public void Cast_gate_allows_one_cast_at_a_time_and_a_lockout_after_it()
+    {
+        var gate = new CastGate();
+        Assert.True(gate.TryBegin());
+        Assert.False(gate.TryBegin()); // one at a time
+        Assert.False(gate.CanStart);
+        var rng = new Rng(7);
+        gate.End(rng);
+        Assert.InRange(gate.Lockout, 0, CastGate.MaxLockout);
+        gate.Tick(CastGate.MaxLockout);
+        Assert.True(gate.CanStart);
+        Assert.True(gate.TryBegin());
+        gate.Release(); // cut short: free at once, no lockout
+        Assert.True(gate.CanStart);
+    }
+
+    [Fact]
+    public void Cast_gate_lockout_is_shared_by_every_ability_of_the_enemy()
+    {
+        var s = new EnemyCombatState(new EnemyProfile { Abilities = new[] { EnemyAbility.Meteor, EnemyAbility.Laser }, MaxHealth = 100 }, Difficulties.Easy);
+        Assert.True(s.Gate.TryBegin());
+        s.Gate.End(new Rng(3));
+        double lock1 = s.Gate.Lockout;
+        if (lock1 > 0) Assert.False(s.Gate.CanStart);
+        s.Tick(lock1 + 0.01, true); // the combat tick runs the lockout down
+        Assert.True(s.Gate.CanStart);
+    }
 }

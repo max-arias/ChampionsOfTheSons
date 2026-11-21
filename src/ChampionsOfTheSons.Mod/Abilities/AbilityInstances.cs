@@ -34,6 +34,9 @@ internal abstract class AbilityInstance : IDisposable
     protected Vector3 EnemyPos => Enemy.Actor!.transform.position;
     protected Vector3 Chest => EnemyPos + Vector3.up * 1.4f;
 
+    /// <summary>A debuff on the local player (COS-89), one source per enemy ability, so separate enemies stack as separate sources.</summary>
+    protected void Debuff(string buffId, double seconds, double amount) => PlayerDebuffs.Buffs.Apply(buffId, Key, seconds, amount);
+
     protected static System.Numerics.Vector3 Num(Vector3 v) => new(v.x, v.y, v.z);
 
     public int ObjectCount => _objects.Count(o => o != null) + _flashes.Count;
@@ -133,13 +136,20 @@ internal abstract class AuraInstance : AbilityInstance
         _phase += dt;
         if (_phase < Spec.TickSeconds) return;
         _phase -= (float)Spec.TickSeconds;
-        if (inside) AbilityDamage.HitPlayer(Enemy, Spec.Ability, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, Spec.Ability, Rng));
+        if (!inside) return;
+        InsideEachSecond();
+        AbilityDamage.HitPlayer(Enemy, Spec.Ability, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, Spec.Ability, Rng));
     }
+
+    /// <summary>Once per tick while the local player is inside (refreshes the aura's debuffs; they outlast the tick a little so they never flicker).</summary>
+    protected virtual void InsideEachSecond() { }
 
     public override void Dispose()
     {
         _loop?.Stop();
         _loop = null;
+        PlayerDebuffs.Buffs.Remove(PlayerDebuffs.AttackSlow, Key);
+        PlayerDebuffs.Buffs.Remove(PlayerDebuffs.DamageDown, Key);
         base.Dispose();
     }
 }
@@ -151,6 +161,9 @@ internal sealed class BlizzardInstance : AuraInstance
     // Warmth (perk, COS-87): the local player's slow inside a Blizzard is much weaker.
     protected override void InsideEachFrame(Vector3 player) =>
         AbilityForces.AddSlow(Key, PlayerState.Character.Stats.IsOn(PerkStatIds.BlizzardSlowReduced) ? PerkRules.WarmBlizzardSlow : ActiveAbilityRules.BlizzardSlow, 0.4f);
+
+    // COS-90: the cold also slows attacks while inside.
+    protected override void InsideEachSecond() => Debuff(PlayerDebuffs.AttackSlow, ActiveAbilityRules.AuraDebuffSeconds, ActiveAbilityRules.BlizzardAttackSlow);
 }
 
 internal sealed class RadianceInstance : AuraInstance
@@ -160,6 +173,9 @@ internal sealed class RadianceInstance : AuraInstance
     protected override void Created(GameObject disc) =>
         AbilityVisuals.AddLight(Track(AbilityVisuals.Make(PrimitiveType.Sphere, new Color(1f, 0.9f, 0.5f), Chest, Vector3.one * 0.4f, "cots-ability-radiance")),
             new Color(1f, 0.85f, 0.4f), 14, 60);
+
+    // COS-90: the glare lowers the damage the player deals while inside.
+    protected override void InsideEachSecond() => Debuff(PlayerDebuffs.DamageDown, ActiveAbilityRules.AuraDebuffSeconds, ActiveAbilityRules.RadianceDamageDown);
 }
 
 /// <summary>
@@ -232,8 +248,10 @@ internal abstract class CastInstance : AbilityInstance
         {
             if (Replica) return; // a copy only casts when the host says so
             if (!_clock.Tick(dt)) return;
+            if (!Enemy.Combat.Gate.CanStart) return; // another ability of this enemy is casting, or the shared lockout runs (COS-90)
             if (AbilityTargets.NearestTarget(EnemyPos) is not { } target) return;
             if (!ActiveAbilityRules.InRange(Spec, Vector3.Distance(target.Position, EnemyPos))) return;
+            if (!Enemy.Combat.Gate.TryBegin()) return;
             TargetId = target.Id;
             TargetIsLocal = target.Id == AbilityTargets.LocalId && AbilityTargets.PlayerAlive;
             ulong seed = (ulong)Rng.Range(1, int.MaxValue);
@@ -250,7 +268,17 @@ internal abstract class CastInstance : AbilityInstance
         if (!Advance(dt)) return;
         _casting = false;
         Finish();
-        if (!Replica) _clock.Fire(Spec.Cooldown);
+        if (Replica) return;
+        _clock.Fire(Spec.Cooldown);
+        Enemy.Combat.Gate.End(Rng);
+    }
+
+    public override void Dispose()
+    {
+        // Cut short (the enemy went inactive or died): the enemy may cast again when it wakes.
+        if (_casting && !Replica) Enemy.Combat.Gate.Release();
+        _casting = false;
+        base.Dispose();
     }
 }
 
@@ -286,7 +314,11 @@ internal sealed class MeteorInstance : CastInstance
         Flash(new Color(1f, 0.55f, 0.1f), _spot + Vector3.up, (float)Spec.Radius, 0.5f);
         foreach (var p in AbilityTargets.Positions())
             if (AbilityTargets.Flat(p, _spot) <= Spec.Radius && Mathf.Abs(p.y - _spot.y) < 5)
+            {
                 AbilityDamage.HitPlayer(Enemy, EnemyAbility.Meteor, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, EnemyAbility.Meteor, Rng));
+                // COS-90: the blast corrodes armor (accumulates per enemy).
+                Debuff(PlayerDebuffs.ArmorCorruption, ActiveAbilityRules.MeteorCorrosionSeconds, PlayerState.Character.Stats.Get(StatIds.Armor) * ActiveAbilityRules.MeteorCorrosionShare);
+            }
         return true;
     }
 
@@ -353,7 +385,12 @@ internal sealed class LaserInstance : CastInstance
             _tick = (float)Spec.TickSeconds;
             foreach (var p in AbilityTargets.Positions())
                 if (ActiveAbilityRules.BeamHits(Num(p + Vector3.up), Num(Chest), Num(_to), Spec.Radius))
+                {
                     AbilityDamage.HitPlayer(Enemy, EnemyAbility.Laser, ActiveAbilityRules.Damage(Enemy.Combat.Difficulty, EnemyAbility.Laser, Rng));
+                    // COS-90: the beam leaves the player sluggish and weakened.
+                    Debuff(PlayerDebuffs.AttackSlow, ActiveAbilityRules.LaserDebuffSeconds, ActiveAbilityRules.LaserAttackSlow);
+                    Debuff(PlayerDebuffs.DamageDown, ActiveAbilityRules.LaserDebuffSeconds, ActiveAbilityRules.LaserDamageDown);
+                }
         }
         return false;
     }

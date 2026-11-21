@@ -34,6 +34,13 @@ public static class ActiveAbilityRules
     public const double BlizzardSlow = 0.55, ArcaneSlow = 0.5;
     public const double ChainsRootSeconds = 2.5, TrapRootSeconds = 3;
 
+    /// <summary>Player debuffs (COS-90; this mod's numbers): Blizzard's attack-speed multiplier and Radiance's damage-dealt multiplier while inside
+    /// (refreshed every aura tick, lasting a little longer than it), Meteor's armor corrosion (share of the player's armor, per hit, accumulating)
+    /// and the Laser's attack-speed and damage multipliers.</summary>
+    public const double BlizzardAttackSlow = 0.8, RadianceDamageDown = 0.85, AuraDebuffSeconds = 1.5;
+    public const double MeteorCorrosionShare = 0.1, MeteorCorrosionSeconds = 30;
+    public const double LaserAttackSlow = 0.7, LaserDamageDown = 0.8, LaserDebuffSeconds = 5;
+
     /// <summary>Black Hole: pull speed (m/s) at the rim and at the centre; the core (this fraction of the radius) deals damage.</summary>
     public const double BlackHolePullRim = 2, BlackHolePullCentre = 9, BlackHoleCoreFraction = 0.25;
 
@@ -123,6 +130,47 @@ public static class ActiveAbilityRules
         dir.Y = 0;
         if (dir.LengthSquared() < 1e-6f) dir = Vector3.UnitX;
         return target + Vector3.Normalize(dir) * (float)distance;
+    }
+}
+
+/// <summary>
+/// One enemy's cast gate (COS-90): only one active ability casts at a time, and after a cast ends a shared lockout of 0 to
+/// <see cref="MaxLockout"/> s must pass before any ability on that enemy may start another. Each ability keeps its own cooldown.
+/// </summary>
+public sealed class CastGate
+{
+    public const double MaxLockout = 3;
+
+    private bool _busy;
+    private double _lockout;
+
+    public bool Busy => _busy;
+    public double Lockout => _lockout;
+
+    /// <summary>True when no cast is running and the lockout is over.</summary>
+    public bool CanStart => !_busy && _lockout <= 0;
+
+    /// <summary>Claims the gate for a cast; false (nothing claimed) if it is not free.</summary>
+    public bool TryBegin()
+    {
+        if (!CanStart) return false;
+        _busy = true;
+        return true;
+    }
+
+    /// <summary>A cast ended: free the gate and start the shared lockout.</summary>
+    public void End(Rng rng)
+    {
+        _busy = false;
+        _lockout = rng.NextDouble() * MaxLockout;
+    }
+
+    /// <summary>A cast was cut short (the enemy went inactive): free the gate without a lockout.</summary>
+    public void Release() => _busy = false;
+
+    public void Tick(double dt)
+    {
+        if (_lockout > 0) _lockout = Math.Max(0, _lockout - dt);
     }
 }
 

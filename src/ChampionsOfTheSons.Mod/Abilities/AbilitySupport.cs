@@ -150,6 +150,10 @@ internal static class AbilityForces
     public static int SlowsOf(EnemyRuntime e) => PlayerDebuffs.Buffs.Snapshot().Count(b => b.BuffId == PlayerDebuffs.MoveSlow
         && b.Source.EndsWith(":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e), StringComparison.Ordinal));
 
+    /// <summary>Attack-speed, damage and armor debuffs this enemy's abilities put on the player (COS-90).</summary>
+    public static int DebuffsOf(EnemyRuntime e) => PlayerDebuffs.Buffs.Snapshot().Count(b => b.BuffId != PlayerDebuffs.MoveSlow
+        && b.Source.EndsWith(":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e), StringComparison.Ordinal));
+
     public static Vector3 PullOf(EnemyRuntime e) =>
         Pulls.Where(kv => kv.Key.EndsWith(":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e), StringComparison.Ordinal) && kv.Value.Left > 0)
             .Aggregate(Vector3.zero, (sum, kv) => sum + kv.Value.Velocity);

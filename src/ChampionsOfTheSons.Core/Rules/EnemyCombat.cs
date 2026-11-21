@@ -7,6 +7,8 @@ public static class AbilityTuning
     public const double BasherStunSeconds = 1;
     public const double RainDamage = 5, RainArmor = 5, RainSpeed = 2;
     public const double UndeadReviveFraction = 0.5;
+    /// <summary>Undead, after its revive: speed and model size multipliers (COS-90).</summary>
+    public const double UndeadSpeed = 1.1, UndeadScale = 1.4;
     public const double PoisonSeconds = 6;
     /// <summary>Slow from "chance to slow": speed ×0.5 for 8 s.</summary>
     public const double SlowAmount = 0.5, SlowSeconds = 8;
@@ -95,6 +97,9 @@ public sealed class EnemyCombatState
     public bool Raining { get; set; }
     public bool UndeadUsed { get; private set; }
 
+    /// <summary>One active ability cast at a time per enemy, plus a shared lockout (COS-90).</summary>
+    public CastGate Gate { get; } = new();
+
     /// <summary>State for an enemy whose level band follows its level (<see cref="Difficulties.ForLevel"/>).</summary>
     public EnemyCombatState(EnemyProfile profile) : this(profile, Difficulties.ForLevel(profile.Level)) { }
 
@@ -121,6 +126,7 @@ public sealed class EnemyCombatState
             foreach (var s in _slows.Values) m *= s.Amount;
             if (RainActive) m *= AbilityTuning.RainSpeed;
             m *= 1 + _furyStacks * AbilityTuning.AvengerSpeedPerStack;
+            if (UndeadUsed) m *= AbilityTuning.UndeadSpeed;
             return m;
         }
     }
@@ -147,6 +153,9 @@ public sealed class EnemyCombatState
             return m;
         }
     }
+
+    /// <summary>The model size factor on top of the profile's scale: Undead grows after its revive.</summary>
+    public double ScaleMultiplier => UndeadUsed ? AbilityTuning.UndeadScale : 1;
 
     public double ArmorMultiplier => RainActive ? AbilityTuning.RainArmor : 1;
 
@@ -227,12 +236,13 @@ public sealed class EnemyCombatState
     /// <summary>Current Smolder Mark bonus on fire damage (0 when unmarked).</summary>
     public double FireMark => _fireMarkLeft > 0 ? _fireMark : 0;
 
-    /// <summary>A damage-over-time: <paramref name="perSecond"/> every 1 s for ceil(duration) ticks. Re-applying a source refreshes it.</summary>
-    public void ApplyDot(string source, DotKind kind, double perSecond, double seconds)
+    /// <summary>A damage-over-time: <paramref name="perSecond"/> every 1 s for ceil(duration) ticks. Re-applying a source refreshes it. Ignored by Juggernaut (COS-90).</summary>
+    public bool ApplyDot(string source, DotKind kind, double perSecond, double seconds)
     {
-        if (perSecond <= 0 || seconds <= 0) return;
+        if (CcImmune || perSecond <= 0 || seconds <= 0) return false;
         _dots[source] = new Dot { Kind = kind, PerSecond = perSecond, TicksLeft = (int)Math.Ceiling(seconds) };
         Raise(new EnemyEffect(EnemyEffectKind.Dot, source, perSecond, seconds, kind));
+        return true;
     }
 
     // ---------------------------------------------------------------- abilities
@@ -290,6 +300,7 @@ public sealed class EnemyCombatState
         if (_furyLeft > 0 && (_furyLeft -= dt) <= 0) _furyStacks = 0;
         Expire(_slows, dt);
         Expire(_weakens, dt);
+        Gate.Tick(dt);
 
         List<DotTick>? due = null;
         List<string>? finished = null;
@@ -327,6 +338,10 @@ public static class EnemyHitEffects
     /// <summary>Poisonous: damage per second = hit damage × √(damageMult/10)/10, for 6 s.</summary>
     public static double PoisonPerSecond(EnemyProfile enemy, double hitDamage) =>
         enemy.Has(EnemyAbility.Poisonous) ? hitDamage * Math.Sqrt(Math.Max(0, enemy.DamageMult) / 10) / 10 : 0;
+
+    /// <summary>Burning melts armor (COS-90): each fire tick adds its damage to the enemy's armor reduction, never past its armor.</summary>
+    public static double MeltArmor(EnemyProfile enemy, double armorReduction, double tickDamage) =>
+        Math.Min(enemy.Armor, armorReduction + Math.Max(0, tickDamage));
 
     public static double StunSeconds(EnemyProfile enemy) => enemy.Has(EnemyAbility.Basher) ? AbilityTuning.BasherStunSeconds : 0;
 }
