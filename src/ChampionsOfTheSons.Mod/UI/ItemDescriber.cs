@@ -145,13 +145,11 @@ internal static class ItemDescriber
         return sb.ToString();
     }
 
-    private static Dictionary<string, double> Sum(ItemInstance item)
-    {
-        var sums = new Dictionary<string, double>();
-        foreach (var s in item.Stats)
-            if (!LootRoller.IsSocketStat(s.StatId)) sums[s.StatId] = sums.GetValueOrDefault(s.StatId) + s.Value;
-        return sums;
-    }
+    /// <summary>Each stat's rolls on one item, combined by the stat's own rule (COS-96: dodge and reduction do not simply add).</summary>
+    private static Dictionary<string, double> Sum(ItemInstance item) =>
+        item.Stats.Where(s => !LootRoller.IsSocketStat(s.StatId)).GroupBy(s => s.StatId)
+            .ToDictionary(g => g.Key, g => g.Count() == 1 ? g.First().Value
+                : StatCombineMath.Combine(ModContent.Db.ItemStats.TryGetValue(g.Key, out var def) ? def.Combine : StatCombine.Sum, g.Select(x => x.Value)));
 
     private static string Color(string hex, string text) => $"<color={hex}>{text}</color>";
 }

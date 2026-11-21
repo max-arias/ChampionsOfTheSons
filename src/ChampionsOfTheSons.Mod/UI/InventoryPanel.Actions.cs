@@ -153,7 +153,7 @@ internal sealed partial class InventoryPanel
     /// <summary>Moves or swaps the item in <paramref name="from"/> into <paramref name="to"/>. Refuses items that do not fit the target slot.</summary>
     public bool DragDrop(string from, string to)
     {
-        bool ok = from != to && Character.Inventory.Move(from, to, ModContent.Db);
+        bool ok = from != to && Character.Inventory.MoveOrMerge(from, to, ModContent.Db); // equal stacks merge (COS-96)
         if (ok) { _dirty = false; RefreshAll(); }
         return ok;
     }

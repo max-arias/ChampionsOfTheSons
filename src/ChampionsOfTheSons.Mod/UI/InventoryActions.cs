@@ -24,7 +24,7 @@ internal static class InventoryActions
     public static bool EquipInto(string bagKey, string equipKey) => bagKey != equipKey && Pc.Inventory.Move(bagKey, equipKey, ModContent.Db);
 
     /// <summary>Moves (or swaps) any slot to any other: bag, equip slot, either way. False when an item does not fit.</summary>
-    public static bool MoveTo(string from, string to) => from != to && Pc.Inventory.Move(from, to, ModContent.Db);
+    public static bool MoveTo(string from, string to) => from != to && Pc.Inventory.MoveOrMerge(from, to, ModContent.Db); // equal stacks merge (COS-96)
 
     public static string? FirstFreeBagSlot(Inventory inv)
     {
