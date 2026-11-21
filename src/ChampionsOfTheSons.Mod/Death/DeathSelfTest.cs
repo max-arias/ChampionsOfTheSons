@@ -1,6 +1,7 @@
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Spells;
+using TheForest.Items.Inventory;
 using TheForest.Utils;
 
 namespace ChampionsOfTheSons.Mod.Death;
@@ -64,6 +65,29 @@ internal static class DeathSelfTest
             SelfTest.Check("death: XP penalty applied", Math.Abs(Pc.Progress.Xp - (_xpBefore - expect)) < 1e-3, $"{_xpBefore:0} -> {Pc.Progress.Xp:0}");
             SelfTest.Check("death: level kept after the game's death", Pc.Progress.Level == _levelBefore);
             TestKit.Screenshot("death-01-after");
+            // COS-149: bring the player back through the game's own respawn-in-place routine, so the phases after this one
+            // start with a living player.
+            var stats = LocalPlayer.Stats;
+            stats.InstantRespawnRoutine();
+        });
+
+        SelfTest.Add(T0 + 12, "death: respawned for later phases", () =>
+        {
+            if (!OnlyRun) return;
+            var stats = LocalPlayer.Stats;
+            var health = LocalPlayer.Vitals.Health;
+            // The respawn routine clears the dead flag and restores health but leaves the player's view on the death screen.
+            var view = LocalPlayer.CurrentView;
+            if (view != PlayerInventory.PlayerViews.World)
+            {
+                SelfTest.Log($"death: view after respawn {view}, set back to World");
+                LocalPlayer.SetCurrentView(PlayerInventory.PlayerViews.World);
+            }
+            SelfTest.Check("death: player respawned after the game's death", !stats.IsDead() && health._currentValue > 0 && LocalPlayer.IsInWorld,
+                $"dead flag {stats.IsDead()}, health {health._currentValue:0.0}, in world {LocalPlayer.IsInWorld}");
+            SelfTest.AllowDeath = false;
+            health.SetCurrentValue(health.GetMax());
+            TestKit.Screenshot("death-02-respawned");
         });
     }
 }

@@ -14,12 +14,14 @@ param(
     [switch]$Headless,
     [switch]$NoGraphics,
     [switch]$NoBuild,
-    [string]$Only = '',
+    [string[]]$Only = @(),
     [switch]$Full,
     [int]$TimeoutSeconds = 1200,
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
 $ErrorActionPreference = 'Stop'
+# -Only A,B arrives as an array; the game wants one comma list.
+$Only = ($Only | ForEach-Object { $_ -split '[,\s]+' } | Where-Object { $_ }) -join ','
 if (-not $Only -and -not $Full) { "The full in-game suite is disabled; pass -Only <Feature,...> (see the header)."; exit 4 }
 $repo = Split-Path $PSScriptRoot -Parent
 $log = Join-Path $GameDir '_Redloader\Latest.log'
