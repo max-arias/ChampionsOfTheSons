@@ -149,7 +149,7 @@ internal static class ItemDescriber
     private static Dictionary<string, double> Sum(ItemInstance item) =>
         item.Stats.Where(s => !LootRoller.IsSocketStat(s.StatId)).GroupBy(s => s.StatId)
             .ToDictionary(g => g.Key, g => g.Count() == 1 ? g.First().Value
-                : StatCombineMath.Combine(ModContent.Db.ItemStats.TryGetValue(g.Key, out var def) ? def.Combine : StatCombine.Sum, g.Select(x => x.Value)));
+                : StatCombineMath.Combine(ModContent.Db.ItemStats.TryGetValue(g.Key, out var def) ? def.Combine : StatCombine.Sum, g.Select(x => (double)x.Value)));
 
     private static string Color(string hex, string text) => $"<color={hex}>{text}</color>";
 }
