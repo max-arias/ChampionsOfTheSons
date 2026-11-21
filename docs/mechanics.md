@@ -20,11 +20,11 @@ No difficulty is picked. Enemy levels follow the players (see Enemies), and the 
 
 | Game difficulty | Level offset | Elite chance |
 |---|---|---|
-| Peaceful | −2 | 8% |
+| Peaceful | −2 | 5% |
 | Normal, Creative | 0 | 10% |
-| Hard | +5 | 15% |
-| Hard Survival | +10 | 20% |
-| Custom | each of enemy health, damage, armour, aggression: Low −1, Normal 0, High +2.5; sum rounded (all High = +10) | by offset |
+| Hard | +2 | 15% |
+| Hard Survival | +4 | 20% |
+| Custom | each of enemy health, damage, armour, aggression: Low −0.5, Normal 0, High +1; sum rounded (all High = +4) | by offset |
 
 Elite chance = `clamp(0.10 + 0.01 × offset, 0.05, 0.25)` (`GameDifficulty`, `Core/Rules/Difficulty.cs`).
 
@@ -59,7 +59,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
   - HP: `max(vanillaHP, (√vanillaHP + 45) / 55 × H(L)) × healthMul` (a 100-health kind gets H itself).
   - Damage multiplier: `D(L)`.
   - Armor: `⌊U(A(L)/3 + 1, A(L)·2/3 + 20) × armorMul⌋`. No band factor: COTF's `L^2.43 × (⌊d/2⌋+1)` stepped ×2 at L20 and ×1.5 at L50 and outgrew armor pierce, so late hits did 1% damage until pierce stripped it.
-  - Targets the curves were fitted to in PacingSim (Max 2026-11-21): on Normal a plain on-level enemy dies in 4–30 s (ideally 8–20 s) and needs 6–60 of its hits to kill the player, in every row of the run table after the first hour; on Hard Survival plain kills at most about 2.5× Normal's at the same player level, 3–40 hits to die; elites about 5–10× a plain kill, bosses under about 5 min at their level on Normal. The player's gear grows about 10× per 10 levels from L15 to L60, so with Hard Survival's +10 levels one curve cannot meet both modes there: Normal is kept in range and Hard Survival plain kills are about 4–15× Normal's (1–3 hits to die) from about L10 to L80 (COS-150).
+  - Targets the curves were fitted to in PacingSim (Claude 2026-11-21, Max away; to tweak): on Normal a plain on-level enemy dies in 4–30 s (ideally 8–20 s) and needs 6–60 of its hits to kill the player, in every row of the run table after the first hour; on Hard Survival plain kills at most about 2.5× Normal's at the same player level, 3–40 hits to die; elites about 5–10× a plain kill, bosses under about 5 min at their level on Normal. The player's gear grows about 10× per 10 levels from L15 to L60, so Hard Survival's offset was cut from +10 to +4 (Hard +5 → +2): its plain kills now take 8–41 s, about 1.5–3× Normal's (COS-150).
   - COTF's curves (`(√v + 45) × L^2.38 × 0.2 × 2^((L−50)/32)` health, `e^⌊L/6⌋ + L` damage) left on-level enemies dying in one hit from L55 and unable to hurt a geared player from L20 to L60 (thousands of hits).
 - Speed: `(0.94 + L/170) × speedMul`.
 - Tier: elite if `(U < eliteChance or kind is a boss type or d = Hell) and elites allowed`, eliteChance from the game difficulty ✱ (COTF: 0.1). Elite ability count: 2 at d ≤ 1, `U[3,6]` at d ≥ 2, 10 for boss types. Boss if `n ≥ 6 and U < 0.1` ✱, Miniboss if `n > 4 and U < 0.25`, else Elite. Non-normal tiers: armor ×2; HP ×5 Elite, ×10 Miniboss, ×20 Boss ✱; scale ×1.1/1.15/1.2. Boss adds Boss Steadfast, Miniboss adds Elite Steadfast.
