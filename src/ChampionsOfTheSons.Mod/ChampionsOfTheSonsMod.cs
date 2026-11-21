@@ -74,6 +74,10 @@ public class ChampionsOfTheSonsMod : SonsMod
                 HostRules.WorldRulesFeature.Settings?.Close();
                 // Enemies from earlier phases stay in the world: switch them off so they neither cast nor take part in this phase.
                 foreach (var enemy in Bridge.EnemyRegistry.Snapshot()) enemy.TestActive = false;
+                // Switches a phase may leave on when a step throws or runs late (COS-153): death allowed, god mode, a Flicker run.
+                SelfTest.AllowDeath = false;
+                Admin.AdminState.Reset();
+                Spells.FlickerRun.Cancel();
             };
             SelfTest.RegisterDefaultSteps();
             // --cots-selftest-only=<names>: run just those checks, comma-separated feature type names plus "bridge" and "ui".

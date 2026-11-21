@@ -83,11 +83,39 @@ internal static class DeathSelfTest
                 SelfTest.Log($"death: view after respawn {view}, set back to World");
                 LocalPlayer.SetCurrentView(PlayerInventory.PlayerViews.World);
             }
+            SelfTest.AllowDeath = false;
             SelfTest.Check("death: player respawned after the game's death", !stats.IsDead() && health._currentValue > 0 && LocalPlayer.IsInWorld,
                 $"dead flag {stats.IsDead()}, health {health._currentValue:0.0}, in world {LocalPlayer.IsInWorld}");
-            SelfTest.AllowDeath = false;
             health.SetCurrentValue(health.GetMax());
             TestKit.Screenshot("death-02-respawned");
+        });
+
+        // COS-153: after this phase a later test's second Stats.Hit did no damage. Prove hits land again before handing over;
+        // if they do not, clear the game's hit state and say so.
+        SelfTest.Add(T0 + 13, "death: hits land again after the respawn", () =>
+        {
+            if (!OnlyRun) return;
+            var stats = LocalPlayer.Stats;
+            var health = LocalPlayer.Vitals.Health;
+            bool Lands()
+            {
+                health.SetCurrentValue(health.GetMax() * 0.5f);
+                float before = health._currentValue;
+                stats.Hit(5f);
+                bool landed = health._currentValue < before - 0.5f;
+                health.SetCurrentValue(health.GetMax());
+                return landed;
+            }
+            bool first = Lands();
+            bool second = Lands();
+            if (!(first && second))
+            {
+                SelfTest.Log($"death: hits after respawn: first {first}, second {second}; ResetHit");
+                stats.ResetHit();
+                first = Lands();
+                second = Lands();
+            }
+            SelfTest.Check("death: two hits in a row both land after the respawn", first && second, $"first {first}, second {second}");
         });
     }
 }

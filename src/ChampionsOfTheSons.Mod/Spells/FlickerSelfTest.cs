@@ -22,6 +22,7 @@ internal static class FlickerSelfTest
     private static PlayerCharacter Pc => PlayerState.Character;
     private static readonly List<VailActor> Enemies = new();
     private static readonly Dictionary<VailActor, float> HealthBefore = new();
+    private static readonly (float Forward, float Side)[] Spots = { (7f, -3f), (9f, 2f), (12f, 0f) };
 
     public static void Register()
     {
@@ -37,7 +38,9 @@ internal static class FlickerSelfTest
     {
         Enemies.Clear();
         var plain = WorldState.Rules with { AllowElites = false, PartyLevelOverride = 5 };
-        foreach (var (d, side) in new[] { (7f, -3f), (9f, 2f), (12f, 0f) })
+        // Earlier phases leave the player anywhere: face open ground first, or terrain hides some of them (COS-152).
+        SelfTest.Check("flicker: open ground for the three spots", TestKit.FaceOpenGround(Spots));
+        foreach (var (d, side) in Spots)
             if (TestKit.Spawn(VailActorTypeId.Carl, d, side, plain) is { } v) Enemies.Add(v);
         SelfTest.Check("flicker: three enemies spawned", Enemies.Count == 3, Enemies.Count.ToString());
     }
@@ -85,11 +88,9 @@ internal static class FlickerSelfTest
     {
         foreach (var e in Enemies) if (e != null) TestKit.Kill(e);
         Pc.Spells.Tick(1e6, Pc.Stats);
-        var t = LocalPlayer.Transform;
-        var away = t.position + Vector3.up * 0; // enemies are dead now: nobody is in reach
-        var outcome = CastSpell();
+        var outcome = CastSpell(); // enemies are dead now: nobody is in reach
         SelfTest.Check("flicker: nobody in reach: no cast, no cost, no cooldown", outcome == SpellCastOutcome.NoTarget && Pc.Spells.IsReady(0),
-            $"{outcome} at {away}");
+            $"{outcome} at {LocalPlayer.Transform.position}");
     }
 
     private static void Cleanup()

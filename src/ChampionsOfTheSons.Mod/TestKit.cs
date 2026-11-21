@@ -39,6 +39,76 @@ public static class TestKit
         }
     }
 
+    /// <summary>
+    /// Turns (and if needed moves) the player so every spot, given as (forward, sideways) metres, has ground under it and a
+    /// clear line from the eye through nothing of the world. Earlier phases leave the player anywhere, so tests that need
+    /// open ground call this before <see cref="Spawn"/> (COS-152). Tries 12 headings here, then the same at four places
+    /// 25 m away. False (player left where it was) if no heading works.
+    /// </summary>
+    public static bool FaceOpenGround(IReadOnlyList<(float Forward, float Side)> spots)
+    {
+        var t = LocalPlayer.Transform;
+        if (t == null) return false;
+        var start = t.position;
+        var startRot = t.rotation;
+        var places = new List<Vector3> { start };
+        float floor = GroundAt(start)?.y ?? start.y;
+        foreach (var d in new[] { Vector3.forward, Vector3.back, Vector3.left, Vector3.right })
+            if (GroundAt(start + d * 25f) is { } g && Mathf.Abs(g.y - floor) < 6f) places.Add(g);
+        foreach (var place in places)
+        {
+            if (place != start) Spells.SpellCaster.TeleportPlayer(place + Vector3.up * 0.05f);
+            Physics.SyncTransforms();
+            float here = GroundAt(t.position)?.y ?? t.position.y;
+            var eye = (Camera.main != null ? Camera.main.transform.position.y - t.position.y : 1.6f) + t.position.y;
+            for (int i = 0; i < 12; i++)
+            {
+                var rot = Quaternion.Euler(0, startRot.eulerAngles.y + i * 30f, 0);
+                if (!spots.All(s => Clear(t.position, eye, here, rot * new Vector3(s.Side, 0, s.Forward)))) continue;
+                t.rotation = rot;
+                Physics.SyncTransforms();
+                SelfTest.Log($"open ground: heading +{i * 30} deg at {t.position}");
+                return true;
+            }
+        }
+        Spells.SpellCaster.TeleportPlayer(start);
+        t.rotation = startRot;
+        Physics.SyncTransforms();
+        SelfTest.Log("open ground: no clear heading found");
+        return false;
+    }
+
+    private static bool Clear(Vector3 player, float eyeY, float floor, Vector3 offset)
+    {
+        var g = GroundAt(player + offset);
+        if (g == null || Mathf.Abs(g.Value.y - floor) > 3f) return false; // a drop, a cliff or no ground
+        var eye = new Vector3(player.x, eyeY, player.z);
+        var to = g.Value + Vector3.up * 1f;
+        var dir = to - eye;
+        float dist = dir.magnitude;
+        foreach (var hit in Physics.RaycastAll(eye, dir / dist, dist))
+        {
+            if (hit.transform == null || hit.collider.isTrigger) continue;
+            if (LocalPlayer.Transform != null && hit.transform.IsChildOf(LocalPlayer.Transform)) continue;
+            if (hit.transform.GetComponentInParent<VailActor>() != null) continue;
+            return false;
+        }
+        return true;
+    }
+
+    /// <summary>The world surface under a point (player and enemies ignored), or null.</summary>
+    public static Vector3? GroundAt(Vector3 at)
+    {
+        foreach (var h in Physics.RaycastAll(at + Vector3.up * 6f, Vector3.down, 16f).OrderBy(h => h.distance))
+        {
+            if (h.transform == null || h.collider.isTrigger) continue;
+            if (LocalPlayer.Transform != null && h.transform.IsChildOf(LocalPlayer.Transform)) continue;
+            if (h.transform.GetComponentInParent<VailActor>() != null) continue;
+            return h.point;
+        }
+        return null;
+    }
+
     /// <summary>A plain hit from the local player through the game's damage path (our hooks apply).</summary>
     public static void Hit(VailActor actor, float amount, ImpactType type = ImpactType.Melee) =>
         actor.ReceivedDamage(null, type, 0, null, amount, true, false, false, Vector3.forward);

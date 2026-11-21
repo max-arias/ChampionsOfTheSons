@@ -207,7 +207,15 @@ internal static class LootSelfTest
 
     private static void StepAway()
     {
-        Teleport(_home + new Vector3(0, 0, -5));
+        // Away from the drop, not along a fixed world axis: the drop lands ahead of the player, and an earlier phase can
+        // leave the player facing the very axis a fixed step would take, keeping it inside the re-arm distance (COS-153).
+        var d = Ground.Get(_target);
+        if (d == null) return;
+        var at = new Vector3(d.X, d.Y, d.Z);
+        var away = _home - at;
+        away.y = 0;
+        if (away.sqrMagnitude < 0.01f) away = -LocalPlayer.Transform.forward;
+        Teleport(at + away.normalized * (LootFeature.RearmDistance + 3f) + Vector3.up * (Player.y - at.y));
     }
 
     private static void StepBack()
@@ -219,7 +227,10 @@ internal static class LootSelfTest
 
     private static void PickUpAgain()
     {
-        SelfTest.Check("loot: dropped item can be picked up again", Ground.Get(_target) == null && Pc.Inventory.Slots.Count == 1);
+        var d = Ground.Get(_target);
+        SelfTest.Check("loot: dropped item can be picked up again", d == null && Pc.Inventory.Slots.Count == 1,
+            d == null ? $"bag {Pc.Inventory.Slots.Count}: {string.Join(",", Pc.Inventory.Slots.Select(kv => kv.Value.BaseId))}"
+                : $"drop at {d.X:0.0},{d.Y:0.0},{d.Z:0.0}, player {Player}, held back {LootFeature.NoAutoPickup.Contains(_target)}, buffs {Spells.SpellWorld.Buffs.Count}");
         Teleport(_home);
         LootFeature.ClearAll();
     }
