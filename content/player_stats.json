@@ -1206,7 +1206,7 @@
       "id": "spell_cataclysm_radius",
       "legacyName": "spell_cataclysmRadius",
       "kind": "add",
-      "default": 18.5
+      "default": 5.0
     },
     {
       "id": "spell_cataclysm_arcane",
@@ -1281,19 +1281,19 @@
       "id": "spell_fart_debuff_duration",
       "legacyName": "spell_fartDebuffDuration",
       "kind": "add",
-      "default": 50.0
+      "default": 30.0
     },
     {
       "id": "spell_fart_base_dmg",
       "legacyName": "spell_fartBaseDmg",
       "kind": "add",
-      "default": 400.0
+      "default": 50.0
     },
     {
       "id": "spell_fart_damage_scaling",
       "legacyName": "spell_fartDamageScaling",
       "kind": "add",
-      "default": 2.0
+      "default": 5.0
     },
     {
       "id": "spell_taunt_speed_change",

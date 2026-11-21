@@ -230,9 +230,6 @@ public static class StatCoverage
         // Wave 7: the stand-in spells read these (SpellTuning), Healing Dome energy was already read.
         "spell_snowstorm_max_charge", "debuff_resistance", "perk_golden_resolve", "spell_healing_dome_reg_energy",
         "perk_parry_anything", "perk_multishot_projectile_count", "perk_multishot_damage_pennalty",
-        // COS-83: Healing Dome, War Cry and Purge radius numbers and perks.
-        "spell_war_cry_give_damage", "spell_healing_dome_gives_immunity", "spell_healing_dome_damage_increase",
-        "spell_healing_dome_damage_resistance", "spell_war_cry_radius", "spell_purge_radius",
         // COS-89: the player buff system reads these (states, immunities).
         "rooted", "stunned", "root_immunity", "debuff_immunity",
     };

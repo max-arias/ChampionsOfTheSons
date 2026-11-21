@@ -71,6 +71,9 @@ public static class PerkRules
     /// <summary>Tearing Spacetime: exit explosion damage = base × movement speed, radius = blink distance × share.</summary>
     public const double BlinkExplosionDamage = 40, BlinkExplosionScaling = 2, BlinkExplosionRadiusShare = 0.2, BlinkExplosionMinRadius = 2;
 
+    /// <summary>Mysterious Robe: the arcane Cataclysm deals ×1.5 and slows enemies inside to ×0.2 (frozen).</summary>
+    public const double ArcaneCataclysmDamage = 1.5, ArcaneCataclysmSlow = 0.2;
+
     /// <summary>Smolder Mark bonus: (1 + spell flat / 3) × spell multiplier × (1 + fire damage) × 0.35 (0.3 for ranged hits).</summary>
     public static double SmolderMarkBonus(StatSheet s, bool ranged) =>
         !s.IsOn(PerkStatIds.SmolderMark) ? 0

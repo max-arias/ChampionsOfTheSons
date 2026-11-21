@@ -175,12 +175,6 @@ public sealed class SpellBook
         return CastResult.Ok;
     }
 
-    /// <summary>Leaves only <paramref name="share"/> of the cooldown on a spell that was just cast (Roaring Cheeks in the air: a third).</summary>
-    public void SetRemainingCooldown(int slot, double share)
-    {
-        if (slot is >= 0 and < Slots && _ready[slot] < 1) _ready[slot] = 1 - Math.Clamp(share, 0, 1);
-    }
-
     /// <summary>Switches a running spell off and starts its cooldown.</summary>
     public void Stop(int slot)
     {

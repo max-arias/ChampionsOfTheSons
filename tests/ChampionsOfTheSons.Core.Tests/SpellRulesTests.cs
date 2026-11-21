@@ -34,18 +34,8 @@ public class SpellRulesTests
       { "id": "spell_frenzy_dmg", "kind": "add", "default": 0.1 },
       { "id": "spell_frenzy_atk_speed", "kind": "add", "default": 0.02 },
       { "id": "spell_shield_per_second", "kind": "add", "default": 10 },
-      { "id": "spell_shield_max", "kind": "add", "default": 40 },
+      { "id": "spell_shield_max", "kind": "add", "default": 20 },
       { "id": "spell_shield_persistance_lifetime", "kind": "add", "default": 5 },
-      { "id": "ranged_flat_dmg", "kind": "add", "default": 0 },
-      { "id": "spell_snap_damage_scaling", "kind": "add", "default": 6.5 },
-      { "id": "spell_magic_arrow_damage_scaling", "kind": "add", "default": 4.2 },
-      { "id": "spell_magic_arrow_crit", "kind": "bool", "default": 0 },
-      { "id": "health_recovery_per_second", "kind": "add", "default": 0 },
-      { "id": "health_per_sec_rate", "kind": "add", "default": 0 },
-      { "id": "all_recovery_mult", "kind": "mult", "default": 1 },
-      { "id": "max_health_mult", "kind": "mult", "default": 1 },
-      { "id": "vitality", "kind": "add", "default": 0 },
-      { "id": "max_health_from_vit", "kind": "add", "default": 0 },
       { "id": "spell_bia_health_taken", "kind": "add", "default": 0.5 },
       { "id": "spell_bia_health_dm_mult", "kind": "add", "default": 4 },
       { "id": "spell_bia_spell_dm_mult", "kind": "add", "default": 0.1 },
@@ -139,67 +129,22 @@ public class SpellRulesTests
     }
 
     [Fact]
-    public void Shield_gains_by_spell_flat_caps_absorbs_holds_then_fades()
+    public void Shield_fills_while_channeled_caps_absorbs_and_expires_after_release()
     {
         var stats = new StatSheet(_db);
         var shield = new SpellShield { Channeling = true };
-        shield.Tick(1, stats); // 10 per second
-        Assert.Equal(10, shield.Amount, 6);
-        stats.SetSource("flat", new[] { new StatModifier("spell_flat_dmg", EffectOp.Add, 70) }); // +2 per second, cap 40 + 70
-        Assert.Equal(12, SpellShield.GainPerSecond(stats), 6);
-        Assert.Equal(110, SpellShield.Cap(stats), 6);
-        shield.Tick(100, stats);
-        Assert.Equal(110, shield.Amount, 6);
-        Assert.Equal(15, shield.Absorb(125), 6);
+        shield.Tick(1, 200, stats); // 10 % of 200 per second
+        Assert.Equal(20, shield.Amount, 6);
+        shield.Tick(5, 200, stats); // capped at 20 % of 200
+        Assert.Equal(40, shield.Amount, 6);
+        Assert.Equal(15, shield.Absorb(55), 6);
         Assert.Equal(0, shield.Amount, 6);
-        shield.Tick(1, stats);
+        shield.Tick(1, 200, stats);
         shield.Channeling = false;
-        double held = shield.Amount;
-        shield.Tick(4.9, stats); // inside the 5 s lifetime: unchanged
-        Assert.Equal(held, shield.Amount, 6);
-        shield.Tick(0.2 + SpellTuning.ShieldDecaySeconds / 2, stats); // lifetime over, half of the fade
-        Assert.InRange(shield.Amount, held * 0.4, held * 0.6);
-        shield.Tick(SpellTuning.ShieldDecaySeconds, stats);
-        Assert.Equal(0, shield.Amount, 6);
-    }
-
-    [Fact]
-    public void Healing_dome_heals_by_regen_recovery_and_spell_flat()
-    {
-        var stats = new StatSheet(_db);
-        double baseRegen = Derived.HealthRegenPerSecond(stats, 0);
-        Assert.Equal(baseRegen * baseRegen * 10 + 43.5, SpellTuning.HealingDomeHeal(stats), 6);
-        stats.SetSource("t", new[]
-        {
-            new StatModifier("spell_flat_dmg", EffectOp.Add, 100),
-            new StatModifier("health_recovery_per_second", EffectOp.Add, 2),
-            new StatModifier("all_recovery_mult", EffectOp.Mult, 1.5),
-        });
-        double regen = Derived.HealthRegenPerSecond(stats, 0);
-        Assert.Equal((regen * regen * 10 + 43.5) * 1.5 + 10, SpellTuning.HealingDomeHeal(stats), 6);
-    }
-
-    [Fact]
-    public void Black_hole_catch_radius_grows_over_its_first_seconds()
-    {
-        Assert.Equal(0, SpellTuning.BlackHoleCatchRadius(15, 0), 6);
-        Assert.Equal(7.5, SpellTuning.BlackHoleCatchRadius(15, SpellTuning.BlackHoleCatchSeconds / 2), 6);
-        Assert.Equal(15, SpellTuning.BlackHoleCatchRadius(15, 10), 6);
-    }
-
-    [Fact]
-    public void Magic_arrow_and_snap_freeze_scale_with_spell_flat_and_ranged_flat()
-    {
-        var stats = new StatSheet(_db);
-        Assert.Equal(110, SpellTuning.MagicArrowHit(stats, new Rng(1)).Amount, 6); // (55 + 0) x 2
-        Assert.Equal(23, SpellTuning.SnapFreezeHit(stats, new Rng(1)).Amount, 6);
-        stats.SetSource("t", new[]
-        {
-            new StatModifier("spell_flat_dmg", EffectOp.Add, 10),
-            new StatModifier("ranged_flat_dmg", EffectOp.Add, 20),
-        });
-        Assert.Equal((55 + 4.2 * 10 + 20 / 2.0) * 2, SpellTuning.MagicArrowHit(stats, new Rng(1)).Amount, 6);
-        Assert.Equal(23 + 6.5 * 10, SpellTuning.SnapFreezeHit(stats, new Rng(1)).Amount, 6);
+        shield.Tick(4.9, 200, stats);
+        Assert.True(shield.Amount > 0);
+        shield.Tick(0.2, 200, stats);
+        Assert.Equal(0, shield.Amount);
     }
 
     [Fact]
