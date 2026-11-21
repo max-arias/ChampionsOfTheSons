@@ -72,6 +72,29 @@ public class CoopRulesTests
         Assert.Empty(board.Active);
         Assert.Equal(2, expired.Count);
     }
+
+    [Fact]
+    public void Pinging_your_own_marker_or_nothing_clears_it()
+    {
+        var board = new PingBoard();
+        Assert.Null(board.PressKind(1, PingKind.Location, null, 0)); // nothing hit, no marker: nothing to do
+        board.Add(new Ping(1, PingKind.Location, new Vec3(0, 0, 0), 0), 0);
+        Assert.Equal(PingKind.Clear, board.PressKind(1, PingKind.Location, new Vec3(1, 0, 1), 0));
+        Assert.Equal(PingKind.Location, board.PressKind(1, PingKind.Location, new Vec3(10, 0, 0), 0));
+        Assert.Equal(PingKind.Clear, board.PressKind(1, PingKind.Location, null, 0));
+        Assert.Equal(PingKind.Location, board.PressKind(2, PingKind.Location, new Vec3(1, 0, 1), 0)); // someone else's marker
+        board.Add(new Ping(1, PingKind.Clear, new Vec3(0, 0, 0), 0), 1);
+        Assert.Empty(board.Active);
+    }
+
+    [Fact]
+    public void An_enemy_ping_on_the_same_enemy_clears_it_wherever_it_moved()
+    {
+        var board = new PingBoard();
+        board.Add(new Ping(1, PingKind.Enemy, new Vec3(0, 0, 0), 42), 0);
+        Assert.Equal(PingKind.Clear, board.PressKind(1, PingKind.Enemy, new Vec3(20, 0, 0), 42));
+        Assert.Equal(PingKind.Enemy, board.PressKind(1, PingKind.Enemy, new Vec3(20, 0, 0), 43));
+    }
 }
 
 public class CoopPickupTests

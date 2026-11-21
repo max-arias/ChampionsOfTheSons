@@ -82,10 +82,16 @@ public sealed class AuraBoard
     public void Clear() => _expires.Clear();
 }
 
-/// <summary>Active ping markers (COS-24). A player has one marker at a time; it expires after <see cref="Lifetime"/> seconds.</summary>
+/// <summary>
+/// Active ping markers (COS-24, COS-98). A player has one marker at a time; it expires after <see cref="Lifetime"/> seconds
+/// (Max 2026-11-21: 30 s) or when that player sends a <see cref="PingKind.Clear"/>.
+/// </summary>
 public sealed class PingBoard
 {
-    public const double Lifetime = 8;
+    public const double Lifetime = 30;
+
+    /// <summary>Pinging within this many metres of your own marker clears it instead of placing a new one.</summary>
+    public const float ClearRadius = 3f;
 
     private readonly Dictionary<uint, (Ping Ping, double Expires)> _byPlayer = new();
 
@@ -96,9 +102,44 @@ public sealed class PingBoard
 
     public void Add(Ping ping, double now)
     {
-        if (_byPlayer.TryGetValue(ping.PlayerId, out var old)) Expired?.Invoke(old.Ping);
+        if (_byPlayer.TryGetValue(ping.PlayerId, out var old))
+        {
+            _byPlayer.Remove(ping.PlayerId);
+            Expired?.Invoke(old.Ping);
+        }
+        if (ping.Kind == PingKind.Clear) return;
         _byPlayer[ping.PlayerId] = (ping, now + Lifetime);
         Added?.Invoke(ping);
+    }
+
+    /// <summary>The player's marker now, or null.</summary>
+    public Ping? Of(uint playerId) => _byPlayer.TryGetValue(playerId, out var v) ? v.Ping : null;
+
+    /// <summary>Ends a player's marker early (the enemy it follows died). False if there was none.</summary>
+    public bool Remove(uint playerId)
+    {
+        if (!_byPlayer.Remove(playerId, out var v)) return false;
+        Expired?.Invoke(v.Ping);
+        return true;
+    }
+
+    /// <summary>
+    /// What a press of the ping key does for <paramref name="playerId"/>: nothing hit, or a point near (or the same target as)
+    /// their own marker, clears it; anything else places a new one. Null: nothing to do (no hit and no marker).
+    /// </summary>
+    public PingKind? PressKind(uint playerId, PingKind hitKind, Vec3? hit, ulong target)
+    {
+        var own = Of(playerId);
+        if (hit == null) return own != null ? PingKind.Clear : null;
+        if (own != null && ((target != 0 && own.TargetId == target && own.Kind == hitKind) || Distance(own.Position, hit.Value) <= ClearRadius))
+            return PingKind.Clear;
+        return hitKind;
+    }
+
+    private static float Distance(Vec3 a, Vec3 b)
+    {
+        float dx = a.X - b.X, dy = a.Y - b.Y, dz = a.Z - b.Z;
+        return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     public void Tick(double now)

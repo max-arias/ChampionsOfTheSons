@@ -249,6 +249,8 @@ public enum PingKind : byte
     Location = 0,
     Enemy = 1,
     Item = 2,
+    /// <summary>Removes the sender's marker (COS-98).</summary>
+    Clear = 3,
 }
 
 /// <summary>Player → everyone: a ping marker. <paramref name="TargetId"/> is the enemy net ID or drop ID, 0 for locations.</summary>

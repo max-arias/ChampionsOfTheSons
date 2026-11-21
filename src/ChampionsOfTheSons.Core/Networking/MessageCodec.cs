@@ -19,7 +19,7 @@ public static class MessageCodec
     /// new <see cref="DropRequest"/>: a client's thrown items reach everyone (COS-14); <see cref="AuraPulse"/> carries two amounts (COS-23);
     /// <see cref="FxShape"/> carries a homing target and <see cref="PlayerInfo"/> the explosion stat (COS-114);
     /// new <see cref="EnemyAware"/> (COS-116).</remarks>
-    public const int ProtocolVersion = 8;
+    public const int ProtocolVersion = 9; // 9: Wave 8 (ping Clear, enemy state, player state, flat XP)
 
     public static byte[] Encode(IMessage message)
     {
