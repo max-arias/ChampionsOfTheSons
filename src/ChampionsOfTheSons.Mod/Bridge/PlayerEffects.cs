@@ -41,6 +41,7 @@ public static class PlayerEffects
     {
         if (perSecond <= 0 || seconds <= 0) return;
         seconds = SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds);
+        if (seconds <= 0) return; // debuff immunity
         Poisons.Add(new Poison { PerSecond = perSecond, TicksLeft = (int)Math.Ceiling(seconds) });
     }
 

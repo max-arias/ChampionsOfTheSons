@@ -99,8 +99,8 @@ internal static class SpellControl
         var eye = Eye;
         switch (spellId)
         {
-            case "spell.black_hole": return (eye.position, AimGround(40) + Vector3.up * 1.5f, S("spell_blackhole_radius"), false);
-            case "spell.cataclysm": return (eye.position, AimGround(50), S("spell_cataclysm_radius"), false);
+            case "spell.black_hole": return (eye.position, AimGround((float)SpellTuning.BlackHoleRange) + Vector3.up * 1.5f, S("spell_blackhole_radius"), false);
+            case "spell.cataclysm": return (eye.position, PlayerPos + Vector3.up * 0.1f, S("spell_cataclysm_radius"), false);
             case "spell.healing_dome": return (eye.position, (PlayerPos + Vector3.up * 0.1f), (float)SpellTuning.HealingDomeRadius, false);
             case "spell.magic_arrow": return (eye.position, AimPoint((float)SpellTuning.MagicArrowRange), 1f, false);
             case "spell.taunt": return (eye.position, (PlayerPos + Vector3.up * 0.1f), 30f, false);

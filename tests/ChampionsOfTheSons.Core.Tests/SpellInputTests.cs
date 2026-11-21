@@ -54,7 +54,13 @@ public class SpellInputTests
         var db = TestContent.Create(new()
         {
             ["player_stats.json"] = """
-            { "playerStats": [ { "id": "silenced", "kind": "bool", "default": 0 } ] }
+            { "playerStats": [
+              { "id": "silenced", "kind": "bool", "default": 0 },
+              { "id": "max_health", "kind": "add", "default": 0 },
+              { "id": "crit_chance", "kind": "add", "default": 0 },
+              { "id": "all_damage_taken", "kind": "mult", "default": 1 },
+              { "id": "i_infinity_loop", "kind": "bool", "default": 0 }
+            ] }
             """,
             ["spells.json"] = """
             { "spells": [

@@ -27,6 +27,8 @@ internal sealed class SpellBolt
     public Vector3 Pos, Dir;
     public float Speed, Range, Radius = 1.2f, Life = 10;
     public bool Homing;
+    /// <summary>Passes through every enemy on its line instead of stopping at the first (Magic Arrow).</summary>
+    public bool Pierces;
     public EnemyRuntime? Target;
     public Action<SpellBolt, EnemyRuntime>? OnHit;
     public GameObject? Visual;
@@ -53,6 +55,9 @@ internal static class SpellWorld
     private static SpellBuffs? _buffs;
     private static StatSheet? _buffSheet;
     private static readonly Rng Rng = Rng.FromTime();
+
+    /// <summary>The spells' random source (crits).</summary>
+    public static Rng SpellRng => Rng;
 
     /// <summary>True while a spell is dealing its own damage, so hit reactions (Frenzy stacks...) ignore it.</summary>
     public static bool Striking { get; private set; }
@@ -178,11 +183,12 @@ internal static class SpellWorld
         SpellFx.Step(dt);
         FlickerRun.Step(dt);
         var pc = Pc;
-        Buffs.Tick(dt);
+        foreach (var ended in Buffs.Tick(dt))
+            if (ended == "berserk") BerserkLeak();
         Parry.Tick(dt);
         if (Frenzy.Tick(dt)) Buffs.Remove("frenzy");
-        double maxHealth = LocalPlayer.Vitals?.Health != null ? LocalPlayer.Vitals.Health.GetMax() : Derived.MaxHealth(Stats);
-        Shield.Tick(dt, maxHealth, Stats);
+        Shield.Tick(dt, Stats);
+        BerserkStep();
 
         if (LocalPlayer.IsInWorld && LocalPlayer.Vitals != null)
         {
@@ -233,6 +239,15 @@ internal static class SpellWorld
         SpellNet.Flush();
     }
 
+    /// <summary>Berserk keeps energy at the top while it lasts; when it ends an energy-leak debuff takes over for 15 s.</summary>
+    private static void BerserkStep()
+    {
+        if (Buffs.Has("berserk") && LocalPlayer.IsInWorld && LocalPlayer.Vitals?.Stamina is { } st) st.SetCurrentValue(st.GetMax());
+    }
+
+    private static void BerserkLeak() =>
+        Buffs.Apply("berserk_leak", SpellTuning.DebuffSeconds(Stats, SpellTuning.BerserkLeakSeconds), SpellTuning.BerserkLeak());
+
     private static void StepBolt(SpellBolt b, float dt)
     {
         b.Life -= dt;
@@ -257,7 +272,8 @@ internal static class SpellWorld
             if (DistanceToSegment(Center(e), from, to) > b.Radius) continue;
             b.Hit.Add(e);
             b.OnHit?.Invoke(b, e);
-            b.Done = true; // a bolt stops at the first enemy
+            if (b.Pierces) continue; // a piercing bolt keeps going through every enemy
+            b.Done = true; // any other bolt stops at the first enemy
             break;
         }
 

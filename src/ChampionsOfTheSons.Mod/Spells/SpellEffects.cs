@@ -70,9 +70,9 @@ internal static class SpellEffects
         }
         if (Stats.IsOn(PerkStatIds.WarCryResistance)) mods.Add(new StatModifier(StatIds.AllDamageTaken, EffectOp.Mult, PerkRules.WarCryDamageTaken));
         Buffs.Apply("war_cry", SpellTuning.WarCryDuration, mods);
-        // Teammates in range get the damage and attack speed part (COS-23); the armor perks stay the caster's own.
-        Net.CoopExtras.SendTeamSpell("spell.war_cry", Feet(), TeamSpells.WarCryRadius, (float)SpellTuning.WarCryDuration,
-            Math.Max(1, Stats.Get("spell_war_cry_damage")), Math.Max(1, Stats.Get("spell_war_cry_atk_speed")));
+        // Teammates in range get the speed part and the damage part when the caster has it (COS-23); the armor perks stay the caster's own.
+        Net.CoopExtras.SendTeamSpell("spell.war_cry", Feet(), S("spell_war_cry_radius"), (float)SpellTuning.WarCryDuration,
+            Stats.IsOn(SpellTuning.WarCryGiveDamage) ? Math.Max(1, Stats.Get("spell_war_cry_damage")) : 1, SpellTuning.WarCrySpeed(Stats));
         SpellFx.Disc(Feet(), 3f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
         return true;
     }
@@ -148,14 +148,25 @@ internal static class SpellEffects
     private static bool Purge()
     {
         PlayerEffects.ClearDebuffs();
-        if (Stats.IsOn("spell_purge_heal")) PlayerEffects.Heal(LocalPlayer.Vitals.Health.GetMax() * SpellTuning.PurgeHealFraction);
-        // Purgatory (COS-88): damage rises with missing health, measured as the Purge lands.
+        Buffs.Apply("purge_immunity", SpellTuning.PurgeImmunitySeconds, SpellTuning.PurgeImmunity());
+        bool heals = Stats.IsOn("spell_purge_heal");
         var health = LocalPlayer.Vitals.Health;
+        if (heals) PurgeHeal();
+        // Purgatory (COS-88): damage rises with missing health, measured as the Purge lands.
         double purge = PerkRules.PurgeDamage(Stats, health.GetMax() > 0 ? health._currentValue / health.GetMax() : 1);
         if (purge > 1) Buffs.Apply("purgatory", PerkRules.PurgeSeconds, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, purge) });
-        Net.CoopExtras.SendTeamSpell("spell.purge", Feet(), TeamSpells.PurgeRadius, 0, Stats.IsOn("spell_purge_heal") ? SpellTuning.PurgeHealFraction : 0);
+        Net.CoopExtras.SendTeamSpell("spell.purge", Feet(), S("spell_purge_radius"), 0, heals ? 1 : 0);
         SpellFx.Disc(Feet(), 3f, SpellFx.Heal, 1f, LocalPlayer.Transform, SpellFx.Look.Glyph);
         return true;
+    }
+
+    /// <summary>The Purge heal perk: 40% of the missing health and 30% of the missing energy.</summary>
+    public static void PurgeHeal()
+    {
+        var health = LocalPlayer.Vitals.Health;
+        var (hp, energy) = SpellTuning.PurgeHeal(health._currentValue, health.GetMax(), SpellCaster.Energy, SpellCaster.MaxEnergy);
+        PlayerEffects.Heal(hp);
+        PlayerEffects.AddEnergy(energy);
     }
 
     // ---------------------------------------------------------------- zones
@@ -171,43 +182,57 @@ internal static class SpellEffects
             Visual = SpellFx.Disc(at, radius, SpellFx.Heal, 1e6f, look: SpellFx.Look.Dome),
             Pulse = z =>
             {
+                double heal = SpellTuning.HealingDomeHeal(Stats);
                 // Teammates inside heal by the caster's dome numbers, as a share of their own max health (COS-23).
+                double casterMax = Math.Max(1, LocalPlayer.Vitals.Health.GetMax());
                 Net.CoopExtras.SendTeamSpell("spell.healing_dome", z.Center, z.Radius, z.Interval,
-                    SpellTuning.HealingDomeHeal(1, Stats), SpellTuning.HealingDomeEnergy(1, Stats));
+                    heal / casterMax, SpellTuning.HealingDomeEnergy(1, Stats));
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
-                PlayerEffects.Heal(SpellTuning.HealingDomeHeal(LocalPlayer.Vitals.Health.GetMax(), Stats) * z.Interval);
+                PlayerEffects.Heal(heal * z.Interval);
                 PlayerEffects.AddEnergy(SpellTuning.HealingDomeEnergy(Derived.MaxEnergy(Stats), Stats) * z.Interval); // Humming Ground (COS-94)
+                // Rally Ring, immunity perk: damage up, damage taken down, stun and debuff immunity while inside (a second after leaving).
+                var boost = SpellTuning.HealingDomeBoost(Stats);
+                if (boost.Length > 0) Buffs.Apply("healing_dome", 1, boost);
             },
         });
         return true;
     }
 
+    /// <summary>Sun Flare: at the caster; after a 2.5 s warm-up it burns and slows enemies inside every 0.5 s for its duration, and players
+    /// inside heal, move faster and take half damage.</summary>
     private static bool SunFlare()
     {
-        var at = AimGround(30);
-        float radius = S("spell_flare_radius");
-        foreach (var e in EnemiesWithin(at, radius)) Strike(e, Hit(S("spell_flare_damage"), S("spell_flare_damage_scaling")));
+        var at = Feet();
+        float radius = S("spell_flare_radius"), warm = (float)SpellTuning.SunFlareWarmup, total = warm + S("spell_flare_duration");
         AddZone(new SpellZone
         {
-            Id = "sun_flare", Center = at, Radius = radius, Left = S("spell_flare_duration"), Interval = (float)SpellTuning.SunFlareTick,
+            Id = "sun_flare", Center = at, Radius = radius, Left = total, Interval = (float)SpellTuning.SunFlareTick,
             Visual = SpellFx.Disc(at, radius, SpellFx.Holy, 1e6f, look: SpellFx.Look.SunFlare),
             Pulse = z =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius)) e.Combat.ApplySlow("spell.flare", S("spell_flare_slow"), 2);
-                Net.CoopExtras.SendTeamSpell("spell.sun_flare", z.Center, z.Radius, 2, S("spell_flare_heal"), S("spell_flare_boost"));
+                if (total - z.Left < warm) return;
+                foreach (var e in EnemiesWithin(z.Center, z.Radius))
+                {
+                    Strike(e, Hit(S("spell_flare_damage"), S("spell_flare_damage_scaling")));
+                    if (e.IsActive) e.Combat.ApplySlow("spell.flare", S("spell_flare_slow"), 1);
+                }
+                double heal = SpellTuning.SunFlareHeal(Stats) * z.Interval;
+                Net.CoopExtras.SendTeamSpell("spell.sun_flare", z.Center, z.Radius, 1, heal, S("spell_flare_boost"));
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
-                PlayerEffects.Heal(S("spell_flare_heal"));
-                Buffs.Apply("flare_boost", 2, SpellTuning.Speed(Math.Max(1, S("spell_flare_boost"))));
+                PlayerEffects.Heal(heal);
+                Buffs.Apply("flare_boost", 1, SpellTuning.SunFlareBoost(Stats));
             },
         });
         SpellFx.Sphere(at + Vector3.up * 3, 1.2f, SpellFx.Holy, 1f);
         return true;
     }
 
+    /// <summary>Black Hole: its catch radius grows from nothing to <c>spell_blackhole_radius</c> over 2.4 s; an enemy that comes inside stays
+    /// caught, is pulled in at <c>spell_blackhole_pullforce</c> m/s (not when immune to crowd control) and is hit every 0.5 s.</summary>
     private static bool BlackHole()
     {
-        var at = AimGround(40) + Vector3.up * 1.5f;
-        float radius = S("spell_blackhole_radius"), pull = S("spell_blackhole_pullforce") / (float)SpellTuning.BlackHolePullDivisor;
+        var at = AimGround((float)SpellTuning.BlackHoleRange) + Vector3.up * 1.5f;
+        float radius = S("spell_blackhole_radius"), pull = S("spell_blackhole_pullforce"), elapsed = 0;
         var core = SpellFx.Sphere(at, 1.5f, SpellFx.Dark, 1e6f, look: SpellFx.Look.BlackHole);
         var caught = new HashSet<EnemyRuntime>();
         AddZone(new SpellZone
@@ -216,21 +241,22 @@ internal static class SpellEffects
             Visual = core,
             Frame = (z, dt) =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius))
+                elapsed += dt;
+                foreach (var e in EnemiesWithin(z.Center, (float)SpellTuning.BlackHoleCatchRadius(z.Radius, elapsed))) caught.Add(e);
+                foreach (var e in caught)
                 {
+                    if (!e.IsActive || e.Combat.CcImmune) continue;
                     var to = z.Center - Center(e);
                     float d = to.magnitude;
-                    if (d < 2f) continue;
-                    Push(e, to / d * Mathf.Min(pull * dt, d - 2f));
+                    float keep = (float)SpellTuning.BlackHoleKeepAway;
+                    if (d < keep) continue;
+                    Push(e, to / d * Mathf.Min(pull * dt, d - keep));
                 }
             },
             Pulse = z =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius))
-                {
-                    Strike(e, Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")));
-                    caught.Add(e);
-                }
+                foreach (var e in caught.ToList())
+                    if (e.IsActive) Strike(e, Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")));
             },
             // Last Engineer's Note: a black hole that caught enough enemies releases a Ball Lightning where it was.
             End = z =>
@@ -245,24 +271,39 @@ internal static class SpellEffects
         return true;
     }
 
+    /// <summary>Cataclysm: at the caster, who is slowed for 2 s; after a 2 s warm-up it hits everything inside every third of a second. Fire:
+    /// half damage, slows, ignites. Arcane (perk or item): double damage, a full stop and x1.65 damage taken.</summary>
     private static bool Cataclysm()
     {
-        var at = AimGround(50);
-        float radius = S("spell_cataclysm_radius");
-        var color = Stats.IsOn("spell_cataclysm_arcane") ? SpellFx.Arcane : SpellFx.Fire;
-        // Mysterious Robe (COS-88): the arcane vortex strikes harder and freezes what is inside.
+        var at = Feet();
+        float radius = S("spell_cataclysm_radius"), warm = (float)SpellTuning.CataclysmWarmup, total = warm + S("spell_cataclysm_duration");
         bool arcane = Stats.IsOn(PerkStatIds.CataclysmArcane);
+        var color = arcane ? SpellFx.Arcane : SpellFx.Fire;
+        Buffs.Apply("cataclysm_slow", SpellTuning.CataclysmCasterSlowSeconds, SpellTuning.Speed(SpellTuning.CataclysmCasterSlow));
         AddZone(new SpellZone
         {
-            Id = "cataclysm", Center = at, Radius = radius, Left = S("spell_cataclysm_duration"), Interval = (float)SpellTuning.CataclysmTick,
+            Id = "cataclysm", Center = at, Radius = radius, Left = total, Interval = (float)SpellTuning.CataclysmTick,
             Visual = SpellFx.Column(at, radius, 14f, color, 1e6f),
             Pulse = z =>
             {
+                if (total - z.Left < warm) return;
+                double factor = SpellTuning.CataclysmDamageFactor(arcane);
                 foreach (var e in EnemiesWithin(z.Center, z.Radius))
                 {
                     var hit = Hit(S("spell_cataclysm_damage"), S("spell_cataclysm_damage_scaling"));
-                    Strike(e, arcane ? hit with { Amount = hit.Amount * PerkRules.ArcaneCataclysmDamage } : hit);
-                    if (arcane && e.IsActive) e.Combat.ApplySlow("spell.cataclysm.arcane", PerkRules.ArcaneCataclysmSlow, 1);
+                    hit = hit with { Amount = hit.Amount * factor };
+                    Strike(e, hit);
+                    if (!e.IsActive) continue;
+                    if (arcane)
+                    {
+                        e.Combat.ApplyStun(SpellTuning.CataclysmArcaneStop);
+                        e.Combat.ApplyWeaken("spell.cataclysm.arcane", SpellTuning.CataclysmArcaneDamageTaken, SpellTuning.CataclysmArcaneStop);
+                    }
+                    else
+                    {
+                        e.Combat.ApplySlow("spell.cataclysm", SpellTuning.CataclysmFireSlow, 1);
+                        e.Combat.ApplyDot("player.cataclysm", DotKind.Fire, hit.Amount * SpellTuning.CataclysmFireBurnFraction, SpellTuning.CataclysmFireBurnSeconds);
+                    }
                 }
             },
         });
@@ -302,25 +343,61 @@ internal static class SpellEffects
         return true;
     }
 
+    /// <summary>The orb flies at 12 m/s and bounces off the world; it stops on touching an enemy or after 30 s, and 4.55 s later explodes
+    /// within 28 m (<c>spell_ball_lightning_damage</c> + flat scaling) and sets the enemies burning.</summary>
     private static void LaunchBallLightning(Vector3 start, Vector3 dir)
     {
         var ball = SpellFx.Sphere(start, 0.8f, SpellFx.Storm, 1e6f);
+        float speed = (float)SpellTuning.BallLightningSpeed;
+        float age = 0, fuse = 0;
+        bool stopped = false;
+        var heading = dir;
+        var self = LocalPlayer.Transform != null ? LocalPlayer.Transform.root : null;
         AddZone(new SpellZone
         {
-            Id = "ball_lightning", Center = start, Radius = (float)SpellTuning.BallLightningRadius, Left = (float)SpellTuning.BallLightningSeconds,
-            Interval = (float)SpellTuning.BallLightningTick, Visual = ball,
+            Id = "ball_lightning", Center = start, Radius = (float)SpellTuning.BallLightningRadius,
+            Left = (float)(SpellTuning.BallLightningMaxSeconds + SpellTuning.BallLightningFuse), Interval = 0, Visual = ball,
             Frame = (z, dt) =>
             {
-                z.Center += dir * (float)SpellTuning.BallLightningSpeed * dt;
+                if (stopped)
+                {
+                    fuse += dt;
+                    if (fuse >= SpellTuning.BallLightningFuse) z.Left = 0;
+                    return;
+                }
+                age += dt;
+                if (age >= SpellTuning.BallLightningMaxSeconds || EnemiesWithin(z.Center, (float)SpellTuning.BallLightningTouch).Count > 0)
+                {
+                    stopped = true;
+                    return;
+                }
+                float step = speed * dt;
+                foreach (var h in Physics.SphereCastAll(z.Center, 0.5f, heading, step + 0.1f, ~0, QueryTriggerInteraction.Ignore).OrderBy(h => h.distance))
+                {
+                    if (self != null && h.collider.transform.IsChildOf(self)) continue;
+                    if (h.distance <= 0) continue; // already overlapping something: keep going
+                    if (EnemyRegistry.Live.Any(en => en.Actor != null && h.collider.transform.IsChildOf(en.Actor.transform))) continue; // enemies stop it, they do not bounce it
+                    heading = Vector3.Reflect(heading, h.normal).normalized;
+                    break;
+                }
+                z.Center += heading * step;
                 if (z.Visual != null) z.Visual.transform.position = z.Center;
             },
-            Pulse = z =>
+            End = z =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, SpellTuning.BallLightningZap(Stats, Rng.FromTime()));
+                foreach (var e in EnemiesWithin(z.Center, z.Radius))
+                {
+                    var hit = SpellTuning.BallLightningBlast(Stats, SpellRng);
+                    Strike(e, hit);
+                    if (e.IsActive) e.Combat.ApplyDot("player.ball_lightning", DotKind.Fire, hit.Amount * SpellTuning.BallLightningBurnFraction, SpellTuning.BallLightningBurnSeconds);
+                }
+                SpellFx.Disc(z.Center, z.Radius, SpellFx.Storm, 0.8f);
             },
         });
-        // Teammates fly their copy along the same line for the same time, so it ends at the same place (COS-80).
-        SpellNet.NoteMotion(ball, (float)SpellTuning.BallLightningSeconds, dir * (float)SpellTuning.BallLightningSpeed);
+        // Teammates fly their copy straight to where it first bounces (COS-80); the explosion is drawn at the real place.
+        float flight = (float)SpellTuning.BallLightningMaxSeconds;
+        if (Physics.SphereCast(start, 0.5f, heading, out var first, speed * flight, ~0, QueryTriggerInteraction.Ignore)) flight = first.distance / speed;
+        SpellNet.NoteMotion(ball, flight, heading * speed);
     }
 
     // ---------------------------------------------------------------- bursts and melee
@@ -373,27 +450,79 @@ internal static class SpellEffects
         float dist = S("spell_snap_freeze_dist");
         foreach (var e in EnemiesWithin(PlayerPos, dist))
         {
-            Strike(e, Hit(SpellTuning.SnapFreezeDamage, S("spell_snap_damage_scaling")));
-            if (e.IsActive) e.Combat.ApplySlow("spell.snap_freeze", S("spell_snap_float_amount"), S("spell_snap_freeze_duration"));
+            Strike(e, SpellTuning.SnapFreezeHit(Stats, SpellRng));
+            if (!e.IsActive) continue;
+            e.Combat.ApplySlow("spell.snap_freeze", S("spell_snap_float_amount"), S("spell_snap_freeze_duration"));
+            e.Combat.ApplyStun(SpellTuning.SnapFreezeStop); // a full stop first
         }
         SpellFx.Disc(Feet(), dist, SpellFx.Ice, 1.2f);
         return true;
     }
 
+    /// <summary>The share of the cooldown a cast leaves (1 normally; Roaring Cheeks in the air a third); <see cref="SpellCaster.Cast"/> applies it.</summary>
+    public static double CooldownShare { get; set; } = 1;
+
+    /// <summary>Roaring Cheeks: a 7.2 s wind-up with the caster slowed, then a blast over a sphere behind the caster that launches them forward. In the
+    /// air there is no wind-up, the sphere is half the size and only a third of the cooldown applies.</summary>
     private static bool RoaringCheeks()
     {
-        float radius = S("spell_fart_radius");
-        foreach (var e in EnemiesWithin(PlayerPos, radius))
+        bool air = SpellCaster.GroundY(PlayerPos + Vector3.up) is float gy && PlayerPos.y - gy > 1.5f;
+        if (air)
         {
-            Strike(e, Hit(S("spell_fart_base_dmg"), S("spell_fart_damage_scaling")));
+            CooldownShare = SpellTuning.RoarAirCooldownShare;
+            Roar(true);
+            return true;
+        }
+        Buffs.Apply("roaring_cheeks_windup", SpellTuning.RoarWindup, SpellTuning.Speed(SpellTuning.RoarWindupSlow));
+        SpellFx.Disc(Feet(), 2.5f, SpellFx.Dark, (float)SpellTuning.RoarWindup, LocalPlayer.Transform, SpellFx.Look.Gas);
+        AddZone(new SpellZone
+        {
+            Id = "roaring_cheeks_windup", Center = PlayerPos, Radius = 0, Left = (float)SpellTuning.RoarWindup, Interval = 0,
+            End = _ => Roar(false),
+        });
+        return true;
+    }
+
+    private static void Roar(bool air)
+    {
+        float radius = S("spell_fart_radius") * (air ? (float)SpellTuning.RoarAirRadiusShare : 1f);
+        var back = Eye.forward;
+        back.y = 0;
+        back = back.sqrMagnitude < 1e-4f ? Vector3.back : -back.normalized;
+        var center = PlayerPos + back * radius;
+        foreach (var e in EnemiesWithin(center, radius))
+        {
+            var hit = Hit(S("spell_fart_base_dmg"), S("spell_fart_damage_scaling"));
+            Strike(e, hit);
             if (!e.IsActive) continue;
+            e.Combat.ApplyDot("player.roaring_cheeks", DotKind.Poison, hit.Amount * SpellTuning.RoarDotShare, SpellTuning.RoarDotSeconds);
             e.Combat.ApplySlow("spell.roaring_cheeks", S("spell_fart_slow"), S("spell_fart_debuff_duration"));
-            var away = Center(e) - PlayerPos;
+            var away = Center(e) - center;
             away.y = 0;
             Push(e, away.normalized * S("spell_fart_knockback") * (float)SpellTuning.RoarKnockbackScale);
         }
-        SpellFx.Disc(Feet(), radius, SpellFx.Dark, 1f, look: SpellFx.Look.Gas);
-        return true;
+        SpellFx.Disc(center, radius, SpellFx.Dark, 1f, look: SpellFx.Look.Gas);
+        Launch(-back);
+    }
+
+    /// <summary>Throws the caster forward and up; gravity brings them down (a character-controller arc, one step per frame).</summary>
+    private static void Launch(Vector3 forward)
+    {
+        var cc = LocalPlayer.Transform != null ? LocalPlayer.Transform.GetComponent<CharacterController>() : null;
+        if (cc == null) return;
+        var velocity = forward * (float)SpellTuning.RoarLaunchForward + Vector3.up * (float)SpellTuning.RoarLaunchUp;
+        float age = 0;
+        AddZone(new SpellZone
+        {
+            Id = "roaring_cheeks_launch", Center = PlayerPos, Radius = 0, Left = 3f, Interval = 0,
+            Frame = (z, dt) =>
+            {
+                age += dt;
+                velocity.y -= (float)SpellTuning.RoarGravity * dt;
+                cc.Move(velocity * dt);
+                if (age > 0.2f && cc.isGrounded) z.Left = 0;
+            },
+        });
     }
 
     private static bool Portal()
@@ -425,7 +554,7 @@ internal static class SpellEffects
     private static bool MagicArrow()
     {
         var eye = Eye;
-        int volley = 1 + Mathf.Max(0, Mathf.RoundToInt(S("spell_magic_arrow_volley_count")));
+        int volley = 1 + 2 * Mathf.Max(0, Mathf.RoundToInt(S("spell_magic_arrow_volley_count")));
         for (int i = 0; i < volley; i++)
         {
             float yaw = volley == 1 ? 0 : (i - (volley - 1) / 2f) * 6f;
@@ -434,23 +563,24 @@ internal static class SpellEffects
         return true;
     }
 
+    /// <summary>A Magic Arrow passes through every enemy on its line; each is hit, slowed x0.6 (x0.2 with the perk) and, with the other perk, takes x1.5.</summary>
     private static void FireMagicArrow(Vector3 from, Vector3 dir)
     {
+        AddBolt(new SpellBolt
         {
-            AddBolt(new SpellBolt
+            Id = "magic_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f,
+            Pierces = true,
+            Visual = SpellFx.Sphere(from + dir, 0.25f, SpellFx.Arcane, 1e6f),
+            OnHit = (b, e) =>
             {
-                Id = "magic_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f,
-                Visual = SpellFx.Sphere(from + dir, 0.25f, SpellFx.Arcane, 1e6f),
-                OnHit = (b, e) =>
-                {
-                    Strike(e, Hit(SpellTuning.MagicArrowDamage, S("spell_magic_arrow_damage_scaling"), Stats.IsOn("spell_magic_arrow_crit")));
-                    if (!e.IsActive) return;
-                    if (Stats.IsOn("spell_magic_arrow_dmg_debuff")) e.Combat.ApplyWeaken("spell.magic_arrow", 1.25, S("spell_magic_arrow_duration"));
-                    if (Stats.IsOn("spell_magic_arrow_double_slow")) e.Combat.ApplySlow("spell.magic_arrow", 0.5, S("spell_magic_arrow_duration"));
-                    SpellFx.Sphere(b.Pos, 0.8f, SpellFx.Arcane, 0.3f);
-                },
-            });
-        }
+                Strike(e, SpellTuning.MagicArrowHit(Stats, SpellRng));
+                if (!e.IsActive) return;
+                double slow = Stats.IsOn("spell_magic_arrow_double_slow") ? SpellTuning.MagicArrowDoubleSlow : SpellTuning.MagicArrowSlow;
+                e.Combat.ApplySlow("spell.magic_arrow", slow, S("spell_magic_arrow_duration"));
+                if (Stats.IsOn("spell_magic_arrow_dmg_debuff")) e.Combat.ApplyWeaken("spell.magic_arrow", SpellTuning.MagicArrowDamageTaken, S("spell_magic_arrow_duration"));
+                SpellFx.Sphere(b.Pos, 0.8f, SpellFx.Arcane, 0.3f);
+            },
+        });
     }
 
     // ---------------------------------------------------------------- unique items that drive spells (COS-42)
