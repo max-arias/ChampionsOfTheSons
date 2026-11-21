@@ -143,6 +143,7 @@ internal static class FlickerRun
         LocalPlayer.Transform.rotation = _originLook;
         _phase = Phase.Beat;
         _timer = (float)FlickerStrikeRules.Beat;
+        ScreenFx.Beat(_timer + 0.05f); // the "already cut" moment: desaturate, vignette, game sound ducked (local only)
     }
 
     private static void Payoff()
@@ -159,6 +160,7 @@ internal static class FlickerRun
             SpellFx.Column(c, hit.Crit ? 0.09f : 0.05f, hit.Crit ? 2.4f : 1.6f, hit.Crit ? Color.white : SpellFx.Steel, 0.35f); // the slash
             alive++;
         }
+        ScreenFx.Release();
         if (alive > 0) Audio.ModAudio.PlayAt("impact_metal", _origin, 40f);
         LastPayoffFrame = Time.frameCount;
         Cancel();
@@ -166,6 +168,7 @@ internal static class FlickerRun
 
     public static void Cancel()
     {
+        if (_phase == Phase.Beat) ScreenFx.Release();
         _phase = Phase.Idle;
         Targets.Clear();
         _castId = null;

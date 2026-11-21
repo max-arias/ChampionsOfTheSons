@@ -82,6 +82,8 @@ internal static class FlickerSelfTest
         SelfTest.Check("flicker: every visited enemy took its hit", hurt >= FlickerRun.LastTargets && FlickerRun.LastPayoffFrame > 0,
             $"{hurt} hurt of {FlickerRun.LastTargets} visited, payoff frame {FlickerRun.LastPayoffFrame}");
         SelfTest.Check("flicker: the visit order covered all three", FlickerRun.LastTargets == 3, FlickerRun.LastTargets.ToString());
+        SelfTest.Check("flicker: the beat darkened the screen and released it", Visuals.ScreenFx.LastPeak > 0.5f && Visuals.ScreenFx.Weight < 0.01f && !Visuals.ScreenFx.Ducked,
+            $"peak {Visuals.ScreenFx.LastPeak:0.00}, now {Visuals.ScreenFx.Weight:0.00}, ducked {Visuals.ScreenFx.LastDucked} -> {Visuals.ScreenFx.Ducked}");
     }
 
     private static void NoTarget()

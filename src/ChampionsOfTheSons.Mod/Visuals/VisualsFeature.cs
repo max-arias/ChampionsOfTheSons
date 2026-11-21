@@ -34,9 +34,11 @@ public sealed class VisualsFeature : IModFeature
         if (!inWorld)
         {
             PlayerStateFx.Clear();
+            ScreenFx.Clear();
             return;
         }
         PlayerStateFx.Update();
+        ScreenFx.Update(Time.unscaledDeltaTime);
         FrameMeter.Sample(Time.unscaledDeltaTime);
     }
 
