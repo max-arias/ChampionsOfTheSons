@@ -7,8 +7,9 @@ namespace ChampionsOfTheSons.Mod.Loot;
 
 /// <summary>
 /// World objects for ground drops (Max 2026-11-21: keep it simple): the item type's model from the asset bundle lying on the
-/// ground (COS-63; a rarity-tinted gem when the bundle or model is missing), a ring in the rarity's colour around it, and for
-/// Rare and Legendary a short line rising from the ring over and over. No name plate. Near the end of its lifetime it blinks.
+/// ground (COS-63; a rarity-tinted gem when the bundle or model is missing) in a beam of its rarity's colour (Fx_LootBeam: a glow
+/// pool, a beam fading upward, rising sparks; small and short for Common and Magic, tall with a ring for Rare and Legendary).
+/// No name plate. Near the end of its lifetime it blinks.
 /// </summary>
 internal static class LootVisuals
 {
@@ -22,9 +23,9 @@ internal static class LootVisuals
         public Vector3 Position;
         /// <summary>The root's scale when created (the fade shrinks from it).</summary>
         public float Scale = 1;
-        public LineRenderer? Ring;
-        public Transform? Pulse;
-        public float PulseHeight, PulsePeriod = 1, PulsePhase;
+        /// <summary>The Fx_LootBeam effect (glow pool, beam, sparks; the ring on Rare and Legendary).</summary>
+        public GameObject? Beam;
+        public bool HasRing;
         public bool Shown = true;
     }
 
@@ -79,17 +80,7 @@ internal static class LootVisuals
             LieOnGround(gem.transform, pos.y, tip: false);
         }
         var v = new Visual { Id = drop.Id, Root = root, Gem = gem.transform, Color = color, Rarity = drop.Item.Rarity, Position = pos };
-        v.Ring = Ring(root.transform, pos, color);
-        // Rare and Legendary only: a short line that keeps rising from the ring (Max 2026-11-21).
-        if (drop.Item.Rarity >= Rarity.Rare)
-        {
-            var pulse = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            Prepare(pulse, root.transform, color);
-            v.Pulse = pulse.transform;
-            v.PulseHeight = drop.Item.Rarity == Rarity.Legendary ? 3.2f : 2.2f;
-            v.PulsePeriod = drop.Item.Rarity == Rarity.Legendary ? 0.9f : 1.2f;
-            v.PulsePhase = (drop.Id * 0.37f) % 1f;
-        }
+        Beam(v, root.transform, pos, drop.Item.Rarity, color);
         ById[drop.Id] = v;
         Animate(v, 0, null);
     }
@@ -114,49 +105,60 @@ internal static class LootVisuals
         return all;
     }
 
-    /// <summary>The rarity ring around the drop, its points set on the ground so it follows slopes.</summary>
-    private static LineRenderer? Ring(Transform parent, Vector3 center, Color color)
+    public const string LootBeam = "Fx_LootBeam";
+
+    /// <summary>How a rarity's beam looks (Max 2026-11-21, after his reference picture): every rarity gets the glow pool, beam and sparks,
+    /// Common and Magic small and short, Rare and Legendary tall with a ring at the base.</summary>
+    internal readonly record struct BeamLook(float Height, float Size, float Sparks, float Streaks, bool Ring);
+
+    internal static BeamLook LookOf(Rarity r) => r switch
     {
-        var go = new GameObject("ring");
-        go.transform.SetParent(parent, false);
-        var line = go.AddComponent<LineRenderer>();
-        if (line == null) return null;
-        const int Points = 28;
-        line.useWorldSpace = true;
-        line.loop = true;
-        line.positionCount = Points;
-        line.widthMultiplier = 0.045f;
-        line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        line.receiveShadows = false;
-        var unlit = FindUnlit();
-        var mat = unlit != null ? new Material(unlit) : line.material;
-        mat.SetColor("_UnlitColor", color);
-        mat.color = color;
-        line.material = mat;
-        line.startColor = line.endColor = color;
-        for (int i = 0; i < Points; i++)
+        Rarity.Common => new(0.8f, 0.7f, 4, 0, false),
+        Rarity.Magic => new(1.3f, 0.8f, 7, 1, false),
+        Rarity.Rare => new(2.6f, 1.0f, 14, 3, true),
+        _ => new(3.8f, 1.2f, 24, 5, true),
+    };
+
+    private static void Beam(Visual v, Transform parent, Vector3 pos, Rarity rarity, Color color)
+    {
+        var look = LookOf(rarity);
+        var fx = Visuals.FxKit.Spawn(LootBeam, pos, look.Size, color, parent);
+        if (fx == null) return;
+        foreach (var t in fx.GetComponentsInChildren<Transform>(true))
         {
-            float a = i * Mathf.PI * 2f / Points;
-            var p = center + new Vector3(Mathf.Cos(a) * RingRadius, 0, Mathf.Sin(a) * RingRadius);
-            p.y = GroundNear(p, center.y) + 0.04f;
-            line.SetPosition(i, p);
+            switch (t.name)
+            {
+                case "beam" or "core":
+                    t.localScale = new Vector3(t.localScale.x, look.Height / look.Size, t.localScale.z);
+                    break;
+                case "ring":
+                    t.gameObject.SetActive(look.Ring);
+                    break;
+            }
         }
-        return line;
+        foreach (var ps in fx.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            var em = ps.emission;
+            var main = ps.main;
+            if (ps.gameObject.name == "sparks")
+            {
+                em.rateOverTimeMultiplier = look.Sparks * (Visuals.FxKit.Reduced ? 0.5f : 1f);
+                main.startLifetimeMultiplier = Mathf.Max(0.5f, look.Height * 0.45f / look.Size);
+            }
+            else if (ps.gameObject.name == "streaks")
+            {
+                em.rateOverTimeMultiplier = look.Streaks;
+                main.startLifetimeMultiplier = look.Height / (2.7f * look.Size);
+                if (look.Streaks <= 0) ps.Clear();
+            }
+        }
+        // The hot core reads whiter than the beam around it.
+        foreach (var r in fx.GetComponentsInChildren<Renderer>(true))
+            if (r.gameObject.name == "core") Visuals.FxKit.Tint(r.gameObject, Color.Lerp(color, Color.white, 0.55f));
+        v.Beam = fx;
+        v.HasRing = look.Ring;
     }
 
-    public const float RingRadius = 0.55f;
-
-    /// <summary>The ground height at <paramref name="p"/> closest to <paramref name="y"/> (the drop's own ground), within half a metre.</summary>
-    private static float GroundNear(Vector3 p, float y)
-    {
-        float best = y, bestDist = 0.5f;
-        foreach (var h in Physics.RaycastAll(new Vector3(p.x, y + 0.5f, p.z), Vector3.down, 1f, ~0, QueryTriggerInteraction.Ignore))
-        {
-            float d = Mathf.Abs(h.point.y - y);
-            if (d < bestDist) { best = h.point.y; bestDist = d; }
-        }
-        return best;
-    }
 
 
     /// <summary>Every drop model prefab (self-tests).</summary>
@@ -199,6 +201,10 @@ internal static class LootVisuals
     public static void Destroy(int id)
     {
         if (!ById.Remove(id, out var v)) return;
+        // The effect's materials are per-instance (tinted): free them with the drop.
+        if (v.Beam != null)
+            foreach (var r in v.Beam.GetComponentsInChildren<Renderer>(true))
+                if (r.sharedMaterial != null) UnityEngine.Object.Destroy(r.sharedMaterial);
         if (v.Root != null) UnityEngine.Object.Destroy(v.Root);
     }
 
@@ -228,15 +234,6 @@ internal static class LootVisuals
     private static void Animate(Visual v, float time, GroundDrop? drop)
     {
         if (v.Root == null) return;
-        if (v.Pulse != null)
-        {
-            float t = (time / v.PulsePeriod + v.PulsePhase) % 1f;
-            const float Length = 0.55f;
-            float y = 0.05f + t * v.PulseHeight;
-            float width = Mathf.Lerp(0.05f, 0.015f, t);
-            v.Pulse.localScale = new Vector3(width, Length / 2f, width);
-            v.Pulse.position = v.Position + Vector3.up * (y + Length / 2f);
-        }
         if (drop == null) return;
         bool shown = BlinkOn(drop.Remaining, time);
         if (shown != v.Shown)

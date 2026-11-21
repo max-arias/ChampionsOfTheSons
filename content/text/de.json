@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "Magiefund der Gruppe (Beute)",
  "ui.death.title": "Du bist gestorben",
  "ui.elites.format": "{0} {1}",
+ "ui.enemyhud.more_bosses": "+{0} Bosse",
+ "ui.enemyhud.one_more_boss": "+1 Boss",
  "ui.equipment.title": "Ausrüstung",
  "ui.followups.daily": "Ein neuer Tag: {0}",
  "ui.followups.dodge": "Ausweichen",

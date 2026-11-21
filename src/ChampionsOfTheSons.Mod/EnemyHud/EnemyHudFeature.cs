@@ -21,7 +21,8 @@ public sealed class EnemyHudFeature : IModFeature
 {
     internal const float EngageRange = 60f, HitMemory = 10f, LoseTrack = 3f;
     private const float ScanInterval = 0.25f;
-    internal const int MaxBars = 2;
+    /// <summary>One bar (Max 2026-11-21: two stacked bars crowded the screen); other engaged bosses show as "+N".</summary>
+    internal const int MaxBars = 1;
 
     internal static EnemyHudFeature? Instance { get; private set; }
 
@@ -41,6 +42,23 @@ public sealed class EnemyHudFeature : IModFeature
     /// <summary>A boss newly engages the local player (its bar appears); the tier effects burst on it (COS-110).</summary>
     public static event Action<EnemyRuntime>? BossEngaged;
     internal int VisibleBars => _bars.Count(b => b.Visible);
+
+    /// <summary>Whether this enemy has a boss bar now (its nameplate hides, Max 2026-11-21).</summary>
+    internal bool HasBar(EnemyRuntime r)
+    {
+        if (!LayerShown) return false;
+        foreach (var b in _bars) if (b.Visible && ReferenceEquals(b.Target, r)) return true;
+        return false;
+    }
+
+    /// <summary>Canvas rectangles (y up) of the visible bars, for the nameplates to keep clear of; returns how many.</summary>
+    internal int BarRects(Rect[] into)
+    {
+        if (!LayerShown) return 0;
+        int n = 0;
+        foreach (var b in _bars) if (b.Visible && n < into.Length) into[n++] = b.Bounds;
+        return n;
+    }
     /// <summary>Whether the boss bar layer is drawn this frame (it hides with the HUD).</summary>
     internal bool LayerShown => _built && _root.Root.activeSelf;
     /// <summary>The panel's place among the UI panels; later ones draw on top (self-test).</summary>
@@ -143,12 +161,14 @@ public sealed class EnemyHudFeature : IModFeature
         foreach (var (r, _) in _order)
         {
             if (shown >= MaxBars) break;
+            // The nearest engaged boss keeps the bar; the rest are counted on it.
             int slot = Array.FindIndex(_bars, b => ReferenceEquals(b.Target, r));
             if (slot < 0) slot = Array.FindIndex(_bars, b => b.Target == null);
             if (slot < 0) break;
             _bars[slot].Show(r, slot);
             shown++;
         }
+        foreach (var b in _bars) if (b.Target != null) b.SetMore(_order.Count - shown);
     }
 
     private static bool Alive(EnemyRuntime r)

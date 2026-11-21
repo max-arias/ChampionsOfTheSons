@@ -208,8 +208,8 @@ internal static class EnemyHudSelfTest
         SelfTest.Check("boss bar: spans 80% of the screen width", Math.Abs(b.width - cw * BossBar.ScreenShare) < 2, $"{b.width:0} of {cw:0}");
         int barIndex = Bars.PanelIndex, hudIndex = HudFeature.Instance?.PanelIndex ?? -1;
         SelfTest.Check("boss bar: draws over the nameplates", barIndex > hudIndex, $"bar panel {barIndex}, HUD panel {hudIndex}");
-        // A boss in view with the scanner open: both at once, for the screenshot.
-        Plates.ForceFocus(_boss);
+        SelfTest.Check("boss bar: the boss's own nameplate hides while it has the bar", !Plates.HasPlate(boss));
+        SelfTest.Check("boss bar: one boss, no '+N' tag", bar.MoreText == "", bar.MoreText);
     }
 
     private static void Cleanup()

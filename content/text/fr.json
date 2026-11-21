@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "Butin magique du groupe (butin)",
  "ui.death.title": "Vous êtes mort",
  "ui.elites.format": "{0} {1}",
+ "ui.enemyhud.more_bosses": "+{0} boss",
+ "ui.enemyhud.one_more_boss": "+1 boss",
  "ui.equipment.title": "Équipement",
  "ui.followups.daily": "Un nouveau jour : {0}",
  "ui.followups.dodge": "Esquive",

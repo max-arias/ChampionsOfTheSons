@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "パーティーのマジックファインド（ドロップ）",
  "ui.death.title": "死んでしまった",
  "ui.elites.format": "{1}{0}",
+ "ui.enemyhud.more_bosses": "+{0} 体のボス",
+ "ui.enemyhud.one_more_boss": "+1 体のボス",
  "ui.equipment.title": "装備",
  "ui.followups.daily": "新しい一日：{0}",
  "ui.followups.dodge": "回避",

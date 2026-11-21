@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "파티 마법 아이템 발견 (드롭)",
  "ui.death.title": "사망했습니다",
  "ui.elites.format": "{1} {0}",
+ "ui.enemyhud.more_bosses": "+{0} 보스",
+ "ui.enemyhud.one_more_boss": "+1 보스",
  "ui.equipment.title": "장비",
  "ui.followups.daily": "새로운 날: {0}",
  "ui.followups.dodge": "회피",

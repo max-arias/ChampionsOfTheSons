@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "Fortuna magica del gruppo (bottino)",
  "ui.death.title": "Sei morto",
  "ui.elites.format": "{0} {1}",
+ "ui.enemyhud.more_bosses": "+{0} boss",
+ "ui.enemyhud.one_more_boss": "+1 boss",
  "ui.equipment.title": "Equipaggiamento",
  "ui.followups.daily": "Un nuovo giorno: {0}",
  "ui.followups.dodge": "Schivata",

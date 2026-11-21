@@ -15,6 +15,9 @@ public static class ModAudio
 {
     public const float DefaultRange = 40f;
 
+    /// <summary>Positioned sounds play at full volume within this many metres, then fade with distance.</summary>
+    public const float NearDistance = 3f;
+
     private static readonly HashSet<string> Cues = new();
     private static readonly List<AudioLoop> Loops = new();
     private static readonly Dictionary<string, float> LastStart = new();
@@ -25,6 +28,27 @@ public static class ModAudio
     private const float Repeat = 0.06f;
 
     public static bool Ready { get; private set; }
+
+    /// <summary>The channel of the last <see cref="PlayAt"/> (self-test).</summary>
+    internal static Channel LastChannel;
+
+    /// <summary>The last positioned sound's 3D setup as FMOD reports it (self-test).</summary>
+    public static string LastChannelInfo()
+    {
+        var ch = LastChannel;
+        ch.getMode(out var mode);
+        ch.get3DMinMaxDistance(out float min, out float max);
+        ch.get3DLevel(out float level);
+        ch.get3DSpread(out float spread);
+        ch.get3DAttributes(out var pos, out _, out _);
+        return $"mode {mode}, min {min:0.##} max {max:0.##}, 3D level {level:0.##}, spread {spread:0.#}, at ({pos.x:0.#}, {pos.y:0.#}, {pos.z:0.#})";
+    }
+
+    /// <summary>FMOD's core listener position now (self-test).</summary>
+    public static Vector3? ListenerPosition() =>
+        Ready && SoundTools.CoreSystem.Value.get3DListenerAttributes(0, out var p, out _, out _, out _) == RESULT.OK ? new Vector3(p.x, p.y, p.z) : null;
+
+
 
     /// <summary>Sounds started so far and the last cue (self-tests).</summary>
     public static int PlayedCount { get; private set; }
@@ -61,7 +85,10 @@ public static class ModAudio
                 s.CopyTo(ms);
                 var bytes = ms.ToArray();
                 Sounds2D[cue] = Create(bytes, MODE._2D);
-                Sounds3D[cue] = Create(bytes, MODE._3D | MODE._3D_LINEARROLLOFF);
+                // Inverse rolloff tapered to silence at the range (Max 2026-11-21: drops sounded "in the ear"): full volume within
+                // NearDistance, then quieter with distance as the game's own sounds do; linear rolloff over 70 m kept a drop 10 m away
+                // at almost full volume, so nothing told the ear how far it was.
+                Sounds3D[cue] = Create(bytes, MODE._3D | MODE._3D_INVERSETAPEREDROLLOFF);
                 Cues.Add(cue);
             }
             catch (Exception e)
@@ -116,7 +143,8 @@ public static class ModAudio
         if (!CanPlay(cue, volume, out var v)) return;
         try
         {
-            SoundTools.PlaySound(Sounds3D[cue!], position, range, v, pitch);
+            LastChannel = SoundTools.PlaySound(Sounds3D[cue!], position, range, v, pitch);
+            LastChannel.set3DMinMaxDistance(NearDistance, range);
             Note(cue!);
         }
         catch (Exception e)
@@ -133,6 +161,7 @@ public static class ModAudio
         try
         {
             var ch = SoundTools.PlaySound(Sounds3D[cue!], position, range, v, 1f);
+            ch.set3DMinMaxDistance(NearDistance, range);
             ch.setMode(MODE.LOOP_NORMAL);
             ch.setLoopCount(-1);
             var loop = new AudioLoop(ch, volume);

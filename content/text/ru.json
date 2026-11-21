@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "Поиск магических предметов отряда (добыча)",
  "ui.death.title": "Вы погибли",
  "ui.elites.format": "{0} {1}",
+ "ui.enemyhud.more_bosses": "+{0} боссов",
+ "ui.enemyhud.one_more_boss": "+1 босс",
  "ui.equipment.title": "Снаряжение",
  "ui.followups.daily": "Новый день: {0}",
  "ui.followups.dodge": "Уклонение",

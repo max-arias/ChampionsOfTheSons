@@ -104,9 +104,9 @@ internal static class LootSelfTest
         SelfTest.Check($"loot: {what}: one world object per drop", LootVisuals.All.Count == Ground.Count, $"{LootVisuals.All.Count}/{Ground.Count}");
         var bad = Ground.All.Where(d => !LootVisuals.All.TryGetValue(d.Id, out var v) || ColorRarity(v.Color) != d.Item.Rarity).Select(d => d.Item.Rarity.ToString()).ToList();
         SelfTest.Check($"loot: {what}: ring color matches rarity", bad.Count == 0, string.Join(",", bad));
-        var look = Ground.All.Where(d => !LootVisuals.All.TryGetValue(d.Id, out var v) || v.Ring == null || (v.Pulse != null) != (d.Item.Rarity >= Rarity.Rare))
+        var look = Ground.All.Where(d => !LootVisuals.All.TryGetValue(d.Id, out var v) || v.Beam == null || v.HasRing != (d.Item.Rarity >= Rarity.Rare))
             .Select(d => d.Item.Rarity.ToString()).ToList();
-        SelfTest.Check($"loot: {what}: every drop has a ring, only Rare and Legendary a rising line", look.Count == 0, string.Join(",", look));
+        SelfTest.Check($"loot: {what}: every drop has a beam, only Rare and Legendary a ring", look.Count == 0, string.Join(",", look));
         bool blink = LootVisuals.BlinkOn(LootVisuals.BlinkSeconds + 1, 0.9f) && !LootVisuals.BlinkOn(1, 0.1f) && LootVisuals.BlinkOn(1, 0.03f);
         SelfTest.Check($"loot: {what}: shown steady until the blink, then blinking fast near the end", blink);
     }

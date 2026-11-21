@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "Magiczne znaleziska drużyny (łupy)",
  "ui.death.title": "Zginąłeś",
  "ui.elites.format": "{0} {1}",
+ "ui.enemyhud.more_bosses": "+{0} bossów",
+ "ui.enemyhud.one_more_boss": "+1 boss",
  "ui.equipment.title": "Wyposażenie",
  "ui.followups.daily": "Nowy dzień: {0}",
  "ui.followups.dodge": "Unik",

@@ -91,6 +91,77 @@ public static class CotsFxPrefabs
         TierEmbers();
         TierShimmer();
         TierPower();
+        LootBeam();
+    }
+
+    // ---- ground drops (COS-96, Max 2026-11-21: a glow pool, a beam and rising sparks, sized by rarity) ----
+
+    /// <summary>
+    /// Fx_LootBeam, white (the mod tints it in the rarity colour), standing on the ground at the origin. "glow": a soft pool of light,
+    /// radius 0.5. "ring": a pulsing ring, radius 0.35 (the mod keeps it for Rare and Legendary). "beam" and "core": a soft beam and a hot
+    /// thin core, 1 m tall, bright at the bottom and fading out upward (the mod sets their height). "sparks": motes rising around the
+    /// base. "streaks": short streaks running up the beam. The mod sets the rates and lifetimes per rarity.
+    /// </summary>
+    private static void LootBeam()
+    {
+        // The fade sits in the colour as well as the alpha: additive blending adds the colour as is.
+        var fade = CotsGen.Tex("FxBeamFade", 64, (u, v) =>
+        {
+            float a = Mathf.Pow(1 - v, 1.8f) * CotsGen.Smooth(0f, 0.04f, v);
+            return new Color(a, a, a, a);
+        });
+        var go = new GameObject("Fx_LootBeam");
+        CotsGen.Child(go, "glow", _disc, CotsGen.Fx("FxLootGlow", SoftDot(), Color.white, 3f), new Vector3(0, 0.08f, 0), scale: new Vector3(0.6f, 1, 0.6f));
+        CotsGen.Child(go, "ring", _disc, CotsGen.Fx("FxLootRing", _ring, Color.white, 3f, pulse: 0.5f), new Vector3(0, 0.1f, 0), scale: new Vector3(0.4f, 1, 0.4f));
+        CotsGen.Child(go, "beam", _cylinder, CotsGen.Fx("FxLootBeam", fade, Color.white, 1.6f, fresnel: 2f, fresnelInvert: true), Vector3.zero, scale: new Vector3(0.09f, 1, 0.09f));
+        CotsGen.Child(go, "core", _cylinder, CotsGen.Fx("FxLootCore", fade, Color.white, 4f, fresnel: 1f, fresnelInvert: true), Vector3.zero, scale: new Vector3(0.012f, 1, 0.012f));
+
+        // A soft halo at the base, standing up so grass does not hide it the way it hides the pool.
+        var halo = Particles(Sub(go, "halo"), CotsGen.Fx("FxLootHalo", SoftDot(), Color.white, 1.6f));
+        halo.transform.localPosition = new Vector3(0, 0.2f, 0);
+        Steady(halo, 2.5f, 1.6f, 0.9f);
+        FadeInOut(halo);
+
+        var sparks = Particles(Sub(go, "sparks"), CotsGen.Fx("FxLootSpark", SoftDot(), Color.white, 5f));
+        Steady(sparks, 14, 1.1f, 0.06f);
+        var sm = sparks.main;
+        sm.startSize = new ParticleSystem.MinMaxCurve(0.04f, 0.09f);
+        sm.maxParticles = 60;
+        var ss = sparks.shape;
+        ss.enabled = true;
+        ss.shapeType = ParticleSystemShapeType.Circle;
+        ss.radius = 0.18f;
+        ss.radiusThickness = 1f;
+        ss.rotation = new Vector3(90, 0, 0);
+        var sv = sparks.velocityOverLifetime;
+        sv.enabled = true;
+        sv.space = ParticleSystemSimulationSpace.Local;
+        sv.x = new ParticleSystem.MinMaxCurve(0f, 0f); sv.z = new ParticleSystem.MinMaxCurve(0f, 0f); // one curve mode on all axes
+        sv.y = new ParticleSystem.MinMaxCurve(0.5f, 1.8f);
+        var sn = sparks.noise;
+        sn.enabled = true;
+        sn.strength = 0.15f;
+        sn.frequency = 1.2f;
+        FadeOut(sparks);
+
+        var streaks = Particles(Sub(go, "streaks"), CotsGen.Fx("FxLootStreak", SoftDot(), Color.white, 4f), ParticleSystemRenderMode.Stretch);
+        Steady(streaks, 3, 0.6f, 0.05f);
+        streaks.GetComponent<ParticleSystemRenderer>().velocityScale = 0.12f;
+        var tm = streaks.main;
+        tm.startSize = new ParticleSystem.MinMaxCurve(0.035f, 0.06f);
+        var ts = streaks.shape;
+        ts.enabled = true;
+        ts.shapeType = ParticleSystemShapeType.Circle;
+        ts.radius = 0.02f;
+        ts.rotation = new Vector3(90, 0, 0);
+        var tv = streaks.velocityOverLifetime;
+        tv.enabled = true;
+        tv.space = ParticleSystemSimulationSpace.Local;
+        tv.x = new ParticleSystem.MinMaxCurve(0f, 0f); tv.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+        tv.y = new ParticleSystem.MinMaxCurve(2.2f, 3.2f);
+        FadeOut(streaks);
+
+        CotsGen.SavePrefab(go);
     }
 
     // ---- enemy tier effects (COS-110): white, tinted and sized per tier by the mod ----

@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "Hallazgo mágico del grupo (botín)",
  "ui.death.title": "Has muerto",
  "ui.elites.format": "{0} {1}",
+ "ui.enemyhud.more_bosses": "+{0} jefes",
+ "ui.enemyhud.one_more_boss": "+1 jefe",
  "ui.equipment.title": "Equipo",
  "ui.followups.daily": "Un nuevo día: {0}",
  "ui.followups.dodge": "Esquiva",

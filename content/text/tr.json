@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "Grubun eşya bulması (ganimet)",
  "ui.death.title": "Öldün",
  "ui.elites.format": "{1} {0}",
+ "ui.enemyhud.more_bosses": "+{0} patron",
+ "ui.enemyhud.one_more_boss": "+1 patron",
  "ui.equipment.title": "Ekipman",
  "ui.followups.daily": "Yeni bir gün: {0}",
  "ui.followups.dodge": "Kaçınma",

@@ -25,7 +25,7 @@ internal sealed class BossBar
     private const float TrailHold = 0.6f, TrailDrain = 0.45f;
 
     private readonly SContainerOptions _root, _fill, _trail;
-    private readonly SLabelOptions _name, _sub, _affixes;
+    private readonly SLabelOptions _name, _sub, _affixes, _more;
     private readonly RectTransform _rt;
     private readonly CanvasGroup _group;
     private float _shownFrac = -1, _trailFrac = 1, _trailWait, _alpha;
@@ -58,6 +58,10 @@ internal sealed class BossBar
         _root.Add(_sub);
         _root.Add(frame);
         _root.Add(_affixes);
+        // "+1 boss": other engaged bosses that get no bar of their own (Max 2026-11-21: one bar only).
+        _more = HudKit.Label("", 14, "#E8DCC8", TextAlignmentOptions.Right).TopLeft(MaxWidth * 0.7f, 46).Size(MaxWidth * 0.3f - 2, 18);
+        _more.TextObject.enableWordWrapping = false;
+        _root.Add(_more);
         layer.Add(_root);
         _rt = _root.RectTransform;
         _group = HudKit.Group(_root.Root);
@@ -110,6 +114,20 @@ internal sealed class BossBar
         Size(_frame.RectTransform, width);
         Size(_back.RectTransform, width - 4);
         Size(_affixes.RectTransform, width);
+        Size(_more.RectTransform, width * 0.3f - 2);
+        _more.RectTransform.anchoredPosition = new Vector2(width * 0.7f, _more.RectTransform.anchoredPosition.y);
+    }
+
+    /// <summary>Text of the "+N bosses" tag (self-test).</summary>
+    public string MoreText { get; private set; } = "";
+
+    /// <summary>Shows how many other engaged bosses have no bar.</summary>
+    public void SetMore(int others)
+    {
+        string text = others <= 0 ? "" : others == 1 ? UiText.T("ui.enemyhud.one_more_boss", "+1 boss") : string.Format(UiText.T("ui.enemyhud.more_bosses", "+{0} bosses"), others);
+        if (text == MoreText) return;
+        MoreText = text;
+        _more.Text(text);
     }
 
     public void Hide()

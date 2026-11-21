@@ -31,7 +31,6 @@ internal sealed class Nameplates
     internal const int MaxAffixLines = 3;
     /// <summary>Seconds a hit keeps an enemy at the front of the queue.</summary>
     private const float HitPriorityTime = 6f;
-    private const float StackGap = 4f;
 
     private sealed class Entry
     {
@@ -76,6 +75,7 @@ internal sealed class Nameplates
     private static readonly ByPriority PriorityOrder = new();
     private Candidate[] _candidates = new Candidate[64];
     private readonly Rect[] _placed = new Rect[MaxPlates];
+    private readonly Rect[] _barRects = new Rect[4];
 
     private sealed class Plate
     {
@@ -95,6 +95,9 @@ internal sealed class Nameplates
         public bool Bound;
         public bool AffixShown;
         public Rect Last;
+        /// <summary>Covered by a plate placed first or by the boss bar: faded out (Max 2026-11-21) instead of stacked upward.</summary>
+        public bool Hidden;
+        public float Shown = 1;
     }
 
     private readonly List<Entry> _entries = new();
@@ -113,12 +116,19 @@ internal sealed class Nameplates
 
     public int Tracked => _entries.Count;
 
+    /// <summary>Whether this enemy shows a plate now (self-test).</summary>
+    public bool HasPlate(EnemyRuntime r)
+    {
+        foreach (var e in _entries) if (ReferenceEquals(e.Runtime, r)) return e.Plate != null && !e.Plate.Hidden;
+        return false;
+    }
+
     public int Visible
     {
         get
         {
             int n = 0;
-            foreach (var p in _all) if (p.Bound) n++;
+            foreach (var p in _all) if (p.Bound && !p.Hidden) n++;
             return n;
         }
     }
@@ -271,6 +281,8 @@ internal sealed class Nameplates
             else if (EnemyRegistry.Get(e.Stats) == null) { Remove(i); continue; } // died or despawned
             if (!show) { e.Why = cam == null ? "no camera" : "disabled"; Release(e); continue; }
             if (e.Runtime.TestActive == false) { e.Why = "test-inactive"; Release(e); continue; } // switched off between self-test phases
+            // A boss with the boss bar needs no plate: the bar shows its name, level, health and affixes (Max 2026-11-21).
+            if (EnemyHud.EnemyHudFeature.Instance?.HasBar(e.Runtime) == true) { e.Why = "boss bar"; Release(e); continue; }
             if (_time < e.NextRangeCheck) continue; // far away at the last look (no plate)
             var pos = e.Sim._position;
 
@@ -314,7 +326,8 @@ internal sealed class Nameplates
                 HalfHeight = Mathf.Abs(sp.y - feet.y) * 0.5f,
                 Dist = dist,
                 Range = range,
-                Priority = tierBonus + (_time - e.LastHit < HitPriorityTime ? 1000 : 0) - dist,
+                // The looked-at enemy always keeps its plate; then recently hit, then near.
+                Priority = tierBonus + (_time - e.LastHit < HitPriorityTime ? 1000 : 0) + (e == _focus || e == _scanned || e == ForcedFocus ? 5000 : 0) - dist,
             };
         }
 
@@ -325,6 +338,7 @@ internal sealed class Nameplates
         float lookScore = float.MaxValue;
         Vector2 centre = TestCrosshair ?? new Vector2(screenW * 0.5f, screenH * 0.5f);
         int playerLevel = PlayerState.Character.Progress.Level;
+        int bars = EnemyHud.EnemyHudFeature.Instance?.BarRects(_barRects) ?? 0;
         for (int i = 0; i < n; i++)
         {
             var c = _candidates[i];
@@ -364,27 +378,22 @@ internal sealed class Nameplates
                     if (score < lookScore) { lookScore = score; look = e; }
                 }
             }
-            plate.Group.alpha = Mathf.Clamp01((c.Range - c.Dist) / (c.Range * 0.3f));
             float s = Mathf.Clamp(16f / Mathf.Max(c.Dist, 1f), 0.65f, 1f) * plate.Scale;
             plate.Rt.localScale = new Vector3(s, s, 1);
 
-            // Stack upwards past every plate already placed that this one would cover.
+            // A plate that would cover one placed before it (higher priority) or the boss bar fades out instead of stacking
+            // upward (Max 2026-11-21: stacks crowded the top of the screen); the looked-at enemy's plate was placed first.
             float w = PlateW * s, h = plate.Rt.sizeDelta.y * s;
             var rect = new Rect(c.Pos.x - w / 2, c.Pos.y, w, h);
-            for (int guard = 0; guard < MaxPlates; guard++)
-            {
-                bool moved = false;
-                for (int j = 0; j < placed; j++)
-                {
-                    if (!rect.Overlaps(_placed[j])) continue;
-                    rect.y = _placed[j].yMax + StackGap;
-                    moved = true;
-                }
-                if (!moved) break;
-            }
-            _placed[placed++] = rect;
+            bool covered = false;
+            for (int j = 0; j < placed && !covered; j++) covered = rect.Overlaps(_placed[j]);
+            for (int j = 0; j < bars && !covered; j++) covered = rect.Overlaps(_barRects[j]);
+            plate.Hidden = covered;
+            plate.Shown = Mathf.MoveTowards(plate.Shown, covered ? 0 : 1, dt * 6f);
+            plate.Group.alpha = Mathf.Clamp01((c.Range - c.Dist) / (c.Range * 0.3f)) * plate.Shown;
             plate.Last = rect;
             plate.Rt.anchoredPosition = new Vector2(rect.x + w / 2, rect.y);
+            if (!covered) _placed[placed++] = rect;
         }
         var forced = ForcedFocus;
         UpdateScan(forced != null && forced.Plate != null ? forced : look, dt);
@@ -440,9 +449,9 @@ internal sealed class Nameplates
         int pairs = 0;
         for (int i = 0; i < _all.Count; i++)
         {
-            if (!_all[i].Bound) continue;
+            if (!_all[i].Bound || _all[i].Hidden) continue;
             for (int j = i + 1; j < _all.Count; j++)
-                if (_all[j].Bound && _all[i].Last.Overlaps(_all[j].Last)) pairs++;
+                if (_all[j].Bound && !_all[j].Hidden && _all[i].Last.Overlaps(_all[j].Last)) pairs++;
         }
         return pairs;
     }
@@ -453,7 +462,7 @@ internal sealed class Nameplates
         get
         {
             int n = 0;
-            foreach (var p in _all) if (p.Bound && p.AffixShown) n++;
+            foreach (var p in _all) if (p.Bound && !p.Hidden && p.AffixShown) n++;
             return n;
         }
     }

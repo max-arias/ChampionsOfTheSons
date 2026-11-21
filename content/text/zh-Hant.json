@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "隊伍尋寶率（掉落）",
  "ui.death.title": "你死了",
  "ui.elites.format": "{1}的{0}",
+ "ui.enemyhud.more_bosses": "+{0} 個首領",
+ "ui.enemyhud.one_more_boss": "+1 個首領",
  "ui.equipment.title": "裝備",
  "ui.followups.daily": "新的一天：{0}",
  "ui.followups.dodge": "閃避",

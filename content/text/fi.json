@@ -1786,6 +1786,8 @@
  "ui.coop.team_magic_find": "Ryhmän taikalöytö (saalis)",
  "ui.death.title": "Kuolit",
  "ui.elites.format": "{0} {1}",
+ "ui.enemyhud.more_bosses": "+{0} pomoa",
+ "ui.enemyhud.one_more_boss": "+1 pomo",
  "ui.equipment.title": "Varusteet",
  "ui.followups.daily": "Uusi päivä: {0}",
  "ui.followups.dodge": "Väistö",
