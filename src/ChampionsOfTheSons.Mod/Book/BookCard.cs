@@ -22,7 +22,8 @@ internal static class BookCard
     private static SContainerOptions _card = null!;
     private static SLabelOptions _title = null!, _sub = null!, _body = null!, _compare = null!;
     private static SContainerOptions _divider = null!, _actions = null!;
-    private static SBgButtonOptions _equip = null!, _drop = null!, _destroy = null!;
+    private static SBgButtonOptions _equip = null!, _drop = null!, _destroy = null!, _dropOne = null!, _split = null!;
+    private static SContainerOptions _stackActions = null!;
     private static Image? _icon;
     private static bool _built, _destroyArmed;
     private static string? _shownKey;
@@ -52,7 +53,12 @@ internal static class BookCard
         _drop = Button();
         _destroy = Button();
         _actions.Add(_equip).Add(_drop).Add(_destroy);
-        inner.Add(header).Add(_sub).Add(_body).Add(_divider).Add(_compare).Add(_actions);
+        // A stack's own row (COS-96): Drop 1 and Split stack.
+        _stackActions = SContainer.Horizontal(8, "CC").PHeight(44);
+        _dropOne = Button();
+        _split = Button();
+        _stackActions.Add(_dropOne).Add(_split);
+        inner.Add(header).Add(_sub).Add(_body).Add(_divider).Add(_compare).Add(_actions).Add(_stackActions);
         var layer = SContainer.Anchor(AnchorType.Fill);
         _root.Add(layer);
         layer.Add(_card);
@@ -159,6 +165,7 @@ internal static class BookCard
             On(_divider.Root, false);
             On(_compare.Root, false);
             On(_actions.Root, false);
+            On(_stackActions.Root, false);
         }
         else
         {
@@ -175,13 +182,20 @@ internal static class BookCard
             On(_compare.Root, cmp);
             if (cmp) _compare.Text(d.Compare!);
             On(_actions.Root, pinned);
+            bool stack = pinned && InventoryActions.IsStack(key);
+            On(_stackActions.Root, stack);
+            if (stack)
+            {
+                _dropOne.Text(UiText.T("ui.inventory.menu.drop_one", "Drop 1"));
+                _split.Text(UiText.T("ui.inventory.menu.split", "Split stack"));
+            }
             if (pinned)
             {
                 bool equipped = key.StartsWith("equip.", StringComparison.Ordinal);
                 _equip.Text(InventoryActions.IsUsable(key)
                     ? UiText.T("ui.catalog.use", "Use")
                     : UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
-                _drop.Text(UiText.T("ui.inventory.menu.drop", "Drop"));
+                _drop.Text(InventoryActions.DropLabel(key));
                 _destroy.Text(_destroyArmed ? UiText.T("ui.book.destroy_confirm", "Again to destroy") : UiText.T("ui.inventory.menu.destroy", "Destroy"));
             }
         }
@@ -211,6 +225,8 @@ internal static class BookCard
         if (Contains(_equip, screen)) return "equip";
         if (Contains(_drop, screen)) return "drop";
         if (Contains(_destroy, screen)) return "destroy";
+        if (_stackActions.Root.activeSelf && Contains(_dropOne, screen)) return "drop_one";
+        if (_stackActions.Root.activeSelf && Contains(_split, screen)) return "split";
         return null;
     }
 
@@ -223,7 +239,7 @@ internal static class BookCard
 
     public static Vector2 ActionScreenCenter(string action)
     {
-        var b = action == "equip" ? _equip : action == "drop" ? _drop : _destroy;
+        var b = action switch { "equip" => _equip, "drop" => _drop, "drop_one" => _dropOne, "split" => _split, _ => _destroy };
         var corners = new Vector3[4];
         b.RectTransform.GetWorldCorners(corners);
         return (corners[0] + corners[2]) / 2;
@@ -246,6 +262,12 @@ internal static class BookCard
             case "drop":
                 BookPages.Selected = null;
                 return InventoryActions.Drop(key) ? "dropped" : "failed";
+            case "drop_one":
+                bool left = InventoryActions.DropOne(key) && PlayerState.Character.Inventory.Get(key) != null;
+                if (!left) BookPages.Selected = null;
+                return "dropped one";
+            case "split":
+                return InventoryActions.Split(key) ? "split" : "no-room";
             case "destroy":
                 if (!_destroyArmed) { _destroyArmed = true; return "armed"; }
                 _destroyArmed = false;

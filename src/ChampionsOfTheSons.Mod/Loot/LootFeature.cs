@@ -164,12 +164,13 @@ public sealed class LootFeature : IModFeature
     }
 
     /// <summary>Inventory "drop to world": the item lands ahead of the player and is not auto-picked until they step away.</summary>
-    public static GroundDrop? DropFromInventory(string slot)
+    /// <param name="amount">How many of a stack to drop (COS-96: Drop 1); the whole stack by default.</param>
+    public static GroundDrop? DropFromInventory(string slot, int amount = int.MaxValue)
     {
         var inv = PlayerState.Character.Inventory;
         // Not IsInWorld: holding the guide book clears it, and the book inventory drops from there (COS-59).
         if (inv.Get(slot) == null || LocalPlayer.Transform == null) return null;
-        var item = inv.Remove(slot)!;
+        var item = inv.Take(slot, amount)!;
         var t = LocalPlayer.Transform;
         // Co-op client: the host makes the drop, so everyone sees it (COS-14); it arrives as a mirror.
         if (Net.CoopLoot.RequestDrop(item, t.position + t.forward * ThrowDistance, DropSource.Thrown)) return null;

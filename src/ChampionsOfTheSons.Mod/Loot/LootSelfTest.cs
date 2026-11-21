@@ -47,7 +47,17 @@ internal static class LootSelfTest
         SelfTest.Add(T0 + 26, "loot: menu drop", MenuDrop);
         SelfTest.Add(T0 + 26.5f, "loot: drag and drop", DragAndDrop);
         SelfTest.Add(T0 + 27f, "loot: level 25 heart, menu Use", UseHeart);
-        SelfTest.Add(T0 + 27.5f, "loot: cleanup", Cleanup);
+        SelfTest.Add(T0 + 27.2f, "loot: stack menu open", () =>
+        {
+            Pc.Inventory.Restore(new[] { new KeyValuePair<string, ItemInstance>("bag.0", new ItemInstance { BaseId = "item.heart_of_purity", Level = 1, Amount = 6 }) });
+            Panel.Open();
+            Panel.OpenMenu("bag.0", Panel.SlotBounds("bag.0").center);
+        });
+        SelfTest.Add(T0 + 27.4f, "loot: shot stack menu", () => TestKit.Screenshot("loot-03-stack-menu"));
+        SelfTest.Add(T0 + 27.6f, "loot: stack menu: Split, Drop 1, Drop all", StackMenu);
+        SelfTest.Add(T0 + 27.8f, "loot: stat lines by stat rarity", StatOrder);
+        SelfTest.Add(T0 + 28f, "loot: shot stat colours", () => TestKit.Screenshot("loot-04-stat-colours"));
+        SelfTest.Add(T0 + 28.4f, "loot: cleanup", Cleanup);
     }
 
     private static void Teleport(Vector3 p)
@@ -340,6 +350,52 @@ internal static class LootSelfTest
         SelfTest.Check("loot: drag onto an item swaps them", Panel.DragDrop("bag.1", "bag.40") && Pc.Inventory.Get("bag.1") == b && Pc.Inventory.Get("bag.40") == a);
         SelfTest.Check("loot: dragging a non-fitting item onto an occupied slot is refused", !Panel.DragDrop("bag.40", "equip.helmet"));
         SelfTest.Check("loot: dragging an empty slot does nothing", !Panel.DragDrop("bag.99", "bag.98"));
+    }
+
+    /// <summary>COS-96: a stack's menu has Drop 1 and Split stack, and Drop reads "Drop all".</summary>
+    private static void StackMenu()
+    {
+        Panel.CloseMenu();
+        var heart = new ItemInstance { BaseId = "item.heart_of_purity", Level = 1, Amount = 6 };
+        Pc.Inventory.Restore(new[] { new KeyValuePair<string, ItemInstance>("bag.0", heart) });
+        Panel.OpenMenu("bag.0", new Vector2(300, 300));
+        SelfTest.Check("loot: a stack's menu shows Drop 1 and Split, and Drop all", Panel.MenuStackRows
+            && Panel.MenuDropText == UiText.T("ui.inventory.menu.drop_all", "Drop all"), $"rows {Panel.MenuStackRows}, '{Panel.MenuDropText}'");
+        bool split = Panel.MenuSplitClicked();
+        var halves = Pc.Inventory.Slots.Where(kv => kv.Value.BaseId == heart.BaseId).Select(kv => kv.Value.Amount).OrderBy(a => a).ToList();
+        SelfTest.Check("loot: Split stack puts half in a free slot", split && halves.SequenceEqual(new[] { 3, 3 }), string.Join("+", halves));
+        int drops = Ground.Count;
+        Panel.OpenMenu("bag.0", new Vector2(300, 300));
+        bool one = Panel.MenuDropOneClicked();
+        var dropped = Ground.All.OrderByDescending(d => d.Id).FirstOrDefault();
+        SelfTest.Check("loot: Drop 1 drops one and keeps the rest", one && Ground.Count == drops + 1 && dropped?.Item.Amount == 1 && Pc.Inventory.Get("bag.0")?.Amount == 2,
+            $"ground {drops} -> {Ground.Count}, dropped {dropped?.Item.Amount}, left {Pc.Inventory.Get("bag.0")?.Amount}");
+        Pc.Inventory.Restore(new[] { new KeyValuePair<string, ItemInstance>("bag.0", heart with { Amount = 1 }) });
+        Panel.OpenMenu("bag.0", new Vector2(300, 300));
+        SelfTest.Check("loot: a single item has no stack rows", !Panel.MenuStackRows && Panel.MenuDropText == UiText.T("ui.inventory.menu.drop", "Drop"), Panel.MenuDropText);
+        Panel.CloseMenu();
+    }
+
+    /// <summary>COS-96: stat lines sort by the stat's own rarity, highest first.</summary>
+    private static void StatOrder()
+    {
+        var stats = ModContent.Db.ItemStats.Values.Where(d => !LootRoller.IsSocketStat(d.Id)).ToList();
+        var low = stats.OrderBy(d => d.Rarity).First();
+        var high = stats.OrderByDescending(d => d.Rarity).First();
+        var baseId = ModContent.Db.Items.Values.First(d => LootRoller.IsEquippable(d)).Id;
+        var item = new ItemInstance { BaseId = baseId, Level = 10, Stats = new[] { new RolledStat(low.Id, 5), new RolledStat(high.Id, 5) } };
+        var body = ItemDescriber.Describe(item, Pc, null).Body;
+        int lo = body.IndexOf(UiText.StatName(low.Id), StringComparison.Ordinal), hi = body.IndexOf(UiText.StatName(high.Id), StringComparison.Ordinal);
+        SelfTest.Check("loot: the rarer stat is listed first, in its rarity colour", hi >= 0 && lo > hi
+            && body.Contains(UiTheme.StatHex((Rarity)Rarities.Clamp(high.Rarity)), StringComparison.Ordinal), $"{high.Id} at {hi}, {low.Id} at {lo}");
+        // A rolled Legendary in the bag with its tooltip, for the screenshot of the stat colours.
+        var roller = new LootRoller(ModContent.Db);
+        var rng = new Rng(11);
+        var legendary = roller.RollItem(roller.PickBase((int)Rarity.Legendary, 40, rng, d => LootRoller.IsEquippable(d) && (int)d.Rarity == (int)Rarity.Legendary)!, 40, rng);
+        Pc.Inventory.Restore(new[] { new KeyValuePair<string, ItemInstance>("bag.0", legendary) });
+        Panel.Open();
+        Panel.RefreshAll();
+        Panel.ShowTooltip("bag.0");
     }
 
     private static void Cleanup()

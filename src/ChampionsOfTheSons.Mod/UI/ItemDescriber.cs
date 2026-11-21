@@ -63,11 +63,14 @@ internal static class ItemDescriber
         };
     }
 
+    /// <summary>A stat's own rarity (COS-96, as COTF did): its lines sort highest first and take that rarity's colour, muted.</summary>
+    internal static Rarity StatRarity(string statId) =>
+        (Rarity)Rarities.Clamp(ModContent.Db.ItemStats.TryGetValue(statId, out var def) ? def.Rarity : 0);
+
     private static void AppendStats(StringBuilder sb, ItemInstance item)
     {
-        foreach (var s in item.Stats)
-            if (!LootRoller.IsSocketStat(s.StatId))
-                sb.Append(Color(UiTheme.Stat, $"{UiText.StatValue(s.StatId, s.Value)} {UiText.StatName(s.StatId)}")).Append('\n');
+        foreach (var s in item.Stats.Where(s => !LootRoller.IsSocketStat(s.StatId)).OrderByDescending(s => StatRarity(s.StatId)))
+            sb.Append(Color(UiTheme.StatHex(StatRarity(s.StatId)), $"{UiText.StatValue(s.StatId, s.Value)} {UiText.StatName(s.StatId)}")).Append('\n');
     }
 
     private static void AppendUnique(StringBuilder sb, ItemInstance item)

@@ -55,6 +55,24 @@ internal static class InventoryActions
 
     public static bool Destroy(string key) => LootFeature.Destroy(key);
 
+    /// <summary>A bag stack of two or more (Split and Drop 1 apply, COS-96).</summary>
+    public static bool IsStack(string key) => key.StartsWith("bag.", StringComparison.Ordinal) && Pc.Inventory.Get(key) is { Amount: > 1 };
+
+    /// <summary>Drops one of a stack; the rest stays in the slot.</summary>
+    public static bool DropOne(string key)
+    {
+        int before = Pc.Inventory.Get(key)?.Amount ?? 0;
+        if (before == 0) return false;
+        return LootFeature.DropFromInventory(key, 1) != null || (Pc.Inventory.Get(key)?.Amount ?? 0) < before;
+    }
+
+    /// <summary>Split Stack: half goes to the first free bag slot.</summary>
+    public static bool Split(string key) => Pc.Inventory.Split(key);
+
+    /// <summary>"Drop all" for a stack, "Drop" otherwise.</summary>
+    public static string DropLabel(string key) =>
+        IsStack(key) ? UiText.T("ui.inventory.menu.drop_all", "Drop all") : UiText.T("ui.inventory.menu.drop", "Drop");
+
     public static int BagCount() => Pc.Inventory.Slots.Count(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal));
 
     /// <summary>Packs the bag to the front, ordered by equipment slot, then rarity (best first), then level (highest first).</summary>

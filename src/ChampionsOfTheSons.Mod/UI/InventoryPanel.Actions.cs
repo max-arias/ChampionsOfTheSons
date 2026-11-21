@@ -13,11 +13,13 @@ namespace ChampionsOfTheSons.Mod.UI;
 internal sealed partial class InventoryPanel
 {
     private const float MenuW = 230, MenuRowH = 38, MenuPad = 4;
-    private const float MenuH = MenuRowH * 4 + MenuPad * 2;
+    /// <summary>Four rows, six for a stack (Drop 1 and Split, COS-96).</summary>
+    private float MenuH => MenuRowH * (_menuStack ? 6 : 4) + MenuPad * 2;
+    private bool _menuStack;
     private const float DragThreshold = 8;
 
     private SContainerOptions _menu = null!;
-    private SBgButtonOptions _menuEquip = null!, _menuDrop = null!, _menuDestroy = null!, _menuMerge = null!;
+    private SBgButtonOptions _menuEquip = null!, _menuDrop = null!, _menuDestroy = null!, _menuMerge = null!, _menuDropOne = null!, _menuSplit = null!;
     private SContainerOptions _ghost = null!;
     private SLabelOptions _ghostLabel = null!;
     private Vector2 _menuPos;
@@ -44,6 +46,11 @@ internal sealed partial class InventoryPanel
 
     public string MenuMergeText => _menuMerge.TextObject.text;
 
+    public string MenuDropText => _menuDrop.TextObject.text;
+
+    /// <summary>Whether the stack rows (Drop 1, Split) show.</summary>
+    public bool MenuStackRows => MenuVisible && _menuStack;
+
     private void BuildMenu()
     {
         _menu = SContainer.TopLeft(0, 0).Size(MenuW, MenuH).Background(C(UiTheme.Divider), EBackground.None);
@@ -60,6 +67,8 @@ internal sealed partial class InventoryPanel
         _menuDrop = Row(1, () => MenuDropClicked());
         _menuDestroy = Row(2, () => MenuDestroyClicked());
         _menuMerge = Row(3, () => MenuMergeClicked());
+        _menuDropOne = Row(4, () => MenuDropOneClicked());
+        _menuSplit = Row(5, () => MenuSplitClicked());
         _root.Add(_menu);
         _menu.Active(false);
     }
@@ -169,8 +178,14 @@ internal sealed partial class InventoryPanel
         _menuEquip.Text(InventoryActions.IsUsable(key)
             ? UiText.T("ui.catalog.use", "Use")
             : UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
-        _menuDrop.Text(UiText.T("ui.inventory.menu.drop", "Drop"));
+        _menuDrop.Text(InventoryActions.DropLabel(key));
         _menuDestroy.Text(UiText.T("ui.inventory.menu.destroy", "Destroy")).FontColor(UiTheme.Bad);
+        _menuStack = InventoryActions.IsStack(key);
+        _menuDropOne.Text(UiText.T("ui.inventory.menu.drop_one", "Drop 1"));
+        _menuSplit.Text(UiText.T("ui.inventory.menu.split", "Split stack"));
+        _menuDropOne.Root.SetActive(_menuStack);
+        _menuSplit.Root.SetActive(_menuStack);
+        _menu.RectTransform.sizeDelta = new Vector2(MenuW, MenuH);
         var (have, need) = Book.BookMerge.QuickCount(key);
         _menuMerge.Text(need == 0 ? UiText.T("ui.merge.button", "Merge") : string.Format(UiText.T("ui.merge.menu", "Merge ({0}/{1})"), have, need))
             .FontColor(need > 0 && have >= need ? UiTheme.Text : UiTheme.TextFaint);
@@ -210,6 +225,28 @@ internal sealed partial class InventoryPanel
         CloseMenu();
         if (key == null) return false;
         bool ok = InventoryActions.Drop(key);
+        if (ok) { _dirty = false; RefreshAll(); }
+        return ok;
+    }
+
+    /// <summary>COS-96: drops one of the stack.</summary>
+    public bool MenuDropOneClicked()
+    {
+        var key = MenuSlot;
+        CloseMenu();
+        if (key == null) return false;
+        bool ok = InventoryActions.DropOne(key);
+        if (ok) { _dirty = false; RefreshAll(); }
+        return ok;
+    }
+
+    /// <summary>COS-96: half the stack to the first free bag slot.</summary>
+    public bool MenuSplitClicked()
+    {
+        var key = MenuSlot;
+        CloseMenu();
+        if (key == null) return false;
+        bool ok = InventoryActions.Split(key);
         if (ok) { _dirty = false; RefreshAll(); }
         return ok;
     }
