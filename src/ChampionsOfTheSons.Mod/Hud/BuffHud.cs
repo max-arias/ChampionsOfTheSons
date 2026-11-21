@@ -16,7 +16,7 @@ namespace ChampionsOfTheSons.Mod.Hud;
 internal sealed class BuffHud
 {
     private const int MaxShown = 12;
-    private const float Size = 46, Gap = 6, Left = 24, Bottom = 150;
+    private const float Size = 46, Gap = 6, Left = 24, Bottom = 240; // above the game's pickup messages
 
     private sealed class Cell
     {
