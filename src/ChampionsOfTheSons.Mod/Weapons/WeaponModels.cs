@@ -314,7 +314,7 @@ internal static class WeaponModels
         _local?.Keep();
 
         var active = _local != null ? type : null;
-        ProjectileDrop.SetDrop(!(active?.NoGravity ?? false));
+        ProjectileDrop.SetNoGravityHolder(active?.NoGravity == true ? _local?.Holder : null);
         Base = active != null && held != null ? held.GetComponent<MeleeWeaponController>() : null;
         if (active != Active)
         {
@@ -334,17 +334,46 @@ internal static class WeaponModels
 }
 
 /// <summary>
-/// The game's projectile gravity switch (COS-93 greatbow: arrows fly straight). Arrows are simulated by the ballistics
-/// handler, whose settings asset has one global "bullet drop" flag, so it is off only while the local player holds a
-/// no-gravity type; other projectiles in flight at that moment fly straight too.
+/// Arrows that ignore gravity (COS-93 greatbow, COS-118). The ballistics handler has one global "bullet drop" flag, so it
+/// is switched off only around the velocity update of a bullet fired by the no-gravity bow (a prefix/postfix on
+/// <c>BulletHandler.updateVelocity</c>): every other projectile keeps its drop, and an arrow already in flight keeps flying
+/// straight after the player switches weapons. If that patch can't be applied, the old way is used: the flag is off while
+/// the bow is held.
 /// </summary>
 internal static class ProjectileDrop
 {
     private static global::Ballistics.BallisticSettings? _settings;
     private static bool? _original;
+    private static IntPtr _noGravityWeapon;
+    private static bool _patchTried;
+
+    /// <summary>True once the per-bullet patch is in place.</summary>
+    public static bool PerBullet { get; private set; }
+
+    /// <summary>Bullet updates with drop switched off by the per-bullet patch (self-test).</summary>
+    public static int StraightUpdates { get; private set; }
 
     /// <summary>Whether projectiles drop right now (null: no ballistics handler found yet).</summary>
     public static bool? Drop => Settings()?.BulletDrop;
+
+    /// <summary>The no-gravity bow the local player holds now (null: none). Arrows it fires fly straight.</summary>
+    public static void SetNoGravityHolder(Transform? holder)
+    {
+        IntPtr key = holder != null ? holder.Pointer : IntPtr.Zero;
+        if (key == _holderKey && _patchTried) return; // called every scan: only work on a change
+        _holderKey = key;
+        TryPatch();
+        RangedWeapon? weapon = holder != null ? holder.GetComponentInChildren<RangedWeapon>(true) : null;
+        // The game's bow object is shared by every bow type: once another type (or nothing) is on it, its arrows drop again.
+        _noGravityWeapon = weapon != null ? weapon.Pointer : IntPtr.Zero;
+        if (PerBullet) return;
+        SetDrop(weapon == null); // fallback: global switch while held
+    }
+
+    private static IntPtr _holderKey;
+
+    /// <summary>The weapon whose arrows fly straight now (self-test).</summary>
+    public static bool HasNoGravityWeapon => _noGravityWeapon != IntPtr.Zero;
 
     public static void SetDrop(bool drop)
     {
@@ -362,6 +391,55 @@ internal static class ProjectileDrop
             RLog.Error($"Champions of the Sons: projectile drop switch failed: {e}");
             _settings = null;
         }
+    }
+
+    private static void TryPatch()
+    {
+        if (_patchTried) return;
+        _patchTried = true;
+        try
+        {
+            var target = HarmonyLib.AccessTools.Method(typeof(global::Ballistics.BulletHandler), "updateVelocity");
+            if (target == null) throw new MissingMethodException("BulletHandler.updateVelocity");
+            new HarmonyLib.Harmony("cots.projectile-drop").Patch(target,
+                prefix: new HarmonyLib.HarmonyMethod(typeof(ProjectileDrop), nameof(BeforeUpdate)),
+                postfix: new HarmonyLib.HarmonyMethod(typeof(ProjectileDrop), nameof(AfterUpdate)));
+            PerBullet = true;
+            RLog.Msg("Champions of the Sons: per-arrow gravity patch on");
+        }
+        catch (Exception e)
+        {
+            RLog.Warning($"Champions of the Sons: per-arrow gravity patch failed, using the global switch: {e.Message}");
+        }
+    }
+
+    private static bool _switched;
+
+    private static void BeforeUpdate(ref global::Ballistics.BulletData bullet)
+    {
+        if (_noGravityWeapon == IntPtr.Zero) return;
+        try
+        {
+            var w = bullet.weapon;
+            if (w == null || w.Pointer != _noGravityWeapon) return;
+            var settings = Settings();
+            if (settings == null || !settings.BulletDrop) return;
+            settings.BulletDrop = false;
+            _switched = true;
+            StraightUpdates++;
+        }
+        catch
+        {
+            // never break the game's bullet loop
+        }
+    }
+
+    private static void AfterUpdate()
+    {
+        if (!_switched) return;
+        _switched = false;
+        var settings = Settings();
+        if (settings != null) settings.BulletDrop = true;
     }
 
     private static global::Ballistics.BallisticSettings? Settings()

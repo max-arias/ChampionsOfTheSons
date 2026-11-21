@@ -43,7 +43,9 @@ public sealed class WeaponsFeature : IModFeature
 
     public void Update(float dt, bool inWorld)
     {
-        if (inWorld) WeaponModels.Tick(dt);
+        if (!inWorld) return;
+        WeaponModels.Tick(dt);
+        BowDraw.Tick(WeaponModels.Active);
     }
 
     public void OnGameStart() => WeaponModels.Reset();
