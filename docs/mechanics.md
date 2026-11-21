@@ -81,6 +81,12 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Carry stats (COTF 1000–1004): while worn, each adds `round(value)` to the game's carry limit of sticks, rocks, ropes, drinks (VodkaBottle, EnergyDrink) or food (Meat, Fish, EnergyBar), through the same pass as the carry perks (`Core/Rules/ItemCarry.cs`).
 - Inventory: 120 bag slots (COTF: a fixed 8 x 15 grid; its bag never grows with level or stats, checked 2026-11-19, COS-64); equipment: helmet, chest, pants, boots, shoulders, gloves, amulet, bracer, ring ×2, weapon, offhand (shield/quiver/scroll).
 
+## Merge (COS-144, new rule, Max 2026-11-20)
+- The only way to change items (no crafting, COS-145). Bag items only, each player's own bag, no host involvement (`Core/Rules/Merge.cs`).
+- Rows: 3 Common → 1 Magic, 5 Magic → 1 Rare, 7 Rare → 1 Legendary, all of one item type (boots, ring, chest...; any base of that type); 3 Legendary of any types → 1 random Legendary of any type, never one of the input bases. Uniques and set pieces are ordinary bases of their rarity.
+- Result: a base of the next rarity (the item type's, or any Legendary for the Legendary row), uniform among those with `minLevel ≤` the lowest input level; if none qualifies, among those with the lowest `minLevel`. Rolled fresh (`LootRoller.RollItem`) at the lowest input level. Every item type has a base at every rarity (COS-143).
+- Book (layout E): Merge, left of Sort, starts merge mode from the selected bag item, which stays picked; items that cannot join dim; the player picks the rest and presses Merge n/N; the result takes the start item's slot with a NEW tag (memory only, cleared on click). With more of the kind left the mode continues from the highest one; Cancel ends it. The screen panel (book off) has a "Merge (n/N)" menu row that merges the item with the highest-level others of its kind.
+
 ## Stats and combat
 - Player stat kinds: add (`default + Σ`), mult (`default × Π`), multi (`(default + Σ adds) × (defaultMult × Π mults)`), bool. ✱ Our sheet rebuilds from named sources instead of add/subtract pairs.
 - Defaults of note: attributes 1, crit chance 0.05, crit damage 0.5 (×1.5), headshot ×6, magic find 1, XP gain 1, massacre 15 s.

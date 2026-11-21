@@ -39,6 +39,7 @@ public sealed class BookFeature : IModFeature
         {
             BookCard.Hide();
             BookPages.Selected = null;
+            if (BookMerge.Active) BookMerge.Cancel();
             CancelDrag();
             return;
         }
@@ -93,7 +94,7 @@ public sealed class BookFeature : IModFeature
             if (action != null && BookPages.Selected != null) LastAction = action + ": " + BookCard.Act(action, BookPages.Selected);
             else { _pressed = true; _pressKey = key; _pressAt = screen; }
         }
-        if (_pressed && input.Held && Dragging == null && _pressKey != null && IsItemSlot(_pressKey)
+        if (_pressed && input.Held && Dragging == null && !BookMerge.Active && _pressKey != null && IsItemSlot(_pressKey)
             && PlayerState.Character.Inventory.Get(_pressKey) != null && (screen - _pressAt).magnitude >= DragThreshold)
             Dragging = _pressKey;
         if (Dragging != null) BookPages.SetDragGhost(PlayerState.Character.Inventory.Get(Dragging), px);

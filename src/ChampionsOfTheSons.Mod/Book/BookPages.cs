@@ -15,6 +15,10 @@ internal sealed class PageSlot
     public Image Bg = null!, Icon = null!, Tape = null!;
     public Image[] Frame = null!, SelectFrame = null!;
     public TextMeshProUGUI Level = null!, Amount = null!, Fallback = null!;
+    /// <summary>Merge mode (COS-144): a paper veil over items that cannot join, a tick on picked ones, a NEW tag on merge results.</summary>
+    public Image Dim = null!, TickBg = null!, NewBg = null!;
+    public Image[] TickMarks = null!;
+    public TextMeshProUGUI NewText = null!;
     public ItemInstance? Shown;
     public bool Rendered, WasSelected;
 }
@@ -200,6 +204,21 @@ internal static class BookPages
         s.Amount = PageKit.Text(root, key + "-amt", x + 4, y + h - 24, w - 8, 22, "", 18, PageKit.Ink, TextAlignmentOptions.BottomRight);
         s.SelectFrame = PageKit.Frame(root, x - 5, y - 5, w + 10, h + 10, PageKit.Select, 4);
         foreach (var f in s.SelectFrame) f.enabled = false;
+        s.Dim = PageKit.Box(root, key + "-dim", x, y, w, h, new Color(PageKit.Paper.r, PageKit.Paper.g, PageKit.Paper.b, 0.72f));
+        s.Dim.enabled = false;
+        // A tick drawn from two bars on a red square, bottom right (the font may not have a check glyph).
+        float tx = x + w - 28, ty = y + h - 28;
+        s.TickBg = PageKit.Box(root, key + "-tick", tx, ty, 24, 24, PageKit.Select);
+        var shortBar = PageKit.Box(root, key + "-tick-a", tx + 5, ty + 11, 8, 3, PageKit.TitleText);
+        shortBar.rectTransform.localRotation = Quaternion.Euler(0, 0, -45);
+        var longBar = PageKit.Box(root, key + "-tick-b", tx + 9, ty + 16, 13, 3, PageKit.TitleText);
+        longBar.rectTransform.localRotation = Quaternion.Euler(0, 0, 50);
+        s.TickMarks = new[] { s.TickBg, shortBar, longBar };
+        foreach (var m in s.TickMarks) m.enabled = false;
+        s.NewBg = PageKit.Box(root, key + "-new", x + 3, y + h - 21, 42, 18, PageKit.Good);
+        s.NewText = PageKit.Text(root, key + "-new-text", x + 3, y + h - 21, 42, 18, UiText.T("ui.merge.new", "NEW"), 14, PageKit.TitleText, TextAlignmentOptions.Center);
+        s.NewBg.enabled = false;
+        s.NewText.enabled = false;
         return s;
     }
 
@@ -223,12 +242,69 @@ internal static class BookPages
         for (int i = 0; i < BagPerPage; i++)
             BagSlots.Add(Slot(_gear, "page-bag-" + i, BagX + (i % BagCols) * (BagCell + BagGap), BagY + (i / BagCols) * (BagCell + BagGap), BagCell, null));
         _bagPager = Pager(_gear);
-        PageKit.Box(_gear, "sort-bg", SortX, PagerY, 110, PagerH, PageKit.TitleBar);
+        _sortBg = PageKit.Box(_gear, "sort-bg", SortX, PagerY, 110, PagerH, PageKit.TitleBar);
         PageKit.Text(_gear, "sort", SortX, PagerY, 110, PagerH, UiText.T("ui.book.sort", "Sort"), 24, PageKit.TitleText, TextAlignmentOptions.Center);
+        BuildMerge();
         // The dragged item's icon follows the cursor, drawn last so it sits over the slots.
         _ghost = PageKit.Box(_gear, "drag-ghost", 0, 0, BagCell * 0.8f, BagCell * 0.8f, new Color(1, 1, 1, 0.85f));
         _ghost.preserveAspect = true;
         _ghost.enabled = false;
+    }
+
+    // Merge mode (COS-144, layout E): the Merge button left of Sort; in merge mode a strip replaces the filter chips and the
+    // pager row holds Cancel and "Merge n/N".
+    private const float MergeX = SortX - 118, MergeW = 110, CancelX = BagX, CancelW = 100, GoX = CancelX + CancelW + 6, GoW = SortX - 6 - GoX;
+    private static Image _sortBg = null!, _mergeBg = null!, _cancelBg = null!, _goBg = null!, _stripBg = null!, _stripTape = null!;
+    private static TextMeshProUGUI _mergeText = null!, _cancelText = null!, _goText = null!, _stripTitle = null!, _stripRule = null!, _stripPicked = null!;
+
+    private static void BuildMerge()
+    {
+        _mergeBg = PageKit.Box(_gear, "merge-bg", MergeX, PagerY, MergeW, PagerH, PageKit.PaperShade);
+        _mergeText = PageKit.Text(_gear, "merge", MergeX, PagerY, MergeW, PagerH, UiText.T("ui.merge.button", "Merge"), 24, PageKit.InkFaint, TextAlignmentOptions.Center);
+        _cancelBg = PageKit.Box(_gear, "merge-cancel-bg", CancelX, PagerY, CancelW, PagerH, PageKit.PaperShade);
+        _cancelText = PageKit.Text(_gear, "merge-cancel", CancelX, PagerY, CancelW, PagerH, UiText.T("ui.merge.cancel", "Cancel"), 22, PageKit.Ink, TextAlignmentOptions.Center);
+        _goBg = PageKit.Box(_gear, "merge-go-bg", GoX, PagerY, GoW, PagerH, PageKit.Select);
+        _goText = PageKit.Text(_gear, "merge-go", GoX, PagerY, GoW, PagerH, "", 22, PageKit.TitleText, TextAlignmentOptions.Center);
+        float w = PageKit.W - Left - Right;
+        _stripBg = PageKit.Box(_gear, "merge-strip", Left, ChipY - 4, w, ChipH + 8, PageKit.TitleBar);
+        _stripTitle = PageKit.Text(_gear, "merge-strip-title", Left + 10, ChipY - 4, 90, ChipH + 8, UiText.T("ui.merge.title", "MERGE"), 20, PageKit.TitleText);
+        _stripTape = PageKit.Box(_gear, "merge-strip-tape", Left + 100, ChipY + 4, 10, ChipH - 8, Color.clear);
+        _stripRule = PageKit.Text(_gear, "merge-strip-rule", Left + 118, ChipY - 4, 300, ChipH + 8, "", 17, PageKit.TitleText);
+        _stripRule.enableAutoSizing = true;
+        _stripRule.fontSizeMin = 12;
+        _stripRule.fontSizeMax = 17;
+        _stripPicked = PageKit.Text(_gear, "merge-strip-picked", Left + 420, ChipY - 4, w - 430, ChipH + 8, "", 16, PageKit.TitleText, TextAlignmentOptions.MidlineRight);
+        _stripPicked.enableAutoSizing = true;
+        _stripPicked.fontSizeMin = 11;
+        _stripPicked.fontSizeMax = 16;
+    }
+
+    private static void RefreshMerge()
+    {
+        bool on = BookMerge.Active;
+        foreach (var (bg, text, _) in FilterChips) { bg.enabled = !on; text.enabled = !on; }
+        _stripBg.enabled = _stripTitle.enabled = _stripRule.enabled = _stripPicked.enabled = _stripTape.enabled = on;
+        _mergeBg.enabled = _mergeText.enabled = !on;
+        _cancelBg.enabled = _cancelText.enabled = _goBg.enabled = _goText.enabled = on;
+        _sortBg.color = on ? PageKit.PaperShade : PageKit.TitleBar;
+        if (on)
+        {
+            _stripTape.color = PageKit.RarityColor((int)BookMerge.Kind.Rarity);
+            _stripRule.text = BookMerge.RuleText();
+            _stripPicked.text = BookMerge.PickedText();
+            _goText.text = string.Format(UiText.T("ui.merge.go", "Merge {0}/{1}"), BookMerge.Picks.Count, BookMerge.Need);
+            _goBg.color = BookMerge.Ready ? PageKit.Select : PageKit.PaperShade;
+            _goText.color = BookMerge.Ready ? PageKit.TitleText : PageKit.InkFaint;
+            Hits.Add(new PageHit("merge.cancel", CancelX, PagerY, CancelW, PagerH));
+            Hits.Add(new PageHit("merge.go", GoX, PagerY, GoW, PagerH));
+        }
+        else
+        {
+            bool can = BookMerge.CanStart(Selected);
+            _mergeBg.color = can ? PageKit.Select : PageKit.PaperShade;
+            _mergeText.color = can ? PageKit.TitleText : PageKit.InkFaint;
+            Hits.Add(new PageHit("merge.start", MergeX, PagerY, MergeW, PagerH));
+        }
     }
 
     private static TextMeshProUGUI Pager(RectTransform root)
@@ -314,6 +390,7 @@ internal static class BookPages
 
     private static void RefreshBag()
     {
+        BookMerge.Validate();
         var keys = BagKeys();
         int pages = Math.Max(1, (keys.Count + BagPerPage - 1) / BagPerPage);
         BagPage = Math.Clamp(BagPage, 0, pages - 1);
@@ -332,11 +409,12 @@ internal static class BookPages
             bool on = i == Filter;
             bg.color = on ? PageKit.TitleBar : PageKit.PaperShade;
             text.color = on ? PageKit.TitleText : PageKit.Ink;
-            Hits.Add(new PageHit("filter." + i, x, ChipY, Filters[i].W, ChipH));
+            if (!BookMerge.Active) Hits.Add(new PageHit("filter." + i, x, ChipY, Filters[i].W, ChipH));
         }
         _bagPager.text = $"{BagPage + 1}/{pages}";
         AddPagerHits();
         Hits.Add(new PageHit("sort", SortX, PagerY, 110, PagerH));
+        RefreshMerge();
     }
 
     private static void AddPagerHits()
@@ -443,6 +521,14 @@ internal static class BookPages
             foreach (var f in s.SelectFrame) f.enabled = selected;
             s.WasSelected = selected;
         }
+        bool merging = BookMerge.Active && item != null;
+        bool dim = merging && !BookMerge.Matches(s.Key);
+        bool picked = merging && BookMerge.Picks.Contains(s.Key);
+        bool isNew = BookMerge.IsNew(item);
+        s.Dim.enabled = dim;
+        foreach (var m in s.TickMarks) m.enabled = picked;
+        s.NewBg.enabled = s.NewText.enabled = isNew;
+        s.Bg.color = merging && !dim ? PageKit.Paper : PageKit.PaperShade;
         if (!force && s.Rendered && Equals(item, s.Shown)) return;
         s.Rendered = true;
         s.Shown = item;
@@ -504,7 +590,7 @@ internal static class BookPages
     {
         _dirty = true;
         Selected = null;
-        if (to == null || to == from) return "cancel";
+        if (to == null || to == from || BookMerge.Active) return "cancel";
         bool fromItem = from.StartsWith("bag.", StringComparison.Ordinal) || from.StartsWith("equip.", StringComparison.Ordinal);
         bool toItem = to.StartsWith("bag.", StringComparison.Ordinal) || to.StartsWith("equip.", StringComparison.Ordinal);
         if (!fromItem || !toItem || Pc.Inventory.Get(from) == null) return "cancel";
@@ -534,7 +620,24 @@ internal static class BookPages
             case "tab.Help": BookHost.ShowModPage(BookTab.Help); return "tab";
             case "prev": Page(tab, -1); return "page";
             case "next": Page(tab, +1); return "page";
-            case "sort": InventoryActions.SortBag(); Selected = null; return "sort";
+            case "sort":
+                if (BookMerge.Active) return "merge-busy";
+                InventoryActions.SortBag(); Selected = null; return "sort";
+            case "merge.start":
+                if (Selected == null || !BookMerge.Start(Selected)) return "merge-off";
+                Selected = null;
+                _dirty = true;
+                return "merge-start";
+            case "merge.cancel":
+                Selected = BookMerge.Cancel();
+                _dirty = true;
+                return "merge-cancel";
+            case "merge.go":
+                var merged = BookMerge.Go();
+                _dirty = true;
+                if (merged is not { Ok: true }) return merged == null ? "merge-not-ready" : "merge-error " + merged.Error;
+                if (!BookMerge.Active) Selected = merged.Slot;
+                return "merged";
             case "filter.0": case "filter.1": case "filter.2": case "filter.3":
                 Filter = key[^1] - '0';
                 BagPage = 0;
@@ -544,6 +647,8 @@ internal static class BookPages
         if (key.StartsWith("row.", StringComparison.Ordinal)) return "row";
         var item = Pc.Inventory.Get(key);
         _dirty = true;
+        BookMerge.ClearNew(item);
+        if (BookMerge.Active) return right ? "merge-busy" : "merge-" + BookMerge.Toggle(key);
         if (right)
         {
             Selected = null;

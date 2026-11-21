@@ -25,6 +25,9 @@ internal static class BookGuide
             "Enemies drop gear when they die; elites and bosses drop more. Walk over a drop to pick it up.\n\n" +
             "Rarity sets how strong the rolls are: Common (white), Magic (blue), Rare (yellow) and Legendary (red-orange). " +
             "Uniques are Legendary and carry a special effect. Magic find raises the rarity of drops."),
+        ("merge", "Merge",
+            "Turn spare gear into better gear. Select an item in the bag and press Merge, next to Sort. Items that cannot join it fade; click the ones you want to give up, then press Merge again.\n\n" +
+            "3 Common of one item type make 1 Magic of that type, 5 Magic make 1 Rare, and 7 Rare make 1 Legendary. Any 3 Legendary items make 1 random Legendary of another kind. The new item takes the lowest level of the ones used and fresh stats, and lands where your first pick was, marked NEW. Cancel stops merging."),
         ("perks", "Perks and spells",
             "Spend perk points in the perk tree ({0}). Some perks unlock spells: put them on the spell bar and cast them with the spell keys.\n\n" +
             "Spells cost energy, which is your stamina bar, and each has a cooldown."),

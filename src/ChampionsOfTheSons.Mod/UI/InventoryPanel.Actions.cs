@@ -13,11 +13,11 @@ namespace ChampionsOfTheSons.Mod.UI;
 internal sealed partial class InventoryPanel
 {
     private const float MenuW = 230, MenuRowH = 38, MenuPad = 4;
-    private const float MenuH = MenuRowH * 3 + MenuPad * 2;
+    private const float MenuH = MenuRowH * 4 + MenuPad * 2;
     private const float DragThreshold = 8;
 
     private SContainerOptions _menu = null!;
-    private SBgButtonOptions _menuEquip = null!, _menuDrop = null!, _menuDestroy = null!;
+    private SBgButtonOptions _menuEquip = null!, _menuDrop = null!, _menuDestroy = null!, _menuMerge = null!;
     private SContainerOptions _ghost = null!;
     private SLabelOptions _ghostLabel = null!;
     private Vector2 _menuPos;
@@ -42,6 +42,8 @@ internal sealed partial class InventoryPanel
 
     public string MenuDestroyText => _menuDestroy.TextObject.text;
 
+    public string MenuMergeText => _menuMerge.TextObject.text;
+
     private void BuildMenu()
     {
         _menu = SContainer.TopLeft(0, 0).Size(MenuW, MenuH).Background(C(UiTheme.Divider), EBackground.None);
@@ -57,6 +59,7 @@ internal sealed partial class InventoryPanel
         _menuEquip = Row(0, () => MenuEquipClicked());
         _menuDrop = Row(1, () => MenuDropClicked());
         _menuDestroy = Row(2, () => MenuDestroyClicked());
+        _menuMerge = Row(3, () => MenuMergeClicked());
         _root.Add(_menu);
         _menu.Active(false);
     }
@@ -168,6 +171,9 @@ internal sealed partial class InventoryPanel
             : UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
         _menuDrop.Text(UiText.T("ui.inventory.menu.drop", "Drop"));
         _menuDestroy.Text(UiText.T("ui.inventory.menu.destroy", "Destroy")).FontColor(UiTheme.Bad);
+        var (have, need) = Book.BookMerge.QuickCount(key);
+        _menuMerge.Text(need == 0 ? UiText.T("ui.merge.button", "Merge") : string.Format(UiText.T("ui.merge.menu", "Merge ({0}/{1})"), have, need))
+            .FontColor(need > 0 && have >= need ? UiTheme.Text : UiTheme.TextFaint);
 
         var canvas = CanvasSize;
         _menuPos = new Vector2(Mathf.Clamp(canvasPos.x, 4, canvas.x - MenuW - 4), Mathf.Clamp(canvasPos.y, 4, canvas.y - MenuH - 4));
@@ -204,6 +210,17 @@ internal sealed partial class InventoryPanel
         CloseMenu();
         if (key == null) return false;
         bool ok = InventoryActions.Drop(key);
+        if (ok) { _dirty = false; RefreshAll(); }
+        return ok;
+    }
+
+    /// <summary>COS-144: merges the item with the highest-level others of its kind; the result takes its slot.</summary>
+    public bool MenuMergeClicked()
+    {
+        var key = MenuSlot;
+        CloseMenu();
+        if (key == null) return false;
+        bool ok = Book.BookMerge.QuickMerge(key) is { Ok: true };
         if (ok) { _dirty = false; RefreshAll(); }
         return ok;
     }
