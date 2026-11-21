@@ -10,15 +10,8 @@ namespace ChampionsOfTheSons.Mod.Bridge;
 /// </summary>
 public static class PlayerEffects
 {
-    private sealed class Poison
-    {
-        public double PerSecond;
-        public int TicksLeft;
-        public float Phase;
-    }
-
-    private static float _stunLeft;
-    private static readonly List<Poison> Poisons = new();
+    private static float _poisonPhase, _leakPhase;
+    private static int _poisonSerial;
 
     public static readonly UndyingPromiseState Undying = new();
     public static readonly NearDeathState NearDeath = new();
@@ -26,31 +19,38 @@ public static class PlayerEffects
     /// <summary>The enemy whose melee attack was last built, and when: the hit that follows is attributed to it.</summary>
     public static (EnemyRuntime Enemy, float Time)? LastAttacker { get; set; }
 
-    public static bool Stunned => _stunLeft > 0;
-    public static int PoisonCount => Poisons.Count;
+    private static PlayerBuffs Buffs => PlayerDebuffs.Buffs;
 
-    public static bool Stun(double seconds)
+    /// <summary>Stunned: no movement, no attacks (the stun buff's <c>stunned</c> stat, COS-89).</summary>
+    public static bool Stunned => PlayerState.Character.Stats.IsOn(StatIds.Stunned);
+    /// <summary>Rooted: no movement or jumping, but the player can still attack and look around.</summary>
+    public static bool Rooted => PlayerState.Character.Stats.IsOn(StatIds.Rooted);
+    public static int PoisonCount => Buffs.CountOf(PlayerDebuffs.Poison);
+
+    public static bool Stun(double seconds, string source = "stun")
     {
-        if (seconds <= 0 || PlayerState.Character.Stats.Get(CombatStatIds.StunImmunity) > 0 || Spells.FlickerRun.Untouchable) return false;
-        seconds = SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds);
-        _stunLeft = Mathf.Max(_stunLeft, (float)seconds);
-        return true;
+        if (seconds <= 0 || Spells.FlickerRun.Untouchable) return false;
+        var r = Buffs.Apply(PlayerDebuffs.Stun, source, seconds);
+        return r is BuffApply.Applied or BuffApply.Refreshed;
     }
 
-    public static void AddPoison(double perSecond, double seconds)
+    public static bool Root(double seconds, string source = "root")
+    {
+        if (seconds <= 0 || Spells.FlickerRun.Untouchable) return false;
+        var r = Buffs.Apply(PlayerDebuffs.Root, source, seconds);
+        return r is BuffApply.Applied or BuffApply.Refreshed;
+    }
+
+    /// <summary>A poison of <paramref name="perSecond"/> damage per second. Each call is its own poison unless a source is given (the
+    /// same source then adds up and refreshes); two or more poisons also slow the player.</summary>
+    public static void AddPoison(double perSecond, double seconds, string? source = null)
     {
         if (perSecond <= 0 || seconds <= 0) return;
-        seconds = SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds);
-        if (seconds <= 0) return; // debuff immunity
-        Poisons.Add(new Poison { PerSecond = perSecond, TicksLeft = (int)Math.Ceiling(seconds) });
+        Buffs.Apply(PlayerDebuffs.Poison, source ?? $"p{++_poisonSerial}", seconds, perSecond);
     }
 
-    /// <summary>Purge: ends stun and poison on the player.</summary>
-    public static void ClearDebuffs()
-    {
-        _stunLeft = 0;
-        Poisons.Clear();
-    }
+    /// <summary>Purge: ends every debuff it can (stun, root, silence, poisons, slows, corruption: dispel level 2).</summary>
+    public static void ClearDebuffs() => Buffs.Dispel(2);
 
     public static void Heal(double amount)
     {
@@ -66,8 +66,8 @@ public static class PlayerEffects
 
     public static void Reset()
     {
-        _stunLeft = 0;
-        Poisons.Clear();
+        Buffs.Clear();
+        _poisonPhase = _leakPhase = 0;
         Undying.Reset();
         NearDeath.Reset();
         LastAttacker = null;
@@ -77,24 +77,29 @@ public static class PlayerEffects
     {
         var vitals = LocalPlayer.Vitals;
         if (vitals == null) return;
-        _stunLeft = Mathf.Max(0, _stunLeft - dt);
+        // Slows age on the ability loops (AbilityForces.Age); every other buff here.
+        Buffs.Tick(dt, id => id != PlayerDebuffs.MoveSlow);
         Undying.Tick(dt);
         bool wasLocked = !NearDeath.Ready;
         NearDeath.Tick(dt);
         if (wasLocked && NearDeath.Ready && PlayerState.Character.Stats.IsOn(NearDeathState.PerkFlag))
             Loot.LootFeature.Message(UI.UiText.T("ui.perks.near_death.ready", "Last Breath is ready again."));
 
-        for (int i = Poisons.Count - 1; i >= 0; i--)
+        // Poison: once a second, the sum of every poison, times the damage-taken multiplier (COTF).
+        double poison = Buffs.Total(PlayerDebuffs.Poison);
+        if (poison > 0 && (_poisonPhase += dt) >= 1)
         {
-            var p = Poisons[i];
-            p.Phase += dt;
-            while (p.Phase >= 1 && p.TicksLeft > 0)
-            {
-                p.Phase -= 1;
-                p.TicksLeft--;
-                vitals.ApplyDamage((float)p.PerSecond);
-            }
-            if (p.TicksLeft <= 0) Poisons.RemoveAt(i);
+            _poisonPhase -= 1;
+            vitals.ApplyDamage((float)(poison * PlayerState.Character.Stats.Get(StatIds.AllDamageTaken)));
         }
+        else if (poison <= 0) _poisonPhase = 0;
+        // Energy leak: energy drained per second.
+        double leak = Buffs.Total(PlayerDebuffs.EnergyLeak);
+        if (leak > 0 && (_leakPhase += dt) >= 1)
+        {
+            _leakPhase -= 1;
+            Spells.SpellCaster.Spend(leak);
+        }
+        else if (leak <= 0) _leakPhase = 0;
     }
 }

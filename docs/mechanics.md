@@ -218,7 +218,12 @@ Numbers marked *stat* are the original `spell_*` player stats (content/player_st
 - Deviations from the original are deliberate placeholders for spells whose original behaviour needed bow/AI hooks: Multishot auto-fires instead of multiplying bow shots; Taunt speeds enemies up instead of redirecting aggro; Portal places both linked gates in one cast, where COTF placed one portal per cast and linked the last two (COS-84).
 
 ## Buffs
-Keyed by source; re-adding a source refreshes duration; amount overwrites, accumulates or takes the max per buff kind. Negative buffs can be blocked by resist (dispel ≤ 1) or immunity (dispel ≤ 2).
+- COS-89: player buff and debuff kinds are content (`content/buffs.json`: positive or negative, dispel level, stacking rule, the stat that blocks it, stat effects); `Core/Rules/PlayerBuffs.cs` runs them on the character's stat sheet (`Mod/Bridge/PlayerDebuffs.cs`).
+- Keyed by buff and source: the same source again refreshes the time (the longer stays) and stacks the amount by the kind's rule (overwrite, accumulate, max, or min for speed multipliers: the strongest slow). Different sources run side by side.
+- Negative buffs: debuff resistance (`debuff_resistance`, at most 75%) shortens them; debuff immunity blocks and ends those of dispel level ≤ 2. Purge ends level ≤ 2. A kind's blocking stat (stun immunity for stun, root immunity for root) blocks it and ends it when it turns on.
+- Kinds: slow (movement, product over sources; two or more poisons add ×0.7), attack slow (attack speed), poison (accumulates; each second the sum × damage taken), weakened (damage dealt), energy leak (energy per second), armor corrosion (accumulates; armor lost against incoming hits), root (no movement or jump), stun (no movement, jump or attacks), silence (no spells); timed immunities: stun, root, debuff immunity, debuff resistance.
+- Spell buffs (War Cry, Berserk, Golden Skin...) stay timed stat sources `spell.<id>` (`SpellBuffs`); the HUD shows both.
+- HUD (COS-89): a row bottom left with every active buff and debuff: icon, stacked amount (or ×sources), time left; pale frame for good, red for bad; it pulses in the last 3 s and hides with the HUD while a panel is open.
 
 ## Weapon types (COS-93)
 - A weapon item's `weaponModel` names a type in `content/weapon_types.json`. The type applies while the item is in the weapon slot and the player holds a game weapon it fits: `melee` types on one-handed melee weapons (machete, katana, axes, club, knife, putter), `polearm` on the crafted spear, `greatbow` on the crafted or tactical bow. The draw key (default L) equips the first owned game weapon from the type's `baseItems`.

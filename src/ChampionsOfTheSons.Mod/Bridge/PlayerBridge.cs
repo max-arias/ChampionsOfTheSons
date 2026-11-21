@@ -70,7 +70,7 @@ public static class PlayerBridge
             if (Net.CoopTest.Enabled) RLog.Msg($"{Net.CoopTestJoin.Tag} client: took a {kind} hit of {damage:F1} before defense");
             ScaleClientMelee(ref damage, kind);
             var character = PlayerState.Character;
-            var result = PlayerDefense.Incoming(character.Stats, damage, kind, Rng);
+            var result = PlayerDefense.Incoming(character.Stats, damage, kind, Rng, PlayerDebuffs.LostArmor); // armor corruption (COS-89)
             double final = result.Damage;
             if (result.Dodged) Followups.FollowupsFeature.OnDodge();
             else final = Followups.FollowupsFeature.OnIncoming(final, kind);
@@ -177,7 +177,7 @@ public static class PlayerBridge
     {
         using var perf = Perf.Perf.Scope(PerfAfterTargetVelocity);
         if (Net.ServerConfig.OnDedicatedServer) return;
-        if (PlayerEffects.Stunned)
+        if (PlayerEffects.Stunned || PlayerEffects.Rooted) // root and stun both stop movement (COS-89)
         {
             __result = new Vector3(0, __result.y, 0);
             return;
@@ -197,6 +197,6 @@ public static class PlayerBridge
         if (Net.ServerConfig.OnDedicatedServer) return;
         float m = (float)PlayerState.Character.Stats.Get(StatIds.JumpPower);
         if (m > 0) __result *= m;
-        if (PlayerEffects.Stunned) __result = 0;
+        if (PlayerEffects.Stunned || PlayerEffects.Rooted) __result = 0;
     }
 }

@@ -19,6 +19,7 @@ public sealed class HudFeature : IModFeature
     internal DamageNumbers Numbers { get; } = new();
     internal ProgressHud Progress { get; } = new();
     internal PartyHud Party { get; } = new();
+    internal BuffHud Buffs { get; } = new();
 
     /// <summary>Whether the HUD layer (nameplates, XP bar, banners) is drawn this frame.</summary>
     internal bool Shown => _built && _root.Root.activeSelf;
@@ -35,6 +36,7 @@ public sealed class HudFeature : IModFeature
         Numbers.Build(layer);
         Progress.Build(layer);
         Party.Build(layer);
+        Buffs.Build(layer);
         HudKit.NoRaycast(_root.Root);
         _built = true;
 
@@ -63,6 +65,7 @@ public sealed class HudFeature : IModFeature
         using (Perf.Perf.Scope(PerfNumbers)) Numbers.Update(dt, Config.ShowDamageNumbers.Value);
         using (Perf.Perf.Scope(PerfProgress)) Progress.Update(dt, true);
         using (Perf.Perf.Scope(PerfParty)) Party.Update(dt, true);
+        Buffs.Update(dt);
     }
 
     public void OnGameStart()
@@ -122,5 +125,9 @@ public sealed class HudFeature : IModFeature
         }
     }
 
-    public void RegisterSelfTests() => HudSelfTest.Register();
+    public void RegisterSelfTests()
+    {
+        HudSelfTest.Register();
+        BuffSelfTest.Register();
+    }
 }

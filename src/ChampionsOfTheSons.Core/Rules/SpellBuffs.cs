@@ -19,6 +19,9 @@ public sealed class SpellBuffs
 
     public int Count => _buffs.Count;
 
+    /// <summary>Ids of the running buffs (HUD row, COS-89).</summary>
+    public IReadOnlyCollection<string> Active => _buffs.Keys;
+
     public bool Has(string id) => _buffs.ContainsKey(id);
 
     public double Remaining(string id) => _buffs.TryGetValue(id, out var b) ? b.Left : 0;

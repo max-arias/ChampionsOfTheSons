@@ -233,6 +233,8 @@ public static class StatCoverage
         // COS-83: Healing Dome, War Cry and Purge radius numbers and perks.
         "spell_war_cry_give_damage", "spell_healing_dome_gives_immunity", "spell_healing_dome_damage_increase",
         "spell_healing_dome_damage_resistance", "spell_war_cry_radius", "spell_purge_radius",
+        // COS-89: the player buff system reads these (states, immunities).
+        "rooted", "stunned", "root_immunity", "debuff_immunity",
     };
 
     /// <summary>Kept in the data but deliberately without an in-game effect, with the reason.</summary>

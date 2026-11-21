@@ -138,43 +138,26 @@ internal static class AbilityDamage
 /// <summary>Movement effects on the player: slows and the Black Hole pull, each keyed by the enemy ability that owns it. Applied in <see cref="AbilityForcePatch"/>, aged by the host loop.</summary>
 internal static class AbilityForces
 {
-    private sealed class Slow
-    {
-        public float Amount, Left;
-    }
-
     private sealed class Pull
     {
         public Vector3 Velocity;
         public float Left;
     }
 
-    private static readonly Dictionary<string, Slow> Slows = new();
     private static readonly Dictionary<string, Pull> Pulls = new();
 
     /// <summary>Slows owned by the abilities of one enemy (keys end with its identity hash).</summary>
-    public static int SlowsOf(EnemyRuntime e) => Slows.Keys.Count(k => k.EndsWith(":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e), StringComparison.Ordinal));
+    public static int SlowsOf(EnemyRuntime e) => PlayerDebuffs.Buffs.Snapshot().Count(b => b.BuffId == PlayerDebuffs.MoveSlow
+        && b.Source.EndsWith(":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e), StringComparison.Ordinal));
 
     public static Vector3 PullOf(EnemyRuntime e) =>
         Pulls.Where(kv => kv.Key.EndsWith(":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e), StringComparison.Ordinal) && kv.Value.Left > 0)
             .Aggregate(Vector3.zero, (sum, kv) => sum + kv.Value.Velocity);
 
-    /// <summary>Per source, keeps the strongest amount and longest duration.</summary>
-    public static void AddSlow(string source, double speedMult, float seconds)
-    {
-        seconds = (float)SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds); // debuff resistance
-        if (Slows.TryGetValue(source, out var s))
-        {
-            s.Amount = Mathf.Min(s.Amount, (float)speedMult);
-            s.Left = Mathf.Max(s.Left, seconds);
-        }
-        else
-        {
-            Slows[source] = new Slow { Amount = (float)speedMult, Left = seconds };
-        }
-    }
+    /// <summary>Per source, keeps the strongest amount and longest duration (a player buff, COS-89; debuff resistance shortens it).</summary>
+    public static void AddSlow(string source, double speedMult, float seconds) => PlayerDebuffs.Buffs.Apply(PlayerDebuffs.MoveSlow, source, seconds, speedMult);
 
-    public static void RemoveSlow(string source) => Slows.Remove(source);
+    public static void RemoveSlow(string source) => PlayerDebuffs.Buffs.Remove(PlayerDebuffs.MoveSlow, source);
 
     public static void SetPull(string source, Vector3 velocity, float seconds)
     {
@@ -182,15 +165,7 @@ internal static class AbilityForces
         else Pulls[source] = new Pull { Velocity = velocity, Left = seconds };
     }
 
-    public static float SpeedMultiplier
-    {
-        get
-        {
-            float m = 1;
-            foreach (var s in Slows.Values) m *= s.Amount;
-            return m;
-        }
-    }
+    public static float SpeedMultiplier => PlayerDebuffs.SpeedMultiplier;
 
     public static Vector3 PullVelocity => Pulls.Values.Where(p => p.Left > 0).Aggregate(Vector3.zero, (sum, p) => sum + p.Velocity);
 
@@ -198,17 +173,12 @@ internal static class AbilityForces
     {
         foreach (var key in Pulls.Keys.ToList())
             if ((Pulls[key].Left -= dt) <= 0) Pulls.Remove(key);
-        foreach (var key in Slows.Keys.ToList())
-        {
-            var s = Slows[key];
-            s.Left -= dt;
-            if (s.Left <= 0) Slows.Remove(key);
-        }
+        PlayerDebuffs.Buffs.Tick(dt, id => id == PlayerDebuffs.MoveSlow); // slows age on the ability loops that cast them
     }
 
     public static void Reset()
     {
-        Slows.Clear();
+        PlayerDebuffs.Buffs.RemoveAll(PlayerDebuffs.MoveSlow);
         Pulls.Clear();
     }
 }

@@ -11,6 +11,8 @@ public enum BuffStack
     Accumulate,
     /// <summary>The larger amount stays.</summary>
     Max,
+    /// <summary>The smaller amount stays (speed multipliers: the strongest slow).</summary>
+    Min,
 }
 
 /// <summary>A player buff or debuff kind (content/buffs.json).</summary>
@@ -108,7 +110,8 @@ public sealed class PlayerBuffs
         if (!def.Positive)
         {
             if (Blocks(def.DispelLevel)) return BuffApply.Resisted;
-            seconds = SpellTuning.DebuffSeconds(_stats, seconds);
+            seconds *= 1 - Math.Clamp(_stats.Get(StatIds.DebuffResistance), 0, SpellTuning.MaxDebuffResistance); // immunity is checked by level above
+            if (seconds <= 0) return BuffApply.Resisted;
         }
         var key = (buffId, source);
         bool refreshed = _active.TryGetValue(key, out var e);
@@ -123,6 +126,7 @@ public sealed class PlayerBuffs
             {
                 BuffStack.Accumulate => e.Amount + amount,
                 BuffStack.Max => Math.Max(e.Amount, amount),
+                BuffStack.Min => Math.Min(e.Amount, amount),
                 _ => amount,
             };
         }
@@ -175,12 +179,14 @@ public sealed class PlayerBuffs
         foreach (var k in _active.Keys.ToList()) Remove(k.Buff, k.Source);
     }
 
-    /// <summary>Counts every buff down; removes the ones that ran out and debuffs a new resistance or immunity now blocks.</summary>
-    public void Tick(double dt)
+    /// <summary>Counts buffs down (only those <paramref name="only"/> accepts, when given: each buff ages on the loop that applies it);
+    /// removes the ones that ran out and debuffs a new immunity now blocks.</summary>
+    public void Tick(double dt, Func<string, bool>? only = null)
     {
         List<(string, string)>? gone = null;
         foreach (var (key, e) in _active)
         {
+            if (only != null && !only(key.Buff)) continue;
             e.Left -= dt;
             if (e.Left <= 0) (gone ??= new()).Add(key);
         }
