@@ -30,7 +30,7 @@ public class PlayerCharacterTests
     {
         var c = NewCharacter();
         c.AddXp(20);
-        c.OnKill(1000);
+        for (int i = 0; i < Massacre.StartKills; i++) c.OnKill(1); // a running streak (COS-95: it starts on the 3rd kill)
         double reported = -1;
         c.Died += lost => reported = lost;
         double lost = c.OnDeath();
@@ -95,10 +95,11 @@ public class PlayerCharacterTests
         double bounty = XpCurve.Goal(1) / 3;
         c.OnKill(bounty);
         c.OnKill(bounty);
+        Assert.Equal(2 * bounty, c.Progress.Xp, 3); // the first two kills of a chain pay at once (COS-95)
         c.OnKill(bounty);
-        Assert.Equal(0, c.Progress.Xp);
+        Assert.Equal(2 * bounty, c.Progress.Xp, 3); // the third starts the streak and banks the chain
         c.Tick(16);
-        // 3 kills × a third of the level-1 goal × 1.1 streak bonus = 1.1 goals: one level up, a tenth of the goal left over
+        // 3 kills × a third of the level-1 goal × 1.1 streak bonus = 1.1 goals in all: one level up, a tenth of the goal left over
         Assert.Equal(2, c.Progress.Level);
         Assert.Equal(0.1 * XpCurve.Goal(1), c.Progress.Xp, 3);
     }
