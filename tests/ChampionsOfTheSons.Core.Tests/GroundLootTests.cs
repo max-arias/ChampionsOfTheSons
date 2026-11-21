@@ -45,13 +45,14 @@ public class GroundLootTests
     [Fact]
     public void Drops_expire_and_are_found_by_distance()
     {
-        var ground = new GroundLoot { Lifetime = 10 };
+        var ground = new GroundLoot();
         var near = ground.Add(Item(), 1, 0, 0);
+        double life = GroundLoot.LifetimeFor(DropSource.Enemy, near.Item.Rarity);
         ground.Add(Item(), 9, 0, 0);
         Assert.Equal(new[] { near.Id }, ground.Near(0, 0, 0, 1.5f));
         var removed = new List<int>();
         ground.Removed += (d, picked) => { if (!picked) removed.Add(d.Id); };
-        ground.Tick(9);
+        ground.Tick(life - 1);
         Assert.Equal(2, ground.Count);
         ground.Tick(2);
         Assert.Equal(0, ground.Count);

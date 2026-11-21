@@ -13,7 +13,7 @@ public static class MessageCodec
     /// <see cref="SpellFxEvent"/>, <see cref="AbilityEvent"/>, <see cref="PlayerInfo"/>, <see cref="Announce"/> (COS-79/80/81);
     /// <see cref="HeldWeapon"/> carries the item's rarity and base id (COS-108).
     /// 4: items carry the four rarities 0..3 (COS-109).</remarks>
-    public const int ProtocolVersion = 5;
+    public const int ProtocolVersion = 6;
 
     public static byte[] Encode(IMessage message)
     {
@@ -39,7 +39,7 @@ public static class MessageCodec
             case PlayerPos m: WriteVec(w, m.Position); w.VarInt(m.Level); break;
             case DamageShown m: w.VarUInt(m.PlayerId).UInt64(m.EnemyNetId); WriteVec(w, m.Position); w.Float(m.Amount).Byte((byte)m.Flags); break;
             case AuraPulse m: w.VarUInt(m.PlayerId).String(m.BuffId); WriteVec(w, m.Origin); w.Float(m.Radius).Float(m.Seconds); break;
-            case DropSpawned m: w.VarUInt(m.DropId); WriteItem(w, m.Item); WriteVec(w, m.Position); break;
+            case DropSpawned m: w.VarUInt(m.DropId); WriteItem(w, m.Item); WriteVec(w, m.Position); w.Float(m.Remaining); break;
             case PickupRequest m: w.VarUInt(m.DropId); break;
             case PickupGranted m: w.VarUInt(m.DropId); WriteItem(w, m.Item); break;
             case DropRemoved m: w.VarUInt(m.DropId); break;
@@ -87,7 +87,7 @@ public static class MessageCodec
             MessageType.PlayerPos => new PlayerPos(ReadVec(r), r.VarInt()),
             MessageType.DamageShown => new DamageShown(r.VarUInt(), r.UInt64(), ReadVec(r), r.Float(), (HitFlags)r.Byte()),
             MessageType.AuraPulse => new AuraPulse(r.VarUInt(), r.String() ?? "", ReadVec(r), r.Float(), r.Float()),
-            MessageType.DropSpawned => new DropSpawned(r.VarUInt(), ReadItem(r), ReadVec(r)),
+            MessageType.DropSpawned => new DropSpawned(r.VarUInt(), ReadItem(r), ReadVec(r), r.Float()),
             MessageType.PickupRequest => new PickupRequest(r.VarUInt()),
             MessageType.PickupGranted => new PickupGranted(r.VarUInt(), ReadItem(r)),
             MessageType.DropRemoved => new DropRemoved(r.VarUInt()),

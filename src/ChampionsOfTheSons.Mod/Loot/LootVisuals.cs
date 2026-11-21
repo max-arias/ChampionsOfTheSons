@@ -18,6 +18,8 @@ internal static class LootVisuals
         public Color Color;
         public Rarity Rarity;
         public Vector3 Position;
+        /// <summary>The root's scale when created (the fade shrinks from it).</summary>
+        public float Scale = 1;
     }
 
     private static readonly Dictionary<int, Visual> ById = new();
@@ -137,6 +139,21 @@ internal static class LootVisuals
     {
         if (!ById.Remove(id, out var v)) return;
         if (v.Root != null) UnityEngine.Object.Destroy(v.Root);
+    }
+
+    /// <summary>Seconds over which a drop shrinks away before it despawns (COS-96).</summary>
+    public const float FadeSeconds = 2f;
+
+    /// <summary>Shrinks drops in their last <see cref="FadeSeconds"/>, so they fade out instead of popping away.</summary>
+    public static void Fade(GroundLoot ground)
+    {
+        foreach (var (id, v) in ById)
+        {
+            if (v.Root == null) continue;
+            var drop = ground.Get(id);
+            if (drop == null || drop.Remaining >= FadeSeconds) continue;
+            v.Root.transform.localScale = Vector3.one * Mathf.Max(0.05f, (float)drop.Remaining / FadeSeconds) * v.Scale;
+        }
     }
 
     public static void Spin(float dt)

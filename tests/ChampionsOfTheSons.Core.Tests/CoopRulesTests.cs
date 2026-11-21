@@ -91,6 +91,29 @@ public class CoopPickupTests
         Assert.Equal(0, ground.Count);
     }
 
+    [Theory]
+    [InlineData(DropSource.Enemy, Rarity.Common, 120)]
+    [InlineData(DropSource.Enemy, Rarity.Legendary, 170)]
+    [InlineData(DropSource.Thrown, Rarity.Magic, 68)]
+    [InlineData(DropSource.Overflow, Rarity.Rare, 918)]
+    public void Drops_last_by_source_and_rarity(DropSource source, Rarity rarity, double seconds) =>
+        Assert.Equal(seconds, GroundLoot.LifetimeFor(source, rarity));
+
+    [Fact]
+    public void Each_drop_expires_on_its_own_lifetime_and_a_mirror_keeps_the_hosts_remaining_time()
+    {
+        var ground = new GroundLoot();
+        var thrown = ground.Add(Item with { Rarity = Rarity.Common }, 0, 0, 0, source: DropSource.Thrown);
+        var enemy = ground.Add(Item with { Rarity = Rarity.Common }, 0, 0, 0);
+        ground.Tick(61);
+        Assert.Null(ground.Get(thrown.Id));
+        Assert.NotNull(ground.Get(enemy.Id));
+        var mirrored = ground.Mirror(99, Item, 0, 0, 0, remaining: 5);
+        ground.Tick(5.5);
+        Assert.Null(ground.Get(mirrored.Id));
+        Assert.NotNull(ground.Get(enemy.Id));
+    }
+
     [Fact]
     public void A_mirrored_drop_keeps_the_hosts_id_and_can_be_removed()
     {

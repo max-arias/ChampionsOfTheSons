@@ -35,7 +35,7 @@ public class MessageCodecTests
         new DamageShown(2u, 42UL, new Vec3(1, 2, 3), 777.5f, HitFlags.Crit | HitFlags.Ranged),
         new AuraPulse(2u, "buff.aura_of_valor", new Vec3(4, 5, 6), 12f, 2.5f),
         new XpGranted(long.MaxValue),
-        new DropSpawned(7u, SampleItem, new Vec3(1.5f, -2f, 300.25f)),
+        new DropSpawned(7u, SampleItem, new Vec3(1.5f, -2f, 300.25f), 42.5f),
         new PickupRequest(7u),
         new PickupGranted(uint.MaxValue, SampleItem),
         new DropRemoved(7u),

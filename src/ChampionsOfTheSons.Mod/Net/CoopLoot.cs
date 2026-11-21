@@ -31,7 +31,7 @@ public sealed class CoopLoot : IModFeature
         CotsNetEvent.Received += OnNet;
         LootFeature.Ground.Added += d =>
         {
-            if (CoopSession.IsHost) CoopSession.SendToPeers(new DropSpawned((uint)d.Id, d.Item, new Vec3(d.X, d.Y, d.Z)));
+            if (CoopSession.IsHost) CoopSession.SendToPeers(new DropSpawned((uint)d.Id, d.Item, new Vec3(d.X, d.Y, d.Z), (float)d.Remaining));
         };
         LootFeature.Ground.Removed += (d, _) =>
         {
@@ -45,7 +45,7 @@ public sealed class CoopLoot : IModFeature
     public static void SendAllTo(BoltConnection connection)
     {
         foreach (var d in LootFeature.Ground.All.ToList())
-            CotsNetEvent.Instance.SendTo(new DropSpawned((uint)d.Id, d.Item, new Vec3(d.X, d.Y, d.Z)), connection);
+            CotsNetEvent.Instance.SendTo(new DropSpawned((uint)d.Id, d.Item, new Vec3(d.X, d.Y, d.Z), (float)d.Remaining), connection);
     }
 
     // A client does not pick up by itself: it asks the host.
@@ -72,7 +72,7 @@ public sealed class CoopLoot : IModFeature
             {
                 case DropSpawned ds when CoopSession.IsClient:
                     int stack = ModContent.Db.Items.TryGetValue(ds.Item.BaseId, out var def) ? def.StackSize : 1;
-                    LootFeature.Ground.Mirror((int)ds.DropId, ds.Item, ds.Position.X, ds.Position.Y, ds.Position.Z, stack);
+                    LootFeature.Ground.Mirror((int)ds.DropId, ds.Item, ds.Position.X, ds.Position.Y, ds.Position.Z, stack, ds.Remaining);
                     MirroredCount = LootFeature.Ground.Count;
                     break;
                 case DropRemoved dr when CoopSession.IsClient:
@@ -114,7 +114,7 @@ public sealed class CoopLoot : IModFeature
         {
             // The bag filled up between the request and the answer: the rest drops at our feet (local only).
             LootFeature.Message(UI.UiText.T("ui.loot.bag_full", "Your bag is full."));
-            if (rest != null && TheForest.Utils.LocalPlayer.IsInWorld) LootFeature.SpawnAt(rest, TheForest.Utils.LocalPlayer.Transform.position);
+            if (rest != null && TheForest.Utils.LocalPlayer.IsInWorld) LootFeature.SpawnAt(rest, TheForest.Utils.LocalPlayer.Transform.position, DropSource.Overflow);
         }
         RLog.Msg($"{CoopTestJoin.Tag} client: picked up {grant.Item.BaseId} (granted by the host)");
         CoopTest.Check("loot: client was granted the pickup", true, grant.Item.BaseId);

@@ -70,10 +70,10 @@ public sealed class LootFeature : IModFeature
         if (PlayerState.Character.Inventory.AddToBag(item, stackSize, out var rest) || rest == null) return;
         if (LocalPlayer.IsInWorld)
         {
-            var drop = SpawnScattered(rest, PlayerPosition(), 0.8f, 1.5f);
+            var drop = SpawnScattered(rest, PlayerPosition(), 0.8f, 1.5f, DropSource.Overflow);
             NoAutoPickup.Add(drop.Id);
         }
-        else Ground.Add(rest, 0, 0, 0, stackSize);
+        else Ground.Add(rest, 0, 0, 0, stackSize, DropSource.Overflow);
         Message(UI.UiText.T("ui.loot.bag_full", "Your bag is full."));
     }
 
@@ -86,6 +86,7 @@ public sealed class LootFeature : IModFeature
         if (!inWorld) return;
         Ground.Tick(dt);
         LootVisuals.Spin(dt);
+        LootVisuals.Fade(Ground);
         TryPickups();
     }
 
@@ -129,18 +130,18 @@ public sealed class LootFeature : IModFeature
         return result;
     }
 
-    public static GroundDrop SpawnScattered(ItemInstance item, Vector3 around, float minRadius = 0.6f, float maxRadius = 1.8f)
+    public static GroundDrop SpawnScattered(ItemInstance item, Vector3 around, float minRadius = 0.6f, float maxRadius = 1.8f, DropSource source = DropSource.Enemy)
     {
         float angle = (float)(Rng.NextDouble() * Math.PI * 2);
         float r = minRadius + (float)Rng.NextDouble() * (maxRadius - minRadius);
-        return SpawnAt(item, around + new Vector3(Mathf.Cos(angle) * r, 0, Mathf.Sin(angle) * r));
+        return SpawnAt(item, around + new Vector3(Mathf.Cos(angle) * r, 0, Mathf.Sin(angle) * r), source);
     }
 
-    public static GroundDrop SpawnAt(ItemInstance item, Vector3 pos)
+    public static GroundDrop SpawnAt(ItemInstance item, Vector3 pos, DropSource source = DropSource.Enemy)
     {
         pos = SnapToGround(pos);
         int stack = ModContent.Db.Items.TryGetValue(item.BaseId, out var def) ? def.StackSize : 1;
-        return Ground.Add(item, pos.x, pos.y, pos.z, stack);
+        return Ground.Add(item, pos.x, pos.y, pos.z, stack, source);
     }
 
     private static Vector3 SnapToGround(Vector3 pos)
@@ -165,7 +166,7 @@ public sealed class LootFeature : IModFeature
         if (inv.Get(slot) == null || LocalPlayer.Transform == null) return null;
         var item = inv.Remove(slot)!;
         var t = LocalPlayer.Transform;
-        var drop = SpawnAt(item, t.position + t.forward * ThrowDistance);
+        var drop = SpawnAt(item, t.position + t.forward * ThrowDistance, DropSource.Thrown);
         NoAutoPickup.Add(drop.Id);
         return drop;
     }

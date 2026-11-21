@@ -123,8 +123,8 @@ public sealed record XpGranted(long Amount) : IMessage
     public MessageType Type => MessageType.XpGranted;
 }
 
-/// <summary>Host → clients: an item dropped in the world.</summary>
-public sealed record DropSpawned(uint DropId, ItemInstance Item, Vec3 Position) : IMessage
+/// <summary>Host → clients: an item dropped in the world, with the seconds it has left (COS-96).</summary>
+public sealed record DropSpawned(uint DropId, ItemInstance Item, Vec3 Position, float Remaining = 120f) : IMessage
 {
     public MessageType Type => MessageType.DropSpawned;
 }
