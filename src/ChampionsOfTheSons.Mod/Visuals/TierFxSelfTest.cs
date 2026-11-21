@@ -71,8 +71,8 @@ internal static class TierFxSelfTest
             var b = Of(_boss);
             SelfTest.Check("tierfx: bundle has the tier prefabs", FxKit.Available && new[] { TierFxFeature.Aura, TierFxFeature.Embers, TierFxFeature.Shimmer }.All(n => Bundles.CotsBundle.Prefab(n) != null));
             SelfTest.Check("tierfx: elite gets an aura only", e != null && e.Parts.Count == 1 && e.Light == null, $"{e?.Parts.Count} parts");
-            SelfTest.Check("tierfx: miniboss gets an aura, embers and a light", m != null && m.Parts.Count == 2 && m.Light != null, $"{m?.Parts.Count} parts, light {m?.Light != null}");
-            SelfTest.Check("tierfx: boss gets an aura, ground ring, embers, shimmer and a light", b != null && b.Parts.Count == 4 && b.Light != null, $"{b?.Parts.Count} parts, light {b?.Light != null}");
+            SelfTest.Check("tierfx: miniboss gets an aura, embers, the power aura and a light", m != null && m.Parts.Count == 3 && HasPower(m) && m.Light != null, $"{m?.Parts.Count} parts, light {m?.Light != null}");
+            SelfTest.Check("tierfx: boss gets an aura, ground ring, embers, the power aura, shimmer and a light", b != null && b.Parts.Count == 5 && HasPower(b) && b.Light != null, $"{b?.Parts.Count} parts, light {b?.Light != null}");
         });
         SelfTest.Add(3.5f, "tierfx: shot all tiers", () => { Loot.LootFeature.ClearAll(); TestKit.Screenshot("tierfx-01-tiers"); });
         SelfTest.Add(3.8f, "tierfx: shot elite close", () => { Look(_elite); TestKit.Screenshot("tierfx-02-elite"); });
@@ -120,4 +120,7 @@ internal static class TierFxSelfTest
         to.y = 0;
         if (to.sqrMagnitude > 0.01f) t.rotation = Quaternion.LookRotation(to);
     }
+
+    /// <summary>The power-up aura (COS-110, Wave 7) is among the parts.</summary>
+    private static bool HasPower(TierFxFeature.Attached a) => a.Parts.Any(p => p != null && p.name.EndsWith(TierFxFeature.Power, StringComparison.Ordinal));
 }
