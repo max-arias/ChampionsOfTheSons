@@ -121,6 +121,10 @@ internal static class BookSelfTest
 
     private static void TabHovered()
     {
+        // COS-135: the game moves its book cursor between steps (it drifted off our tab once); aim it again before checking.
+        var center = BookTabs.ScreenCenter(BookTab.Gear);
+        SetCursor(center);
+        BookTabs.Tick(center);
         var pose = BookTabs.Pose(BookTab.Gear);
         float moved = (pose.Face - _tabIdle.Face).magnitude;
         SelfTest.Check("book: hovering our tab slides it out", BookTabs.Hovered == BookTab.Gear && BookTabs.SlidOut(BookTab.Gear) && moved > 0.0005f && BookTabs.OutlineShown(BookTab.Gear),

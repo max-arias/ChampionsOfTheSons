@@ -196,17 +196,16 @@ internal static class ModKeys
     /// The game actions that also fire on <paramref name="key"/>. A combo clashes with the game's own combo and with a plain game binding
     /// on its base key (the game ignores modifiers), except the item hotkeys, which <see cref="Tick"/> holds back while a combo is down.
     /// </summary>
-    public static IReadOnlyList<string> GameClashes(string key, string? modKeyId)
-    {
-        var all = GameClashes(key);
-        return modKeyId != null && IntendedOverlaps.TryGetValue(modKeyId, out var ok) ? all.Where(a => !ok.Contains(a)).ToList() : all;
-    }
+    public static IReadOnlyList<string> GameClashes(string key, string? modKeyId) =>
+        modKeyId != null && IntendedOverlaps.TryGetValue(modKeyId, out var ok) && string.Equals(KeyCombo.Parse(key).ToString(), ok, StringComparison.OrdinalIgnoreCase)
+            ? Array.Empty<string>()
+            : GameClashes(key);
 
-    /// <summary>Game actions a mod key shares on purpose, so the settings do not warn about them. COS-115 (Max 2026-11-20): I opens
-    /// the game's guide book on the mod's page, so sharing the game's OpenInventory key is intended.</summary>
-    private static readonly Dictionary<string, string[]> IntendedOverlaps = new(StringComparer.Ordinal)
+    /// <summary>Mod keys that share a game key on purpose, so the settings do not warn about it. COS-115 (Max 2026-11-20): I opens the
+    /// game's inventory and guide book (the game's Open Inventory, Inventory and Open Quick Select on I), and the mod's page with it.</summary>
+    private static readonly Dictionary<string, string> IntendedOverlaps = new(StringComparer.Ordinal)
     {
-        ["inventory_key"] = new[] { "OpenInventory" },
+        ["inventory_key"] = "i",
     };
 
     public static IReadOnlyList<string> GameClashes(string key)

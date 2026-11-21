@@ -95,6 +95,7 @@ internal static class EnemyHudSelfTest
             if (r != null)
             {
                 r.TestActive = true; // the headless game keeps spawns dormant
+                r.TestAware = false; // COS-134: it would notice the player on its own; the steps set awareness when they want it
                 r.Actor = v; // the registry may still point at the actor SetMaxHealthStat saw; the game's bridge fixes that later
             }
             return v;
@@ -107,6 +108,11 @@ internal static class EnemyHudSelfTest
 
     private static void Spawn()
     {
+        // COS-134: a boss left by an earlier phase (the admin test spawns one) can still be aware of the player and hold a bar.
+        int cleared = 0;
+        foreach (var r in EnemyRegistry.Snapshot())
+            if (r.Profile.Tier >= EnemyTier.Miniboss && r.Actor != null) { TestKit.Kill(r.Actor); cleared++; }
+        if (cleared > 0) SelfTest.Log($"enemyhud: killed {cleared} leftover bosses from earlier phases");
         var elites = WorldState.Rules with
         {
             PartyLevelOverride = Difficulties.Hell.BaseLevelMin,
