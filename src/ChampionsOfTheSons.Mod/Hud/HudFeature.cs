@@ -58,7 +58,7 @@ public sealed class HudFeature : IModFeature
     {
         if (!_built) return;
         dt = Time.unscaledDeltaTime; // fades keep running while the game is paused
-        bool show = inWorld && !UI.CotsUi.AnyPanelOpen;
+        bool show = inWorld && !UI.CotsUi.AnyPanelOpen && Config.ShowHud.Value;
         if (_root.Root.activeSelf != show) _root.Active(show);
         if (!show) return;
         using (Perf.Perf.Scope(PerfPlates)) Plates.Update(dt, Config.ShowNameplates.Value);

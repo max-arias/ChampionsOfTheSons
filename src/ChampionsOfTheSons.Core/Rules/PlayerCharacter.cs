@@ -192,9 +192,12 @@ public sealed class PlayerCharacter
         RebuildAll();
     }
 
-    /// <summary>XP from a kill: banked into the massacre streak (paid when it ends).</summary>
-    public void OnKill(double xp) =>
-        Massacre.OnKill(xp, Stats.Get(StatIds.MaxMassacreTime), Stats.Get(StatIds.TimeBonusPerKill));
+    /// <summary>XP from a kill: paid at once before a streak starts, banked into the running streak after (COS-95).</summary>
+    public LevelUpResult? OnKill(double xp)
+    {
+        double now = Massacre.OnKill(xp, Stats.Get(StatIds.MaxMassacreTime), Stats.Get(StatIds.TimeBonusPerKill));
+        return now > 0 ? AddXp(now) : null;
+    }
 
     /// <summary>XP that skips the streak (trees, bushes, consumables). Returns what changed.</summary>
     public LevelUpResult AddXp(double xp)

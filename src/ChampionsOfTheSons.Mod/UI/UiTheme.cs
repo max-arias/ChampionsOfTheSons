@@ -55,6 +55,10 @@ internal static class UiTheme
     public const string EmberGlow = "#FF9A3CE0";
     public const string PickGlow = "#FFF1C890";
     public const string Starved = "#FF8070";
+    /// <summary>A spell slot while the player is silenced (COS-95): dark, set apart from a cooldown and from too little energy.</summary>
+    public const string Silenced = "#4A4458";
+    public const string HealthText = "#E8B4A0";
+    public const string ShieldText = "#9FD4F0";
     public const string EnergyFill = "#6F8FE8";
     public const string BoneTint = "#D2C5AA";
     public const string XpFill = "#E3B341";

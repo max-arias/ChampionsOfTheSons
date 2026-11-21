@@ -66,7 +66,7 @@ internal sealed class ActionBarFeature : IModFeature
         Bar.Build();
     }
 
-    public void Update(float dt, bool inWorld) => Bar.Update(UnityEngine.Time.unscaledDeltaTime, inWorld && !UI.CotsUi.AnyPanelOpen);
+    public void Update(float dt, bool inWorld) => Bar.Update(UnityEngine.Time.unscaledDeltaTime, inWorld && !UI.CotsUi.AnyPanelOpen && Config.ShowHud.Value);
 
     public void RegisterSelfTests() => ActionBarSelfTest.Register();
 }

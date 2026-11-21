@@ -101,6 +101,7 @@ internal sealed class ProgressHud
 
     public bool MassacreVisible => _mRoot.Root.activeSelf;
     public string MassacreText => _mKills.TextObject.text + " | " + _mInfo.TextObject.text;
+    public string MassacreTitle => _mHead.TextObject.text;
     public string XpText => _xpLevel.TextObject.text + " | " + _xpText.TextObject.text;
     public Banner LevelBanner => _levelBanner;
     public Banner PayoutBanner => _payoutBanner;
@@ -179,11 +180,21 @@ internal sealed class ProgressHud
         _pendingTimer = 0; // shown on the next Update (Unity objects are only touched from there)
     }
 
+    /// <summary>The streak's title by kill count (COS-95), our own words.</summary>
+    public static string StreakTitle(int kills)
+    {
+        int tier = Massacre.TitleTier(kills);
+        return tier == 0 ? UiText.T("ui.hud.massacre", "Massacre") : UiText.T($"ui.hud.streak.{tier}", StreakDefaults[tier]);
+    }
+
+    private static readonly string[] StreakDefaults =
+        { "", "Bloodlust", "Savagery", "Rampage", "Carnage", "Slaughter", "Butchery", "Massacre", "Annihilation" };
+
     public void OnPaid(int kills, double banked, double mult, double payout)
     {
-        string title = $"{UiText.T("ui.hud.massacre", "Massacre")}!";
+        string title = $"{StreakTitle(kills)}!";
         string body = $"{kills} {UiText.T("ui.hud.kills", "kills")}  ×{mult.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}\n" +
-                      $"<color={UiTheme.Gold}>+{HudKit.Grouped(payout)} XP</color>";
+                      $"<color={UiTheme.Gold}>+{HudKit.Grouped(banked * mult)} XP</color>"; // the streak's whole worth (COS-95)
         _payoutBanner.Show(title, body, 4f);
     }
 
@@ -235,16 +246,34 @@ internal sealed class ProgressHud
             if (p.Level != _shownLevel) _xpLevel.Text($"<size=9>{UiText.T("ui.hud.level", "Lv")}</size>\n{p.Level}");
             _xpText.Text($"{HudKit.Grouped(p.Xp)} / {HudKit.Grouped(goal)} XP");
             _targetFraction = (float)Math.Clamp(p.Xp / goal, 0, 1);
-            if (p.Level != _shownLevel) _shownFraction = _targetFraction; // no sweep across a level change
+            // COS-95: a level-up sweeps the bar to full once per level gained (at most 5), then on to the new fraction.
+            if (_shownLevel >= 0 && p.Level > _shownLevel) _sweeps = Math.Min(5, _sweeps + p.Level - _shownLevel);
+            else if (p.Level != _shownLevel) { _sweeps = 0; _shownFraction = _targetFraction; }
             _shownLevel = p.Level;
             _shownXp = xp;
         }
-        if (!Mathf.Approximately(_shownFraction, _targetFraction))
+        if (_sweeps > 0)
+        {
+            _shownFraction = Mathf.MoveTowards(_shownFraction, 1f, dt * 3f);
+            if (_shownFraction >= 1f)
+            {
+                _sweeps--;
+                SweepsDone++;
+                _shownFraction = 0;
+            }
+            HudKit.SetFill(_xpFill, _shownFraction);
+        }
+        else if (!Mathf.Approximately(_shownFraction, _targetFraction))
         {
             _shownFraction = Mathf.MoveTowards(_shownFraction, _targetFraction, dt * 1.5f);
             HudKit.SetFill(_xpFill, _shownFraction);
         }
     }
+
+    private int _sweeps;
+
+    /// <summary>Full-bar sweeps shown since start (self-test).</summary>
+    public int SweepsDone { get; private set; }
 
     private void UpdateMassacre()
     {
@@ -260,6 +289,7 @@ internal sealed class ProgressHud
         long bank = (long)(m.PendingXp * mult);
         if (m.Kills != _mKillsShown || bank != _mBankShown)
         {
+            if (Massacre.TitleTier(m.Kills) != Massacre.TitleTier(Math.Max(0, _mKillsShown))) _mHead.Text(StreakTitle(m.Kills));
             _mKillsShown = m.Kills;
             _mBankShown = bank;
             _mKills.Text($"{m.Kills} <size=24>{UiText.T("ui.hud.kills", "kills")}</size>");

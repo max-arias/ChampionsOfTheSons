@@ -11,8 +11,10 @@ The rules Champions of the Sons implements. Numbers and formulas come from readi
 - Death ✱ (COS-76): the base game's death (no item drops, the game's downed and respawn rules). On top, `xpLost = min(0.5 × xp, 0.1 × goal(L))` of the XP into the current level is lost and pending massacre XP is lost; never a level or perk point. Spell buffs, running spells and debuffs end. Each player's own client watches its own death (host, clients, single player alike).
 
 ## Massacre (kill streak)
-- On kill: `kills++`, `pending += xp`. Timer: if 0 → `maxMassacreTime` (15 s), else `clamp(timer + 7.5, 1, maxMassacreTime)`.
-- When the timer runs out: grant `pending × mult(kills)`; reset.
+- ✱ Start (COS-95, Max 2026-11-21): a streak starts only on the 3rd kill of a chain in which each kill comes within 7.5 s of the one before. The chain's first two kills pay their XP at once (no HUD); a slower kill starts a new chain.
+- The 3rd kill starts the streak: `kills = 3`, `pending = xp of all three`, timer = `maxMassacreTime` (15 s). Each later kill: `kills++`, `pending += xp`, timer `clamp(timer + 7.5, 1, maxMassacreTime)`.
+- When the timer runs out: grant `pending × mult(kills) − prepaid` (prepaid = what the first two kills already paid), so the total equals banking every kill; reset.
+- Streak titles on the HUD by kill count: 3, 6, 10, 16, 25, 40, 65, 100 (eight tiers, our own words).
 - `mult`: <3→1, 3→1.1, 4→1.25, 5→1.5, 6–9→1.75, 10–11→2.3, 12–15→3, 16–19→5, 20–24→8.5, 25–29→16, 30–39→22.5, 40–49→35, 50–64→50, 65–74→100, 75–99→250, ≥100→1000.
 
 ## Difficulty (COS-130) ✱

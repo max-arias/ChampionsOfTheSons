@@ -18,6 +18,9 @@ public sealed class VisualsFeature : IModFeature
     /// <summary>Hides hand flames and glyphs, halves particles and drops non-essential lights. Track B's settings overlay shows it.</summary>
     public static bool ReduceHeavyEffects => _reduce?.Value ?? false;
 
+    /// <summary>The setting itself (settings overlay).</summary>
+    public static ConfigEntry<bool>? ReduceEntry => _reduce;
+
     public static void SetReduceHeavyEffects(bool on)
     {
         if (_reduce != null) _reduce.Value = on;

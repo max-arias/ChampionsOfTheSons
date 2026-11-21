@@ -36,6 +36,10 @@ internal static class HudSelfTest
             Hud.Progress.LiftXpBar(6);
             Cleanup();
         });
+        SelfTest.Add(T0 + 11.3f, "hud: vitals, slot states, merged numbers", HudGaps);
+        SelfTest.Add(T0 + 11.6f, "hud: shot slot states", () => TestKit.Screenshot("hud-06-slots"));
+        SelfTest.Add(T0 + 11.8f, "hud: hide the whole HUD", () => Config.ShowHud.Value = false);
+        SelfTest.Add(T0 + 12.3f, "hud: hidden", HudHidden);
         SelfTest.Add(T0 + 13f, "hud: character sheet rows and tips", SheetTips);
         SelfTest.Add(T0 + 15f, "hud: spawn a cluster of 10", SpawnCluster);
         SelfTest.Add(T0 + 18f, "hud: clustered plates readable", ClusterPlates);
@@ -150,7 +154,13 @@ internal static class HudSelfTest
         Pc.Massacre.Reset();
         Victims.Clear();
         for (int i = 0; i < 4; i++) Victims.Add(TestKit.Spawn(VailActorTypeId.Carl, 6 + i, -3 + i * 2)!);
-        foreach (var v in Victims) TestKit.Kill(v);
+        // COS-95: the first kills of a chain pay at once and start no streak; the 3rd starts it.
+        double xp = Pc.Progress.Xp;
+        int level = Pc.Progress.Level;
+        TestKit.Kill(Victims[0]);
+        SelfTest.Check("hud: a single kill pays at once and starts no streak", !Pc.Massacre.Active && (Pc.Progress.Xp > xp || Pc.Progress.Level > level),
+            $"xp {xp:N0} -> {Pc.Progress.Xp:N0}, active {Pc.Massacre.Active}");
+        foreach (var v in Victims.Skip(1)) TestKit.Kill(v);
     }
 
     private static void MassacreCounter()
@@ -158,6 +168,8 @@ internal static class HudSelfTest
         SelfTest.Log($"hud: massacre kills={Pc.Massacre.Kills} bank={Pc.Massacre.PendingXp:N0} left={Pc.Massacre.TimeLeft:0.0}; widget '{Hud.Progress.MassacreText}'");
         SelfTest.Check("hud: massacre counts kills", Pc.Massacre.Kills >= 3, Pc.Massacre.Kills.ToString());
         SelfTest.Check("hud: massacre counter shown", Hud.Progress.MassacreVisible && Hud.Progress.MassacreText.Contains(Pc.Massacre.Kills.ToString()), Hud.Progress.MassacreText);
+        SelfTest.Check("hud: streak title by kill count", Hud.Progress.MassacreTitle.Equals(ProgressHud.StreakTitle(Pc.Massacre.Kills), StringComparison.OrdinalIgnoreCase),
+            $"'{Hud.Progress.MassacreTitle}' for {Pc.Massacre.Kills} kills");
         SelfTest.Check("hud: xp bar shows the level", Hud.Progress.XpText.Contains(Pc.Progress.Level.ToString()), Hud.Progress.XpText);
     }
 
@@ -166,6 +178,7 @@ internal static class HudSelfTest
         SelfTest.Check("hud: no payout banner before the streak ends", !Hud.Progress.PayoutBanner.Visible);
         double before = Pc.Progress.Xp;
         int level = Pc.Progress.Level;
+        _sweepsBefore = Hud.Progress.SweepsDone;
         // Streak ends: pays out through AddXp, and enough extra XP to cross level 20 (a Untainted Heart reward).
         Pc.Tick(1000);
         double need = 0;
@@ -174,13 +187,56 @@ internal static class HudSelfTest
         SelfTest.Log($"hud: xp {before:N0} -> level {level} -> {Pc.Progress.Level}");
     }
 
+    private static int _sweepsBefore;
+
     private static void Notices()
     {
         var p = Hud.Progress;
+        SelfTest.Check("hud: the XP bar swept for the level-ups", p.SweepsDone > _sweepsBefore, $"{_sweepsBefore} -> {p.SweepsDone}");
         SelfTest.Check("hud: massacre payout popup shown", p.PayoutBanner.Visible && p.PayoutBanner.Body.Contains("XP"), p.PayoutBanner.Body);
         SelfTest.Check("hud: massacre counter hidden after payout", !p.MassacreVisible);
         SelfTest.Check("hud: level-up notice shown", p.LevelBanner.Visible && p.LevelBanner.Body.Contains(Pc.Progress.Level.ToString()), p.LevelBanner.Body);
         SelfTest.Check("hud: level-up notice lists the reward item", p.LevelBanner.Body.Contains(HudText.ItemName(Progress.HeartOfPurity)), p.LevelBanner.Body);
+    }
+
+    /// <summary>COS-95: the health line, the three spell slot states, merged damage numbers.</summary>
+    private static void HudGaps()
+    {
+        var bar = ActionBar.ActionBar.Instance;
+        SelfTest.Check("hud: health shown as numbers over the action bar", bar != null && bar.VitalsText.Contains("/"), bar?.VitalsText ?? "no bar");
+        SelfTest.Check("hud: a shield shows its amount", ActionBar.ActionBar.VitalsLine(50, 100, 30).Contains("30"));
+
+        // Three slots: one ready-but-unaffordable, one on cooldown; then silence over everything.
+        var spells = Pc.Spells;
+        spells.Equip(0, "spell.black_hole");
+        spells.Equip(1, "spell.blink");
+        spells.Tick(1e6, Pc.Stats);
+        spells.Equip(1, "spell.blink"); // equipping starts the full cooldown
+        TheForest.Utils.LocalPlayer.Vitals.Stamina.SetCurrentValue(0); // energy reads from it
+        var sb = Spells.SpellBar.Instance;
+        sb.Refresh();
+        SelfTest.Check("hud: slot states: no energy and cooldown differ", sb.States[0] == Spells.SpellBar.SlotState.Starved && sb.States[1] == Spells.SpellBar.SlotState.Cooldown,
+            $"{sb.States[0]}, {sb.States[1]}");
+        PlayerDebuffs.Buffs.Apply(PlayerDebuffs.Silence, "selftest", 3);
+        sb.Refresh();
+        SelfTest.Check("hud: slot states: silenced darkens every spell", sb.States[0] == Spells.SpellBar.SlotState.Silenced && sb.States[1] == Spells.SpellBar.SlotState.Silenced,
+            $"{sb.States[0]}, {sb.States[1]}");
+
+        int merged = Hud.Numbers.Merged;
+        var at = TheForest.Utils.LocalPlayer.Transform.position + TheForest.Utils.LocalPlayer.Transform.forward * 4;
+        Hud.Numbers.Spawn(at, 100, false);
+        Hud.Numbers.Spawn(at, 50, false);
+        SelfTest.Check("hud: quick hits on one spot add up into one number", Hud.Numbers.Merged == merged + 1 && Hud.Numbers.LastText.StartsWith("150"), Hud.Numbers.LastText);
+    }
+
+    private static void HudHidden()
+    {
+        var bar = ActionBar.ActionBar.Instance;
+        SelfTest.Check("hud: one setting hides the whole mod HUD", !Hud.Shown && bar != null && !bar.Visible, $"hud {Hud.Shown}, bar {bar?.Visible}");
+        Config.ShowHud.Value = true;
+        PlayerDebuffs.Buffs.Clear();
+        Pc.Spells.Equip(0, null);
+        Pc.Spells.Equip(1, null);
     }
 
     private static void Cleanup()

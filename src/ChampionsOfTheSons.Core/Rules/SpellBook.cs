@@ -66,6 +66,10 @@ public sealed class SpellBook
         Math.Max(0, (_content.Spells[spellId].Cooldown - (CooldownReduction?.Invoke(spellId) ?? 0)) * (CooldownScale?.Invoke(spellId) ?? 1))
         * stats.Get(StatIds.Cooldown);
 
+    /// <summary>Seconds a full cooldown takes for this player: <see cref="CooldownOf"/> over the cooldown rate (and the spell's own rate factor).</summary>
+    public double EffectiveCooldown(string spellId, StatSheet stats) =>
+        CooldownOf(spellId, stats) / Math.Max(0.0001, stats.Get(StatIds.CooldownRate) * (CooldownRateScale?.Invoke(spellId, stats) ?? 1));
+
     /// <summary>Puts a spell in a slot. Equipping starts its full cooldown, as in the original.</summary>
     public bool Equip(int slot, string? spellId)
     {

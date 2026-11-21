@@ -35,6 +35,15 @@ public static class Config
     public static ConfigEntry<bool> ShowScanner { get; private set; } = null!;
     public static ConfigEntry<bool> ShowBossBar { get; private set; } = null!;
 
+    /// <summary>COS-95: one switch for the whole mod HUD (action bar, XP bar, streak, buffs, nameplates, numbers, boss bar).</summary>
+    public static ConfigEntry<bool> ShowHud { get; private set; } = null!;
+
+    /// <summary>COS-95: quick hits on one enemy add up into one running number.</summary>
+    public static ConfigEntry<bool> MergeDamageNumbers { get; private set; } = null!;
+
+    /// <summary>COS-97: one-time hint toasts.</summary>
+    public static ConfigEntry<bool> ShowHints { get; private set; } = null!;
+
     /// <summary>Mod sound volume, 0..1, on top of the game's SFX volume (COS-101).</summary>
     public static ConfigEntry<float> SoundVolume { get; private set; } = null!;
 
@@ -67,6 +76,9 @@ public static class Config
         ShowDamageNumbers = Category.CreateEntry("show_damage_numbers", true, "Damage numbers", "Show floating damage numbers.");
         ShowScanner = Category.CreateEntry("show_scanner", true, "Enemy scanner", "Looking at an enemy shows its armor, damage, bounty and affixes next to its nameplate.");
         ShowBossBar = Category.CreateEntry("show_boss_bar", true, "Boss health bar", "Show a wide health bar at the top of the screen while a boss is fighting you.");
+        ShowHud = Category.CreateEntry("show_hud", true, "Mod HUD", "Show the mod's HUD: action bar, XP bar, kill streak, buffs, nameplates, damage numbers and boss bar.");
+        MergeDamageNumbers = Category.CreateEntry("merge_damage_numbers", true, "Merge damage numbers", "Quick hits on the same enemy add up into one number.");
+        ShowHints = Category.CreateEntry("show_hints", true, "Hints", "Show a short hint the first time something new comes up.");
 
         SoundVolume = Category.CreateEntry("sound_volume", 1f, "Sound volume", "Volume of the mod's sounds, 0 to 1, on top of the game's sound effects volume.");
         SoundVolume.SetRange(0f, 1f);

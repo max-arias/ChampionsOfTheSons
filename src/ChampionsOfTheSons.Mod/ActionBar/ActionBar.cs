@@ -32,8 +32,13 @@ internal sealed class ActionBar
     private readonly SpellBar _spells = new();
     public readonly ItemGroup Weapons = new(weapons: true), Consumables = new(weapons: false);
     private float _itemTimer;
+    private SLabelOptions _vitals = null!;
+    private string _vitalsShown = "";
 
     public bool Visible => _root.Root.activeSelf;
+
+    /// <summary>The health and shield line above the bar (COS-95; self-test).</summary>
+    public string VitalsText => _vitalsShown;
 
     public void Build()
     {
@@ -53,6 +58,11 @@ internal sealed class ActionBar
         bar.Add(HudArt.Piece(HudArt.Clasp, 1, UiTheme.BoneDark).TopLeft(x + 4, 4).Size(ClaspW - 8, Height - 8));
         x += ClaspW;
         Consumables.Build(bar, x, itemY);
+        // COS-95: health and the absorb shield as numbers, a thin line over the spell group (the game's own gauges stay as they are).
+        _vitals = HudKit.Label("", 13, UiTheme.Bone, TMPro.TextAlignmentOptions.Center).TopLeft(Pad + GroupW + ClaspW, -20).Size(SpellBar.Width, 18);
+        _vitals.TextObject.fontStyle = TMPro.FontStyles.Bold;
+        BarSlot.Outline(_vitals, 0.3f);
+        bar.Add(_vitals);
         HudKit.NoRaycast(_root.Root);
         _root.Active(false);
     }
@@ -66,8 +76,27 @@ internal sealed class ActionBar
         _itemTimer -= dt;
         if (_itemTimer > 0) return;
         _itemTimer = 0.1f;
+        RefreshVitals();
         Weapons.Refresh();
         Consumables.Refresh();
+    }
+
+    private void RefreshVitals()
+    {
+        var health = TheForest.Utils.LocalPlayer.Vitals?.Health;
+        if (health == null) return;
+        double shield = SpellWorld.Shield.Amount + Followups.FollowupsFeature.Shield.Amount;
+        string text = VitalsLine(health._currentValue, health.GetMax(), shield);
+        if (text == _vitalsShown) return;
+        _vitalsShown = text;
+        _vitals.Text(text);
+    }
+
+    public static string VitalsLine(double health, double max, double shield)
+    {
+        string line = $"<color={UiTheme.HealthText}>{UiText.T("ui.hud.health", "Health")} {Math.Max(0, health):0} / {max:0}</color>";
+        if (shield >= 1) line += $"   <color={UiTheme.ShieldText}>{UiText.T("ui.hud.shield", "Shield")} {shield:0}</color>";
+        return line;
     }
 
     /// <summary>Forces the item groups to re-read the game's hotkeys on the next update (tests, pad actions).</summary>

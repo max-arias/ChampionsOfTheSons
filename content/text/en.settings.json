@@ -1,0 +1,13 @@
+{
+ "ui.settings.merge_damage_numbers": "Merge damage numbers",
+ "ui.settings.off": "Off",
+ "ui.settings.on": "On",
+ "ui.settings.reduce_effects": "Reduce heavy effects",
+ "ui.settings.section.display": "Display",
+ "ui.settings.show_boss_bar": "Boss health bar",
+ "ui.settings.show_damage_numbers": "Damage numbers",
+ "ui.settings.show_hints": "Hints",
+ "ui.settings.show_hud": "Mod HUD",
+ "ui.settings.show_nameplates": "Enemy nameplates",
+ "ui.settings.show_scanner": "Enemy scanner"
+}

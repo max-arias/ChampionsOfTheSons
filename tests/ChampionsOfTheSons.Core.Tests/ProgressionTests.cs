@@ -97,21 +97,53 @@ public class ProgressionTests
 public class MassacreTests
 {
     [Fact]
-    public void Streak_pays_banked_xp_times_multiplier_when_the_timer_ends()
+    public void Streak_pays_banked_xp_times_multiplier_less_what_the_first_kills_paid()
     {
         var m = new Massacre();
-        for (int i = 0; i < 5; i++) m.OnKill(100, maxTime: 15, bonusPerKill: 7.5);
+        double paidNow = 0;
+        for (int i = 0; i < 5; i++) paidNow += m.OnKill(100, maxTime: 15, bonusPerKill: 7.5);
+        Assert.Equal(200, paidNow, 6); // kills 1 and 2 pay at once
         Assert.Equal(0, m.Tick(14.9));
-        Assert.Equal(500 * 1.5, m.Tick(1), 6);
+        Assert.Equal(500 * 1.5 - 200, m.Tick(1), 6); // same total as banking all five
         Assert.False(m.Active);
         Assert.Equal(0, m.Kills);
+    }
+
+    [Fact]
+    public void A_streak_starts_only_on_the_third_kill_in_a_quick_chain()
+    {
+        var m = new Massacre();
+        Assert.Equal(10, m.OnKill(10, 15, 7.5));
+        Assert.False(m.Active);
+        m.Tick(7);
+        Assert.Equal(20, m.OnKill(20, 15, 7.5));
+        Assert.False(m.Active);
+        m.Tick(7);
+        Assert.Equal(0, m.OnKill(30, 15, 7.5));
+        Assert.True(m.Active);
+        Assert.Equal(3, m.Kills);
+        Assert.Equal(60, m.PendingXp, 6);
+    }
+
+    [Fact]
+    public void A_slow_kill_breaks_the_chain_and_pays_at_once()
+    {
+        var m = new Massacre();
+        m.OnKill(10, 15, 7.5);
+        m.OnKill(10, 15, 7.5);
+        m.Tick(7.6);
+        Assert.Equal(0, m.Kills);
+        Assert.Equal(10, m.OnKill(10, 15, 7.5)); // a new chain's first kill
+        Assert.False(m.Active);
+        Assert.Equal(1, m.Kills);
     }
 
     [Fact]
     public void Kills_extend_the_timer_up_to_the_max()
     {
         var m = new Massacre();
-        m.OnKill(1, 15, 7.5);
+        for (int i = 0; i < 3; i++) m.OnKill(1, 15, 7.5);
+        Assert.Equal(15, m.TimeLeft, 6);
         m.Tick(10);
         m.OnKill(1, 15, 7.5);
         Assert.Equal(12.5, m.TimeLeft, 6);

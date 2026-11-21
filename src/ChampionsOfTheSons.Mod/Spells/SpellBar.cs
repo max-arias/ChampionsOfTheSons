@@ -40,6 +40,11 @@ internal sealed class SpellBar
     public string SlotGlow(int i) => _slots[i].GlowHex;
     public string EnergyText => _energyText.TextObject.text;
 
+    public enum SlotState { Empty, Ready, Cooldown, Starved, Silenced }
+
+    /// <summary>Each slot's state at the last refresh (self-test).</summary>
+    public readonly SlotState[] States = new SlotState[SpellBook.Slots];
+
     /// <summary>Builds the group at (x, y) inside <paramref name="parent"/>; <paramref name="visibleRoot"/> is the action bar's panel.</summary>
     public void Build(SContainerOptions parent, float x, float y, GameObject visibleRoot)
     {
@@ -71,6 +76,7 @@ internal sealed class SpellBar
     {
         var pc = PlayerState.Character;
         double energy = SpellCaster.Energy;
+        bool silenced = pc.Stats.IsOn(StatIds.Silenced);
         for (int i = 0; i < SpellBook.Slots; i++)
         {
             var s = _slots[i];
@@ -91,25 +97,24 @@ internal sealed class SpellBar
             string remaining = "";
             if (id == null)
             {
+                States[i] = SlotState.Empty;
                 s.SetCooldown(0);
                 s.SetGlow(null);
                 s.SetPlateDim(true);
             }
             else
             {
-                s.SetPlateDim(false);
                 double progress = pc.Spells.CooldownProgress(i);
                 bool ready = progress >= 1;
                 s.SetCooldown((float)(1 - progress));
                 bool affordable = pc.Spells.IsActive(i) || energy >= pc.Spells.CostOf(id, pc.Stats).Total;
-                if (!ready)
-                {
-                    double cd = pc.Spells.CooldownOf(id, pc.Stats);
-                    double rate = Math.Max(0.0001, pc.Stats.Get(StatIds.CooldownRate));
-                    remaining = Math.Ceiling((1 - progress) * cd / rate).ToString("0");
-                }
-                s.SetIconColor(affordable ? "#FFFFFF" : UiTheme.Starved);
-                s.SetGlow(pc.Spells.IsActive(i) ? UiTheme.EmberGlow : ready && affordable ? UiTheme.RuneGlow : null);
+                if (!ready) remaining = Math.Ceiling((1 - progress) * pc.Spells.EffectiveCooldown(id, pc.Stats)).ToString("0");
+                // COS-95: three states. Cooldown: the draining overlay and seconds. No energy: a cold tint. Silenced: dark, no glow.
+                var state = silenced ? SlotState.Silenced : !ready ? SlotState.Cooldown : !affordable ? SlotState.Starved : SlotState.Ready;
+                States[i] = state;
+                s.SetPlateDim(silenced);
+                s.SetIconColor(state switch { SlotState.Silenced => UiTheme.Silenced, SlotState.Starved => UiTheme.Starved, _ => "#FFFFFF" });
+                s.SetGlow(silenced ? null : pc.Spells.IsActive(i) ? UiTheme.EmberGlow : state == SlotState.Ready ? UiTheme.RuneGlow : null);
             }
             if (remaining != _shownRemaining[i])
             {

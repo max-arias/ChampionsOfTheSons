@@ -25,7 +25,15 @@ internal sealed class DamageNumbers
         public float Age;
         public Vector3 World;
         public float DriftX;
+        public double Value = -1; // a numeric hit that later hits can add to; -1 = text (dodge, a word)
+        public Color Color;
     }
+
+    /// <summary>A hit lands on a number still young enough to add to (COS-95): same colour, within this distance and age.</summary>
+    private const float MergeDistance = 1.5f, MergeAge = 0.6f;
+
+    /// <summary>Hits added onto an existing number (self-test counter).</summary>
+    public int Merged { get; private set; }
 
     private readonly Number[] _pool = new Number[PoolSize];
     private int _next;
@@ -84,10 +92,31 @@ internal sealed class DamageNumbers
 
     public void Spawn(Vector3 world, double damage, bool crit, Core.Rules.DamageKind kind = Core.Rules.DamageKind.Physical)
     {
+        var color = crit ? CritColor : ColorOf(kind);
+        if (Config.MergeDamageNumbers.Value && TryMerge(world, damage, crit, color)) return;
         string text = HudKit.Compact(damage);
         if (crit) text += "!";
-        Spawn(world, text, crit ? CritColor : ColorOf(kind), crit);
+        Spawn(world, text, color, crit);
+        _pool[_lastIndex].Value = damage;
     }
+
+    private bool TryMerge(Vector3 world, double damage, bool crit, Color color)
+    {
+        foreach (var n in _pool)
+        {
+            if (!n.Active || n.Value < 0 || n.Crit != crit || n.Color != color) continue;
+            if (n.Age > MergeAge || (n.World - world).sqrMagnitude > MergeDistance * MergeDistance) continue;
+            n.Value += damage;
+            n.Text.text = HudKit.Compact(n.Value) + (crit ? "!" : "");
+            n.Age = Mathf.Min(n.Age, 0.15f); // stays up while the hits keep coming
+            Merged++;
+            LastText = n.Text.text;
+            return true;
+        }
+        return false;
+    }
+
+    private int _lastIndex;
 
     public void Spawn(Vector3 world, string text, Color color, bool big)
     {
@@ -108,6 +137,9 @@ internal sealed class DamageNumbers
         }
 
         n.Active = true;
+        n.Value = -1;
+        n.Color = color;
+        _lastIndex = Array.IndexOf(_pool, n);
         n.Crit = big;
         n.Age = 0;
         n.World = world;

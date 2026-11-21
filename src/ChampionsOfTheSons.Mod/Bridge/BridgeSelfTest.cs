@@ -97,7 +97,7 @@ public static class BridgeSelfTest
         {
             var m = PlayerState.Character.Massacre;
             SelfTest.Check("victim died", _victim == null || _victim.IsDead(), $"dead={_victim?.IsDead()}");
-            SelfTest.Check("kill banked xp in the streak", m.Kills >= 1 && m.PendingXp > 0, $"kills={m.Kills} pending={m.PendingXp:N0}");
+            SelfTest.Check("kill counted toward a streak", m.Kills >= 1, $"kills={m.Kills} pending={m.PendingXp:N0}");
             SelfTest.Check("dead enemy left the registry", EnemyRegistry.Get(_victim) == null);
             SelfTest.Check("elite cap held on the first enemy", EnemyRegistry.Get(_easy) is not { Profile.HitCap: < 1 } || !_easy!.IsDead());
         });

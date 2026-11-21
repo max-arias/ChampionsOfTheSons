@@ -24,7 +24,7 @@ internal static class DeathSelfTest
         {
             Pc.SetLevel(12);
             Pc.AddXp(XpCurve.Goal(12) * 0.6);
-            Pc.OnKill(5000);
+            for (int i = 0; i < Massacre.StartKills; i++) Pc.OnKill(50); // a running streak with banked XP
             SpellWorld.Buffs.Apply("selftest_buff", 60, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, 2) });
             double before = Pc.Progress.Xp;
             double expect = DeathPenalty.XpLost(12, before);
@@ -32,7 +32,7 @@ internal static class DeathSelfTest
             SelfTest.Check("death: lost the penalty share of the level's XP", Math.Abs(lost - expect) < 1e-6 && Math.Abs(Pc.Progress.Xp - (before - expect)) < 1e-6,
                 $"{before:0} -> {Pc.Progress.Xp:0} (lost {lost:0}, expected {expect:0})");
             SelfTest.Check("death: level kept", Pc.Progress.Level == 12);
-            SelfTest.Check("death: massacre streak cleared", Pc.Massacre.PendingXp == 0);
+            SelfTest.Check("death: massacre streak cleared", Pc.Massacre.PendingXp == 0 && !Pc.Massacre.Active);
             SelfTest.Check("death: spell buffs cleared", SpellWorld.Buffs.Count == 0);
             SelfTest.Check("death: stat buff removed from the sheet", Math.Abs(Pc.Stats.Get(StatIds.AllDamage) - new StatSheet(ModContent.Db).Get(StatIds.AllDamage)) < 1e-9,
                 $"all damage {Pc.Stats.Get(StatIds.AllDamage):0.###}");

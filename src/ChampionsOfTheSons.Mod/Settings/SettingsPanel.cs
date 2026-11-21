@@ -36,7 +36,38 @@ internal sealed class SettingsPanel : ModalPanel
 
     public IReadOnlyList<string> RowIds => _rows.Select(r => r.Key.Id).ToList();
 
-    private static float Height => RowTop + ModKeys.All.Count * RowH + 150;
+    private static float Height => RowTop + ModKeys.All.Count * RowH + 150 + 56 + (Toggles.Length + 1) / 2 * ToggleH;
+
+    private const float ToggleH = 44;
+
+    /// <summary>On/off settings (COS-95), two to a row under "Display".</summary>
+    private static readonly (string Key, string Label, Func<RedLoader.ConfigEntry<bool>> Entry)[] Toggles =
+    {
+        ("ui.settings.show_hud", "Mod HUD", () => Config.ShowHud),
+        ("ui.settings.show_nameplates", "Enemy nameplates", () => Config.ShowNameplates),
+        ("ui.settings.show_damage_numbers", "Damage numbers", () => Config.ShowDamageNumbers),
+        ("ui.settings.merge_damage_numbers", "Merge damage numbers", () => Config.MergeDamageNumbers),
+        ("ui.settings.show_scanner", "Enemy scanner", () => Config.ShowScanner),
+        ("ui.settings.show_boss_bar", "Boss health bar", () => Config.ShowBossBar),
+        ("ui.settings.show_hints", "Hints", () => Config.ShowHints),
+        ("ui.settings.reduce_effects", "Reduce heavy effects", () => Visuals.VisualsFeature.ReduceEntry!),
+    };
+
+    private readonly List<SBgButtonOptions> _toggleButtons = new();
+
+    /// <summary>Flips one on/off setting by its text key (buttons and self-tests).</summary>
+    public void Flip(string key)
+    {
+        var t = Toggles.FirstOrDefault(x => x.Key == key);
+        if (t.Entry == null) return;
+        var e = t.Entry();
+        e.Value = !e.Value;
+        ModKeys.Save();
+        Refresh();
+        ModAudio.Play(SoundCues.UiClick);
+    }
+
+    public IReadOnlyList<string> ToggleKeys => Toggles.Select(t => t.Key).ToList();
 
     public void Build()
     {
@@ -80,6 +111,19 @@ internal sealed class SettingsPanel : ModalPanel
         Window.Add(Button("+", 22, () => StepVolume(0.1f)).TopLeft(500, sy).Size(44, 36));
         Window.Add(Label(UiText.T("ui.settings.volume_hint", "On top of the game's sound effects volume."), 16, UiTheme.TextDim, TextAlignmentOptions.MidlineLeft)
             .TopLeft(556, sy).Size(W - 584, 36));
+
+        float ty = sy + 56;
+        Window.Add(Label(UiText.T("ui.settings.section.display", "Display"), 22, UiTheme.Gold, TextAlignmentOptions.MidlineLeft).TopLeft(28, ty).Size(300, 36));
+        for (int i = 0; i < Toggles.Length; i++)
+        {
+            var t = Toggles[i];
+            float x = i % 2 == 0 ? 160 : 160 + (W - 188) / 2, y = ty + i / 2 * ToggleH;
+            Window.Add(Label(UiText.T(t.Key, t.Label), 19, UiTheme.Text, TextAlignmentOptions.MidlineLeft).TopLeft(x, y).Size(260, 36));
+            var b = Button("", 18, () => Flip(t.Key));
+            b.TopLeft(x + 270, y).Size(90, 36);
+            Window.Add(b);
+            _toggleButtons.Add(b);
+        }
     }
 
     public void Toggle()
@@ -201,5 +245,9 @@ internal sealed class SettingsPanel : ModalPanel
             row.Warning.Text(string.Join("  ", parts));
         }
         _volume.Text($"{Mathf.RoundToInt(Config.SoundVolume.Value * 100)}%");
+        for (int i = 0; i < Toggles.Length && i < _toggleButtons.Count; i++)
+            _toggleButtons[i].Text(Toggles[i].Entry().Value
+                ? $"<color={UiTheme.Gold}>{UiText.T("ui.settings.on", "On")}</color>"
+                : UiText.T("ui.settings.off", "Off"));
     }
 }
