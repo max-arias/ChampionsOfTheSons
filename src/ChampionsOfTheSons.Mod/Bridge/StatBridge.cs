@@ -229,6 +229,7 @@ public static class StatCoverage
         "spell_blink_damage_scaling",
         // Wave 7: the stand-in spells read these (SpellTuning), Healing Dome energy was already read.
         "spell_snowstorm_max_charge", "debuff_resistance", "perk_golden_resolve", "spell_healing_dome_reg_energy",
+        "spell_healing_dome_gives_immunity", "spell_healing_dome_damage_increase", "spell_healing_dome_damage_resistance",
         "perk_parry_anything", "perk_multishot_projectile_count", "perk_multishot_damage_pennalty",
         // COS-89: the player buff system reads these (states, immunities).
         "rooted", "stunned", "root_immunity", "debuff_immunity",

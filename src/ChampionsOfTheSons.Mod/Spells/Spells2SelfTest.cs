@@ -263,6 +263,21 @@ internal static class Spells2SelfTest
             Advance(2);
             SelfTest.Check("spells2: Healing Dome heals the player inside", health._currentValue > before + 3, $"{before:0.#} -> {health._currentValue:0.#}");
             Advance(11);
+            // Perks that act while the player is inside: damage up, damage taken down, stun and debuff immunity.
+            SelfTest.Check("spells2: Healing Dome perks give nothing without the perks", !SpellWorld.Buffs.Has("healing_dome") && !PlayerDebuffs.Buffs.Has(PlayerDebuffs.DebuffImmune));
+            Pc.Stats.SetSource("test.dome", new[]
+            {
+                new StatModifier("spell_healing_dome_damage_increase", EffectOp.Add, 0.2),
+                new StatModifier("spell_healing_dome_damage_resistance", EffectOp.Add, 0.7),
+                new StatModifier("spell_healing_dome_gives_immunity", EffectOp.Enable, 1),
+            });
+            Advance(1);
+            SelfTest.Check("spells2: Healing Dome gives damage up and less damage taken while inside",
+                SpellWorld.Buffs.Has("healing_dome") && Stat(StatIds.AllDamageTaken) < 0.5, $"taken x{Stat(StatIds.AllDamageTaken):0.##}");
+            SelfTest.Check("spells2: Healing Dome gives stun and debuff immunity while inside",
+                PlayerDebuffs.Buffs.Has(PlayerDebuffs.StunImmune) && PlayerDebuffs.Buffs.Has(PlayerDebuffs.DebuffImmune));
+            Advance(11);
+            Pc.Stats.RemoveSource("test.dome");
             SelfTest.Check("spells2: Healing Dome ends", SpellWorld.ZoneCount == 0);
         });
         Case("sun flare", () =>
@@ -281,7 +296,9 @@ internal static class Spells2SelfTest
             var foe = Put(Foe(), center + Flat(SpellWorld.Eye.right) * 9);
             float d0 = Dist(foe, center), before = Hp(foe);
             if (!Ok("spell.black_hole")) return;
-            Advance(3);
+            Advance(0.5f); // the catch radius is still small: an enemy 9 m out is not caught or pulled yet
+            SelfTest.Check("spells2: Black Hole catches nothing outside its growing radius", Hp(foe) == before && Dist(foe, center) > d0 - 0.5f, $"{d0:0.##} m -> {Dist(foe, center):0.##} m");
+            Advance(2.5f);
             float d1 = Dist(foe, center);
             SelfTest.Check("spells2: Black Hole damages", Hp(foe) < before, $"{before:0.#} -> {Hp(foe):0.#}");
             SelfTest.Check("spells2: Black Hole pulls enemies in", d1 < d0 - 2, $"{d0:0.##} m -> {d1:0.##} m");
@@ -387,10 +404,12 @@ internal static class Spells2SelfTest
         Case("magic arrow", () =>
         {
             var foe = Put(Foe(), OnRay(25));
-            float before = Hp(foe);
+            var behind = Put(Foe(), OnRay(45));
+            float before = Hp(foe), beforeBehind = Hp(behind);
             if (!Ok("spell.magic_arrow")) return;
-            Advance(0.6f);
+            Advance(0.8f);
             SelfTest.Check("spells2: Magic Arrow hits", Hp(foe) < before, $"{before:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: Magic Arrow pierces on to the enemy behind", Hp(behind) < beforeBehind, $"{beforeBehind:0.#} -> {Hp(behind):0.#}");
         });
         Case("seeking arrow", () =>
         {

@@ -196,6 +196,14 @@ internal static class SpellEffects
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
                 PlayerEffects.Heal(SpellTuning.HealingDomeHeal(LocalPlayer.Vitals.Health.GetMax(), Stats) * z.Interval);
                 PlayerEffects.AddEnergy(SpellTuning.HealingDomeEnergy(Derived.MaxEnergy(Stats), Stats) * z.Interval); // Humming Ground (COS-94)
+                // Perks that act while the player stands inside: short buffs, refreshed every pulse.
+                var boost = SpellTuning.HealingDomeBoost(Stats);
+                if (boost.Length > 0) Buffs.Apply("healing_dome", (float)SpellTuning.HealingDomeBuffSeconds, boost);
+                if (Stats.IsOn("spell_healing_dome_gives_immunity"))
+                {
+                    PlayerDebuffs.Buffs.Apply(PlayerDebuffs.StunImmune, "spell.healing_dome", SpellTuning.HealingDomeBuffSeconds);
+                    PlayerDebuffs.Buffs.Apply(PlayerDebuffs.DebuffImmune, "spell.healing_dome", SpellTuning.HealingDomeBuffSeconds);
+                }
             },
         });
         return true;
@@ -229,13 +237,18 @@ internal static class SpellEffects
         float radius = S("spell_blackhole_radius"), pull = S("spell_blackhole_pullforce") / (float)SpellTuning.BlackHolePullDivisor;
         var core = SpellFx.Sphere(at, 1.5f, SpellFx.Dark, 1e6f, look: SpellFx.Look.BlackHole);
         var caught = new HashSet<EnemyRuntime>();
+        float age = 0;
         AddZone(new SpellZone
         {
             Id = "black_hole", Center = at, Radius = radius, Left = S("spell_blackhole_duration"), Interval = (float)SpellTuning.BlackHoleTick,
             Visual = core,
             Frame = (z, dt) =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius))
+                // The catch radius grows from 0 to the full radius; whatever it caught stays caught until the hole ends.
+                age += dt;
+                foreach (var e in EnemiesWithin(z.Center, (float)SpellTuning.BlackHoleCatchRadius(z.Radius, age))) caught.Add(e);
+                caught.RemoveWhere(e => !e.IsActive);
+                foreach (var e in caught)
                 {
                     var to = z.Center - Center(e);
                     float d = to.magnitude;
@@ -245,11 +258,8 @@ internal static class SpellEffects
             },
             Pulse = z =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius))
-                {
-                    Strike(e, Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")));
-                    caught.Add(e);
-                }
+                foreach (var e in caught.ToList())
+                    if (e.IsActive) Strike(e, Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")));
             },
             // Last Engineer's Note: a black hole that caught enough enemies releases a Ball Lightning where it was.
             End = z =>
@@ -457,7 +467,7 @@ internal static class SpellEffects
         {
             AddBolt(new SpellBolt
             {
-                Id = "magic_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f,
+                Id = "magic_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f, Pierces = true,
                 Visual = SpellFx.Sphere(from + dir, 0.25f, SpellFx.Arcane, 1e6f),
                 OnHit = (b, e) =>
                 {

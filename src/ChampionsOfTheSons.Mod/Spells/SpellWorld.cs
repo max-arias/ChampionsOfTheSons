@@ -27,6 +27,8 @@ internal sealed class SpellBolt
     public Vector3 Pos, Dir;
     public float Speed, Range, Radius = 1.2f, Life = 10;
     public bool Homing;
+    /// <summary>Flies on through every enemy it touches (each at most once) instead of stopping at the first.</summary>
+    public bool Pierces;
     public EnemyRuntime? Target;
     public Action<SpellBolt, EnemyRuntime>? OnHit;
     public GameObject? Visual;
@@ -251,8 +253,7 @@ internal static class SpellWorld
             if (DistanceToSegment(Center(e), from, to) > b.Radius) continue;
             b.Hit.Add(e);
             b.OnHit?.Invoke(b, e);
-            b.Done = true; // a bolt stops at the first enemy
-            break;
+            if (!b.Pierces) { b.Done = true; break; } // a bolt stops at the first enemy unless it pierces
         }
 
         b.Pos = to;
