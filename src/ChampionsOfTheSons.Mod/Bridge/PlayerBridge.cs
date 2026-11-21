@@ -54,7 +54,7 @@ public static class PlayerBridge
 
     [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.Hit))]
     [HarmonyPrefix]
-    private static void BeforePlayerHit(ref float damage, bool isDemonic)
+    private static void BeforePlayerHit(ref float damage, bool isDemonic, ImpactType impactType)
     {
         using var perf = Perf.Perf.Scope(PerfBeforePlayerHit);
         try
@@ -67,8 +67,19 @@ public static class PlayerBridge
                 return;
             }
             var kind = isDemonic ? DamageKind.Magic : DamageKind.Physical;
+            // COS-92: only an enemy's attack can be dodged, armored or blocked; fire, poison, traps, falls, explosions and the
+            // rest of the world take COTF's amount and only the damage-taken multipliers.
+            bool recent = PlayerEffects.LastAttacker is { } la && Time.time - la.Time <= 0.75f;
+            var source = GameRules.GameRulesFeature.Classify(impactType, isDemonic, recent, !recent && NearestEnemy(MeleeReach) != null);
+            if (source != PlayerDamageSource.Enemy)
+            {
+                double game = damage;
+                damage = (float)GameRules.GameRulesFeature.NonEnemyHit(source, damage);
+                kind = DamageKind.Pure;
+                GameRules.GameRulesFeature.LastHit = (source, game, damage);
+            }
             if (Net.CoopTest.Enabled) RLog.Msg($"{Net.CoopTestJoin.Tag} client: took a {kind} hit of {damage:F1} before defense");
-            ScaleClientMelee(ref damage, kind);
+            if (source == PlayerDamageSource.Enemy) ScaleClientMelee(ref damage, kind);
             var character = PlayerState.Character;
             var result = PlayerDefense.Incoming(character.Stats, damage, kind, Rng, PlayerDebuffs.LostArmor); // armor corruption (COS-89)
             double final = result.Damage;
@@ -76,7 +87,7 @@ public static class PlayerBridge
             else final = Followups.FollowupsFeature.OnIncoming(final, kind);
             if (!result.Dodged && final > 0)
             {
-                OnEnemyHitPlayer(character, final, kind);
+                if (source == PlayerDamageSource.Enemy) OnEnemyHitPlayer(character, final, kind);
                 var health = LocalPlayer.Vitals?.Health;
                 // Near Death Experience (COS-105): a lethal hit restores full health and starts its 10 s of protection.
                 if (health != null && PlayerEffects.NearDeath.TryTrigger(character.Stats.IsOn(NearDeathState.PerkFlag), health._currentValue, final))

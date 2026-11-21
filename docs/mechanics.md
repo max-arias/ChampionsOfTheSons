@@ -250,6 +250,13 @@ Numbers marked *stat* are the original `spell_*` player stats (content/player_st
 - Spell buffs (War Cry, Berserk, Golden Skin...) stay timed stat sources `spell.<id>` (`SpellBuffs`); the HUD shows both.
 - HUD (COS-89): a row bottom left with every active buff and debuff: icon, stacked amount (or ×sources), time left; pale frame for good, red for bad; it pulses in the last 3 s and hides with the HUD while a panel is open.
 
+## Game rule changes (COS-92, COTF's rules; Max 2026-11-21: all of them)
+- Only an enemy's attack can be dodged, reduced by armor or blocked. The game's fire, poison and skunk, trap and fall hits are marked as such; an explosion is one by its impact type; anything else with no enemy attacker in the last 0.75 s and no enemy in melee reach is the environment. Those take the damage-taken multiplier only.
+- Player: burning `(3 + 1% max health) × fire damage taken`, poison `2 + 2%`, drowning `3 + 10%`, trap 150, thirst damage 20% of max health per tick; fall damage = the game's + 0.8% of max health per m/s over 12 m/s, death at 40 m/s; explosions only with friendly fire on, by difficulty tier from 85 (Easy) to 40000 (Hell), geometric between (ours).
+- Heals: meds 60% of max health, herbs (aloe, yarrow, horsetail) 6%, any other heal +0.2% of max health per point. Hunger and thirst drain at 40% of the game's rate × the perk rates. Worn armor soaks 70% of what it would.
+- Enemies: a trap that goes off hits enemies within 8 m for 400 (spike-type traps 1000, the swinging mace 2000) instead of killing; an explosion hits for the game's amount held to 40..850, times (1 + explosion damage). An enemy killed by a trap or the world still pays XP and loot, unless it drowned.
+- Not done: the noose trap ignoring elites (no noose trap found in the game's trap classes) and the bad-water and cold numbers (no hook found yet); drowning has no hook of its own (environment rule).
+
 ## Weapon types (COS-93)
 - A weapon item's `weaponModel` names a type in `content/weapon_types.json`. The type applies while the item is in the weapon slot and the player holds a game weapon it fits: `melee` types on one-handed melee weapons (machete, katana, axes, club, knife, putter), `polearm` on the crafted spear, `greatbow` on the crafted or tactical bow. The draw key (default L) equips the first owned game weapon from the type's `baseItems`.
 - While it applies, the game weapon's mesh is hidden and the type's model sits in the same hand (the game weapon keeps its animations, hit logic and sounds). Other players see the model: each player broadcasts the type in hand, receivers dress the held weapon nearest to the reported position.

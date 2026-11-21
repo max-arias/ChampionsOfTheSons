@@ -164,8 +164,10 @@ public static class EnemyPatches
                     double baseDamage = weapon == WeaponClass.Melee ? amount * Weapons.WeaponModels.MeleeDamageFactor : amount;
                     hit = PlayerAttack.Weapon(sheet, weapon, baseDamage, Rng);
                 }
-                // Explosions (bombs, molotovs) take the explosion stat; thrown spears are projectiles and get their own multiplier.
-                if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + Net.CoopParty.TeamExplosionDamage()) };
+                // Explosions (bombs, molotovs): COTF's fixed 40..850 by the game's falloff, times (1 + explosion damage), so a
+                // bomb never one-shots a scaled enemy (COS-92). Thrown spears are projectiles and get their own multiplier.
+                if (weapon == WeaponClass.Thrown)
+                    hit = new OutgoingHit(Core.Rules.GameRules.ExplosionToEnemy(amount, Net.CoopParty.TeamExplosionDamage()), DamageKind.Physical, false, 0);
                 if (weapon == WeaponClass.Melee) hit = hit with { Amount = hit.Amount * MeleeRules.FireDanceMultiplier(sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame")) };
                 double fire = sheet.Get(StatIds.FireDamage) + runtime.Combat.FireMark;
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };
@@ -179,7 +181,10 @@ public static class EnemyPatches
                 // A remote player's hit arrives as a Hit message with their own stats (COS-13): the vanilla one is dropped.
                 if (fromPlayer && Net.CoopHits.ReplacesVanillaRemoteHits) { amount = 0; return; }
                 local = false;
-                hit = new OutgoingHit(amount, DamageKind.Physical, false, 0);
+                // COS-92: a trap hits for its fixed amount and an explosion for COTF's 40..850 instead of killing outright.
+                double world = GameRules.GameRulesFeature.TrapHitOn(__instance) is { } trap ? trap
+                    : impactType == ImpactType.Explosion ? Core.Rules.GameRules.ExplosionToEnemy(amount, 0) : amount;
+                hit = new OutgoingHit(world, DamageKind.Physical, false, 0);
             }
 
             amount = (float)Mitigate(runtime, EnemyRegistry.HealthOf(__instance), hit, amount, local, forced: false);
@@ -273,7 +278,9 @@ public static class EnemyPatches
             EnemyRegistry.Remove(stats);
             EnemyAbilityFeature.OnEnemyDied(runtime);
             // The game's flag misses some player kills (e.g. deaths finished by its own state machine); our hook saw the last hit.
-            if (!killedByPlayer && !runtime.LastHitByLocalPlayer && !Net.CoopHits.HitByRemote(runtime)) return;
+            // COS-92: a death by a trap or the world still pays, except drowning.
+            bool byPlayer = killedByPlayer || runtime.LastHitByLocalPlayer || Net.CoopHits.HitByRemote(runtime);
+            if (!Core.Rules.GameRules.DeathPays(byPlayer, GameRules.GameRulesFeature.Drowned(runtime.Actor))) return;
 
             double xp = Net.CoopHits.DistributeKillXp(runtime); // co-op: players in range share it (COS-13)
             if (xp > 0 || !(Net.CoopSession.IsHost && Net.CoopFeature.Verified.Count > 0)) PlayerState.Character.OnKill(xp);
