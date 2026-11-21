@@ -149,7 +149,8 @@ internal static class AffixSelfTest
             }
             if (d != null)
             {
-                SelfTest.Check("ExtraDamage: x5 damage multiplier", Math.Abs(d.Profile.DamageMult / 5000 - 1) < 1e-6, $"{d.Profile.DamageMult:0.0}");
+                double dmgExpected = EnemyScaler.DamageMultiplier(d.Profile.Level) * 5;
+                SelfTest.Check("ExtraDamage: x5 damage multiplier", Math.Abs(d.Profile.DamageMult / dmgExpected - 1) < 1e-6, $"{d.Profile.DamageMult:0.0} vs {dmgExpected:0.0}");
                 double hit = EnemyScaler.DamageToPlayer(d.Profile, 30, d.Combat.DamageDealtMultiplier);
                 SelfTest.Check("ExtraDamage: hits harder than vanilla", hit > 30, hit.ToString("0"));
             }
