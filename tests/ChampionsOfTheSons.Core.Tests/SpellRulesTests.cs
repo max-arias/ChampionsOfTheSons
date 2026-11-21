@@ -47,6 +47,14 @@ public class SpellRulesTests
     private readonly ContentDb _db = TestContent.Create(new() { ["spells.json"] = Spells, ["player_stats.json"] = Stats });
 
     [Fact]
+    public void Black_hole_catch_radius_grows_from_zero_to_the_full_radius()
+    {
+        Assert.Equal(0, SpellTuning.BlackHoleCatchRadius(15, 0), 6);
+        Assert.Equal(7.5, SpellTuning.BlackHoleCatchRadius(15, SpellTuning.BlackHoleCatchSeconds / 2), 6);
+        Assert.Equal(15, SpellTuning.BlackHoleCatchRadius(15, 50), 6);
+    }
+
+    [Fact]
     public void Toggle_costs_upkeep_per_second_and_switching_off_starts_the_cooldown()
     {
         var book = new SpellBook(_db);

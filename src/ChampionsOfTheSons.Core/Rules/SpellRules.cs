@@ -19,8 +19,8 @@ public static class SpellTuning
     public const double MagicArrowDamage = 60, MagicArrowRange = 70, MagicArrowSpeed = 70;
     public const double SeekingArrowDamage = 30, SeekingArrowScaling = 1, SeekingArrowSpeed = 30, SeekingArrowRange = 40;
     public const double BlackFlameRadius = 6, BlackFlameDamage = 8, BlackFlameTick = 1;
-    public const double BlackHoleTick = 1, BlackHolePullDivisor = 5;
-    public const double HealingDomeRadius = 8, HealingDomeHealFraction = 0.05;
+    public const double BlackHoleTick = 1, BlackHolePullDivisor = 5, BlackHoleCatchSeconds = 2;
+    public const double HealingDomeRadius = 8, HealingDomeHealFraction = 0.05, HealingDomeBuffSeconds = 1;
     public const double SunFlareTick = 1;
     public const double SnapFreezeDamage = 40;
     public const double BallLightningRadius = 7, BallLightningSeconds = 10, BallLightningSpeed = 6, BallLightningTick = 1, BallLightningShare = 0.1;
@@ -65,6 +65,20 @@ public static class SpellTuning
         new StatModifier(StatIds.AllDamage, EffectOp.Mult, Math.Max(1, s.Get("spell_war_cry_damage"))),
         new StatModifier(StatIds.AttackSpeed, EffectOp.Mult, Math.Max(1, s.Get("spell_war_cry_atk_speed"))),
     };
+
+    /// <summary>Healing Dome perks for a player inside: all damage up by <c>spell_healing_dome_damage_increase</c>, damage taken down by
+    /// <c>spell_healing_dome_damage_resistance</c>; empty without them. (The immunity perk is two timed buffs, see the spell.)</summary>
+    public static StatModifier[] HealingDomeBoost(StatSheet s)
+    {
+        var mods = new List<StatModifier>();
+        double up = s.Get("spell_healing_dome_damage_increase"), resist = s.Get("spell_healing_dome_damage_resistance");
+        if (up > 0) mods.Add(new StatModifier(StatIds.AllDamage, EffectOp.Mult, 1 + up));
+        if (resist > 0) mods.Add(new StatModifier(StatIds.AllDamageTaken, EffectOp.Mult, Math.Max(0, 1 - resist)));
+        return mods.ToArray();
+    }
+
+    /// <summary>Black Hole: how far from its centre an enemy gets caught, <paramref name="elapsed"/> seconds after the cast (grows from 0 to the radius over <see cref="BlackHoleCatchSeconds"/>).</summary>
+    public static double BlackHoleCatchRadius(double radius, double elapsed) => radius * Math.Clamp(elapsed / BlackHoleCatchSeconds, 0, 1);
 
     public static StatModifier[] Berserk(StatSheet s) => new[]
     {
