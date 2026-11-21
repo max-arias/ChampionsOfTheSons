@@ -122,6 +122,11 @@ internal static class BookPages
     public static int BagPage { get; private set; }
     public static int CharPage { get; private set; }
 
+    /// <summary>Character pages: the stat pages plus the stat box page (set when the sheet is built).</summary>
+    public static int CharPages { get; private set; } = 3;
+
+    private const int RowsPerPage = 20;
+
     /// <summary>The selected slot key (equip.* or bag.N), shown with a red frame.</summary>
     public static string? Selected { get; set; }
 
@@ -433,12 +438,14 @@ internal static class BookPages
         _xpText.text = $"{Math.Floor(sum.Xp).ToString("N0", inv)} / {sum.Goal.ToString("N0", inv)} XP";
 
         _sheet = SheetData.Build(Pc);
-        // Page 1: attributes, vitals, offense. Page 2: defense, utility. Page 3: stat box and set bonuses.
-        int split = _sheet.FindIndex(r => r.Header && r.Id == "defense");
-        if (split < 0) split = _sheet.Count / 2;
-        var rows = CharPage == 0 ? _sheet.Take(split).ToList() : CharPage == 1 ? _sheet.Skip(split).ToList() : new List<SheetRow>();
-        _charStats.gameObject.SetActive(CharPage == 2);
-        if (CharPage == 2)
+        // Stat pages hold whole sections, up to RowsPerPage rows each (COS-97); the last page is the stat box and set bonuses.
+        var pages = SheetData.Paginate(_sheet, RowsPerPage);
+        CharPages = pages.Count + 1;
+        if (CharPage >= CharPages) CharPage = CharPages - 1;
+        bool statBox = CharPage == CharPages - 1;
+        var rows = statBox ? new List<SheetRow>() : pages[CharPage];
+        _charStats.gameObject.SetActive(statBox);
+        if (statBox)
         {
             var st = Pc.Stats;
             _gearStats.text = $"{UiText.T("ui.sheet.armor", "Armor")} <b>{st.Get(StatIds.Armor).ToString("N0", inv)}</b>    "
@@ -476,7 +483,7 @@ internal static class BookPages
             value.text = row.Value;
             if (!row.Header) Hits.Add(new PageHit("row." + row.Id, Left, y, XpW, rowH));
         }
-        _charPager.text = $"{CharPage + 1}/3";
+        _charPager.text = $"{CharPage + 1}/{CharPages}";
         AddPagerHits();
     }
 
@@ -564,7 +571,7 @@ internal static class BookPages
     public static void Page(BookTab tab, int delta)
     {
         if (tab is BookTab.Bag or BookTab.Gear) BagPage = (BagPage + delta + BagPages) % BagPages;
-        else if (tab == BookTab.Character) CharPage = (CharPage + delta + 3) % 3;
+        else if (tab == BookTab.Character) CharPage = (CharPage + delta + CharPages) % CharPages;
         else if (tab == BookTab.Help) HelpPage = (HelpPage + delta + BookGuide.Pages) % BookGuide.Pages;
         _dirty = true;
     }

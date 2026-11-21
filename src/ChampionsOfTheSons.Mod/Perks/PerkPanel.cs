@@ -497,7 +497,7 @@ internal sealed class PerkPanel
             bool unlocked = pc.Perks.UnlockedSpells.Contains(r.Def.Id);
             bool levelOk = pc.Progress.Level >= r.Def.LevelReq;
             r.Name.Text(ModContent.Text.Get(r.Def.Id + ".name", r.Def.Name));
-            r.Info.Text($"{UiText.T("ui.sheet.level", "Level")} {r.Def.LevelReq}  ·  {r.Def.EnergyCost:0} {UiText.T("ui.spells.energy", "energy")}  ·  {r.Def.Cooldown:0.#} s");
+            r.Info.Text(SpellMeta(r.Def));
             r.Name.TextObject.color = C(unlocked ? UiTheme.Gold : levelOk ? UiTheme.Text : UiTheme.TextFaint);
             r.Unlock.Active(!unlocked);
             foreach (var s in r.Slots) s.Active(unlocked);
@@ -538,7 +538,7 @@ internal sealed class PerkPanel
         if (ModContent.Db.Spells.TryGetValue(id, out var spell))
         {
             _dName.Text(ModContent.Text.Get(id + ".name", spell.Name));
-            _dMeta.Text($"{UiText.T("ui.sheet.level", "Level")} {spell.LevelReq}  ·  {spell.EnergyCost:0} {UiText.T("ui.spells.energy", "energy")}  ·  {spell.Cooldown:0.#} s");
+            _dMeta.Text(SpellMeta(spell));
             _dFlavor.Text("");
             _dEffect.Text(ModContent.Text.Get(id + ".description", ""));
             _dStatus.Text(_lastMessage);
@@ -663,5 +663,21 @@ internal sealed class PerkPanel
         _edges.ForEach(e => e.Lit = null);
         Refresh();
         return true;
+    }
+
+    /// <summary>
+    /// COS-97: level, energy and cooldown as they are for this player (perks, items, cooldown rate), with the base value
+    /// after it when they differ.
+    /// </summary>
+    private static string SpellMeta(SpellDef def)
+    {
+        var pc = PlayerState.Character;
+        double cost = pc.Spells.CostOf(def.Id, pc.Stats).Total;
+        double cd = pc.Spells.EffectiveCooldown(def.Id, pc.Stats);
+        string Was(double now, double baseValue, string fmt) =>
+            Math.Abs(now - baseValue) < 0.05 ? "" : $" <color={UiTheme.TextFaint}>({baseValue.ToString(fmt, System.Globalization.CultureInfo.InvariantCulture)})</color>";
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        return $"{UiText.T("ui.sheet.level", "Level")} {def.LevelReq}  ·  {cost.ToString("0", inv)}{Was(cost, def.EnergyCost, "0")} {UiText.T("ui.spells.energy", "energy")}"
+            + $"  ·  {cd.ToString("0.#", inv)} s{Was(cd, def.Cooldown, "0.#")}";
     }
 }

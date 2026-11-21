@@ -45,6 +45,7 @@ public static class StatIds
     public const string Armor = "armor";
     public const string AllDamageTaken = "all_damage_taken";
     public const string MagicDamageTaken = "magic_damage_taken";
+    public const string FireDamageTaken = "fire_damage_taken";
     public const string GetHitChance = "get_hit_chance";
     public const string Block = "block";
     public const string Thorns = "thorns";

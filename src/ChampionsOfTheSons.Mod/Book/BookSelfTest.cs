@@ -403,7 +403,7 @@ internal static class BookSelfTest
         BookHost.ShowModPage(BookTab.Character);
         int c0 = BookPages.CharPage;
         BookFeature.Handle(BookInput.Pad(off, rb: true));
-        SelfTest.Check("book: pad RB pages the character sheet", BookPages.CharPage == (c0 + 1) % 3, $"{c0} -> {BookPages.CharPage}");
+        SelfTest.Check("book: pad RB pages the character sheet", BookPages.CharPage == (c0 + 1) % BookPages.CharPages, $"{c0} -> {BookPages.CharPage}");
         BookFeature.Handle(BookInput.Pad(off, lb: true));
         BookHost.ShowModPage(BookTab.Gear);
     }

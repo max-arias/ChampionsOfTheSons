@@ -92,7 +92,10 @@ internal sealed class ProgressHud
     private long _mBankShown = -1;
     private float _mFraction = -1;
 
-    private Banner _levelBanner = null!, _payoutBanner = null!;
+    private Banner _levelBanner = null!, _payoutBanner = null!, _hintBanner = null!;
+
+    /// <summary>COS-97: one-time hints, lower on the screen than the level and streak notices.</summary>
+    public Banner HintBanner => _hintBanner;
 
     // pending level-up while one is showing
     private int _pendingOld, _pendingNew;
@@ -115,6 +118,7 @@ internal sealed class ProgressHud
         BuildMassacre(layer);
         _levelBanner = new Banner(layer, 150, 52, UiTheme.Gold, 24, 190);
         _payoutBanner = new Banner(layer, 360, 36, "#FF8A4A", 26, 120);
+        _hintBanner = new Banner(layer, 520, 20, UiTheme.Gold, 20, 110);
     }
 
     private void BuildXpBar(SContainerOptions layer)
@@ -232,6 +236,7 @@ internal sealed class ProgressHud
         if (_pendingTimer >= 0) ShowLevelUp();
         _levelBanner.Update(dt);
         _payoutBanner.Update(dt);
+        _hintBanner.Update(dt);
         UpdateXp(dt);
         UpdateMassacre();
     }
