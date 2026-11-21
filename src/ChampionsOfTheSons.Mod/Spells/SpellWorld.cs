@@ -189,14 +189,8 @@ internal static class SpellWorld
             var sustain = pc.Spells.SustainTick(dt, SpellCaster.Energy, Stats);
             SpellCaster.Spend(sustain.Spent);
             foreach (int slot in sustain.Stopped) SpellEffects.Stopped(slot);
-            for (int slot = 0; slot < SpellBook.Slots; slot++)
-                if (pc.Spells.IsActive(slot) && pc.Spells.Loadout[slot] is string id)
-                {
-                    SpellNet.Context = SpellNet.ToggleCast(id);
-                    SpellEffects.Sustained(id, dt);
-                    SpellNet.Context = null;
-                }
         }
+        SpellHits.Tick(dt);
 
         for (int i = Zones.Count - 1; i >= 0; i--)
         {
@@ -290,6 +284,7 @@ internal static class SpellWorld
         Shield.Reset();
         Parry.Reset();
         Frenzy.Reset();
+        SpellHits.Reset();
         SpellPortals.Reset();
         SpellEffects.ResetState();
         SpellNet.Reset();

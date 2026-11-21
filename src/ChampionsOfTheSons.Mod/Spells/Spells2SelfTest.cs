@@ -174,25 +174,34 @@ internal static class Spells2SelfTest
             var foe = Put(Foe(), OnRay(8));
             if (!Ok("spell.focus")) return;
             SelfTest.Check("spells2: Focus speeds attacks up", Stat(StatIds.AttackSpeed) >= 1.29, $"{Stat(StatIds.AttackSpeed):0.##}");
-            TestKit.Hit(foe, 5f);
-            Advance(0.2f);
-            var rt = Rt(foe)!;
-            SelfTest.Check("spells2: Focus slows what the player hits", rt.Combat.HasSlow && rt.Combat.SpeedMultiplier < 0.9, $"speed ×{rt.Combat.SpeedMultiplier:0.##}");
+            // Passive (COS-84): the spell sits in the loadout, so a real shot stores a bonus for the next one and a body shot hastens the player.
+            PerkHooks.ShotTracker.RecordKind(RangedKind.Bow);
+            TestKit.Hit(foe, 5f, ImpactType.Projectile);
+            SelfTest.Check("spells2: Focus: a body shot stores a bonus and gives attack speed", SpellHits.Focus.Has && SpellWorld.Buffs.Has("focus_haste"),
+                $"stored {SpellHits.Focus.Value:0.##}");
+            TestKit.Hit(foe, 5f, ImpactType.Projectile);
+            SelfTest.Check("spells2: Focus: the next shot spends the stored bonus and stores its own", SpellHits.Focus.Has && Math.Abs(SpellHits.Focus.Value - SpellTuning.FocusBonus(Pc.Stats, false)) < 1e-6);
         });
         Case("frenzy", () =>
         {
             var foe = Put(Foe(), OnRay(8));
             if (!Ok("spell.frenzy")) return;
             double dmg = Stat(StatIds.AllDamage);
+            // Passive (COS-84): real attacks stack while the spell is in the loadout.
             for (int i = 0; i < 3; i++) TestKit.Hit(foe, 1f);
             SelfTest.Check("spells2: Frenzy stacks on hits", SpellWorld.Frenzy.Stacks >= 3 && Stat(StatIds.AllDamage) > dmg * 1.2,
                 $"stacks {SpellWorld.Frenzy.Stacks}, damage ×{Stat(StatIds.AllDamage) / dmg:0.###}");
-            Advance(SpellTuning.FrenzyDuration + 1);
+            Advance(SpellTuning.FrenzyStackSeconds + 1);
             SelfTest.Check("spells2: Frenzy stacks end", SpellWorld.Frenzy.Stacks == 0 && Math.Abs(Stat(StatIds.AllDamage) - dmg) < 1e-6);
+            // Active: the cast spends the stacks for energy regeneration.
+            for (int i = 0; i < 3; i++) TestKit.Hit(foe, 1f);
+            CastSpell("spell.frenzy");
+            SelfTest.Check("spells2: casting Frenzy spends the stacks for energy regeneration", SpellWorld.Frenzy.Stacks == 0 && SpellWorld.Buffs.Has("frenzy_burst") && Math.Abs(Stat(StatIds.AllDamage) - dmg) < 1e-6);
         });
         Case("taunt", () =>
         {
-            var foe = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 15 + Vector3.up);
+            // Aimed (COS-84): enemies within the radius of the aim point, not of the caster.
+            var foe = Put(Foe(), SpellWorld.AimGround((float)SpellTuning.TauntAimRange) + Vector3.up + Flat(SpellWorld.Eye.right) * 20);
             double armor = Stat(StatIds.Armor);
             if (!Ok("spell.taunt")) return;
             Advance(0.2f);
@@ -225,6 +234,10 @@ internal static class Spells2SelfTest
             float after = health._currentValue;
             LocalPlayer.Stats.Hit(20f);
             SelfTest.Check("spells2: only one hit is parried", health._currentValue < after - 1, $"{after:0.#} -> {health._currentValue:0.#}");
+            // Passive (COS-84): a parry the game reports (a timed block) with Parry in the loadout strikes back and gives stun immunity.
+            float hp2 = Hp(foe);
+            SpellHits.OnParried(timedParry: true);
+            SelfTest.Check("spells2: a real parry strikes back and gives stun immunity", Hp(foe) < hp2 && PlayerDebuffs.Buffs.Has(PlayerDebuffs.StunImmune), $"{hp2:0.#} -> {Hp(foe):0.#}");
         });
         Case("sustain shield", () =>
         {
@@ -303,8 +316,12 @@ internal static class Spells2SelfTest
         Case("portal", () =>
         {
             var origin = LocalPlayer.Transform.position;
+            // COS-84: one cast places one gate; the second cast links them and starts the timer.
             if (!Ok("spell.portal")) return;
-            SelfTest.Check("spells2: Portal opens a pair", SpellPortals.Count == 1);
+            SelfTest.Check("spells2: the first Portal cast places one waiting gate", SpellPortals.Count == 0 && SpellPortals.HasPending);
+            SpellCaster.TeleportPlayer(origin + Flat(SpellWorld.Eye.forward) * 14);
+            if (!Ok("spell.portal")) return;
+            SelfTest.Check("spells2: the second Portal cast links the pair", SpellPortals.Count == 1 && !SpellPortals.HasPending);
             var (entrance, exit) = SpellPortals.LastOpened;
             SpellCaster.TeleportPlayer(entrance);
             Advance(0.8f);
@@ -332,6 +349,11 @@ internal static class Spells2SelfTest
             float d1 = Vector3.Distance(rt.Actor!.transform.position, LocalPlayer.Transform.position);
             SelfTest.Check("spells2: Bash damages, weakens and slows", Hp(foe) < before && rt.Combat.HasWeaken && rt.Combat.HasSlow, $"{before:0.#} -> {Hp(foe):0.#}");
             SelfTest.Check("spells2: Bash knocks the enemy back", d1 > d0 + 1, $"{d0:0.##} m -> {d1:0.##} m");
+            // Passive (COS-84): with Bash in the loadout every real melee hit weakens and slows.
+            var other = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 6 + Vector3.up);
+            TestKit.Hit(other, 5f);
+            var rt2 = Rt(other)!;
+            SelfTest.Check("spells2: a melee hit weakens and slows while Bash is slotted", rt2.Combat.HasWeaken && rt2.Combat.HasSlow);
         });
         Case("snap freeze", () =>
         {
@@ -375,39 +397,50 @@ internal static class Spells2SelfTest
             var eye = SpellWorld.Eye;
             var dir = Quaternion.AngleAxis(30, Vector3.up) * eye.forward;
             var foe = Put(Foe(), eye.position + dir * 3);
-            float before = Hp(foe);
             if (!Ok("spell.seeking_arrow")) return;
-            Advance(2);
-            SelfTest.Check("spells2: Seeking Arrow bends to its target and slows it", Hp(foe) < before && Rt(foe)!.Combat.HasSlow, $"{before:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: Seeking Arrow arms a mark and fires nothing itself", SpellHits.SeekArmed.Has && SpellWorld.BoltCount == 0);
+            PerkHooks.ShotTracker.RecordKind(RangedKind.Bow);
+            TestKit.Hit(foe, 5f, ImpactType.Projectile); // the next real arrow marks its target
+            SelfTest.Check("spells2: the next arrow that hits marks its target", SpellHits.SeekTarget == Rt(foe) && !SpellHits.SeekArmed.Has);
+            SelfTest.Check("spells2: arrows now leave aimed at the mark", SpellHits.SeekAim(eye.position) != null);
+            TestKit.Hit(foe, 5f, ImpactType.Projectile);
+            SelfTest.Check("spells2: a body hit on the mark slows it", Rt(foe)!.Combat.HasSlow);
         });
         Case("blood infused arrow", () =>
         {
             var foe = Put(Foe(), OnRay(15));
-            float before = Hp(foe);
             var health = LocalPlayer.Vitals.Health;
             if (!Ok("spell.blood_infused_arrow")) return;
             SelfTest.Check("spells2: Blood Infused Arrow costs health", health._currentValue < health.GetMax() * 0.6f, $"{health._currentValue:0.#} / {health.GetMax():0.#}");
-            Advance(0.6f);
-            SelfTest.Check("spells2: Blood Infused Arrow hits hard", Hp(foe) < before - 50, $"{before:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: it stores damage for the next arrow", SpellHits.BloodArrows.Has && SpellHits.BloodArrows.Value > 50, $"{SpellHits.BloodArrows.Value:0.#}");
+            float before = Hp(foe);
+            PerkHooks.ShotTracker.RecordKind(RangedKind.Bow);
+            TestKit.Hit(foe, 5f, ImpactType.Projectile);
+            SelfTest.Check("spells2: the next real arrow carries it", Hp(foe) < before - 50 && !SpellHits.BloodArrows.Has, $"{before:0.#} -> {Hp(foe):0.#}");
         });
 
         // ---- toggles
         Case("black flame", () =>
         {
             var foe = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 4 + Vector3.up);
-            float before = Hp(foe);
             if (!Ok("spell.black_flame")) return;
             Advance(2.2f);
-            SelfTest.Check("spells2: Black Flame burns nearby enemies each second", Hp(foe) < before, $"{before:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: Black Flame has no aura of its own now", Rt(foe)!.Combat.DotCount == 0);
+            TestKit.Hit(foe, 5f); // a melee hit always ignites
+            SelfTest.Check("spells2: a melee hit sets the enemy burning while Black Flame is on", Rt(foe)!.Combat.DotCount > 0, $"dots {Rt(foe)!.Combat.DotCount}");
             SelfTest.Check("spells2: switching it off starts the cooldown", SpellCaster.Cast(0) == SpellCastOutcome.Stopped && !Pc.Spells.IsReady(0));
         });
         Case("multishot", () =>
         {
-            var foe = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 2 + Vector3.up);
-            float before = Hp(foe);
             if (!Ok("spell.multishot")) return;
-            Advance(1.6f);
-            SelfTest.Check("spells2: Multishot fires at the nearest enemy while on", Hp(foe) < before, $"{before:0.#} -> {Hp(foe):0.#}");
+            // The volley itself needs the game's weapon (RangedWeapon.Shoot); the falloff of its arrows is a real-hit rule.
+            SpellHits.QueueVolleyForTest(2);
+            var foe = Put(Foe(), OnRay(8));
+            PerkHooks.ShotTracker.RecordKind(RangedKind.Bow);
+            SelfTest.Check("spells2: Multishot queues the volley's arrows", SpellHits.VolleyPending == 3);
+            TestKit.Hit(foe, 5f, ImpactType.Projectile);
+            TestKit.Hit(foe, 5f, ImpactType.Projectile);
+            SelfTest.Check("spells2: each arrow that lands takes its place in the volley", SpellHits.VolleyPending == 1, $"{SpellHits.VolleyPending} left");
         });
 
         SelfTest.Check("spells2: casts raised the cast event", _castEvents >= 20, _castEvents.ToString());

@@ -232,6 +232,10 @@ public static class StatCoverage
         "perk_parry_anything", "perk_multishot_projectile_count", "perk_multishot_damage_pennalty",
         // COS-89: the player buff system reads these (states, immunities).
         "rooted", "stunned", "root_immunity", "debuff_immunity",
+        // COS-84: the weapon-linked spells (Spells/SpellHits.cs) and Taunt read these.
+        "spell_taunt_pull_enemies_in", "spell_parry_dmg_bonus", "spell_frenzy_ms", "spell_fury_swipes", "spell_bash_damage_buff",
+        "spell_seeking_arrow_head_damage", "spell_seeking_arrow_damage_bonus", "spell_bia_triple_dmg", "spell_bia_stun", "spell_bia_crit",
+        "spell_focus_bonus_dmg", "spell_focus_on_hs", "spell_focus_on_bs", "spell_focus_slow_amount", "spell_focus_slow_duration",
     };
 
     /// <summary>Kept in the data but deliberately without an in-game effect, with the reason.</summary>
