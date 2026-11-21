@@ -1,5 +1,0 @@
-{
- "spell.flicker_strike.description": "Blink from enemy to enemy within 20 m, up to eight, then back to where you stood. A heartbeat later every one of them is cut at once. Each enemy in the chain makes every cut hit harder. 120 energy, 45 s cooldown.",
- "spell.flicker_strike.name": "Flicker Strike",
- "ui.spells.no_targets": "No enemy in reach"
-}

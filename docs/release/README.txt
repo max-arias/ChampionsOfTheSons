@@ -1,8 +1,9 @@
 Champions of the Sons
 =====================
-An RPG overhaul for Sons of the Forest: enemy levels and elite affixes, loot with eight rarities and
-rolled stats, sets and unique items, a perk tree, 27 spells, item merging, a kill-streak XP bonus and eleven
-difficulty tiers from Easy to Hell. Works alone and in co-op (host, client and dedicated server).
+An RPG overhaul for Sons of the Forest: enemy levels, elites, minibosses and bosses with affixes, loot in four
+rarities (Common, Magic, Rare, Legendary) with rolled stats, sets and unique items, a perk tree, 28 spells,
+item merging and a kill-streak XP bonus. Enemies follow the level of the players near them; the game's own
+difficulty adds levels and elites on top. Works alone and in co-op (host, client and dedicated server).
 
 Requirements
 - Sons of the Forest (Steam, current version)
@@ -17,7 +18,9 @@ Install
 Multiplayer
 - Every player and the dedicated server need the mod, all on the same version. The game refuses
   to mix versions and says so.
-- The host (or server) decides difficulty, enemies and drops. Each player keeps their own character.
+- The host (or server) decides enemies, drops and the host settings (O). Each player keeps their own character.
+- Friendly fire is a host setting: off (the default) blocks all damage between players; on uses the game's
+  own player-versus-player damage.
 - Dedicated server: put the same files into the server's Mods folder.
 
 Keys (change them in the RedLoader mod settings, file ChampionsOfTheSons.cfg)
@@ -39,7 +42,7 @@ Admin and cheat commands (host or server admin only)
   cots heal [player]                 full health and energy
   cots god [on|off] [player]         no damage taken      cots nocooldowns [on|off] [player]
   cots spawn <normal|elite|miniboss|boss> [actor type] [count]
-  cots difficulty <id|0-10>          cots list <items|perks|spells|stats|enemies|difficulties> [filter]
+  cots extralevels <n>               extra enemy levels   cots list <items|perks|spells|stats|enemies> [filter]
 
 Saves
 - Your level, items and perks are saved with the game's own save (through RedLoader). Each player's
@@ -47,6 +50,10 @@ Saves
 
 Uninstall
 - Delete Mods\ChampionsOfTheSons.dll and the Mods\ChampionsOfTheSons folder.
+
+Languages
+- The mod follows the game's language. English is the original; the 12 other languages are machine
+  translations that no native speaker has checked yet. Corrections are welcome.
 
 Credits: see CREDITS.md and CREDITS-icons.md. The mechanics follow the original Champions of the
 Forest mod for The Forest; the code, names and text here are new.

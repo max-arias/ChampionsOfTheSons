@@ -30,7 +30,7 @@ RedLoader's schema (https://raw.githubusercontent.com/ToniMacaroni/RedLoader/mai
 ## Before uploading
 
 - Targeted headless self-tests of the features changed since the last release (`tools/run-selftest.ps1 -Headless -Only ...`; the full suite is disabled), one co-op run (`tools/run-coop-test.ps1 -Windowed`).
-- Strict translations pass (COS-39 native review is separate).
+- Strict translations pass. The 12 translations ship as machine translations, said so on the page and in README.txt (Max, Wave 7); the native review (COS-39) follows after release.
 - `CREDITS.md` lists every third-party asset in the build.
 - Bump `version` in the manifest.
 
@@ -41,6 +41,7 @@ From sotf-mods.com's rules (https://sotf-mods.com/content-policy, https://sotf-m
 - **Name:** Champions of the Sons
 - **Short description:** RPG overhaul: enemy levels and affixes, loot with rarities and stats, perks, spells and item merging; enemies scale with the party and the game's difficulty. Co-op and dedicated servers.
 - **Description:** the first paragraph of `docs/release/README.txt`, then its Requirements, Install, Multiplayer and Keys sections.
+- **Languages:** English, plus 12 machine-translated languages (corrections welcome).
 - **Requirements:** RedLoader 0.8.6. Every player and the dedicated server need the mod, same version.
 - **Dedicated server:** supported (install into the server's Mods folder).
 - **Credits:** Champions of the Forest (mechanics), game-icons.net (icons, CC BY 3.0).

@@ -1,7 +1,0 @@
-{
- "ui.sheet.extra_levels": "Extra enemy levels",
- "ui.sheet.game_difficulty": "Game difficulty",
- "ui.sheet.tip.extra_levels": "Levels the host added to every enemy.",
- "ui.sheet.tip.game_difficulty": "Set by the game's own difficulty: it adds enemy levels and elites on top of the players' level.",
- "ui.sheet.world": "World"
-}
