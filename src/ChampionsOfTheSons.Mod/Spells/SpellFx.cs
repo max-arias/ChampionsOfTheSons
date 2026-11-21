@@ -265,7 +265,7 @@ internal static class SpellFx
         Items.Clear();
     }
 
-    private static Shader? FindUnlit()
+    internal static Shader? FindUnlit()
     {
         if (_looked) return _unlit;
         _looked = true;

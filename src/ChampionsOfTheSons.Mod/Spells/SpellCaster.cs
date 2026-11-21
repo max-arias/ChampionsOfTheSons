@@ -17,6 +17,8 @@ public enum SpellCastOutcome
     Stopped,
     /// <summary>The spell needs a target and none is in reach: nothing is spent (Flicker Strike, COS-141).</summary>
     NoTarget,
+    /// <summary>The player is silenced (COS-82).</summary>
+    Silenced,
 }
 
 /// <summary>A cast, as a clear event a later co-op sync can send: which spell, from where, along what direction, at what aim point.</summary>
@@ -102,6 +104,7 @@ internal static class SpellCaster
             case CastResult.EmptySlot: return SpellCastOutcome.EmptySlot;
             case CastResult.OnCooldown: return SpellCastOutcome.OnCooldown;
             case CastResult.NotEnoughEnergy: LastMessage = "not enough energy"; return SpellCastOutcome.NotEnoughEnergy;
+            case CastResult.Silenced: LastMessage = "silenced"; return SpellCastOutcome.Silenced;
             case CastResult.Stopped:
                 SpellEffects.Stopped(slot);
                 return SpellCastOutcome.Stopped;

@@ -215,6 +215,10 @@ public sealed class SpellDef
     public bool Channeled { get; set; }
     /// <summary>On/off spell with an upkeep instead of a cooldown cast.</summary>
     public bool Toggle { get; set; }
+    /// <summary>Held to aim, cast on key up (COS-82).</summary>
+    public bool CastOnRelease { get; set; }
+    /// <summary>Aim aid while held: "line" (player to the target point) or "sphere" (the effect's radius at the target); empty for none.</summary>
+    public string Aim { get; set; } = "";
 }
 
 /// <summary>An item set: equipping several pieces (items whose <see cref="ItemBaseDef.Set"/> is this id) unlocks bonuses.</summary>

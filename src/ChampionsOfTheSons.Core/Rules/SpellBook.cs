@@ -10,6 +10,8 @@ public enum CastResult
     NotEnoughEnergy,
     /// <summary>A channeled or toggle spell that was running has been switched off by the cast.</summary>
     Stopped,
+    /// <summary>The player is silenced (COS-82): no spell can be cast.</summary>
+    Silenced,
 }
 
 /// <summary>Energy and stamina a cast takes.</summary>
@@ -59,9 +61,9 @@ public sealed class SpellBook
         return new SpellCost(c.Energy * k, c.Stamina * k);
     }
 
-    /// <summary>A spell's cooldown in seconds before the cooldown rate: (base - flat perks) x perk scale, at least 0.5 s, x the cooldown stat.</summary>
+    /// <summary>A spell's cooldown in seconds before the cooldown rate: (base - flat perks) x perk scale, x the cooldown stat. No minimum (COTF: Wide Reach is 0.4 s, COS-82).</summary>
     public double CooldownOf(string spellId, StatSheet stats) =>
-        Math.Max(0.5, (_content.Spells[spellId].Cooldown - (CooldownReduction?.Invoke(spellId) ?? 0)) * (CooldownScale?.Invoke(spellId) ?? 1))
+        Math.Max(0, (_content.Spells[spellId].Cooldown - (CooldownReduction?.Invoke(spellId) ?? 0)) * (CooldownScale?.Invoke(spellId) ?? 1))
         * stats.Get(StatIds.Cooldown);
 
     /// <summary>Puts a spell in a slot. Equipping starts its full cooldown, as in the original.</summary>
@@ -157,12 +159,14 @@ public sealed class SpellBook
                 Stop(slot);
                 return CastResult.Stopped;
             }
+            if (stats.IsOn(StatIds.Silenced)) return CastResult.Silenced;
             if (!IsReady(slot)) return CastResult.OnCooldown;
             if (energy < CostOf(id, stats).Total) return CastResult.NotEnoughEnergy;
             _active[slot] = true;
             OnCast(stats);
             return CastResult.Ok;
         }
+        if (stats.IsOn(StatIds.Silenced)) return CastResult.Silenced;
         if (!IsReady(slot)) return CastResult.OnCooldown;
         cost = CostOf(id, stats);
         if (energy < cost.Total) return CastResult.NotEnoughEnergy;

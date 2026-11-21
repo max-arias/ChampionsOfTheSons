@@ -70,6 +70,8 @@ public static class StatIds
     public const string AllRecoveryMult = "all_recovery_mult";
     public const string EnergyRecoveryFromInt = "energy_recovery_from_int";
     public const string StaminaPerSecRate = "stamina_per_sec_rate";
+    /// <summary>Bool: no spell can be cast while on (COS-82; set by debuffs, COS-89).</summary>
+    public const string Silenced = "silenced";
 }
 
 /// <summary>Values computed from several stats (COTF's derived formulas).</summary>

@@ -6,7 +6,9 @@
       "name": "Black Hole",
       "levelReq": 20,
       "energyCost": 350.0,
-      "cooldown": 140.0
+      "cooldown": 140.0,
+      "castOnRelease": true,
+      "aim": "sphere"
     },
     {
       "id": "spell.healing_dome",
@@ -14,7 +16,9 @@
       "name": "Healing Dome",
       "levelReq": 6,
       "energyCost": 80.0,
-      "cooldown": 70.0
+      "cooldown": 70.0,
+      "castOnRelease": true,
+      "aim": "sphere"
     },
     {
       "id": "spell.blink",
@@ -22,7 +26,9 @@
       "name": "Blink",
       "levelReq": 3,
       "energyCost": 25.0,
-      "cooldown": 14.0
+      "cooldown": 14.0,
+      "castOnRelease": true,
+      "aim": "line"
     },
     {
       "id": "spell.sun_flare",
@@ -72,7 +78,9 @@
       "name": "Portal",
       "levelReq": 12,
       "energyCost": 90.0,
-      "cooldown": 60.0
+      "cooldown": 60.0,
+      "castOnRelease": true,
+      "aim": "line"
     },
     {
       "id": "spell.magic_arrow",
@@ -80,7 +88,9 @@
       "name": "Magic Arrow",
       "levelReq": 27,
       "energyCost": 100.0,
-      "cooldown": 20.0
+      "cooldown": 20.0,
+      "castOnRelease": true,
+      "aim": "sphere"
     },
     {
       "id": "spell.multishot",
@@ -177,7 +187,9 @@
       "name": "Cataclysm",
       "levelReq": 50,
       "energyCost": 500.0,
-      "cooldown": 300.0
+      "cooldown": 300.0,
+      "castOnRelease": true,
+      "aim": "sphere"
     },
     {
       "id": "spell.blood_infused_arrow",
@@ -201,7 +213,9 @@
       "name": "Taunt",
       "levelReq": 9,
       "energyCost": 40.0,
-      "cooldown": 45.0
+      "cooldown": 45.0,
+      "castOnRelease": true,
+      "aim": "sphere"
     },
     {
       "id": "spell.firebolt",

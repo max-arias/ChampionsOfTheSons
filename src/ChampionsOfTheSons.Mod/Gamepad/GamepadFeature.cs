@@ -78,6 +78,15 @@ internal sealed class GamepadFeature : IModFeature
         };
     }
 
+    /// <summary>Whether slot <paramref name="slot"/>'s pad binding is held (main button and its modifiers), for SpellControl (COS-82).
+    /// False while a mod panel has the pad.</summary>
+    public static bool SpellHeld(int slot)
+    {
+        if (slot < 0 || slot >= _spellEntries.Length || OpenPanel != null) return false;
+        var b = Binding(_spellEntries[slot], SpellDefaults[Math.Min(slot, SpellDefaults.Length - 1)]);
+        return b != null && PadInput.Held(b.Main) && b.Modifiers.All(PadInput.Held);
+    }
+
     private static PadBinding? Binding(ConfigEntry<string> entry, string fallback)
     {
         string text;
@@ -128,8 +137,7 @@ internal sealed class GamepadFeature : IModFeature
             var b = Binding(_spellEntries[i], SpellDefaults[Math.Min(i, SpellDefaults.Length - 1)]);
             if (b != null && PadInput.IsTriggered(b))
             {
-                LastPadCast = i;
-                SpellCaster.Cast(i);
+                LastPadCast = i; // the cast itself is SpellControl's, from SpellHeld (press, hold, release; COS-82)
                 return;
             }
         }

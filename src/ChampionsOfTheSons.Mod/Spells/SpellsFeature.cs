@@ -6,14 +6,8 @@ namespace ChampionsOfTheSons.Mod.Spells;
 /// <summary>Hotkeys for the six spell slots (entries in <see cref="Config.SpellKeys"/>, rebindable in the settings overlay, COS-104).</summary>
 internal static class SpellKeys
 {
-    public static void Init()
-    {
-        for (int i = 0; i < SpellBook.Slots; i++)
-        {
-            int slot = i;
-            Config.SpellKeys[i].Notify(() => SpellCaster.Cast(slot));
-        }
-    }
+    /// <summary>The keys are read every frame by <see cref="SpellControl"/> (held, released), not on press (COS-82).</summary>
+    public static void Init() { }
 
     /// <summary>The key shown on the bar.</summary>
     public static string Label(int slot)
@@ -46,11 +40,13 @@ internal sealed class SpellsFeature : IModFeature
     public void OnGameStart()
     {
         SpellWorld.Reset();
+        SpellControl.Reset();
         SpellCaster.Refund.Clear();
     }
 
     public void Update(float dt, bool inWorld)
     {
+        SpellControl.Update(inWorld);
         if (inWorld)
         {
             SpellWorld.Step(dt);
@@ -64,6 +60,8 @@ internal sealed class SpellsFeature : IModFeature
     {
         SpellsSelfTest.Register();
         Spells2SelfTest.Register();
+        SpellControlSelfTest.Register();
         SelfTest.PhaseReset += SpellWorld.Reset;
+        SelfTest.PhaseReset += SpellControl.Reset;
     }
 }
