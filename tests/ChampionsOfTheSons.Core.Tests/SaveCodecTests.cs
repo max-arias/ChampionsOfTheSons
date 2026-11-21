@@ -48,9 +48,19 @@ public class SaveCodecTests
     [Fact]
     public void World_save_round_trips()
     {
-        var loaded = SaveCodec.ReadWorld(SaveCodec.Write(new WorldSave { ExtraEnemyLevels = 4, FriendlyFire = true }));
+        var loaded = SaveCodec.ReadWorld(SaveCodec.Write(new WorldSave { ExtraEnemyLevels = 4, FriendlyFire = true, LootLevel = "Closest" }));
         Assert.Equal(4, loaded.ExtraEnemyLevels);
         Assert.True(loaded.FriendlyFire);
+        Assert.Equal("Closest", loaded.LootLevel);
+    }
+
+    [Fact]
+    public void Version_3_worlds_get_the_default_loot_level()
+    {
+        var world = SaveCodec.ReadWorld("{\"version\":3,\"extraEnemyLevels\":2}");
+        Assert.Equal(WorldSave.CurrentVersion, world.Version);
+        Assert.Equal("Highest", world.LootLevel);
+        Assert.Equal(2, world.ExtraEnemyLevels);
     }
 
     [Fact]
@@ -145,5 +155,28 @@ public class SaveCodecTests
         Assert.Equal(1, loaded.Perks["perk.root"]);
         Assert.False(loaded.Slots.ContainsKey("bag.0"));
         Assert.Equal(new[] { "stat.max_life" }, loaded.Slots["bag.1"].Stats.Select(s => s.Id));
+    }
+
+    [Fact]
+    public void Version_5_saves_drop_the_island_foods_and_start_with_no_grant_day()
+    {
+        var v5 = """
+        { "version": 5, "level": 3,
+          "slots": {
+            "bag.0": { "baseId": "item.minibar_whiskey", "level": 12, "rarity": 0, "amount": 3, "stats": [] },
+            "bag.1": { "baseId": "item.ring", "level": 30, "rarity": 1, "amount": 1, "stats": [] } } }
+        """;
+        var loaded = SaveCodec.ReadPlayer(v5);
+        Assert.Equal(PlayerSave.CurrentVersion, loaded.Version);
+        Assert.False(loaded.Slots.ContainsKey("bag.0"));
+        Assert.True(loaded.Slots.ContainsKey("bag.1"));
+        Assert.Equal(-1, loaded.LastGrantDay);
+    }
+
+    [Fact]
+    public void Last_grant_day_round_trips()
+    {
+        var loaded = SaveCodec.ReadPlayer(SaveCodec.Write(new PlayerSave { LastGrantDay = 17 }));
+        Assert.Equal(17, loaded.LastGrantDay);
     }
 }

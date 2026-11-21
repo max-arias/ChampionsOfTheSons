@@ -52,6 +52,20 @@ public sealed class Progress
     public double Xp { get; private set; }
     public int BonusPerkPoints { get; set; }
 
+    /// <summary>The game day daily grants last paid out on; -1 before the first (COS-100).</summary>
+    public int LastGrantDay { get; set; } = -1;
+
+    /// <summary>COS-100: whether daily grants pay out on <paramref name="day"/>. The first day ever seen only sets the baseline;
+    /// a later day pays once (however many days passed) and becomes the new baseline. Survives a reload, so a reload neither pays
+    /// twice nor loses the grant.</summary>
+    public bool TakeDailyGrant(int day)
+    {
+        if (LastGrantDay < 0) { LastGrantDay = day; return false; }
+        if (day <= LastGrantDay) return false;
+        LastGrantDay = day;
+        return true;
+    }
+
     /// <summary>Perk points earned in total: one per level plus permanent bonus points.</summary>
     public int TotalPerkPoints => Level + BonusPerkPoints;
 

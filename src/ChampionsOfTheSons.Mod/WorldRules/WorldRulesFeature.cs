@@ -69,6 +69,7 @@ public sealed class WorldRulesFeature : IModFeature
         if (_syncTimer > 0) return;
         _syncTimer = 10;
         ReadGameDifficulty();
+        FriendlyFireRule.Apply(WorldState.FriendlyFire); // a loaded world may bring its own PvP setting back (COS-78)
         Broadcast();
     }
 
@@ -113,6 +114,8 @@ public sealed class WorldRulesFeature : IModFeature
     public static void Apply(WorldSettings ws)
     {
         WorldState.SetGameDifficulty(new GameDifficulty(ws.Mode, ws.LevelOffset));
+        if (WorldState.FriendlyFire != ws.FriendlyFire) WorldState.SetFriendlyFire(ws.FriendlyFire);
+        FriendlyFireRule.Apply(ws.FriendlyFire); // the client follows the host's friendly fire (COS-78)
         if (WorldState.Rules.ExtraEnemyLevels != ws.ExtraEnemyLevels)
         {
             WorldState.Update(r => r with { ExtraEnemyLevels = ws.ExtraEnemyLevels });

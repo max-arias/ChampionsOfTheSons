@@ -94,6 +94,14 @@ internal static class SheetData
         Row("massacre_time", "Massacre duration", Num(s.Get(StatIds.MaxMassacreTime), 0) + "s",
             "How long a kill streak lasts after a kill (longest wait). Each kill adds {0}s; the banked XP pays out when it runs out.",
             tipArg: Num(s.Get(StatIds.TimeBonusPerKill), 1));
+
+        // COS-77: every player sees the world's difficulty (a client has it from the host).
+        Header("world", "World");
+        var rules = WorldState.Rules;
+        Row("game_difficulty", "Game difficulty", HostRules.HostSettingsPanel.GameDifficultyText(rules.GameDifficulty),
+            "Set by the game's own difficulty: it adds enemy levels and elites on top of the players' level.");
+        Row("extra_levels", "Extra enemy levels", "+" + rules.ExtraEnemyLevels.ToString(CultureInfo.InvariantCulture),
+            "Levels the host added to every enemy.");
         return rows;
     }
 

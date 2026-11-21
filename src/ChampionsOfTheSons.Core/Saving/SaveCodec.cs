@@ -23,7 +23,19 @@ public static class SaveCodec
         RemoveDeletedPerks,   // 2 → 3 (COS-86/COS-87)
         CollapseItemRarities, // 3 → 4 (COS-109)
         RemoveCraftingContent, // 4 → 5 (COS-145)
+        RemoveIslandFoods, // 5 → 6 (COS-147; the grant day defaults to none, COS-100)
     };
+
+    /// <summary>The four island foods never had a use and are gone (COS-147, Max: remove).</summary>
+    private static readonly string[] IslandFoods =
+        { "item.canned_pasta_ration", "item.cult_sacrament_wafer", "item.minibar_whiskey", "item.bottled_cave_water" };
+
+    private static void RemoveIslandFoods(JsonObject save)
+    {
+        if (save["slots"] is not JsonObject slots) return;
+        foreach (var key in slots.Select(kv => kv.Key).ToList())
+            if (slots[key] is JsonObject item && item["baseId"]?.GetValue<string>() is { } id && IslandFoods.Contains(id)) slots.Remove(key);
+    }
 
     /// <summary>3 → 4: eight rarities became four (<see cref="Rarities.FromLegacy"/>). Uniques are raised to Legendary on load,
     /// from content (<see cref="Rules.PlayerCharacter.Load"/>).</summary>
@@ -131,7 +143,14 @@ public static class SaveCodec
     {
         CollapseMinLootRarity, // 1 → 2 (COS-109)
         DropDifficultyTier, // 2 → 3 (COS-130)
+        AddLootLevel, // 3 → 4 (COS-77)
     };
+
+    /// <summary>COS-77: the loot level policy is saved with the world; older worlds used the default, Highest.</summary>
+    private static void AddLootLevel(JsonObject save)
+    {
+        if (save["lootLevel"] is null) save["lootLevel"] = nameof(Rules.LootLevelPolicy.Highest);
+    }
 
     /// <summary>
     /// COS-130: worlds no longer store a difficulty tier; enemy levels follow the party and the game's difficulty. The old tier is

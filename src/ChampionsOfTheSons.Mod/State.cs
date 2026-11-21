@@ -88,6 +88,7 @@ public static class WorldState
         AllowElites = Rules.AllowElites,
         DisabledAbilities = Rules.DisabledAbilities.Select(a => a.ToString()).ToList(),
         MinLootRarity = Rules.MinLootRarity,
+        LootLevel = Rules.LootLevel.ToString(),
     };
 
     /// <summary>Loads the host settings; the game's difficulty is not in the save (the game keeps its own) and stays as it is.</summary>
@@ -109,6 +110,7 @@ public static class WorldState
                 .Select(n => Enum.TryParse<EnemyAbility>(n, out var a) ? (EnemyAbility?)a : null)
                 .Where(a => a.HasValue).Select(a => a!.Value).ToArray(),
             MinLootRarity = save.MinLootRarity,
+            LootLevel = Enum.TryParse<LootLevelPolicy>(save.LootLevel, true, out var policy) ? policy : LootLevelPolicy.Highest,
         };
         FriendlyFire = save.FriendlyFire;
     }

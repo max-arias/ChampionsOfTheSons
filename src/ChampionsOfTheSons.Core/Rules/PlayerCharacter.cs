@@ -238,11 +238,12 @@ public sealed class PlayerCharacter
         Perks = Perks.Bought.ToDictionary(kv => kv.Key, kv => kv.Value),
         UnlockedSpells = Perks.UnlockedSpells.ToList(),
         SpellLoadout = Spells.Loadout.ToList(),
+        LastGrantDay = Progress.LastGrantDay,
     };
 
     public void Load(PlayerSave save)
     {
-        Progress = new Progress(save.Level, save.Xp, save.BonusPerkPoints);
+        Progress = new Progress(save.Level, save.Xp, save.BonusPerkPoints) { LastGrantDay = save.LastGrantDay };
         Perks.Restore(save.Perks, save.UnlockedSpells);
         Spells.Restore(save.SpellLoadout);
         var loot = new LootRoller(Content);

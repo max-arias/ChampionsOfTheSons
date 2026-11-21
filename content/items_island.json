@@ -1879,50 +1879,6 @@
         ]
       ],
       "legacyIndex": 10051
-    },
-    {
-      "id": "item.canned_pasta_ration",
-      "name": "Canned Pasta Ration",
-      "type": "other",
-      "rarity": 1,
-      "minLevel": 1,
-      "maxLevel": 31,
-      "statPools": [],
-      "consumable": true,
-      "legacyIndex": 10052
-    },
-    {
-      "id": "item.cult_sacrament_wafer",
-      "name": "Cult Ration Wafer",
-      "type": "other",
-      "rarity": 2,
-      "minLevel": 20,
-      "maxLevel": 50,
-      "statPools": [],
-      "consumable": true,
-      "legacyIndex": 10053
-    },
-    {
-      "id": "item.minibar_whiskey",
-      "name": "Minibar Whiskey",
-      "type": "other",
-      "rarity": 1,
-      "minLevel": 10,
-      "maxLevel": 40,
-      "statPools": [],
-      "consumable": true,
-      "legacyIndex": 10054
-    },
-    {
-      "id": "item.bottled_cave_water",
-      "name": "Bottled Cave Water",
-      "type": "other",
-      "rarity": 2,
-      "minLevel": 30,
-      "maxLevel": 60,
-      "statPools": [],
-      "consumable": true,
-      "legacyIndex": 10055
     }
   ]
 }

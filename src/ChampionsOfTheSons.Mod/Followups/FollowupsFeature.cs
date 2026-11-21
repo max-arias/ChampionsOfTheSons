@@ -26,7 +26,6 @@ public sealed class FollowupsFeature : IModFeature
     private static Vector3? _lastPos;
     private static string _rushSig = "", _uniqueSig = "";
     private static string _capacitySig = "";
-    private static int _lastDay = -1;
     private static float _scan;
 
     /// <summary>Original carry limits of items we raised, by item id.</summary>
@@ -39,7 +38,6 @@ public sealed class FollowupsFeature : IModFeature
         Shield.Reset();
         Rush.Reset();
         Unique.Reset();
-        _lastDay = -1;
         _capacitySig = "";
     }
 
@@ -212,9 +210,8 @@ public sealed class FollowupsFeature : IModFeature
         int day;
         try { day = Sons.Environment.TimeOfDayHolder.GetTimeOfDay().Days; }
         catch { return; }
-        if (_lastDay < 0) { _lastDay = day; return; }
-        if (day <= _lastDay) return;
-        _lastDay = day;
+        // The day is kept with the character, so a reload neither pays twice nor loses a grant (COS-100).
+        if (!PlayerState.Character.Progress.TakeDailyGrant(day)) return;
         var given = GrantDaily();
         if (given.Count > 0) LootFeatureMessage(string.Format(UI.UiText.T("ui.followups.daily", "A new day: {0}"), string.Join(", ", given.Select(kv => $"{kv.Value} {kv.Key}"))));
     }
