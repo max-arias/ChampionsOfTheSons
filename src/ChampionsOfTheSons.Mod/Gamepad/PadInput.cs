@@ -23,8 +23,6 @@ internal static class PadInput
     private static readonly bool[] NavFire = new bool[4];
     private static readonly float[] NavTimer = new float[4];
 
-    public static bool Connected => Gamepad.current != null;
-
     /// <summary>True while a pad is the active input: a pad button went down within the last few seconds.</summary>
     public static bool RecentlyUsed => Time.unscaledTime - LastUse < 4f;
     public static float LastUse { get; private set; } = -100f;

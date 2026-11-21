@@ -88,7 +88,7 @@ public sealed class VisualsFeature : IModFeature
     }
 
     private static readonly string[] WeaponModels =
-        { "Weapon_Sword", "Weapon_GreatSword", "Weapon_Axe", "Weapon_Hammer", "Weapon_Spear", "Weapon_Bow", "Weapon_Polearm", "Weapon_GreatAxe", "Weapon_GreatHammer" };
+        { "Weapon_Sword", "Weapon_GreatSword", "Weapon_Axe", "Weapon_Hammer", "Weapon_Bow", "Weapon_Polearm" };
 
     /// <summary>The held-weapon models at real size, standing in a row in front of the camera, turned three-quarters.</summary>
     private void ShowWeapons()
@@ -247,15 +247,18 @@ public sealed class VisualsFeature : IModFeature
     private void FrameCost()
     {
         var many = FrameMeter.Stop();
-        int particles = 0;
+        int particles = 0, lights = 0;
         foreach (var go in _shown)
             if (go != null)
+            {
                 foreach (var ps in go.GetComponentsInChildren<ParticleSystem>()) particles += ps.particleCount;
-        SelfTest.Log($"visuals: frame cost: baseline {_baseline.ms:F2} ms over {_baseline.frames} frames, with {_shown.Count} effects ({particles} particles) {many.ms:F2} ms over {many.frames} frames");
-        // A loose bound: catches a runaway effect (thousands of particles, a light per particle), not GPU noise.
-        if (_baseline.frames > 10 && many.frames > 10)
-            SelfTest.Check("visuals: many effects cost under 6 ms a frame", many.ms - _baseline.ms < 6f, $"+{many.ms - _baseline.ms:F2} ms");
-        else SelfTest.Log("visuals: frame cost not measured (too few frames rendered)");
+                lights += go.GetComponentsInChildren<Light>().Length;
+            }
+        // Frame time is logged only: other features running in the same pass and the shared machine make it noisy
+        // (COS-113, COS-108 saw +-20%). The budget is checked on counts, which catch a runaway effect deterministically.
+        SelfTest.Log($"visuals: frame cost: baseline {_baseline.ms:F2} ms over {_baseline.frames} frames, with {_shown.Count} effects ({particles} particles, {lights} lights) {many.ms:F2} ms over {many.frames} frames");
+        SelfTest.Check("visuals: 60 effects stay under 15000 particles", particles < 15000, particles.ToString());
+        SelfTest.Check("visuals: 60 effects carry at most one light per five effects", lights <= _shown.Count / 5 + 1, lights.ToString());
         Cleanup();
     }
 

@@ -112,7 +112,7 @@ internal static class BookPages
     public static int HelpPage { get; private set; }
     private static readonly List<PageSlot> GearSlots = new(), BagSlots = new();
     private static readonly List<PageHit> Hits = new();
-    private static TextMeshProUGUI _sets = null!, _gearCount = null!, _bagCount = null!, _bagPager = null!, _charPager = null!;
+    private static TextMeshProUGUI _sets = null!, _gearCount = null!, _bagPager = null!, _charPager = null!;
     private static TextMeshProUGUI _level = null!, _xpText = null!, _perks = null!;
     private static RectTransform _xpFill = null!;
     private static readonly List<(TextMeshProUGUI Name, TextMeshProUGUI Value, Image Shade)> Rows = new();
@@ -595,15 +595,6 @@ internal static class BookPages
         bool toItem = to.StartsWith("bag.", StringComparison.Ordinal) || to.StartsWith("equip.", StringComparison.Ordinal);
         if (!fromItem || !toItem || Pc.Inventory.Get(from) == null) return "cancel";
         return InventoryActions.MoveTo(from, to) ? "moved" : "no-fit";
-    }
-
-    /// <summary>The bag page that shows a bag key, so a test or the card can jump to it.</summary>
-    public static void ShowBagSlot(string bagKey)
-    {
-        if (!int.TryParse(bagKey.AsSpan(4), out int i)) return;
-        Filter = 0;
-        BagPage = i / BagPerPage;
-        _dirty = true;
     }
 
     /// <summary>

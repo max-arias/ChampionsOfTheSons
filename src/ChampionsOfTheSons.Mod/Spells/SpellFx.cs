@@ -25,13 +25,20 @@ internal static class SpellFx
         public Transform? Follow;
         public Vector3 Offset;
         public Vector3 Velocity;
+        public Transform? Homing;
+    }
+
+    /// <summary>A flying visual turns toward <paramref name="target"/> at the caster's bolt turn rate (a teammate's Seeking Arrow).</summary>
+    public static void SetHoming(GameObject? go, Transform target)
+    {
+        if (go == null) return;
+        var it = Items.FirstOrDefault(x => x.Go == go);
+        if (it != null) it.Homing = target;
     }
 
     private static readonly List<Item> Items = new();
     private static Shader? _unlit;
     private static bool _looked;
-
-    public static int Count => Items.Count;
 
     public static readonly Color Fire = new(1f, 0.45f, 0.1f), Ice = new(0.55f, 0.85f, 1f), Arcane = new(0.7f, 0.35f, 1f),
         Holy = new(1f, 0.9f, 0.4f), Heal = new(0.4f, 1f, 0.5f), Blood = new(0.75f, 0.05f, 0.1f), Dark = new(0.12f, 0.05f, 0.2f),
@@ -44,7 +51,7 @@ internal static class SpellFx
     {
         if (look == Look.Auto)
             look = seconds <= BurstSeconds && follow == null ? Look.Burst : follow != null ? Look.Bubble : radius <= 1f ? Look.Orb : Look.Bubble;
-        var go = Fx(look, pos, radius, 0, color, seconds, follow) ?? Make(PrimitiveType.Sphere, pos, Vector3.one * radius * 2, color, seconds, follow);
+        var go = Fx(look, pos, radius, color, seconds, follow) ?? Make(PrimitiveType.Sphere, pos, Vector3.one * radius * 2, color, seconds, follow);
         return Record(go, FxKind.Sphere, look, pos, radius, 0, color, seconds, follow != null, Vector3.zero);
     }
 
@@ -52,7 +59,7 @@ internal static class SpellFx
     public static GameObject Disc(Vector3 pos, float radius, Color color, float seconds, Transform? follow = null, Look look = Look.Auto)
     {
         if (look == Look.Auto) look = seconds <= BurstSeconds ? Look.Burst : Look.Ring;
-        var go = Fx(look, pos, radius, 0, color, seconds, follow) ?? Make(PrimitiveType.Cylinder, pos, new Vector3(radius * 2, 0.04f, radius * 2), color, seconds, follow);
+        var go = Fx(look, pos, radius, color, seconds, follow) ?? Make(PrimitiveType.Cylinder, pos, new Vector3(radius * 2, 0.04f, radius * 2), color, seconds, follow);
         return Record(go, FxKind.Disc, look, pos, radius, 0, color, seconds, follow != null, Vector3.zero);
     }
 
@@ -113,7 +120,7 @@ internal static class SpellFx
     }
 
     /// <summary>The bundled effect for <paramref name="look"/>, tracked like a primitive; null without the bundle.</summary>
-    private static GameObject? Fx(Look look, Vector3 pos, float radius, float height, Color color, float seconds, Transform? follow)
+    private static GameObject? Fx(Look look, Vector3 pos, float radius, Color color, float seconds, Transform? follow)
     {
         if (!FxKit.Available) return null;
         GameObject? go;
@@ -234,7 +241,15 @@ internal static class SpellFx
                 continue;
             }
             if (it.Follow != null) it.Go.transform.position = it.Follow.position + it.Offset;
-            else if (it.Velocity != Vector3.zero) it.Go.transform.position += it.Velocity * dt;
+            else if (it.Velocity != Vector3.zero)
+            {
+                if (it.Homing != null)
+                {
+                    var want = (it.Homing.position + Vector3.up * 1.2f - it.Go.transform.position).normalized;
+                    it.Velocity = Vector3.RotateTowards(it.Velocity, want * it.Velocity.magnitude, SpellWorld.BoltTurnRate * dt, 0);
+                }
+                it.Go.transform.position += it.Velocity * dt;
+            }
             it.Left -= dt;
             if (it.Left > 0) continue;
             Spells.SpellNet.Expired(it.Go);

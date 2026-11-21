@@ -218,6 +218,13 @@
       "levelReq": 9,
       "energyCost": 120.0,
       "cooldown": 20.0
+    },
+    {
+      "id": "spell.flicker_strike",
+      "name": "Flicker Strike",
+      "levelReq": 30,
+      "energyCost": 120.0,
+      "cooldown": 45.0
     }
   ]
 }

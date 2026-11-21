@@ -26,6 +26,7 @@ public static class SoundCues
         ["spell.taunt"] = "cast_debuff",
         ["spell.blink"] = "cast_warp",
         ["spell.portal"] = "cast_warp",
+        ["spell.flicker_strike"] = "cast_warp",
         ["spell.bash"] = "cast_physical",
         ["spell.parry"] = "impact_metal",
     };

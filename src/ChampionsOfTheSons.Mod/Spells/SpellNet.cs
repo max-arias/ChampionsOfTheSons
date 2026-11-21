@@ -114,6 +114,16 @@ internal static class SpellNet
         p.Shapes[i] = p.Shapes[i] with { Seconds = seconds, Velocity = CoopSession.ToVec(velocity) };
     }
 
+    /// <summary>A recorded flying visual curves toward this enemy on the other machines (Seeking Arrow, COS-114).</summary>
+    public static void NoteHoming(GameObject? go, ulong enemyNetId)
+    {
+        if (go == null || enemyNetId == 0 || !Known.TryGetValue(go.Pointer, out var k) || !Out.TryGetValue(k.Cast, out var p)) return;
+        int first = NextIndex.GetValueOrDefault(k.Cast) - p.Shapes.Count;
+        int i = k.Index - first;
+        if (i < 0 || i >= p.Shapes.Count) return;
+        p.Shapes[i] = p.Shapes[i] with { HomingTarget = enemyNetId };
+    }
+
     /// <summary>A recorded visual was removed before its time ran out: the others remove theirs too.</summary>
     public static void Removed(GameObject go)
     {
@@ -198,6 +208,7 @@ internal static class SpellNet
         };
         var v = CoopSession.ToUnity(s.Velocity);
         if (v != Vector3.zero) SpellFx.SetVelocity(go, v);
+        if (s.HomingTarget != 0 && Net.EnemySyncFeature.ActorOf(s.HomingTarget) is { } target) SpellFx.SetHoming(go, target.transform);
         RemoteShapesDrawn++;
         return go;
     }

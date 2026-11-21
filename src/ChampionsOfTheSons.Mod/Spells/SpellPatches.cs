@@ -1,6 +1,5 @@
 using HarmonyLib;
 using RedLoader;
-using TheForest.Utils;
 
 namespace ChampionsOfTheSons.Mod.Spells;
 

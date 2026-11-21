@@ -22,6 +22,18 @@ internal static class AudioSelfTest
         SelfTest.Add(4f, "audio: loop starts", LoopStart);
         SelfTest.Add(5f, "audio: loop stops", LoopStop);
         SelfTest.Add(5.5f, "audio: mod volume 0 mutes", Mute);
+        SelfTest.Add(6f, "audio: the 3D listener follows the camera", () =>
+        {
+            var cam = Hud.HudKit.PlayerCamera();
+            var at = ModAudio.ListenerPosition();
+            var t = LocalPlayer.Transform;
+            ModAudio.PlayAt(SoundCues.Drop(Rarity.Rare), t.position + t.right * 8f, Audio.AudioFeature.DropRange);
+            SelfTest.Log($"audio: drop sound 8 m to the right: {ModAudio.LastChannelInfo()}");
+            SelfTest.Check("audio: a drop sound fades with distance (inverse rolloff from 3 m)", ModAudio.LastChannelInfo().Contains("INVERSETAPERED") && ModAudio.LastChannelInfo().Contains("min 3 "), ModAudio.LastChannelInfo());
+            // Our sounds play on FMOD's core system; the game keeps its listener at the camera (checked 2026-11-21).
+            SelfTest.Check("audio: the 3D listener follows the camera", cam != null && at != null && Vector3.Distance(at.Value, cam.transform.position) < 1f,
+                $"listener {at}, camera {cam?.transform.position}");
+        });
     }
 
     private static void Registered()

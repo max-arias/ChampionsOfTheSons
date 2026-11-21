@@ -20,8 +20,6 @@ public sealed class DeathFeature : IModFeature
     /// <summary>Deaths seen this session (self-tests).</summary>
     public static int Deaths { get; private set; }
 
-    public static double LastXpLost { get; private set; }
-
     public void OnGameStart() => _wasDead = false;
 
     public void Update(float dt, bool inWorld)
@@ -61,7 +59,6 @@ public sealed class DeathFeature : IModFeature
         PlayerEffects.ClearDebuffs();
         double lost = pc.OnDeath();
         Deaths++;
-        LastXpLost = lost;
         RLog.Msg($"Champions of the Sons: player died at level {pc.Progress.Level}, lost {lost:0} XP (bar now {pc.Progress.Xp:0})");
         return lost;
     }

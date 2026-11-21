@@ -12,7 +12,6 @@ internal sealed class SpellZone
     public string Id = "";
     public Vector3 Center;
     public float Radius, Left, Interval = 1, Next = 1;
-    public int Pulses;
     public Action<SpellZone>? Pulse;
     public Action<SpellZone, float>? Frame;
     public Action<SpellZone>? End;
@@ -27,7 +26,7 @@ internal sealed class SpellBolt
     public string Id = "";
     public Vector3 Pos, Dir;
     public float Speed, Range, Radius = 1.2f, Life = 10;
-    public bool Pierce, Homing;
+    public bool Homing;
     public EnemyRuntime? Target;
     public Action<SpellBolt, EnemyRuntime>? OnHit;
     public GameObject? Visual;
@@ -147,6 +146,7 @@ internal static class SpellWorld
     {
         if (!e.IsActive || delta == Vector3.zero) return;
         e.Actor!.transform.position += delta;
+        if (Net.CoopHits.ForwardsToHost) Net.CoopHits.ForwardPush(e, delta); // the host's enemy moves too (COS-13)
     }
 
     public static SpellZone AddZone(SpellZone z)
@@ -158,11 +158,15 @@ internal static class SpellWorld
         return z;
     }
 
+    /// <summary>How fast a homing bolt turns, radians per second (the same on every machine).</summary>
+    public const float BoltTurnRate = 4f;
+
     public static SpellBolt AddBolt(SpellBolt b)
     {
         b.Dir.Normalize();
         b.CastId = SpellNet.Context;
         SpellNet.NoteMotion(b.Visual, Mathf.Min(b.Life, b.Speed > 0 ? b.Range / b.Speed : b.Life), b.Dir * b.Speed);
+        if (b.Homing && b.Target?.Actor != null) SpellNet.NoteHoming(b.Visual, Net.EnemySyncFeature.NetIdOf(b.Target.Actor));
         Bolts.Add(b);
         return b;
     }
@@ -172,6 +176,7 @@ internal static class SpellWorld
     public static void Step(float dt)
     {
         SpellFx.Step(dt);
+        FlickerRun.Step(dt);
         var pc = Pc;
         Buffs.Tick(dt);
         Parry.Tick(dt);
@@ -203,7 +208,6 @@ internal static class SpellWorld
             while (z.Next <= 0 && z.Interval > 0)
             {
                 z.Next += z.Interval;
-                z.Pulses++;
                 z.Pulse?.Invoke(z);
             }
             if (z.Left > 0) continue;
@@ -239,7 +243,7 @@ internal static class SpellWorld
             if (b.Target != null)
             {
                 var want = (Center(b.Target) - b.Pos).normalized;
-                b.Dir = Vector3.RotateTowards(b.Dir, want, 4f * dt, 0).normalized;
+                b.Dir = Vector3.RotateTowards(b.Dir, want, BoltTurnRate * dt, 0).normalized;
             }
         }
         float step = b.Speed * dt;
@@ -253,7 +257,8 @@ internal static class SpellWorld
             if (DistanceToSegment(Center(e), from, to) > b.Radius) continue;
             b.Hit.Add(e);
             b.OnHit?.Invoke(b, e);
-            if (!b.Pierce) { b.Done = true; break; }
+            b.Done = true; // a bolt stops at the first enemy
+            break;
         }
 
         b.Pos = to;

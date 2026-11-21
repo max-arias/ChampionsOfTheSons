@@ -29,7 +29,7 @@ internal sealed class ActiveHandler : IAbilityHandler
     public void OnTick(EnemyRuntime enemy, float dt)
     {
         // Self-tests: only enemies a test declared active cast, so random elites spawned by other phases stay quiet.
-        if (SelfTest.Enabled && enemy.TestActive != true) { Drop(enemy); return; }
+        if (SelfTest.Enabled && (enemy.TestActive != true || enemy.TestSilent)) { Drop(enemy); return; }
         if (!_live.TryGetValue(enemy, out var instance))
         {
             instance = _create(enemy);
@@ -88,8 +88,6 @@ internal static class ActiveAbilitySystem
 {
     private static readonly List<ActiveHandler> Handlers = new();
 
-    public static IReadOnlyList<ActiveHandler> All => Handlers;
-
     public static void Register(ActiveHandler handler)
     {
         Handlers.Add(handler);
@@ -102,8 +100,6 @@ internal static class ActiveAbilitySystem
         AbilityForces.Age(dt);
         foreach (var h in Handlers) h.Sweep();
     }
-
-    public static ActiveHandler For(EnemyAbility ability) => Handlers.First(h => h.Ability == ability);
 
     public static ActiveHandler? Find(EnemyAbility ability) => Handlers.FirstOrDefault(h => h.Ability == ability);
 

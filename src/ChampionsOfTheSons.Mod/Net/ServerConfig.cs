@@ -1,8 +1,8 @@
+using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
 using RedLoader;
 using Sons.Multiplayer;
-using SonsSdk;
 
 namespace ChampionsOfTheSons.Mod.Net;
 
@@ -40,7 +40,19 @@ public sealed class ServerConfig : IModFeature
         _friendlyFire = category.CreateEntry("friendly_fire", false, "Friendly fire", "Players can hurt each other.");
         _lootLevel = category.CreateEntry("loot_level_policy", LootLevelPolicy.Highest.ToString(), "Loot level",
             "Level of dropped items: " + string.Join(", ", Enum.GetNames<LootLevelPolicy>()));
+        // COS-77: the host panel's multipliers and minimum loot rarity, for servers that have no host panel.
+        _minRarity = category.CreateEntry("min_loot_rarity", 0, "Minimum loot rarity", "0 Common, 1 Magic, 2 Rare, 3 Legendary.");
+        foreach (var (key, name) in Multipliers)
+            _multipliers[key] = category.CreateEntry(key, 1f, name, "Multiplier, 1 = normal (0-10).");
     }
+
+    private static ConfigEntry<int>? _minRarity;
+    private static readonly Dictionary<string, ConfigEntry<float>> _multipliers = new();
+    private static readonly (string Key, string Name)[] Multipliers =
+    {
+        ("drop_quantity", "Drop quantity"), ("drop_chance", "Drop chance"), ("xp", "XP"),
+        ("enemy_damage", "Enemy damage"), ("enemy_health", "Enemy health"), ("enemy_armor", "Enemy armor"), ("enemy_speed", "Enemy speed"),
+    };
 
     public void OnGameStart()
     {
@@ -54,8 +66,22 @@ public sealed class ServerConfig : IModFeature
         int extra = Math.Clamp(_extraLevels?.Value ?? 0, 0, 100);
         WorldState.Update(r => r with { ExtraEnemyLevels = extra });
         WorldState.SetFriendlyFire(_friendlyFire?.Value ?? false);
+        HostRules.FriendlyFireRule.Apply(WorldState.FriendlyFire);
         if (Enum.TryParse<LootLevelPolicy>(_lootLevel?.Value, true, out var policy))
             WorldState.Update(r => r with { LootLevel = policy });
+        int minRarity = Math.Clamp(_minRarity?.Value ?? 0, 0, (int)Rarity.Legendary);
+        double M(string key, double min) => _multipliers.TryGetValue(key, out var e) && float.IsFinite(e.Value) ? Math.Clamp(e.Value, min, 10) : 1;
+        WorldState.Update(r => r with
+        {
+            MinLootRarity = minRarity,
+            DropQuantity = M("drop_quantity", 0),
+            DropChance = M("drop_chance", 0),
+            Xp = M("xp", 0),
+            EnemyDamage = M("enemy_damage", 0),
+            EnemyHealth = M("enemy_health", 0.25),
+            EnemyArmor = M("enemy_armor", 0),
+            EnemySpeed = M("enemy_speed", 0.25),
+        });
         RLog.Msg($"{CoopTestJoin.Tag} server config applied: extra enemy levels {extra}, game difficulty {WorldState.Rules.GameDifficulty.Mode}, friendly fire {WorldState.FriendlyFire}, loot level {WorldState.Rules.LootLevel}");
     }
 }

@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
 using TheForest.Utils;
 using UnityEngine;

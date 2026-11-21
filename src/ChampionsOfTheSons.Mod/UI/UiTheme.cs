@@ -16,6 +16,18 @@ internal static class UiTheme
 
     public static string RarityHex(Rarity r) => RarityHexes[Math.Clamp((int)r, 0, RarityHexes.Length - 1)];
 
+    /// <summary>Stat lines by the stat's own rarity (COS-96): the rarity colours mixed 35% toward grey, so a card of
+    /// stats stays calm next to the item name in full colour.</summary>
+    private static readonly string[] StatHexes = RarityHexes.Select(h => Mix(h, "#9AA3AF", 0.35f)).ToArray();
+
+    public static string StatHex(Rarity r) => StatHexes[Math.Clamp((int)r, 0, StatHexes.Length - 1)];
+
+    private static string Mix(string a, string b, float t)
+    {
+        int C(string h, int i) => Convert.ToInt32(h.Substring(1 + i * 2, 2), 16);
+        return "#" + string.Concat(Enumerable.Range(0, 3).Select(i => ((int)Math.Round(C(a, i) * (1 - t) + C(b, i) * t)).ToString("X2")));
+    }
+
     public const string Text = "#E6E9EE";
     public const string TextDim = "#8A93A0";
     public const string TextFaint = "#707A89";
@@ -33,8 +45,6 @@ internal static class UiTheme
     public const string SlotFrameEmpty = "#2B333E";
     public const string Divider = "#2B333E";
     public const string BarBack = "#232A33";
-    public const string TooltipInner = "#0D1015F7";
-
     // Rune & bone action bar (COS-151). Fallbacks when the ui.hud.* art is missing, and the tints laid over it.
     public const string Bone = "#E8DCC0";
     public const string BoneDark = "#7A6246";

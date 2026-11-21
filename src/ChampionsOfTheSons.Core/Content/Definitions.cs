@@ -87,6 +87,18 @@ public enum StatCombine
     OneMinusProduct,
 }
 
+public static class StatCombineMath
+{
+    /// <summary>Several rolls of one stat on one item, combined by the stat's rule (COS-96: compare uses this).</summary>
+    public static double Combine(StatCombine rule, IEnumerable<double> values) => rule switch
+    {
+        StatCombine.Product => values.Aggregate(1.0, (p, x) => p * x) - 1,
+        StatCombine.ProductPlusOne => values.Aggregate(1.0, (p, x) => p * (1 + x)) - 1,
+        StatCombine.OneMinusProduct => 1 - values.Aggregate(1.0, (p, x) => p * (1 - x)),
+        _ => values.Sum(),
+    };
+}
+
 /// <summary>A stat that can roll on an item (Strength, Maximum Life, Socket: Crit Chance...).</summary>
 public sealed class ItemStatDef
 {
@@ -109,7 +121,6 @@ public sealed class ItemStatDef
     public List<StatEffect> Effects { get; set; } = new();
     /// <summary>Needs hand-written behavior (see COS-17); has no data effects yet.</summary>
     public bool Manual { get; set; }
-    public string? ConsumeAction { get; set; }
 }
 
 /// <summary>A base item. Each entry in <see cref="StatPools"/> is one stat slot: the slot rolls one of its options.
@@ -120,7 +131,6 @@ public sealed class ItemBaseDef
     public int LegacyIndex { get; set; }
     public string Name { get; set; } = "";
     public string Type { get; set; } = "";
-    public string? Subtype { get; set; }
     public int Rarity { get; set; }
     public int MinLevel { get; set; } = 1;
     public int MaxLevel { get; set; } = 1;
@@ -137,7 +147,6 @@ public sealed class ItemBaseDef
     public string? Set { get; set; }
     public List<StatEffect> UniqueEffects { get; set; } = new();
     public bool Manual { get; set; }
-    public string? ConsumeAction { get; set; }
 
     public const string AnyStat = "*";
 

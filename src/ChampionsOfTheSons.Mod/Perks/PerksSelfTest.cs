@@ -2,7 +2,6 @@ using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.UI;
-using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Perks;
 

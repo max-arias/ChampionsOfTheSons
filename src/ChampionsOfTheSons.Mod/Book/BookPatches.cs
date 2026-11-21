@@ -15,7 +15,6 @@ internal static class BookPatches
 {
     /// <summary>Set by <see cref="BookHost"/> while a mod page shows.</summary>
     public static bool Block;
-    public static int Blocked;
 
     private static readonly string[] PageActions =
     {
@@ -33,7 +32,6 @@ internal static class BookPatches
     private static bool Prefix()
     {
         if (!Block) return true;
-        Blocked++;
         return false;
     }
 
@@ -58,7 +56,6 @@ internal static class BookInteractPatch
         {
             RedLoader.RLog.Error($"Champions of the Sons book: tab check failed: {e.Message}");
         }
-        BookPatches.Blocked++;
         return false;
     }
 }

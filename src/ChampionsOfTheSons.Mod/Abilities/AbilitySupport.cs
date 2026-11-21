@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
 using HarmonyLib;
@@ -153,9 +152,6 @@ internal static class AbilityForces
     private static readonly Dictionary<string, Slow> Slows = new();
     private static readonly Dictionary<string, Pull> Pulls = new();
 
-    public static int SlowCount => Slows.Count;
-    public static bool Pulling => Pulls.Values.Any(p => p.Left > 0 && p.Velocity != Vector3.zero);
-
     /// <summary>Slows owned by the abilities of one enemy (keys end with its identity hash).</summary>
     public static int SlowsOf(EnemyRuntime e) => Slows.Keys.Count(k => k.EndsWith(":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e), StringComparison.Ordinal));
 
@@ -166,6 +162,7 @@ internal static class AbilityForces
     /// <summary>Per source, keeps the strongest amount and longest duration.</summary>
     public static void AddSlow(string source, double speedMult, float seconds)
     {
+        seconds = (float)SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds); // debuff resistance
         if (Slows.TryGetValue(source, out var s))
         {
             s.Amount = Mathf.Min(s.Amount, (float)speedMult);

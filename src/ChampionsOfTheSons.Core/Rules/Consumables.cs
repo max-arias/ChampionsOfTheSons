@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Core.Content;
 
 namespace ChampionsOfTheSons.Core.Rules;
 

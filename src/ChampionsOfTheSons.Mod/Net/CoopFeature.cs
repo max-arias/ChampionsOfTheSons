@@ -1,7 +1,6 @@
 using Bolt;
 using ChampionsOfTheSons.Core.Networking;
 using RedLoader;
-using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Net;
 
@@ -90,6 +89,7 @@ public sealed class CoopFeature : IModFeature
                 }
                 Verified.Add(from);
                 EnemySyncFeature.ResendAll(); // a late joiner gets every enemy that already exists (COS-79)
+                CoopLoot.SendAllTo(from); // ... and every drop already on the ground, with its remaining lifetime (COS-14, COS-146)
                 var settings = HostRules.WorldRulesFeature.CurrentSettings();
                 CotsNetEvent.Instance.SendTo(settings, from);
                 RLog.Msg($"{Tag} host: accepted {from.RemoteEndPoint}, sent WorldSettings ({settings.Mode} +{settings.LevelOffset}, extra {settings.ExtraEnemyLevels})");

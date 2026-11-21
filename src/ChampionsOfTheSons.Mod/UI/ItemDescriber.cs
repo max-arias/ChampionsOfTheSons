@@ -50,7 +50,7 @@ internal static class ItemDescriber
         var body = new StringBuilder();
         AppendStats(body, item);
         AppendUnique(body, item);
-        AppendSet(body, item, def, pc);
+        AppendSet(body, def, pc);
         AppendFlavor(body, item);
 
         return new ItemDescription
@@ -63,11 +63,14 @@ internal static class ItemDescriber
         };
     }
 
+    /// <summary>A stat's own rarity (COS-96, as COTF did): its lines sort highest first and take that rarity's colour, muted.</summary>
+    internal static Rarity StatRarity(string statId) =>
+        (Rarity)Rarities.Clamp(ModContent.Db.ItemStats.TryGetValue(statId, out var def) ? def.Rarity : 0);
+
     private static void AppendStats(StringBuilder sb, ItemInstance item)
     {
-        foreach (var s in item.Stats)
-            if (!LootRoller.IsSocketStat(s.StatId))
-                sb.Append(Color(UiTheme.Stat, $"{UiText.StatValue(s.StatId, s.Value)} {UiText.StatName(s.StatId)}")).Append('\n');
+        foreach (var s in item.Stats.Where(s => !LootRoller.IsSocketStat(s.StatId)).OrderByDescending(s => StatRarity(s.StatId)))
+            sb.Append(Color(UiTheme.StatHex(StatRarity(s.StatId)), $"{UiText.StatValue(s.StatId, s.Value)} {UiText.StatName(s.StatId)}")).Append('\n');
     }
 
     private static void AppendUnique(StringBuilder sb, ItemInstance item)
@@ -76,7 +79,7 @@ internal static class ItemDescriber
         if (text.Length > 0) sb.Append(Color(UiTheme.Unique, text)).Append('\n');
     }
 
-    private static void AppendSet(StringBuilder sb, ItemInstance item, ItemBaseDef? def, PlayerCharacter pc)
+    private static void AppendSet(StringBuilder sb, ItemBaseDef? def, PlayerCharacter pc)
     {
         if (def?.Set == null || !pc.Content.Sets.TryGetValue(def.Set, out var set)) return;
         var counts = ItemEffects.SetCounts(pc.Inventory.Equipped.Select(kv => kv.Value), pc.Content);
@@ -145,13 +148,11 @@ internal static class ItemDescriber
         return sb.ToString();
     }
 
-    private static Dictionary<string, double> Sum(ItemInstance item)
-    {
-        var sums = new Dictionary<string, double>();
-        foreach (var s in item.Stats)
-            if (!LootRoller.IsSocketStat(s.StatId)) sums[s.StatId] = sums.GetValueOrDefault(s.StatId) + s.Value;
-        return sums;
-    }
+    /// <summary>Each stat's rolls on one item, combined by the stat's own rule (COS-96: dodge and reduction do not simply add).</summary>
+    private static Dictionary<string, double> Sum(ItemInstance item) =>
+        item.Stats.Where(s => !LootRoller.IsSocketStat(s.StatId)).GroupBy(s => s.StatId)
+            .ToDictionary(g => g.Key, g => g.Count() == 1 ? g.First().Value
+                : StatCombineMath.Combine(ModContent.Db.ItemStats.TryGetValue(g.Key, out var def) ? def.Combine : StatCombine.Sum, g.Select(x => (double)x.Value)));
 
     private static string Color(string hex, string text) => $"<color={hex}>{text}</color>";
 }

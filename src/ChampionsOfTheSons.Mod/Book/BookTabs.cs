@@ -51,7 +51,7 @@ internal static class BookTabs
     /// <summary>The tab the cursor was over on the last <see cref="Tick"/> (None if none).</summary>
     public static BookTab Hovered { get; private set; }
 
-    public static void Attach(BlueprintBookController book, Vector3 pageUp, Vector3 pageRight)
+    public static void Attach(BlueprintBookController book, Vector3 pageUp)
     {
         Made.Clear();
         Faces.Clear();

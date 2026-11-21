@@ -57,6 +57,11 @@ public readonly record struct DotTick(string Source, DotKind Kind, double Damage
 /// Abilities and debuffs only advance while the enemy is alive and active (the original's bug #43: abilities
 /// kept acting on dead or despawned enemies); <see cref="Tick"/> does nothing otherwise.
 /// </summary>
+/// <summary>What a player did to an enemy's combat state, as data: lets a co-op client forward its debuffs to the host (COS-13).</summary>
+public enum EnemyEffectKind : byte { Slow = 1, Weaken = 2, Stun = 3, FireMark = 4, Dot = 5 }
+
+public readonly record struct EnemyEffect(EnemyEffectKind Kind, string Source, double Amount, double Seconds, DotKind Dot = default);
+
 public sealed class EnemyCombatState
 {
     private sealed class Timed
@@ -103,7 +108,6 @@ public sealed class EnemyCombatState
 
     public bool CcImmune => Profile.Has(EnemyAbility.Juggernaut);
     public bool Stunned => _stunLeft > 0;
-    public bool ShieldUp => _shieldLeft > 0;
     public int FuryStacks => _furyStacks;
     public bool RainActive => Raining && Profile.Has(EnemyAbility.RainEmpowerment);
 
@@ -152,6 +156,24 @@ public sealed class EnemyCombatState
 
     // ---------------------------------------------------------------- applying effects
 
+    /// <summary>Raised after any slow, weaken, stun, fire mark or damage-over-time took hold on any enemy.</summary>
+    public static event Action<EnemyCombatState, EnemyEffect>? Applied;
+
+    /// <summary>Applies an effect given as data (a co-op client's forwarded debuff).</summary>
+    public void Apply(EnemyEffect e)
+    {
+        switch (e.Kind)
+        {
+            case EnemyEffectKind.Slow: ApplySlow(e.Source, e.Amount, e.Seconds); break;
+            case EnemyEffectKind.Weaken: ApplyWeaken(e.Source, e.Amount, e.Seconds); break;
+            case EnemyEffectKind.Stun: ApplyStun(e.Seconds); break;
+            case EnemyEffectKind.FireMark: ApplyFireMark(e.Amount, e.Seconds); break;
+            case EnemyEffectKind.Dot: ApplyDot(e.Source, e.Dot, e.Amount, e.Seconds); break;
+        }
+    }
+
+    private void Raise(EnemyEffect e) => Applied?.Invoke(this, e);
+
     /// <summary>Per source: keeps the longest duration and the strongest (lowest) speed multiplier. Ignored by Juggernaut.</summary>
     public bool ApplySlow(string source, double speedMult, double seconds)
     {
@@ -165,6 +187,7 @@ public sealed class EnemyCombatState
         {
             _slows[source] = new Timed { Amount = speedMult, Left = seconds };
         }
+        Raise(new EnemyEffect(EnemyEffectKind.Slow, source, speedMult, seconds));
         return true;
     }
 
@@ -181,12 +204,14 @@ public sealed class EnemyCombatState
         {
             _weakens[source] = new Timed { Amount = damageTakenMult, Left = seconds };
         }
+        Raise(new EnemyEffect(EnemyEffectKind.Weaken, source, damageTakenMult, seconds));
     }
 
     public bool ApplyStun(double seconds)
     {
         if (CcImmune || seconds <= 0) return false;
         _stunLeft = Math.Max(_stunLeft, seconds);
+        Raise(new EnemyEffect(EnemyEffectKind.Stun, "", 0, seconds));
         return true;
     }
 
@@ -196,6 +221,7 @@ public sealed class EnemyCombatState
         if (bonus <= 0 || seconds <= 0) return;
         _fireMark = _fireMarkLeft > 0 ? Math.Max(_fireMark, bonus) : bonus;
         _fireMarkLeft = Math.Max(_fireMarkLeft, seconds);
+        Raise(new EnemyEffect(EnemyEffectKind.FireMark, "", bonus, seconds));
     }
 
     /// <summary>Current Smolder Mark bonus on fire damage (0 when unmarked).</summary>
@@ -206,6 +232,7 @@ public sealed class EnemyCombatState
     {
         if (perSecond <= 0 || seconds <= 0) return;
         _dots[source] = new Dot { Kind = kind, PerSecond = perSecond, TicksLeft = (int)Math.Ceiling(seconds) };
+        Raise(new EnemyEffect(EnemyEffectKind.Dot, source, perSecond, seconds, kind));
     }
 
     // ---------------------------------------------------------------- abilities

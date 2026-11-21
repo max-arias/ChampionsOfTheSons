@@ -7,7 +7,6 @@ using ChampionsOfTheSons.Mod.Loot;
 using ChampionsOfTheSons.Mod.UI;
 using Sons.Items.Core;
 using TheForest.Utils;
-using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Followups;
 

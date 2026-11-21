@@ -21,6 +21,7 @@ public static class PlayerEffects
     private static readonly List<Poison> Poisons = new();
 
     public static readonly UndyingPromiseState Undying = new();
+    public static readonly NearDeathState NearDeath = new();
 
     /// <summary>The enemy whose melee attack was last built, and when: the hit that follows is attributed to it.</summary>
     public static (EnemyRuntime Enemy, float Time)? LastAttacker { get; set; }
@@ -30,7 +31,8 @@ public static class PlayerEffects
 
     public static bool Stun(double seconds)
     {
-        if (seconds <= 0 || PlayerState.Character.Stats.Get(CombatStatIds.StunImmunity) > 0) return false;
+        if (seconds <= 0 || PlayerState.Character.Stats.Get(CombatStatIds.StunImmunity) > 0 || Spells.FlickerRun.Untouchable) return false;
+        seconds = SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds);
         _stunLeft = Mathf.Max(_stunLeft, (float)seconds);
         return true;
     }
@@ -38,6 +40,7 @@ public static class PlayerEffects
     public static void AddPoison(double perSecond, double seconds)
     {
         if (perSecond <= 0 || seconds <= 0) return;
+        seconds = SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds);
         Poisons.Add(new Poison { PerSecond = perSecond, TicksLeft = (int)Math.Ceiling(seconds) });
     }
 
@@ -65,6 +68,7 @@ public static class PlayerEffects
         _stunLeft = 0;
         Poisons.Clear();
         Undying.Reset();
+        NearDeath.Reset();
         LastAttacker = null;
     }
 
@@ -74,6 +78,10 @@ public static class PlayerEffects
         if (vitals == null) return;
         _stunLeft = Mathf.Max(0, _stunLeft - dt);
         Undying.Tick(dt);
+        bool wasLocked = !NearDeath.Ready;
+        NearDeath.Tick(dt);
+        if (wasLocked && NearDeath.Ready && PlayerState.Character.Stats.IsOn(NearDeathState.PerkFlag))
+            Loot.LootFeature.Message(UI.UiText.T("ui.perks.near_death.ready", "Last Breath is ready again."));
 
         for (int i = Poisons.Count - 1; i >= 0; i--)
         {

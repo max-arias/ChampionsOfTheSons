@@ -38,11 +38,11 @@ internal static class EnemyHudSelfTest
         });
         SelfTest.Add(T0 + 5.8f, "enemyhud: boss bar shows", BossBarShows);
         SelfTest.Add(T0 + 5.9f, "enemyhud: shot boss bar", () => TestKit.Screenshot("enemyhud-02-bossbar"));
-        SelfTest.Add(T0 + 6.2f, "enemyhud: open a panel", () => UI.CotsUi.Inventory.Open());
+        SelfTest.Add(T0 + 6.2f, "enemyhud: open a panel", () => Perks.PerksFeature.Panel.Open());
         SelfTest.Add(T0 + 6.8f, "enemyhud: hidden under panels", () =>
         {
             SelfTest.Check("boss bar: hidden while a panel is open", !Bars.LayerShown);
-            UI.CotsUi.Inventory.Close();
+            Perks.PerksFeature.Panel.Close();
         });
         SelfTest.Add(T0 + 7.5f, "enemyhud: kill the boss", () => TestKit.Kill(_boss!));
         SelfTest.Add(T0 + 8.3f, "enemyhud: gone on death", () =>
@@ -205,8 +205,11 @@ internal static class EnemyHudSelfTest
         float k = HudKit.CanvasPerPixel, ch = UnityEngine.Screen.height * k, cw = UnityEngine.Screen.width * k;
         // Top band only: clear of the level-up banner (150 canvas units down) and the bottom XP bar.
         SelfTest.Check("boss bar: sits in the top band, inside the screen", b.xMin >= 0 && b.xMax <= cw + 0.5f && b.yMax <= ch && ch - b.yMin <= 150, b.ToString());
-        // A boss in view with the scanner open: both at once, for the screenshot.
-        Plates.ForceFocus(_boss);
+        SelfTest.Check("boss bar: spans 80% of the screen width", Math.Abs(b.width - cw * BossBar.ScreenShare) < 2, $"{b.width:0} of {cw:0}");
+        int barIndex = Bars.PanelIndex, hudIndex = HudFeature.Instance?.PanelIndex ?? -1;
+        SelfTest.Check("boss bar: draws over the nameplates", barIndex > hudIndex, $"bar panel {barIndex}, HUD panel {hudIndex}");
+        SelfTest.Check("boss bar: the boss's own nameplate hides while it has the bar", !Plates.HasPlate(boss));
+        SelfTest.Check("boss bar: one boss, no '+N' tag", bar.MoreText == "", bar.MoreText);
     }
 
     private static void Cleanup()

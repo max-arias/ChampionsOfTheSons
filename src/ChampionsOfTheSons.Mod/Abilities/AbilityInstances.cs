@@ -189,8 +189,6 @@ internal abstract class CastInstance : AbilityInstance
 
     protected CastInstance(EnemyRuntime enemy, ActiveAbilitySpec spec) : base(enemy, spec) { }
 
-    public bool Casting => _casting;
-
     protected abstract void Begin(Vector3 target);
 
     /// <summary>Runs every frame of the cast with the seconds since it began; true when it is over.</summary>
@@ -525,9 +523,6 @@ internal sealed class WarpInstance : CastInstance
     private Vector3 _target;
     private GameObject? _orb;
 
-    /// <summary>Times it blinked (for self-tests).</summary>
-    public int Warps { get; private set; }
-
     public WarpInstance(EnemyRuntime e) : base(e, ActiveAbilityRules.Spec(EnemyAbility.Warp)) { }
 
     protected override void Begin(Vector3 target)
@@ -553,7 +548,6 @@ internal sealed class WarpInstance : CastInstance
             Enemy.LastPosition = dest;
         }
         Flash(new Color(0.7f, 0.3f, 1f), dest + Vector3.up, 1.5f, 0.4f);
-        Warps++;
         AbilityDamage.NoteEffect(Enemy, EnemyAbility.Warp);
         return true;
     }
@@ -618,8 +612,6 @@ internal sealed class TrapperInstance : CastInstance
     }
 
     private readonly List<Trap> _traps = new();
-
-    public int TrapCount => _traps.Count;
 
     public TrapperInstance(EnemyRuntime e) : base(e, ActiveAbilityRules.Spec(EnemyAbility.Trapper)) { }
 

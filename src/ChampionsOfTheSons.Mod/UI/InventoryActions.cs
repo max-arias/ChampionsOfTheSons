@@ -5,7 +5,7 @@ using ChampionsOfTheSons.Mod.Loot;
 
 namespace ChampionsOfTheSons.Mod.UI;
 
-/// <summary>Inventory actions shared by the screen panel and the guide book pages (COS-59). No UI code.</summary>
+/// <summary>Inventory actions behind the guide book pages and card (COS-59). No UI code.</summary>
 internal static class InventoryActions
 {
     private static PlayerCharacter Pc => PlayerState.Character;
@@ -24,7 +24,7 @@ internal static class InventoryActions
     public static bool EquipInto(string bagKey, string equipKey) => bagKey != equipKey && Pc.Inventory.Move(bagKey, equipKey, ModContent.Db);
 
     /// <summary>Moves (or swaps) any slot to any other: bag, equip slot, either way. False when an item does not fit.</summary>
-    public static bool MoveTo(string from, string to) => from != to && Pc.Inventory.Move(from, to, ModContent.Db);
+    public static bool MoveTo(string from, string to) => from != to && Pc.Inventory.MoveOrMerge(from, to, ModContent.Db); // equal stacks merge (COS-96)
 
     public static string? FirstFreeBagSlot(Inventory inv)
     {
@@ -46,9 +46,32 @@ internal static class InventoryActions
         return true;
     }
 
-    public static bool Drop(string key) => LootFeature.DropFromInventory(key) != null;
+    public static bool Drop(string key)
+    {
+        bool had = PlayerState.Character.Inventory.Get(key) != null;
+        // A co-op client hands the drop to the host and gets no local drop back: the item leaving the bag is the success.
+        return LootFeature.DropFromInventory(key) != null || (had && PlayerState.Character.Inventory.Get(key) == null);
+    }
 
     public static bool Destroy(string key) => LootFeature.Destroy(key);
+
+    /// <summary>A bag stack of two or more (Split and Drop 1 apply, COS-96).</summary>
+    public static bool IsStack(string key) => key.StartsWith("bag.", StringComparison.Ordinal) && Pc.Inventory.Get(key) is { Amount: > 1 };
+
+    /// <summary>Drops one of a stack; the rest stays in the slot.</summary>
+    public static bool DropOne(string key)
+    {
+        int before = Pc.Inventory.Get(key)?.Amount ?? 0;
+        if (before == 0) return false;
+        return LootFeature.DropFromInventory(key, 1) != null || (Pc.Inventory.Get(key)?.Amount ?? 0) < before;
+    }
+
+    /// <summary>Split Stack: half goes to the first free bag slot.</summary>
+    public static bool Split(string key) => Pc.Inventory.Split(key);
+
+    /// <summary>"Drop all" for a stack, "Drop" otherwise.</summary>
+    public static string DropLabel(string key) =>
+        IsStack(key) ? UiText.T("ui.inventory.menu.drop_all", "Drop all") : UiText.T("ui.inventory.menu.drop", "Drop");
 
     public static int BagCount() => Pc.Inventory.Slots.Count(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal));
 

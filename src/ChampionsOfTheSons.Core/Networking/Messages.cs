@@ -12,17 +12,20 @@ public enum MessageType : byte
     Hello = 1,
     HelloReject = 2,
     WorldSettings = 3,
-    EnemyProfileRequest = 10,
     EnemySync = 11,
     EnemyHealth = 12,
     Hit = 13,
     XpGranted = 14,
     DamageShown = 15,
     PlayerPos = 16,
+    EnemyEffectNet = 17,
+    EnemyPush = 18,
+    EnemyAware = 19,
     DropSpawned = 20,
     PickupRequest = 21,
     PickupGranted = 22,
     DropRemoved = 23,
+    DropRequest = 24,
     SpellCast = 30,
     AuraPulse = 31,
     Ping = 40,
@@ -56,12 +59,6 @@ public sealed record HelloReject(string Reason) : IMessage
 public sealed record WorldSettings(GameMode Mode, int LevelOffset, int ExtraEnemyLevels, bool FriendlyFire) : IMessage
 {
     public MessageType Type => MessageType.WorldSettings;
-}
-
-/// <summary>Client → host: send me this enemy's profile. <paramref name="EnemyNetId"/> is the packed Bolt network ID.</summary>
-public sealed record EnemyProfileRequest(ulong EnemyNetId) : IMessage
-{
-    public MessageType Type => MessageType.EnemyProfileRequest;
 }
 
 /// <summary>Host → clients: the rolled profile of one enemy. Protocol 2 added the damage multiplier and the elite name ids
@@ -109,6 +106,30 @@ public enum HitFlags : byte
     Melee = 8,
     Ranged = 16,
     Thrown = 32,
+}
+
+/// <summary>Client → host: the client threw an item out of its bag (or its bag overflowed); the host makes the drop for everyone (COS-14).</summary>
+public sealed record DropRequest(ItemInstance Item, Vec3 Position, DropSource Source) : IMessage
+{
+    public MessageType Type => MessageType.DropRequest;
+}
+
+/// <summary>Host → clients: a boss noticed a player or lost track (only the host runs the AI), for the boss bar (COS-116).</summary>
+public sealed record EnemyAware(ulong EnemyNetId, bool Aware) : IMessage
+{
+    public MessageType Type => MessageType.EnemyAware;
+}
+
+/// <summary>Client → host: a debuff the client's hit or spell put on a host-owned enemy (COS-13).</summary>
+public sealed record EnemyEffectNet(ulong EnemyNetId, EnemyEffectKind Kind, string Source, float Amount, float Seconds, DotKind Dot) : IMessage
+{
+    public MessageType Type => MessageType.EnemyEffectNet;
+}
+
+/// <summary>Client → host: a spell moved a host-owned enemy (pull, knockback) by <paramref name="Delta"/> (COS-13).</summary>
+public sealed record EnemyPush(ulong EnemyNetId, Vec3 Delta) : IMessage
+{
+    public MessageType Type => MessageType.EnemyPush;
 }
 
 /// <summary>Client → host: an outgoing hit computed from the attacker's own stat sheet. The host applies defense.</summary>
@@ -168,6 +189,7 @@ public enum FxKind : byte
 /// One spell visual exactly as the caster drew it (COS-80): kind and look, where, how big, which colour (0xRRGGBB), for how
 /// long. <paramref name="Follow"/>: it rides on the caster's body. <paramref name="Velocity"/>: it flies (bolts, Ball Lightning).
 /// <paramref name="Facing"/>: which way a portal looks. <paramref name="Look"/> is the caster's look enum as a byte.
+/// <paramref name="HomingTarget"/>: the enemy net id a flying visual curves toward (Seeking Arrow, COS-114); 0 flies straight.
 /// </summary>
 public readonly record struct FxShape(
     FxKind Kind,
@@ -179,7 +201,8 @@ public readonly record struct FxShape(
     float Seconds,
     bool Follow,
     Vec3 Velocity,
-    Vec3 Facing);
+    Vec3 Facing,
+    ulong HomingTarget = 0);
 
 /// <summary>Caster → everyone: a spell cast, with every visual it drew (COS-80) so receivers show the same thing at the same
 /// place, size and duration. <paramref name="CastId"/> numbers the caster's casts, so a later <see cref="SpellFxEvent"/> can stop
@@ -244,7 +267,8 @@ public sealed record DamageShown(uint PlayerId, ulong EnemyNetId, Vec3 Position,
 /// <summary>Caster → everyone: a Support perk or aura is active around <paramref name="Origin"/> for a moment.
 /// Receivers inside <paramref name="Radius"/> get the buff for <paramref name="Seconds"/>; it is repeated while the aura lasts,
 /// so a teammate who leaves the range loses it when the last pulse runs out (COS-23).</summary>
-public sealed record AuraPulse(uint PlayerId, string BuffId, Vec3 Origin, float Radius, float Seconds) : IMessage
+/// <remarks><paramref name="Amount"/> and <paramref name="Amount2"/> carry the caster's numbers for team spells (COS-23): heal, buff size.</remarks>
+public sealed record AuraPulse(uint PlayerId, string BuffId, Vec3 Origin, float Radius, float Seconds, float Amount = 0, float Amount2 = 0) : IMessage
 {
     public MessageType Type => MessageType.AuraPulse;
 }
@@ -305,7 +329,7 @@ public sealed record AbilityEvent(ulong EnemyNetId, string Ability, AbilityPhase
 
 /// <summary>Player → everyone (the host relays with <paramref name="PlayerId"/> set), every few seconds: name, level, magic
 /// find and position, for the party list, name tags and team magic find (COS-81).</summary>
-public sealed record PlayerInfo(uint PlayerId, string Name, int Level, float MagicFind, Vec3 Position) : IMessage
+public sealed record PlayerInfo(uint PlayerId, string Name, int Level, float MagicFind, Vec3 Position, float ExplosionDamage = 0) : IMessage
 {
     public MessageType Type => MessageType.PlayerInfo;
 }

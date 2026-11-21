@@ -103,7 +103,10 @@ public static class EnemyScaler
     }
 
     public static double DamageMultiplier(int level) =>
-        level < 65 ? Math.Exp(level / 6) + level : Math.Pow(level - 60, 2.6) * 600;
+        level < 65 ? Math.Exp(level / 6) + level : Math.Pow(level - 60, HighLevelDamagePower) * 600;
+
+    /// <summary>COS-60: COTF used 2.6, under which an on-level geared player died to one or two hits past level 90.</summary>
+    public const double HighLevelDamagePower = 2.45;
 
     /// <remarks>COTF's curve; vanilla health is a floor (SotF enemies would otherwise be ~5× weaker than vanilla below level 5).</remarks>
     public static double MaxHealth(int level, double vanillaHealth, double healthMul) =>
@@ -115,6 +118,9 @@ public static class EnemyScaler
         double p = Math.Pow(level, 2.43);
         return Math.Floor(rng.Range((float)(p / 3 + 1), (float)(p * 2 / 3 + 20)) * armorMul) * d.ArmorFactor;
     }
+
+    /// <summary>The bounty of a plain enemy with 100 vanilla health at <paramref name="level"/>: the XP curve's unit (COS-60).</summary>
+    public static double ReferenceBounty(int level) => Bounty(MaxHealth(level, 100, 1), level, 0, 1);
 
     public static double Bounty(double maxHealth, int level, int abilityCount, double xpMul)
     {

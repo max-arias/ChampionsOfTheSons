@@ -81,16 +81,21 @@ public class LootTests
     }
 
     [Fact]
-    public void Elites_always_drop_and_bosses_drop_more()
+    public void Elites_always_drop_plain_enemies_rarely_and_bosses_drop_most()
     {
         var rng = new Rng(15);
         var rules = new WorldRules();
         var normal = new EnemyProfile { Level = 10 };
+        var elite = new EnemyProfile { Level = 10, Tier = EnemyTier.Elite, Abilities = new[] { EnemyAbility.Steadfast } };
         var boss = new EnemyProfile { Level = 10, Tier = EnemyTier.Boss, Abilities = new[] { EnemyAbility.BossSteadfast, EnemyAbility.Meteor, EnemyAbility.Laser } };
-        Assert.True(LootRoller.ShouldDrop(boss, rules, 1, rng));
-        double normalAvg = Enumerable.Range(0, 200).Average(_ => LootRoller.DropCount(normal, rules, rng));
-        double bossAvg = Enumerable.Range(0, 200).Average(_ => LootRoller.DropCount(boss, rules, rng));
-        Assert.True(bossAvg > normalAvg + 7);
+        Assert.True(LootRoller.ShouldDrop(elite, rules, 1, rng) && LootRoller.ShouldDrop(boss, rules, 1, rng));
+        double plainRate = Enumerable.Range(0, 20000).Count(_ => LootRoller.ShouldDrop(normal, rules, 1, rng)) / 20000.0;
+        Assert.InRange(plainRate, 0.07, 0.09);
+        double doubled = Enumerable.Range(0, 20000).Count(_ => LootRoller.ShouldDrop(normal, rules, 2, rng)) / 20000.0;
+        Assert.InRange(doubled, 0.15, 0.17); // magic find multiplies the chance
+        Assert.True(LootRoller.DropCount(boss, rules, rng) > LootRoller.DropCount(elite, rules, rng));
+        // Level no longer adds items: a level-400 plain enemy drops in the same 1-3 range.
+        Assert.All(Enumerable.Range(0, 200).Select(_ => LootRoller.DropCount(normal with { Level = 400 }, rules, rng)), n => Assert.InRange(n, 1, 3));
     }
 
     [Fact]

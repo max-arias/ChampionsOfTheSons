@@ -214,11 +214,11 @@ internal sealed class WeaponSkin
         }
         UnityEngine.Object.Destroy(holder);
         source = "primitive";
-        return Primitive(type);
+        return Primitive();
     }
 
     /// <summary>A plain blade: a flat box along +Y on a short handle, for builds without the bundle.</summary>
-    private static GameObject Primitive(WeaponTypeDef type)
+    private static GameObject Primitive()
     {
         var root = new GameObject("cots-weapon-primitive");
         var blade = GameObject.CreatePrimitive(PrimitiveType.Cube);

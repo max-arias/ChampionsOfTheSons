@@ -24,7 +24,6 @@ internal static class PageKit
     public static readonly Color TitleText = Hex("#EFE7D6");
     public static readonly Color Select = Hex("#B8322A");
     public static readonly Color Good = Hex("#3E6B2A");
-    public static readonly Color Bad = Hex("#8E2424");
 
     /// <summary>Rarity tape colors 0..3 (COS-57, COS-109): muted so they sit on paper.</summary>
     private static readonly Color[] Rarity =
@@ -97,12 +96,6 @@ internal static class PageKit
         t.richText = true;
         t.raycastTarget = false;
         return t;
-    }
-
-    public static void SetLayerRecursive(GameObject go, int layer)
-    {
-        go.layer = layer;
-        foreach (var t in go.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = layer;
     }
 
     /// <summary>Page pixels (origin top-left) of a 0..1 page point (origin bottom-left).</summary>

@@ -25,11 +25,7 @@ internal static class ShotTracker
     private static readonly Rng Rng = Rng.FromTime();
 
     public static RangedKind LastKind { get; private set; }
-    public static string LastItemName { get; private set; } = "";
     private static float _lastShotAt = -1000f;
-
-    /// <summary>Rounds given back by the no-consume chance (self-test).</summary>
-    public static int Refunds { get; private set; }
 
     /// <summary>The weapon kind a projectile hit arriving now came from.</summary>
     public static RangedKind KindForHit() => Time.time - _lastShotAt <= ShotMemorySeconds ? LastKind : RangedKind.Other;
@@ -37,7 +33,6 @@ internal static class ShotTracker
     public static void Reset()
     {
         LastKind = RangedKind.Other;
-        LastItemName = "";
         _lastShotAt = -1000f;
     }
 
@@ -53,7 +48,6 @@ internal static class ShotTracker
         {
             // the item database is not ready: the shot stays unclassified
         }
-        LastItemName = name ?? "";
         LastKind = RangedRules.KindOf(name);
         _lastShotAt = Time.time;
     }
@@ -105,7 +99,6 @@ internal static class ShotTracker
         var inv = LocalPlayer.Inventory;
         if (ammoItemId <= 0 || inv == null || !RangedRules.KeepsAmmo(PlayerState.Character.Stats, Rng)) return false;
         if (!inv.AddItem(ammoItemId, 1, false, false, null)) return false;
-        Refunds++;
         return true;
     }
 }

@@ -5,9 +5,8 @@ namespace ChampionsOfTheSons.Core.Tests;
 public class ProgressionTests
 {
     [Fact]
-    public void Xp_goal_grows_with_level_and_matches_the_curve()
+    public void Xp_goal_grows_with_level()
     {
-        Assert.Equal(30, XpCurve.Goal(1));
         for (int l = 1; l < XpCurve.PracticalMaxLevel; l++)
             Assert.True(XpCurve.Goal(l + 1) > XpCurve.Goal(l), $"goal({l + 1}) <= goal({l})");
     }

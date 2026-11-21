@@ -1,79 +1,29 @@
-using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
-using ChampionsOfTheSons.Core.Saving;
 using ChampionsOfTheSons.Mod.HostRules;
 using ChampionsOfTheSons.Mod.Perks;
-using ChampionsOfTheSons.Mod.UI;
-using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Pad;
 
 /// <summary>COS-30 checks: pad input is simulated through <see cref="PadInput.Inject"/>, so the whole path (bindings, focus, confirm) runs; real controller feel is on the hands-on list.</summary>
 internal static class GamepadSelfTest
 {
-    private static InventoryPanel Inv => CotsUi.Inventory;
-    private static PlayerCharacter Pc => PlayerState.Character;
-    private static GameObject? _before;
     private static string _tab = "";
 
     public static void Register()
     {
         SelfTest.PhaseReset += CloseAll;
         float t = 0;
-        // These checks drive the screen panels; the inventory binding opens the guide book by default (COS-59).
-        SelfTest.Add(t += 0.2f, "pad: unpause, screen inventory", () =>
+        SelfTest.Add(t += 0.2f, "pad: unpause", TestKit.Unpause);
+        SelfTest.Add(t += 0.5f, "pad: binding opens the book", () =>
         {
-            TestKit.Unpause();
-            _bookSetting = Config.InventoryInBook.Value;
-            Config.InventoryInBook.Value = false;
-        });
-        SelfTest.Add(t += 0.5f, "pad: binding opens the inventory", () =>
-        {
-            var def = ModContent.Db.Items.Values.First(d => d.Type == "ring" && d.Rarity >= 1 && d.Rarity <= 3);
-            TestKit.Give(def.Id, def.Rarity, 5);
-            SelfTest.Check("pad: ring is in bag.0", Pc.Inventory.Get("bag.0") != null);
-            SelfTest.Check("pad: panels closed to start", GamepadFeature.OpenPanel == null);
+            SelfTest.Check("pad: panels closed to start", GamepadFeature.OpenPanel == null && !Book.BookHost.ModPageActive);
             PadInput.Inject(PadButton.LeftShoulder, PadButton.DpadUp);
         });
-        SelfTest.Add(t += 0.5f, "pad: inventory open and focused", () =>
+        SelfTest.Add(t += 2.5f, "pad: book open", () =>
         {
-            SelfTest.Check("pad: inventory opened by LeftShoulder+DpadUp", Inv.IsOpen);
-            SelfTest.Check("pad: a control has focus", PadFocus.Current != null);
-            _before = PadFocus.Current;
-            PadInput.Inject(PadButton.DpadRight);
-        });
-        SelfTest.Add(t += 0.5f, "pad: d-pad moves focus", () =>
-        {
-            SelfTest.Check("pad: focus moved right", PadFocus.Current != null && PadFocus.Current != _before);
-            var slot = Inv.Slot("bag.0")!;
-            SelfTest.Check("pad: bag slot is focusable", PadFocus.FocusOn(Inv.PadRoot!, slot.Button.Root));
-            SelfTest.Check("pad: pointer follows focus", PadPointer.Active && Vector2.Distance(PadPointer.Position, Inv.ScreenPointOf("bag.0")) < 6f,
-                $"active={PadPointer.Active} {PadPointer.Position} vs {Inv.ScreenPointOf("bag.0")}");
-            PadInput.Inject(PadButton.South);
-        });
-        SelfTest.Add(t += 0.6f, "pad: A equips the focused item", () =>
-        {
-            SelfTest.Check("pad: item left the bag", Pc.Inventory.Get("bag.0") == null);
-            SelfTest.Log("pad: slots now " + string.Join(", ", Pc.Inventory.Slots.Keys));
-            SelfTest.Check("pad: item is equipped", Pc.Inventory.Slots.Keys.Any(k => k.StartsWith("equip.ring", StringComparison.Ordinal)));
-            string? equipped = Pc.Inventory.Slots.Keys.FirstOrDefault(k => k.StartsWith("equip.ring", StringComparison.Ordinal));
-            PadFocus.FocusOn(Inv.PadRoot!, Inv.Slot(equipped ?? "equip.ring1")!.Button.Root);
-            PadInput.Inject(PadButton.West);
-        });
-        SelfTest.Add(t += 0.6f, "pad: X opens the item menu", () =>
-        {
-            SelfTest.Check("pad: right-click menu open", Inv.MenuVisible);
-            PadInput.Inject(PadButton.East);
-        });
-        SelfTest.Add(t += 0.5f, "pad: B closes the menu first, then the panel", () =>
-        {
-            SelfTest.Check("pad: menu closed, panel still open", !Inv.MenuVisible && Inv.IsOpen);
-            PadInput.Inject(PadButton.East);
-        });
-        SelfTest.Add(t += 0.5f, "pad: panel closed by B", () =>
-        {
-            SelfTest.Check("pad: inventory closed", !Inv.IsOpen);
-            SelfTest.Check("pad: focus cleared", PadFocus.Current == null);
+            SelfTest.Check("pad: LeftShoulder+DpadUp opened the guide book on Gear", Book.BookHost.ModPageActive && Book.BookHost.Tab == Book.BookTab.Gear,
+                $"open {Book.BookHost.IsOpen}, tab {Book.BookHost.Tab}, last failure '{Book.BookHost.LastFailure}'");
+            Book.BookHost.Close();
         });
         SelfTest.Add(t += 1.5f, "pad: wait for the player to be controllable again", () =>
         {
@@ -91,6 +41,7 @@ internal static class GamepadSelfTest
             // then the d-pad moves along the tab row to the next tab.
             var tabButton = panel.TabButton(_tab);
             SelfTest.Check("pad: current tab is focusable", tabButton != null && panel.PadRoot != null && PadFocus.FocusOn(panel.PadRoot, tabButton));
+            SelfTest.Check("pad: pointer follows focus", PadPointer.Active);
             PadInput.Inject(PadButton.DpadRight);
         });
         SelfTest.Add(t += 0.5f, "pad: focus a tab and confirm", () =>
@@ -123,12 +74,9 @@ internal static class GamepadSelfTest
         });
     }
 
-    private static bool? _bookSetting;
-
     private static void CloseAll()
     {
-        if (_bookSetting.HasValue) { Config.InventoryInBook.Value = _bookSetting.Value; _bookSetting = null; }
-        if (Inv.IsOpen) { Inv.CloseMenu(); Inv.Close(); }
+        if (Book.BookHost.IsOpen) Book.BookHost.Close();
         if (PerksFeature.Panel.IsOpen) PerksFeature.Panel.Close();
         if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close();
         PadFocus.Clear();

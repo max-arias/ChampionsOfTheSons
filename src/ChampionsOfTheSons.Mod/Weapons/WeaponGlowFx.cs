@@ -52,6 +52,12 @@ internal static class WeaponGlowFx
     private static readonly List<GameObject> Spawned = new();
     private static readonly List<(Light Light, float Base)> Pulsing = new();
 
+    /// <summary>COS-119: material instances the glow made (renderer.materials / .material copy them), with the object they belong
+    /// to; destroyed once that object is gone, so equips and glowing drops no longer leave instances behind.</summary>
+    private static readonly List<(GameObject Owner, Material Material)> Owned = new();
+    private static float _sweep;
+    private static bool? _reducedSeen;
+
     /// <summary>Glow parts alive now (frame-cost logs, self-tests).</summary>
     public static int Alive
     {
@@ -91,7 +97,11 @@ internal static class WeaponGlowFx
             var own = mf.GetComponent<MeshRenderer>();
             if (own != null)
                 foreach (var m in own.materials)
-                    if (m != null && m.HasProperty(_emissive)) m.SetColor(_emissive, look.Color * EmissionNits(look.Level));
+                {
+                    if (m == null) continue;
+                    Owned.Add((model, m));
+                    if (m.HasProperty(_emissive)) m.SetColor(_emissive, look.Color * EmissionNits(look.Level));
+                }
             var shell = Bundles.CotsBundle.Spawn(Edge, mf.transform);
             if (shell != null)
             {
@@ -106,6 +116,7 @@ internal static class WeaponGlowFx
                 foreach (var sr in shell.GetComponentsInChildren<Renderer>(true))
                 {
                     var sm = sr.material;
+                    Owned.Add((shell, sm));
                     if (sm.HasProperty(_fresnel)) sm.SetFloat(_fresnel, 1.1f);
                     if (sm.HasProperty(_intensity)) sm.SetFloat(_intensity, 1.3f + look.Strength);
                 }
@@ -130,6 +141,30 @@ internal static class WeaponGlowFx
     /// <summary>Per frame: Legendary lights breathe.</summary>
     public static void Tick()
     {
+        _sweep += Time.deltaTime;
+        if (_sweep > 2f)
+        {
+            _sweep = 0;
+            for (int i = Owned.Count - 1; i >= 0; i--)
+            {
+                if (Owned[i].Owner != null) continue;
+                if (Owned[i].Material != null) UnityEngine.Object.Destroy(Owned[i].Material);
+                Owned.RemoveAt(i);
+            }
+        }
+        // COS-119: "reduce heavy effects" hides the extras (light, particles) of glows already out at once; switching it off
+        // brings them back on the next equip or drop.
+        bool reduced = FxKit.Reduced;
+        if (_reducedSeen != reduced)
+        {
+            if (_reducedSeen != null)
+            {
+                Spawned.RemoveAll(g => g == null);
+                foreach (var g in Spawned) if (g.name == "cots-glow-wisp") g.SetActive(!reduced);
+                foreach (var (l, _) in Pulsing) if (l != null) l.enabled = !reduced;
+            }
+            _reducedSeen = reduced;
+        }
         if (Pulsing.Count == 0) return;
         Pulsing.RemoveAll(p => p.Light == null);
         float k = 0.7f + 0.3f * Mathf.Sin(Time.time * Mathf.PI * 1.6f) + 0.08f * Mathf.Sin(Time.time * 11f);

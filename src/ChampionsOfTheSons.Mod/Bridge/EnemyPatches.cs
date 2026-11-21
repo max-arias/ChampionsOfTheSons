@@ -1,6 +1,5 @@
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
-using Bolt;
 using HarmonyLib;
 using RedLoader;
 using Sons.Ai.Vail;
@@ -69,6 +68,14 @@ public static class EnemyPatches
     {
         var health = runtime.Stats == null ? null : EnemyRegistry.Health(runtime.Stats);
         if (health == null || health._currentValue <= 0) return;
+        if (Net.CoopHits.ForwardsToHost)
+        {
+            // Co-op client: the enemy is the host's. Our spell, thorn and splash damage goes there (COS-13); the local
+            // estimate only drives our own number. The host's health sync moves the mirror.
+            Mitigate(runtime, health, hit, hit.Amount, creditPlayer, forced: true);
+            Net.CoopHits.Forward(runtime, hit, Core.Networking.HitFlags.None);
+            return;
+        }
         double damage = Mitigate(runtime, health, hit, hit.Amount, creditPlayer, forced: true);
         if (damage <= 0) return;
         float left = health._currentValue - (float)damage;
@@ -92,7 +99,6 @@ public static class EnemyPatches
         if (local)
         {
             runtime.LastHitByLocalPlayer = true;
-            runtime.LastHitWasCrit = hit.Crit;
         }
 
         // Undead: the first lethal hit leaves it at half health instead.
@@ -119,13 +125,15 @@ public static class EnemyPatches
         using var perf = Perf.Perf.Scope(PerfBeforeReceivedDamage);
         try
         {
-            if (!EnemyRegistry.IsAuthority || amount <= 0) return;
+            bool client = Net.CoopHits.ForwardsToHost;
+            if ((!EnemyRegistry.IsAuthority && !client) || amount <= 0) return;
             var runtime = EnemyRegistry.Get(__instance);
             if (runtime == null) return;
             runtime.Actor = __instance;
 
             bool local;
             OutgoingHit hit;
+            if (client && !(fromPlayer && IsLocalPlayer(sourceStimuli))) return; // the host owns every other hit on its enemies
             if (fromPlayer && IsLocalPlayer(sourceStimuli))
             {
                 local = true;
@@ -156,7 +164,7 @@ public static class EnemyPatches
                     hit = PlayerAttack.Weapon(sheet, weapon, baseDamage, Rng);
                 }
                 // Explosions (bombs, molotovs) take the explosion stat; thrown spears are projectiles and get their own multiplier.
-                if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + sheet.Get(CombatStatIds.ExplosionDamage)) };
+                if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + Net.CoopParty.TeamExplosionDamage()) };
                 if (weapon == WeaponClass.Melee) hit = hit with { Amount = hit.Amount * MeleeRules.FireDanceMultiplier(sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame")) };
                 double fire = sheet.Get(StatIds.FireDamage) + runtime.Combat.FireMark;
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };
@@ -174,6 +182,13 @@ public static class EnemyPatches
 
             amount = (float)Mitigate(runtime, EnemyRegistry.HealthOf(__instance), hit, amount, local, forced: false);
             if (local && amount > 0 && _shot is { } landed) AfterRangedHit(runtime, hit, landed);
+            if (client)
+            {
+                // The same pipeline as the host's own hits (melee factor, fire, follow-ups, headshots, procs, extra hits);
+                // the hit itself goes to the host, which applies defense and owns health (COS-13).
+                Net.CoopHits.Forward(runtime, hit, Net.CoopHits.WeaponFlag(_hitWeapon));
+                amount = 0;
+            }
         }
         catch (Exception e)
         {
@@ -186,10 +201,6 @@ public static class EnemyPatches
     private static int _extraHits;
     private static bool _headshot;
 
-    /// <summary>Extra hits a ranged hit brought (True Aim, Double Spears, area damage), last ranged hit (self-test).</summary>
-    public static int LastExtraHits { get; private set; }
-    public static int LastSplashes { get; private set; }
-
     /// <summary>After a ranged hit landed: True Aim's extra hits, a second spear, and area damage around the target (COS-86).
     /// Each goes through the forced-hit path (armor, shields, caps) and procs nothing further.</summary>
     private static void AfterRangedHit(EnemyRuntime runtime, OutgoingHit hit, RangedShot shot)
@@ -199,10 +210,8 @@ public static class EnemyPatches
         if (Rng.Chance(RangedRules.SecondSpearChance(sheet, shot.Kind))) extra++;
         _shot = null;
         _extraHits = 0;
-        LastExtraHits = extra;
         for (int i = 0; i < extra && runtime.IsActive; i++) DealForced(runtime, hit, creditPlayer: true);
 
-        LastSplashes = 0;
         bool headshot = _headshot;
         _headshot = false;
         if (runtime.Actor == null) return;
@@ -220,7 +229,6 @@ public static class EnemyPatches
         {
             if (other == target) continue;
             DealForced(other, new OutgoingHit(amount, DamageKind.Physical, false, pierce), creditPlayer: true);
-            LastSplashes++;
         }
     }
 

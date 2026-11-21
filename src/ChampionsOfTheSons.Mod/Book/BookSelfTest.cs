@@ -143,7 +143,6 @@ internal static class BookSelfTest
 
     private static void Setup()
     {
-        CotsUi.Inventory.Close();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
         LootFeature.ClearAll();
         var save = PlayerState.ToSave();
@@ -156,7 +155,7 @@ internal static class BookSelfTest
 
     private static void Kill()
     {
-        WorldState.SetRulesForTest(_savedRules! with { DropChance = 1000, AllowElites = false });
+        WorldState.SetRulesForTest(_savedRules! with { DropChance = 1000, DropQuantity = 3, AllowElites = false });
         Victims.Clear();
         for (int i = 0; i < 3; i++)
         {
@@ -197,7 +196,6 @@ internal static class BookSelfTest
     {
         SelfTest.Check("book: the inventory key opened the book on Gear", BookHost.IsOpen && BookHost.Tab == BookTab.Gear, $"open {BookHost.IsOpen}, tab {BookHost.Tab}");
         SelfTest.Check("book: our tab was added", BookTabs.Tabs.Count == 1, BookTabs.Tabs.Count.ToString());
-        SelfTest.Check("book: the screen panel stayed closed", !CotsUi.Inventory.IsOpen);
         SelfTest.Check("book: the game's page actions are blocked", BookPatches.Block);
     }
 
@@ -338,6 +336,15 @@ internal static class BookSelfTest
         var slots = BookPages.Slots(BookTab.Bag);
         var full = slots.Where(s => s.Shown != null).ToList();
         var empty = slots.FirstOrDefault(s => s.Key.Length > 0 && s.Shown == null);
+        if (empty == null && full.Count > 2)
+        {
+            // The kills can fill the whole page: free its last slot for the move.
+            Pc.Inventory.Remove(full[^1].Key);
+            BookPages.Refresh(BookTab.Bag);
+            slots = BookPages.Slots(BookTab.Bag);
+            full = slots.Where(s => s.Shown != null).ToList();
+            empty = slots.FirstOrDefault(s => s.Key.Length > 0 && s.Shown == null);
+        }
         if (full.Count < 2 || empty == null) { SelfTest.Check("book: drag bag to bag: two items and an empty slot", false); return; }
         var a = full[0];
         var item = a.Shown!;

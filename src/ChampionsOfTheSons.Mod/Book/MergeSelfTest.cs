@@ -2,6 +2,7 @@ using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Loot;
 using ChampionsOfTheSons.Mod.UI;
+using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Book;
 
@@ -41,13 +42,14 @@ internal static class MergeSelfTest
         SelfTest.Add(4.9f, "merge: shot after merge", () => TestKit.Screenshot("merge-after"));
         SelfTest.Add(5.2f, "merge: cancel and NEW tag", CancelAndNew);
         SelfTest.Add(5.5f, "merge: every row", EveryRow);
-        SelfTest.Add(6f, "merge: close", () => BookHost.Close());
-        SelfTest.Add(7f, "merge: cleanup", Cleanup);
+        SelfTest.Add(5.8f, "merge: by pad across bag pages", () => ByInput(pad: true));
+        SelfTest.Add(6.1f, "merge: by mouse", () => ByInput(pad: false));
+        SelfTest.Add(6.4f, "merge: close", () => BookHost.Close());
+        SelfTest.Add(10.5f, "merge: cleanup", Cleanup);
     }
 
     private static void Setup()
     {
-        CotsUi.Inventory.Close();
         LootFeature.ClearAll();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
         _boots.Clear();
@@ -101,7 +103,7 @@ internal static class MergeSelfTest
         SelfTest.Check("merge: clicking the result clears NEW", !BookMerge.IsNew(result) && Cell(_anchor)?.NewBg.enabled == false);
     }
 
-    /// <summary>Each row once through the one-click path (the screen panel's menu uses it too).</summary>
+    /// <summary>Each row once through the one-click merge.</summary>
     private static void EveryRow()
     {
         foreach (var (rarity, type) in new[] { (1, "ring"), (2, "helmet"), (3, (string?)null) })
@@ -118,6 +120,74 @@ internal static class MergeSelfTest
             SelfTest.Check($"merge: {need} x {(Rarity)rarity} give one {(Rarity)Math.Min(rarity + 1, 3)}", result is { Ok: true } && item!.Rarity == (Rarity)Math.Min(rarity + 1, 3)
                 && typeOk && item.Level == 30 && Pc.Inventory.Slots.Count == 1 && Pc.Inventory.Get(slot) == item, $"{result?.Error} {item?.BaseId} lvl {item?.Level}");
         }
+    }
+
+    // ---- COS-146: the same flow through BookFeature.Handle with pad (cursor + South, RB pages) and mouse input.
+
+    private static Vector2 ScreenOfHit(string key)
+    {
+        var h = BookPages.CurrentHits.FirstOrDefault(x => x.Key == key);
+        return h.Key == null ? new Vector2(-1, -1) : BookHost.ScreenOfPagePx(new Vector2(h.X + h.W / 2, h.Y + h.H / 2));
+    }
+
+    private static void Press(Vector2 at, bool pad)
+    {
+        if (pad)
+        {
+            BookFeature.Handle(BookInput.Pad(at, southDown: true, southHeld: true));
+            BookFeature.Handle(BookInput.Pad(at, southUp: true));
+        }
+        else
+        {
+            BookFeature.Handle(BookInput.MouseAt(at, down: true, held: true));
+            BookFeature.Handle(BookInput.MouseAt(at, up: true));
+        }
+        BookPages.Refresh(BookTab.Gear);
+    }
+
+    private static void PressSlot(string key, bool pad) =>
+        Press(Cell(key) is { } c ? BookHost.ScreenOfPagePx(new Vector2(c.X + c.W / 2, c.Y + c.H / 2)) : new Vector2(-1, -1), pad);
+
+    /// <summary>Three Common gloves; by pad the third sits on bag page 2, so the pick crosses pages with RB.</summary>
+    private static void ByInput(bool pad)
+    {
+        string label = pad ? "pad" : "mouse";
+        if (BookMerge.Active) BookMerge.Cancel();
+        Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
+        string glove = Base("glove", 0, 5);
+        var slots = new List<string>();
+        for (int i = 0; i < 3; i++) slots.Add(SlotOf(TestKit.Give(glove, 0, 6 + i)));
+        if (pad)
+        {
+            string far = Inventory.Bag(BookPages.BagPerPage + 2);
+            Pc.Inventory.Move(slots[2], far, ModContent.Db);
+            slots[2] = far;
+        }
+        BookHost.ShowModPage(BookTab.Gear);
+        BookPages.Click(BookTab.Gear, "filter.0", false);
+        BookPages.Selected = null;
+        BookPages.Refresh(BookTab.Gear);
+
+        PressSlot(slots[0], pad);
+        SelfTest.Check($"merge: {label} selects the start item", BookPages.Selected == slots[0], $"selected {BookPages.Selected}");
+        Press(ScreenOfHit("merge.start"), pad);
+        SelfTest.Check($"merge: {label} Merge starts merge mode", BookMerge.Active && BookMerge.Picks.SequenceEqual(new[] { slots[0] }), BookFeature.LastAction);
+        PressSlot(slots[1], pad);
+        if (pad)
+        {
+            BookFeature.Handle(BookInput.Pad(new Vector2(5, 5), rb: true));
+            BookPages.Refresh(BookTab.Gear);
+            SelfTest.Check("merge: pad RB pages the bag during merge mode", BookPages.BagPage == 1 && BookMerge.Active, $"page {BookPages.BagPage}");
+        }
+        PressSlot(slots[2], pad);
+        SelfTest.Check($"merge: {label} picks fill the batch", BookMerge.Picks.Count == 3, string.Join(",", BookMerge.Picks));
+        Press(ScreenOfHit("merge.go"), pad);
+        var result = Pc.Inventory.Get(slots[0]);
+        SelfTest.Check($"merge: {label} Merge n/N merges", result != null && result.Rarity == Rarity.Magic && Pc.Inventory.Slots.Count == 1,
+            $"{BookFeature.LastAction}: {result?.BaseId} r{(int?)result?.Rarity}, {Pc.Inventory.Slots.Count} items");
+        if (BookMerge.Active) Press(ScreenOfHit("merge.cancel"), pad);
+        SelfTest.Check($"merge: {label} leaves merge mode", !BookMerge.Active);
+        if (pad) { BookFeature.Handle(BookInput.Pad(new Vector2(5, 5), lb: true)); BookPages.Refresh(BookTab.Gear); }
     }
 
     private static void Cleanup()

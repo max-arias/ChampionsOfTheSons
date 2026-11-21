@@ -53,7 +53,7 @@ internal static class WorldRulesSelfTest
 
         SelfTest.Add(T0 + 4, "host settings: edit", () =>
         {
-            WorldState.Update(r => r with { EnemyHealth = 2, AllowElites = false, ExtraEnemyLevels = 5 });
+            WorldState.Update(r => r with { EnemyHealth = 2, AllowElites = false, ExtraEnemyLevels = 5, LootLevel = LootLevelPolicy.Closest, MinLootRarity = 2 });
             WorldRulesFeature.Settings.ToggleAbility(EnemyAbility.Meteor);
             WorldRulesFeature.Settings.Open();
             SelfTest.Check("host settings open", WorldRulesFeature.Settings.IsOpen);
@@ -72,7 +72,32 @@ internal static class WorldRulesSelfTest
             SelfTest.Check("multiplier, extra levels, elites switch and disabled ability survive a save and load",
                 r.EnemyHealth == 2 && r.ExtraEnemyLevels == 5 && !r.AllowElites && r.DisabledAbilities.Contains(EnemyAbility.Meteor));
             SelfTest.Check("the game's difficulty is kept across a world load", r.GameDifficulty == game);
+            SelfTest.Check("loot level and lowest drop rarity survive a save and load (COS-77)", r.LootLevel == LootLevelPolicy.Closest && r.MinLootRarity == 2,
+                $"{r.LootLevel}, {r.MinLootRarity}");
             WorldState.FromSave(new WorldSave());
+        });
+
+        SelfTest.Add(T0 + 8, "host settings: friendly fire drives the game's PvP damage (COS-78)", () =>
+        {
+            bool before = WorldState.FriendlyFire;
+            WorldState.SetFriendlyFire(false);
+            FriendlyFireRule.Apply(false);
+            SelfTest.Check("friendly fire off: the game's PvP damage is Off", FriendlyFireRule.Applied == "Off", FriendlyFireRule.Applied ?? "not applied");
+            WorldState.SetFriendlyFire(true);
+            FriendlyFireRule.Apply(true);
+            SelfTest.Check("friendly fire on: the game's PvP damage is on", FriendlyFireRule.Applied is "Normal" or "Reduced", FriendlyFireRule.Applied ?? "not applied");
+            WorldState.SetFriendlyFire(before);
+            FriendlyFireRule.Apply(before);
+        });
+
+        SelfTest.Add(T0 + 9, "host settings: reset to defaults (COS-77)", () =>
+        {
+            var game = WorldState.Rules.GameDifficulty;
+            WorldState.Update(r => r with { Xp = 3, LootLevel = LootLevelPolicy.Lowest, AllowElites = false });
+            WorldRulesFeature.Settings.ResetDefaults();
+            var r = WorldState.Rules;
+            SelfTest.Check("reset brings every host setting back to its default and keeps the game's difficulty",
+                r.Xp == 1 && r.LootLevel == LootLevelPolicy.Highest && r.AllowElites && !WorldState.FriendlyFire && r.GameDifficulty == game);
         });
     }
 }

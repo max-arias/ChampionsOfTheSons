@@ -1,7 +1,5 @@
 using ChampionsOfTheSons.Core.Rules;
-using RedLoader;
 using SonsSdk;
-using TheForest.Utils;
 
 namespace ChampionsOfTheSons.Mod.Spells;
 

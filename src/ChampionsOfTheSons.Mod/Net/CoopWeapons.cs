@@ -1,4 +1,3 @@
-using Bolt;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Mod.Weapons;
 using RedLoader;
@@ -32,9 +31,6 @@ public sealed class CoopWeapons : IModFeature
     private static float _sendTimer, _matchTimer;
     private static string _sentType = "", _sentItem = "";
     private static int _sentRarity;
-
-    /// <summary>Self-tests and logs: remote players currently showing a model.</summary>
-    public static int RemoteModels => Players.Values.Count(p => p.Skin?.Alive == true);
 
     public void Init() => CotsNetEvent.Received += OnNet;
 

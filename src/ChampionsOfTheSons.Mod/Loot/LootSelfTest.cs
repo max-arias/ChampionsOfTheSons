@@ -11,7 +11,6 @@ namespace ChampionsOfTheSons.Mod.Loot;
 internal static class LootSelfTest
 {
     private static PlayerCharacter Pc => PlayerState.Character;
-    private static InventoryPanel Panel => CotsUi.Inventory;
     private static GroundLoot Ground => LootFeature.Ground;
 
     private static WorldRules? _savedRules;
@@ -28,7 +27,7 @@ internal static class LootSelfTest
         SelfTest.Add(T0 + 0.5f, "loot: kill drops", KillForDrops);
         SelfTest.Add(T0 + 4, "loot: kill result", KillResult);
         SelfTest.Add(T0 + 5, "loot: boss drops", BossDrops);
-        SelfTest.Add(T0 + 6.5f, "loot: shot beams", () => TestKit.Screenshot("loot-01-beams"));
+        SelfTest.Add(T0 + 6.5f, "loot: shot drops", () => TestKit.Screenshot("loot-01-drops"));
         SelfTest.Add(T0 + 8, "loot: walk over", WalkOver);
         SelfTest.Add(T0 + 10, "loot: walk over result", WalkOverResult);
         SelfTest.Add(T0 + 11, "loot: full bag", FullBag);
@@ -40,14 +39,10 @@ internal static class LootSelfTest
         SelfTest.Add(T0 + 19, "loot: step away", StepAway);
         SelfTest.Add(T0 + 20, "loot: step back", StepBack);
         SelfTest.Add(T0 + 21.5f, "loot: pick up again", PickUpAgain);
-        SelfTest.Add(T0 + 22.5f, "loot: right-click menu", MenuOpen);
-        SelfTest.Add(T0 + 24, "loot: shot menu", () => TestKit.Screenshot("loot-02-menu"));
-        SelfTest.Add(T0 + 25, "loot: menu equip", MenuEquip);
-        SelfTest.Add(T0 + 25.5f, "loot: menu destroy", MenuDestroy);
-        SelfTest.Add(T0 + 26, "loot: menu drop", MenuDrop);
-        SelfTest.Add(T0 + 26.5f, "loot: drag and drop", DragAndDrop);
-        SelfTest.Add(T0 + 27f, "loot: level 25 heart, menu Use", UseHeart);
-        SelfTest.Add(T0 + 27.5f, "loot: cleanup", Cleanup);
+        SelfTest.Add(T0 + 27f, "loot: level 25 heart, Use on the book card", UseHeart);
+        SelfTest.Add(T0 + 27.6f, "loot: stack actions: Split, Drop 1, Drop all", StackMenu);
+        SelfTest.Add(T0 + 27.8f, "loot: stat lines by stat rarity", StatOrder);
+        SelfTest.Add(T0 + 28.4f, "loot: cleanup", Cleanup);
     }
 
     private static void Teleport(Vector3 p)
@@ -70,7 +65,6 @@ internal static class LootSelfTest
 
     private static void Setup()
     {
-        UI.CotsUi.Inventory.Close();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
         LootFeature.ClearAll();
         _home = Player;
@@ -81,7 +75,7 @@ internal static class LootSelfTest
     private static void KillForDrops()
     {
         // Force the drop roll: the host's drop chance multiplier is part of the world rules.
-        WorldState.SetRulesForTest(_savedRules! with { DropChance = 1000, AllowElites = false });
+        WorldState.SetRulesForTest(_savedRules! with { DropChance = 1000, DropQuantity = 3, AllowElites = false });
         _victim = TestKit.Spawn(distance: 7);
         SelfTest.Check("loot: victim spawned", _victim != null);
         if (_victim == null) return;
@@ -103,7 +97,12 @@ internal static class LootSelfTest
     {
         SelfTest.Check($"loot: {what}: one world object per drop", LootVisuals.All.Count == Ground.Count, $"{LootVisuals.All.Count}/{Ground.Count}");
         var bad = Ground.All.Where(d => !LootVisuals.All.TryGetValue(d.Id, out var v) || ColorRarity(v.Color) != d.Item.Rarity).Select(d => d.Item.Rarity.ToString()).ToList();
-        SelfTest.Check($"loot: {what}: beam color matches rarity", bad.Count == 0, string.Join(",", bad));
+        SelfTest.Check($"loot: {what}: ring color matches rarity", bad.Count == 0, string.Join(",", bad));
+        var look = Ground.All.Where(d => !LootVisuals.All.TryGetValue(d.Id, out var v) || v.Beam == null || v.HasRing != (d.Item.Rarity >= Rarity.Rare))
+            .Select(d => d.Item.Rarity.ToString()).ToList();
+        SelfTest.Check($"loot: {what}: every drop has a beam, only Rare and Legendary a ring", look.Count == 0, string.Join(",", look));
+        bool blink = LootVisuals.BlinkOn(LootVisuals.BlinkSeconds + 1, 0.9f) && !LootVisuals.BlinkOn(1, 0.1f) && LootVisuals.BlinkOn(1, 0.03f);
+        SelfTest.Check($"loot: {what}: shown steady until the blink, then blinking fast near the end", blink);
     }
 
     private static void BossDrops()
@@ -116,7 +115,7 @@ internal static class LootSelfTest
             Abilities = new[] { EnemyAbility.Gargantuan, EnemyAbility.ExtraHealth, EnemyAbility.ExtraDamage, EnemyAbility.Blizzard },
         };
         var items = LootFeature.RollForKill(boss, rules);
-        SelfTest.Check("loot: boss rolls many drops", items.Count >= 9, $"{items.Count}");
+        SelfTest.Check("loot: a boss drops its ten items and the XP heart", items.Count >= 11, $"{items.Count}");
         SelfTest.Check("loot: a boss drops an XP heart (COS-123)", items.Any(i => i.BaseId == LootRoller.XpHeart));
         int maxRarity = items.Select(i => (int)i.Rarity).DefaultIfEmpty(0).Max();
         SelfTest.Check("loot: boss drops reach high rarity", maxRarity >= (int)Rarity.Rare, $"max rarity {maxRarity}");
@@ -157,6 +156,8 @@ internal static class LootSelfTest
         Teleport(_home);
     }
 
+    private static string _targetBase = "";
+
     private static void FullBag()
     {
         Teleport(_home);
@@ -166,6 +167,7 @@ internal static class LootSelfTest
         var item = new ItemInstance { BaseId = ModContent.Db.Items.Keys.First(), Level = 5 };
         var drop = LootFeature.SpawnAt(item, Player);
         _target = drop.Id;
+        _targetBase = item.BaseId;
     }
 
     private static void FullBagResult()
@@ -181,7 +183,8 @@ internal static class LootSelfTest
 
     private static void FreeSlotResult()
     {
-        SelfTest.Check("loot: drop is picked up once a slot is free", Ground.Get(_target) == null && Pc.Inventory.Get("bag.0") != null);
+        // The item may go to a free equipment slot (a quiver) instead of the freed bag slot.
+        SelfTest.Check("loot: drop is picked up once a slot is free", Ground.Get(_target) == null && Pc.Inventory.Slots.Values.Any(i => i.BaseId == _targetBase), _targetBase);
         LootFeature.ClearAll();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
     }
@@ -223,37 +226,6 @@ internal static class LootSelfTest
 
     // ---------------------------------------------------------------- inventory actions
 
-    private static void MenuOpen()
-    {
-        Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        TestKit.Give("item.yuki_onna_strides", level: 5);
-        // bag.1 must be equippable for the menu-equip check (a random base can be a material or consumable).
-        TestKit.Give(ModContent.Db.Items.Values.Where(d => LootRoller.IsEquippable(d) && (int)d.Rarity == (int)Rarity.Rare && d.MinLevel <= 20).OrderBy(d => d.Id, StringComparer.Ordinal).First().Id, level: 20);
-        TestKit.Give(rarity: 5, level: 20);
-        Panel.Open();
-        var bounds = Panel.SlotBounds("bag.1");
-        Panel.OpenMenu("bag.1", new Vector2(bounds.center.x, bounds.center.y));
-        SelfTest.Check("loot: right-click menu opens on an item", Panel.MenuVisible && Panel.MenuSlot == "bag.1");
-        SelfTest.Check("loot: menu offers equip for a bag item", Panel.MenuEquipText == UiText.T("ui.inventory.menu.equip", "Equip"), Panel.MenuEquipText);
-        var b = Panel.MenuBounds;
-        var canvas = Panel.CanvasSize;
-        SelfTest.Check("loot: menu stays on the canvas", b.xMin >= 0 && b.yMin >= 0 && b.xMax <= canvas.x && b.yMax <= canvas.y, b.ToString());
-    }
-
-    private static void MenuEquip()
-    {
-        var item = Pc.Inventory.Get("bag.1");
-        bool ok = Panel.MenuEquipClicked();
-        SelfTest.Check("loot: menu equip equips the item", ok && Pc.Inventory.Get("bag.1") == null && Pc.Inventory.Equipped.Any(kv => kv.Value == item));
-        SelfTest.Check("loot: menu closed after equip", !Panel.MenuVisible);
-
-        var slot = Pc.Inventory.Equipped.First().Key;
-        var sb = Panel.SlotBounds(slot);
-        Panel.OpenMenu(slot, new Vector2(sb.center.x, sb.center.y));
-        SelfTest.Check("loot: menu offers unequip on an equipped item", Panel.MenuEquipText == UiText.T("ui.inventory.menu.unequip", "Unequip"), Panel.MenuEquipText);
-        SelfTest.Check("loot: menu unequip moves it to the bag", Panel.MenuEquipClicked() && Pc.Inventory.Equipped.Count() == 0);
-    }
-
     /// <summary>COS-72: level 24 -> 25 gives the bonus-point heart; the menu offers Use on it and using it adds one permanent point.</summary>
     private static void UseHeart()
     {
@@ -270,73 +242,52 @@ internal static class LootSelfTest
             var heart = Pc.Inventory.Slots.FirstOrDefault(kv => kv.Value.BaseId == Progress.GreaterMutatedHeart).Key;
             SelfTest.Check("loot: level 25 gives the bonus-point heart", Pc.Progress.Level == 25 && heart != null, $"level {Pc.Progress.Level}");
             if (heart == null) return;
-            Panel.Open();
-            Panel.OpenMenu(heart, new Vector2(300, 300));
-            SelfTest.Check("loot: menu offers Use on the heart", Panel.MenuEquipText == UiText.T("ui.catalog.use", "Use"), Panel.MenuEquipText);
-            bool used = Panel.MenuEquipClicked();
+            SelfTest.Check("loot: the card offers Use on the heart", InventoryActions.IsUsable(heart));
+            bool used = Book.BookCard.Act("equip", heart) == "used";
             SelfTest.Check("loot: using the heart adds one permanent perk point",
                 used && Pc.Progress.BonusPerkPoints == bonus + 1 && Pc.Perks.AvailablePoints(Pc.Progress) == points + 2,
                 $"bonus {bonus} -> {Pc.Progress.BonusPerkPoints}, points {points} -> {Pc.Perks.AvailablePoints(Pc.Progress)}");
             SelfTest.Check("loot: the used heart is gone", Pc.Inventory.Get(heart) == null);
-            Panel.Close();
         }
         finally { Pc.Load(original); }
     }
 
-    private static void MenuDestroy()
+    /// <summary>COS-96: a stack gets Drop 1 and Split stack on the book card, and its Drop reads "Drop all".</summary>
+    private static void StackMenu()
     {
-        var slot = Pc.Inventory.Slots.Keys.First(k => k.StartsWith("bag."));
-        int count = Pc.Inventory.Slots.Count;
-        Panel.OpenMenu(slot, new Vector2(300, 300));
-        bool first = Panel.MenuDestroyClicked();
-        SelfTest.Check("loot: first destroy click only asks to confirm", !first && Pc.Inventory.Slots.Count == count && Panel.MenuVisible);
-        SelfTest.Check("loot: destroy button shows the confirm text", Panel.MenuDestroyText == UiText.T("ui.inventory.menu.destroy_confirm", "Click again to destroy"), Panel.MenuDestroyText);
-        // Closing the menu and reopening it must disarm the button.
-        Panel.CloseMenu();
-        Panel.OpenMenu(slot, new Vector2(300, 300));
-        SelfTest.Check("loot: reopening the menu disarms destroy", !Panel.MenuDestroyClicked() && Pc.Inventory.Slots.Count == count);
-        bool second = Panel.MenuDestroyClicked();
-        SelfTest.Check("loot: second destroy click deletes the item", second && Pc.Inventory.Slots.Count == count - 1 && !Panel.MenuVisible);
+        var heart = new ItemInstance { BaseId = "item.heart_of_purity", Level = 1, Amount = 6 };
+        Pc.Inventory.Restore(new[] { new KeyValuePair<string, ItemInstance>("bag.0", heart) });
+        SelfTest.Check("loot: a stack gets the stack actions, and Drop all", InventoryActions.IsStack("bag.0")
+            && InventoryActions.DropLabel("bag.0") == UiText.T("ui.inventory.menu.drop_all", "Drop all"), InventoryActions.DropLabel("bag.0"));
+        string split = Book.BookCard.Act("split", "bag.0");
+        var halves = Pc.Inventory.Slots.Where(kv => kv.Value.BaseId == heart.BaseId).Select(kv => kv.Value.Amount).OrderBy(a => a).ToList();
+        SelfTest.Check("loot: Split stack puts half in a free slot", split == "split" && halves.SequenceEqual(new[] { 3, 3 }), $"{split}: {string.Join("+", halves)}");
+        int drops = Ground.Count;
+        Book.BookCard.Act("drop_one", "bag.0");
+        var dropped = Ground.All.OrderByDescending(d => d.Id).FirstOrDefault();
+        SelfTest.Check("loot: Drop 1 drops one and keeps the rest", Ground.Count == drops + 1 && dropped?.Item.Amount == 1 && Pc.Inventory.Get("bag.0")?.Amount == 2,
+            $"ground {drops} -> {Ground.Count}, dropped {dropped?.Item.Amount}, left {Pc.Inventory.Get("bag.0")?.Amount}");
+        Pc.Inventory.Restore(new[] { new KeyValuePair<string, ItemInstance>("bag.0", heart with { Amount = 1 }) });
+        SelfTest.Check("loot: a single item has no stack actions", !InventoryActions.IsStack("bag.0")
+            && InventoryActions.DropLabel("bag.0") == UiText.T("ui.inventory.menu.drop", "Drop"), InventoryActions.DropLabel("bag.0"));
     }
 
-    private static void MenuDrop()
+    /// <summary>COS-96: stat lines sort by the stat's own rarity, highest first.</summary>
+    private static void StatOrder()
     {
-        var slot = Pc.Inventory.Slots.Keys.First(k => k.StartsWith("bag."));
-        int drops = Ground.Count, items = Pc.Inventory.Slots.Count;
-        Panel.OpenMenu(slot, new Vector2(300, 300));
-        bool ok = Panel.MenuDropClicked();
-        SelfTest.Check("loot: menu drop puts the item in the world", ok && Ground.Count == drops + 1 && Pc.Inventory.Slots.Count == items - 1);
-    }
-
-    private static void DragAndDrop()
-    {
-        Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        var db = ModContent.Db;
-        // Find items by type so the checks do not depend on what was rolled.
-        var roller = new LootRoller(db);
-        var rng = new Rng(5);
-        ItemInstance Make(string type) => roller.RollItem(roller.PickBase(2, 30, rng, d => d.Type == type)!, 30, rng);
-        Pc.Inventory.Restore(new[]
-        {
-            new KeyValuePair<string, ItemInstance>("bag.0", Make("helmet")),
-            new KeyValuePair<string, ItemInstance>("bag.1", Make("weapon")),
-            new KeyValuePair<string, ItemInstance>("bag.5", Make("ring")),
-        });
-        var helm = Pc.Inventory.Get("bag.0");
-        SelfTest.Check("loot: drag refuses an item that does not fit the slot", !Panel.DragDrop("bag.0", "equip.weapon") && Pc.Inventory.Get("bag.0") == helm);
-        SelfTest.Check("loot: drag moves a fitting item into an equipment slot", Panel.DragDrop("bag.0", "equip.helmet") && Pc.Inventory.Get("equip.helmet") == helm);
-        SelfTest.Check("loot: drag onto a free bag slot moves the item", Panel.DragDrop("bag.5", "bag.40") && Pc.Inventory.Get("bag.5") == null && Pc.Inventory.Get("bag.40") != null);
-        var a = Pc.Inventory.Get("bag.1");
-        var b = Pc.Inventory.Get("bag.40");
-        SelfTest.Check("loot: drag onto an item swaps them", Panel.DragDrop("bag.1", "bag.40") && Pc.Inventory.Get("bag.1") == b && Pc.Inventory.Get("bag.40") == a);
-        SelfTest.Check("loot: dragging a non-fitting item onto an occupied slot is refused", !Panel.DragDrop("bag.40", "equip.helmet"));
-        SelfTest.Check("loot: dragging an empty slot does nothing", !Panel.DragDrop("bag.99", "bag.98"));
+        var stats = ModContent.Db.ItemStats.Values.Where(d => !LootRoller.IsSocketStat(d.Id)).ToList();
+        var low = stats.OrderBy(d => d.Rarity).First();
+        var high = stats.OrderByDescending(d => d.Rarity).First();
+        var baseId = ModContent.Db.Items.Values.First(d => LootRoller.IsEquippable(d)).Id;
+        var item = new ItemInstance { BaseId = baseId, Level = 10, Stats = new[] { new RolledStat(low.Id, 5), new RolledStat(high.Id, 5) } };
+        var body = ItemDescriber.Describe(item, Pc, null).Body;
+        int lo = body.IndexOf(UiText.StatName(low.Id), StringComparison.Ordinal), hi = body.IndexOf(UiText.StatName(high.Id), StringComparison.Ordinal);
+        SelfTest.Check("loot: the rarer stat is listed first, in its rarity colour", hi >= 0 && lo > hi
+            && body.Contains(UiTheme.StatHex((Rarity)Rarities.Clamp(high.Rarity)), StringComparison.Ordinal), $"{high.Id} at {hi}, {low.Id} at {lo}");
     }
 
     private static void Cleanup()
     {
-        Panel.CloseMenu();
-        Panel.Close();
         LootFeature.ClearAll();
         WorldState.SetRulesForTest(_savedRules!);
         Teleport(_home);

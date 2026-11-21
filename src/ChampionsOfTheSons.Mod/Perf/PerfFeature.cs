@@ -1,5 +1,4 @@
 using RedLoader;
-using SonsSdk;
 
 namespace ChampionsOfTheSons.Mod.Perf;
 

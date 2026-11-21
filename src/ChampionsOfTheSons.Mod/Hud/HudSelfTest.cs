@@ -36,14 +36,7 @@ internal static class HudSelfTest
             Hud.Progress.LiftXpBar(6);
             Cleanup();
         });
-        SelfTest.Add(T0 + 12f, "hud: open sheet", () => UI.CotsUi.Inventory.Open());
-        SelfTest.Add(T0 + 13f, "hud: sheet row tooltips", SheetTips);
-        SelfTest.Add(T0 + 13.5f, "hud: shot sheet tooltip", () => TestKit.Screenshot("hud-04-sheet-tooltip"));
-        SelfTest.Add(T0 + 14f, "hud: close sheet", () =>
-        {
-            UI.CotsUi.Inventory.ReleaseSimulatedHover();
-            UI.CotsUi.Inventory.Close();
-        });
+        SelfTest.Add(T0 + 13f, "hud: character sheet rows and tips", SheetTips);
         SelfTest.Add(T0 + 15f, "hud: spawn a cluster of 10", SpawnCluster);
         SelfTest.Add(T0 + 18f, "hud: clustered plates readable", ClusterPlates);
         SelfTest.Add(T0 + 18.1f, "hud: shot cluster", () => TestKit.Screenshot("hud-05-cluster"));
@@ -90,9 +83,10 @@ internal static class HudSelfTest
 
     private static void Spawn()
     {
-        var hell = WorldState.Rules with { PartyLevelOverride = Difficulties.Hell.BaseLevelMin };
-        _a = TestKit.Spawn(VailActorTypeId.Carl, 7, -2.5f);
-        _b = TestKit.Spawn(VailActorTypeId.Carl, 9, 2.5f);
+        var hell = WorldState.Rules with { PartyLevelOverride = Difficulties.Hell.BaseLevelMin, ForcedTier = EnemyTier.Elite }; // an Elite keeps its plate (a Boss gets the boss bar instead)
+        var plain = WorldState.Rules with { AllowElites = false }; // COS-112: _a and _b must never roll a tier or affixes
+        _a = TestKit.Spawn(VailActorTypeId.Carl, 7, -2.5f, plain);
+        _b = TestKit.Spawn(VailActorTypeId.Carl, 9, 2.5f, plain);
         _elite = TestKit.Spawn(VailActorTypeId.Carl, 11, 0, hell);
         SelfTest.Check("hud: spawned three enemies", _a != null && _b != null && _elite != null);
     }
@@ -199,27 +193,12 @@ internal static class HudSelfTest
 
     private static void SheetTips()
     {
-        var panel = UI.CotsUi.Inventory;
-        panel.RefreshAll();
-        var rows = panel.SheetRows.ToDictionary(r => r.Id);
+        var all = UI.SheetData.Build(Pc);
+        var rows = all.Where(r => !r.Header).GroupBy(r => r.Id).ToDictionary(g => g.Key, g => g.First());
         foreach (var id in new[] { "thorns", "health_on_hit", "armor_piercing", "massacre_time" })
             SelfTest.Check($"hud: sheet has row {id}", rows.ContainsKey(id));
-        var noTip = panel.SheetRows.Where(r => !r.Header && r.Tip.Length == 0).Select(r => r.Id).ToList();
+        var noTip = all.Where(r => !r.Header && r.Tip.Length == 0).Select(r => r.Id).ToList();
         SelfTest.Check("hud: every sheet row has a tooltip", noTip.Count == 0, string.Join(",", noTip));
-        SelfTest.Check("hud: armor tooltip shows the live reduction", rows["armor"].Tip.Contains("%"), rows["armor"].Tip);
-
-        int points = Pc.Perks.AvailablePoints(Pc.Progress);
-        SelfTest.Check("hud: perk points shown next to the level", points > 0 && panel.PerkPointsText.StartsWith(points.ToString()), $"{points} / '{panel.PerkPointsText}'");
-
-        // The same UI raycast the item slots use.
-        string key = UI.InventoryPanel.RowPrefix + "physical_reduction";
-        var hit = panel.RaycastSlotAt(panel.ScreenPointOfRow("physical_reduction"));
-        SelfTest.Check("hud: raycast finds the sheet row", hit == key, hit ?? "null");
-
-        panel.SimulateHover(key);
-        SelfTest.Check("hud: row tooltip shown on hover", panel.RowTipShown == "physical_reduction" && panel.RowTipText.Contains("armor"), panel.RowTipText);
-        var b = panel.TooltipBounds;
-        var c = panel.CanvasSize;
-        SelfTest.Check("hud: row tooltip inside the canvas", b.xMin >= 0 && b.yMin >= 0 && b.xMax <= c.x && b.yMax <= c.y, b.ToString());
+        SelfTest.Check("hud: armor tooltip shows the live reduction", rows.TryGetValue("armor", out var armor) && armor.Tip.Contains("%"), armor.Tip);
     }
 }

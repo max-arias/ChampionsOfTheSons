@@ -1,7 +1,7 @@
-using Bolt;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
+using ChampionsOfTheSons.Mod.Loot;
 using RedLoader;
 using Sons.Ai.Vail;
 using SonsSdk;
@@ -41,6 +41,8 @@ public sealed class CoopSyncSelfTest : IModFeature
     public void OnGameStart()
     {
         _stage = 0;
+        _lateDropPlaced = false;
+        _eliteState = 0;
         _enemy = null;
     }
 
@@ -111,10 +113,41 @@ public sealed class CoopSyncSelfTest : IModFeature
                 Next(now);
                 break;
             case 2: // let it cast for a while (the client's ability, party and late-join steps run meanwhile)
+                // A long-lived drop out of pickup reach for the client's late-join check (COS-146); placed once the client's
+                // loot steps are done, so they never pick it by mistake.
+                // An elite to the side for the client's tier-effect check (COS-146): the client draws it from the synced tier.
+                if (_eliteState == 0 && now - _stageAt > 4)
+                {
+                    _eliteState = 1;
+                    EnemyRegistry.TestProfileOverride = p => p with { Tier = EnemyTier.Elite, Abilities = Array.Empty<EnemyAbility>() };
+                    try { ActorTools.Spawn(VailActorTypeId.Carl, at + new Vector3(-12, 0, 6)); }
+                    catch (Exception e) { RLog.Error($"{CoopTestJoin.Tag} server: elite spawn failed: {e.Message}"); }
+                }
+                else if (_eliteState == 1 && now - _stageAt > 8)
+                {
+                    _eliteState = 2;
+                    EnemyRegistry.TestProfileOverride = null;
+                }
+                if (!_lateDropPlaced && now - _stageAt > 12)
+                {
+                    _lateDropPlaced = true;
+                    try
+                    {
+                        var gift = new LootRoller(ModContent.Db).RollItem(ModContent.Db.Items.Values.First(d => LootRoller.IsEquippable(d) && d.Rarity == 1), 10, new ChampionsOfTheSons.Core.Rng(7));
+                        var lateDrop = LootFeature.SpawnAt(gift, at + new Vector3(0, 0, 40), DropSource.Overflow);
+                        RLog.Msg($"{CoopTestJoin.Tag} server: late-join drop {lateDrop.Id}, {lateDrop.Remaining:F0} s left");
+                    }
+                    catch (Exception e)
+                    {
+                        RLog.Error($"{CoopTestJoin.Tag} server: late-join drop failed: {e.Message}");
+                    }
+                }
                 if (now - _resent > 3)
                 {
                     _resent = now;
                     CoopSession.SendToPeers(new PlayerInfo(TestPeer, "Test Peer", 12, 1.5f, CoopSession.ToVec(at + new Vector3(3, 0, 3))));
+                    // A teammate's War Cry around the client (COS-23).
+                    CoopSession.SendToPeers(new AuraPulse(TestPeer, "spell.war_cry", CoopSession.ToVec(at), 20, 5, 1.3f, 1.2f));
                 }
                 if (now - _stageAt < 110) break;
                 RLog.Msg($"{CoopTestJoin.Tag} server: ability casts sent {Abilities.AbilityNet.Sent}");
@@ -136,11 +169,36 @@ public sealed class CoopSyncSelfTest : IModFeature
     private static float _wait = -1;
     private static bool _rooted;
     private static int _castState, _joinState;
+    private static bool _lateDropPlaced;
+    private static int _eliteState;
+    private static Dictionary<int, double> _dropsBefore = new();
+    private static float _joinWaitFrom = -1;
     private static int _shapesBefore;
 
     /// <summary>Called by <see cref="CoopSelfTest"/> before its last (version check) step.</summary>
     internal static void RegisterClientSteps()
     {
+        CoopTest.Add("tier fx: the host's elite carries its effect on the client (COS-146)", () =>
+        {
+            if (_wait < 0) _wait = Time.realtimeSinceStartup;
+            bool on = Visuals.TierFxFeature.All.Values.Any(a => a.Tier == EnemyTier.Elite);
+            if (!on && Time.realtimeSinceStartup - _wait < 15) return false;
+            CoopTest.Check("tier fx: elite effect attached on the client", on || !Visuals.FxKit.Available,
+                $"{Visuals.TierFxFeature.All.Count} attached, fx available {Visuals.FxKit.Available}");
+            _wait = -1;
+            return true;
+        }, 20);
+
+        CoopTest.Add("team spell: a teammate's War Cry buffs the client (COS-23)", () =>
+        {
+            if (_wait < 0) _wait = Time.realtimeSinceStartup;
+            bool on = Spells.SpellWorld.Buffs.Has("team.war_cry");
+            if (!on && Time.realtimeSinceStartup - _wait < 15) return false;
+            CoopTest.Check("team spell: War Cry from a teammate applied", on, $"{CoopExtras.TeamSpellsApplied} team pulse(s) applied");
+            _wait = -1;
+            return true;
+        }, 20);
+
         CoopTest.Add("abilities: a host enemy's casts play on the client", () =>
         {
             if (_wait < 0)
@@ -198,16 +256,30 @@ public sealed class CoopSyncSelfTest : IModFeature
         {
             if (_joinState == 0)
             {
+                // Wait for the host's long-lived drop (placed 12 s into its stage 2) so the rejoin has a drop to resend;
+                // the client's steps can get here first.
+                if (_joinWaitFrom < 0) _joinWaitFrom = Time.realtimeSinceStartup;
+                if (!LootFeature.Ground.All.Any() && Time.realtimeSinceStartup - _joinWaitFrom < 8) return false;
                 EnemySyncFeature.ForgetReceived();
+                _dropsBefore = LootFeature.Ground.All.ToDictionary(d => d.Id, d => d.Remaining);
+                foreach (var id in _dropsBefore.Keys.ToList()) LootFeature.Ground.Remove(id);
                 CoopSession.SendToHost(new Hello(MessageCodec.ProtocolVersion, CoopFeature.ModVersion));
                 _wait = Time.realtimeSinceStartup;
                 _joinState = 1;
                 return false;
             }
             if (EnemySyncFeature.Received.Count == 0) return false;
+            if (LootFeature.Ground.All.Count() < _dropsBefore.Count && Time.realtimeSinceStartup - _wait < 10) return false;
             CoopTest.Check("late join: the host resends existing enemies' profiles", true, $"{EnemySyncFeature.Received.Count} profile(s) after the rejoin");
+            double elapsed = Time.realtimeSinceStartup - _wait;
+            var back = LootFeature.Ground.All.ToList();
+            CoopTest.Check("late join: drops on the ground arrive again (COS-14)", _dropsBefore.Count > 0 && _dropsBefore.Keys.All(id => back.Any(d => d.Id == id)),
+                $"{_dropsBefore.Count} before, {back.Count} after");
+            bool lifetimesKept = back.Where(d => _dropsBefore.ContainsKey(d.Id)).All(d => System.Math.Abs(d.Remaining - (_dropsBefore[d.Id] - elapsed)) < 3);
+            CoopTest.Check("late join: a resent drop keeps the host's remaining lifetime (COS-146)", _dropsBefore.Count > 0 && lifetimesKept,
+                string.Join(", ", back.Select(d => $"{d.Id}: {d.Remaining:F0} s (was {(_dropsBefore.TryGetValue(d.Id, out var r) ? r : -1):F0})")));
             return true;
-        }, 20);
+        }, 25);
 
         CoopTest.Add("spells: casts carry their visuals and a teammate's copy is drawn", () =>
         {

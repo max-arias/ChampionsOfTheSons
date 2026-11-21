@@ -19,7 +19,7 @@ internal static class PadFocus
 
     public static GameObject? Current => _current != null && _current.activeInHierarchy ? _current : null;
 
-    private readonly record struct Item(Button Button, FocusRect Rect, Vector2 ScreenCenter, Vector2 ScreenSize);
+    private readonly record struct Item(Button Button, FocusRect Rect, Vector2 ScreenCenter);
 
     /// <summary>Screen rectangle (pixels, origin bottom-left) of a UI object, worked out in the SUI canvas's own units
     /// (the same basis the panels' hit-tests use), so it does not depend on the overlay canvas having been laid out for a display.</summary>
@@ -53,7 +53,7 @@ internal static class PadFocus
             var rt = b.GetComponent<RectTransform>();
             if (rt == null || !ScreenRectOf(rt, out var c, out var size)) continue;
             if (size.x < 2 || size.y < 2) continue;
-            items.Add(new Item(b, new FocusRect(c.x - size.x / 2, screenH - (c.y + size.y / 2), size.x, size.y), c, size));
+            items.Add(new Item(b, new FocusRect(c.x - size.x / 2, screenH - (c.y + size.y / 2), size.x, size.y), c));
         }
         return items;
     }
@@ -110,18 +110,7 @@ internal static class PadFocus
         var b = go.GetComponent<Button>();
         if (b == null || !b.interactable) return false;
         PadPointer.MoveTo(CenterOf(go));
-        PadPointer.Click(0);
         b.onClick.Invoke();
-        return true;
-    }
-
-    /// <summary>A right click on the focused control (item menus).</summary>
-    public static bool Secondary()
-    {
-        var go = Current;
-        if (go == null) return false;
-        PadPointer.MoveTo(CenterOf(go));
-        PadPointer.Click(1);
         return true;
     }
 

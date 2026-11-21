@@ -1,6 +1,5 @@
 using ChampionsOfTheSons.Core.Rules;
 using RedLoader;
-using Sons.StatSystem;
 using TheForest.World;
 using UnityEngine;
 
@@ -66,7 +65,6 @@ public sealed class EnemyAbilityFeature : IModFeature
             if (Math.Abs(enemy.Profile.Scale - 1) > 0.001)
             {
                 actor.SetScaleMult((float)enemy.Profile.Scale);
-                enemy.ScaleApplied = true;
             }
             if (enemy.Combat.CcImmune) actor._knockdownEnabled = false;
             foreach (var h in EnemyAbilities.For(enemy)) h.OnSpawn(enemy);
@@ -176,6 +174,5 @@ public sealed class EnemyAbilityFeature : IModFeature
         var anim = enemy.Actor!._animator;
         if (anim == null) return;
         if (Mathf.Abs(anim.speed - want) > 0.01f) anim.speed = want;
-        enemy.AppliedSpeed = anim.speed;
     }
 }

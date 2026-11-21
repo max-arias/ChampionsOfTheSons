@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text;
-using Bolt;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Net;

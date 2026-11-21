@@ -1,4 +1,3 @@
-using Bolt;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
@@ -6,8 +5,6 @@ using ChampionsOfTheSons.Mod.Bridge;
 using HarmonyLib;
 using RedLoader;
 using Sons.Ai.Vail;
-using Sons.Ai.Vail.StimuliTypes;
-using Sons.Weapon;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -38,6 +35,13 @@ public sealed class CoopHits : IModFeature
     {
         CotsNetEvent.Received += OnNet;
         EnemyPatches.EnemyHit += OnHostDamage;
+        EnemyCombatState.Applied += OnEffectApplied;
+        PlayerBridge.PlayerHurt += (damage, dodged, kind) =>
+        {
+            if (dodged || damage <= 0.5 || !CoopSession.Active) return;
+            _hurt += damage;
+            _hurtMagic |= kind == DamageKind.Magic;
+        };
     }
 
     /// <summary>True while the host applies a client's hit (that one is shown to the others by <see cref="ApplyRemoteHit"/>).</summary>
@@ -69,70 +73,100 @@ public sealed class CoopHits : IModFeature
         }
     }
 
+    // ---------------------------------------------------------------- damage the local player takes (COS-114)
+
+    private static double _hurt;
+    private static bool _hurtMagic;
+    private static float _hurtTimer;
+
+    /// <summary>Damage the local player took is shown to the teammates, summed over a short window so a DoT is one number a tick.</summary>
+    public void Update(float dt, bool inWorld)
+    {
+        _hurtTimer -= dt;
+        if (_hurtTimer > 0 || _hurt <= 0) return;
+        _hurtTimer = 0.3f;
+        double amount = _hurt;
+        bool magic = _hurtMagic;
+        _hurt = 0;
+        _hurtMagic = false;
+        if (!inWorld || !CoopSession.Active || LocalPlayer.Transform == null || (CoopSession.IsClient && !CoopFeature.Accepted)) return;
+        var shown = new DamageShown(CoopSession.HostId, 0, CoopSession.ToVec(LocalPlayer.Transform.position + Vector3.up * 2.1f), (float)amount,
+            magic ? HitFlags.Magic : HitFlags.None);
+        CoopSession.Broadcast(shown);
+    }
+
     // ---------------------------------------------------------------- client: outgoing hits
 
-    /// <summary>The hit the local player's stat sheet makes from a weapon swing of <paramref name="rawAmount"/>.</summary>
     /// <summary>Kill XP the host has granted this client (co-op test checks).</summary>
     public static long XpReceived { get; private set; }
 
-    public static OutgoingHit LocalHit(ImpactType impactType, float rawAmount, bool head)
+    /// <summary>Hits and effects the client forwarded to the host (co-op test checks).</summary>
+    public static int Forwarded { get; private set; }
+    public static int EffectsForwarded { get; private set; }
+
+    /// <summary>True on an accepted co-op client: hits, debuffs and pushes on host enemies go to the host (COS-13).</summary>
+    public static bool ForwardsToHost => CoopSession.IsClient && CoopFeature.Accepted && !EnemyRegistry.IsAuthority;
+
+    public static HitFlags WeaponFlag(WeaponClass weapon) => weapon switch
     {
-        var sheet = PlayerState.Character.Stats;
-        var weapon = impactType switch
-        {
-            ImpactType.Projectile => WeaponClass.Ranged,
-            ImpactType.Explosion => WeaponClass.Thrown,
-            _ => WeaponClass.Melee,
-        };
-        var hit = PlayerAttack.Weapon(sheet, weapon, rawAmount, Rng, headshot: weapon == WeaponClass.Ranged && head);
-        if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + sheet.Get(CombatStatIds.ExplosionDamage)) * sheet.Get(CombatStatIds.ThrownSpearDamage) };
-        return hit;
+        WeaponClass.Ranged => HitFlags.Ranged,
+        WeaponClass.Thrown => HitFlags.Thrown,
+        _ => HitFlags.Melee,
+    };
+
+    /// <summary>Client: sends one of the local player's hits on a host enemy (weapon, spell, thorns, splash) to the host.
+    /// The hit comes out of the same pipeline as the host's own (stats, procs, headshots); the host applies defense.</summary>
+    public static void Forward(EnemyRuntime runtime, OutgoingHit hit, HitFlags weapon)
+    {
+        ulong id = EnemySyncFeature.NetIdOf(runtime.Actor);
+        if (id == 0 || hit.Amount <= 0) return;
+        var flags = weapon;
+        if (hit.Crit) flags |= HitFlags.Crit;
+        if (hit.Kind == DamageKind.Magic) flags |= HitFlags.Magic;
+        if (hit.Kind == DamageKind.Pure) flags |= HitFlags.Pure;
+        CoopSession.SendToHost(new Hit(id, (float)hit.Amount, flags, (float)hit.ArmorPierce));
+        Forwarded++;
+        if (CoopTest.Enabled) RLog.Msg($"{CoopTestJoin.Tag} client: sent Hit {hit.Amount:F0} ({flags}) to enemy {id}");
     }
 
-    public static HitFlags FlagsOf(OutgoingHit hit, ImpactType type)
-    {
-        var f = HitFlags.None;
-        if (hit.Crit) f |= HitFlags.Crit;
-        if (hit.Kind == DamageKind.Magic) f |= HitFlags.Magic;
-        if (hit.Kind == DamageKind.Pure) f |= HitFlags.Pure;
-        f |= type switch { ImpactType.Projectile => HitFlags.Ranged, ImpactType.Explosion => HitFlags.Thrown, _ => HitFlags.Melee };
-        return f;
-    }
+    /// <summary>Co-op test: the hit the local stat sheet makes from a weapon swing of <paramref name="rawAmount"/>.</summary>
+    public static OutgoingHit LocalHit(ImpactType impactType, float rawAmount, bool head) =>
+        PlayerAttack.Weapon(PlayerState.Character.Stats, impactType == ImpactType.Projectile ? WeaponClass.Ranged : WeaponClass.Melee, rawAmount, Rng,
+            headshot: impactType == ImpactType.Projectile && head);
 
-    /// <summary>Sends one outgoing hit of the local player to the host (client side).</summary>
+    /// <summary>Co-op test: sends a hit message straight to the host.</summary>
     public static void SendHit(ulong enemyNetId, OutgoingHit hit, HitFlags flags)
     {
         if (enemyNetId == 0) return;
         CoopSession.SendToHost(new Hit(enemyNetId, (float)hit.Amount, flags, (float)hit.ArmorPierce));
-        if (CoopTest.Enabled) RLog.Msg($"{CoopTestJoin.Tag} client: sent Hit {hit.Amount:F0} to enemy {enemyNetId}");
     }
 
-    private static readonly int PerfBeforeReceivedDamage = Perf.Perf.Register("Hook.CoopReceivedDamage");
+    /// <summary>True while the host applies a client's forwarded effect.</summary>
+    private static bool _applyingEffect;
 
-    [HarmonyPatch(typeof(VailActor), nameof(VailActor.ReceivedDamage))]
-    [HarmonyPrefix]
-    private static void BeforeReceivedDamage(VailActor __instance, ImpactType impactType, MonoBehaviourStimuli sourceStimuli, ref float amount, bool fromPlayer)
+    /// <summary>Client: a debuff our hit or spell put on a mirror goes to the host's enemy too.</summary>
+    private static void OnEffectApplied(EnemyCombatState state, EnemyEffect e)
     {
-        using var perf = Perf.Perf.Scope(PerfBeforeReceivedDamage);
         try
         {
-            if (amount <= 0 || !fromPlayer || !CoopSession.Active) return;
-            if (CoopSession.IsClient)
-            {
-                // A client's swing: our own numbers go to the host; the vanilla amount is not applied twice.
-                var player = sourceStimuli?.TryCast<PlayerStimuli>();
-                if (player == null || !player.IsLocalPlayer()) return;
-                ulong id = EnemySyncFeature.NetIdOf(__instance);
-                if (id == 0 || !CoopFeature.Accepted) return;
-                var hit = LocalHit(impactType, amount, head: false);
-                SendHit(id, hit, FlagsOf(hit, impactType));
-                amount = 0;
-            }
+            if (_applyingEffect || !ForwardsToHost) return;
+            var runtime = EnemyRegistry.Live.FirstOrDefault(r => ReferenceEquals(r.Combat, state));
+            ulong id = runtime == null ? 0 : EnemySyncFeature.NetIdOf(runtime.Actor);
+            if (id == 0) return;
+            CoopSession.SendToHost(new EnemyEffectNet(id, e.Kind, e.Source, (float)e.Amount, (float)e.Seconds, e.Dot));
+            EffectsForwarded++;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            RLog.Error($"{CoopTestJoin.Tag} client hit hook failed: {e}");
+            RLog.Warning($"{CoopTestJoin.Tag} effect forward failed: {ex.Message}");
         }
+    }
+
+    /// <summary>Client: a spell pushed or pulled a mirror; the host moves its enemy the same way.</summary>
+    public static void ForwardPush(EnemyRuntime runtime, Vector3 delta)
+    {
+        ulong id = EnemySyncFeature.NetIdOf(runtime.Actor);
+        if (id != 0) CoopSession.SendToHost(new EnemyPush(id, CoopSession.ToVec(delta)));
     }
 
     // ---------------------------------------------------------------- host: incoming hits
@@ -146,6 +180,15 @@ public sealed class CoopHits : IModFeature
                 case Hit hit when CoopSession.IsHost && CoopFeature.Verified.Contains(from):
                     ApplyRemoteHit(CoopSession.IdOf(from), hit, from);
                     break;
+                case EnemyEffectNet fx when CoopSession.IsHost && CoopFeature.Verified.Contains(from):
+                    ApplyRemoteEffect(CoopSession.IdOf(from), fx);
+                    break;
+                case EnemyPush push when CoopSession.IsHost && CoopFeature.Verified.Contains(from):
+                    var pushed = FindLive(push.EnemyNetId);
+                    var delta = CoopSession.ToUnity(push.Delta);
+                    // A spell moves an enemy a few metres at most: refuse larger claims.
+                    if (pushed is { IsActive: true, Actor: not null } && delta.magnitude <= 20f) pushed.Actor.transform.position += delta;
+                    break;
                 case XpGranted xp when CoopSession.IsClient:
                     XpReceived += xp.Amount;
                     PlayerState.Character.OnKill(xp.Amount);
@@ -155,6 +198,14 @@ public sealed class CoopHits : IModFeature
                 case PlayerPos pos when CoopSession.IsHost && CoopFeature.Verified.Contains(from):
                     CoopSession.SetPosition(from, pos.Position);
                     CoopSession.SetLevel(from, pos.Level);
+                    break;
+                case DamageShown hurt when CoopSession.IsHost && hurt.EnemyNetId == 0 && CoopFeature.Verified.Contains(from):
+                    // A client's own damage taken (COS-114): to the other clients, and on the host's screen.
+                    var relayed = hurt with { PlayerId = CoopSession.IdOf(from) };
+                    CoopSession.SendToPeers(relayed, except: from);
+                    var hp = CoopSession.ToUnity(relayed.Position);
+                    if (LocalPlayer.Transform != null && Vector3.Distance(hp, LocalPlayer.Transform.position) <= DamageNumberRange)
+                        CoopFx.ShowDamage(hp, relayed.Amount, false);
                     break;
                 case DamageShown shown when CoopSession.IsClient:
                     // Only hits near this player (COS-81); the setting is checked where the number is drawn.
@@ -173,9 +224,31 @@ public sealed class CoopHits : IModFeature
     /// <summary>Teammates' and the host's hits farther than this from the local player show no number.</summary>
     private const float DamageNumberRange = 80f;
 
+    private static EnemyRuntime? FindLive(ulong netId) => EnemyRegistry.Live.FirstOrDefault(r => EnemySyncFeature.NetIdOf(r.Actor) == netId);
+
+    /// <summary>Host: a client's debuff on one of our enemies (COS-13), clamped to sane values.</summary>
+    private static void ApplyRemoteEffect(uint playerId, EnemyEffectNet fx)
+    {
+        var runtime = FindLive(fx.EnemyNetId);
+        if (runtime == null || !float.IsFinite(fx.Amount) || !float.IsFinite(fx.Seconds)) return;
+        double seconds = System.Math.Clamp(fx.Seconds, 0, 60);
+        double amount = fx.Kind switch
+        {
+            EnemyEffectKind.Slow => System.Math.Clamp(fx.Amount, 0, 1),
+            EnemyEffectKind.Weaken => System.Math.Clamp(fx.Amount, 1, 5),
+            _ => System.Math.Max(0, fx.Amount),
+        };
+        // Sources are per player: two players' bleeds run side by side, like their own hits would.
+        string source = fx.Source.Length == 0 ? "" : $"{fx.Source}#{playerId}";
+        LastHitter[fx.EnemyNetId] = playerId;
+        _applyingEffect = true;
+        try { runtime.Combat.Apply(new EnemyEffect(fx.Kind, source, amount, seconds, fx.Dot)); }
+        finally { _applyingEffect = false; }
+    }
+
     private static void ApplyRemoteHit(uint playerId, Hit hit, BoltConnection from)
     {
-        var runtime = EnemyRegistry.Live.FirstOrDefault(r => EnemySyncFeature.NetIdOf(r.Actor) == hit.EnemyNetId);
+        var runtime = FindLive(hit.EnemyNetId);
         if (runtime == null) return;
         // Clamp what a client may claim: finite, non-negative.
         float amount = float.IsFinite(hit.Amount) ? Mathf.Max(0, hit.Amount) : 0;

@@ -47,11 +47,8 @@ public static class CotsLootPrefabs
         Weapon("Weapon_GreatSword", "Great_Sword", 1.6f);
         Weapon("Weapon_Axe", "Bearded_Axe", 0.95f);
         Weapon("Weapon_Hammer", "War_Hammer", 1.1f);
-        Weapon("Weapon_Spear", "Spear", 2.0f);
         Weapon("Weapon_Bow", "Bow", 1.4f, alongX: true);
         Weapon("Weapon_Polearm", "Halberd", 2.1f);
-        Weapon("Weapon_GreatAxe", "Double_Axe", 1.2f);
-        Weapon("Weapon_GreatHammer", "Double_Hammer", 1.4f);
 
         // Ground drops: centred on the origin (the mod spins them about it), longest side DropSize, tilted to read in profile.
         Drop("Drop_Sword", Kickin("Arming_Sword"), 0.95f, new Vector3(0, 0, 25));

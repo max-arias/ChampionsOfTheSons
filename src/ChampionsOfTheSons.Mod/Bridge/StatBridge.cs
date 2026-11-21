@@ -1,6 +1,5 @@
 using ChampionsOfTheSons.Core.Rules;
 using RedLoader;
-using Sons.Items.Core;
 using Sons.Weapon;
 using TheForest.Utils;
 using UnityEngine;
@@ -44,8 +43,7 @@ public sealed class StatBridge : IModFeature
     /// <summary>The held melee weapon's swing speed as the game now has it (ratio to the original), or null with no weapon seen.</summary>
     public static double? MeleeSwingRatio => MeleeData.Count == 0 ? null : LastMeleeRatio;
     public static double? BulletSpeedRatio => BulletData.Count == 0 ? null : LastBulletRatio;
-    public static double? BulletSizeRatio => BulletData.Count == 0 ? null : LastBulletSize;
-    private static double LastMeleeRatio, LastBulletRatio, LastBulletSize;
+    private static double LastMeleeRatio, LastBulletRatio;
 
     /// <summary>The last bow shot-delay multiplier a bow type applied (self-tests), 1 when none.</summary>
     public static double LastShotDelayFactor { get; private set; } = 1;
@@ -152,7 +150,6 @@ public sealed class StatBridge : IModFeature
                 info.diameter = orig.Diameter * (float)size;
                 info.weight = orig.Weight * (float)pen;
                 LastBulletRatio = orig.Speed > 0 ? info.maxSpeed / orig.Speed : projSpeed;
-                LastBulletSize = orig.Diameter > 0 ? info.diameter / orig.Diameter : size;
             }
 
             foreach (var controller in root.GetComponentsInChildren<RangedWeaponController>(false))
@@ -230,6 +227,9 @@ public static class StatCoverage
         "perk_blizzard_slow_reduced", "perk_bow_damage_mult", "perk_bunny_hop", "perk_flashlight_battery_drain", "perk_flashlight_intensity",
         "spell_cataclysm_damage_scaling", "spell_cataclysm_duration", "spell_flare_radius", "spell_healing_dome_duration", "spell_parry_radius",
         "spell_blink_damage_scaling",
+        // Wave 7: the stand-in spells read these (SpellTuning), Healing Dome energy was already read.
+        "spell_snowstorm_max_charge", "debuff_resistance", "perk_golden_resolve", "spell_healing_dome_reg_energy",
+        "perk_parry_anything", "perk_multishot_projectile_count", "perk_multishot_damage_pennalty",
     };
 
     /// <summary>Kept in the data but deliberately without an in-game effect, with the reason.</summary>
@@ -243,13 +243,6 @@ public static class StatCoverage
         ["i_great_bow_ignites"] = "a test enemy could not be ignited through the game's burn API",
         ["i_archangel_bow"] = "needs a second player (co-op, COS-13)",
         ["i_smokey_crossbow_quiver"] = "needs the crossbow bolt to explode; no verified hook (COS-86 can tell crossbow shots apart now)",
-        ["spell_snowstorm_max_charge"] = "Snow Storm has no charges yet (COS-83)",
-        ["debuff_resistance"] = "player buff and debuff rules are COS-89",
-        ["perk_golden_resolve"] = "the gold rule is not defined yet",
-        ["spell_healing_dome_reg_energy"] = "Healing Dome perks and items are COS-83",
-        ["perk_parry_anything"] = "parry perks are COS-84",
-        ["perk_multishot_projectile_count"] = "Multishot is a placeholder until COS-84",
-        ["perk_multishot_damage_pennalty"] = "Multishot is a placeholder until COS-84",
         ["perk_raft_speed_multipier"] = "rafts are a vanilla survival feature we leave alone",
     };
 

@@ -1,6 +1,5 @@
 using System.Globalization;
 using ChampionsOfTheSons.Core;
-using ChampionsOfTheSons.Core.Content;
 
 namespace ChampionsOfTheSons.Mod.UI;
 

@@ -80,6 +80,58 @@ public sealed class Inventory
         return true;
     }
 
+    /// <summary>Two equal stackable items (same base, level and stats) in the bag stack together.</summary>
+    public static bool CanStack(ItemInstance a, ItemInstance b, ContentDb content) =>
+        a.BaseId == b.BaseId && a.Level == b.Level && a.Stats.SequenceEqual(b.Stats)
+        && content.Items.TryGetValue(a.BaseId, out var def) && def.StackSize > 1;
+
+    /// <summary>COS-96: dragging a stack onto an equal stack in the bag merges them up to the stack size; what does not fit stays
+    /// in <paramref name="from"/>. Anything else is a plain <see cref="Move"/> (a swap).</summary>
+    public bool MoveOrMerge(string from, string to, ContentDb content)
+    {
+        var a = Get(from);
+        var b = Get(to);
+        if (a == null || b == null || from == to || !from.StartsWith("bag.", StringComparison.Ordinal) || !to.StartsWith("bag.", StringComparison.Ordinal)
+            || !CanStack(a, b, content))
+            return Move(from, to, content);
+        int size = content.Items[a.BaseId].StackSize;
+        int moved = Math.Min(size - b.Amount, a.Amount);
+        if (moved <= 0) return Move(from, to, content); // the target stack is full: swap as before
+        _slots[to] = b with { Amount = b.Amount + moved };
+        if (a.Amount - moved > 0) _slots[from] = a with { Amount = a.Amount - moved };
+        else _slots.Remove(from);
+        Changed?.Invoke();
+        return true;
+    }
+
+    /// <summary>COS-96: Split Stack: half the stack (rounded down) goes to the first free bag slot. False for a single item or a full bag.</summary>
+    public bool Split(string slot)
+    {
+        var item = Get(slot);
+        if (item == null || item.Amount < 2 || !slot.StartsWith("bag.", StringComparison.Ordinal)) return false;
+        int half = item.Amount / 2;
+        for (int i = 0; i < LootRoller.BagSlots; i++)
+        {
+            if (_slots.ContainsKey(Bag(i))) continue;
+            _slots[Bag(i)] = item with { Amount = half };
+            _slots[slot] = item with { Amount = item.Amount - half };
+            Changed?.Invoke();
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>COS-96: takes <paramref name="amount"/> units out of a stack (partial drop); the rest stays. Null when the slot is empty.</summary>
+    public ItemInstance? Take(string slot, int amount)
+    {
+        var item = Get(slot);
+        if (item == null || amount <= 0) return null;
+        if (amount >= item.Amount) return Remove(slot);
+        _slots[slot] = item with { Amount = item.Amount - amount };
+        Changed?.Invoke();
+        return item with { Amount = amount };
+    }
+
     /// <summary>Equips a bag item into its slot (second ring slot if the first is taken), swapping out what was there.</summary>
     public bool Equip(string bagSlot, ContentDb content)
     {
@@ -238,11 +290,12 @@ public sealed class PlayerCharacter
         Perks = Perks.Bought.ToDictionary(kv => kv.Key, kv => kv.Value),
         UnlockedSpells = Perks.UnlockedSpells.ToList(),
         SpellLoadout = Spells.Loadout.ToList(),
+        LastGrantDay = Progress.LastGrantDay,
     };
 
     public void Load(PlayerSave save)
     {
-        Progress = new Progress(save.Level, save.Xp, save.BonusPerkPoints);
+        Progress = new Progress(save.Level, save.Xp, save.BonusPerkPoints) { LastGrantDay = save.LastGrantDay };
         Perks.Restore(save.Perks, save.UnlockedSpells);
         Spells.Restore(save.SpellLoadout);
         var loot = new LootRoller(Content);

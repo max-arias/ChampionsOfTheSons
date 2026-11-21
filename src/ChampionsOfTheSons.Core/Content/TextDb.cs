@@ -21,7 +21,6 @@ public sealed class TextDb
 
     public string Language { get; set; } = English;
     public IReadOnlyList<string> Errors => _errors;
-    public IEnumerable<string> LoadedLanguages => _tables.Keys;
 
     /// <summary>Files keyed by path relative to content/ ("text/en.json").</summary>
     public static TextDb Load(IReadOnlyDictionary<string, string> files)
@@ -52,15 +51,6 @@ public sealed class TextDb
         }
         if (!db._tables.ContainsKey(English)) db._errors.Add("text/en.json: missing");
         return db;
-    }
-
-    public static TextDb LoadFolder(string contentFolder)
-    {
-        var textDir = Path.Combine(contentFolder, "text");
-        var files = Directory.Exists(textDir)
-            ? Directory.GetFiles(textDir, "*.json").ToDictionary(f => "text/" + Path.GetFileName(f), File.ReadAllText)
-            : new Dictionary<string, string>();
-        return Load(files);
     }
 
     public bool Has(string key, string? language = null) =>

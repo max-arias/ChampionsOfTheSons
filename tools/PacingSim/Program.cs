@@ -3,7 +3,7 @@
 // would decide (kill pace, weapon damage, enemy mix) is an assumption listed in Assumptions and printed with the tables.
 // COS-130: enemies roll at the player's level plus the game difficulty's offset; one run per game difficulty.
 //
-//   dotnet run --project tools/PacingSim -c Release -- [content folder] [--profile hunting|casual] [--seeds N] [--xp X]
+//   dotnet run --project tools/PacingSim -c Release -- [content folder] [--profile hunting|casual] [--seeds N] [--xp X] [--fixed-kit]
 using System.Globalization;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
@@ -17,6 +17,9 @@ string folder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", ".
 var a = Assumptions.Hunting;
 int seeds = 3;
 double xpMul = 1;
+bool fixedKit = false;
+double dropMul = 1;
+double worthMul = 1;
 for (int i = 0; i < args.Length; i++)
 {
     switch (args[i])
@@ -24,10 +27,13 @@ for (int i = 0; i < args.Length; i++)
         case "--profile": a = args[++i] == "casual" ? Assumptions.Casual : Assumptions.Hunting; break;
         case "--seeds": seeds = int.Parse(args[++i]); break;
         case "--xp": xpMul = double.Parse(args[++i]); break;
+        case "--fixed-kit": fixedKit = true; break;
+        case "--drops": dropMul = double.Parse(args[++i]); break;
+        case "--worth": worthMul = double.Parse(args[++i]); break;
         default: folder = Path.GetFullPath(args[i]); break;
     }
 }
-a = a with { XpMul = xpMul };
+a = a with { XpMul = xpMul, FixedKit = fixedKit, DropMul = dropMul, WorthMul = worthMul };
 
 var content = ContentDb.LoadFolder(folder);
 if (content.Errors.Count > 0) { foreach (var e in content.Errors) Console.Error.WriteLine(e); return 1; }
@@ -57,6 +63,8 @@ foreach (var g in modes)
     Console.WriteLine($"| {g.Mode} | {g.LevelOffset:+0;-0;0} | {g.EliteChance:P0} | " + string.Join(" | ", marks.Select(m => Med(r => r.HoursTo(m)))) +
         $" | {runs.Select(r => r.LevelAt(10)).OrderBy(x => x).ElementAt(seeds / 2)} | {runs.Select(r => r.LevelAt(50)).OrderBy(x => x).ElementAt(seeds / 2)} |");
 }
+Console.WriteLine("\nDrops (equipment; XP hearts not counted): " + string.Join("; ", runsByMode.Select(kv =>
+    $"{kv.Key} {kv.Value.Sum(r => r.Drops) / kv.Value.Sum(r => r.Hours):0.0}/h, {kv.Value.Sum(r => r.Drops) / (double)Math.Max(1, kv.Value.Sum(r => r.Kills)):0.00} per kill, {kv.Value.Sum(r => r.Merges) / kv.Value.Sum(r => r.Hours):0.0} merges/h")));
 
 // 2. How a run feels over time (median seed), Normal and Hard Survival.
 foreach (var mode in new[] { GameMode.Normal, GameMode.HardSurvival })
@@ -106,13 +114,20 @@ sealed record Assumptions
     public double SecondsBetweenGroups { get; init; } = 90;
     /// <summary>Game enemy hit damage before the mod's scaling.</summary>
     public double VanillaEnemyHit { get; init; } = 15;
-    /// <summary>Drops a player sees per slot before each kit refresh (keeps the best).</summary>
+    /// <summary>Drops a player sees per slot for the starting kit (and every refresh with --fixed-kit); otherwise each refresh
+    /// gets the equipment the simulated kills since the last one actually dropped, spread over the slots.</summary>
     public int KitCandidates { get; init; } = 6;
+    /// <summary>True: the old model, <see cref="KitCandidates"/> per slot at every refresh whatever the drop rate.</summary>
+    public bool FixedKit { get; init; }
     /// <summary>Kit and perks are refreshed every this many levels.</summary>
     public int KitEveryLevels { get; init; } = 5;
     public double MaxHours { get; init; } = 300;
     public double MinHitsToDie { get; init; } = 4;
     public double XpMul { get; init; } = 1;
+    /// <summary>Host drop chance and quantity (--drops): to see what drop rate a pace needs.</summary>
+    public double DropMul { get; init; } = 1;
+    /// <summary>Multiplies the worth that drives the rarity roll (--worth): what a rarer-leaning drop table would do.</summary>
+    public double WorthMul { get; init; } = 1;
     /// <summary>Enemy mix: kind id → (weight, vanilla max health). Story bosses are left out.</summary>
     public IReadOnlyDictionary<string, (double Weight, double VanillaHp)> Mix { get; init; } = new Dictionary<string, (double, double)>
     {
@@ -129,7 +144,7 @@ sealed record Assumptions
     public string Describe() =>
         $"Assumptions: melee weapon {WeaponDamage} per swing every {SwingSeconds} s; groups of {GroupMin}-{GroupMax} enemies, {SecondsBetweenGroups} s between groups; " +
         $"vanilla enemy hit {VanillaEnemyHit}; kit = best of {KitCandidates} drops per slot (rarity from the loot roll of normal enemies at the player's level), refreshed every {KitEveryLevels} levels; " +
-        "perks bought greedily for damage x sqrt(effective health); spells, ranged, headshots, crafting and non-kill XP not modelled; no deaths.";
+        "perks bought greedily for damage x sqrt(effective health); spells, ranged, headshots and non-kill XP not modelled; no deaths.";
 }
 
 sealed record Snapshot(double Hours, int Level, int EnemyLevel, double KillsPerHour, double NormalKillSeconds, double HitsToDie);
@@ -139,6 +154,9 @@ sealed class RunResult
     public readonly SortedDictionary<int, double> FirstHourAtLevel = new();
     public readonly List<(double Hours, int Level)> Track = new();
     public readonly List<Snapshot> Snapshots = new();
+    /// <summary>Equipment drops and kills over the whole run (drop rate check, Max 2026-11-21).</summary>
+    public int Drops, Kills, Merges;
+    public double Hours;
     public double? HoursTo(int level) => FirstHourAtLevel.TryGetValue(level, out var h) ? h : null;
     public int LevelAt(double hours) => Track.LastOrDefault(t => t.Hours <= hours).Level;
 }
@@ -154,6 +172,11 @@ sealed class Sim
     public PlayerCharacter Pc { get; private set; }
     private double _seconds;
     private int _lastKitLevel = -1;
+    private int _dropsSinceKit, _kills, _totalDrops, _lastKitDrops = -1;
+    private readonly List<double> _dropWorths = new();
+    /// <summary>Drops the player did not wear, kept for Merge (COS-144): by item type and rarity ("*" for Legendary).</summary>
+    private readonly Dictionary<(string Type, int Rarity), List<ItemInstance>> _mergePool = new();
+    public int Merges { get; private set; }
     private readonly GameDifficulty _game;
 
     public Sim(ContentDb content, Assumptions a, ulong seed, GameDifficulty game)
@@ -169,7 +192,7 @@ sealed class Sim
         Pc = new PlayerCharacter(content);
     }
 
-    private WorldRules Rules => new() { GameDifficulty = _game, Xp = _a.XpMul };
+    private WorldRules Rules => new() { GameDifficulty = _game, Xp = _a.XpMul, DropChance = _a.DropMul, DropQuantity = _a.DropMul };
     private double Hours => _seconds / 3600;
     private int Party => Pc.Progress.Level;
     /// <summary>A normal enemy kind's (level extra 1) middle level at the current player level.</summary>
@@ -195,6 +218,7 @@ sealed class Sim
             FightGroup();
             Record(r);
         }
+        r.Drops = _totalDrops + _dropsSinceKit; r.Kills = _kills; r.Hours = Hours; r.Merges = Merges;
         return r;
     }
 
@@ -211,6 +235,7 @@ sealed class Sim
         Pc = new PlayerCharacter(_content);
         Pc.Load(new PlayerSave { Level = level });
         _lastKitLevel = -1;
+        _lastKitDrops = -1;
         Refresh();
     }
 
@@ -237,7 +262,18 @@ sealed class Sim
             var p = EnemyScaler.Roll(kind, hp, rules, Party, _rng);
             double t = KillSeconds(p, out bool killed);
             Advance(t);
-            if (killed) Pc.OnKill(p.Bounty);
+            if (killed)
+            {
+                Pc.OnKill(p.Bounty);
+                double mf = Math.Max(0.1, Pc.Stats.Get(StatIds.MagicFind));
+                if (LootRoller.ShouldDrop(p, rules, mf, _rng))
+                {
+                    int count = LootRoller.DropCount(p, rules, _rng);
+                    _dropsSinceKit += count;
+                    for (int d = 0; d < count; d++) _dropWorths.Add(p.Bounty); // the rarity roll scales with the killed enemy's bounty
+                }
+                _kills++;
+            }
         }
         Advance(_a.SecondsBetweenGroups);
     }
@@ -382,27 +418,90 @@ sealed class Sim
     private void RollKit()
     {
         int level = Pc.Progress.Level;
-        double worth = MeanBounty(EnemyTier.Normal);
+        double normalWorth = MeanBounty(EnemyTier.Normal);
         double mf = Math.Max(0.1, Pc.Stats.Get(StatIds.MagicFind));
         var slots = Pc.Inventory.Slots.Where(kv => kv.Key.StartsWith("equip.", StringComparison.Ordinal)).ToDictionary(kv => kv.Key, kv => kv.Value);
+        bool first = _lastKitDrops < 0;
+        bool fixedKit = first || _a.FixedKit;
+        // Real drops since the last refresh: each with the bounty of the enemy that dropped it, dealt to random slots.
+        var worths = fixedKit ? new List<double>() : _dropWorths.OrderBy(_ => _rng.NextDouble()).ToList();
+        var bySlot = LootRoller.EquipSlots.ToDictionary(sl => sl, _ => new List<double>());
+        for (int i = 0; i < worths.Count; i++) bySlot[LootRoller.EquipSlots[i % LootRoller.EquipSlots.Count]].Add(worths[i]);
+        _totalDrops += _dropsSinceKit;
+        _lastKitDrops = _dropsSinceKit;
+        _dropsSinceKit = 0;
+        _dropWorths.Clear();
         foreach (var slot in LootRoller.EquipSlots)
         {
-            ItemInstance? best = slots.GetValueOrDefault(slot);
-            Pc.Inventory.Restore(slots);
-            double bestScore = Score();
-            for (int i = 0; i < _a.KitCandidates; i++)
+            var dropWorths = fixedKit ? Enumerable.Repeat(normalWorth, _a.KitCandidates).ToList() : bySlot[slot];
+            foreach (double w in dropWorths)
             {
-                int rarity = LootRoller.RollRarity(worth, level, mf, Band.Index, _rng);
+                int rarity = LootRoller.RollRarity(w * _a.WorthMul, level, mf, Band.Index, _rng);
                 var def = _loot.PickBase(rarity, level, _rng, b => LootRoller.SlotsFor(b.Type).Contains(slot));
                 if (def == null) continue;
-                var item = _loot.RollItem(def, level, _rng);
-                slots[slot] = item;
-                Pc.Inventory.Restore(slots);
-                double sc = Score();
-                if (sc > bestScore) { bestScore = sc; best = item; }
+                Offer(slots, slot, _loot.RollItem(def, level, _rng), keepLeftovers: !fixedKit);
             }
-            if (best != null) slots[slot] = best; else slots.Remove(slot);
-            Pc.Inventory.Restore(slots);
+        }
+        if (!fixedKit) MergePool(slots);
+        Pc.Inventory.Restore(slots);
+    }
+
+    /// <summary>Wears the item in the slot if that scores better; whatever is not worn goes to the merge pool.</summary>
+    private void Offer(Dictionary<string, ItemInstance> slots, string slot, ItemInstance item, bool keepLeftovers)
+    {
+        var old = slots.GetValueOrDefault(slot);
+        Pc.Inventory.Restore(slots);
+        double before = Score();
+        slots[slot] = item;
+        Pc.Inventory.Restore(slots);
+        double after = Score();
+        ItemInstance? spare;
+        if (after > before) spare = old;
+        else
+        {
+            spare = item;
+            if (old != null) slots[slot] = old; else slots.Remove(slot);
+        }
+        if (keepLeftovers && spare != null) Pool(spare);
+    }
+
+    private void Pool(ItemInstance item)
+    {
+        if (!_content.Items.TryGetValue(item.BaseId, out var def)) return;
+        var key = ((int)item.Rarity == Rarities.Max ? "*" : def.Type, (int)item.Rarity);
+        if (!_mergePool.TryGetValue(key, out var list)) _mergePool[key] = list = new();
+        list.Add(item);
+    }
+
+    /// <summary>Merge (COS-144) as a player would: any full set of one kind becomes one item of the next rarity, at the lowest
+    /// input level, offered to its slot; leftovers stay pooled.</summary>
+    private void MergePool(Dictionary<string, ItemInstance> slots)
+    {
+        for (bool merged = true; merged;)
+        {
+            merged = false;
+            foreach (var key in _mergePool.Keys.ToList())
+            {
+                var list = _mergePool[key];
+                int need = Merger.Need((Rarity)key.Rarity);
+                if (list.Count < need) continue;
+                var batch = list.OrderByDescending(i => i.Level).Take(need).ToList();
+                foreach (var i in batch) list.Remove(i);
+                int lvl = batch.Min(i => i.Level);
+                int rarity = Math.Min(key.Rarity + 1, Rarities.Max);
+                var inputs = batch.Select(i => i.BaseId).ToHashSet();
+                var pool = _content.Items.Values.Where(d => d.Rarity == rarity && LootRoller.IsEquippable(d)
+                    && (key.Type == "*" ? !inputs.Contains(d.Id) : d.Type == key.Type)).OrderBy(d => d.Id, StringComparer.Ordinal).ToList();
+                if (pool.Count == 0) continue;
+                var fitting = pool.Where(d => d.MinLevel <= lvl).ToList();
+                if (fitting.Count == 0) fitting = pool.Where(d => d.MinLevel == pool.Min(x => x.MinLevel)).ToList();
+                var def = _rng.Pick(fitting);
+                var result = _loot.RollItem(def, lvl, _rng);
+                Merges++;
+                merged = true;
+                var slot = LootRoller.SlotsFor(def.Type).FirstOrDefault(sl => LootRoller.EquipSlots.Contains(sl));
+                if (slot != null) Offer(slots, slot, result, keepLeftovers: true); else Pool(result);
+            }
         }
     }
 }

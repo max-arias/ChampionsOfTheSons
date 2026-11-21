@@ -124,13 +124,6 @@ public static class Perf
         return new Summary(n, Avg(FrameMs), Pct(FrameMs, 0.99), Max(FrameMs), Avg(ModFrameMs), Pct(ModFrameMs, 0.99), Max(ModFrameMs));
     }
 
-    /// <summary>Per-slot cost per frame (ms) in the current window, by name.</summary>
-    public static double MsPerFrame(string name)
-    {
-        if (!ByName.TryGetValue(name, out int id) || FrameMs.Count == 0) return 0;
-        return Slots[id].TotalMs / FrameMs.Count;
-    }
-
     /// <summary>The window as a table (one line per slot, slowest per frame first). Does not reset.</summary>
     public static string Report()
     {

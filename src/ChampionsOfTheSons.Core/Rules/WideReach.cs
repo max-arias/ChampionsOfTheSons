@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Core.Content;
 
 namespace ChampionsOfTheSons.Core.Rules;
 
@@ -35,7 +34,7 @@ public static class WideReachRules
 
     /// <summary>COTF's rule: a mod drop is taken if its rarity is at least the lowest equipped rarity (COTF also always took
     /// materials, which COTS no longer has, COS-145).</summary>
-    public static bool Takes(ItemInstance item, ContentDb content, int lowestEquippedRarity) => (int)item.Rarity >= lowestEquippedRarity;
+    public static bool Takes(ItemInstance item, int lowestEquippedRarity) => (int)item.Rarity >= lowestEquippedRarity;
 
     /// <summary>Whether a game item name is on the loose-pickup list.</summary>
     public static bool IsGamePickup(string? itemName) =>

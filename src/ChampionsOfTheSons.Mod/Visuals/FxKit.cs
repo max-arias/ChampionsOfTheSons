@@ -1,5 +1,4 @@
 using ChampionsOfTheSons.Mod.Bundles;
-using RedLoader;
 using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Visuals;
@@ -118,20 +117,4 @@ internal static class FxKit
         return light;
     }
 
-    /// <summary>Points a beam or chain (0..1 along +Y) from <paramref name="a"/> to <paramref name="b"/>, <paramref name="width"/> across.</summary>
-    public static void Stretch(GameObject go, Vector3 a, Vector3 b, float width)
-    {
-        var d = b - a;
-        float len = Mathf.Max(d.magnitude, 0.01f);
-        go.transform.position = a;
-        if (d.sqrMagnitude > 1e-4f) go.transform.up = d / len;
-        go.transform.localScale = new Vector3(width / 2, len, width / 2);
-        if (go.name.EndsWith(Chain, StringComparison.Ordinal))
-            foreach (var r in go.GetComponentsInChildren<Renderer>())
-                r.material.mainTextureScale = new Vector2(1, len / Mathf.Max(width * 1.6f, 0.05f)); // one link per ~1.6 widths
-    }
-
-    public static bool IsFx(GameObject? go) => go != null && go.name.StartsWith("cots-fx-", StringComparison.Ordinal);
-
-    public static void Log(string msg) => RLog.Msg("Champions of the Sons fx: " + msg);
 }

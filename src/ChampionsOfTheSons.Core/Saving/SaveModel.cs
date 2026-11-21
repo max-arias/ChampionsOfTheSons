@@ -8,8 +8,9 @@ namespace ChampionsOfTheSons.Core.Saving;
 public sealed class PlayerSave
 {
     /// <summary>2: rolled stats carry their stat slot (COS-73). 3: deleted perks removed (COS-86/COS-87). 4: four rarities (COS-109).
-    /// 5: crafting perks, materials and socket stats removed (COS-145).</summary>
-    public const int CurrentVersion = 5;
+    /// 5: crafting perks, materials and socket stats removed (COS-145). 6: the last daily-grant day (COS-100); the island
+    /// foods removed (COS-147).</summary>
+    public const int CurrentVersion = 6;
 
     public int Version { get; set; } = CurrentVersion;
     public double Xp { get; set; }
@@ -26,6 +27,9 @@ public sealed class PlayerSave
 
     /// <summary>Spell bar, one entry per slot; null = empty slot.</summary>
     public List<string?> SpellLoadout { get; set; } = new();
+
+    /// <summary>The game day on which daily-grant perks last paid out; -1 = none yet (COS-100).</summary>
+    public int LastGrantDay { get; set; } = -1;
 }
 
 public sealed class SavedItem
@@ -69,11 +73,14 @@ public sealed class SavedStat
 /// <summary>World-wide settings, stored in the world save and owned by the host.</summary>
 public sealed class WorldSave
 {
-    public const int CurrentVersion = 3;
+    public const int CurrentVersion = 4;
 
     public int Version { get; set; } = CurrentVersion;
 
     public bool FriendlyFire { get; set; }
+
+    /// <summary>Which player's level drops roll at (<see cref="Rules.LootLevelPolicy"/> by name). Saved since version 4 (COS-77).</summary>
+    public string LootLevel { get; set; } = nameof(Rules.LootLevelPolicy.Highest);
 
     // Host multipliers and switches, saved so they survive a reload (the original's issue #29).
     public double DropQuantity { get; set; } = 1;

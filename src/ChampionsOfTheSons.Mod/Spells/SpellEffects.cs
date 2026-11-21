@@ -43,6 +43,7 @@ internal static class SpellEffects
         ["spell.firebolt"] = Firebolt,
         ["spell.snow_storm"] = SnowStorm,
         ["spell.parry"] = ParryCast,
+        ["spell.flicker_strike"] = () => FlickerRun.Start(FlickerRun.Reachable()),
     };
 
     private static GameObject? _shieldFx, _flameFx, _multishotFx;
@@ -69,6 +70,9 @@ internal static class SpellEffects
         }
         if (Stats.IsOn(PerkStatIds.WarCryResistance)) mods.Add(new StatModifier(StatIds.AllDamageTaken, EffectOp.Mult, PerkRules.WarCryDamageTaken));
         Buffs.Apply("war_cry", SpellTuning.WarCryDuration, mods);
+        // Teammates in range get the damage and attack speed part (COS-23); the armor perks stay the caster's own.
+        Net.CoopExtras.SendTeamSpell("spell.war_cry", Feet(), TeamSpells.WarCryRadius, (float)SpellTuning.WarCryDuration,
+            Math.Max(1, Stats.Get("spell_war_cry_damage")), Math.Max(1, Stats.Get("spell_war_cry_atk_speed")));
         SpellFx.Disc(Feet(), 3f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
         return true;
     }
@@ -82,7 +86,7 @@ internal static class SpellEffects
 
     private static bool GoldenSkin()
     {
-        Buffs.Apply("golden_skin", SpellTuning.GoldenSkinDuration, SpellTuning.GoldenSkin());
+        Buffs.Apply("golden_skin", SpellTuning.GoldenSkinDuration, SpellTuning.GoldenSkin(Stats));
         SpellFx.Disc(Feet(), 2.2f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
         return true;
     }
@@ -116,8 +120,9 @@ internal static class SpellEffects
 
     private static bool ParryCast()
     {
-        Parry.Cast();
-        SpellFx.Sphere(PlayerPos + Vector3.up * 1.2f, 1.1f, SpellFx.Steel, (float)SpellTuning.ParryWindow, LocalPlayer.Transform);
+        double window = SpellTuning.ParryWindowFor(Stats);
+        Parry.Cast(window);
+        SpellFx.Sphere(PlayerPos + Vector3.up * 1.2f, 1.1f, SpellFx.Steel, (float)window, LocalPlayer.Transform);
         return true;
     }
 
@@ -148,6 +153,7 @@ internal static class SpellEffects
         var health = LocalPlayer.Vitals.Health;
         double purge = PerkRules.PurgeDamage(Stats, health.GetMax() > 0 ? health._currentValue / health.GetMax() : 1);
         if (purge > 1) Buffs.Apply("purgatory", PerkRules.PurgeSeconds, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, purge) });
+        Net.CoopExtras.SendTeamSpell("spell.purge", Feet(), TeamSpells.PurgeRadius, 0, Stats.IsOn("spell_purge_heal") ? SpellTuning.PurgeHealFraction : 0);
         SpellFx.Disc(Feet(), 3f, SpellFx.Heal, 1f, LocalPlayer.Transform, SpellFx.Look.Glyph);
         return true;
     }
@@ -165,6 +171,9 @@ internal static class SpellEffects
             Visual = SpellFx.Disc(at, radius, SpellFx.Heal, 1e6f, look: SpellFx.Look.Dome),
             Pulse = z =>
             {
+                // Teammates inside heal by the caster's dome numbers, as a share of their own max health (COS-23).
+                Net.CoopExtras.SendTeamSpell("spell.healing_dome", z.Center, z.Radius, z.Interval,
+                    SpellTuning.HealingDomeHeal(1, Stats), SpellTuning.HealingDomeEnergy(1, Stats));
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
                 PlayerEffects.Heal(SpellTuning.HealingDomeHeal(LocalPlayer.Vitals.Health.GetMax(), Stats) * z.Interval);
                 PlayerEffects.AddEnergy(SpellTuning.HealingDomeEnergy(Derived.MaxEnergy(Stats), Stats) * z.Interval); // Humming Ground (COS-94)
@@ -185,6 +194,7 @@ internal static class SpellEffects
             Pulse = z =>
             {
                 foreach (var e in EnemiesWithin(z.Center, z.Radius)) e.Combat.ApplySlow("spell.flare", S("spell_flare_slow"), 2);
+                Net.CoopExtras.SendTeamSpell("spell.sun_flare", z.Center, z.Radius, 2, S("spell_flare_heal"), S("spell_flare_boost"));
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
                 PlayerEffects.Heal(S("spell_flare_heal"));
                 Buffs.Apply("flare_boost", 2, SpellTuning.Speed(Math.Max(1, S("spell_flare_boost"))));
@@ -229,7 +239,6 @@ internal static class SpellEffects
                 var dir = Eye.forward;
                 dir.y = 0;
                 LaunchBallLightning(z.Center, dir.normalized);
-                SparkBalls++;
             },
         });
         SpellFx.Disc(at - Vector3.up * 1.4f, radius, SpellFx.Dark, 0.6f);
@@ -263,11 +272,12 @@ internal static class SpellEffects
     private static bool SnowStorm()
     {
         var at = AimGround(30);
-        float radius = (float)SpellTuning.SnowStormRadius;
+        double scale = SpellTuning.SnowStormScale(Stats); // max charge makes it bigger and longer
+        float radius = (float)(SpellTuning.SnowStormRadius * Math.Sqrt(scale));
         float interval = Math.Max(0.1f, S("spell_snowstorm_hit_delay"));
         AddZone(new SpellZone
         {
-            Id = "snow_storm", Center = at, Radius = radius, Left = (float)SpellTuning.SnowStormSeconds, Interval = interval,
+            Id = "snow_storm", Center = at, Radius = radius, Left = (float)(SpellTuning.SnowStormSeconds * scale), Interval = interval,
             Visual = SpellFx.Disc(at, radius, SpellFx.Ice, 1e6f, look: SpellFx.Look.Snow),
             Pulse = z =>
             {
@@ -291,9 +301,6 @@ internal static class SpellEffects
         LaunchBallLightning(PlayerPos + Vector3.up * 1.5f + dir * 2f, dir);
         return true;
     }
-
-    /// <summary>Ball Lightnings released by Last Engineer's Note (self-test).</summary>
-    public static int SparkBalls { get; private set; }
 
     private static void LaunchBallLightning(Vector3 start, Vector3 dir)
     {
@@ -551,9 +558,6 @@ internal static class SpellEffects
         return true;
     }
 
-    /// <summary>Extra Multishot projectiles fired by Grip of Sora (self-test).</summary>
-    public static int SoraExtras { get; private set; }
-
     private static bool StartMultishot()
     {
         _multishotTimer = 0;
@@ -612,8 +616,17 @@ internal static class SpellEffects
                     _multishotTimer -= (float)SpellTuning.MultishotInterval;
                     var target = Nearest(PlayerPos, (float)SpellTuning.MultishotRange);
                     if (target == null) break;
-                    Strike(target, Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling));
-                    SpellFx.Sphere(Center(target), 0.5f, SpellFx.Steel, 0.2f);
+                    // A volley: the projectile count from perks and items; each further arrow takes the damage penalty again.
+                    int shots = SpellTuning.MultishotShots(Stats);
+                    var volley = EnemiesWithin(PlayerPos, (float)SpellTuning.MultishotRange).Where(e => e != target)
+                        .OrderBy(e => (Center(e) - PlayerPos).sqrMagnitude).Take(shots - 1).ToList();
+                    for (int s = 0; s < shots; s++)
+                    {
+                        var hit = Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling);
+                        var to = s == 0 ? target : s - 1 < volley.Count ? volley[s - 1] : target;
+                        Strike(to, hit with { Amount = hit.Amount * SpellTuning.MultishotCopyDamage(Stats, s) });
+                        SpellFx.Sphere(Center(to), 0.5f, SpellFx.Steel, 0.2f);
+                    }
                     // Grip of Sora: extra projectiles go to the next nearest enemies, the rest to the main target.
                     if (Stats.IsOn(UniqueFlagIds.Sora))
                     {
@@ -621,7 +634,6 @@ internal static class SpellEffects
                             .OrderBy(e => (Center(e) - PlayerPos).sqrMagnitude).Take(UniqueTuning.SoraExtraProjectiles).ToList();
                         for (int k = 0; k < UniqueTuning.SoraExtraProjectiles; k++)
                             Strike(k < others.Count ? others[k] : target, Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling));
-                        SoraExtras += UniqueTuning.SoraExtraProjectiles;
                     }
                 }
                 break;
