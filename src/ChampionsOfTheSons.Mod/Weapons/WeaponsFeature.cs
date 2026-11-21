@@ -50,8 +50,8 @@ public sealed class WeaponsFeature : IModFeature
 
     public void RegisterSelfTests()
     {
-        WeaponsSelfTest.Register();
-        GlowSelfTest.Register(55f);
+        float end = WeaponsSelfTest.Register();
+        GlowSelfTest.Register(Math.Max(55f, end + 2f)); // never overlap the weapon steps (their retries stretch the timeline)
     }
 }
 

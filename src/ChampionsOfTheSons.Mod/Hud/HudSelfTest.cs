@@ -91,8 +91,9 @@ internal static class HudSelfTest
     private static void Spawn()
     {
         var hell = WorldState.Rules with { PartyLevelOverride = Difficulties.Hell.BaseLevelMin };
-        _a = TestKit.Spawn(VailActorTypeId.Carl, 7, -2.5f);
-        _b = TestKit.Spawn(VailActorTypeId.Carl, 9, 2.5f);
+        var plain = WorldState.Rules with { AllowElites = false }; // COS-112: _a and _b must never roll a tier or affixes
+        _a = TestKit.Spawn(VailActorTypeId.Carl, 7, -2.5f, plain);
+        _b = TestKit.Spawn(VailActorTypeId.Carl, 9, 2.5f, plain);
         _elite = TestKit.Spawn(VailActorTypeId.Carl, 11, 0, hell);
         SelfTest.Check("hud: spawned three enemies", _a != null && _b != null && _elite != null);
     }

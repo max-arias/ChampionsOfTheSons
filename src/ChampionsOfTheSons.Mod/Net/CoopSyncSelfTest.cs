@@ -2,6 +2,7 @@ using Bolt;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
+using ChampionsOfTheSons.Mod.Loot;
 using RedLoader;
 using Sons.Ai.Vail;
 using SonsSdk;
@@ -89,10 +90,17 @@ public sealed class CoopSyncSelfTest : IModFeature
                 {
                     Abilities = new List<EnemyAbility> { EnemyAbility.Meteor, EnemyAbility.Blizzard, EnemyAbility.Chains },
                     Scale = TestScale,
+                    Tier = EnemyTier.Elite, // the client draws the tier effect from the synced tier (COS-146)
                 };
                 try
                 {
                     _enemy = ActorTools.Spawn(VailActorTypeId.Carl, at + new Vector3(10, 0, 0));
+                    // A long-lived drop out of pickup reach, for the client's late-join check (COS-146).
+                    var gift = TestKit.Give(null, 1, 10);
+                    var giftSlot = PlayerState.Character.Inventory.Slots.First(kv => ReferenceEquals(kv.Value, gift)).Key;
+                    PlayerState.Character.Inventory.Remove(giftSlot);
+                    var lateDrop = LootFeature.SpawnAt(gift, at + new Vector3(0, 0, 40), DropSource.Overflow);
+                    RLog.Msg($"{CoopTestJoin.Tag} server: late-join drop {lateDrop.Id}, {lateDrop.Remaining:F0} s left");
                     RLog.Msg($"{CoopTestJoin.Tag} server: spawned the ability enemy {(_enemy == null ? "FAILED" : "at " + _enemy.transform.position)}");
                 }
                 catch (Exception e)
@@ -136,11 +144,23 @@ public sealed class CoopSyncSelfTest : IModFeature
     private static float _wait = -1;
     private static bool _rooted;
     private static int _castState, _joinState;
+    private static Dictionary<int, double> _dropsBefore = new();
     private static int _shapesBefore;
 
     /// <summary>Called by <see cref="CoopSelfTest"/> before its last (version check) step.</summary>
     internal static void RegisterClientSteps()
     {
+        CoopTest.Add("tier fx: the host's elite carries its effect on the client (COS-146)", () =>
+        {
+            if (_wait < 0) _wait = Time.realtimeSinceStartup;
+            bool on = Visuals.TierFxFeature.All.Values.Any(a => a.Tier == EnemyTier.Elite);
+            if (!on && Time.realtimeSinceStartup - _wait < 15) return false;
+            CoopTest.Check("tier fx: elite effect attached on the client", on || !Visuals.FxKit.Available,
+                $"{Visuals.TierFxFeature.All.Count} attached, fx available {Visuals.FxKit.Available}");
+            _wait = -1;
+            return true;
+        }, 20);
+
         CoopTest.Add("abilities: a host enemy's casts play on the client", () =>
         {
             if (_wait < 0)
@@ -199,13 +219,23 @@ public sealed class CoopSyncSelfTest : IModFeature
             if (_joinState == 0)
             {
                 EnemySyncFeature.ForgetReceived();
+                _dropsBefore = LootFeature.Ground.All.ToDictionary(d => d.Id, d => d.Remaining);
+                foreach (var id in _dropsBefore.Keys.ToList()) LootFeature.Ground.Remove(id);
                 CoopSession.SendToHost(new Hello(MessageCodec.ProtocolVersion, CoopFeature.ModVersion));
                 _wait = Time.realtimeSinceStartup;
                 _joinState = 1;
                 return false;
             }
             if (EnemySyncFeature.Received.Count == 0) return false;
+            if (LootFeature.Ground.All.Count() < _dropsBefore.Count && Time.realtimeSinceStartup - _wait < 10) return false;
             CoopTest.Check("late join: the host resends existing enemies' profiles", true, $"{EnemySyncFeature.Received.Count} profile(s) after the rejoin");
+            double elapsed = Time.realtimeSinceStartup - _wait;
+            var back = LootFeature.Ground.All.ToList();
+            CoopTest.Check("late join: drops on the ground arrive again (COS-14)", _dropsBefore.Count > 0 && _dropsBefore.Keys.All(id => back.Any(d => d.Id == id)),
+                $"{_dropsBefore.Count} before, {back.Count} after");
+            bool lifetimesKept = back.Where(d => _dropsBefore.ContainsKey(d.Id)).All(d => System.Math.Abs(d.Remaining - (_dropsBefore[d.Id] - elapsed)) < 3);
+            CoopTest.Check("late join: a resent drop keeps the host's remaining lifetime (COS-146)", _dropsBefore.Count > 0 && lifetimesKept,
+                string.Join(", ", back.Select(d => $"{d.Id}: {d.Remaining:F0} s (was {(_dropsBefore.TryGetValue(d.Id, out var r) ? r : -1):F0})")));
             return true;
         }, 20);
 

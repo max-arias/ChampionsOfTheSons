@@ -27,7 +27,8 @@ internal static class WeaponsSelfTest
 
     private static int _spearsBefore, _swingsBefore;
 
-    public static void Register()
+    /// <summary>Registers the steps; returns the time after the last one, so later tests in the phase start after it.</summary>
+    public static float Register()
     {
         SelfTest.Add(1f, "weapons: equip machete", () =>
         {
@@ -68,9 +69,11 @@ internal static class WeaponsSelfTest
             });
             SelfTest.Add(t + 1.5f, $"weapons: {typeId} swing", Attack);
             SelfTest.Add(t + 1.75f, $"weapons: {typeId} screenshot", () => TestKit.Screenshot("weapons-" + typeId));
-            SelfTest.Add(t + 2.6f, $"weapons: {typeId} swing retry", RetryAttack);
-            SelfTest.Add(t + 3.8f, $"weapons: {typeId} swing fx", () => CheckSwingFx(typeId));
-            t += 4f;
+            // COS-120: under load the game swallows early presses; keep pressing (only while no swing has registered).
+            for (int r = 0; r < SwingRetries; r++)
+                SelfTest.Add(t + 2.6f + r * 0.8f, $"weapons: {typeId} swing retry {r + 1}", RetryAttack);
+            SelfTest.Add(t + 3.8f + (SwingRetries - 1) * 0.8f, $"weapons: {typeId} swing fx", () => CheckSwingFx(typeId));
+            t += 4f + (SwingRetries - 1) * 0.8f;
         }
 
         // Spear and bow: the draw key path (equip the type's base game weapon), then the same checks.
@@ -125,9 +128,10 @@ internal static class WeaponsSelfTest
         });
         SelfTest.Add(t + 6.5f, "weapons: polearm swing", Attack);
         SelfTest.Add(t + 6.75f, "weapons: polearm swing screenshot", () => TestKit.Screenshot("weapons-polearm-swing"));
-        SelfTest.Add(t + 7.6f, "weapons: polearm swing retry", RetryAttack);
-        SelfTest.Add(t + 8.8f, "weapons: polearm swing fx", () => CheckSwingFx("polearm"));
-        t += 10f;
+        for (int r = 0; r < SwingRetries; r++)
+            SelfTest.Add(t + 7.6f + r * 0.8f, $"weapons: polearm swing retry {r + 1}", RetryAttack);
+        SelfTest.Add(t + 8.8f + (SwingRetries - 1) * 0.8f, "weapons: polearm swing fx", () => CheckSwingFx("polearm"));
+        t += 10f + (SwingRetries - 1) * 0.8f;
 
         SelfTest.Add(t, "weapons: unequip", () =>
         {
@@ -141,6 +145,7 @@ internal static class WeaponsSelfTest
             SelfTest.Check("weapons: game model restored", restored);
             SelfTest.Check("weapons: projectile drop back on", ProjectileDrop.Drop != false, $"drop {ProjectileDrop.Drop}");
         });
+        return t + 1f;
     }
 
     /// <summary>COS-129 diagnosis: what the game's inventory says about an item and the hand slots.</summary>
@@ -212,6 +217,8 @@ internal static class WeaponsSelfTest
         var missing = new[] { type.SwingSound, type.HitSound }.Where(c => c != null && !ModAudio.KnownCues.Contains(c)).ToList();
         SelfTest.Check($"weapons: {type.Id} sounds registered", !ModAudio.Ready || missing.Count == 0, string.Join(", ", missing));
     }
+
+    private const int SwingRetries = 3;
 
     /// <summary>A real attack through the game weapon: its swing event plays the type's sound and lights the trail.</summary>
     private static void Attack()
