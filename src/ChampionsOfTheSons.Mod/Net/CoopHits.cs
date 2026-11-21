@@ -39,6 +39,12 @@ public sealed class CoopHits : IModFeature
         CotsNetEvent.Received += OnNet;
         EnemyPatches.EnemyHit += OnHostDamage;
         EnemyCombatState.Applied += OnEffectApplied;
+        PlayerBridge.PlayerHurt += (damage, dodged, kind) =>
+        {
+            if (dodged || damage <= 0.5 || !CoopSession.Active) return;
+            _hurt += damage;
+            _hurtMagic |= kind == DamageKind.Magic;
+        };
     }
 
     /// <summary>True while the host applies a client's hit (that one is shown to the others by <see cref="ApplyRemoteHit"/>).</summary>
@@ -69,6 +75,32 @@ public sealed class CoopHits : IModFeature
             RLog.Warning($"{CoopTestJoin.Tag} damage number broadcast failed: {e.Message}");
         }
     }
+
+    // ---------------------------------------------------------------- damage the local player takes (COS-114)
+
+    private static double _hurt;
+    private static bool _hurtMagic;
+    private static float _hurtTimer;
+
+    /// <summary>Damage the local player took is shown to the teammates, summed over a short window so a DoT is one number a tick.</summary>
+    public void Update(float dt, bool inWorld)
+    {
+        _hurtTimer -= dt;
+        if (_hurtTimer > 0 || _hurt <= 0) return;
+        _hurtTimer = 0.3f;
+        double amount = _hurt;
+        bool magic = _hurtMagic;
+        _hurt = 0;
+        _hurtMagic = false;
+        if (!inWorld || !CoopSession.Active || LocalPlayer.Transform == null || (CoopSession.IsClient && !CoopFeature.Accepted)) return;
+        var shown = new DamageShown(CoopSession.HostId, 0, CoopSession.ToVec(LocalPlayer.Transform.position + Vector3.up * 2.1f), (float)amount,
+            magic ? HitFlags.Magic : HitFlags.None);
+        CoopSession.Broadcast(shown);
+        PlayerDamageSent++;
+    }
+
+    /// <summary>Numbers sent for damage the local player took (co-op test checks).</summary>
+    public static int PlayerDamageSent { get; private set; }
 
     // ---------------------------------------------------------------- client: outgoing hits
 
@@ -173,6 +205,14 @@ public sealed class CoopHits : IModFeature
                 case PlayerPos pos when CoopSession.IsHost && CoopFeature.Verified.Contains(from):
                     CoopSession.SetPosition(from, pos.Position);
                     CoopSession.SetLevel(from, pos.Level);
+                    break;
+                case DamageShown hurt when CoopSession.IsHost && hurt.EnemyNetId == 0 && CoopFeature.Verified.Contains(from):
+                    // A client's own damage taken (COS-114): to the other clients, and on the host's screen.
+                    var relayed = hurt with { PlayerId = CoopSession.IdOf(from) };
+                    CoopSession.SendToPeers(relayed, except: from);
+                    var hp = CoopSession.ToUnity(relayed.Position);
+                    if (LocalPlayer.Transform != null && Vector3.Distance(hp, LocalPlayer.Transform.position) <= DamageNumberRange)
+                        CoopFx.ShowDamage(hp, relayed.Amount, false);
                     break;
                 case DamageShown shown when CoopSession.IsClient:
                     // Only hits near this player (COS-81); the setting is checked where the number is drawn.

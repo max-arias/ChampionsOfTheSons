@@ -69,6 +69,9 @@ internal static class SpellEffects
         }
         if (Stats.IsOn(PerkStatIds.WarCryResistance)) mods.Add(new StatModifier(StatIds.AllDamageTaken, EffectOp.Mult, PerkRules.WarCryDamageTaken));
         Buffs.Apply("war_cry", SpellTuning.WarCryDuration, mods);
+        // Teammates in range get the damage and attack speed part (COS-23); the armor perks stay the caster's own.
+        Net.CoopExtras.SendTeamSpell("spell.war_cry", Feet(), TeamSpells.WarCryRadius, (float)SpellTuning.WarCryDuration,
+            Math.Max(1, Stats.Get("spell_war_cry_damage")), Math.Max(1, Stats.Get("spell_war_cry_atk_speed")));
         SpellFx.Disc(Feet(), 3f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
         return true;
     }
@@ -148,6 +151,7 @@ internal static class SpellEffects
         var health = LocalPlayer.Vitals.Health;
         double purge = PerkRules.PurgeDamage(Stats, health.GetMax() > 0 ? health._currentValue / health.GetMax() : 1);
         if (purge > 1) Buffs.Apply("purgatory", PerkRules.PurgeSeconds, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, purge) });
+        Net.CoopExtras.SendTeamSpell("spell.purge", Feet(), TeamSpells.PurgeRadius, 0, Stats.IsOn("spell_purge_heal") ? SpellTuning.PurgeHealFraction : 0);
         SpellFx.Disc(Feet(), 3f, SpellFx.Heal, 1f, LocalPlayer.Transform, SpellFx.Look.Glyph);
         return true;
     }
@@ -165,6 +169,9 @@ internal static class SpellEffects
             Visual = SpellFx.Disc(at, radius, SpellFx.Heal, 1e6f, look: SpellFx.Look.Dome),
             Pulse = z =>
             {
+                // Teammates inside heal by the caster's dome numbers, as a share of their own max health (COS-23).
+                Net.CoopExtras.SendTeamSpell("spell.healing_dome", z.Center, z.Radius, z.Interval,
+                    SpellTuning.HealingDomeHeal(1, Stats), SpellTuning.HealingDomeEnergy(1, Stats));
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
                 PlayerEffects.Heal(SpellTuning.HealingDomeHeal(LocalPlayer.Vitals.Health.GetMax(), Stats) * z.Interval);
                 PlayerEffects.AddEnergy(SpellTuning.HealingDomeEnergy(Derived.MaxEnergy(Stats), Stats) * z.Interval); // Humming Ground (COS-94)
@@ -185,6 +192,7 @@ internal static class SpellEffects
             Pulse = z =>
             {
                 foreach (var e in EnemiesWithin(z.Center, z.Radius)) e.Combat.ApplySlow("spell.flare", S("spell_flare_slow"), 2);
+                Net.CoopExtras.SendTeamSpell("spell.sun_flare", z.Center, z.Radius, 2, S("spell_flare_heal"), S("spell_flare_boost"));
                 if (Vector3.Distance(PlayerPos, z.Center) > z.Radius) return;
                 PlayerEffects.Heal(S("spell_flare_heal"));
                 Buffs.Apply("flare_boost", 2, SpellTuning.Speed(Math.Max(1, S("spell_flare_boost"))));

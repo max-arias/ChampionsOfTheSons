@@ -49,6 +49,9 @@ public sealed class EnemyRuntime
     /// <summary>Self-tests only: overrides whether the boss bar sees this enemy as aware of the player (COS-67). Null = ask the game.</summary>
     public bool? TestAware { get; set; }
 
+    /// <summary>Co-op client: the host says this boss is aware of a player (COS-116); null until the host has said.</summary>
+    public bool? NetAware { get; set; }
+
     /// <summary>Alive, enabled in the scene and not despawned: the only state in which abilities may act (the original's bug #43).</summary>
     public bool IsActive
     {

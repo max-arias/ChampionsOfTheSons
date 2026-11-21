@@ -25,6 +25,7 @@ public sealed class CoopParty : IModFeature
         public string Name = "";
         public int Level = 1;
         public float MagicFind = 1;
+        public float ExplosionDamage;
         public Vector3 Position;
         public float Seen;
     }
@@ -119,7 +120,16 @@ public sealed class CoopParty : IModFeature
     }
 
     private static PlayerInfo MyInfo() =>
-        new(CoopSession.HostId, LocalName, PlayerState.Character.Progress.Level, (float)LocalMagicFind, CoopSession.ToVec(LocalPlayer.Transform.position));
+        new(CoopSession.HostId, LocalName, PlayerState.Character.Progress.Level, (float)LocalMagicFind, CoopSession.ToVec(LocalPlayer.Transform.position),
+            (float)PlayerState.Character.Stats.Get(CombatStatIds.ExplosionDamage));
+
+    /// <summary>Explosion damage bonus for the local player's explosions: in co-op, every player's bonus summed, as in COTF (COS-114).</summary>
+    public static double TeamExplosionDamage()
+    {
+        double sum = PlayerState.Character.Stats.Get(CombatStatIds.ExplosionDamage);
+        if (CoopSession.Active) sum += Others.Sum(m => (double)m.ExplosionDamage);
+        return sum;
+    }
 
     /// <summary>The local player's own line: shown here, sent to everyone (the host relays).</summary>
     private static void Send(Announce line, bool sendInfo)
@@ -154,6 +164,7 @@ public sealed class CoopParty : IModFeature
         m.Level = System.Math.Clamp(info.Level, 1, 100000);
         m.MagicFind = float.IsFinite(info.MagicFind) ? Mathf.Clamp(info.MagicFind, 0, 1000) : 1;
         m.Position = CoopSession.ToUnity(info.Position);
+        m.ExplosionDamage = float.IsFinite(info.ExplosionDamage) ? Mathf.Clamp(info.ExplosionDamage, 0, 100) : 0;
         m.Seen = Time.realtimeSinceStartup;
     }
 

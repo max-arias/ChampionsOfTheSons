@@ -166,7 +166,7 @@ public static class EnemyPatches
                     hit = PlayerAttack.Weapon(sheet, weapon, baseDamage, Rng);
                 }
                 // Explosions (bombs, molotovs) take the explosion stat; thrown spears are projectiles and get their own multiplier.
-                if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + sheet.Get(CombatStatIds.ExplosionDamage)) };
+                if (weapon == WeaponClass.Thrown) hit = hit with { Amount = hit.Amount * (1 + Net.CoopParty.TeamExplosionDamage()) };
                 if (weapon == WeaponClass.Melee) hit = hit with { Amount = hit.Amount * MeleeRules.FireDanceMultiplier(sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame")) };
                 double fire = sheet.Get(StatIds.FireDamage) + runtime.Combat.FireMark;
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };

@@ -261,9 +261,27 @@ public sealed class CoopExtras : IModFeature
         }
     }
 
+    /// <summary>Team spells (COS-23): the caster's War Cry, Purge, Healing Dome and Sun Flare reach teammates within the radius.</summary>
+    public static void SendTeamSpell(string spellId, Vector3 origin, float radius, float seconds, double amount, double amount2 = 0)
+    {
+        if (!CoopSession.Active || (CoopSession.IsClient && !CoopFeature.Accepted)) return;
+        CoopSession.Broadcast(new AuraPulse(CoopSession.HostId, spellId, CoopSession.ToVec(origin), radius, seconds, (float)amount, (float)amount2));
+        TeamSpellsSent++;
+    }
+
+    /// <summary>Team spell pulses sent and applied here (co-op test checks).</summary>
+    public static int TeamSpellsSent { get; private set; }
+    public static int TeamSpellsApplied { get; private set; }
+
     private static void ApplyPulse(AuraPulse pulse)
     {
         if (!LocalPlayer.IsInWorld) return;
+        if (pulse.BuffId.StartsWith("spell.", StringComparison.Ordinal))
+        {
+            if (Vector3.Distance(LocalPlayer.Transform.position, CoopSession.ToUnity(pulse.Origin)) <= pulse.Radius && Spells.TeamSpells.Apply(pulse))
+                TeamSpellsApplied++;
+            return;
+        }
         if (Auras.Apply(pulse, CoopSession.ToVec(LocalPlayer.Transform.position), Time.realtimeSinceStartup)) PulsesApplied++;
     }
 }

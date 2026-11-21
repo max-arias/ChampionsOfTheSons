@@ -123,6 +123,8 @@ public sealed class CoopSyncSelfTest : IModFeature
                 {
                     _resent = now;
                     CoopSession.SendToPeers(new PlayerInfo(TestPeer, "Test Peer", 12, 1.5f, CoopSession.ToVec(at + new Vector3(3, 0, 3))));
+                    // A teammate's War Cry around the client (COS-23).
+                    CoopSession.SendToPeers(new AuraPulse(TestPeer, "spell.war_cry", CoopSession.ToVec(at), 20, 5, 1.3f, 1.2f));
                 }
                 if (now - _stageAt < 110) break;
                 RLog.Msg($"{CoopTestJoin.Tag} server: ability casts sent {Abilities.AbilityNet.Sent}");
@@ -157,6 +159,16 @@ public sealed class CoopSyncSelfTest : IModFeature
             if (!on && Time.realtimeSinceStartup - _wait < 15) return false;
             CoopTest.Check("tier fx: elite effect attached on the client", on || !Visuals.FxKit.Available,
                 $"{Visuals.TierFxFeature.All.Count} attached, fx available {Visuals.FxKit.Available}");
+            _wait = -1;
+            return true;
+        }, 20);
+
+        CoopTest.Add("team spell: a teammate's War Cry buffs the client (COS-23)", () =>
+        {
+            if (_wait < 0) _wait = Time.realtimeSinceStartup;
+            bool on = Spells.SpellWorld.Buffs.Has("team.war_cry");
+            if (!on && Time.realtimeSinceStartup - _wait < 15) return false;
+            CoopTest.Check("team spell: War Cry from a teammate applied", on, $"{CoopExtras.TeamSpellsApplied} team pulse(s) applied");
             _wait = -1;
             return true;
         }, 20);

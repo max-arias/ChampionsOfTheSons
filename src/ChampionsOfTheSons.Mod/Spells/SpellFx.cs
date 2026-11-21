@@ -25,6 +25,15 @@ internal static class SpellFx
         public Transform? Follow;
         public Vector3 Offset;
         public Vector3 Velocity;
+        public Transform? Homing;
+    }
+
+    /// <summary>A flying visual turns toward <paramref name="target"/> at the caster's bolt turn rate (a teammate's Seeking Arrow).</summary>
+    public static void SetHoming(GameObject? go, Transform target)
+    {
+        if (go == null) return;
+        var it = Items.FirstOrDefault(x => x.Go == go);
+        if (it != null) it.Homing = target;
     }
 
     private static readonly List<Item> Items = new();
@@ -234,7 +243,15 @@ internal static class SpellFx
                 continue;
             }
             if (it.Follow != null) it.Go.transform.position = it.Follow.position + it.Offset;
-            else if (it.Velocity != Vector3.zero) it.Go.transform.position += it.Velocity * dt;
+            else if (it.Velocity != Vector3.zero)
+            {
+                if (it.Homing != null)
+                {
+                    var want = (it.Homing.position + Vector3.up * 1.2f - it.Go.transform.position).normalized;
+                    it.Velocity = Vector3.RotateTowards(it.Velocity, want * it.Velocity.magnitude, SpellWorld.BoltTurnRate * dt, 0);
+                }
+                it.Go.transform.position += it.Velocity * dt;
+            }
             it.Left -= dt;
             if (it.Left > 0) continue;
             Spells.SpellNet.Expired(it.Go);

@@ -161,6 +161,7 @@ public sealed class EnemyHudFeature : IModFeature
     private static bool Aware(EnemyRuntime r)
     {
         if (r.TestAware is { } forced) return forced;
+        if (r.NetAware is { } host) return host; // co-op client: the host's AI decides (COS-116)
         try
         {
             return r.Actor != null && r.Actor.IsInCombatAwareState();

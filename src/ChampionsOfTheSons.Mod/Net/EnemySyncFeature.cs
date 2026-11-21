@@ -97,6 +97,24 @@ public sealed class EnemySyncFeature : IModFeature
         else if (CoopSession.IsClient) ClientTick(dt);
     }
 
+    private static readonly Dictionary<ulong, bool> AwareSent = new();
+
+    /// <summary>Awareness changes the host sent (co-op test checks).</summary>
+    public static int AwareSentCount { get; private set; }
+
+    /// <summary>Host: a boss's "aware of a player" state, sent when it changes (and again to a late joiner via <see cref="ResendAll"/>).</summary>
+    private static void SendAwareness(EnemyRuntime r, ulong id)
+    {
+        bool aware;
+        try { aware = r.TestAware ?? (r.Actor != null && r.Actor.IsInCombatAwareState()); }
+        catch { return; }
+        if (!Announced.ContainsKey(id)) return; // the profile goes first; the next tick sends the state
+        if (AwareSent.TryGetValue(id, out var last) && last == aware) return;
+        AwareSent[id] = aware;
+        CoopSession.SendToPeers(new EnemyAware(id, aware));
+        AwareSentCount++;
+    }
+
     private static void HostTick(float dt)
     {
         _timer -= dt;
@@ -113,6 +131,7 @@ public sealed class EnemySyncFeature : IModFeature
             ulong id = NetIdOf(r.Actor);
             if (id == 0) continue;
             live.Add(id);
+            if (r.Profile.Tier == EnemyTier.Boss) SendAwareness(r, id);
             var health = r.Stats == null ? null : EnemyRegistry.Health(r.Stats);
             float hp = health?._currentValue ?? 0;
             float armor = (float)System.Math.Max(0, r.Profile.Armor - r.ArmorReduction);
@@ -135,7 +154,11 @@ public sealed class EnemySyncFeature : IModFeature
 
     /// <summary>A client just passed the handshake: announce every enemy again, so a late joiner gets the profiles of enemies that
     /// already exist (COS-79).</summary>
-    public static void ResendAll() => Announced.Clear();
+    public static void ResendAll()
+    {
+        Announced.Clear();
+        AwareSent.Clear();
+    }
 
     // ---------------------------------------------------------------- client
 
@@ -256,6 +279,9 @@ public sealed class EnemySyncFeature : IModFeature
                 try { applied = TryApply(s); }
                 catch (Exception e) { RLog.Error($"{CoopTestJoin.Tag} client: mirroring enemy {s.EnemyNetId} failed: {e}"); applied = false; }
                 if (!applied) Pending[s.EnemyNetId] = s;
+                break;
+            case EnemyAware a when !CoopSession.IsHost:
+                if (ActorOf(a.EnemyNetId) is { } awareActor && EnemyRegistry.Get(awareActor) is { } awareRuntime) awareRuntime.NetAware = a.Aware;
                 break;
             case EnemyHealth h when !CoopSession.IsHost:
                 if (ReceivedProfiles.TryGetValue(h.EnemyNetId, out var known))

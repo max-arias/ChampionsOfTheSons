@@ -159,11 +159,15 @@ internal static class SpellWorld
         return z;
     }
 
+    /// <summary>How fast a homing bolt turns, radians per second (the same on every machine).</summary>
+    public const float BoltTurnRate = 4f;
+
     public static SpellBolt AddBolt(SpellBolt b)
     {
         b.Dir.Normalize();
         b.CastId = SpellNet.Context;
         SpellNet.NoteMotion(b.Visual, Mathf.Min(b.Life, b.Speed > 0 ? b.Range / b.Speed : b.Life), b.Dir * b.Speed);
+        if (b.Homing && b.Target?.Actor != null) SpellNet.NoteHoming(b.Visual, Net.EnemySyncFeature.NetIdOf(b.Target.Actor));
         Bolts.Add(b);
         return b;
     }
@@ -240,7 +244,7 @@ internal static class SpellWorld
             if (b.Target != null)
             {
                 var want = (Center(b.Target) - b.Pos).normalized;
-                b.Dir = Vector3.RotateTowards(b.Dir, want, 4f * dt, 0).normalized;
+                b.Dir = Vector3.RotateTowards(b.Dir, want, BoltTurnRate * dt, 0).normalized;
             }
         }
         float step = b.Speed * dt;
