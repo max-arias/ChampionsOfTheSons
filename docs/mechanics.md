@@ -3,7 +3,7 @@
 The rules Champions of the Sons implements. Numbers and formulas come from reading the original Champions of the Forest (COTF) source (2026-11-18); the code here is new. `U(a,b)` is a uniform roll, `L` a level, `d` the index 0..10 of an enemy's level band (see Difficulty). **Deviations** from COTF are listed at the end and marked ✱ inline.
 
 ## Progression
-- XP to next level: `goal(L) = round(0.8L⁴ + L³ + 2L² + 20L + 4e^(L/3.3) + 1.36^(L−5))`; from L 138 the goal is 5e18 (practical cap).
+- ✱ XP to next level (COS-60, Max 2026-11-21): `goal(L) = round(killsPerLevel(L) × referenceBounty(L))`, `killsPerLevel(L) = 18 + 0.0003 × L^3.5` (about 19 kills of a plain on-level enemy at L10, 41 at L25, 280 at L50, 1100 at L75, 3000 at L100), `referenceBounty(L)` = the bounty of a plain enemy with 100 vanilla health at L. Fitted in PacingSim (real drops at ~50/h, Merge modelled) to Normal L25 ~5 h, L50 ~15 h, L75 ~40 h, L100 ~90 h; COTF's exponential tail stalled near L65. From L 138 the goal is 5e18 (practical cap).
 - Gaining XP: `xp += amount × expGain`; while `xp ≥ goal(L)`: `xp −= goal`, level up.
 - Level up: +1 mutation (perk) point; STR/AGI/VIT/INT from level = `A(L)` with `A(1)=1, A(x)=A(x−1)+round(√x)` (the default 1 plus `A(L) − 1` from levels: 1 at level 1, as COTF's live level-up path gives).
 - Reward items: every 10th level a Clearpulse Heart (respec); levels 25, 45, 65… a Writhing Heart (+1 permanent perk point).
@@ -48,7 +48,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 
 ## Enemies
 - Level ✱ (COS-130): `max(1, party + U[−1,1] + kindExtra + gameOffset + extraLevels)`. `party` is the average level of the players within 150 m of the enemy when it is rolled, rounded up (nobody in range: all players; a dedicated server counts only clients; `EnemyLevels.PartyLevel`). kindExtra comes from content per enemy kind (COTF: normal 1, leader 2, pale 2, painted 3, creepy 2, boss-type 6, baby 0). gameOffset is the game difficulty's (table above). The band `d` used below is the enemy's own (`Difficulties.ForLevel(L)`).
-- Damage multiplier: `L < 65 ? e^⌊L/6⌋ + L : (L−60)^2.6 × 600`.
+- ✱ Damage multiplier: `L < 65 ? e^⌊L/6⌋ + L : (L−60)^2.45 × 600` (COS-60: COTF's 2.6 made on-level enemies kill a geared player in one or two hits past L90).
 - Armor: `⌊U(L^2.43/3 + 1, L^2.43·2/3 + 20) × armorMul⌋ × (⌊d/2⌋+1)`.
 - HP: `(√vanillaHP + 45) × L^2.38 × 0.2 × 2^((L−50)/32) × healthMul`.
 - Speed: `(0.94 + L/170) × speedMul`.
@@ -62,9 +62,9 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Enemy debuffs are keyed by source: slows keep max duration/min amount per source and multiply across sources; damage-taken keeps max duration/latest amount and multiplies. COTF's summed fire bonus is not built (COS-90). DoTs tick every 1 s for `ceil(duration)` ticks.
 
 ## Loot
-- ✱ Drop on kill if the enemy is an elite, miniboss or boss, or else if `U ≤ 0.04 × dropChanceMul × magicFind` (Max 2026-11-21: about 20 items an hour on Normal; COTF's 10% with 3+ items per drop gave 65–100).
+- ✱ Drop on kill if the enemy is an elite, miniboss or boss, or else if `U ≤ 0.08 × dropChanceMul × magicFind` (Max 2026-11-21: about 50 items an hour on Normal, the rate at which found gear keeps up with the COS-60 pace in PacingSim; COTF's 10% with 3+ items per drop gave 65–100+).
 - Co-op magic find (COS-81, Max 2026-11-20): the `magicFind` used for a kill's drop chance and rarity is the sum of every player's magic find (each player's multiplier, 1 = no bonus; a missing value counts as 1; a dedicated server counts only the clients), so a group of n players without bonuses rolls with `n` (`KillCredit.TeamMagicFind`). Alone it is the player's own. Each player sends theirs to the host every 3 s; the Character page lists every player's level and magic find and the team total.
-- ✱ Count by tier: plain 1, elite `U[1,2]`, miniboss 3, boss 5 (the XP heart comes on top), × drop quantity, rounded. It does not grow with level.
+- ✱ Count by tier: plain `U[1,3]`, elite `U[2,4]`, miniboss 6, boss 10 (the XP heart comes on top), × drop quantity, rounded. It does not grow with level.
 - Item level = player level by loot level policy; "other" items whose stats do not grow with level (the respec and perk-point hearts) are level 1. The XP heart keeps its level.
 - Rarity ✱ (COS-109, Max 2026-11-20): four tiers, Common 0, Magic 1, Rare 2, Legendary 3. The roll is COTF's eight-step climb below (`LootRoller.RollStep`), then folded: steps 0–1 → Common, 2 → Magic, 3–4 → Rare, 5–7 → Legendary (`Rarities.FromLegacy`), so drop pacing is unchanged. Every unique (an item with unique effects, or one of the five hand-coded uniques) is Legendary. Climb: `w = bounty / itemLevel × MF`, `mf = √MF − 1`, fresh U each check, climbing while each step passes:
   - r1: `(w > 20 and U < 0.70 + 0.45mf + 0.075d) or (d > 5 and w > 2000)`

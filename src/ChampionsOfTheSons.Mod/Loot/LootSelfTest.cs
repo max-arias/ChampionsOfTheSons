@@ -115,7 +115,7 @@ internal static class LootSelfTest
             Abilities = new[] { EnemyAbility.Gargantuan, EnemyAbility.ExtraHealth, EnemyAbility.ExtraDamage, EnemyAbility.Blizzard },
         };
         var items = LootFeature.RollForKill(boss, rules);
-        SelfTest.Check("loot: a boss drops its five items and the XP heart", items.Count >= 6, $"{items.Count}");
+        SelfTest.Check("loot: a boss drops its ten items and the XP heart", items.Count >= 11, $"{items.Count}");
         SelfTest.Check("loot: a boss drops an XP heart (COS-123)", items.Any(i => i.BaseId == LootRoller.XpHeart));
         int maxRarity = items.Select(i => (int)i.Rarity).DefaultIfEmpty(0).Max();
         SelfTest.Check("loot: boss drops reach high rarity", maxRarity >= (int)Rarity.Rare, $"max rarity {maxRarity}");

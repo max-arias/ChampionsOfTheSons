@@ -10,9 +10,17 @@ public static class XpCurve
     public static double Goal(int level)
     {
         if (level >= PracticalMaxLevel) return 5e18;
-        double l = level;
-        return Math.Round(0.8 * Math.Pow(l, 4) + Math.Pow(l, 3) + 2 * l * l + 20 * l + 4 * Math.Exp(l / 3.3) + Math.Pow(1.36, l - 5));
+        // COS-60 (Wave 7, Max: faster overall, no wall): a level costs about KillsPerLevel(L) kills of a normal on-level enemy,
+        // so the pace follows the enemy curve instead of COTF's exponential tail (which stalled near level 65).
+        return Math.Round(KillsPerLevel(level) * EnemyScaler.ReferenceBounty(level));
     }
+
+    /// <summary>Normal kills of an on-level enemy one level costs: about 19 at level 10, 41 at 25, 280 at 50, 1100 at 75, 3000 at 100
+    /// (fitted 2026-11-21 in PacingSim with real drops at ~50 an hour and Merge, to Max's Normal targets: L25 ~5 h, L50 ~15 h,
+    /// L75 ~40 h, L100 ~90 h; late levels need many kills because on-level enemies die in about a second there).</summary>
+    public static double KillsPerLevel(int level) => KillsBase + KillsFactor * Math.Pow(level, KillsPower);
+
+    public const double KillsBase = 18, KillsFactor = 0.0003, KillsPower = 3.5;
 
     /// <summary>Attribute base value at a level: 1 + A(L), A(1)=1, A(x)=A(x−1)+round(√x).</summary>
     public static int AttributeBase(int level)

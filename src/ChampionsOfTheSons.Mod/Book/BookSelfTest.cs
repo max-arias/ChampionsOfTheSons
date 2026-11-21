@@ -336,6 +336,15 @@ internal static class BookSelfTest
         var slots = BookPages.Slots(BookTab.Bag);
         var full = slots.Where(s => s.Shown != null).ToList();
         var empty = slots.FirstOrDefault(s => s.Key.Length > 0 && s.Shown == null);
+        if (empty == null && full.Count > 2)
+        {
+            // The kills can fill the whole page: free its last slot for the move.
+            Pc.Inventory.Remove(full[^1].Key);
+            BookPages.Refresh(BookTab.Bag);
+            slots = BookPages.Slots(BookTab.Bag);
+            full = slots.Where(s => s.Shown != null).ToList();
+            empty = slots.FirstOrDefault(s => s.Key.Length > 0 && s.Shown == null);
+        }
         if (full.Count < 2 || empty == null) { SelfTest.Check("book: drag bag to bag: two items and an empty slot", false); return; }
         var a = full[0];
         var item = a.Shown!;

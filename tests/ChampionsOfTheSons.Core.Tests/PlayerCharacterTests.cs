@@ -92,14 +92,15 @@ public class PlayerCharacterTests
     public void Kills_pay_out_through_the_streak()
     {
         var c = NewCharacter();
-        c.OnKill(10);
-        c.OnKill(10);
-        c.OnKill(10);
+        double bounty = XpCurve.Goal(1) / 3;
+        c.OnKill(bounty);
+        c.OnKill(bounty);
+        c.OnKill(bounty);
         Assert.Equal(0, c.Progress.Xp);
         c.Tick(16);
-        // 3 kills × 10 XP × 1.1 streak bonus = 33; the level-1 goal is 30
+        // 3 kills × a third of the level-1 goal × 1.1 streak bonus = 1.1 goals: one level up, a tenth of the goal left over
         Assert.Equal(2, c.Progress.Level);
-        Assert.Equal(3, c.Progress.Xp, 6);
+        Assert.Equal(0.1 * XpCurve.Goal(1), c.Progress.Xp, 3);
     }
 
     [Fact]
