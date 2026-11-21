@@ -29,7 +29,8 @@ internal static class SettingsSelfTest
         SelfTest.Add(3.5f, "settings: shot the overlay", () => TestKit.Screenshot("60-settings-overlay"));
         SelfTest.Add(4f, "settings: hold Alt", HoldAlt);
         SelfTest.Add(4.3f, "settings: press 1 with Alt", () => Send(Key.Digit1, true));
-        SelfTest.Add(4.6f, "settings: Alt+1 cast the spell", AltOneCast);
+        SelfTest.Add(4.6f, "settings: Alt+1 aims the spell", AltOneAims);
+        SelfTest.Add(4.75f, "settings: releasing Alt+1 casts", AltOneCast);
         SelfTest.Add(4.9f, "settings: press a plain 1", PlainOne);
         SelfTest.Add(5.2f, "settings: plain 1 did not cast", PlainOneChecked);
         SelfTest.Add(5.6f, "settings: reset to defaults", Reset);
@@ -144,9 +145,17 @@ internal static class SettingsSelfTest
         stamina.SetCurrentValue(stamina.GetMax());
     }
 
-    private static void AltOneCast()
+    /// <summary>Blink casts on release (COS-82): holding Alt+1 aims it, letting go casts it.</summary>
+    private static void AltOneAims()
     {
         if (_kb == null) { SelfTest.Log("settings: no keyboard; key presses not checked"); return; }
+        SelfTest.Check("settings: holding Alt+1 aims Blink", Spells.SpellControl.Input.IsAiming(0) && _casts == 0, $"aiming {Spells.SpellControl.Input.IsAiming(0)}, {_casts} casts");
+        Send(Key.Digit1, false);
+    }
+
+    private static void AltOneCast()
+    {
+        if (_kb == null) return;
         SelfTest.Check("settings: Alt+1 cast the spell", _casts >= 1, $"{_casts} casts, bound {ModKeys.BoundPath(Slot1)}");
         SelfTest.Check("settings: the game's hotkey 1 and set hotkey 1 are held back under Alt",
             ModKeys.HeldBack("Hotkey1") && ModKeys.HeldBack("SetHotkey1") && !ModKeys.HeldBack("Hotkey7"),
@@ -170,7 +179,7 @@ internal static class SettingsSelfTest
     {
         SpellCaster.Casted -= OnCast;
         if (_kb == null) return;
-        SelfTest.Check("settings: a plain 1 does not cast", _casts == 0, $"{_casts} casts");
+        SelfTest.Check("settings: a plain 1 does not cast", _casts == 0 && !Spells.SpellControl.Input.IsAiming(0), $"{_casts} casts, aiming {Spells.SpellControl.Input.IsAiming(0)}");
         Send(Key.Digit1, false);
         if (_addedKeyboard)
         {
