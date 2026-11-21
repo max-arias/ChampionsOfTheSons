@@ -129,7 +129,11 @@ public static class EnemyPatches
             bool client = Net.CoopHits.ForwardsToHost;
             if ((!EnemyRegistry.IsAuthority && !client) || amount <= 0) return;
             var runtime = EnemyRegistry.Get(__instance);
-            if (runtime == null) return;
+            if (runtime == null)
+            {
+                if (fromPlayer && IsLocalPlayer(sourceStimuli)) World.WorldXpFeature.MarkPlayerHit(__instance); // animals (COS-75)
+                return;
+            }
             runtime.Actor = __instance;
 
             bool local;

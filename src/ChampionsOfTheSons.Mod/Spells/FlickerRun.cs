@@ -48,6 +48,9 @@ internal static class FlickerRun
 
     private static System.Numerics.Vector3 ToNum(Vector3 v) => new(v.x, v.y, v.z);
 
+    /// <summary>Self-test: whether the spell would see this enemy from where the player stands now.</summary>
+    public static bool Sees(EnemyRuntime e) => e.Actor != null && InSight(Eye.position, e);
+
     /// <summary>Nothing of the world (terrain, rocks, buildings) between the eye and the enemy. The player's own colliders and
     /// enemies (this one or others in the way) do not block.</summary>
     private static bool InSight(Vector3 eye, EnemyRuntime e)

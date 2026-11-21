@@ -114,6 +114,7 @@ internal static class HudSelfTest
     {
         _numbersBefore = Hud.Numbers.Spawned;
         _damagingHits = 0;
+        Config.MergeDamageNumbers.Value = false; // one number per hit here; merging has its own check (COS-95)
         // A number per hit that dealt damage: the Hell elite may roll a defensive affix that swallows its hit.
         foreach (var (target, amount) in new[] { (_a!, 20f), (_a!, 20f), (_elite!, 5000f), (_b!, 9f) })
         {
@@ -125,6 +126,7 @@ internal static class HudSelfTest
     private static void Numbers()
     {
         int spawned = Hud.Numbers.Spawned - _numbersBefore;
+        Config.MergeDamageNumbers.Value = true;
         SelfTest.Check("hud: damage numbers spawned per hit", spawned == _damagingHits && _damagingHits >= 3, $"{spawned} (last '{Hud.Numbers.LastText}', crit {Hud.Numbers.LastCrit}), {Hud.Numbers.Active} on screen");
         var a = Hud.Plates.Info(_a!);
         var rt = TestKit.Profile(_a);

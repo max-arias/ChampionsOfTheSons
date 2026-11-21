@@ -40,9 +40,14 @@ public sealed class WorldXpFeature : IModFeature
     /// <summary>From the enemy death hook, for actors that are not tracked enemies. Authority only.</summary>
     public static void OnActorDied(WorldSimActor dead, bool killedByPlayer)
     {
-        if (!killedByPlayer) return;
         if (!ModContent.Db.Animals.TryGetValue(dead.TypeId.ToString(), out var animal)) return;
         Vector3 at = dead.Position();
+        // The game's flag misses some player kills: a hit from the local player within the last 10 s near the body counts too.
+        float now = Time.realtimeSinceStartup;
+        PlayerHits.RemoveAll(h => now - h.Time > 10f);
+        bool hitByUs = PlayerHits.Any(h => Vector3.Distance(h.At, at) < 6f);
+        if (!killedByPlayer && !hitByUs) return;
+        PlayerHits.Clear();
         double xp = WorldXp.AnimalXp(animal, Rng);
         double own = animal.Everyone ? CoopHits.GiveEveryone(xp) : CoopHits.DistributeXpAt(xp, at);
         if (own > 0 || !(CoopSession.IsHost && CoopFeature.Verified.Count > 0)) PlayerState.Character.OnKill(own);
@@ -51,6 +56,14 @@ public sealed class WorldXpFeature : IModFeature
         foreach (var worth in WorldXp.DropWorths(animal, xp, Rng))
             if (LootFeature.RollAtWorth(worth) is { } item) LootFeature.SpawnScattered(item, at, source: DropSource.Enemy);
         if (SelfTest.Enabled) SelfTest.Log($"world: {animal.Actor} killed, {xp} XP");
+    }
+
+    private static readonly List<(Vector3 At, float Time)> PlayerHits = new();
+
+    /// <summary>The local player hit an actor that is not a tracked enemy (an animal).</summary>
+    public static void MarkPlayerHit(VailActor actor)
+    {
+        if (actor != null) PlayerHits.Add((actor.transform.position, Time.realtimeSinceStartup));
     }
 
     // ---------------------------------------------------------------- trees
@@ -110,7 +123,7 @@ public sealed class WorldXpFeature : IModFeature
 
     // ---------------------------------------------------------------- bushes
 
-    private static readonly Regex BushName = new("(?i)bush|shrub|sapling|fern|plant|leaf|leaves|brush");
+    private static readonly Regex BushName = new("(?i)bush|shrub|sapling|fern|plant|leaf|leaves|brush|stick");
     private static readonly HashSet<string> NamesLogged = new();
 
     /// <summary>Whether a breakable is a bush or sapling (by its name: the game has no bush type of its own).</summary>
@@ -206,7 +219,8 @@ public sealed class WorldXpFeature : IModFeature
                 float d = Vector3.Distance(t.transform.position, me);
                 if (d < best) { best = d; near = t; }
             }
-            if (near == null) { SelfTest.Log($"world: no cuttable tree within 80 m ({trees.Length} found)"); return; }
+            _treeFound = near != null;
+            if (near == null) { SelfTest.Log($"world: no cuttable tree within 80 m ({trees.Length} found): tree XP not checked here"); return; }
             SpellsTeleport(near.transform.position + (me - near.transform.position).normalized * 3f);
             xpBefore = PlayerState.Character.Progress.Xp;
             levelBefore = PlayerState.Character.Progress.Level;
@@ -214,11 +228,14 @@ public sealed class WorldXpFeature : IModFeature
         });
         SelfTest.Add(7f, "world: tree XP", () =>
         {
+            if (!_treeFound) return;
             if (LastSource != "tree") { SelfTest.Check("world: felling a tree gives flat XP", false, $"last {LastSource}"); return; }
             var pc = PlayerState.Character;
             SelfTest.Check("world: felling a tree gives flat XP", pc.Progress.Xp > xpBefore || pc.Progress.Level > levelBefore, $"xp {xpBefore:0} -> {pc.Progress.Xp:0}");
         });
     }
+
+    private static bool _treeFound;
 
     private static void SpellsTeleport(Vector3 at) => Spells.SpellCaster.TeleportPlayer(TestKit.GroundAt(at) ?? at);
 }

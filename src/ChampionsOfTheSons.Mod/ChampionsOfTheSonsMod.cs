@@ -93,7 +93,9 @@ public class ChampionsOfTheSonsMod : SonsMod
                 SelfTest.BeginPhase("ui");
                 UI.UiSelfTest.Register();
             }
-            foreach (var f in Features.Loaded)
+            // The death test's real death leaves the game's player unable to take hits for a while after the respawn, which
+            // spoils later phases (COS-153): it always runs last.
+            foreach (var f in Features.Loaded.OrderBy(x => x.GetType().Name == "DeathFeature" ? 1 : 0))
             {
                 if (only != null && !only.Contains(f.GetType().Name)) continue;
                 SelfTest.BeginPhase(f.GetType().Name);

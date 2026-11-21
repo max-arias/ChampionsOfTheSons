@@ -15,9 +15,36 @@ namespace ChampionsOfTheSons.Mod.GameRules;
 /// COTF's amount. Heals from meds and herbs, hunger and thirst drain, thirst damage and worn armor are adjusted here; traps
 /// and explosions against enemies in <see cref="EnemyPatches"/>.
 /// </summary>
-[HarmonyPatch]
 public sealed class GameRulesFeature : IModFeature
 {
+    /// <summary>
+    /// Patches one by one with a log line before each: a patch the IL2CPP runtime cannot take crashes the game without an
+    /// exception, and the log then names it.
+    /// </summary>
+    public void Init()
+    {
+        var h = new HarmonyLib.Harmony("cots.game-rules");
+        void Patch(Type type, string method, string? prefix, string? postfix)
+        {
+            RLog.Msg($"[COTS] game rules: patching {type.Name}.{method}");
+            var target = AccessTools.Method(type, method);
+            if (target == null) { RLog.Warning($"[COTS] game rules: {type.Name}.{method} not found"); return; }
+            h.Patch(target,
+                prefix: prefix == null ? null : new HarmonyMethod(typeof(GameRulesFeature), prefix),
+                postfix: postfix == null ? null : new HarmonyMethod(typeof(GameRulesFeature), postfix));
+        }
+        Patch(typeof(PlayerStats), nameof(PlayerStats.HitFire), nameof(BeforeFire), nameof(AfterFire));
+        Patch(typeof(PlayerStats), nameof(PlayerStats.HitPoison), nameof(BeforePoison), nameof(AfterPoison));
+        Patch(typeof(PlayerStats), nameof(PlayerStats.HitSkunkSpray), nameof(BeforeSkunk), nameof(AfterSkunk));
+        Patch(typeof(PlayerStats), nameof(PlayerStats.HitFromTrap), nameof(BeforeTrap), nameof(AfterTrap));
+        Patch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.DoFallDamage), nameof(BeforeFall), nameof(AfterFall));
+        Patch(typeof(Vitals), nameof(Vitals.ApplyHealing), nameof(BeforeHealing), null);
+        Patch(typeof(Sons.Wearable.Armour.PlayerArmourSystem), nameof(Sons.Wearable.Armour.PlayerArmourSystem.CalculateRemainingDamageAfterArmourHit), null, nameof(AfterArmour));
+        // Not BaseTrapController.TryTriggerTrapMechanics: patching it crashes the game as the save loads (2026-11-21).
+        // Traps are polled instead (PollTraps).
+        RLog.Msg("[COTS] game rules: patched");
+    }
+
     private static PlayerDamageSource? _flag;
     private static float _fallSpeed;
 
@@ -37,6 +64,9 @@ public sealed class GameRulesFeature : IModFeature
     {
         if (_flag is { } f) return f;
         if (impact == ImpactType.Explosion) return PlayerDamageSource.Explosion;
+        bool burning;
+        try { burning = LocalPlayer.Stats != null && LocalPlayer.Stats.IsBurning; } catch { burning = false; }
+        if (burning && !recentAttacker && !isDemonic && impact is not (ImpactType.Melee or ImpactType.Projectile)) return PlayerDamageSource.Fire;
         if (recentAttacker || isDemonic || impact is ImpactType.Melee or ImpactType.Projectile || enemyInReach)
             return PlayerDamageSource.Enemy;
         return PlayerDamageSource.Environment;
@@ -59,25 +89,21 @@ public sealed class GameRulesFeature : IModFeature
     private static void Mark(PlayerDamageSource s) => _flag = s;
     private static void Unmark() => _flag = null;
 
-    [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.HitFire))] [HarmonyPrefix] private static void BeforeFire() => Mark(PlayerDamageSource.Fire);
-    [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.HitFire))] [HarmonyPostfix] private static void AfterFire() => Unmark();
-    [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.HitPoison))] [HarmonyPrefix] private static void BeforePoison() => Mark(PlayerDamageSource.Poison);
-    [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.HitPoison))] [HarmonyPostfix] private static void AfterPoison() => Unmark();
-    [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.HitSkunkSpray))] [HarmonyPrefix] private static void BeforeSkunk() => Mark(PlayerDamageSource.Poison);
-    [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.HitSkunkSpray))] [HarmonyPostfix] private static void AfterSkunk() => Unmark();
-    [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.HitFromTrap))] [HarmonyPrefix] private static void BeforeTrap() => Mark(PlayerDamageSource.Trap);
-    [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.HitFromTrap))] [HarmonyPostfix] private static void AfterTrap() => Unmark();
+    private static void BeforeFire() => Mark(PlayerDamageSource.Fire);
+    private static void AfterFire() => Unmark();
+    private static void BeforePoison() => Mark(PlayerDamageSource.Poison);
+    private static void AfterPoison() => Unmark();
+    private static void BeforeSkunk() => Mark(PlayerDamageSource.Poison);
+    private static void AfterSkunk() => Unmark();
+    private static void BeforeTrap() => Mark(PlayerDamageSource.Trap);
+    private static void AfterTrap() => Unmark();
 
-    [HarmonyPatch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.DoFallDamage))]
-    [HarmonyPrefix]
     private static void BeforeFall(FirstPersonCharacter __instance)
     {
         try { _fallSpeed = Mathf.Abs(__instance.LandingVelocityY); } catch { _fallSpeed = 0; }
         Mark(PlayerDamageSource.Fall);
     }
 
-    [HarmonyPatch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.DoFallDamage))]
-    [HarmonyPostfix]
     private static void AfterFall() => Unmark();
 
     // ---------------------------------------------------------------- heals
@@ -88,8 +114,6 @@ public sealed class GameRulesFeature : IModFeature
 
     /// <summary>Meds 60% of max health, herbs 6%, other heals +0.2% of max health per point. A heal right after the bag lost
     /// meds or a herb counts as that item.</summary>
-    [HarmonyPatch(typeof(Vitals), nameof(Vitals.ApplyHealing))]
-    [HarmonyPrefix]
     private static void BeforeHealing(ref float value)
     {
         try
@@ -137,8 +161,6 @@ public sealed class GameRulesFeature : IModFeature
 
     // ---------------------------------------------------------------- armor
 
-    [HarmonyPatch(typeof(Sons.Wearable.Armour.PlayerArmourSystem), nameof(Sons.Wearable.Armour.PlayerArmourSystem.CalculateRemainingDamageAfterArmourHit))]
-    [HarmonyPostfix]
     private static void AfterArmour(float initialDamage, ref float __result)
     {
         __result = (float)Core.Rules.GameRules.WornArmorRemaining(initialDamage, __result);
@@ -150,9 +172,36 @@ public sealed class GameRulesFeature : IModFeature
     private static Vector3 _trapAt;
     private static float _trapUntil;
 
-    [HarmonyPatch(typeof(Sons.Gameplay.Traps.BaseTrapController), nameof(Sons.Gameplay.Traps.BaseTrapController.TryTriggerTrapMechanics))]
-    [HarmonyPrefix]
-    private static void BeforeTrapTriggers(Sons.Gameplay.Traps.BaseTrapController __instance)
+    private static readonly List<Sons.Gameplay.Traps.BaseTrapController> Traps = new();
+    private static readonly HashSet<IntPtr> Triggered = new();
+    private static float _trapScan, _trapPoll;
+
+    /// <summary>Every 5 s: the traps within 60 m. Every 0.1 s: a trap that just went off sets the trap context.</summary>
+    private static void PollTraps(float dt)
+    {
+        var me = LocalPlayer.Transform;
+        if (me == null) return;
+        _trapScan -= dt;
+        if (_trapScan <= 0)
+        {
+            _trapScan = 5f;
+            Traps.Clear();
+            foreach (var t in UnityEngine.Object.FindObjectsOfType<Sons.Gameplay.Traps.BaseTrapController>())
+                if (t != null && Vector3.Distance(t.transform.position, me.position) < 60f) Traps.Add(t);
+        }
+        _trapPoll -= dt;
+        if (_trapPoll > 0) return;
+        _trapPoll = 0.1f;
+        foreach (var t in Traps)
+        {
+            if (t == null) continue;
+            bool on = t.IsTriggered;
+            if (on && Triggered.Add(t.Pointer)) OnTrapTriggered(t);
+            else if (!on) Triggered.Remove(t.Pointer);
+        }
+    }
+
+    private static void OnTrapTriggered(Sons.Gameplay.Traps.BaseTrapController __instance)
     {
         try
         {
@@ -196,6 +245,7 @@ public sealed class GameRulesFeature : IModFeature
         try
         {
             TrackConsumables();
+            PollTraps(dt);
             var v = LocalPlayer.Vitals;
             var s = PlayerState.Character.Stats;
             if (v != null)

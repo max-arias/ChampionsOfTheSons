@@ -28,7 +28,11 @@ internal static class FlickerSelfTest
     {
         SelfTest.Add(0.5f, "flicker: unpause", TestKit.Unpause);
         SelfTest.Add(1f, "flicker: spawn three", Spawn);
-        SelfTest.Add(4f, "flicker: cast", Cast);
+        // The spell's own sight rule decides, once the spawned enemies have settled: one it would not see is replaced by one
+        // nearer the player (COS-152).
+        SelfTest.Add(1.8f, "flicker: sight check 1", () => Resight(1));
+        SelfTest.Add(2.6f, "flicker: sight check 2", () => Resight(2));
+        SelfTest.Add(3.4f, "flicker: cast", Cast);
         SelfTest.Add(7f, "flicker: payoff", Payoff);
         SelfTest.Add(8f, "flicker: no target", NoTarget);
         SelfTest.Add(9f, "flicker: cleanup", Cleanup);
@@ -43,6 +47,27 @@ internal static class FlickerSelfTest
         foreach (var (d, side) in Spots)
             if (TestKit.Spawn(VailActorTypeId.Carl, d, side, plain) is { } v) Enemies.Add(v);
         SelfTest.Check("flicker: three enemies spawned", Enemies.Count == 3, Enemies.Count.ToString());
+        // Held in place until the cast, so none walks behind a rock first (COS-152).
+        foreach (var e in Enemies)
+            if (EnemyRegistry.Get(e) is { } r) r.Combat.ApplyStun(4);
+    }
+
+    private static void Resight(int attempt)
+    {
+        var plain = WorldState.Rules with { AllowElites = false, PartyLevelOverride = 5 };
+        for (int i = 0; i < Enemies.Count; i++)
+        {
+            if (EnemyRegistry.Get(Enemies[i]) is not { } r || FlickerRun.Sees(r)) continue;
+            TestKit.Kill(Enemies[i]);
+            var (d, side) = Spots[i];
+            float k = 1f - 0.3f * attempt;
+            if (TestKit.Spawn(VailActorTypeId.Carl, d * k, side * k, plain) is { } again)
+            {
+                Enemies[i] = again;
+                if (EnemyRegistry.Get(again) is { } nr) nr.Combat.ApplyStun(4);
+            }
+            SelfTest.Log($"flicker: enemy {i} out of sight, respawned at {d * k:0.#} m");
+        }
     }
 
     private static SpellCastOutcome CastSpell()
