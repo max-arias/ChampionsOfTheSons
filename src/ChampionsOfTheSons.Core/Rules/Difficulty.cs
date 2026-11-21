@@ -3,7 +3,7 @@ namespace ChampionsOfTheSons.Core.Rules;
 /// <summary>
 /// One of the 11 level bands (COTF's difficulty tiers). Since COS-130 nobody picks one: an enemy's band is the highest one whose
 /// <see cref="BaseLevelMin"/> its level reaches (<see cref="Difficulties.ForLevel"/>), and the band gives the per-level tables
-/// (armor factor, shielding cooldown, Meteor and Laser damage, elite ability count, ability gating, loot rarity).
+/// (shielding cooldown, Meteor and Laser damage, elite ability count, ability gating, loot rarity).
 /// <see cref="Index"/> is d in the formulas (0 = Easy, 10 = Hell).
 /// </summary>
 public sealed record DifficultyTier(
@@ -18,7 +18,6 @@ public sealed record DifficultyTier(
     int LaserDamageMin,
     int LaserDamageMax)
 {
-    public int ArmorFactor => Index / 2 + 1;
     public bool IsHell => Index == Difficulties.Hell.Index;
     /// <summary>Elite ability count range (inclusive).</summary>
     public (int Min, int Max) EliteAbilityCount => Index <= 1 ? (2, 2) : (3, 6);
@@ -82,23 +81,24 @@ public sealed record GameDifficulty(GameMode Mode, int LevelOffset)
     public static readonly GameDifficulty Normal = For(GameMode.Normal);
 
     /// <summary>Chance that a normal enemy kind rolls as an elite: 10% plus 1% per offset level, 5% to 25%.</summary>
-    public double EliteChance => Math.Clamp(0.10 + 0.01 * LevelOffset, 0.05, 0.25);
+    public double EliteChance => Math.Clamp(0.10 + 0.025 * LevelOffset, 0.05, 0.25);
 
-    /// <summary>Peaceful −2, Normal and Creative 0, Hard +5, Hard Survival +10, Custom from its enemy sliders.</summary>
+    /// <summary>Peaceful −2, Normal and Creative 0, Hard +2, Hard Survival +4, Custom from its enemy sliders (COS-150: with the
+    /// item power curve, +10 levels made Hard Survival fights 5-17x longer than Normal's; +4 keeps them within about 2.5x).</summary>
     public static GameDifficulty For(GameMode mode, GameSlider health = GameSlider.Normal, GameSlider damage = GameSlider.Normal,
         GameSlider armour = GameSlider.Normal, GameSlider aggression = GameSlider.Normal) => new(mode, mode switch
     {
         GameMode.Peaceful => -2,
-        GameMode.Hard => 5,
-        GameMode.HardSurvival => 10,
+        GameMode.Hard => 2,
+        GameMode.HardSurvival => 4,
         GameMode.Custom => CustomOffset(health, damage, armour, aggression),
         _ => 0,
     });
 
-    /// <summary>Custom game: each of enemy health, damage, armour and aggression adds −1 at Low and +2.5 at High (all High = Hard Survival's +10).</summary>
+    /// <summary>Custom game: each of enemy health, damage, armour and aggression adds −0.5 at Low and +1 at High (all High = Hard Survival's +4).</summary>
     public static int CustomOffset(GameSlider health, GameSlider damage, GameSlider armour, GameSlider aggression)
     {
-        static double Of(GameSlider s) => s switch { GameSlider.Low => -1, GameSlider.High => 2.5, _ => 0 };
+        static double Of(GameSlider s) => s switch { GameSlider.Low => -0.5, GameSlider.High => 1, _ => 0 };
         return (int)Math.Round(Of(health) + Of(damage) + Of(armour) + Of(aggression), MidpointRounding.AwayFromZero);
     }
 }
