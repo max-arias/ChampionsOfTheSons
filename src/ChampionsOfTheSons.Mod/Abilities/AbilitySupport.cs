@@ -166,6 +166,7 @@ internal static class AbilityForces
     /// <summary>Per source, keeps the strongest amount and longest duration.</summary>
     public static void AddSlow(string source, double speedMult, float seconds)
     {
+        seconds = (float)SpellTuning.DebuffSeconds(PlayerState.Character.Stats, seconds); // debuff resistance
         if (Slows.TryGetValue(source, out var s))
         {
             s.Amount = Mathf.Min(s.Amount, (float)speedMult);

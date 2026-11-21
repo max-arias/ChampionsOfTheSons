@@ -468,7 +468,7 @@
       "legacyName": "debuffResistance",
       "kind": "add",
       "default": 0.0,
-      "integer": true
+      "percent": true
     },
     {
       "id": "jump_power",

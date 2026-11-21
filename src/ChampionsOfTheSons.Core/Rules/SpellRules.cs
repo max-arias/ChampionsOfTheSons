@@ -49,11 +49,41 @@ public static class SpellTuning
         new StatModifier(StatIds.MaxHealthMult, EffectOp.Mult, Math.Max(0.1, s.Get("spell_berserk_max_hp"))),
     };
 
-    public static StatModifier[] GoldenSkin() => new[]
+    public static StatModifier[] GoldenSkin(StatSheet s)
     {
-        new StatModifier(StatIds.Armor, EffectOp.Add, GoldenSkinArmor),
-        new StatModifier(StatIds.AllDamageTaken, EffectOp.Mult, GoldenSkinDamageTaken),
-    };
+        var mods = new List<StatModifier>
+        {
+            new(StatIds.Armor, EffectOp.Add, GoldenSkinArmor),
+            new(StatIds.AllDamageTaken, EffectOp.Mult, GoldenSkinDamageTaken),
+        };
+        // Golden Resolve (perk or the gold set, COS-105 wave: dead stats get a use): gold halves the damage taken on top.
+        if (s.IsOn(GoldenResolve)) mods.Add(new StatModifier(StatIds.AllDamageTaken, EffectOp.Mult, GoldenResolveDamageTaken));
+        return mods.ToArray();
+    }
+
+    public const string GoldenResolve = "perk_golden_resolve", ParryAnything = "perk_parry_anything",
+        MultishotCount = "perk_multishot_projectile_count", MultishotPenalty = "perk_multishot_damage_pennalty",
+        SnowStormCharge = "spell_snowstorm_max_charge", DebuffResistance = "debuff_resistance";
+    public const double GoldenResolveDamageTaken = 0.5, SnowStormBaseCharge = 10, MaxDebuffResistance = 0.75;
+
+    /// <summary>Multishot: arrows per volley (<c>perk_multishot_projectile_count</c>, 1 without perks or items).</summary>
+    public static int MultishotShots(StatSheet s) => Math.Max(1, (int)Math.Round(s.Get(MultishotCount)));
+
+    /// <summary>Multishot: the i-th arrow of a volley (0 = first) deals the penalty to the i-th power (×0.75, ×0.56, ...).</summary>
+    public static double MultishotCopyDamage(StatSheet s, int i)
+    {
+        double penalty = s.Get(MultishotPenalty);
+        return Math.Pow(penalty > 0 ? Math.Min(1, penalty) : 0.75, i);
+    }
+
+    /// <summary>Parry window; Parry Anything (perk or the first survivor's shield) doubles it.</summary>
+    public static double ParryWindowFor(StatSheet s) => s.IsOn(ParryAnything) ? ParryWindow * 2 : ParryWindow;
+
+    /// <summary>Snow Storm grows with max charge (10 by default): duration × charge/10, radius × √(charge/10).</summary>
+    public static double SnowStormScale(StatSheet s) => Math.Max(SnowStormBaseCharge, s.Get(SnowStormCharge)) / SnowStormBaseCharge;
+
+    /// <summary>Debuff resistance (a fraction, the gold set gives 0.25) shortens slows, stuns and poison on the player, at most by 75%.</summary>
+    public static double DebuffSeconds(StatSheet s, double seconds) => seconds * (1 - Math.Clamp(s.Get(DebuffResistance), 0, MaxDebuffResistance));
 
     public static StatModifier[] Focus(StatSheet s) => new[]
     {
@@ -157,7 +187,7 @@ public sealed class ParryState
 
     public bool Open => _left > 0;
 
-    public void Cast() => _left = SpellTuning.ParryWindow;
+    public void Cast(double window = SpellTuning.ParryWindow) => _left = window;
 
     public void Tick(double dt) => _left = Math.Max(0, _left - dt);
 
