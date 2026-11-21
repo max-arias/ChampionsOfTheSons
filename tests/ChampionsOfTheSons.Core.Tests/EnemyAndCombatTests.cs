@@ -14,7 +14,18 @@ public class EnemyScalerTests
         {
             Assert.True(EnemyScaler.MaxHealth(l + 1, 100, 1) >= EnemyScaler.MaxHealth(l, 100, 1));
             Assert.True(EnemyScaler.DamageMultiplier(l + 1) >= EnemyScaler.DamageMultiplier(l), $"damage drops at {l}");
+            Assert.True(EnemyScaler.MeanArmor(l + 1) >= EnemyScaler.MeanArmor(l), $"armor drops at {l}");
         }
+    }
+
+    [Fact]
+    public void Level_curves_pass_through_their_knots_and_never_overshoot_between_them()
+    {
+        var c = new LevelCurve((1, 0), (10, 3), (20, 3), (30, 8));
+        Assert.Equal(3, c.Log10At(10), 9);
+        Assert.Equal(8, c.Log10At(30), 9);
+        for (double l = 10; l <= 20; l += 0.5) Assert.Equal(3, c.Log10At(l), 9); // flat between equal knots
+        for (double l = 1; l < 40; l += 0.25) Assert.True(c.Log10At(l + 0.25) >= c.Log10At(l) - 1e-12, $"dips at {l}");
     }
 
     [Fact]

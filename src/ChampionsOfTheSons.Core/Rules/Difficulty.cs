@@ -3,7 +3,7 @@ namespace ChampionsOfTheSons.Core.Rules;
 /// <summary>
 /// One of the 11 level bands (COTF's difficulty tiers). Since COS-130 nobody picks one: an enemy's band is the highest one whose
 /// <see cref="BaseLevelMin"/> its level reaches (<see cref="Difficulties.ForLevel"/>), and the band gives the per-level tables
-/// (armor factor, shielding cooldown, Meteor and Laser damage, elite ability count, ability gating, loot rarity).
+/// (shielding cooldown, Meteor and Laser damage, elite ability count, ability gating, loot rarity).
 /// <see cref="Index"/> is d in the formulas (0 = Easy, 10 = Hell).
 /// </summary>
 public sealed record DifficultyTier(
@@ -18,7 +18,6 @@ public sealed record DifficultyTier(
     int LaserDamageMin,
     int LaserDamageMax)
 {
-    public int ArmorFactor => Index / 2 + 1;
     public bool IsHell => Index == Difficulties.Hell.Index;
     /// <summary>Elite ability count range (inclusive).</summary>
     public (int Min, int Max) EliteAbilityCount => Index <= 1 ? (2, 2) : (3, 6);

@@ -102,25 +102,56 @@ public static class EnemyScaler
         return Math.Max(1, party + rng.RangeInclusive(-1, 1) + kind.LevelExtra + rules.GameDifficulty.LevelOffset + rules.ExtraEnemyLevels);
     }
 
-    public static double DamageMultiplier(int level) =>
-        level < 65 ? Math.Exp(level / 6) + level : Math.Pow(level - 60, HighLevelDamagePower) * 600;
+    // COS-150: the three enemy level curves, as log10 knots (monotone cubic between knots, straight in log10 past the last).
+    // Fitted in PacingSim (real drops, Merge) so a plain on-level enemy takes about 8-20 s to kill and about 6-60 of its hits
+    // to kill a geared player on Normal, while Hard Survival (+10 levels) stays as close to that as one curve allows. They
+    // follow the player's gear, which grows fastest from level 40 to 80. COTF's curves (L^2.38 health, e^⌊L/6⌋ damage,
+    // L^2.43 × band armor) left late enemies dying in one hit and mid-level ones unable to hurt the player.
 
-    /// <summary>COS-60: COTF used 2.6, under which an on-level geared player died to one or two hits past level 90.</summary>
-    public const double HighLevelDamagePower = 2.45;
+    /// <summary>Health of a plain enemy with 100 vanilla health, by level.</summary>
+    public static readonly LevelCurve HealthCurve = new(
+        (1, 2.0), (5, 2.5), (10, 2.9), (20, 3.53), (30, 3.9), (40, 4.9), (50, 6.0), (60, 7.15), (70, 8.3), (80, 8.9),
+        (90, 9.3), (100, 9.7), (110, 9.9), (120, 10.08), (130, 10.25), (200, 11.05), (300, 12.05));
 
-    /// <remarks>COTF's curve; vanilla health is a floor (SotF enemies would otherwise be ~5× weaker than vanilla below level 5).</remarks>
-    public static double MaxHealth(int level, double vanillaHealth, double healthMul) =>
+    /// <summary>Damage multiplier (see <see cref="DamageToPlayer"/>), by level.</summary>
+    public static readonly LevelCurve DamageCurve = new(
+        (1, 0.3), (6, 0.92), (12, 1.4), (20, 2.15), (30, 2.97), (40, 4.05), (50, 4.92), (60, 5.65), (70, 6.22), (80, 6.5),
+        (90, 6.78), (100, 7.05), (110, 7.3), (120, 7.6), (130, 7.75), (200, 8.5), (300, 9.5));
+
+    /// <summary>Armor scale <c>A</c> of the armor roll <c>U(A/3 + 1, 2A/3 + 20)</c>, by level. Grows about as fast as the
+    /// player's armor pierce, so pierce strips it in a few hits instead of armor cutting every hit by 99% late.</summary>
+    public static readonly LevelCurve ArmorCurve = new(
+        (1, 0), (10, 2.43), (20, 3.2), (30, 3.7), (50, 4.25), (75, 4.55), (100, 4.75), (130, 4.9), (200, 5.15), (300, 5.4));
+
+    public static double DamageMultiplier(int level) => DamageCurve.At(level);
+
+    /// <remarks>Vanilla health is a floor (SotF enemies would otherwise be far weaker than vanilla at level 1); the vanilla health
+    /// scales the curve as in COTF, <c>(√vanilla + 45) / 55</c>, so a 100-health kind gets the curve itself.</remarks>
+    public static double MaxHealth(int level, double vanillaHealth, double healthMul)
+    {
+        double v = Math.Max(0, vanillaHealth);
+        return Math.Max(v, (Math.Sqrt(v) + 45) / 55 * HealthCurve.At(level)) * healthMul;
+    }
+
+    /// <summary>
+    /// COTF's health curve, kept as the price list of kills: the bounty (XP, and the loot rarity roll it feeds) is computed
+    /// from this health, not <see cref="MaxHealth"/>, so the COS-60 XP and drop tuning does not move when toughness is tuned.
+    /// </summary>
+    public static double RewardHealth(int level, double vanillaHealth, double healthMul) =>
         Math.Max(Math.Max(0, vanillaHealth),
             (Math.Sqrt(Math.Max(0, vanillaHealth)) + 45) * Math.Pow(level, 2.38) * 0.2 * Math.Pow(2, (level - 50) / 32.0)) * healthMul;
 
-    public static double RollArmor(int level, DifficultyTier d, double armorMul, Rng rng)
+    public static double RollArmor(int level, double armorMul, Rng rng)
     {
-        double p = Math.Pow(level, 2.43);
-        return Math.Floor(rng.Range((float)(p / 3 + 1), (float)(p * 2 / 3 + 20)) * armorMul) * d.ArmorFactor;
+        double a = ArmorCurve.At(level);
+        return Math.Floor(rng.Range((float)(a / 3 + 1), (float)(a * 2 / 3 + 20)) * armorMul);
     }
 
+    /// <summary>The mean of <see cref="RollArmor"/> with no host multiplier.</summary>
+    public static double MeanArmor(int level) => ArmorCurve.At(level) / 2 + 10.5;
+
     /// <summary>The bounty of a plain enemy with 100 vanilla health at <paramref name="level"/>: the XP curve's unit (COS-60).</summary>
-    public static double ReferenceBounty(int level) => Bounty(MaxHealth(level, 100, 1), level, 0, 1);
+    public static double ReferenceBounty(int level) => Bounty(RewardHealth(level, 100, 1), level, 0, 1);
 
     public static double Bounty(double maxHealth, int level, int abilityCount, double xpMul)
     {
@@ -166,7 +197,7 @@ public static class EnemyScaler
 
         double hp = MaxHealth(level, vanillaHealth, rules.EnemyHealth);
         double dmg = DamageMultiplier(level) * rules.EnemyDamage;
-        double armor = RollArmor(level, d, rules.EnemyArmor, rng);
+        double armor = RollArmor(level, rules.EnemyArmor, rng);
         double speed = (0.94 + level / 170.0) * rules.EnemySpeed;
         double scale = 1;
 
@@ -208,7 +239,7 @@ public static class EnemyScaler
             Armor = armor,
             Speed = speed,
             Scale = scale,
-            Bounty = Bounty(hp, level, abilities.Count, rules.Xp),
+            Bounty = Bounty(hp * RewardHealth(level, vanillaHealth, 1) / MaxHealth(level, vanillaHealth, 1), level, abilities.Count, rules.Xp),
         };
     }
 

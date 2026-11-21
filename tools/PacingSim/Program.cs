@@ -77,21 +77,24 @@ foreach (var mode in new[] { GameMode.Normal, GameMode.HardSurvival })
         Console.WriteLine($"| {snap.Hours:0.#} | {snap.Level} | {snap.EnemyLevel} | {snap.KillsPerHour:0} | {snap.NormalKillSeconds:0.#} | {snap.HitsToDie:0.#} |");
 }
 
-// 3. Kill times by tier at set player levels, geared and perked for that level.
+// 3. Kill times by tier at set player levels, with the kit and perks the median run (section 2) had on reaching the level
+// (COS-150: a kit rolled at the level without the run's drops and merges is far weaker than what a player has by then).
 int[] levels = { 1, 10, 25, 50, 75, 100, 130 };
 foreach (var g in modes.Where(m => m.Mode is GameMode.Normal or GameMode.HardSurvival))
 {
-    Console.WriteLine($"\n## 3. {g.Mode}: kill time by tier (seconds) at a player level, kit rolled at that level");
+    var median = runsByMode[g.Mode].OrderBy(r => r.HoursTo(50) ?? double.MaxValue).ElementAt(seeds / 2);
+    Console.WriteLine($"\n## 3. {g.Mode}: kill time by tier (seconds) at a player level, kit and perks of the median run on reaching it (* = not reached: kit rolled at the level)");
     Console.WriteLine("| Player lvl | Enemy lvl | Normal | Elite | Miniboss | Boss | Normal hits to die | XP per normal kill | Goal(L) | Normal kills per level |");
     Console.WriteLine("|---|---|---|---|---|---|---|---|---|---|");
     foreach (int lvl in levels)
     {
         var sim = new Sim(content, a, 3000, g);
-        sim.SetUp(lvl);
+        bool reached = median.Saves.TryGetValue(lvl, out var save);
+        if (reached) sim.SetUpFrom(save!); else sim.SetUp(lvl);
         var t = sim.KillTimesByTier();
         double xp = sim.MeanBounty(EnemyTier.Normal) * sim.Pc.Stats.Get(StatIds.ExpGain);
         double goal = XpCurve.Goal(lvl);
-        Console.WriteLine($"| {lvl} | {sim.EnemyLevel} | {Sec(t[EnemyTier.Normal])} | {Sec(t[EnemyTier.Elite])} | {Sec(t[EnemyTier.Miniboss])} | {Sec(t[EnemyTier.Boss])} | {sim.HitsToDie():0.#} | {xp:N0} | {goal:N0} | {goal / xp:0.#} |");
+        Console.WriteLine($"| {lvl}{(reached ? "" : "*")} | {sim.EnemyLevel} | {Sec(t[EnemyTier.Normal])} | {Sec(t[EnemyTier.Elite])} | {Sec(t[EnemyTier.Miniboss])} | {Sec(t[EnemyTier.Boss])} | {sim.HitsToDie():0.#} | {xp:N0} | {goal:N0} | {goal / xp:0.#} |");
     }
 }
 return 0;
@@ -121,6 +124,8 @@ sealed record Assumptions
     public bool FixedKit { get; init; }
     /// <summary>Kit and perks are refreshed every this many levels.</summary>
     public int KitEveryLevels { get; init; } = 5;
+    /// <summary>... or after this many hours without a refresh (COS-150: a player stuck on a level still wears what drops).</summary>
+    public double KitEveryHours { get; init; } = 5;
     public double MaxHours { get; init; } = 300;
     public double MinHitsToDie { get; init; } = 4;
     public double XpMul { get; init; } = 1;
@@ -143,7 +148,7 @@ sealed record Assumptions
 
     public string Describe() =>
         $"Assumptions: melee weapon {WeaponDamage} per swing every {SwingSeconds} s; groups of {GroupMin}-{GroupMax} enemies, {SecondsBetweenGroups} s between groups; " +
-        $"vanilla enemy hit {VanillaEnemyHit}; kit = best of {KitCandidates} drops per slot (rarity from the loot roll of normal enemies at the player's level), refreshed every {KitEveryLevels} levels; " +
+        $"vanilla enemy hit {VanillaEnemyHit}; kit = best of {KitCandidates} drops per slot (rarity from the loot roll of normal enemies at the player's level), refreshed every {KitEveryLevels} levels or {KitEveryHours} h; " +
         "perks bought greedily for damage x sqrt(effective health); spells, ranged, headshots and non-kill XP not modelled; no deaths.";
 }
 
@@ -154,6 +159,8 @@ sealed class RunResult
     public readonly SortedDictionary<int, double> FirstHourAtLevel = new();
     public readonly List<(double Hours, int Level)> Track = new();
     public readonly List<Snapshot> Snapshots = new();
+    /// <summary>The character (kit and perks) on first reaching each level, for table 3.</summary>
+    public readonly Dictionary<int, PlayerSave> Saves = new();
     /// <summary>Equipment drops and kills over the whole run (drop rate check, Max 2026-11-21).</summary>
     public int Drops, Kills, Merges;
     public double Hours;
@@ -172,6 +179,7 @@ sealed class Sim
     public PlayerCharacter Pc { get; private set; }
     private double _seconds;
     private int _lastKitLevel = -1;
+    private double _lastKitHours;
     private int _dropsSinceKit, _kills, _totalDrops, _lastKitDrops = -1;
     private readonly List<double> _dropWorths = new();
     /// <summary>Drops the player did not wear, kept for Merge (COS-144): by item type and rarity ("*" for Legendary).</summary>
@@ -225,6 +233,7 @@ sealed class Sim
     private void Record(RunResult r)
     {
         int l = Pc.Progress.Level;
+        for (int x = 1; x <= l; x++) if (!r.Saves.ContainsKey(x)) r.Saves[x] = Pc.ToSave();
         for (int x = 1; x <= l; x++) r.FirstHourAtLevel.TryAdd(x, Hours);
         if (r.Track.Count == 0 || r.Track[^1].Level != l) r.Track.Add((Hours, l));
     }
@@ -239,11 +248,21 @@ sealed class Sim
         Refresh();
     }
 
+    /// <summary>Puts back the character a run had at some level (table 3).</summary>
+    public void SetUpFrom(PlayerSave save)
+    {
+        Pc = new PlayerCharacter(_content);
+        Pc.Load(save);
+        _lastKitLevel = save.Level;
+        _lastKitDrops = 0;
+    }
+
     private void Refresh()
     {
         int l = Pc.Progress.Level;
-        if (_lastKitLevel >= 0 && l < _lastKitLevel + _a.KitEveryLevels) return;
+        if (_lastKitLevel >= 0 && l < _lastKitLevel + _a.KitEveryLevels && Hours < _lastKitHours + _a.KitEveryHours) return;
         _lastKitLevel = l;
+        _lastKitHours = Hours;
         BuyPerks();
         RollKit();
     }
@@ -368,13 +387,7 @@ sealed class Sim
 
     // ---- character building ----
 
-    private double MeanArmor()
-    {
-        var d = Band;
-        int lvl = EnemyLevel;
-        double p = Math.Pow(lvl, 2.43);
-        return (p / 3 + 1 + p * 2 / 3 + 20) / 2 * d.ArmorFactor;
-    }
+    private double MeanArmor() => EnemyScaler.MeanArmor(EnemyLevel);
 
     /// <summary>Damage per second against a typical armored enemy times the square root of effective health.</summary>
     private double Score()

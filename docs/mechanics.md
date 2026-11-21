@@ -3,7 +3,7 @@
 The rules Champions of the Sons implements. Numbers and formulas come from reading the original Champions of the Forest (COTF) source (2026-11-18); the code here is new. `U(a,b)` is a uniform roll, `L` a level, `d` the index 0..10 of an enemy's level band (see Difficulty). **Deviations** from COTF are listed at the end and marked ✱ inline.
 
 ## Progression
-- ✱ XP to next level (COS-60, Max 2026-11-21): `goal(L) = round(killsPerLevel(L) × referenceBounty(L))`, `killsPerLevel(L) = 18 + 0.0003 × L^3.5` (about 19 kills of a plain on-level enemy at L10, 41 at L25, 280 at L50, 1100 at L75, 3000 at L100), `referenceBounty(L)` = the bounty of a plain enemy with 100 vanilla health at L. Fitted in PacingSim (real drops at ~50/h, Merge modelled) to Normal L25 ~5 h, L50 ~15 h, L75 ~40 h, L100 ~90 h; COTF's exponential tail stalled near L65. From L 138 the goal is 5e18 (practical cap).
+- ✱ XP to next level (COS-60, Max 2026-11-21): `goal(L) = round(killsPerLevel(L) × referenceBounty(L))`, `killsPerLevel(L) = 7 + 0.051 × L^2.255` (about 16 kills of a plain on-level enemy at L10, 80 at L25, 350 at L50, 870 at L75, 1650 at L100), `referenceBounty(L)` = the bounty of a plain enemy with 100 vanilla health at L (on the reward health curve, see Enemies). Refit in COS-150 after the enemy curves changed (late kills went from about 1 s to about 10 s) to keep Normal near the COS-60 pace (PacingSim: L25 ~3.4 h, L50 ~17.7 h, L75 ~38 h, L100 ~91 h; Max's targets were L25 ~5 h, L50 ~15 h, L75 ~40 h, L100 ~90 h); COTF's exponential tail stalled near L65. From L 138 the goal is 5e18 (practical cap).
 - Gaining XP: `xp += amount × expGain`; while `xp ≥ goal(L)`: `xp −= goal`, level up.
 - Level up: +1 mutation (perk) point; STR/AGI/VIT/INT from level = `A(L)` with `A(1)=1, A(x)=A(x−1)+round(√x)` (the default 1 plus `A(L) − 1` from levels: 1 at level 1, as COTF's live level-up path gives).
 - Reward items: every 10th level a Clearpulse Heart (respec); levels 25, 45, 65… a Writhing Heart (+1 permanent perk point).
@@ -28,33 +28,43 @@ No difficulty is picked. Enemy levels follow the players (see Enemies), and the 
 
 Elite chance = `clamp(0.10 + 0.01 × offset, 0.05, 0.25)` (`GameDifficulty`, `Core/Rules/Difficulty.cs`).
 
-COTF's 11 tiers stay as **level bands**: an enemy's band `d` is the highest one whose base level its level reaches (`Difficulties.ForLevel`), and gives the per-band numbers below (armor factor, Shielding cooldown, Meteor and Laser damage, elite ability count, ability gating, loot rarity roll).
+COTF's 11 tiers stay as **level bands**: an enemy's band `d` is the highest one whose base level its level reaches (`Difficulties.ForLevel`), and gives the per-band numbers below (Shielding cooldown, Meteor and Laser damage, elite ability count, ability gating, loot rarity roll).
 
-| d | Name | Band from level (COTF base level) | Armor factor `⌊d/2⌋+1` | Shielding CD | Meteor dmg | Laser dmg |
-|---|---|---|---|---|---|---|
-|0|Easy|1–3|1|60|40–49|30–39|
-|1|Veteran|10–13|1|55|100–149|85–104|
-|2|Elite|20–24|2|50|300–354|221–233|
-|3|Master|30–39|2|45|660–699|444–469|
-|4|Challenge I|50–59|3|40|3000|4124|
-|5|Challenge II|89–91|3|35|9000|15653|
-|6|Challenge III|100|4|30|14000|72346|
-|7|Challenge IV|130–132|4|25|25000|85932|
-|8|Challenge V|160–164|5|20|50000|124636|
-|9|Challenge VI|200|5|15|65000|164636|
-|10|Hell|300|6|15|75000|224636|
+| d | Name | Band from level (COTF base level) | Shielding CD | Meteor dmg | Laser dmg |
+|---|---|---|---|---|---|
+|0|Easy|1–3|60|40–49|30–39|
+|1|Veteran|10–13|55|100–149|85–104|
+|2|Elite|20–24|50|300–354|221–233|
+|3|Master|30–39|45|660–699|444–469|
+|4|Challenge I|50–59|40|3000|4124|
+|5|Challenge II|89–91|35|9000|15653|
+|6|Challenge III|100|30|14000|72346|
+|7|Challenge IV|130–132|25|25000|85932|
+|8|Challenge V|160–164|20|50000|124636|
+|9|Challenge VI|200|15|65000|164636|
+|10|Hell|300|15|75000|224636|
 
 Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels (also `extra_enemy_levels` in a dedicated server's config), enemy damage/health/armor/speed; allow elites; loot level policy (highest/average/lowest/closest/host); minimum loot rarity. No day-based scaling.
 
 ## Enemies
 - Level ✱ (COS-130): `max(1, party + U[−1,1] + kindExtra + gameOffset + extraLevels)`. `party` is the average level of the players within 150 m of the enemy when it is rolled, rounded up (nobody in range: all players; a dedicated server counts only clients; `EnemyLevels.PartyLevel`). kindExtra comes from content per enemy kind (COTF: normal 1, leader 2, pale 2, painted 3, creepy 2, boss-type 6, baby 0). gameOffset is the game difficulty's (table above). The band `d` used below is the enemy's own (`Difficulties.ForLevel(L)`).
-- ✱ Damage multiplier: `L < 65 ? e^⌊L/6⌋ + L : (L−60)^2.45 × 600` (COS-60: COTF's 2.6 made on-level enemies kill a geared player in one or two hits past L90).
-- Armor: `⌊U(L^2.43/3 + 1, L^2.43·2/3 + 20) × armorMul⌋ × (⌊d/2⌋+1)`.
-- HP: `(√vanillaHP + 45) × L^2.38 × 0.2 × 2^((L−50)/32) × healthMul`.
+- ✱ Level curves (COS-150): health, damage multiplier and armor each follow a curve given as log10 knots, smooth and rising (monotone cubic between knots, straight in log10 before the first and past the last; `LevelCurve`, `EnemyScaler.HealthCurve/DamageCurve/ArmorCurve`):
+
+| L | 1 | 5 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100 | 110 | 120 | 130 | 200 | 300 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| log10 H(L) | 2.0 | 2.5 | 2.9 | 3.53 | 3.9 | 4.9 | 6.0 | 7.15 | 8.3 | 8.9 | 9.3 | 9.7 | 9.9 | 10.08 | 10.25 | 11.05 | 12.05 |
+| log10 D(L) | 0.3 | 0.92 (L6) | 1.4 (L12) | 2.15 | 2.97 | 4.05 | 4.92 | 5.65 | 6.22 | 6.5 | 6.78 | 7.05 | 7.3 | 7.6 | 7.75 | 8.5 | 9.5 |
+| log10 A(L) | 0 | | 2.43 | 3.2 | 3.7 | | 4.25 | | | 4.55 (L75) | | 4.75 | | | 4.9 | 5.15 | 5.4 |
+
+  - HP: `max(vanillaHP, (√vanillaHP + 45) / 55 × H(L)) × healthMul` (a 100-health kind gets H itself).
+  - Damage multiplier: `D(L)`.
+  - Armor: `⌊U(A(L)/3 + 1, A(L)·2/3 + 20) × armorMul⌋`. No band factor: COTF's `L^2.43 × (⌊d/2⌋+1)` stepped ×2 at L20 and ×1.5 at L50 and outgrew armor pierce, so late hits did 1% damage until pierce stripped it.
+  - Targets the curves were fitted to in PacingSim (Max 2026-11-21): on Normal a plain on-level enemy dies in 4–30 s (ideally 8–20 s) and needs 6–60 of its hits to kill the player, in every row of the run table after the first hour; on Hard Survival plain kills at most about 2.5× Normal's at the same player level, 3–40 hits to die; elites about 5–10× a plain kill, bosses under about 5 min at their level on Normal. The player's gear grows about 10× per 10 levels from L15 to L60, so with Hard Survival's +10 levels one curve cannot meet both modes there: Normal is kept in range and Hard Survival plain kills are about 4–15× Normal's (1–3 hits to die) from about L10 to L80 (COS-150).
+  - COTF's curves (`(√v + 45) × L^2.38 × 0.2 × 2^((L−50)/32)` health, `e^⌊L/6⌋ + L` damage) left on-level enemies dying in one hit from L55 and unable to hurt a geared player from L20 to L60 (thousands of hits).
 - Speed: `(0.94 + L/170) × speedMul`.
 - Tier: elite if `(U < eliteChance or kind is a boss type or d = Hell) and elites allowed`, eliteChance from the game difficulty ✱ (COTF: 0.1). Elite ability count: 2 at d ≤ 1, `U[3,6]` at d ≥ 2, 10 for boss types. Boss if `n ≥ 6 and U < 0.1` ✱, Miniboss if `n > 4 and U < 0.25`, else Elite. Non-normal tiers: armor ×2; HP ×5 Elite, ×10 Miniboss, ×20 Boss ✱; scale ×1.1/1.15/1.2. Boss adds Boss Steadfast, Miniboss adds Elite Steadfast.
 - Abilities: n distinct picks; only one steadfast; Tiny/Gargantuan exclusive; Meteor, Black Hole and Cataclysms need d ≥ 3; Undead only on kinds that allow it.
-- Bounty (kill XP): `b = maxHP^0.8 × 0.8 × L^0.25 + 100`; `×n` if n > 1; `× max(1, L/20)`; `× xpMul`. Co-op: each player within 80 m of the kill gets `b × (1 + 0.2 × (n − 1)) / n` for n such players (`Enemies.KillXpShare`).
+- Bounty (kill XP): `b = rewardHP^0.8 × 0.8 × L^0.25 + 100`; `×n` if n > 1; `× max(1, L/20)`; `× xpMul`. Co-op: each player within 80 m of the kill gets `b × (1 + 0.2 × (n − 1)) / n` for n such players (`Enemies.KillXpShare`). ✱ `rewardHP` is the enemy's max HP measured on COTF's health curve (`EnemyScaler.RewardHealth`: `(√vanillaHP + 45) × L^2.38 × 0.2 × 2^((L−50)/32)`, at least vanilla, times the same tier and ability multipliers), so XP and the loot rarity roll it feeds keep the COS-60 tuning when toughness changes (COS-150).
 - Armor reduction: `DR(a) = (max(a,0)/(max(a,0)+500))²`. Physical damage `× dmgTakenMult × (1 − DR(armor − armorReduction))`; magic uses DR/1.5; pure ignores armor. Armor pierce adds to `armorReduction` (capped at armor). COTF's fire ticks also reduce armor; not built here (COS-90).
 - Steadfast caps each hit at 6% (Steadfast), 4% (Elite) or 1% (Boss) of max HP.
 - Ability numbers (COTF): Gargantuan armor ×3, HP ×2.5, dmg ×2.5, speed ÷1.5; Tiny speed ×1.1, dmg ×1.2; Extra Health HP ×4; Extra Damage dmg ×5; Juggernaut CC-immune, speed ÷1.15; Rain Empowerment while raining dmg ×5, armor ×5, speed ×2; Undead revives once at half HP; Shielding 3 s immunity then tier CD; Basher 1 s stun; Poisonous `√(dmg/10)/10` per s for 6 s; Warp, Chains, Trapper, Blizzard, Radiance, Black Hole, Meteor, Flare, Laser, Arcane/Fire Cataclysm, Sacrifice, Avenger — see COTF spec numbers in the COS-19/COS-20 tickets.
@@ -237,6 +247,7 @@ Keyed by source; re-adding a source refreshes duration; amount overwrites, accum
 - No difficulty picker (COS-130, Max 2026-11-20): COTF's host picked one of 11 tiers that fixed enemy levels for the world. Here enemy levels follow the party's level and the game's own difficulty adds levels and elite chance; the tiers only remain as level bands for their per-band numbers. Worlds saved with a tier (WorldSave v2) drop it on load and keep the host's extra levels: a tier's fixed levels do not translate into an offset over the party.
 - Four rarities instead of eight (COS-109, Max 2026-11-20): Common, Magic, Rare, Legendary; every unique is Legendary. The roll keeps COTF's eight-step climb and folds its result. Value multipliers are averaged per tier (Legendary ×4.5, between COTF's ×3.4 and ×5.6), so the old Primal tier rolls about 20% lower and the old Legendary tier about 30% higher; the XP heart gives ×4.5 instead of ×3.4. Old saves are remapped on load.
 - Vanilla floors: enemy max health is at least the game's own value, and enemy damage to the player is at least the game's own hit. COTF's curves were tuned for The Forest's numbers; in Sons of the Forest they made low-level enemies far weaker than vanilla (seen in the 2026-11-18 self-test: a level-2 cannibal had 20 HP vs 100 vanilla).
+- Enemy level curves (COS-150): health, damage and armor follow knot curves fitted to this mod's gear pace instead of COTF's formulas, and armor has no per-band factor. Kill XP and the loot roll still price enemies on COTF's health curve. See Enemies.
 - Boss tier: COTF requires n > 6 abilities, which only its Megan could reach, and gives Bosses ×2 HP (less than Miniboss ×10). Here Boss needs n ≥ 6 and has ×20 HP.
 - Incoming damage: COTF computed armor/DR/block for the player but applied the vanilla damage. Here the computed value is applied.
 - Pierce chance: COTF pierced when `U > chance` (inverted). Here `U < chance`.

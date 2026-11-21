@@ -15,12 +15,12 @@ public static class XpCurve
         return Math.Round(KillsPerLevel(level) * EnemyScaler.ReferenceBounty(level));
     }
 
-    /// <summary>Normal kills of an on-level enemy one level costs: about 19 at level 10, 41 at 25, 280 at 50, 1100 at 75, 3000 at 100
-    /// (fitted 2026-11-21 in PacingSim with real drops at ~50 an hour and Merge, to Max's Normal targets: L25 ~5 h, L50 ~15 h,
-    /// L75 ~40 h, L100 ~90 h; late levels need many kills because on-level enemies die in about a second there).</summary>
+    /// <summary>Normal kills of an on-level enemy one level costs: about 16 at level 10, 80 at 25, 350 at 50, 870 at 75, 1650 at 100.
+    /// COS-150 refit (PacingSim, real drops and Merge) after the enemy curves made late kills take ~10 s instead of ~1 s, to keep
+    /// Normal near the COS-60 pace: L25 ~3.4 h, L50 ~18 h, L75 ~38 h, L100 ~91 h.</summary>
     public static double KillsPerLevel(int level) => KillsBase + KillsFactor * Math.Pow(level, KillsPower);
 
-    public const double KillsBase = 18, KillsFactor = 0.0003, KillsPower = 3.5;
+    public const double KillsBase = 7, KillsFactor = 0.051, KillsPower = 2.255;
 
     /// <summary>Attribute base value at a level: 1 + A(L), A(1)=1, A(x)=A(x−1)+round(√x).</summary>
     public static int AttributeBase(int level)
