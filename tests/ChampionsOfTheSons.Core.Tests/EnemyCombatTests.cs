@@ -53,6 +53,38 @@ public class EnemyCombatStateTests
     }
 
     [Fact]
+    public void Juggernaut_refuses_damage_over_time_and_other_enemies_take_it()
+    {
+        var j = State(EnemyAbility.Juggernaut);
+        Assert.False(j.ApplyDot("fire", DotKind.Fire, 5, 4));
+        Assert.Equal(0, j.DotCount);
+        Assert.True(State().ApplyDot("fire", DotKind.Fire, 5, 4));
+    }
+
+    [Fact]
+    public void Undead_after_reviving_is_faster_and_larger()
+    {
+        var s = State(EnemyAbility.Undead);
+        Assert.Equal(1, s.SpeedMultiplier);
+        Assert.Equal(1, s.ScaleMultiplier);
+        s.TryUndeadRevive();
+        Assert.Equal(AbilityTuning.UndeadSpeed, s.SpeedMultiplier, 6);
+        Assert.Equal(AbilityTuning.UndeadScale, s.ScaleMultiplier, 6);
+    }
+
+    [Fact]
+    public void Burn_ticks_melt_armor_up_to_the_enemys_armor()
+    {
+        var e = new EnemyProfile { MaxHealth = 1000, Armor = 100 };
+        double r = EnemyHitEffects.MeltArmor(e, 0, 30);
+        Assert.Equal(30, r);
+        r = EnemyHitEffects.MeltArmor(e, r, 50);
+        Assert.Equal(80, r);
+        Assert.Equal(100, EnemyHitEffects.MeltArmor(e, r, 50)); // capped at its armor
+        Assert.Equal(80, EnemyHitEffects.MeltArmor(e, 80, -5)); // never negative
+    }
+
+    [Fact]
     public void Shielding_absorbs_for_three_seconds_then_recharges_for_the_difficulty_cooldown()
     {
         var s = State(EnemyAbility.Shielding);

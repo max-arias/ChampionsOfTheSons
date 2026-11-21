@@ -62,11 +62,13 @@ public sealed class EnemyAbilityFeature : IModFeature
         if (actor == null) return;
         try
         {
-            if (Math.Abs(enemy.Profile.Scale - 1) > 0.001)
+            float scale = WantedScale(enemy);
+            if (Math.Abs(scale - 1) > 0.001) actor.SetScaleMult(scale);
+            if (enemy.Combat.CcImmune)
             {
-                actor.SetScaleMult((float)enemy.Profile.Scale);
+                actor._knockdownEnabled = false;
+                actor._staggerPerHit = 0; // Juggernaut: a hit never builds up a stagger (COS-90)
             }
-            if (enemy.Combat.CcImmune) actor._knockdownEnabled = false;
             foreach (var h in EnemyAbilities.For(enemy)) h.OnSpawn(enemy);
         }
         catch (Exception e)
@@ -74,6 +76,9 @@ public sealed class EnemyAbilityFeature : IModFeature
             RLog.Error($"Champions of the Sons: enemy prepare failed: {e}");
         }
     }
+
+    /// <summary>The model size the enemy should have: its profile scale times the Undead revive growth.</summary>
+    public static float WantedScale(EnemyRuntime enemy) => (float)(enemy.Profile.Scale * enemy.Combat.ScaleMultiplier);
 
     /// <summary>An enemy died: Avenger allies grow angrier, Sacrifice heals and empowers the survivors, handlers get their callback.</summary>
     public static void OnEnemyDied(EnemyRuntime dead)
@@ -153,6 +158,8 @@ public sealed class EnemyAbilityFeature : IModFeature
                 // Damage over time is pure damage (armor does not help) but the steadfast caps and shields still apply.
                 var hit = new OutgoingHit(tick.Damage, DamageKind.Pure, false, 0);
                 EnemyPatches.DealForced(enemy, hit, creditPlayer: tick.Source.StartsWith("player.", StringComparison.Ordinal));
+                // Burning melts armor: each fire tick adds its damage to the enemy's armor reduction (COS-90).
+                if (tick.Kind == DotKind.Fire) enemy.ArmorReduction = EnemyHitEffects.MeltArmor(enemy.Profile, enemy.ArmorReduction, tick.Damage);
                 if (!enemy.IsActive) break;
             }
             if (!enemy.IsActive) continue;
@@ -167,8 +174,9 @@ public sealed class EnemyAbilityFeature : IModFeature
     private static void ApplySpeed(EnemyRuntime enemy)
     {
         // The game resets scale when it activates the actor, so it is kept in step here as well as at spawn.
-        if (Math.Abs(enemy.Profile.Scale - 1) > 0.001 && Mathf.Abs(enemy.Actor!.GetScaleMult() - (float)enemy.Profile.Scale) > 0.01f)
-            enemy.Actor.SetScaleMult((float)enemy.Profile.Scale);
+        float scale = WantedScale(enemy);
+        if (Math.Abs(scale - 1) > 0.001 && Mathf.Abs(enemy.Actor!.GetScaleMult() - scale) > 0.01f)
+            enemy.Actor.SetScaleMult(scale);
         float want = (float)(enemy.Profile.Speed * enemy.Combat.SpeedMultiplier);
         enemy.WantedSpeed = want;
         var anim = enemy.Actor!._animator;

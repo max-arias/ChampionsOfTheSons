@@ -163,6 +163,12 @@ internal static class AffixSelfTest
             SelfTest.Check("Juggernaut: knockdown switched off in the game", !actor._knockdownEnabled);
             SelfTest.Check("Juggernaut: refuses slow", !r.Combat.ApplySlow("test", 0.5, 5));
             SelfTest.Check("Juggernaut: refuses stun", !r.Combat.ApplyStun(2));
+            SelfTest.Check("Juggernaut: refuses damage over time (COS-90)", !r.Combat.ApplyDot("test", DotKind.Fire, 5, 3) && r.Combat.DotCount == 0);
+            SelfTest.Check("Juggernaut: a hit builds no stagger (COS-90)", actor._staggerPerHit == 0, actor._staggerPerHit.ToString());
+            var before = actor.transform.position;
+            Spells.SpellWorld.Knock(r, Vector3.forward * 3);
+            Spells.SpellWorld.Step(0.1f);
+            SelfTest.Check("Juggernaut: spells knock it back not at all (COS-90)", Spells.SpellWorld.SlidingCount == 0 && Vector3.Distance(before, actor.transform.position) < 0.01f);
             var plain = Rt(_plain)!;
             SelfTest.Check("a normal enemy is slowed", plain.Combat.ApplySlow("test", 0.5, 5));
             Advance(0.5f);
@@ -183,6 +189,11 @@ internal static class AffixSelfTest
             TestKit.Hit(actor, 1e9f);
             SelfTest.Check("Undead: not dead after a lethal hit", !actor.IsDead() && r.Revived, $"hp {actor.GetHealth():E2}");
             SelfTest.Check("Undead: back at half health", Mathf.Abs(actor.GetHealth() / (float)r.Profile.MaxHealth - 0.5f) < 0.02f, $"{actor.GetHealth() / r.Profile.MaxHealth:0.000}");
+            Advance(0.3f);
+            SelfTest.Check("Undead: speed x1.1 and model x1.4 after reviving (COS-90)",
+                Math.Abs(r.Combat.SpeedMultiplier - AbilityTuning.UndeadSpeed) < 1e-6 && Mathf.Abs(actor.GetScaleMult() - EnemyAbilityFeature.WantedScale(r)) < 0.01f
+                && Math.Abs(EnemyAbilityFeature.WantedScale(r) - r.Profile.Scale * AbilityTuning.UndeadScale) < 1e-4,
+                $"speed {r.Combat.SpeedMultiplier:0.00}, scale {actor.GetScaleMult():0.00} (wanted {EnemyAbilityFeature.WantedScale(r):0.00})");
             hp.SetCurrentValue(5);
             TestKit.Kill(actor);
             SelfTest.Check("Undead: the second lethal hit kills it", actor.IsDead());
@@ -266,6 +277,27 @@ internal static class AffixSelfTest
             SelfTest.Check("bleed took health in 3 ticks", _bleeder.GetHealth() < _healthBefore * 0.95f && _bleeder.GetHealth() > _healthBefore * 0.8f,
                 $"{_healthBefore:0.0} -> {_bleeder.GetHealth():0.0}");
             SelfTest.Check("bleed ended", r.Combat.DotCount == 0);
+        });
+
+        SelfTest.Add(T0 + 12.5f, "affix: burning melts armor, knockback slides", () =>
+        {
+            var r = Rt(_bleeder);
+            if (r == null || _bleeder == null) return;
+            r.ArmorReduction = 0;
+            r.Combat.ApplyDot("test.burn", DotKind.Fire, 2, 3);
+            Advance(3.5f);
+            double want = Math.Min(r.Profile.Armor, 6);
+            SelfTest.Check("burn ticks add their damage to the armor reduction, capped at its armor (COS-90)",
+                r.Profile.Armor <= 0 || Math.Abs(r.ArmorReduction - want) < 0.01, $"reduction {r.ArmorReduction:0.##}, armor {r.Profile.Armor:0.##}, wanted {want:0.##}");
+
+            var start = _bleeder.transform.position;
+            Spells.SpellWorld.Knock(r, Vector3.forward * 3);
+            Spells.SpellWorld.Step(0.05f);
+            float first = Vector3.Distance(start, _bleeder.transform.position);
+            SelfTest.Check("knockback is not an instant jump (COS-90)", first > 0.1f && first < 2.9f, $"{first:0.00} m after 0.05 s");
+            for (int i = 0; i < 20; i++) Spells.SpellWorld.Step(0.1f);
+            float total = Vector3.Distance(start, _bleeder.transform.position);
+            SelfTest.Check("knockback slides the whole distance and stops", total > 2.8f && Spells.SpellWorld.SlidingCount == 0, $"{total:0.00} m, sliding {Spells.SpellWorld.SlidingCount}");
         });
 
         SelfTest.Add(T0 + 13, "affix: abilities stop on an inactive enemy (bug #43)", () =>

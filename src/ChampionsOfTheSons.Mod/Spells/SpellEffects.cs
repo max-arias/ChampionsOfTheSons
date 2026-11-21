@@ -378,7 +378,7 @@ internal static class SpellEffects
             e.Combat.ApplySlow("spell.bash", S("spell_bash_slow_amount"), S("spell_bash_duration"));
             var away = Center(e) - PlayerPos;
             away.y = 0;
-            Push(e, away.normalized * (float)SpellTuning.BashKnockback);
+            Knock(e, away.normalized * (float)SpellTuning.BashKnockback);
         }
         SpellFx.Sphere(PlayerPos + flat * 2.2f + Vector3.up, 1.2f, SpellFx.Steel, 0.2f);
         return true;
@@ -418,7 +418,7 @@ internal static class SpellEffects
             e.Combat.ApplySlow("spell.roaring_cheeks", S("spell_fart_slow"), S("spell_fart_debuff_duration"));
             var away = Center(e) - PlayerPos;
             away.y = 0;
-            Push(e, away.normalized * S("spell_fart_knockback") * (float)SpellTuning.RoarKnockbackScale);
+            Knock(e, away.normalized * S("spell_fart_knockback") * (float)SpellTuning.RoarKnockbackScale);
         }
         SpellFx.Disc(Feet(), radius, SpellFx.Dark, 1f, look: SpellFx.Look.Gas);
         return true;
