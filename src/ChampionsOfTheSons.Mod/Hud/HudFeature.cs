@@ -22,6 +22,8 @@ public sealed class HudFeature : IModFeature
 
     /// <summary>Whether the HUD layer (nameplates, XP bar, banners) is drawn this frame.</summary>
     internal bool Shown => _built && _root.Root.activeSelf;
+    /// <summary>The panel's place among the UI panels; later ones draw on top (self-test).</summary>
+    internal int PanelIndex => _built ? _root.Root.transform.GetSiblingIndex() : -1;
 
     public void Init()
     {

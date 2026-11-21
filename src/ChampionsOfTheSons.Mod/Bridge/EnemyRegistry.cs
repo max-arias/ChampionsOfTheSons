@@ -34,6 +34,9 @@ public sealed class EnemyRuntime
     /// <summary>Where it was when last seen alive (a dead actor's position is not reliable).</summary>
     public UnityEngine.Vector3? LastPosition { get; set; }
 
+    /// <summary>Self-tests: the enemy keeps its abilities (and their look) but casts none of them.</summary>
+    public bool TestSilent { get; set; }
+
     /// <summary>Self-tests only: the headless game keeps spawned enemies dormant, so a test can declare one active (true) or inactive (false). Null = ask the game.</summary>
     public bool? TestActive
     {

@@ -29,7 +29,7 @@ internal sealed class ActiveHandler : IAbilityHandler
     public void OnTick(EnemyRuntime enemy, float dt)
     {
         // Self-tests: only enemies a test declared active cast, so random elites spawned by other phases stay quiet.
-        if (SelfTest.Enabled && enemy.TestActive != true) { Drop(enemy); return; }
+        if (SelfTest.Enabled && (enemy.TestActive != true || enemy.TestSilent)) { Drop(enemy); return; }
         if (!_live.TryGetValue(enemy, out var instance))
         {
             instance = _create(enemy);

@@ -205,6 +205,9 @@ internal static class EnemyHudSelfTest
         float k = HudKit.CanvasPerPixel, ch = UnityEngine.Screen.height * k, cw = UnityEngine.Screen.width * k;
         // Top band only: clear of the level-up banner (150 canvas units down) and the bottom XP bar.
         SelfTest.Check("boss bar: sits in the top band, inside the screen", b.xMin >= 0 && b.xMax <= cw + 0.5f && b.yMax <= ch && ch - b.yMin <= 150, b.ToString());
+        SelfTest.Check("boss bar: spans 80% of the screen width", Math.Abs(b.width - cw * BossBar.ScreenShare) < 2, $"{b.width:0} of {cw:0}");
+        int barIndex = Bars.PanelIndex, hudIndex = HudFeature.Instance?.PanelIndex ?? -1;
+        SelfTest.Check("boss bar: draws over the nameplates", barIndex > hudIndex, $"bar panel {barIndex}, HUD panel {hudIndex}");
         // A boss in view with the scanner open: both at once, for the screenshot.
         Plates.ForceFocus(_boss);
     }

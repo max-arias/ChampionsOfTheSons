@@ -43,6 +43,8 @@ public sealed class EnemyHudFeature : IModFeature
     internal int VisibleBars => _bars.Count(b => b.Visible);
     /// <summary>Whether the boss bar layer is drawn this frame (it hides with the HUD).</summary>
     internal bool LayerShown => _built && _root.Root.activeSelf;
+    /// <summary>The panel's place among the UI panels; later ones draw on top (self-test).</summary>
+    internal int PanelIndex => _built ? _root.Root.transform.GetSiblingIndex() : -1;
 
     public void Init()
     {
@@ -77,7 +79,11 @@ public sealed class EnemyHudFeature : IModFeature
         dt = Time.unscaledDeltaTime;
         _time += dt;
         bool show = inWorld && Config.ShowBossBar.Value && (HudFeature.Instance?.Shown ?? false);
-        if (_root.Root.activeSelf != show) _root.Active(show);
+        if (_root.Root.activeSelf != show)
+        {
+            _root.Active(show);
+            if (show) _root.Root.transform.SetAsLastSibling(); // over the nameplates and the other HUD panels (Max 2026-11-21)
+        }
         if (!show) return;
         try
         {

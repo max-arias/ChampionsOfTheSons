@@ -12,11 +12,16 @@ namespace ChampionsOfTheSons.Mod.EnemyHud;
 
 /// <summary>
 /// One wide boss health bar at the top centre (COS-67): name on the left, kind and level on the right, a long bar with a
-/// pale "damage taken" chunk that drains after the hit, and the affixes in a small line under it.
+/// pale "damage taken" chunk that drains after the hit, and the affixes in a small line under it. Bosses only; the bar spans
+/// <see cref="ScreenShare"/> of the screen width and draws over nameplates and other bars (Max 2026-11-21).
 /// </summary>
 internal sealed class BossBar
 {
     internal const float MaxWidth = 640, Height = 64;
+    /// <summary>The bar's share of the screen width (Max 2026-11-21: 80%).</summary>
+    internal const float ScreenShare = 0.8f;
+    private readonly SContainerOptions _frame, _back;
+    private float _width = MaxWidth;
     private const float TrailHold = 0.6f, TrailDrain = 0.45f;
 
     private readonly SContainerOptions _root, _fill, _trail;
@@ -39,8 +44,8 @@ internal sealed class BossBar
         _sub = HudKit.Label("", 14, "#9AA3AF", TextAlignmentOptions.BottomRight).TopLeft(MaxWidth * 0.62f, 0).Size(MaxWidth * 0.38f - 2, 26);
         _sub.TextObject.enableWordWrapping = false;
         _sub.TextObject.overflowMode = TextOverflowModes.Ellipsis;
-        var frame = SContainer.TopLeft(0, 30).Size(MaxWidth, 14).Background(HudKit.C("#0A0D12D8"), EBackground.None);
-        var back = SContainer.TopLeft(2, 2).Size(MaxWidth - 4, 10).Background(HudKit.C("#2A2622"), EBackground.None);
+        var frame = _frame = SContainer.TopLeft(0, 30).Size(MaxWidth, 14).Background(HudKit.C("#0A0D12D8"), EBackground.None);
+        var back = _back = SContainer.TopLeft(2, 2).Size(MaxWidth - 4, 10).Background(HudKit.C("#2A2622"), EBackground.None);
         _trail = SContainer.Background(HudKit.C("#D9CFB8C0"), EBackground.None);
         _fill = SContainer.Background(HudKit.C("#B8322A"), EBackground.None);
         back.Add(_trail);
@@ -66,19 +71,16 @@ internal sealed class BossBar
         get
         {
             float k = HudKit.CanvasPerPixel, cw = Screen.width * k, ch = Screen.height * k;
-            float s = _rt.localScale.x;
             var p = _rt.anchoredPosition;
-            return new Rect(cw / 2 - MaxWidth * s / 2, ch + p.y - Height * s, MaxWidth * s, Height * s);
+            return new Rect(cw / 2 - _width / 2, ch + p.y - Height, _width, Height);
         }
     }
 
     public void Show(EnemyRuntime r, int slot)
     {
         float k = HudKit.CanvasPerPixel, cw = Screen.width * k;
-        // Narrow windows get a smaller bar rather than one that runs into the screen edges.
-        float s = Mathf.Min(1, cw * 0.6f / MaxWidth);
-        _rt.localScale = new Vector3(s, s, 1);
-        HudKit.Place(_rt, new Vector2(0.5f, 1), new Vector2(0.5f, 1), 0, -(18 + slot * (Height + 8) * s));
+        Layout(cw * ScreenShare);
+        HudKit.Place(_rt, new Vector2(0.5f, 1), new Vector2(0.5f, 1), 0, -(18 + slot * (Height + 8)));
         if (ReferenceEquals(r, Target)) return;
         Target = r;
         var p = r.Profile;
@@ -93,6 +95,21 @@ internal sealed class BossBar
         _trailWait = 0;
         _alpha = 0;
         _root.Active(true);
+    }
+
+    /// <summary>Sizes the bar and its rows to <paramref name="width"/> canvas units.</summary>
+    private void Layout(float width)
+    {
+        if (Mathf.Approximately(width, _width)) return;
+        _width = width;
+        static void Size(RectTransform rt, float w) => rt.sizeDelta = new Vector2(w, rt.sizeDelta.y);
+        Size(_rt, width);
+        Size(_name.RectTransform, width * 0.62f);
+        Size(_sub.RectTransform, width * 0.38f - 2);
+        _sub.RectTransform.anchoredPosition = new Vector2(width * 0.62f, _sub.RectTransform.anchoredPosition.y);
+        Size(_frame.RectTransform, width);
+        Size(_back.RectTransform, width - 4);
+        Size(_affixes.RectTransform, width);
     }
 
     public void Hide()
