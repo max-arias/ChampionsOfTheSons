@@ -72,6 +72,8 @@ public sealed record EnemyProfile
     public double Bounty { get; init; }
     /// <summary>Personal name of an elite, miniboss or boss (COS-68); null for normal enemies.</summary>
     public EliteName? Name { get; init; }
+    /// <summary>A story boss kind (<see cref="EnemyKind.BossType"/>): always Boss tier, casts nothing until engaged, pays boss-kind loot (COS-91).</summary>
+    public bool BossKind { get; init; }
 
     /// <summary>Max fraction of max health one hit can remove; 1 = uncapped.</summary>
     public double HitCap => Abilities.Contains(EnemyAbility.BossSteadfast) ? 0.01
@@ -135,7 +137,8 @@ public static class EnemyScaler
         int level = RollLevel(kind, rules, partyLevel, rng);
         var d = Difficulties.ForLevel(level);
 
-        var forced = rules.ForcedTier;
+        // COS-91: story boss kinds are always Boss tier with 10 abilities (never Tiny), whatever the elite roll or the host's elite switch.
+        var forced = rules.ForcedTier ?? (kind.BossType ? EnemyTier.Boss : null);
         bool elite = forced is { } f ? f != EnemyTier.Normal
             : rules.AllowElites && kind.CanBeElite && (rng.Chance(rules.GameDifficulty.EliteChance) || kind.BossType || d.IsHell);
         var tier = EnemyTier.Normal;
@@ -145,7 +148,8 @@ public static class EnemyScaler
             int n = kind.BossType ? 10 : rng.RangeInclusive(d.EliteAbilityCount.Min, d.EliteAbilityCount.Max);
             if (forced == EnemyTier.Boss) n = Math.Max(n, 6);
             else if (forced == EnemyTier.Miniboss) n = Math.Max(n, 5);
-            abilities = PickAbilities(n, kind, d, rng, rules.DisabledAbilities);
+            var disabled = kind.BossType ? rules.DisabledAbilities.Append(EnemyAbility.Tiny).ToList() : rules.DisabledAbilities;
+            abilities = PickAbilities(n, kind, d, rng, disabled);
             if (forced is { } ft ? ft == EnemyTier.Boss : n >= 6 && rng.Chance(0.1))
             {
                 tier = EnemyTier.Boss;
@@ -209,6 +213,7 @@ public static class EnemyScaler
             Speed = speed,
             Scale = scale,
             Bounty = Bounty(hp, level, abilities.Count, rules.Xp),
+            BossKind = kind.BossType,
         };
     }
 

@@ -30,6 +30,7 @@ internal sealed class ActiveHandler : IAbilityHandler
     {
         // Self-tests: only enemies a test declared active cast, so random elites spawned by other phases stay quiet.
         if (SelfTest.Enabled && (enemy.TestActive != true || enemy.TestSilent)) { Drop(enemy); return; }
+        if (enemy.Dormant) { Drop(enemy); return; } // a story boss before the fight (COS-91)
         if (!_live.TryGetValue(enemy, out var instance))
         {
             instance = _create(enemy);

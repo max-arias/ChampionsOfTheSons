@@ -169,8 +169,14 @@ public sealed class ContentDb
             foreach (var bonus in set.Bonuses)
                 foreach (var e in bonus.Effects)
                     if (!_playerStats.ContainsKey(e.Stat)) _errors.Add($"set {set.Id}: unknown player stat '{e.Stat}'");
+        var kindIds = _enemies.Values.Select(k => k.Id).ToHashSet();
         foreach (var item in _items.Values)
+        {
             if (item.Set != null && _sets.Count > 0 && !_sets.ContainsKey(item.Set)) _errors.Add($"item {item.Id}: unknown set '{item.Set}'");
+            if (_enemies.Count > 0)
+                foreach (var kind in item.DropsFrom)
+                    if (!kindIds.Contains(kind)) _errors.Add($"item {item.Id}: drops from unknown enemy kind '{kind}'");
+        }
         foreach (var perk in _perks.Values)
         {
             foreach (var e in perk.Effects)

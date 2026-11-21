@@ -1,3 +1,4 @@
+using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
 
 namespace ChampionsOfTheSons.Core.Tests;
@@ -144,15 +145,41 @@ public class EnemyScalerTests
     }
 
     [Fact]
-    public void Bosses_are_reachable_and_tougher_than_minibosses()
+    public void Story_boss_kinds_always_roll_boss_tier_never_tiny_and_say_so()
     {
         var rng = new Rng(4);
-        var rules = new WorldRules { PartyLevelOverride = Difficulties.All[6].BaseLevelMin };
-        var rolls = Enumerable.Range(0, 3000).Select(_ => EnemyScaler.Roll(Boss, 100, rules, 1, rng)).ToList();
-        Assert.Contains(rolls, r => r.Tier == EnemyTier.Boss);
-        var boss = rolls.First(r => r.Tier == EnemyTier.Boss);
-        Assert.Equal(0.01, boss.HitCap);
-        Assert.Contains(EnemyAbility.BossSteadfast, boss.Abilities);
+        var rules = new WorldRules { PartyLevelOverride = Difficulties.All[6].BaseLevelMin, AllowElites = false };
+        var rolls = Enumerable.Range(0, 500).Select(_ => EnemyScaler.Roll(Boss, 100, rules, 1, rng)).ToList();
+        Assert.All(rolls, r =>
+        {
+            Assert.Equal(EnemyTier.Boss, r.Tier);
+            Assert.DoesNotContain(EnemyAbility.Tiny, r.Abilities);
+            Assert.Contains(EnemyAbility.BossSteadfast, r.Abilities);
+            Assert.True(r.BossKind);
+        });
+        Assert.False(EnemyScaler.Roll(Cannibal, 100, new WorldRules { PartyLevelOverride = 10 }, 1, rng).BossKind);
+    }
+
+    [Fact]
+    public void Story_bosses_pay_more_items_and_one_rare_per_player()
+    {
+        var rng = new Rng(1);
+        var boss = EnemyScaler.Roll(Boss, 100, new WorldRules { PartyLevelOverride = 30 }, 1, rng);
+        var plainBoss = boss with { BossKind = false };
+        Assert.True(LootRoller.DropCount(boss, new WorldRules(), rng) > LootRoller.DropCount(plainBoss, new WorldRules(), rng));
+        Assert.Equal(3, LootRoller.BossKindPerPlayerDrops(boss, 3));
+        Assert.Equal(0, LootRoller.BossKindPerPlayerDrops(plainBoss, 3));
+    }
+
+    [Fact]
+    public void Kind_only_items_drop_only_from_their_kinds()
+    {
+        var any = new ItemBaseDef { Id = "item.any" };
+        var bossOnly = new ItemBaseDef { Id = "item.boss_only", DropsFrom = { "enemy.boss" } };
+        Assert.True(LootRoller.DropsFromKind(any, "enemy.cannibal"));
+        Assert.True(LootRoller.DropsFromKind(bossOnly, "enemy.boss"));
+        Assert.False(LootRoller.DropsFromKind(bossOnly, "enemy.cannibal"));
+        Assert.False(LootRoller.DropsFromKind(bossOnly, null));
     }
 
     [Fact]

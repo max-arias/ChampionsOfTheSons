@@ -129,9 +129,17 @@ public sealed class LootFeature : IModFeature
             result.Add(Roller.RollItem(heart, level, Rng));
         if (!LootRoller.ShouldDrop(enemy, rules, mf, Rng)) return result;
         int count = LootRoller.DropCount(enemy, rules, Rng);
+        int difficulty = Difficulties.ForLevel(enemy.Level).Index;
         for (int i = 0; i < count; i++)
         {
-            var item = Roller.RollDrop(enemy.Bounty, level, mf, Difficulties.ForLevel(enemy.Level).Index, Rng, rules.MinLootRarity);
+            var item = Roller.RollDrop(enemy.Bounty, level, mf, difficulty, Rng, rules.MinLootRarity, kindId: enemy.KindId);
+            if (item != null) result.Add(item);
+        }
+        // COS-91: a story boss adds one Rare-or-better item per player in the game (host-authoritative: drops are the host's).
+        int players = 1 + (Net.CoopSession.IsHost ? Net.CoopFeature.Verified.Count : 0);
+        for (int i = 0; i < LootRoller.BossKindPerPlayerDrops(enemy, players); i++)
+        {
+            var item = Roller.RollDrop(enemy.Bounty, level, mf, difficulty, Rng, rules.MinLootRarity, LootRoller.BossKindMinRarity, enemy.KindId);
             if (item != null) result.Add(item);
         }
         return result;

@@ -158,7 +158,7 @@ public sealed class EnemyAbilityFeature : IModFeature
             if (!enemy.IsActive) continue;
 
             ApplySpeed(enemy);
-            EnemyAbilities.Tick(enemy, dt);
+            if (!enemy.Dormant) EnemyAbilities.Tick(enemy, dt);
         }
         Abilities.ActiveAbilitySystem.Sweep(dt);
     }

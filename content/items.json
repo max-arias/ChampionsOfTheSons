@@ -1009,6 +1009,7 @@
     {
       "id": "item.pendant_of_perpetual_rebirth",
       "legacyIndex": 79,
+      "dropsFrom": ["enemy.demon_boss", "enemy.puffy_boss", "enemy.boss_mutant"],
       "name": "Everturn Pendant",
       "type": "amulet",
       "rarity": 3,
@@ -3540,6 +3541,7 @@
     {
       "id": "item.purgatory",
       "legacyIndex": 165,
+      "dropsFrom": ["enemy.cannibal", "enemy.faceless_cannibal", "enemy.heavy_cannibal", "enemy.muddy_cannibal", "enemy.painted_cannibal", "enemy.tribe_veteran"],
       "name": "Ashtally Signet",
       "type": "ring",
       "rarity": 3,

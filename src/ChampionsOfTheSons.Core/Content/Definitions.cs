@@ -145,6 +145,8 @@ public sealed class ItemBaseDef
     /// <summary>A unique weapon's own glow look (COS-108); null = the rarity's colour and the default wisp.</summary>
     public GlowDef? Glow { get; set; }
     public string? Set { get; set; }
+    /// <summary>Enemy kind ids this item drops from; empty = any enemy (COS-91).</summary>
+    public List<string> DropsFrom { get; set; } = new();
     public List<StatEffect> UniqueEffects { get; set; } = new();
     public bool Manual { get; set; }
 

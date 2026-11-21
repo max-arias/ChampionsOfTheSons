@@ -131,6 +131,7 @@ public sealed class EnemyHudFeature : IModFeature
             bool hitRecently = _lastHit.TryGetValue(r, out var hitAt) && _time - hitAt < HitMemory;
             if (dist <= EngageRange && (hitRecently || Aware(r)))
             {
+                r.Engaged = true; // a story boss starts using abilities (COS-91)
                 if (!_engagedAt.ContainsKey(r)) BossEngaged?.Invoke(r);
                 _engagedAt[r] = _time;
             }

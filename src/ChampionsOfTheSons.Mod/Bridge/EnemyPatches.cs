@@ -112,6 +112,7 @@ public static class EnemyPatches
         LastHit = (rawAmount, damage, hit.Crit);
         if (damage > 0 && local && !forced) OnPlayerHit(runtime, damage);
         LastHitKind = hit.Kind;
+        if (damage > 0) runtime.Engaged = true;
         if (runtime.Actor != null) EnemyHit?.Invoke(runtime.Actor, runtime, damage, hit.Crit);
         return damage;
     }

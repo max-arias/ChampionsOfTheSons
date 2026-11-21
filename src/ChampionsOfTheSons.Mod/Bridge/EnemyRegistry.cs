@@ -34,6 +34,12 @@ public sealed class EnemyRuntime
     /// <summary>Self-tests: the enemy keeps its abilities (and their look) but casts none of them.</summary>
     public bool TestSilent { get; set; }
 
+    /// <summary>A player has hit it, or its boss bar has come up (COS-91).</summary>
+    public bool Engaged { get; set; }
+
+    /// <summary>A story boss before the fight starts (cutscene, transform, walking in): it uses no abilities until engaged (COS-91, COTF issue #14).</summary>
+    public bool Dormant => Profile.BossKind && !Engaged;
+
     /// <summary>Self-tests only: the headless game keeps spawned enemies dormant, so a test can declare one active (true) or inactive (false). Null = ask the game.</summary>
     public bool? TestActive
     {

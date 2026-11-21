@@ -46,7 +46,7 @@ public sealed class LootRoller
     /// times the host's drop quantity. No longer grows with level.</summary>
     public static int DropCount(EnemyProfile enemy, WorldRules rules, Rng rng)
     {
-        int count = enemy.Tier switch
+        int count = enemy.BossKind ? BossKindDrops : enemy.Tier switch
         {
             EnemyTier.Boss => 10,
             EnemyTier.Miniboss => 6,
@@ -55,6 +55,18 @@ public sealed class LootRoller
         };
         return Math.Max(0, (int)Math.Round(count * rules.DropQuantity, MidpointRounding.AwayFromZero));
     }
+
+    /// <summary>Items a story boss kind drops (COS-91; COTF: +100, scaled to this mod's drop rate), before the per-player ones.</summary>
+    public const int BossKindDrops = 20;
+
+    /// <summary>Items of at least <see cref="BossKindMinRarity"/> a story boss adds per player in the game (COTF: one fixed amulet per player).</summary>
+    public static int BossKindPerPlayerDrops(EnemyProfile enemy, int players) => enemy.BossKind ? Math.Max(1, players) : 0;
+
+    public const int BossKindMinRarity = (int)Rarity.Rare;
+
+    /// <summary>Whether <paramref name="kindId"/>'s kills can drop <paramref name="d"/>: items with <see cref="ItemBaseDef.DropsFrom"/> drop
+    /// only from those kinds (COS-91); the rest from any enemy. A null kind (not an enemy kill) drops only unrestricted items.</summary>
+    public static bool DropsFromKind(ItemBaseDef d, string? kindId) => d.DropsFrom.Count == 0 || (kindId != null && d.DropsFrom.Contains(kindId));
 
     /// <summary>The drop's rarity: the original's eight-step climb (<see cref="RollStep"/>, so drop pacing stays as tuned)
     /// mapped onto the four tiers.</summary>
@@ -97,10 +109,13 @@ public sealed class LootRoller
     }
 
     /// <summary>Rolls everything a drop needs: rarity, base, stats and sockets.</summary>
-    public ItemInstance? RollDrop(double worth, int itemLevel, double magicFind, int difficulty, Rng rng, int minRarity = 0)
+    /// <param name="minRarity">Host's loot floor: a drop below it is discarded.</param>
+    /// <param name="atLeast">The rarity is raised to at least this before the base is picked (boss-kind drops, COS-91).</param>
+    /// <param name="kindId">The killed enemy's kind, for kind-only items.</param>
+    public ItemInstance? RollDrop(double worth, int itemLevel, double magicFind, int difficulty, Rng rng, int minRarity = 0, int atLeast = 0, string? kindId = null)
     {
-        int rarity = RollRarity(worth, itemLevel, magicFind, difficulty, rng);
-        var baseDef = PickBase(rarity, itemLevel, rng, IsDroppable);
+        int rarity = Math.Max(atLeast, RollRarity(worth, itemLevel, magicFind, difficulty, rng));
+        var baseDef = PickBase(rarity, itemLevel, rng, d => IsDroppable(d) && DropsFromKind(d, kindId));
         if (baseDef == null || baseDef.Rarity < minRarity) return null;
         return RollItem(baseDef, itemLevel, rng);
     }
