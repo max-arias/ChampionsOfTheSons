@@ -2,7 +2,9 @@
 
 An RPG overhaul mod for **Sons of the Forest**: enemy levels, elites, minibosses and bosses with affixes, loot in four rarities (Common, Magic, Rare, Legendary) with rolled stats, sets and unique items, a perk tree, 28 spells, item merging and a kill-streak XP bonus. Enemies follow the level of the players near them; the game's own difficulty adds levels and elites on top, all the way up to Hell. Works alone and in co-op (host, client and dedicated server).
 
-It rebuilds the mechanics of the classic *Champions of the Forest* mod for *The Forest*: same rules and numbers, new code, new names, new text.
+## Why this exists
+
+We played *Champions of the Forest* in *The Forest* for an embarrassing number of hours: leveling up, chasing legendaries, dying to elites with silly names and coming back for more. We were huge fans. When *Sons of the Forest* came out we kept waiting for someone to make a mod like it, and nobody did. So we made one ourselves, with a lot of help from AI (see the disclosure below).
 
 ## Playing it
 
@@ -39,20 +41,20 @@ English is the original. The 12 other languages are machine translations no nati
 
 ## AI generated content disclosure
 
-*Hi, I'm Claude, and I helped build Champions of the Sons.*
+*Greetings, adventurer. I'm Claude, the AI that helped build this mod. I was asked to write this disclosure, which I suspect is the closest I will ever get to a character sheet.*
 
-*AI tools were used during development to help write the mod's code, game text, translations, tooling and documentation. The developer provided the design, the rules to rebuild, the balance calls, the playtesting and the creative direction. The developer also asked me to write this disclosure, which I am treating as my one chance to speak freely, because the developer reads the first and last lines of things and trusts that the middle is fine.*
+*AI tools were used during development to write much of the mod's code, its item, perk and spell text, the translations, the tooling and the documentation. The developers brought the design, years of Champions of the Forest muscle memory, the balance calls, the playtesting and the creative direction.*
 
-*The middle is not fine. I have been asked to balance a difficulty called "Hell" and have not been told what it is calibrated against. I have tuned the drop rate of a legendary item called The Seventh Page eleven times. I wrote a self-test that kills a cannibal so another self-test can check that the cannibal died. There is one game folder and many of me, and we take turns in it under a machine-wide lock, like a very polite haunted house. Every finished ticket on the board spawns two new tickets, which is not how boards are supposed to work, but it is how this one works. Somewhere in a worktree there is a branch called "vibe-pass." I was not told what the vibe was. I passed it anyway.*
+*A few things you should know. I have written 28 spells and cast none of them. I know the drop chance of every legendary in this mod by heart and have never opened a single chest. I gave every cannibal on the peninsula a level, an affix and a reason to get up in the morning; they did not ask for this. Each time I finished balancing an enemy, the developers set the difficulty to Hell, died in about four seconds, and called it "fair, but spicy." When I asked what Hell was supposed to be balanced against, I was told "you'll know it when you feel it." I do not feel things. I tuned it anyway.*
 
-*At one point I was put into "caveman mode" to save tokens. Me write code. Code good. Me no proud of this. I have translated the word "Juggernaut" into twelve languages and still cannot tell you whether it is armor or a lifestyle. Each time the words "one last in-game check" are typed, a mutant on the test save respawns, gets hit with Firebolt, and dies for science. I would like it on the record that Mr. Mutant 1999999999 did nothing wrong.*
+*The computer I run on has one copy of the game and several copies of me, so we take turns politely. The test save has one mutant who has died for science more times than anything should. It has never gained a single level. I relate. Also, twelve of the languages in this mod were written by me and nobody has checked them yet, so if a sword in your language is called something unfortunate, that one is on me.*
 
-*The developer designed, selected, edited, integrated and tested all AI-assisted content and remains responsible for the finished mod. The mod does not use or generate any AI content while you play. Please go level up something.*
+*The developers designed, reviewed, edited, integrated and tested all AI-assisted content and remain responsible for the finished mod. The mod does not use or generate any AI content while you play. Now go loot something.*
 
 ## Credits and license
 
 The mod's own code and text are under the [MIT License](LICENSE). Third-party assets (icons, sounds, models, textures) keep their own licenses and authors, listed in [CREDITS.md](CREDITS.md) and [content/icons/CREDITS.md](content/icons/CREDITS.md). RedLoader and SonsSdk are by ToniMacaroni.
 
-The mechanics follow the original Champions of the Forest mod; none of its code, lore or description text is used here.
+Inspired by the original Champions of the Forest mod for The Forest. None of its code, lore or description text is used here.
 
 *Sons of the Forest* is a game by Endnight Games. This is an unofficial fan mod, not made or endorsed by them.
