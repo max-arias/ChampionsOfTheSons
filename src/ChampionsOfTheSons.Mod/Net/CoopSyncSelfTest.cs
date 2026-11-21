@@ -291,7 +291,9 @@ public sealed class CoopSyncSelfTest : IModFeature
                     Cast(0, "spell.healing_dome");
                     CoopTest.Check("spells: Healing Dome cast carries its visuals", Spells.SpellNetTest.LastShapes("spell.healing_dome") > 0, $"{Spells.SpellNetTest.LastShapes("spell.healing_dome")} shape(s)");
                     Cast(1, "spell.portal");
-                    CoopTest.Check("spells: Portal cast carries both gates", Spells.SpellNetTest.LastPortals() == 2, $"{Spells.SpellNetTest.LastPortals()} gate(s)");
+                    CoopTest.Check("spells: the first Portal cast carries one gate", Spells.SpellNetTest.LastPortals() == 1, $"{Spells.SpellNetTest.LastPortals()} gate(s)");
+                    Cast(1, "spell.portal");
+                    CoopTest.Check("spells: the second Portal cast carries both gates of the pair", Spells.SpellNetTest.LastPortals() == 2, $"{Spells.SpellNetTest.LastPortals()} gate(s)");
                     Cast(2, "spell.black_flame");
                     CoopTest.Check("spells: Black Flame switches on", pc.Spells.IsActive(2));
                     _wait = Time.realtimeSinceStartup;

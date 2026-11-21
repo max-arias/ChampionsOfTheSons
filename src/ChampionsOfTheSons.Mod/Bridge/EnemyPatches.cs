@@ -170,6 +170,7 @@ public static class EnemyPatches
                 double fire = sheet.Get(StatIds.FireDamage) + runtime.Combat.FireMark;
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };
                 hit = Followups.FollowupsFeature.OnLocalHit(hit, weapon);
+                hit = Spells.SpellHits.Modify(runtime, weapon, _shot, weapon == WeaponClass.Ranged && _headshot, hit); // weapon-linked spells (COS-84)
                 LocalWeaponHit?.Invoke(runtime, weapon);
                 _hitWeapon = weapon;
             }

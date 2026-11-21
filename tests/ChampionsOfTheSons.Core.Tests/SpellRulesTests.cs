@@ -111,21 +111,33 @@ public class SpellRulesTests
     }
 
     [Fact]
-    public void Frenzy_stacks_on_hits_up_to_the_cap_and_drops_when_it_ends()
+    public void Frenzy_stacks_on_attacks_up_to_the_cap_refresh_and_drop_after_their_seconds()
     {
         var stats = new StatSheet(_db);
         var frenzy = new FrenzyState();
-        Assert.False(frenzy.OnHit(stats)); // not cast yet
-        frenzy.Cast();
-        for (int i = 0; i < 10; i++) frenzy.OnHit(stats);
+        for (int i = 0; i < 10; i++) frenzy.OnAttack(stats);
         Assert.Equal(3, frenzy.Stacks);
-        var mods = SpellTuning.Frenzy(stats, frenzy.Stacks);
-        stats.SetSource("spell.frenzy", mods);
+        stats.SetSource("spell.frenzy", SpellTuning.Frenzy(stats, frenzy.Stacks));
         Assert.Equal(1.3, stats.Get("all_damage"), 6);
         Assert.Equal(1.06, stats.Get("attack_speed"), 6);
-        Assert.False(frenzy.Tick(10));
-        Assert.True(frenzy.Tick(10.1));
+        Assert.False(frenzy.Tick(SpellTuning.FrenzyStackSeconds - 1));
+        frenzy.OnAttack(stats); // an attack refreshes the time
+        Assert.False(frenzy.Tick(SpellTuning.FrenzyStackSeconds - 1));
+        Assert.True(frenzy.Tick(2));
         Assert.Equal(0, frenzy.Stacks);
+    }
+
+    [Fact]
+    public void Casting_frenzy_spends_every_stack()
+    {
+        var stats = new StatSheet(_db);
+        var frenzy = new FrenzyState();
+        frenzy.OnAttack(stats);
+        frenzy.OnAttack(stats);
+        Assert.Equal(2, frenzy.Spend());
+        Assert.False(frenzy.Active);
+        Assert.Equal(0, frenzy.Spend());
+        Assert.Equal(2 * SpellTuning.FrenzyBurstShare * 200, SpellTuning.FrenzyBurst(2, 200), 6);
     }
 
     [Fact]

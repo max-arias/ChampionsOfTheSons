@@ -13,7 +13,7 @@ public static class SpellTuning
     public const double GoldenSkinDuration = 20, GoldenSkinArmor = 250, GoldenSkinDamageTaken = 0.75;
     public const double FocusDuration = 4;
     public const double FrenzyDuration = 20;
-    public const double TauntDuration = 8, TauntArmor = 100;
+    public const double TauntDuration = 8, TauntArmor = 100, TauntRadius = 30;
     public const double PortalMaxRange = 40, PortalReenterLock = 1.5, PortalRadius = 1.5;
     public const double FireboltDamage = 30, FireboltBurnSeconds = 4, FireboltBurnFraction = 0.25, ProjectileSpeed = 40;
     public const double MagicArrowDamage = 60, MagicArrowRange = 70, MagicArrowSpeed = 70;
@@ -32,6 +32,31 @@ public static class SpellTuning
     public const double MultishotInterval = 0.75, MultishotRange = 30, MultishotDamage = 15, MultishotScaling = 1;
     public const double PurgeHealFraction = 0.2;
     public const double BloodArrowRange = 70, BloodArrowSpeed = 60;
+
+    // Weapon-linked spells (COS-84): this mod's own numbers where the stand-ins had none --------------------------------
+    /// <summary>Taunt is aimed: how far the point may be.</summary>
+    public const double TauntAimRange = 60;
+    /// <summary>Portal: a first gate waits this long for the second cast.</summary>
+    public const double PortalPendingSeconds = 120;
+    /// <summary>Multishot: energy per shot is <c>base x extra^1.5</c>; the extra arrows fan out this many degrees apart.</summary>
+    public const double MultishotShotEnergy = 5, MultishotShotExponent = 1.5, MultishotSpreadDegrees = 4;
+    /// <summary>Black Flame: seconds a weapon hit's burn lasts, the chance an arrow ignites (melee always).</summary>
+    public const double BlackFlameBurnSeconds = 5, BlackFlameArrowChance = 0.5;
+    /// <summary>Frenzy: seconds a stack lasts (every attack refreshes it); casting spends the stacks for energy, per stack and second, as a share of max energy.</summary>
+    public const double FrenzyStackSeconds = 4, FrenzyBurstShare = 0.01, FrenzyMoveSpeedPerStack = 0.05;
+    /// <summary>Repeat Offender: flat damage per earlier hit on the same target while Frenzy has stacks.</summary>
+    public const double FuryMeleePerHit = 10, FuryRangedPerHit = 3;
+    /// <summary>Focus: the stored bonus waits this long for the next shot.</summary>
+    public const double FocusStoredSeconds = 20;
+    /// <summary>Parry: stun immunity after a parry, seconds the stored counter-strike bonus waits for the next melee hit.</summary>
+    public const double ParryStunImmunitySeconds = 10, ParryStoredSeconds = 20;
+    /// <summary>Bash (passive): most hits that stack on one enemy, the extra damage per stack per point of <c>spell_bash_damage_buff</c>.</summary>
+    public const int BashMaxStacks = 5;
+    public const double BashStackDamage = 0.1;
+    /// <summary>Seeking Arrow: ranged damage factor while a mark is up; the armed mark and Blood Infused Arrow's stored damage wait this long.</summary>
+    public const double SeekingRangedMult = 0.9, ArrowChargeSeconds = 30;
+    /// <summary>Blood Infused Arrow with the triple perk: damage x3 and an energy leak.</summary>
+    public const double BloodArrowTriple = 3, BloodArrowLeakPerSecond = 10, BloodArrowLeakSeconds = 10;
 
     // Buff modifiers -------------------------------------------------------------------------------------------------
 
@@ -76,6 +101,46 @@ public static class SpellTuning
         return Math.Pow(penalty > 0 ? Math.Min(1, penalty) : 0.75, i);
     }
 
+    /// <summary>Multishot: extra arrows per shot, at least one: the count stat's volley minus the first arrow, plus the bracers' four.</summary>
+    public static int MultishotExtras(StatSheet s) =>
+        Math.Max(1, MultishotShots(s) - 1) + (s.IsOn(UniqueFlagIds.Sora) ? UniqueTuning.SoraExtraProjectiles : 0);
+
+    /// <summary>Multishot: energy one shot with <paramref name="extras"/> extra arrows costs (the bracers make it cheaper).</summary>
+    public static double MultishotShotCost(StatSheet s, int extras) =>
+        MultishotShotEnergy * Math.Pow(Math.Max(0, extras), MultishotShotExponent) * (s.IsOn(UniqueFlagIds.Sora) ? UniqueTuning.SoraCostScale : 1);
+
+    /// <summary>Black Flame: burn per second a weapon hit sets: <c>(8 x Netherflame + flat x scaling) x spell multiplier</c>.</summary>
+    public static double BlackFlameBurn(StatSheet s, bool nether) =>
+        (BlackFlameDamage * (nether ? PerkTuning.NetherflameDamage : 1) + s.Get(StatIds.SpellFlatDmg) * s.Get("spell_black_flame_damage_scaling"))
+        * Derived.SpellMultiplier(s);
+
+    /// <summary>Black Flame: chance a weapon hit ignites (melee always, arrows half the time).</summary>
+    public static double BlackFlameIgnite(WeaponClass weapon) => weapon == WeaponClass.Melee ? 1 : BlackFlameArrowChance;
+
+    /// <summary>Focus: the bonus a shot stores for the next one, by where it hit (headshot or body).</summary>
+    public static double FocusBonus(StatSheet s, bool head) =>
+        (head ? s.Get("spell_focus_on_hs") : s.Get("spell_focus_on_bs")) + s.Get("spell_focus_bonus_dmg");
+
+    /// <summary>Frenzy: energy per second spending <paramref name="stacks"/> stacks gives (a share of max energy each).</summary>
+    public static double FrenzyBurst(int stacks, double maxEnergy) => stacks * FrenzyBurstShare * maxEnergy;
+
+    /// <summary>Repeat Offender: flat damage after <paramref name="repeats"/> earlier hits on the same target.</summary>
+    public static double FuryDamage(StatSheet s, bool melee, int repeats) =>
+        s.IsOn("spell_fury_swipes") ? repeats * (melee ? FuryMeleePerHit : FuryRangedPerHit) : 0;
+
+    /// <summary>Parry: the multiplier the next melee hit gets (the <c>spell_parry_dmg_bonus</c> total, 1 without it).</summary>
+    public static double ParryStoredMult(StatSheet s) => Math.Max(1, s.Get("spell_parry_dmg_bonus"));
+
+    /// <summary>Bash (passive): the melee hit's factor with <paramref name="stacks"/> earlier Bash hits on the enemy.</summary>
+    public static double BashStackFactor(StatSheet s, int stacks) =>
+        1 + Math.Min(Math.Max(0, stacks), BashMaxStacks) * BashStackDamage * s.Get("spell_bash_damage_buff");
+
+    /// <summary>Seeking Arrow: the factor on a headshot while a mark is up (<c>spell_seeking_arrow_head_damage</c>, at most 1).</summary>
+    public static double SeekingHeadMult(StatSheet s) => Math.Clamp(s.Get("spell_seeking_arrow_head_damage"), 0, 1);
+
+    /// <summary>Blood Infused Arrow: the flat damage stored for the arrow (tripled with its perk).</summary>
+    public static double BloodArrowStored(StatSheet s, OutgoingHit hit) => hit.Amount * (s.IsOn("spell_bia_triple_dmg") ? BloodArrowTriple : 1);
+
     /// <summary>Parry window; Parry Anything (perk or the first survivor's shield) doubles it.</summary>
     public static double ParryWindowFor(StatSheet s) => s.IsOn(ParryAnything) ? ParryWindow * 2 : ParryWindow;
 
@@ -101,6 +166,8 @@ public static class SpellTuning
         {
             mods.Add(new StatModifier(StatIds.AllDamage, EffectOp.Mult, 1 + stacks * s.Get("spell_frenzy_dmg")));
             mods.Add(new StatModifier(StatIds.AttackSpeed, EffectOp.Mult, 1 + stacks * s.Get("spell_frenzy_atk_speed")));
+            // Red Tempo's upgrade (spell_frenzy_ms): movement speed per stack too.
+            if (s.IsOn("spell_frenzy_ms")) mods.Add(new StatModifier(StatIds.MovementSpeed, EffectOp.Mult, 1 + stacks * FrenzyMoveSpeedPerStack));
         }
         double crit = s.Get(PerkStatIds.FrenzyCrit);
         if (crit > 0) mods.Add(new StatModifier(StatIds.CritChance, EffectOp.Add, crit));
@@ -202,30 +269,38 @@ public sealed class ParryState
     public void Reset() => _left = 0;
 }
 
-/// <summary>Frenzy: for its duration every hit adds a stack (to <c>spell_frenzy_max_stacks</c>); stacks drop when it ends.</summary>
+/// <summary>Frenzy: while slotted every attack adds a stack (to <c>spell_frenzy_max_stacks</c>) and refreshes them; they drop
+/// <see cref="SpellTuning.FrenzyStackSeconds"/> after the last attack. Casting spends them (<see cref="Spend"/>).</summary>
 public sealed class FrenzyState
 {
     private double _left;
 
     public int Stacks { get; private set; }
-    public bool Active => _left > 0;
+    public bool Active => Stacks > 0;
 
-    public void Cast() => _left = SpellTuning.FrenzyDuration;
-
-    /// <summary>A hit lands; returns true when the stack count changed.</summary>
-    public bool OnHit(StatSheet s)
+    /// <summary>An attack lands; returns true when the stack count changed.</summary>
+    public bool OnAttack(StatSheet s)
     {
-        if (!Active) return false;
+        _left = SpellTuning.FrenzyStackSeconds;
         int max = (int)Math.Max(1, s.Get("spell_frenzy_max_stacks"));
         if (Stacks >= max) return false;
         Stacks++;
         return true;
     }
 
-    /// <summary>Returns true when Frenzy just ended.</summary>
+    /// <summary>Takes every stack (the cast): returns how many there were.</summary>
+    public int Spend()
+    {
+        int n = Stacks;
+        Stacks = 0;
+        _left = 0;
+        return n;
+    }
+
+    /// <summary>Returns true when the stacks just ran out.</summary>
     public bool Tick(double dt)
     {
-        if (_left <= 0) return false;
+        if (Stacks == 0) return false;
         _left -= dt;
         if (_left > 0) return false;
         Stacks = 0;
@@ -236,5 +311,70 @@ public sealed class FrenzyState
     {
         _left = 0;
         Stacks = 0;
+    }
+}
+
+/// <summary>A bonus a spell stores for a later hit: Focus (the next shot), Parry (the next melee hit), Blood Infused Arrow (the next
+/// arrows, one charge each), Seeking Arrow's armed mark. It runs out after its seconds.</summary>
+public sealed class StoredBonus
+{
+    private double _left;
+
+    public double Value { get; private set; }
+    public int Charges { get; private set; }
+    public bool Has => Charges > 0 && _left > 0;
+
+    public void Store(double value, double seconds, int charges = 1)
+    {
+        Value = value;
+        _left = seconds;
+        Charges = charges;
+    }
+
+    /// <summary>Uses one charge; returns the stored value, or null when there is none.</summary>
+    public double? Take()
+    {
+        if (!Has) return null;
+        double v = Value;
+        if (--Charges <= 0) Clear();
+        return v;
+    }
+
+    public void Tick(double dt)
+    {
+        if (_left <= 0) return;
+        _left -= dt;
+        if (_left <= 0) Clear();
+    }
+
+    public void Clear()
+    {
+        Value = 0;
+        Charges = 0;
+        _left = 0;
+    }
+}
+
+/// <summary>Repeat Offender: counts hits in a row on one target; a different target starts over.</summary>
+public sealed class RepeatTracker
+{
+    private object? _target;
+    private int _count;
+
+    /// <summary>A hit on <paramref name="target"/>; returns how many hits in a row came before it.</summary>
+    public int Hit(object target)
+    {
+        if (!ReferenceEquals(target, _target))
+        {
+            _target = target;
+            _count = 0;
+        }
+        return _count++;
+    }
+
+    public void Reset()
+    {
+        _target = null;
+        _count = 0;
     }
 }

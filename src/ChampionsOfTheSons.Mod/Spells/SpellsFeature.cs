@@ -32,7 +32,7 @@ internal sealed class SpellsFeature : IModFeature
         SpellNet.Init();
         Bridge.EnemyPatches.EnemyHit += (_, enemy, damage, _) =>
         {
-            if (damage > 0) SpellEffects.OnPlayerHit(enemy);
+            SpellHits.AfterHit(enemy, damage);
         };
         Bridge.EnemyPatches.LocalWeaponHit += SpellEffects.OnWeaponHit;
     }

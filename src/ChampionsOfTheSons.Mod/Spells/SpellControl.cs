@@ -103,7 +103,7 @@ internal static class SpellControl
             case "spell.cataclysm": return (eye.position, AimGround(50), S("spell_cataclysm_radius"), false);
             case "spell.healing_dome": return (eye.position, (PlayerPos + Vector3.up * 0.1f), (float)SpellTuning.HealingDomeRadius, false);
             case "spell.magic_arrow": return (eye.position, AimPoint((float)SpellTuning.MagicArrowRange), 1f, false);
-            case "spell.taunt": return (eye.position, (PlayerPos + Vector3.up * 0.1f), 30f, false);
+            case "spell.taunt": return (eye.position, AimGround((float)SpellTuning.TauntAimRange), (float)SpellTuning.TauntRadius, false);
             case "spell.portal":
             {
                 var b = AimGround((float)SpellTuning.PortalMaxRange);

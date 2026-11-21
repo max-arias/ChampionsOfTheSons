@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Spells;
 
-/// <summary>Portal: a linked pair of gates that carry the player between them while they last.</summary>
+/// <summary>Portal: each cast places one gate; two casts make a linked pair that carries the player between them while it lasts.</summary>
 internal static class SpellPortals
 {
     private sealed class Pair
@@ -20,24 +20,39 @@ internal static class SpellPortals
     public static int Count => Pairs.Count;
     public static (Vector3 Entrance, Vector3 Exit) LastOpened { get; private set; }
 
-    /// <summary>Opens the entrance a few metres ahead of the player and the exit where the view ray lands (up to the range).</summary>
-    public static (Vector3 Entrance, Vector3 Exit) Open(float seconds)
+    private static Vector3? _pending;
+    private static GameObject? _pendingVisual;
+    private static float _pendingLeft;
+
+    /// <summary>A gate is waiting for the second cast.</summary>
+    public static bool HasPending => _pending != null;
+
+    /// <summary>One cast places one gate at the aimed point (up to the range). The second cast places the other and links them; the
+    /// <paramref name="seconds"/> timer starts then. Returns true when this cast completed a pair.</summary>
+    public static bool Place(float seconds)
     {
-        var eye = SpellWorld.Eye;
-        var flat = new Vector3(eye.forward.x, 0, eye.forward.z).normalized;
-        var a = SpellWorld.PlayerPos + flat * 3f;
-        var b = SpellWorld.AimGround((float)SpellTuning.PortalMaxRange);
-        if (Vector3.Distance(a, b) < 8f) b = SpellWorld.PlayerPos + flat * (float)SpellTuning.PortalMaxRange;
-        if (SpellCaster.GroundY(b + Vector3.up * 3) is float gy) b.y = gy;
-        var pair = new Pair { A = a, B = b, Left = seconds };
-        pair.VisualA = Gate(a);
-        pair.VisualB = Gate(b);
+        var at = SpellWorld.AimGround((float)SpellTuning.PortalMaxRange);
+        if (_pending is not Vector3 first)
+        {
+            _pending = at;
+            _pendingLeft = (float)SpellTuning.PortalPendingSeconds;
+            _pendingVisual = Gate(at);
+            SpellNet.NoteMotion(_pendingVisual, _pendingLeft, Vector3.zero);
+            return false;
+        }
+        // The waiting gate is redrawn with the second, so teammates get the pair from this one cast.
+        SpellFx.Remove(_pendingVisual);
+        _pending = null;
+        _pendingVisual = null;
+        var pair = new Pair { A = first, B = at, Left = seconds };
+        pair.VisualA = Gate(first);
+        pair.VisualB = Gate(at);
         SpellNet.NoteMotion(pair.VisualA, seconds, Vector3.zero);
         SpellNet.NoteMotion(pair.VisualB, seconds, Vector3.zero);
         Pairs.Add(pair);
         _lock = 0.5f;
-        LastOpened = (a, b);
-        return (a, b);
+        LastOpened = (first, at);
+        return true;
     }
 
     /// <summary>A teammate's Portal (COS-80): the same pair, drawn from their cast, carries the local player too.</summary>
@@ -60,6 +75,12 @@ internal static class SpellPortals
     public static void Step(float dt)
     {
         _lock = Mathf.Max(0, _lock - dt);
+        if (_pending != null && (_pendingLeft -= dt) <= 0)
+        {
+            SpellFx.Remove(_pendingVisual);
+            _pending = null;
+            _pendingVisual = null;
+        }
         if (Pairs.Count == 0) return;
         for (int i = Pairs.Count - 1; i >= 0; i--)
         {
@@ -96,6 +117,9 @@ internal static class SpellPortals
             SpellFx.Remove(p.VisualB);
         }
         Pairs.Clear();
+        SpellFx.Remove(_pendingVisual);
+        _pending = null;
+        _pendingVisual = null;
         _lock = 0;
     }
 }

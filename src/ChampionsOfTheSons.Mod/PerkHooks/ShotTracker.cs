@@ -36,8 +36,8 @@ internal static class ShotTracker
         _lastShotAt = -1000f;
     }
 
-    /// <summary>Records a shot from the game item <paramref name="itemId"/> (also used by self-tests).</summary>
-    public static void Record(int itemId)
+    /// <summary>The weapon kind of the game item <paramref name="itemId"/> (Other when the item database cannot say).</summary>
+    public static RangedKind KindOfItem(int itemId)
     {
         string? name = null;
         try
@@ -48,7 +48,20 @@ internal static class ShotTracker
         {
             // the item database is not ready: the shot stays unclassified
         }
-        LastKind = RangedRules.KindOf(name);
+        return RangedRules.KindOf(name);
+    }
+
+    /// <summary>Self-tests: the last shot came from a weapon of this kind.</summary>
+    public static void RecordKind(RangedKind kind)
+    {
+        LastKind = kind;
+        _lastShotAt = Time.time;
+    }
+
+    /// <summary>Records a shot from the game item <paramref name="itemId"/> (also used by self-tests).</summary>
+    public static void Record(int itemId)
+    {
+        LastKind = KindOfItem(itemId);
         _lastShotAt = Time.time;
     }
 
