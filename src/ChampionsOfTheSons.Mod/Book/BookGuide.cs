@@ -22,7 +22,7 @@ internal static class BookGuide
             "Each level gives a perk point and raises your attributes. Dying costs part of the XP in your current level, never a level."),
         ("loot", "Loot",
             "Enemies drop gear when they die; elites and bosses drop more. Walk over a drop to pick it up.\n\n" +
-            "Rarity sets how strong the rolls are: Common (white), Magic (blue), Rare (yellow) and Legendary (red-orange). " +
+            "Rarity sets how strong the rolls are: Common (white), Magic (blue), Rare (yellow) and Legendary (red). " +
             "Uniques are Legendary and carry a special effect. Magic find raises the rarity of drops."),
         ("merge", "Merge",
             "Turn spare gear into better gear. Select an item in the bag and press Merge, next to Sort. Items that cannot join it fade; click the ones you want to give up, then press Merge again.\n\n" +

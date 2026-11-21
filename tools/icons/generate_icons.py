@@ -159,14 +159,12 @@ def match(ents, overrides):
     return res
 
 
-RARITY = ["#b9b9b9", "#5fd05f", "#4aa3ff", "#ecd84a", "#b266ff", "#ff8c2e", "#ff3d3d", "#ff55dd"]
-# Content has four rarities since COS-109 (Common, Magic, Rare, Legendary); icons keep the look of the old tier each one
-# mostly came from, so new icons match the ones rendered before the collapse.
-TIER = [0, 2, 3, 5]
+# The four rarities (COS-109), one colour each, the same as the mod's UI (Max, 2026-11-21): white, blue, yellow, red.
+RARITY = ["#e8e8e8", "#4d9dff", "#ffd94a", "#ff3b30"]
 
 
 def tier(e):
-    return TIER[min(3, e["rarity"])]
+    return min(3, max(0, e["rarity"]))
 CAT = {"melee_offense": "#e8603c", "ranged_offense": "#8ac24a", "magic_offense": "#9a6bff", "defense": "#5aa0e8",
        "support": "#4ed6a0", "utility": "#e8c25a", "spell": "#5ad8ff", "set": "#ffd24a"}
 
@@ -238,9 +236,10 @@ def render_one(e, key):
     col = np.where(yy < 0.5, light + (base - light) * (yy / 0.5), base + (dark - base) * ((yy - 0.5) / 0.5))
     col = np.broadcast_to(col, (h, w, 3))
     out = np.zeros((h, w, 4), np.float32)
-    glow_r = ([0, 0, 3, 5, 7, 9, 11, 13][r] * 4) if e["kind"] == "item" else 32
+    # Glow grows with rarity: none, small, medium, strong (the sizes the old tiers had before COS-109).
+    glow_r = ([0, 3, 5, 9][r] * 4) if e["kind"] == "item" else 32
     if glow_r:
-        ga = np.asarray(a.filter(ImageFilter.GaussianBlur(glow_r)), np.float32) / 255 * (0.45 + 0.07 * r)
+        ga = np.asarray(a.filter(ImageFilter.GaussianBlur(glow_r)), np.float32) / 255 * (0.45 + 0.07 * [0, 2, 3, 5][r])
         out[..., :3] = base
         out[..., 3] = np.clip(ga * 1.6, 0, 1)
     if e["kind"] != "item":

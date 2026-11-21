@@ -28,7 +28,7 @@ internal static class PageKit
     /// <summary>Rarity tape colors 0..3 (COS-57, COS-109): muted so they sit on paper.</summary>
     private static readonly Color[] Rarity =
     {
-        Hex("#9A968C"), Hex("#4F7FA6"), Hex("#C9982A"), Hex("#C24A22"),
+        Hex("#9A968C"), Hex("#4F7FA6"), Hex("#C9982A"), Hex("#B8282A"),
     };
 
     public static Color RarityColor(int r) => Rarity[Math.Clamp(r, 0, Rarity.Length - 1)];

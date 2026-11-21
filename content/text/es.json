@@ -1792,7 +1792,7 @@
  "ui.guide.keys.title": "Teclas",
  "ui.guide.levels.body": "Las muertes dan PX. Mata otra vez rápido para encadenar una racha de Masacre: los PX se acumulan y se multiplican al terminar la racha.\n\nCada nivel da un punto de ventaja y sube tus atributos. Morir cuesta parte de los PX del nivel actual, nunca un nivel.",
  "ui.guide.levels.title": "Niveles y PX",
- "ui.guide.loot.body": "Los enemigos sueltan equipo al morir; las élites y los jefes, más. Pasa por encima de un objeto para recogerlo.\n\nLa rareza marca la fuerza de las estadísticas: Común (blanco), Mágico (azul), Raro (amarillo) y Legendario (rojo anaranjado). Los únicos son Legendarios y tienen un efecto especial. El hallazgo mágico sube la rareza del botín.",
+ "ui.guide.loot.body": "Los enemigos sueltan equipo al morir; las élites y los jefes, más. Pasa por encima de un objeto para recogerlo.\n\nLa rareza marca la fuerza de las estadísticas: Común (blanco), Mágico (azul), Raro (amarillo) y Legendario (rojo). Los únicos son Legendarios y tienen un efecto especial. El hallazgo mágico sube la rareza del botín.",
  "ui.guide.loot.title": "Botín",
  "ui.guide.merge.body": "Convierte el equipo que te sobra en equipo mejor. Selecciona un objeto en la bolsa y pulsa Fusionar, junto a Ordenar. Los objetos que no pueden unirse se atenúan; haz clic en los que quieras entregar y vuelve a pulsar Fusionar.\n\n3 Comunes de un mismo tipo dan 1 Mágico de ese tipo, 5 Mágicos dan 1 Raro y 7 Raros dan 1 Legendario. 3 Legendarios cualesquiera dan 1 Legendario aleatorio de otra clase. El nuevo objeto toma el nivel más bajo de los usados y estadísticas nuevas, y aparece donde estaba tu primera elección, marcado NUEVO. Cancelar detiene la fusión.",
  "ui.guide.merge.title": "Fusión",

@@ -63,7 +63,7 @@ internal static class GlowSelfTest
             Equip("item.rage", "great_sword", Rarity.Common);
             var skin = WeaponModels.LocalSkin;
             var c = skin?.Look.Color ?? Color.black;
-            SelfTest.Check("glow: a Common unique is Legendary and red-orange", skin?.Look.Level == GlowLevel.Legendary && c.r > 0.9f && c.g < 0.5f && c.b < 0.25f, $"{skin?.Look.Level} {c}");
+            SelfTest.Check("glow: a Common unique is Legendary and red", skin?.Look.Level == GlowLevel.Legendary && c.r > 0.9f && c.g < 0.5f && c.b < 0.25f, $"{skin?.Look.Level} {c}");
             SelfTest.Check("glow: unique has edge, light and embers", skin != null && Count(skin.Model, "cots-glow-edge") > 0
                 && Count(skin.Model, "cots-glow-light") == 1 && Count(skin.Model, "cots-glow-wisp") == 1, Describe(skin));
         });

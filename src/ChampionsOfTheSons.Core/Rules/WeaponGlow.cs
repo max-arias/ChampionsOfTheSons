@@ -11,7 +11,7 @@ public enum GlowLevel
     Magic,
     /// <summary>Yellow, a medium glow.</summary>
     Rare,
-    /// <summary>Red-orange, a strong glow plus embers along the blade, a pulsing light, a flame trail and sparks on hit.</summary>
+    /// <summary>Red, a strong glow plus embers along the blade, a pulsing light, a flame trail and sparks on hit.</summary>
     Legendary,
 }
 
@@ -42,7 +42,7 @@ public static class WeaponGlow
     {
         GlowLevel.Magic => "#5AA8FF",
         GlowLevel.Rare => "#FFD94A",
-        GlowLevel.Legendary => "#FF5A1E",
+        GlowLevel.Legendary => "#FF2A1E",
         _ => "#FFFFFF",
     };
 

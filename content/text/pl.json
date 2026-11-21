@@ -1792,7 +1792,7 @@
  "ui.guide.keys.title": "Klawisze",
  "ui.guide.levels.body": "Zabójstwa dają PD. Zabijaj szybko jeden po drugim, by zbudować serię Masakry: PD się odkładają i są mnożone, gdy seria się kończy.\n\nKażdy poziom daje punkt atutu i podnosi twoje atrybuty. Śmierć kosztuje część PD z bieżącego poziomu, nigdy poziom.",
  "ui.guide.levels.title": "Poziomy i PD",
- "ui.guide.loot.body": "Wrogowie upuszczają ekwipunek po śmierci; elity i bossowie więcej. Przejdź po przedmiocie, by go podnieść.\n\nRzadkość decyduje o sile statystyk: Zwykły (biały), Magiczny (niebieski), Rzadki (żółty) i Legendarny (czerwonopomarańczowy). Unikaty są Legendarne i mają specjalny efekt. Magiczne znalezisko podnosi rzadkość łupu.",
+ "ui.guide.loot.body": "Wrogowie upuszczają ekwipunek po śmierci; elity i bossowie więcej. Przejdź po przedmiocie, by go podnieść.\n\nRzadkość decyduje o sile statystyk: Zwykły (biały), Magiczny (niebieski), Rzadki (żółty) i Legendarny (czerwony). Unikaty są Legendarne i mają specjalny efekt. Magiczne znalezisko podnosi rzadkość łupu.",
  "ui.guide.loot.title": "Łup",
  "ui.guide.merge.body": "Zamień nadmiarowy sprzęt na lepszy. Zaznacz przedmiot w torbie i naciśnij Połącz, obok Sortuj. Przedmioty, które nie mogą do niego dołączyć, bledną; kliknij te, które chcesz oddać, a potem znów naciśnij Połącz.\n\n3 Zwykłe jednego typu dają 1 Magiczny tego typu, 5 Magicznych daje 1 Rzadki, a 7 Rzadkich daje 1 Legendarny. Dowolne 3 Legendarne dają 1 losowy Legendarny innego rodzaju. Nowy przedmiot dostaje najniższy poziom z użytych i nowe statystyki, a trafia tam, gdzie był twój pierwszy wybór, z oznaczeniem NOWY. Anuluj kończy łączenie.",
  "ui.guide.merge.title": "Łączenie",

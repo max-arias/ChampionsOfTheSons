@@ -1792,7 +1792,7 @@
  "ui.guide.keys.title": "Tuşlar",
  "ui.guide.levels.body": "Öldürmeler TP verir. Hızla art arda öldürerek Katliam serisi kur: TP birikir ve seri bitince çarpılır.\n\nHer seviye bir perk puanı verir ve niteliklerini artırır. Ölmek, mevcut seviyedeki TP'nin bir kısmına mal olur, asla bir seviyeye değil.",
  "ui.guide.levels.title": "Seviyeler ve TP",
- "ui.guide.loot.body": "Düşmanlar ölünce teçhizat düşürür; seçkinler ve patronlar daha fazla. Almak için üzerinden yürü.\n\nNadirlik değerlerin gücünü belirler: Sıradan (beyaz), Büyülü (mavi), Nadir (sarı) ve Efsanevi (kırmızı turuncu). Benzersizler Efsanevidir ve özel bir etkileri vardır. Büyü bulma ganimetin nadirliğini artırır.",
+ "ui.guide.loot.body": "Düşmanlar ölünce teçhizat düşürür; seçkinler ve patronlar daha fazla. Almak için üzerinden yürü.\n\nNadirlik değerlerin gücünü belirler: Sıradan (beyaz), Büyülü (mavi), Nadir (sarı) ve Efsanevi (kırmızı). Benzersizler Efsanevidir ve özel bir etkileri vardır. Büyü bulma ganimetin nadirliğini artırır.",
  "ui.guide.loot.title": "Ganimet",
  "ui.guide.merge.body": "Fazla ekipmanı daha iyi ekipmana dönüştür. Çantada bir eşya seç ve Sırala'nın yanındaki Birleştir'e bas. Ona katılamayan eşyalar soluklaşır; vazgeçmek istediklerine tıkla, sonra yine Birleştir'e bas.\n\nAynı türden 3 Sıradan, o türden 1 Büyülü eder; 5 Büyülü 1 Nadir, 7 Nadir de 1 Efsanevi eder. Herhangi 3 Efsanevi, başka türden rastgele 1 Efsanevi eder. Yeni eşya, kullanılanların en düşük seviyesini ve yeni özellikler alır; ilk seçtiğin eşyanın yerine YENİ işaretiyle gelir. İptal birleştirmeyi durdurur.",
  "ui.guide.merge.title": "Birleştirme",

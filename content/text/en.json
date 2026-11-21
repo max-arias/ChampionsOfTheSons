@@ -1792,7 +1792,7 @@
  "ui.guide.keys.title": "Keys",
  "ui.guide.levels.body": "Kills give XP. Kill again quickly to build a massacre streak: the XP is banked and multiplied when the streak ends.\n\nEach level gives a perk point and raises your attributes. Dying costs part of the XP in your current level, never a level.",
  "ui.guide.levels.title": "Levels and XP",
- "ui.guide.loot.body": "Enemies drop gear when they die; elites and bosses drop more. Walk over a drop to pick it up.\n\nRarity sets how strong the rolls are: Common (white), Magic (blue), Rare (yellow) and Legendary (red-orange). Uniques are Legendary and carry a special effect. Magic find raises the rarity of drops.",
+ "ui.guide.loot.body": "Enemies drop gear when they die; elites and bosses drop more. Walk over a drop to pick it up.\n\nRarity sets how strong the rolls are: Common (white), Magic (blue), Rare (yellow) and Legendary (red). Uniques are Legendary and carry a special effect. Magic find raises the rarity of drops.",
  "ui.guide.loot.title": "Loot",
  "ui.guide.merge.body": "Turn spare gear into better gear. Select an item in the bag and press Merge, next to Sort. Items that cannot join it fade; click the ones you want to give up, then press Merge again.\n\n3 Common of one item type make 1 Magic of that type, 5 Magic make 1 Rare, and 7 Rare make 1 Legendary. Any 3 Legendary items make 1 random Legendary of another kind. The new item takes the lowest level of the ones used and fresh stats, and lands where your first pick was, marked NEW. Cancel stops merging.",
  "ui.guide.merge.title": "Merge",
