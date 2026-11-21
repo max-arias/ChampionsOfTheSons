@@ -1,6 +1,5 @@
 using SonsSdk;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace ChampionsOfTheSons.Mod.Perks;
 

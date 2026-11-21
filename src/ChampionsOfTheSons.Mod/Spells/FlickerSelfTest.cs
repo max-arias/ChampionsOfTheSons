@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;

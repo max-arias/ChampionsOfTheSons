@@ -1,11 +1,9 @@
-using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
 using ChampionsOfTheSons.Mod.Hud;
 using ChampionsOfTheSons.Mod.UI;
 using SUI;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using static SUI.SUI;
 
 namespace ChampionsOfTheSons.Mod.EnemyHud;

@@ -1,7 +1,6 @@
 using Bolt;
 using ChampionsOfTheSons.Core.Networking;
 using RedLoader;
-using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Net;
 

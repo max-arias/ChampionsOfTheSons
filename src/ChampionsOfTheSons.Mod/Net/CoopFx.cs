@@ -12,15 +12,12 @@ namespace ChampionsOfTheSons.Mod.Net;
 /// </summary>
 public static class CoopFx
 {
-    private static readonly Dictionary<string, Action<SpellCast>> SpellFx = new();
 
     /// <summary>Last remote spell shown (self-tests).</summary>
     public static SpellCast? LastSpell { get; private set; }
 
     /// <summary>Remote damage numbers shown so far (self-tests).</summary>
     public static int DamageShownCount { get; private set; }
-
-    public static void Register(string spellId, Action<SpellCast> draw) => SpellFx[spellId] = draw;
 
     /// <summary>Draws a teammate's cast from its shapes (set by the spells feature).</summary>
     public static Action<SpellCast>? DrawCast { get; set; }
@@ -57,8 +54,7 @@ public static class CoopFx
             Audio.ModAudio.PlayAt(Audio.SoundCues.Spell(cast.SpellId), CoopSession.ToUnity(cast.Origin)); // COS-101: a teammate's cast, where they stand
         try
         {
-            if (SpellFx.TryGetValue(cast.SpellId, out var draw)) draw(cast);
-            else if ((cast.AllShapes.Count > 0 || cast.Mode == SpellCastMode.Off) && DrawCast != null) DrawCast(cast);
+            if ((cast.AllShapes.Count > 0 || cast.Mode == SpellCastMode.Off) && DrawCast != null) DrawCast(cast);
             else if (cast.Mode != SpellCastMode.Off) Flash(CoopSession.ToUnity(cast.Origin), new Color(0.5f, 0.7f, 1f));
             if (cast.SpellId == "spell.blink") Flash(CoopSession.ToUnity(cast.Origin) + CoopSession.ToUnity(cast.Direction), new Color(0.7f, 0.5f, 1f));
         }

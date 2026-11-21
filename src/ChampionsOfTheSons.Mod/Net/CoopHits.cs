@@ -1,4 +1,3 @@
-using Bolt;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
@@ -6,8 +5,6 @@ using ChampionsOfTheSons.Mod.Bridge;
 using HarmonyLib;
 using RedLoader;
 using Sons.Ai.Vail;
-using Sons.Ai.Vail.StimuliTypes;
-using Sons.Weapon;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -96,11 +93,7 @@ public sealed class CoopHits : IModFeature
         var shown = new DamageShown(CoopSession.HostId, 0, CoopSession.ToVec(LocalPlayer.Transform.position + Vector3.up * 2.1f), (float)amount,
             magic ? HitFlags.Magic : HitFlags.None);
         CoopSession.Broadcast(shown);
-        PlayerDamageSent++;
     }
-
-    /// <summary>Numbers sent for damage the local player took (co-op test checks).</summary>
-    public static int PlayerDamageSent { get; private set; }
 
     // ---------------------------------------------------------------- client: outgoing hits
 
@@ -233,9 +226,6 @@ public sealed class CoopHits : IModFeature
 
     private static EnemyRuntime? FindLive(ulong netId) => EnemyRegistry.Live.FirstOrDefault(r => EnemySyncFeature.NetIdOf(r.Actor) == netId);
 
-    /// <summary>Effects the host applied from clients (co-op test checks).</summary>
-    public static int RemoteEffects { get; private set; }
-
     /// <summary>Host: a client's debuff on one of our enemies (COS-13), clamped to sane values.</summary>
     private static void ApplyRemoteEffect(uint playerId, EnemyEffectNet fx)
     {
@@ -254,7 +244,6 @@ public sealed class CoopHits : IModFeature
         _applyingEffect = true;
         try { runtime.Combat.Apply(new EnemyEffect(fx.Kind, source, amount, seconds, fx.Dot)); }
         finally { _applyingEffect = false; }
-        RemoteEffects++;
     }
 
     private static void ApplyRemoteHit(uint playerId, Hit hit, BoltConnection from)

@@ -1,4 +1,3 @@
-using Bolt;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Networking;
@@ -41,7 +40,6 @@ public sealed class CoopSelfTest : IModFeature
     private static float _stageAt;
     private static VailActor? _enemy;
     private static GroundDrop? _drop;
-    private static int _auraUntilStage;
 
     public void Init()
     {
@@ -147,7 +145,6 @@ public sealed class CoopSelfTest : IModFeature
                 CoopExtras.SendPing(PingKind.Location, at + new Vector3(5, 0, 5), 0);
                 CoopExtras.SendSpell("spell.blink", at, Vector3.forward * 5);
                 CoopSession.SendToPeers(new DamageShown(99, 1, CoopSession.ToVec(at + Vector3.up * 2), 1234, HitFlags.Crit));
-                _auraUntilStage = 1;
                 Next(now);
                 break;
             case 6: // aura pulses for 6 s, then stop

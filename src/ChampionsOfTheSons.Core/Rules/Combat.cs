@@ -125,12 +125,6 @@ public sealed class EnemyHealthState
         return dmg;
     }
 
-    /// <summary>Sets health from the host (clients mirror the host's numbers).</summary>
-    public void SetHealth(double health, double armorReduction)
-    {
-        Health = health;
-        ArmorReduction = Math.Clamp(armorReduction, 0, Profile.Armor);
-    }
 }
 
 /// <summary>Enemy → player damage after the player's defenses.</summary>

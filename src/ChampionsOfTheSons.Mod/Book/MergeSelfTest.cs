@@ -45,16 +45,11 @@ internal static class MergeSelfTest
         SelfTest.Add(5.8f, "merge: by pad across bag pages", () => ByInput(pad: true));
         SelfTest.Add(6.1f, "merge: by mouse", () => ByInput(pad: false));
         SelfTest.Add(6.4f, "merge: close", () => BookHost.Close());
-        SelfTest.Add(7f, "merge: screen panel", ScreenPanelOpen);
-        SelfTest.Add(9f, "merge: screen panel menu row", ScreenPanelMenu);
-        SelfTest.Add(9.3f, "merge: shot screen panel menu", () => TestKit.Screenshot("merge-screen-menu"));
-        SelfTest.Add(9.6f, "merge: screen panel merges", ScreenPanelMerge);
         SelfTest.Add(10.5f, "merge: cleanup", Cleanup);
     }
 
     private static void Setup()
     {
-        CotsUi.Inventory.Close();
         LootFeature.ClearAll();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
         _boots.Clear();
@@ -108,7 +103,7 @@ internal static class MergeSelfTest
         SelfTest.Check("merge: clicking the result clears NEW", !BookMerge.IsNew(result) && Cell(_anchor)?.NewBg.enabled == false);
     }
 
-    /// <summary>Each row once through the one-click path (the screen panel's menu uses it too).</summary>
+    /// <summary>Each row once through the one-click merge.</summary>
     private static void EveryRow()
     {
         foreach (var (rarity, type) in new[] { (1, "ring"), (2, "helmet"), (3, (string?)null) })
@@ -195,45 +190,8 @@ internal static class MergeSelfTest
         if (pad) { BookFeature.Handle(BookInput.Pad(new Vector2(5, 5), lb: true)); BookPages.Refresh(BookTab.Gear); }
     }
 
-    // ---- COS-146: the screen panel (inventory_in_book off): the right-click menu's Merge (n/N) row.
-
-    private static bool? _bookSetting;
-    private static string _screenSlot = "";
-
-    private static void ScreenPanelOpen()
-    {
-        _bookSetting = Config.InventoryInBook.Value;
-        Config.InventoryInBook.Value = false;
-        Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        string ring = Base("ring", 0, 5);
-        _screenSlot = SlotOf(TestKit.Give(ring, 0, 7));
-        TestKit.Give(ring, 0, 9);
-        CotsUi.ToggleInventory();
-    }
-
-    private static void ScreenPanelMenu()
-    {
-        SelfTest.Check("merge: screen panel open", CotsUi.Inventory.IsOpen);
-        CotsUi.Inventory.OpenMenu(_screenSlot, new Vector2(400, 300));
-        SelfTest.Check("merge: screen menu row counts 2/3", CotsUi.Inventory.MenuMergeText.Contains("2/3"), CotsUi.Inventory.MenuMergeText);
-        SelfTest.Check("merge: screen menu Merge refused below the count", !CotsUi.Inventory.MenuMergeClicked() && Pc.Inventory.Slots.Count == 2);
-        TestKit.Give(Base("ring", 0, 5), 0, 11);
-        CotsUi.Inventory.OpenMenu(_screenSlot, new Vector2(400, 300));
-        SelfTest.Check("merge: screen menu row counts 3/3", CotsUi.Inventory.MenuMergeText.Contains("3/3"), CotsUi.Inventory.MenuMergeText);
-    }
-
-    private static void ScreenPanelMerge()
-    {
-        bool ok = CotsUi.Inventory.MenuMergeClicked();
-        var result = Pc.Inventory.Get(_screenSlot);
-        SelfTest.Check("merge: screen menu Merge gives a Magic ring in the slot", ok && result?.Rarity == Rarity.Magic && Pc.Inventory.Slots.Count == 1,
-            $"{result?.BaseId} r{(int?)result?.Rarity}, {Pc.Inventory.Slots.Count} items");
-        CotsUi.Inventory.Close();
-    }
-
     private static void Cleanup()
     {
-        if (_bookSetting.HasValue) { Config.InventoryInBook.Value = _bookSetting.Value; _bookSetting = null; }
         if (BookMerge.Active) BookMerge.Cancel();
         BookCard.Hide();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());

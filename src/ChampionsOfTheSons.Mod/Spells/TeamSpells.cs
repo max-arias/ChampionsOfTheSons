@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;

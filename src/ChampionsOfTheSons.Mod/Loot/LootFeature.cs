@@ -87,8 +87,10 @@ public sealed class LootFeature : IModFeature
 
     public void Update(float dt, bool inWorld)
     {
-        if (!inWorld) return;
+        // Drops age even without a local player in the world: a dedicated server has none (its drops never expired before,
+        // found 2026-11-21 by the co-op test), and a host holding the guide book is not "in world" either.
         Ground.Tick(dt);
+        if (!inWorld) return;
         LootVisuals.Animate(Ground);
         TryPickups();
     }

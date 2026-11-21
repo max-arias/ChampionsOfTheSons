@@ -121,7 +121,6 @@ public sealed class ItemStatDef
     public List<StatEffect> Effects { get; set; } = new();
     /// <summary>Needs hand-written behavior (see COS-17); has no data effects yet.</summary>
     public bool Manual { get; set; }
-    public string? ConsumeAction { get; set; }
 }
 
 /// <summary>A base item. Each entry in <see cref="StatPools"/> is one stat slot: the slot rolls one of its options.
@@ -132,7 +131,6 @@ public sealed class ItemBaseDef
     public int LegacyIndex { get; set; }
     public string Name { get; set; } = "";
     public string Type { get; set; } = "";
-    public string? Subtype { get; set; }
     public int Rarity { get; set; }
     public int MinLevel { get; set; } = 1;
     public int MaxLevel { get; set; } = 1;
@@ -149,7 +147,6 @@ public sealed class ItemBaseDef
     public string? Set { get; set; }
     public List<StatEffect> UniqueEffects { get; set; } = new();
     public bool Manual { get; set; }
-    public string? ConsumeAction { get; set; }
 
     public const string AnyStat = "*";
 

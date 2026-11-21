@@ -45,5 +45,4 @@ internal static class UiTheme
     public const string SlotFrameEmpty = "#2B333E";
     public const string Divider = "#2B333E";
     public const string BarBack = "#232A33";
-    public const string TooltipInner = "#0D1015F7";
 }

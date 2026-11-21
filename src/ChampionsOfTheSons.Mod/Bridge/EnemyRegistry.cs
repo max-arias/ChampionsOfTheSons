@@ -1,6 +1,5 @@
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
-using Bolt;
 using Il2CppInterop.Runtime;
 using Sons.Ai.Vail;
 using Sons.StatSystem;
@@ -26,10 +25,8 @@ public sealed class EnemyRuntime
     public StatsManager? Stats { get; set; }
     /// <summary>Abilities, debuffs and DoTs in motion (see <see cref="EnemyCombatState"/>).</summary>
     public EnemyCombatState Combat { get; }
-    public bool ScaleApplied { get; set; }
     /// <summary>Undead used its revive.</summary>
     public bool Revived { get; set; }
-    public float AppliedSpeed { get; set; } = -1;
     public float WantedSpeed { get; set; } = -1;
     /// <summary>Where it was when last seen alive (a dead actor's position is not reliable).</summary>
     public UnityEngine.Vector3? LastPosition { get; set; }
@@ -77,7 +74,6 @@ public sealed class EnemyRuntime
     public double VanillaMaxHealth { get; }
     public double ArmorReduction { get; set; }
     public bool LastHitByLocalPlayer { get; set; }
-    public bool LastHitWasCrit { get; set; }
 }
 
 /// <summary>
@@ -139,7 +135,6 @@ public static class EnemyRegistry
         var runtime = new EnemyRuntime(kind, profile, profile.MaxHealth, actor, new EnemyCombatState(profile))
         {
             Stats = stats,
-            ScaleApplied = true,
         };
         ByStats[stats.Pointer] = runtime;
         Dirty = true;
@@ -149,13 +144,6 @@ public static class EnemyRegistry
     public static void Remove(StatsManager? stats)
     {
         if (stats != null) ByStats.Remove(stats.Pointer);
-    }
-
-    public static void Clear()
-    {
-        ByStats.Clear();
-        _live.Clear();
-        TestForced.Clear();
     }
 
     private static readonly int PerfResolve = Perf.Perf.Register("  EnemyRegistry.ResolveActors");

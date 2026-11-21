@@ -62,9 +62,9 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - Enemy debuffs are keyed by source: slows keep max duration/min amount per source and multiply across sources; damage-taken keeps max duration/latest amount and multiplies. COTF's summed fire bonus is not built (COS-90). DoTs tick every 1 s for `ceil(duration)` ticks.
 
 ## Loot
-- Drop on kill if `U ≤ 0.1 × dropChanceMul × magicFind`, or the enemy has any ability.
+- ✱ Drop on kill if the enemy is an elite, miniboss or boss, or else if `U ≤ 0.04 × dropChanceMul × magicFind` (Max 2026-11-21: about 20 items an hour on Normal; COTF's 10% with 3+ items per drop gave 65–100).
 - Co-op magic find (COS-81, Max 2026-11-20): the `magicFind` used for a kill's drop chance and rarity is the sum of every player's magic find (each player's multiplier, 1 = no bonus; a missing value counts as 1; a dedicated server counts only the clients), so a group of n players without bonuses rolls with `n` (`KillCredit.TeamMagicFind`). Alone it is the player's own. Each player sends theirs to the host every 3 s; the Character page lists every player's level and magic find and the team total.
-- Count: `U[2,3]` (+`U[2,4]` with 3+ abilities) (+7 Boss / +3 Miniboss) + `clamp(⌊L/50⌋, 1, 8)`, × drop quantity, rounded.
+- ✱ Count by tier: plain 1, elite `U[1,2]`, miniboss 3, boss 5 (the XP heart comes on top), × drop quantity, rounded. It does not grow with level.
 - Item level = player level by loot level policy; "other" items whose stats do not grow with level (the respec and perk-point hearts) are level 1. The XP heart keeps its level.
 - Rarity ✱ (COS-109, Max 2026-11-20): four tiers, Common 0, Magic 1, Rare 2, Legendary 3. The roll is COTF's eight-step climb below (`LootRoller.RollStep`), then folded: steps 0–1 → Common, 2 → Magic, 3–4 → Rare, 5–7 → Legendary (`Rarities.FromLegacy`), so drop pacing is unchanged. Every unique (an item with unique effects, or one of the five hand-coded uniques) is Legendary. Climb: `w = bounty / itemLevel × MF`, `mf = √MF − 1`, fresh U each check, climbing while each step passes:
   - r1: `(w > 20 and U < 0.70 + 0.45mf + 0.075d) or (d > 5 and w > 2000)`
@@ -87,7 +87,7 @@ Host multipliers (default 1): drop quantity, drop chance, XP, extra enemy levels
 - The only way to change items (no crafting, COS-145). Bag items only, each player's own bag, no host involvement (`Core/Rules/Merge.cs`).
 - Rows: 3 Common → 1 Magic, 5 Magic → 1 Rare, 7 Rare → 1 Legendary, all of one item type (boots, ring, chest...; any base of that type); 3 Legendary of any types → 1 random Legendary of any type, never one of the input bases. Uniques and set pieces are ordinary bases of their rarity.
 - Result: a base of the next rarity (the item type's, or any Legendary for the Legendary row), uniform among those with `minLevel ≤` the lowest input level; if none qualifies, among those with the lowest `minLevel`. Rolled fresh (`LootRoller.RollItem`) at the lowest input level. Every item type has a base at every rarity (COS-143).
-- Book (layout E): Merge, left of Sort, starts merge mode from the selected bag item, which stays picked; items that cannot join dim; the player picks the rest and presses Merge n/N; the result takes the start item's slot with a NEW tag (memory only, cleared on click). With more of the kind left the mode continues from the highest one; Cancel ends it. The screen panel (book off) has a "Merge (n/N)" menu row that merges the item with the highest-level others of its kind.
+- Book (layout E): Merge, left of Sort, starts merge mode from the selected bag item, which stays picked; items that cannot join dim; the player picks the rest and presses Merge n/N; the result takes the start item's slot with a NEW tag (memory only, cleared on click). With more of the kind left the mode continues from the highest one; Cancel ends it.
 
 ## Stats and combat
 - Player stat kinds: add (`default + Σ`), mult (`default × Π`), multi (`(default + Σ adds) × (defaultMult × Π mults)`), bool. ✱ Our sheet rebuilds from named sources instead of add/subtract pairs.

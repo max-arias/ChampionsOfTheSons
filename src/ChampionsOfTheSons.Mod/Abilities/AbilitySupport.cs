@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
 using HarmonyLib;
@@ -152,9 +151,6 @@ internal static class AbilityForces
 
     private static readonly Dictionary<string, Slow> Slows = new();
     private static readonly Dictionary<string, Pull> Pulls = new();
-
-    public static int SlowCount => Slows.Count;
-    public static bool Pulling => Pulls.Values.Any(p => p.Left > 0 && p.Velocity != Vector3.zero);
 
     /// <summary>Slows owned by the abilities of one enemy (keys end with its identity hash).</summary>
     public static int SlowsOf(EnemyRuntime e) => Slows.Keys.Count(k => k.EndsWith(":" + System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(e), StringComparison.Ordinal));

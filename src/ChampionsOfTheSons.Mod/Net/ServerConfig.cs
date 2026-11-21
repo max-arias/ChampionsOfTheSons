@@ -3,7 +3,6 @@ using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
 using RedLoader;
 using Sons.Multiplayer;
-using SonsSdk;
 
 namespace ChampionsOfTheSons.Mod.Net;
 

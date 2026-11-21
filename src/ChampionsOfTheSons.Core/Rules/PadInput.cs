@@ -37,8 +37,6 @@ public sealed record PadBinding(PadButton Main, IReadOnlyList<PadButton> Modifie
     public bool IsTriggered(Func<PadButton, bool> held, Func<PadButton, bool> pressedThisFrame) =>
         pressedThisFrame(Main) && Modifiers.All(held);
 
-    /// <summary>True when any of this binding's buttons is a modifier of <paramref name="other"/>, i.e. the two share a button.</summary>
-    public bool Uses(PadButton b) => Main == b || Modifiers.Contains(b);
 }
 
 public enum FocusDirection { Up, Down, Left, Right }

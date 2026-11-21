@@ -11,7 +11,7 @@ namespace ChampionsOfTheSons.Mod.Net;
 /// <summary>
 /// COS-12: the host owns every enemy's rolled profile and sends it to the clients, so a client's nameplates show the host's
 /// level, tier and health. The host announces an enemy once (<see cref="EnemySync"/>), then only sends <see cref="EnemyHealth"/>
-/// when health or armor changed. A client that sees an enemy it has no profile for can ask with <see cref="EnemyProfileRequest"/>.
+/// when health or armor changed.
 /// Enemies are matched by the Bolt network id of their entity.
 /// </summary>
 public sealed class EnemySyncFeature : IModFeature
@@ -99,9 +99,6 @@ public sealed class EnemySyncFeature : IModFeature
 
     private static readonly Dictionary<ulong, bool> AwareSent = new();
 
-    /// <summary>Awareness changes the host sent (co-op test checks).</summary>
-    public static int AwareSentCount { get; private set; }
-
     /// <summary>Host: a boss's "aware of a player" state, sent when it changes (and again to a late joiner via <see cref="ResendAll"/>).</summary>
     private static void SendAwareness(EnemyRuntime r, ulong id)
     {
@@ -112,7 +109,6 @@ public sealed class EnemySyncFeature : IModFeature
         if (AwareSent.TryGetValue(id, out var last) && last == aware) return;
         AwareSent[id] = aware;
         CoopSession.SendToPeers(new EnemyAware(id, aware));
-        AwareSentCount++;
     }
 
     private static void HostTick(float dt)
@@ -256,22 +252,12 @@ public sealed class EnemySyncFeature : IModFeature
     /// <summary>Co-op test: forget the received profiles (not the mirrors), as if this client had just joined.</summary>
     internal static void ForgetReceived() => ReceivedProfiles.Clear();
 
-    /// <summary>Asks the host for an enemy's profile (a client that sees an enemy it knows nothing about).</summary>
-    public static void Request(ulong netId)
-    {
-        if (netId != 0 && !ReceivedProfiles.ContainsKey(netId)) CoopSession.SendToHost(new EnemyProfileRequest(netId));
-    }
-
     // ---------------------------------------------------------------- messages
 
     private static void OnNet(IMessage message, BoltConnection from)
     {
         switch (message)
         {
-            case EnemyProfileRequest req when CoopSession.IsHost:
-                var runtime = EnemyRegistry.Live.FirstOrDefault(r => NetIdOf(r.Actor) == req.EnemyNetId);
-                if (runtime != null) CotsNetEvent.Instance.SendTo(Describe(runtime, req.EnemyNetId), from);
-                break;
             case EnemySync s when !CoopSession.IsHost:
                 if (!ReceivedProfiles.ContainsKey(s.EnemyNetId)) RLog.Msg($"{CoopTestJoin.Tag} client: got enemy {s.EnemyNetId} ({s.KindId}, level {s.Level})");
                 ReceivedProfiles[s.EnemyNetId] = s;

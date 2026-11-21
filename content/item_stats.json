@@ -581,8 +581,7 @@
       "levelPow": 0.0,
       "combine": "sum",
       "rarity": 3,
-      "effects": [],
-      "consumeAction": "manual"
+      "effects": []
     },
     {
       "id": "stat.experience",
@@ -593,8 +592,7 @@
       "levelPow": 3.0,
       "combine": "sum",
       "rarity": 3,
-      "effects": [],
-      "consumeAction": "manual"
+      "effects": []
     },
     {
       "id": "stat.movementspeed",
@@ -674,8 +672,7 @@
           "op": "mult",
           "transform": "one_minus"
         }
-      ],
-      "consumeAction": "manual"
+      ]
     },
     {
       "id": "stat.spellcosttostamina",
@@ -836,8 +833,7 @@
           "op": "add",
           "transform": "x"
         }
-      ],
-      "consumeAction": "manual"
+      ]
     },
     {
       "id": "stat.cooldownreduction",

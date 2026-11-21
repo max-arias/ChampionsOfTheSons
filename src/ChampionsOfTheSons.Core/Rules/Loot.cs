@@ -34,17 +34,25 @@ public sealed class LootRoller
     public static bool DropsXpHeart(EnemyTier tier, Rng rng) =>
         tier == EnemyTier.Boss || (tier == EnemyTier.Miniboss && rng.NextDouble() < 0.25);
 
-    /// <summary>Does this kill drop anything? Enemies with abilities always drop.</summary>
-    public static bool ShouldDrop(EnemyProfile enemy, WorldRules rules, double magicFind, Rng rng) =>
-        enemy.Abilities.Count > 0 || rng.NextDouble() <= 0.1 * rules.DropChance * magicFind;
+    /// <summary>A plain enemy's chance to drop, before the host's drop chance and magic find (Max 2026-11-21: about 20 items an hour
+    /// on Normal; COTF's 10% with 3+ items per drop gave 65-100).</summary>
+    public const double PlainDropChance = 0.04;
 
+    /// <summary>Does this kill drop anything? Elites, minibosses and bosses always drop.</summary>
+    public static bool ShouldDrop(EnemyProfile enemy, WorldRules rules, double magicFind, Rng rng) =>
+        enemy.Tier != EnemyTier.Normal || rng.NextDouble() <= PlainDropChance * rules.DropChance * magicFind;
+
+    /// <summary>Items in a drop by tier (Max 2026-11-21): plain 1, elite 1-2, miniboss 3, boss 5 (its XP heart comes on top),
+    /// times the host's drop quantity. No longer grows with level.</summary>
     public static int DropCount(EnemyProfile enemy, WorldRules rules, Rng rng)
     {
-        int count = rng.RangeInclusive(2, 3);
-        if (enemy.Abilities.Count >= 3) count += rng.RangeInclusive(2, 4);
-        if (enemy.Tier == EnemyTier.Boss) count += 7;
-        else if (enemy.Tier == EnemyTier.Miniboss) count += 3;
-        count += Math.Clamp(enemy.Level / 50, 1, 8);
+        int count = enemy.Tier switch
+        {
+            EnemyTier.Boss => 5,
+            EnemyTier.Miniboss => 3,
+            EnemyTier.Elite => rng.RangeInclusive(1, 2),
+            _ => 1,
+        };
         return Math.Max(0, (int)Math.Round(count * rules.DropQuantity, MidpointRounding.AwayFromZero));
     }
 

@@ -3,7 +3,7 @@
 // would decide (kill pace, weapon damage, enemy mix) is an assumption listed in Assumptions and printed with the tables.
 // COS-130: enemies roll at the player's level plus the game difficulty's offset; one run per game difficulty.
 //
-//   dotnet run --project tools/PacingSim -c Release -- [content folder] [--profile hunting|casual] [--seeds N] [--xp X]
+//   dotnet run --project tools/PacingSim -c Release -- [content folder] [--profile hunting|casual] [--seeds N] [--xp X] [--fixed-kit]
 using System.Globalization;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
@@ -17,6 +17,7 @@ string folder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", ".
 var a = Assumptions.Hunting;
 int seeds = 3;
 double xpMul = 1;
+bool fixedKit = false;
 for (int i = 0; i < args.Length; i++)
 {
     switch (args[i])
@@ -24,10 +25,11 @@ for (int i = 0; i < args.Length; i++)
         case "--profile": a = args[++i] == "casual" ? Assumptions.Casual : Assumptions.Hunting; break;
         case "--seeds": seeds = int.Parse(args[++i]); break;
         case "--xp": xpMul = double.Parse(args[++i]); break;
+        case "--fixed-kit": fixedKit = true; break;
         default: folder = Path.GetFullPath(args[i]); break;
     }
 }
-a = a with { XpMul = xpMul };
+a = a with { XpMul = xpMul, FixedKit = fixedKit };
 
 var content = ContentDb.LoadFolder(folder);
 if (content.Errors.Count > 0) { foreach (var e in content.Errors) Console.Error.WriteLine(e); return 1; }
@@ -57,6 +59,8 @@ foreach (var g in modes)
     Console.WriteLine($"| {g.Mode} | {g.LevelOffset:+0;-0;0} | {g.EliteChance:P0} | " + string.Join(" | ", marks.Select(m => Med(r => r.HoursTo(m)))) +
         $" | {runs.Select(r => r.LevelAt(10)).OrderBy(x => x).ElementAt(seeds / 2)} | {runs.Select(r => r.LevelAt(50)).OrderBy(x => x).ElementAt(seeds / 2)} |");
 }
+Console.WriteLine("\nDrops (equipment; XP hearts not counted): " + string.Join("; ", runsByMode.Select(kv =>
+    $"{kv.Key} {kv.Value.Sum(r => r.Drops) / kv.Value.Sum(r => r.Hours):0.0}/h, {kv.Value.Sum(r => r.Drops) / (double)Math.Max(1, kv.Value.Sum(r => r.Kills)):0.00} per kill")));
 
 // 2. How a run feels over time (median seed), Normal and Hard Survival.
 foreach (var mode in new[] { GameMode.Normal, GameMode.HardSurvival })
@@ -106,8 +110,11 @@ sealed record Assumptions
     public double SecondsBetweenGroups { get; init; } = 90;
     /// <summary>Game enemy hit damage before the mod's scaling.</summary>
     public double VanillaEnemyHit { get; init; } = 15;
-    /// <summary>Drops a player sees per slot before each kit refresh (keeps the best).</summary>
+    /// <summary>Drops a player sees per slot for the starting kit (and every refresh with --fixed-kit); otherwise each refresh
+    /// gets the equipment the simulated kills since the last one actually dropped, spread over the slots.</summary>
     public int KitCandidates { get; init; } = 6;
+    /// <summary>True: the old model, <see cref="KitCandidates"/> per slot at every refresh whatever the drop rate.</summary>
+    public bool FixedKit { get; init; }
     /// <summary>Kit and perks are refreshed every this many levels.</summary>
     public int KitEveryLevels { get; init; } = 5;
     public double MaxHours { get; init; } = 300;
@@ -129,7 +136,7 @@ sealed record Assumptions
     public string Describe() =>
         $"Assumptions: melee weapon {WeaponDamage} per swing every {SwingSeconds} s; groups of {GroupMin}-{GroupMax} enemies, {SecondsBetweenGroups} s between groups; " +
         $"vanilla enemy hit {VanillaEnemyHit}; kit = best of {KitCandidates} drops per slot (rarity from the loot roll of normal enemies at the player's level), refreshed every {KitEveryLevels} levels; " +
-        "perks bought greedily for damage x sqrt(effective health); spells, ranged, headshots, crafting and non-kill XP not modelled; no deaths.";
+        "perks bought greedily for damage x sqrt(effective health); spells, ranged, headshots and non-kill XP not modelled; no deaths.";
 }
 
 sealed record Snapshot(double Hours, int Level, int EnemyLevel, double KillsPerHour, double NormalKillSeconds, double HitsToDie);
@@ -139,6 +146,9 @@ sealed class RunResult
     public readonly SortedDictionary<int, double> FirstHourAtLevel = new();
     public readonly List<(double Hours, int Level)> Track = new();
     public readonly List<Snapshot> Snapshots = new();
+    /// <summary>Equipment drops and kills over the whole run (drop rate check, Max 2026-11-21).</summary>
+    public int Drops, Kills;
+    public double Hours;
     public double? HoursTo(int level) => FirstHourAtLevel.TryGetValue(level, out var h) ? h : null;
     public int LevelAt(double hours) => Track.LastOrDefault(t => t.Hours <= hours).Level;
 }
@@ -154,6 +164,7 @@ sealed class Sim
     public PlayerCharacter Pc { get; private set; }
     private double _seconds;
     private int _lastKitLevel = -1;
+    private int _dropsSinceKit, _kills, _totalDrops, _lastKitDrops = -1;
     private readonly GameDifficulty _game;
 
     public Sim(ContentDb content, Assumptions a, ulong seed, GameDifficulty game)
@@ -195,6 +206,7 @@ sealed class Sim
             FightGroup();
             Record(r);
         }
+        r.Drops = _totalDrops + _dropsSinceKit; r.Kills = _kills; r.Hours = Hours;
         return r;
     }
 
@@ -211,6 +223,7 @@ sealed class Sim
         Pc = new PlayerCharacter(_content);
         Pc.Load(new PlayerSave { Level = level });
         _lastKitLevel = -1;
+        _lastKitDrops = -1;
         Refresh();
     }
 
@@ -237,7 +250,13 @@ sealed class Sim
             var p = EnemyScaler.Roll(kind, hp, rules, Party, _rng);
             double t = KillSeconds(p, out bool killed);
             Advance(t);
-            if (killed) Pc.OnKill(p.Bounty);
+            if (killed)
+            {
+                Pc.OnKill(p.Bounty);
+                double mf = Math.Max(0.1, Pc.Stats.Get(StatIds.MagicFind));
+                if (LootRoller.ShouldDrop(p, rules, mf, _rng)) _dropsSinceKit += LootRoller.DropCount(p, rules, _rng);
+                _kills++;
+            }
         }
         Advance(_a.SecondsBetweenGroups);
     }
@@ -385,12 +404,24 @@ sealed class Sim
         double worth = MeanBounty(EnemyTier.Normal);
         double mf = Math.Max(0.1, Pc.Stats.Get(StatIds.MagicFind));
         var slots = Pc.Inventory.Slots.Where(kv => kv.Key.StartsWith("equip.", StringComparison.Ordinal)).ToDictionary(kv => kv.Key, kv => kv.Value);
+        // Equipment from the kills since the last refresh, spread over the slots (the remainder goes to random slots).
+        bool first = _lastKitDrops < 0;
+        int perSlot = 0, extra = 0;
+        if (!first && !_a.FixedKit)
+        {
+            perSlot = _dropsSinceKit / LootRoller.EquipSlots.Count;
+            extra = _dropsSinceKit % LootRoller.EquipSlots.Count;
+        }
+        _totalDrops += _dropsSinceKit;
+        _lastKitDrops = _dropsSinceKit;
+        _dropsSinceKit = 0;
         foreach (var slot in LootRoller.EquipSlots)
         {
+            int candidates = first || _a.FixedKit ? _a.KitCandidates : perSlot + (extra-- > 0 ? 1 : 0);
             ItemInstance? best = slots.GetValueOrDefault(slot);
             Pc.Inventory.Restore(slots);
             double bestScore = Score();
-            for (int i = 0; i < _a.KitCandidates; i++)
+            for (int i = 0; i < candidates; i++)
             {
                 int rarity = LootRoller.RollRarity(worth, level, mf, Band.Index, _rng);
                 var def = _loot.PickBase(rarity, level, _rng, b => LootRoller.SlotsFor(b.Type).Contains(slot));

@@ -64,32 +64,4 @@ internal static class UiCapture
         }
     }
 
-    /// <summary>Loads the PNG and checks that it is neither missing nor a flat color.</summary>
-    public static (bool Ok, string Detail) Verify(string path)
-    {
-        try
-        {
-            if (!File.Exists(path)) return (false, "file missing");
-            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-            if (!ImageConversion.LoadImage(tex, File.ReadAllBytes(path))) return (false, "not a PNG");
-            var px = tex.GetPixels32();
-            double sum = 0, sum2 = 0;
-            int n = 0;
-            for (int i = 0; i < px.Length; i += 53)
-            {
-                double l = (px[i].r + px[i].g + px[i].b) / 3.0;
-                sum += l;
-                sum2 += l * l;
-                n++;
-            }
-            double mean = sum / n, std = Math.Sqrt(Math.Max(0, sum2 / n - mean * mean));
-            int w = tex.width, h = tex.height;
-            UnityEngine.Object.Destroy(tex);
-            return (std > 15, $"{w}x{h} brightness mean {mean:0} stddev {std:0}");
-        }
-        catch (Exception e)
-        {
-            return (false, e.GetType().Name + ": " + e.Message);
-        }
-    }
 }

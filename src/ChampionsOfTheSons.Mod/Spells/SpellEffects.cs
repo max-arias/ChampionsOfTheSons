@@ -239,7 +239,6 @@ internal static class SpellEffects
                 var dir = Eye.forward;
                 dir.y = 0;
                 LaunchBallLightning(z.Center, dir.normalized);
-                SparkBalls++;
             },
         });
         SpellFx.Disc(at - Vector3.up * 1.4f, radius, SpellFx.Dark, 0.6f);
@@ -302,9 +301,6 @@ internal static class SpellEffects
         LaunchBallLightning(PlayerPos + Vector3.up * 1.5f + dir * 2f, dir);
         return true;
     }
-
-    /// <summary>Ball Lightnings released by Last Engineer's Note (self-test).</summary>
-    public static int SparkBalls { get; private set; }
 
     private static void LaunchBallLightning(Vector3 start, Vector3 dir)
     {
@@ -562,9 +558,6 @@ internal static class SpellEffects
         return true;
     }
 
-    /// <summary>Extra Multishot projectiles fired by Grip of Sora (self-test).</summary>
-    public static int SoraExtras { get; private set; }
-
     private static bool StartMultishot()
     {
         _multishotTimer = 0;
@@ -641,7 +634,6 @@ internal static class SpellEffects
                             .OrderBy(e => (Center(e) - PlayerPos).sqrMagnitude).Take(UniqueTuning.SoraExtraProjectiles).ToList();
                         for (int k = 0; k < UniqueTuning.SoraExtraProjectiles; k++)
                             Strike(k < others.Count ? others[k] : target, Hit(SpellTuning.MultishotDamage, SpellTuning.MultishotScaling));
-                        SoraExtras += UniqueTuning.SoraExtraProjectiles;
                     }
                 }
                 break;

@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Icons;
@@ -315,7 +314,6 @@ internal sealed class PerkPanel
     public void Open()
     {
         _lastToggleFrame = Time.frameCount;
-        CotsUi.Inventory?.Close();
         _root.Active(true);
         _dirty = false;
         Refresh();

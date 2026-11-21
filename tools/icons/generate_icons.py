@@ -34,8 +34,6 @@ def load_entries():
         ents.append(dict(id=i["id"], kind="perk", type=i["category"], name=i["name"], rarity=0))
     for i in json.load(open(CONTENT / "spells.json", encoding="utf8"))["spells"]:
         ents.append(dict(id=i["id"], kind="spell", type="spell", name=i["name"], rarity=0))
-    for i in json.load(open(CONTENT / "sets.json", encoding="utf8"))["sets"]:
-        ents.append(dict(id=i["id"], kind="set", type="set", name=i["name"], rarity=0))
     for e in ents:  # current display names (the content name may be stale after naming passes)
         e["name"] = text.get(e["id"] + ".name", e["name"])
         e["desc"] = text.get(e["id"] + ".description", text.get(e["id"] + ".flavor", ""))

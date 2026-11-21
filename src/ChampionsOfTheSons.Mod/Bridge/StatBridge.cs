@@ -1,6 +1,5 @@
 using ChampionsOfTheSons.Core.Rules;
 using RedLoader;
-using Sons.Items.Core;
 using Sons.Weapon;
 using TheForest.Utils;
 using UnityEngine;
@@ -44,8 +43,7 @@ public sealed class StatBridge : IModFeature
     /// <summary>The held melee weapon's swing speed as the game now has it (ratio to the original), or null with no weapon seen.</summary>
     public static double? MeleeSwingRatio => MeleeData.Count == 0 ? null : LastMeleeRatio;
     public static double? BulletSpeedRatio => BulletData.Count == 0 ? null : LastBulletRatio;
-    public static double? BulletSizeRatio => BulletData.Count == 0 ? null : LastBulletSize;
-    private static double LastMeleeRatio, LastBulletRatio, LastBulletSize;
+    private static double LastMeleeRatio, LastBulletRatio;
 
     /// <summary>The last bow shot-delay multiplier a bow type applied (self-tests), 1 when none.</summary>
     public static double LastShotDelayFactor { get; private set; } = 1;
@@ -152,7 +150,6 @@ public sealed class StatBridge : IModFeature
                 info.diameter = orig.Diameter * (float)size;
                 info.weight = orig.Weight * (float)pen;
                 LastBulletRatio = orig.Speed > 0 ? info.maxSpeed / orig.Speed : projSpeed;
-                LastBulletSize = orig.Diameter > 0 ? info.diameter / orig.Diameter : size;
             }
 
             foreach (var controller in root.GetComponentsInChildren<RangedWeaponController>(false))

@@ -4,7 +4,6 @@ using ChampionsOfTheSons.Mod.UI;
 using SUI;
 using TMPro;
 using UnityEngine;
-using static SUI.SUI;
 
 namespace ChampionsOfTheSons.Mod.Hud;
 
@@ -29,9 +28,6 @@ internal sealed class PartyHud
     private readonly List<LineView> _lines = new();
     private readonly List<(SLabelOptions Label, RectTransform Rt)> _tags = new();
     private readonly Queue<string> _incoming = new();
-
-    /// <summary>Text of the newest line shown (self-tests).</summary>
-    public string LastLine { get; private set; } = "";
 
     public void Build(SContainerOptions layer)
     {
@@ -90,7 +86,6 @@ internal sealed class PartyHud
     /// <summary>Newest line at the top; the others move down one row.</summary>
     private void Push(string text)
     {
-        LastLine = text;
         for (int i = _lines.Count - 1; i > 0; i--)
         {
             var from = _lines[i - 1];

@@ -1,5 +1,4 @@
 using SUI;
-using UnityEngine.UI;
 using static SUI.SUI;
 
 namespace ChampionsOfTheSons.Mod.Icons;
@@ -26,5 +25,4 @@ internal static class IconView
         return tex != null;
     }
 
-    public static bool IsShown(SImageOptions img) => img.Root.activeSelf && img.ImageObject.texture != null;
 }

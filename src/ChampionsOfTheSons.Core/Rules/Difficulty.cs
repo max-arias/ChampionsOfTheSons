@@ -44,8 +44,6 @@ public static class Difficulties
         Hell,
     };
 
-    public static DifficultyTier? ById(string? id) => All.FirstOrDefault(d => d.Id == id);
-
     /// <summary>The band of an enemy of this level: the highest band whose minimum base level it reaches.</summary>
     public static DifficultyTier ForLevel(int level)
     {

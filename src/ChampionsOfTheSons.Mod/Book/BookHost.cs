@@ -59,16 +59,44 @@ internal static class BookHost
 
     // ------------------------------------------------------------------ open / close
 
-    /// <summary>Opens the book on one of our tabs. False when the player has no guide book.</summary>
+    /// <summary>Why the last <see cref="Open"/> failed, for the log and the self-test (Max 2026-11-21: no fallback panel, so every
+    /// failure says why).</summary>
+    public static string LastFailure { get; private set; } = "";
+
+    internal static bool Fail(string why)
+    {
+        LastFailure = why;
+        return false;
+    }
+
+    /// <summary>Logs the last failure with what the player held, and tells the player.</summary>
+    internal static void ReportFailure()
+    {
+        string held;
+        try
+        {
+            held = LocalPlayer.Inventory?.RightHandItem?._itemID.ToString() ?? "nothing";
+        }
+        catch
+        {
+            held = "unknown";
+        }
+        RLog.Warning($"Champions of the Sons: the guide book did not open: {LastFailure} (right hand: {held}, in world: {LocalPlayer.IsInWorld})");
+        Loot.LootFeature.Message(UI.UiText.T("ui.book.cannot_open", "The guide book can't open right now."));
+    }
+
+    /// <summary>Opens the book on one of our tabs. False, with <see cref="LastFailure"/>, when it cannot.</summary>
     public static bool Open(BookTab tab)
     {
         var inv = LocalPlayer.Inventory;
-        if (inv == null) return false;
+        if (inv == null) return Fail("no player inventory yet");
         if (Book != null) { ShowModPage(tab); return true; }
-        if (inv.AmountOf(GuideBookId, false, false) == 0) return false;
+        if (inv.AmountOf(GuideBookId, false, false) == 0) return Fail("the player has no guide book");
         _pending = tab;
         _pendingSince = Time.realtimeSinceStartup;
-        return inv.TryEquip(GuideBookId, false, true, false);
+        if (!inv.TryEquip(GuideBookId, false, true, false)) { _pending = BookTab.None; return Fail("the game refused to equip the guide book"); }
+        LastFailure = "";
+        return true;
     }
 
     public static void Close()
@@ -95,7 +123,12 @@ internal static class BookHost
         if (Book == null)
         {
             if (Tab != BookTab.None) { Tab = BookTab.None; BookPatches.Block = false; }
-            if (_pending != BookTab.None && Time.realtimeSinceStartup - _pendingSince > 5) _pending = BookTab.None;
+            if (_pending != BookTab.None && Time.realtimeSinceStartup - _pendingSince > 5)
+            {
+                _pending = BookTab.None;
+                Fail("the guide book was equipped but never came up within 5 s");
+                ReportFailure();
+            }
             return;
         }
         // Set up right away (no waiting for the raise animation, so our page never pops in): the page axes are a
@@ -128,7 +161,7 @@ internal static class BookHost
         if (_pageRenderer == null) return; // the book builds its meshes a frame or two after it is enabled
         _ready = true;
         PageAxes();
-        BookTabs.Attach(_book, PageUpWorld, PageRightWorld);
+        BookTabs.Attach(_book, PageUpWorld);
         LogState($"set up: page material {(_pageMat != null)}, page renderer {(_pageRenderer != null)}, tabs {BookTabs.Tabs.Count}");
     }
 
@@ -246,9 +279,6 @@ internal static class BookHost
         _vAxis = 1;
         _vSign = 1;
     }
-
-    /// <summary>"Up" on the page in world space (towards the title).</summary>
-    public static Vector3 PageRightWorld => _pageRenderer != null ? _pageRenderer.transform.TransformDirection(Vector3.right) * _uSign : Vector3.right;
 
     public static Vector3 PageUpWorld => _pageRenderer != null ? _pageRenderer.transform.TransformDirection(Vector3.up) * _vSign : Vector3.up;
 

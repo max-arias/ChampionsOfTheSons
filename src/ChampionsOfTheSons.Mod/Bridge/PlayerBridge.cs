@@ -54,7 +54,7 @@ public static class PlayerBridge
 
     [HarmonyPatch(typeof(PlayerStats), nameof(PlayerStats.Hit))]
     [HarmonyPrefix]
-    private static void BeforePlayerHit(ref float damage, ImpactType impactType, bool isDemonic)
+    private static void BeforePlayerHit(ref float damage, bool isDemonic)
     {
         using var perf = Perf.Perf.Scope(PerfBeforePlayerHit);
         try

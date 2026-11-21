@@ -88,8 +88,6 @@ internal static class ActiveAbilitySystem
 {
     private static readonly List<ActiveHandler> Handlers = new();
 
-    public static IReadOnlyList<ActiveHandler> All => Handlers;
-
     public static void Register(ActiveHandler handler)
     {
         Handlers.Add(handler);
@@ -102,8 +100,6 @@ internal static class ActiveAbilitySystem
         AbilityForces.Age(dt);
         foreach (var h in Handlers) h.Sweep();
     }
-
-    public static ActiveHandler For(EnemyAbility ability) => Handlers.First(h => h.Ability == ability);
 
     public static ActiveHandler? Find(EnemyAbility ability) => Handlers.FirstOrDefault(h => h.Ability == ability);
 

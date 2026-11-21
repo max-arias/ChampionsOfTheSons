@@ -9,7 +9,7 @@ namespace ChampionsOfTheSons.Mod.Book;
 /// Merge mode on the bag (COS-144, Max's layout E): the Merge button beside Sort starts it from the selected bag item. That item
 /// stays picked; items that cannot join it dim; the player clicks matching items up to the row's count and presses Merge.
 /// The result takes the start item's slot with a NEW tag (memory only). If more of the kind remain, the mode stays on with the
-/// highest one as the next start item; otherwise it ends with the result selected. Shared by the book page and the screen panel.
+/// highest one as the next start item; otherwise it ends with the result selected.
 /// </summary>
 internal static class BookMerge
 {
@@ -102,16 +102,7 @@ internal static class BookMerge
         if (!Picks.Contains(Anchor)) Picks.Insert(0, Anchor);
     }
 
-    /// <summary>The screen panel's one-click merge (it has no selection or Sort row): the clicked item plus the highest-level
-    /// others of its kind. (n, N) for the menu label; n counts the clicked item.</summary>
-    public static (int Have, int Need) QuickCount(string slot)
-    {
-        var kind = M.KindOf(Inv.Get(slot));
-        if (kind == null || !Merger.IsBagSlot(slot)) return (0, 0);
-        int need = Merger.Need(kind.Value.Rarity);
-        return (Math.Min(need, M.Matching(Inv, kind.Value).Count), need);
-    }
-
+    /// <summary>One-click merge (self-tests run every row through it): the item plus the highest-level others of its kind.</summary>
     public static MergeResult? QuickMerge(string slot)
     {
         if (Active) return null;

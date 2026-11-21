@@ -143,7 +143,6 @@ internal static class BookSelfTest
 
     private static void Setup()
     {
-        CotsUi.Inventory.Close();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
         LootFeature.ClearAll();
         var save = PlayerState.ToSave();
@@ -156,7 +155,7 @@ internal static class BookSelfTest
 
     private static void Kill()
     {
-        WorldState.SetRulesForTest(_savedRules! with { DropChance = 1000, AllowElites = false });
+        WorldState.SetRulesForTest(_savedRules! with { DropChance = 1000, DropQuantity = 3, AllowElites = false });
         Victims.Clear();
         for (int i = 0; i < 3; i++)
         {
@@ -197,7 +196,6 @@ internal static class BookSelfTest
     {
         SelfTest.Check("book: the inventory key opened the book on Gear", BookHost.IsOpen && BookHost.Tab == BookTab.Gear, $"open {BookHost.IsOpen}, tab {BookHost.Tab}");
         SelfTest.Check("book: our tab was added", BookTabs.Tabs.Count == 1, BookTabs.Tabs.Count.ToString());
-        SelfTest.Check("book: the screen panel stayed closed", !CotsUi.Inventory.IsOpen);
         SelfTest.Check("book: the game's page actions are blocked", BookPatches.Block);
     }
 

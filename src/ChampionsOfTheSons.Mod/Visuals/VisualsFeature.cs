@@ -88,7 +88,7 @@ public sealed class VisualsFeature : IModFeature
     }
 
     private static readonly string[] WeaponModels =
-        { "Weapon_Sword", "Weapon_GreatSword", "Weapon_Axe", "Weapon_Hammer", "Weapon_Spear", "Weapon_Bow", "Weapon_Polearm", "Weapon_GreatAxe", "Weapon_GreatHammer" };
+        { "Weapon_Sword", "Weapon_GreatSword", "Weapon_Axe", "Weapon_Hammer", "Weapon_Bow", "Weapon_Polearm" };
 
     /// <summary>The held-weapon models at real size, standing in a row in front of the camera, turned three-quarters.</summary>
     private void ShowWeapons()

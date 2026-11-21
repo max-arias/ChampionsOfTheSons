@@ -34,7 +34,6 @@ internal sealed class GamepadFeature : IModFeature
     /// <summary>The spell slot the last pad binding cast (-1: none yet).</summary>
     internal static int LastPadCast { get; set; } = -1;
 
-    internal static IReadOnlyList<PadPanel> Panels => _panels;
     internal static PadPanel? OpenPanel => _panels.FirstOrDefault(p => p.IsOpen());
 
     public void Init()
@@ -55,9 +54,8 @@ internal sealed class GamepadFeature : IModFeature
 
         _panels = new List<PadPanel>
         {
-            new("inventory", () => CotsUi.Inventory.IsOpen, () => CotsUi.ToggleInventory(),
-                () => { if (!CotsUi.Inventory.CloseMenu()) CotsUi.Inventory.Close(); },
-                () => CotsUi.Inventory.PadRoot, () => CotsUi.Inventory.PadMenuRoot),
+            // The inventory is the guide book, which reads the pad itself (BookInput.Pad): this entry only opens it.
+            new("inventory", () => false, () => CotsUi.ToggleInventory(), () => { }, () => null),
             new("perks", () => PerksFeature.Panel.IsOpen, () => PerksFeature.Panel.Toggle(), () => PerksFeature.Panel.Close(), () => PerksFeature.Panel.PadRoot),
             new("host_settings", () => WorldRulesFeature.Settings.IsOpen, () => { if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close(); else WorldRulesFeature.Settings.Open(); }, () => WorldRulesFeature.Settings.Close(),
                 () => WorldRulesFeature.Settings.PadRoot),
@@ -154,12 +152,11 @@ internal sealed class GamepadFeature : IModFeature
             if (PadFocus.Current == null) PadFocus.Enter(scope);
             else PadFocus.Move(scope, dir);
         }
-        if (PadInput.Pressed(PadButton.South) || PadInput.Pressed(PadButton.West))
+        if (PadInput.Pressed(PadButton.South))
         {
             any = true;
             if (PadFocus.Current == null) PadFocus.Enter(scope);
-            else if (PadInput.Pressed(PadButton.South)) PadFocus.Confirm();
-            else PadFocus.Secondary();
+            else PadFocus.Confirm();
         }
         if (!any && PadFocus.Current == null && PadInput.RecentlyUsed) PadFocus.Enter(scope);
         PadFocus.Refresh();

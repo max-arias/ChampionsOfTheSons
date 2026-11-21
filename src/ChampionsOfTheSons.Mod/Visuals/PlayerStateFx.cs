@@ -33,9 +33,6 @@ internal static class PlayerStateFx
 
     private static bool _reduced;
 
-    /// <summary>Ids of the state effects on screen now (self-tests).</summary>
-    public static IEnumerable<string> Showing => States.Where(s => s.Go != null).Select(s => s.Id);
-
     public static void Update()
     {
         if (!FxKit.Available || LocalPlayer.Transform == null) return;

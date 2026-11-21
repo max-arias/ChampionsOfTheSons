@@ -58,9 +58,6 @@ internal static class WeaponGlowFx
     private static float _sweep;
     private static bool? _reducedSeen;
 
-    /// <summary>Glow material instances alive (self-tests).</summary>
-    public static int OwnedMaterials => Owned.Count;
-
     /// <summary>Glow parts alive now (frame-cost logs, self-tests).</summary>
     public static int Alive
     {

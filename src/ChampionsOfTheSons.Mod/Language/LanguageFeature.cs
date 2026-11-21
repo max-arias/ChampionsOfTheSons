@@ -105,7 +105,6 @@ public sealed class LanguageFeature : IModFeature
     {
         try
         {
-            if (UI.CotsUi.Inventory is { IsOpen: true } inv) inv.RefreshAll();
             if (Perks.PerkPanel.Instance is { IsOpen: true } perks) perks.Refresh();
             Book.BookPages.MarkDirty();
         }

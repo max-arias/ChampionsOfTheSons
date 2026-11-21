@@ -12,7 +12,6 @@ public enum MessageType : byte
     Hello = 1,
     HelloReject = 2,
     WorldSettings = 3,
-    EnemyProfileRequest = 10,
     EnemySync = 11,
     EnemyHealth = 12,
     Hit = 13,
@@ -60,12 +59,6 @@ public sealed record HelloReject(string Reason) : IMessage
 public sealed record WorldSettings(GameMode Mode, int LevelOffset, int ExtraEnemyLevels, bool FriendlyFire) : IMessage
 {
     public MessageType Type => MessageType.WorldSettings;
-}
-
-/// <summary>Client → host: send me this enemy's profile. <paramref name="EnemyNetId"/> is the packed Bolt network ID.</summary>
-public sealed record EnemyProfileRequest(ulong EnemyNetId) : IMessage
-{
-    public MessageType Type => MessageType.EnemyProfileRequest;
 }
 
 /// <summary>Host → clients: the rolled profile of one enemy. Protocol 2 added the damage multiplier and the elite name ids

@@ -1,4 +1,3 @@
-using System.Text;
 using ChampionsOfTheSons.Mod.Settings;
 using ChampionsOfTheSons.Mod.UI;
 

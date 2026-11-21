@@ -1,7 +1,4 @@
-using Bolt;
 using ChampionsOfTheSons.Core.Networking;
-using ChampionsOfTheSons.Core.Rules;
-using ChampionsOfTheSons.Mod.Bridge;
 using ChampionsOfTheSons.Mod.Loot;
 using HarmonyLib;
 using RedLoader;
@@ -26,10 +23,7 @@ public sealed class CoopExtras : IModFeature
     // ---- auras (COS-23)
     public static AuraBoard Auras { get; } = new();
 
-    private sealed record Source(string BuffId, float Radius, Func<bool> IsActive);
-
-    private static readonly List<Source> Sources = new();
-    private static float _auraTimer, _posTimer;
+    private static float _posTimer;
     private static bool _posLogged;
     private static string? _castSpell;
 
@@ -74,17 +68,6 @@ public sealed class CoopExtras : IModFeature
             }
         }
 
-        _auraTimer -= dt;
-        if (_auraTimer <= 0)
-        {
-            _auraTimer = 1f;
-            foreach (var s in Sources.ToList())
-            {
-                bool on;
-                try { on = s.IsActive(); } catch { on = false; }
-                if (on) SendPulse(s.BuffId, s.Radius, 2.5f);
-            }
-        }
     }
 
     // ---------------------------------------------------------------- pings
@@ -153,22 +136,8 @@ public sealed class CoopExtras : IModFeature
 
     // ---------------------------------------------------------------- auras
 
-    /// <summary>
-    /// Registers an aura the local player can project: while <paramref name="isActive"/> says so, teammates within
-    /// <paramref name="radius"/> metres get <paramref name="buffId"/> (pulses go out once a second and last 2.5 s).
-    /// The perk code that owns the aura calls this once and applies the received buff with <see cref="IsBuffed"/>.
-    /// </summary>
-    public static void RegisterAura(string buffId, float radius, Func<bool> isActive) => Sources.Add(new Source(buffId, radius, isActive));
-
     /// <summary>True while a teammate's aura of this buff reaches the local player.</summary>
     public static bool IsBuffed(string buffId) => Auras.IsActive(buffId, Time.realtimeSinceStartup);
-
-    public static void SendPulse(string buffId, float radius, float seconds)
-    {
-        if (!LocalPlayer.IsInWorld) return;
-        var pulse = new AuraPulse(CoopSession.HostId, buffId, CoopSession.ToVec(LocalPlayer.Transform.position), radius, seconds);
-        CoopSession.Broadcast(pulse);
-    }
 
     // ---------------------------------------------------------------- spells (COS-51)
 
@@ -266,11 +235,8 @@ public sealed class CoopExtras : IModFeature
     {
         if (!CoopSession.Active || (CoopSession.IsClient && !CoopFeature.Accepted)) return;
         CoopSession.Broadcast(new AuraPulse(CoopSession.HostId, spellId, CoopSession.ToVec(origin), radius, seconds, (float)amount, (float)amount2));
-        TeamSpellsSent++;
     }
 
-    /// <summary>Team spell pulses sent and applied here (co-op test checks).</summary>
-    public static int TeamSpellsSent { get; private set; }
     public static int TeamSpellsApplied { get; private set; }
 
     private static void ApplyPulse(AuraPulse pulse)

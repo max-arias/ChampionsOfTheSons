@@ -5,7 +5,7 @@ using ChampionsOfTheSons.Mod.Loot;
 
 namespace ChampionsOfTheSons.Mod.UI;
 
-/// <summary>Inventory actions shared by the screen panel and the guide book pages (COS-59). No UI code.</summary>
+/// <summary>Inventory actions behind the guide book pages and card (COS-59). No UI code.</summary>
 internal static class InventoryActions
 {
     private static PlayerCharacter Pc => PlayerState.Character;

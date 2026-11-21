@@ -23,7 +23,6 @@ public class MessageCodecTests
         new Hello(MessageCodec.ProtocolVersion, "0.1.0"),
         new HelloReject("Mod version mismatch: host 0.2.0, you 0.1.0"),
         new WorldSettings(GameMode.Hard, 5, 3, true),
-        new EnemyProfileRequest(0xDEADBEEF12345678UL),
         new EnemySync(42UL, "enemy.cannibal_heavy", 250, 3, 1.5e6f, 1.2e6f, 4500f, new[] { "affix.meteor", "affix.steadfast" }, 9_000_000_000L),
         new EnemySync(43UL, "enemy.fingers", 1, 0, 100f, 100f, 0f, Array.Empty<string>(), 0),
         new EnemySync(44UL, "Carl", 77, 1, 9e5f, 4e5f, 1200f, new[] { "Meteor" }, 123_456L, 3.4e4f, "elite_name.ashjaw", "elite_name.unburied"),

@@ -1,7 +1,6 @@
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
-using RedLoader;
 using Sons.Items.Core;
 using TheForest.Utils;
 using UnityEngine;

@@ -224,12 +224,10 @@ public class SaveFormatException : Exception
 public sealed class SaveVersionException : SaveFormatException
 {
     public int Found { get; }
-    public int Supported { get; }
 
     public SaveVersionException(int found, int supported)
         : base($"Save version {found} is newer than this mod supports ({supported}). Update the mod.")
     {
         Found = found;
-        Supported = supported;
     }
 }

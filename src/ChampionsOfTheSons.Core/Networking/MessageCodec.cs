@@ -19,7 +19,7 @@ public static class MessageCodec
     /// new <see cref="DropRequest"/>: a client's thrown items reach everyone (COS-14); <see cref="AuraPulse"/> carries two amounts (COS-23);
     /// <see cref="FxShape"/> carries a homing target and <see cref="PlayerInfo"/> the explosion stat (COS-114);
     /// new <see cref="EnemyAware"/> (COS-116).</remarks>
-    public const int ProtocolVersion = 7;
+    public const int ProtocolVersion = 8;
 
     public static byte[] Encode(IMessage message)
     {
@@ -30,7 +30,6 @@ public static class MessageCodec
             case Hello m: w.VarInt(m.ProtocolVersion).String(m.ModVersion); break;
             case HelloReject m: w.String(m.Reason); break;
             case WorldSettings m: w.Byte((byte)m.Mode).VarInt(m.LevelOffset).VarInt(m.ExtraEnemyLevels).Bool(m.FriendlyFire); break;
-            case EnemyProfileRequest m: w.UInt64(m.EnemyNetId); break;
             case EnemySync m:
                 w.UInt64(m.EnemyNetId).String(m.KindId).VarInt(m.Level).Byte(m.Tier)
                     .Float(m.MaxHealth).Float(m.Health).Float(m.Armor);
@@ -89,7 +88,6 @@ public static class MessageCodec
             MessageType.Hello => new Hello(r.VarInt(), r.String() ?? ""),
             MessageType.HelloReject => new HelloReject(r.String() ?? ""),
             MessageType.WorldSettings => new WorldSettings((GameMode)r.Byte(), r.VarInt(), r.VarInt(), r.Bool()),
-            MessageType.EnemyProfileRequest => new EnemyProfileRequest(r.UInt64()),
             MessageType.EnemySync => ReadEnemySync(r),
             MessageType.EnemyHealth => new EnemyHealth(r.UInt64(), r.Float(), r.Float()),
             MessageType.Hit => new Hit(r.UInt64(), r.Float(), (HitFlags)r.Byte(), r.Float()),

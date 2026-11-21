@@ -1,4 +1,3 @@
-using ChampionsOfTheSons.Mod.Icons;
 using ChampionsOfTheSons.Mod.UI;
 using SUI;
 using TMPro;
@@ -74,8 +73,6 @@ internal static class BookCard
 
     private static readonly Vector2 OffScreen = new(-5000, 5000);
     private static bool _hidden;
-
-    public static bool Visible => _built && !_hidden;
 
     /// <summary>
     /// The item icon left of the title: a plain uGUI Image on a GameObject of our own (a SUI RawImage here threw
@@ -235,14 +232,6 @@ internal static class BookCard
         var corners = new Vector3[4];
         b.RectTransform.GetWorldCorners(corners);
         return screen.x >= corners[0].x && screen.x <= corners[2].x && screen.y >= corners[0].y && screen.y <= corners[2].y;
-    }
-
-    public static Vector2 ActionScreenCenter(string action)
-    {
-        var b = action switch { "equip" => _equip, "drop" => _drop, "drop_one" => _dropOne, "split" => _split, _ => _destroy };
-        var corners = new Vector3[4];
-        b.RectTransform.GetWorldCorners(corners);
-        return (corners[0] + corners[2]) / 2;
     }
 
     /// <summary>Runs a card action on the selected slot. Destroy needs two clicks.</summary>

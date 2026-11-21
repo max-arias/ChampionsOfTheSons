@@ -260,8 +260,8 @@ public class PerkRulesTests
         foreach (var slot in LootRoller.EquipSlots) inv.Restore(inv.Slots.Append(new(slot, new ItemInstance { BaseId = "item.ring", Rarity = Rarity.Rare })).ToList());
         int lowest = WideReachRules.LowestEquippedRarity(inv);
         Assert.Equal((int)Rarity.Rare, lowest);
-        Assert.False(WideReachRules.Takes(new ItemInstance { BaseId = "item.boots", Rarity = Rarity.Common }, Db, lowest));
-        Assert.True(WideReachRules.Takes(new ItemInstance { BaseId = "item.boots", Rarity = Rarity.Rare }, Db, lowest));
+        Assert.False(WideReachRules.Takes(new ItemInstance { BaseId = "item.boots", Rarity = Rarity.Common }, lowest));
+        Assert.True(WideReachRules.Takes(new ItemInstance { BaseId = "item.boots", Rarity = Rarity.Rare }, lowest));
     }
 
 }

@@ -110,5 +110,4 @@ public sealed class Progress
         Xp = 0;
     }
 
-    public double ProgressToNext => Xp / XpCurve.Goal(Level);
 }

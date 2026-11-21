@@ -28,7 +28,7 @@ internal static class WideReachPickup
         foreach (var id in LootFeature.Ground.Near(p.x, p.y, p.z, radius))
         {
             var drop = LootFeature.Ground.Get(id);
-            if (drop == null || !WideReachRules.Takes(drop.Item, pc.Content, lowest)) continue;
+            if (drop == null || !WideReachRules.Takes(drop.Item, lowest)) continue;
             if (LootFeature.Pickup(id) == Core.Rules.PickupResult.Ok) LastDrops++;
         }
         CollectGamePickups(p, radius);

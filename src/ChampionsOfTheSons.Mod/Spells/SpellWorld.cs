@@ -12,7 +12,6 @@ internal sealed class SpellZone
     public string Id = "";
     public Vector3 Center;
     public float Radius, Left, Interval = 1, Next = 1;
-    public int Pulses;
     public Action<SpellZone>? Pulse;
     public Action<SpellZone, float>? Frame;
     public Action<SpellZone>? End;
@@ -27,7 +26,7 @@ internal sealed class SpellBolt
     public string Id = "";
     public Vector3 Pos, Dir;
     public float Speed, Range, Radius = 1.2f, Life = 10;
-    public bool Pierce, Homing;
+    public bool Homing;
     public EnemyRuntime? Target;
     public Action<SpellBolt, EnemyRuntime>? OnHit;
     public GameObject? Visual;
@@ -209,7 +208,6 @@ internal static class SpellWorld
             while (z.Next <= 0 && z.Interval > 0)
             {
                 z.Next += z.Interval;
-                z.Pulses++;
                 z.Pulse?.Invoke(z);
             }
             if (z.Left > 0) continue;
@@ -259,7 +257,8 @@ internal static class SpellWorld
             if (DistanceToSegment(Center(e), from, to) > b.Radius) continue;
             b.Hit.Add(e);
             b.OnHit?.Invoke(b, e);
-            if (!b.Pierce) { b.Done = true; break; }
+            b.Done = true; // a bolt stops at the first enemy
+            break;
         }
 
         b.Pos = to;

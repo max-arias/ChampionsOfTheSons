@@ -101,7 +101,6 @@ internal sealed class ProgressHud
     public bool MassacreVisible => _mRoot.Root.activeSelf;
     public string MassacreText => _mKills.TextObject.text + " | " + _mInfo.TextObject.text;
     public string XpText => _xpLevel.TextObject.text + " | " + _xpText.TextObject.text;
-    public float XpFraction => _targetFraction;
     public Banner LevelBanner => _levelBanner;
     public Banner PayoutBanner => _payoutBanner;
 

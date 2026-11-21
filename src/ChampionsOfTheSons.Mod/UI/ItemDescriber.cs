@@ -50,7 +50,7 @@ internal static class ItemDescriber
         var body = new StringBuilder();
         AppendStats(body, item);
         AppendUnique(body, item);
-        AppendSet(body, item, def, pc);
+        AppendSet(body, def, pc);
         AppendFlavor(body, item);
 
         return new ItemDescription
@@ -79,7 +79,7 @@ internal static class ItemDescriber
         if (text.Length > 0) sb.Append(Color(UiTheme.Unique, text)).Append('\n');
     }
 
-    private static void AppendSet(StringBuilder sb, ItemInstance item, ItemBaseDef? def, PlayerCharacter pc)
+    private static void AppendSet(StringBuilder sb, ItemBaseDef? def, PlayerCharacter pc)
     {
         if (def?.Set == null || !pc.Content.Sets.TryGetValue(def.Set, out var set)) return;
         var counts = ItemEffects.SetCounts(pc.Inventory.Equipped.Select(kv => kv.Value), pc.Content);

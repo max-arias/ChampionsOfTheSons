@@ -1,4 +1,3 @@
-using Bolt;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
@@ -129,7 +128,7 @@ public sealed class CoopSyncSelfTest : IModFeature
                     _eliteState = 2;
                     EnemyRegistry.TestProfileOverride = null;
                 }
-                if (!_lateDropPlaced && now - _stageAt > 20)
+                if (!_lateDropPlaced && now - _stageAt > 12)
                 {
                     _lateDropPlaced = true;
                     try
@@ -173,6 +172,7 @@ public sealed class CoopSyncSelfTest : IModFeature
     private static bool _lateDropPlaced;
     private static int _eliteState;
     private static Dictionary<int, double> _dropsBefore = new();
+    private static float _joinWaitFrom = -1;
     private static int _shapesBefore;
 
     /// <summary>Called by <see cref="CoopSelfTest"/> before its last (version check) step.</summary>
@@ -256,6 +256,10 @@ public sealed class CoopSyncSelfTest : IModFeature
         {
             if (_joinState == 0)
             {
+                // Wait for the host's long-lived drop (placed 12 s into its stage 2) so the rejoin has a drop to resend;
+                // the client's steps can get here first.
+                if (_joinWaitFrom < 0) _joinWaitFrom = Time.realtimeSinceStartup;
+                if (!LootFeature.Ground.All.Any() && Time.realtimeSinceStartup - _joinWaitFrom < 8) return false;
                 EnemySyncFeature.ForgetReceived();
                 _dropsBefore = LootFeature.Ground.All.ToDictionary(d => d.Id, d => d.Remaining);
                 foreach (var id in _dropsBefore.Keys.ToList()) LootFeature.Ground.Remove(id);
@@ -275,7 +279,7 @@ public sealed class CoopSyncSelfTest : IModFeature
             CoopTest.Check("late join: a resent drop keeps the host's remaining lifetime (COS-146)", _dropsBefore.Count > 0 && lifetimesKept,
                 string.Join(", ", back.Select(d => $"{d.Id}: {d.Remaining:F0} s (was {(_dropsBefore.TryGetValue(d.Id, out var r) ? r : -1):F0})")));
             return true;
-        }, 20);
+        }, 25);
 
         CoopTest.Add("spells: casts carry their visuals and a teammate's copy is drawn", () =>
         {

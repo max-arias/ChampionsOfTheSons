@@ -1,4 +1,3 @@
-using Bolt;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Networking;
 using ChampionsOfTheSons.Core.Rules;
@@ -48,9 +47,6 @@ public sealed class CoopLoot : IModFeature
     /// <summary>Where this client recently asked the host for a drop: the mirror that lands there is not walked over at once.</summary>
     private static readonly List<(Vector3 Pos, float At)> PendingThrows = new();
 
-    /// <summary>Drops the client asked the host for (co-op test checks).</summary>
-    public static int DropsRequested { get; private set; }
-
     /// <summary>Co-op client: asks the host to make a drop for everyone (COS-14). False when not a client: drop locally.</summary>
     public static bool RequestDrop(ItemInstance item, Vector3 pos, DropSource source)
     {
@@ -58,7 +54,6 @@ public sealed class CoopLoot : IModFeature
         pos = LootFeature.SnapToGround(pos);
         PendingThrows.Add((pos, Time.realtimeSinceStartup));
         CoopSession.SendToHost(new DropRequest(item, CoopSession.ToVec(pos), source));
-        DropsRequested++;
         return true;
     }
 

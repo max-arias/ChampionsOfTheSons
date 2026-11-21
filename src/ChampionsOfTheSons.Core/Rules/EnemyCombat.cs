@@ -108,7 +108,6 @@ public sealed class EnemyCombatState
 
     public bool CcImmune => Profile.Has(EnemyAbility.Juggernaut);
     public bool Stunned => _stunLeft > 0;
-    public bool ShieldUp => _shieldLeft > 0;
     public int FuryStacks => _furyStacks;
     public bool RainActive => Raining && Profile.Has(EnemyAbility.RainEmpowerment);
 

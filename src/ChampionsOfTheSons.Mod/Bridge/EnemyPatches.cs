@@ -1,6 +1,5 @@
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Rules;
-using Bolt;
 using HarmonyLib;
 using RedLoader;
 using Sons.Ai.Vail;
@@ -100,7 +99,6 @@ public static class EnemyPatches
         if (local)
         {
             runtime.LastHitByLocalPlayer = true;
-            runtime.LastHitWasCrit = hit.Crit;
         }
 
         // Undead: the first lethal hit leaves it at half health instead.
@@ -203,10 +201,6 @@ public static class EnemyPatches
     private static int _extraHits;
     private static bool _headshot;
 
-    /// <summary>Extra hits a ranged hit brought (True Aim, Double Spears, area damage), last ranged hit (self-test).</summary>
-    public static int LastExtraHits { get; private set; }
-    public static int LastSplashes { get; private set; }
-
     /// <summary>After a ranged hit landed: True Aim's extra hits, a second spear, and area damage around the target (COS-86).
     /// Each goes through the forced-hit path (armor, shields, caps) and procs nothing further.</summary>
     private static void AfterRangedHit(EnemyRuntime runtime, OutgoingHit hit, RangedShot shot)
@@ -216,10 +210,8 @@ public static class EnemyPatches
         if (Rng.Chance(RangedRules.SecondSpearChance(sheet, shot.Kind))) extra++;
         _shot = null;
         _extraHits = 0;
-        LastExtraHits = extra;
         for (int i = 0; i < extra && runtime.IsActive; i++) DealForced(runtime, hit, creditPlayer: true);
 
-        LastSplashes = 0;
         bool headshot = _headshot;
         _headshot = false;
         if (runtime.Actor == null) return;
@@ -237,7 +229,6 @@ public static class EnemyPatches
         {
             if (other == target) continue;
             DealForced(other, new OutgoingHit(amount, DamageKind.Physical, false, pierce), creditPlayer: true);
-            LastSplashes++;
         }
     }
 

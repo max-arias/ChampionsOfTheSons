@@ -17,7 +17,6 @@ internal static class LootVisuals
     {
         public int Id;
         public GameObject Root = null!;
-        public Transform Gem = null!;
         public Color Color;
         public Rarity Rarity;
         public Vector3 Position;
@@ -79,7 +78,7 @@ internal static class LootVisuals
             gem.transform.localRotation = Quaternion.Euler(0, 45, 0);
             LieOnGround(gem.transform, pos.y, tip: false);
         }
-        var v = new Visual { Id = drop.Id, Root = root, Gem = gem.transform, Color = color, Rarity = drop.Item.Rarity, Position = pos };
+        var v = new Visual { Id = drop.Id, Root = root, Color = color, Rarity = drop.Item.Rarity, Position = pos };
         Beam(v, root.transform, pos, drop.Item.Rarity, color);
         ById[drop.Id] = v;
         Animate(v, 0, null);
