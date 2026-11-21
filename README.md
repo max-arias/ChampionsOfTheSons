@@ -55,6 +55,6 @@ English is the original. The 12 other languages are machine translations no nati
 
 The mod's own code and text are under the [MIT License](LICENSE). Third-party assets (icons, sounds, models, textures) keep their own licenses and authors, listed in [CREDITS.md](CREDITS.md) and [content/icons/CREDITS.md](content/icons/CREDITS.md). RedLoader and SonsSdk are by ToniMacaroni.
 
-Inspired by the original Champions of the Forest mod for The Forest. None of its code, lore or description text is used here.
+Inspired by the original [Champions of the Forest](https://github.com/Hazardu/ChampionsOfForest) mod for The Forest. None of its code, lore or description text is used here.
 
 *Sons of the Forest* is a game by Endnight Games. This is an unofficial fan mod, not made or endorsed by them.
