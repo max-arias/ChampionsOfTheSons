@@ -36,6 +36,13 @@ public static class TestContent
     ] }
     """;
 
+    /// <summary><see cref="PlayerStats"/> plus more stat rows (JSON objects).</summary>
+    public static string StatsWith(params string[] rows)
+    {
+        int end = PlayerStats.LastIndexOf(']');
+        return PlayerStats[..end] + ", " + string.Join(", ", rows) + PlayerStats[end..];
+    }
+
     public static ContentDb Create(Dictionary<string, string>? overrides = null)
     {
         var files = new Dictionary<string, string>

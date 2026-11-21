@@ -1,0 +1,15 @@
+{
+ "ui.buffs.armor_corruption": "Armor Corrosion",
+ "ui.buffs.attack_slow": "Sluggish",
+ "ui.buffs.damage_down": "Weakened",
+ "ui.buffs.debuff_immune": "Warded",
+ "ui.buffs.debuff_resistant": "Resolute",
+ "ui.buffs.energy_leak": "Energy Leak",
+ "ui.buffs.move_slow": "Slowed",
+ "ui.buffs.poison": "Poisoned",
+ "ui.buffs.root": "Rooted",
+ "ui.buffs.root_immune": "Unbound",
+ "ui.buffs.silence": "Silenced",
+ "ui.buffs.stun": "Stunned",
+ "ui.buffs.stun_immune": "Unshakable"
+}

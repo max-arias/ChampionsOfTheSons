@@ -26,6 +26,7 @@ public sealed class ContentDb
     private readonly Dictionary<string, PerkDef> _perks = new();
     private readonly Dictionary<string, SpellDef> _spells = new();
     private readonly Dictionary<string, SetDef> _sets = new();
+    private readonly Dictionary<string, Rules.BuffDef> _buffs = new();
     private readonly Dictionary<string, Rules.EnemyKind> _enemies = new();
     private readonly Dictionary<string, EliteNameDef> _eliteNames = new();
     private readonly Dictionary<string, WeaponTypeDef> _weaponTypes = new();
@@ -37,6 +38,8 @@ public sealed class ContentDb
     public IReadOnlyDictionary<string, PerkDef> Perks => _perks;
     public IReadOnlyDictionary<string, SpellDef> Spells => _spells;
     public IReadOnlyDictionary<string, SetDef> Sets => _sets;
+    /// <summary>Player buff and debuff kinds (COS-89).</summary>
+    public IReadOnlyDictionary<string, Rules.BuffDef> Buffs => _buffs;
     /// <summary>Enemy kinds keyed by the game's actor type name ("Carl", "Fingers").</summary>
     public IReadOnlyDictionary<string, Rules.EnemyKind> Enemies => _enemies;
     /// <summary>Elite name parts by id (COS-68).</summary>
@@ -61,6 +64,7 @@ public sealed class ContentDb
         db.Add(files, "perks.json", "perks", db._perks, p => p.Id, optional: true);
         db.Add(files, "spells.json", "spells", db._spells, s => s.Id, optional: true);
         db.Add(files, "sets.json", "sets", db._sets, s => s.Id, optional: true);
+        db.Add(files, "buffs.json", "buffs", db._buffs, b => b.Id, optional: true);
         db.Add(files, "enemies.json", "enemies", db._enemies, e => e.ActorType, optional: true);
         db.Add(files, "elite_names.json", "eliteNames", db._eliteNames, n => n.Id, optional: true);
         db.Add(files, "weapon_types.json", "weaponTypes", db._weaponTypes, w => w.Id, optional: true);
@@ -176,6 +180,12 @@ public sealed class ContentDb
             if (_enemies.Count > 0)
                 foreach (var kind in item.DropsFrom)
                     if (!kindIds.Contains(kind)) _errors.Add($"item {item.Id}: drops from unknown enemy kind '{kind}'");
+        }
+        foreach (var buff in _buffs.Values)
+        {
+            foreach (var e in buff.Effects)
+                if (!_playerStats.ContainsKey(e.Stat)) _errors.Add($"buff {buff.Id}: unknown player stat '{e.Stat}'");
+            if (buff.BlockedBy != null && !_playerStats.ContainsKey(buff.BlockedBy)) _errors.Add($"buff {buff.Id}: unknown blocking stat '{buff.BlockedBy}'");
         }
         foreach (var perk in _perks.Values)
         {

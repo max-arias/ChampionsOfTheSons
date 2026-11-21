@@ -72,6 +72,7 @@ public static class StatIds
     public const string StaminaPerSecRate = "stamina_per_sec_rate";
     /// <summary>Bool: no spell can be cast while on (COS-82; set by debuffs, COS-89).</summary>
     public const string Silenced = "silenced";
+    public const string Rooted = "rooted", Stunned = "stunned", RootImmunity = "root_immunity", DebuffImmunity = "debuff_immunity";
 }
 
 /// <summary>Values computed from several stats (COTF's derived formulas).</summary>

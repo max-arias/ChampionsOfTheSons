@@ -1,0 +1,163 @@
+{
+  "buffs": [
+    {
+      "id": "buff.move_slow",
+      "name": "Slowed",
+      "positive": false,
+      "dispelLevel": 1,
+      "stack": "overwrite",
+      "icon": "perk.power_slowdown"
+    },
+    {
+      "id": "buff.attack_slow",
+      "name": "Sluggish",
+      "positive": false,
+      "dispelLevel": 1,
+      "stack": "overwrite",
+      "icon": "perk.falter",
+      "effects": [
+        {
+          "stat": "attack_speed",
+          "op": "mult"
+        }
+      ]
+    },
+    {
+      "id": "buff.poison",
+      "name": "Poisoned",
+      "positive": false,
+      "dispelLevel": 1,
+      "stack": "accumulate",
+      "icon": "perk.corrosive_skin"
+    },
+    {
+      "id": "buff.damage_down",
+      "name": "Weakened",
+      "positive": false,
+      "dispelLevel": 1,
+      "stack": "overwrite",
+      "icon": "perk.weaken",
+      "effects": [
+        {
+          "stat": "all_damage",
+          "op": "mult"
+        }
+      ]
+    },
+    {
+      "id": "buff.energy_leak",
+      "name": "Energy Leak",
+      "positive": false,
+      "dispelLevel": 1,
+      "stack": "accumulate",
+      "icon": "perk.overcharge"
+    },
+    {
+      "id": "buff.armor_corruption",
+      "name": "Armor Corrosion",
+      "positive": false,
+      "dispelLevel": 1,
+      "stack": "accumulate",
+      "icon": "perk.armor_penetration"
+    },
+    {
+      "id": "buff.root",
+      "name": "Rooted",
+      "positive": false,
+      "dispelLevel": 2,
+      "stack": "max",
+      "blockedBy": "root_immunity",
+      "icon": "perk.curse_of_binding",
+      "effects": [
+        {
+          "stat": "rooted",
+          "op": "enable"
+        }
+      ]
+    },
+    {
+      "id": "buff.stun",
+      "name": "Stunned",
+      "positive": false,
+      "dispelLevel": 2,
+      "stack": "max",
+      "blockedBy": "stun_immunity",
+      "icon": "perk.concussive_bash",
+      "effects": [
+        {
+          "stat": "stunned",
+          "op": "enable"
+        }
+      ]
+    },
+    {
+      "id": "buff.silence",
+      "name": "Silenced",
+      "positive": false,
+      "dispelLevel": 2,
+      "stack": "max",
+      "icon": "perk.anti_magic_training",
+      "effects": [
+        {
+          "stat": "silenced",
+          "op": "enable"
+        }
+      ]
+    },
+    {
+      "id": "buff.stun_immune",
+      "name": "Unshakable",
+      "positive": true,
+      "stack": "max",
+      "icon": "perk.indestructable",
+      "effects": [
+        {
+          "stat": "stun_immunity",
+          "op": "add",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "buff.root_immune",
+      "name": "Unbound",
+      "positive": true,
+      "stack": "max",
+      "icon": "perk.light_foot",
+      "effects": [
+        {
+          "stat": "root_immunity",
+          "op": "add",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "buff.debuff_immune",
+      "name": "Warded",
+      "positive": true,
+      "stack": "max",
+      "icon": "perk.temple_of_protection",
+      "effects": [
+        {
+          "stat": "debuff_immunity",
+          "op": "add",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "buff.debuff_resistant",
+      "name": "Resolute",
+      "positive": true,
+      "stack": "max",
+      "icon": "perk.magic_resistance",
+      "effects": [
+        {
+          "stat": "debuff_resistance",
+          "op": "add"
+        }
+      ]
+    }
+  ]
+}

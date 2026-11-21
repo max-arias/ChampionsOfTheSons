@@ -53,9 +53,7 @@ public class SpellInputTests
     {
         var db = TestContent.Create(new()
         {
-            ["player_stats.json"] = """
-            { "playerStats": [ { "id": "silenced", "kind": "bool", "default": 0 } ] }
-            """,
+            ["player_stats.json"] = TestContent.StatsWith("""{ "id": "silenced", "kind": "bool", "default": 0 }"""),
             ["spells.json"] = """
             { "spells": [
               { "id": "spell.blink", "name": "Blink", "energyCost": 25, "cooldown": 0 },
