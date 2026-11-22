@@ -31,12 +31,11 @@
       "maxLevel": 6,
       "statPools": [
         [
-          "stat.movementspeed"
+          "stat.lesserarmor"
         ],
         [
-          "stat.movementspeed",
-          "stat.lesseragility",
-          "stat.lesservitality"
+          "stat.lesservitality",
+          "stat.staminapersecond"
         ],
         [
           "stat.lesserarmor",
@@ -87,14 +86,7 @@
       "maxLevel": 2,
       "statPools": [
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
-          "stat.lesserarmor",
-          "stat.basespelldamage",
-          "stat.basemeleedamage",
-          "stat.baserangeddamage"
+          "stat.lifepersecond"
         ],
         [
           "stat.lesserstrength",
@@ -153,8 +145,7 @@
       "maxLevel": 4,
       "statPools": [
         [
-          "stat.lesserarmor",
-          null
+          "stat.movementspeed"
         ],
         [
           "stat.lesserarmor",
@@ -211,7 +202,8 @@
       "maxLevel": 7,
       "statPools": [
         [
-          "stat.maximumlife"
+          "stat.lesserarmor",
+          "stat.armor"
         ],
         [
           "stat.strength",
@@ -508,8 +500,7 @@
           "stat.block"
         ],
         [
-          "stat.strength",
-          null
+          "stat.thorns"
         ],
         [
           "stat.lesserarmor",
@@ -668,7 +659,7 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "*"
+          "stat.criticalhitchance"
         ],
         [
           "stat.lesserstrength",
@@ -769,11 +760,8 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
-          "stat.lesserarmor"
+          "stat.baserangeddamage",
+          "stat.lesseragility"
         ],
         [
           "stat.lesserarmor"
@@ -1009,7 +997,11 @@
     {
       "id": "item.pendant_of_perpetual_rebirth",
       "legacyIndex": 79,
-      "dropsFrom": ["enemy.demon_boss", "enemy.puffy_boss", "enemy.boss_mutant"],
+      "dropsFrom": [
+        "enemy.demon_boss",
+        "enemy.puffy_boss",
+        "enemy.boss_mutant"
+      ],
       "name": "Everturn Pendant",
       "type": "amulet",
       "rarity": 3,
@@ -1610,45 +1602,6 @@
         }
       ],
       "weaponModel": "long_sword"
-    },
-    {
-      "id": "item.iron_horn",
-      "legacyIndex": 109,
-      "name": "Rustbray Horn",
-      "type": "amulet",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [
-        [
-          "stat.armor"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "stat.thorns"
-        ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.armor",
-          "multiplier": 2.0
-        }
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "spell_war_cry_give_armor",
-          "op": "enable"
-        }
-      ]
     },
     {
       "id": "item.the_great_iron_horn",
@@ -2628,7 +2581,10 @@
         }
       ],
       "weaponModel": "hammer",
-      "glow": { "tint": "#8fd8ff", "style": "frost" },
+      "glow": {
+        "tint": "#8fd8ff",
+        "style": "frost"
+      },
       "uniqueEffects": [
         {
           "stat": "i_hammer_stun_duration",
@@ -2639,62 +2595,6 @@
           "stat": "i_hammer_stun_amount",
           "op": "mult",
           "value": 0.0
-        }
-      ]
-    },
-    {
-      "id": "item.alexander_s_shield",
-      "legacyIndex": 135,
-      "name": "Holdfast Shield",
-      "type": "shield",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [
-        [
-          "stat.damagereduction"
-        ],
-        [
-          "stat.thorns"
-        ],
-        [
-          "stat.armor",
-          "stat.resistancetomagic"
-        ],
-        [
-          "stat.strength",
-          "stat.damagereduction",
-          "stat.percentmaximumlife"
-        ],
-        [
-          "stat.dodgechance"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "spell_chance_to_parry_on_hit",
-          "op": "enable"
         }
       ]
     },
@@ -2937,7 +2837,10 @@
         }
       ],
       "weaponModel": "greatbow",
-      "glow": { "tint": "#ff8a2a", "style": "ember" },
+      "glow": {
+        "tint": "#ff8a2a",
+        "style": "ember"
+      },
       "uniqueEffects": [
         {
           "stat": "i_great_bow_ignites",
@@ -3263,61 +3166,6 @@
       ]
     },
     {
-      "id": "item.forbidden_scroll",
-      "legacyIndex": 159,
-      "name": "Blackedge Pages",
-      "type": "spell_scroll",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 1,
-      "statPools": [
-        [
-          "stat.intelligence"
-        ],
-        [
-          "stat.maximumenergy",
-          "stat.intelligence",
-          "stat.vitality",
-          "stat.energypersecond"
-        ],
-        [
-          "stat.spelldamageincrease",
-          "stat.basespelldamage"
-        ],
-        [
-          "stat.spelldamageincrease",
-          "stat.basespelldamage"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "stat.cooldownreduction",
-          "stat.intelligence",
-          "stat.maximumlife",
-          "stat.maximumenergy",
-          "stat.lifepersecond",
-          "stat.firedamage",
-          "stat.resistancetomagic",
-          null,
-          null,
-          null,
-          null,
-          "stat.agility",
-          "stat.magicfind",
-          "stat.allattributes",
-          "stat.energyonhit",
-          "stat.chanceonhittoweaken"
-        ]
-      ]
-    },
-    {
       "id": "item.wind_armor",
       "legacyIndex": 161,
       "name": "Wreckwing Cuirass",
@@ -3405,7 +3253,7 @@
       "name": "Burlap Cowl",
       "type": "helmet",
       "rarity": 2,
-      "minLevel": 2,
+      "minLevel": 1,
       "maxLevel": 6,
       "statPools": [
         [
@@ -3541,7 +3389,14 @@
     {
       "id": "item.purgatory",
       "legacyIndex": 165,
-      "dropsFrom": ["enemy.cannibal", "enemy.faceless_cannibal", "enemy.heavy_cannibal", "enemy.muddy_cannibal", "enemy.painted_cannibal", "enemy.tribe_veteran"],
+      "dropsFrom": [
+        "enemy.cannibal",
+        "enemy.faceless_cannibal",
+        "enemy.heavy_cannibal",
+        "enemy.muddy_cannibal",
+        "enemy.painted_cannibal",
+        "enemy.tribe_veteran"
+      ],
       "name": "Ashtally Signet",
       "type": "ring",
       "rarity": 3,
@@ -3692,7 +3547,10 @@
         }
       ],
       "weaponModel": "greatbow",
-      "glow": { "tint": "#ff5a1a", "style": "ember" },
+      "glow": {
+        "tint": "#ff5a1a",
+        "style": "ember"
+      },
       "uniqueEffects": [
         {
           "stat": "i_eruption_bow",
@@ -4260,35 +4118,6 @@
       ]
     },
     {
-      "id": "item.peasant_s_scarf",
-      "legacyIndex": 213,
-      "name": "Scrapwool Cape",
-      "type": "amulet",
-      "rarity": 2,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.strength"
-        ],
-        [
-          "stat.maximumlife",
-          "stat.vitality"
-        ],
-        [
-          "stat.meleearmorpiercing",
-          "stat.meleedamageincrease"
-        ],
-        [
-          "stat.spellcostreduction",
-          "stat.criticalhitdamage"
-        ],
-        [
-          "stat.strength"
-        ]
-      ]
-    },
-    {
       "id": "item.anger",
       "legacyIndex": 231,
       "name": "Scarlet Grasp",
@@ -4833,45 +4662,6 @@
       ]
     },
     {
-      "id": "item.small_tribal_necklace",
-      "legacyIndex": 242,
-      "name": "Firsthunt Beads",
-      "type": "amulet",
-      "rarity": 3,
-      "minLevel": 6,
-      "maxLevel": 9,
-      "statPools": [
-        [
-          "*"
-        ],
-        [
-          "stat.basespelldamage",
-          "stat.baserangeddamage",
-          "stat.basemeleedamage"
-        ],
-        [
-          "stat.spelldmgfromint",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.damagereduction"
-        ],
-        [
-          "stat.allattributes",
-          "stat.agility",
-          "stat.strength",
-          "stat.intelligence",
-          "stat.vitality"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "spell_frenzy_max_stacks",
-          "op": "add",
-          "value": 2.0
-        }
-      ]
-    },
-    {
       "id": "item.tribal_necklace",
       "legacyIndex": 243,
       "name": "Killtally Necklace",
@@ -4910,51 +4700,6 @@
           "stat": "spell_frenzy_max_stacks",
           "op": "add",
           "value": 3.0
-        }
-      ]
-    },
-    {
-      "id": "item.warlord_necklace",
-      "legacyIndex": 244,
-      "name": "Boneyoke Collar",
-      "type": "amulet",
-      "rarity": 3,
-      "minLevel": 6,
-      "maxLevel": 9,
-      "statPools": [
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "stat.basespelldamage",
-          "stat.baserangeddamage",
-          "stat.basemeleedamage"
-        ],
-        [
-          "stat.spelldmgfromint",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.damagereduction"
-        ],
-        [
-          "stat.allattributes",
-          "stat.agility",
-          "stat.strength",
-          "stat.intelligence",
-          "stat.vitality"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "spell_frenzy_max_stacks",
-          "op": "add",
-          "value": 4.0
         }
       ]
     },
@@ -5003,87 +4748,6 @@
           "stat": "spell_blink_range",
           "op": "add",
           "value": 25.0
-        }
-      ]
-    },
-    {
-      "id": "item.destroyed_void_shard",
-      "legacyIndex": 246,
-      "name": "Voidsplit Pendant",
-      "type": "amulet",
-      "rarity": 3,
-      "minLevel": 80,
-      "maxLevel": 90,
-      "statPools": [
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "stat.cooldownreduction",
-          null
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "i_infinity_loop",
-          "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "item.famine_hammer",
-      "legacyIndex": 247,
-      "name": "Hollowbelly Hammer",
-      "type": "weapon",
-      "rarity": 3,
-      "minLevel": 30,
-      "maxLevel": 35,
-      "statPools": [
-        [
-          "stat.basemeleedamage"
-        ],
-        [
-          "stat.attackspeed"
-        ],
-        [
-          "stat.stunonhit"
-        ],
-        [
-          "stat.strength",
-          "stat.vitality",
-          "stat.chanceonhittoslow",
-          "stat.chanceonhittobleed",
-          "stat.chanceonhittoweaken"
-        ],
-        [
-          "stat.meleearmorpiercing",
-          "stat.armor"
-        ],
-        [
-          "stat.basemeleedamage",
-          "stat.meleedamageincrease",
-          "stat.strength",
-          "stat.criticalhitchance",
-          "stat.criticalhitdamage",
-          "stat.maximumlife",
-          "stat.maximumenergy"
-        ]
-      ],
-      "weaponModel": "hammer",
-      "uniqueEffects": [
-        {
-          "stat": "chance_to_weaken",
-          "op": "add",
-          "value": 0.3
         }
       ]
     },
@@ -5189,33 +4853,6 @@
       ]
     },
     {
-      "id": "item.vampiric_band",
-      "legacyIndex": 250,
-      "name": "Leechband",
-      "type": "ring",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*"
-        ],
-        [
-          "stat.lifeonhit"
-        ],
-        [
-          "stat.energyonhit"
-        ],
-        [
-          "stat.staminaregeneration",
-          "stat.percentmaximumenergy",
-          "stat.percentmaximumlife"
-        ]
-      ],
-      "uniqueEffects": [],
-      "manual": true
-    },
-    {
       "id": "item.vampire_ring",
       "legacyIndex": 251,
       "name": "Bloatstone Ring",
@@ -5256,50 +4893,6 @@
       ],
       "uniqueEffects": [],
       "manual": true
-    },
-    {
-      "id": "item.tricksters_scarf",
-      "legacyIndex": 252,
-      "name": "Turncoat Headband",
-      "type": "amulet",
-      "rarity": 3,
-      "minLevel": 20,
-      "maxLevel": 22,
-      "statPools": [
-        [
-          "stat.spelldamageincrease",
-          "stat.intelligence",
-          "stat.basespelldamage"
-        ],
-        [
-          "stat.spelldamageincrease",
-          "stat.intelligence",
-          "stat.basespelldamage"
-        ],
-        [
-          "stat.vitality",
-          "stat.lifepersecond",
-          "stat.liferegeneration",
-          "stat.intelligence",
-          "stat.agility",
-          "stat.strength",
-          "stat.allattributes"
-        ],
-        [
-          "stat.cooldownreduction",
-          "stat.spellcostreduction",
-          "stat.spellcosttostamina",
-          "stat.intelligence",
-          "stat.damagereduction"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "spell_magic_arrow_volley_count",
-          "op": "add",
-          "value": 1.0
-        }
-      ]
     },
     {
       "id": "item.magus_necktie",
@@ -5348,197 +4941,6 @@
           "stat": "spell_magic_arrow_volley_count",
           "op": "add",
           "value": 2.0
-        }
-      ]
-    },
-    {
-      "id": "item.discounted_knockoff_magic_quiver",
-      "legacyIndex": 254,
-      "name": "Cheapglow Quiver",
-      "type": "quiver",
-      "rarity": 3,
-      "minLevel": 2,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.rangeddamageincrease",
-          "stat.baserangeddamage"
-        ],
-        [
-          "stat.movementspeed",
-          "stat.attackspeed",
-          "stat.resistancetomagic",
-          "stat.armor",
-          "stat.dodgechance",
-          "stat.lifeonhit",
-          "stat.headshotdamage",
-          "stat.firedamage",
-          "stat.armorpiercing"
-        ],
-        [
-          "stat.armor",
-          "stat.expgain",
-          "stat.rangeddamageincrease",
-          "stat.allhealingpercent",
-          "stat.rangedarmorpiercing",
-          "stat.projectilespeed",
-          "stat.projectilesize",
-          "stat.piercechance",
-          "stat.allattributes"
-        ],
-        [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.maximumlife",
-          "stat.maximumenergy",
-          "stat.lifepersecond",
-          "stat.staminapersecond",
-          "stat.staminaregeneration",
-          "stat.liferegeneration"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "perk_projectile_no_consume_chance",
-          "op": "add",
-          "value": 0.15
-        }
-      ]
-    },
-    {
-      "id": "item.magic_quiver",
-      "legacyIndex": 255,
-      "name": "Silverthread Quiver",
-      "type": "quiver",
-      "rarity": 3,
-      "minLevel": 2,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.rangeddamageincrease",
-          "stat.baserangeddamage"
-        ],
-        [
-          "stat.movementspeed",
-          "stat.attackspeed",
-          "stat.resistancetomagic",
-          "stat.armor",
-          "stat.dodgechance",
-          "stat.lifeonhit",
-          "stat.headshotdamage",
-          "stat.firedamage",
-          "stat.armorpiercing"
-        ],
-        [
-          "stat.armor",
-          "stat.expgain",
-          "stat.rangeddamageincrease",
-          "stat.allhealingpercent",
-          "stat.rangedarmorpiercing",
-          "stat.projectilespeed",
-          "stat.projectilesize",
-          "stat.piercechance",
-          "stat.allattributes"
-        ],
-        [
-          "stat.agility",
-          "stat.rangeddmgfromagi",
-          null,
-          null
-        ],
-        [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.maximumlife",
-          "stat.maximumenergy",
-          "stat.lifepersecond",
-          "stat.staminapersecond",
-          "stat.staminaregeneration",
-          "stat.liferegeneration"
-        ],
-        [
-          "stat.agility",
-          "stat.strength",
-          "stat.maximumlife",
-          "stat.maximumenergy",
-          null
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "perk_projectile_no_consume_chance",
-          "op": "add",
-          "value": 0.2
-        }
-      ]
-    },
-    {
-      "id": "item.improved_magic_quiver",
-      "legacyIndex": 256,
-      "name": "Spoolwire Quiver",
-      "type": "quiver",
-      "rarity": 3,
-      "minLevel": 2,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.rangeddamageincrease",
-          "stat.baserangeddamage"
-        ],
-        [
-          "stat.rangeddamageincrease"
-        ],
-        [
-          "stat.movementspeed",
-          "stat.attackspeed",
-          "stat.resistancetomagic",
-          "stat.armor",
-          "stat.dodgechance",
-          "stat.lifeonhit",
-          "stat.headshotdamage",
-          "stat.firedamage",
-          "stat.armorpiercing"
-        ],
-        [
-          "stat.armor",
-          "stat.expgain",
-          "stat.rangeddamageincrease",
-          "stat.allhealingpercent",
-          "stat.rangedarmorpiercing",
-          "stat.projectilespeed",
-          "stat.projectilesize",
-          "stat.piercechance",
-          "stat.allattributes"
-        ],
-        [
-          "stat.agility",
-          "stat.rangeddmgfromagi"
-        ],
-        [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.maximumlife",
-          "stat.maximumenergy",
-          "stat.lifepersecond",
-          "stat.staminapersecond",
-          "stat.staminaregeneration",
-          "stat.liferegeneration"
-        ],
-        [
-          "stat.agility",
-          "stat.strength",
-          "stat.maximumlife",
-          "stat.maximumenergy"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "perk_projectile_no_consume_chance",
-          "op": "add",
-          "value": 0.25
         }
       ]
     },
@@ -5608,90 +5010,6 @@
           "stat": "perk_projectile_no_consume_chance",
           "op": "add",
           "value": 0.4
-        }
-      ]
-    },
-    {
-      "id": "item.gun_blade",
-      "legacyIndex": 269,
-      "name": "Trigger Axe",
-      "type": "weapon",
-      "rarity": 3,
-      "minLevel": 35,
-      "maxLevel": 36,
-      "statPools": [
-        [
-          "stat.spellcostreduction",
-          "stat.meleedamageincrease",
-          "stat.spelldamageincrease",
-          "stat.cooldownreduction",
-          "stat.damagereduction",
-          "stat.rangeddmgfromagi",
-          "stat.attackspeed"
-        ],
-        [
-          "stat.agility",
-          "stat.lesseragility"
-        ],
-        [
-          "stat.meleearmorpiercing",
-          "stat.rangedarmorpiercing",
-          "stat.armorpiercing",
-          "stat.armor"
-        ],
-        [
-          "stat.rangeddamageincrease",
-          "stat.rangeddmgfromagi",
-          "stat.baserangeddamage",
-          "stat.criticalhitchance",
-          "stat.criticalhitdamage",
-          "stat.allattributes"
-        ],
-        [
-          "stat.intelligence",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.allattributes",
-          "stat.maximumlife",
-          "stat.maximumenergy"
-        ],
-        [
-          "stat.intelligence",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.allattributes",
-          "stat.lifeonhit",
-          "stat.energyonhit",
-          "stat.energypersecond",
-          "stat.allhealingpercent"
-        ],
-        [
-          "stat.rangeddamageincrease",
-          "stat.baserangeddamage",
-          "stat.agility"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.spellcostreduction",
-          "multiplier": -1.0
-        }
-      ],
-      "weaponModel": "axe",
-      "uniqueEffects": [
-        {
-          "stat": "perk_bullet_damage_mult",
-          "op": "mult",
-          "value": 2.5
         }
       ]
     },
@@ -5956,68 +5274,6 @@
           "stat": "spell_frenzy_dmg",
           "op": "add",
           "value": 0.69
-        }
-      ]
-    },
-    {
-      "id": "item.pyromancy_mask",
-      "legacyIndex": 275,
-      "name": "Cindertender Mask",
-      "type": "helmet",
-      "rarity": 3,
-      "minLevel": 2,
-      "maxLevel": 6,
-      "statPools": [
-        [
-          "stat.firedamage"
-        ],
-        [
-          "stat.maximumenergy",
-          "stat.maximumlife",
-          "stat.percentmaximumenergy",
-          "stat.percentmaximumlife"
-        ],
-        [
-          "stat.strength",
-          "stat.intelligence",
-          "stat.agility",
-          "stat.spellcostreduction"
-        ],
-        [
-          "stat.spelldamageincrease",
-          "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
-        ],
-        [
-          "stat.spelldamageincrease",
-          "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
-        ],
-        [
-          "stat.armor",
-          "stat.damagereduction"
-        ],
-        [
-          "stat.resistancetomagic",
-          "stat.magicfind",
-          "stat.movementspeed",
-          "stat.armor"
-        ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.firedamage",
-          "multiplier": 2.0
-        }
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "fire_duration",
-          "op": "add",
-          "value": 2.0
         }
       ]
     },
@@ -6321,1803 +5577,6 @@
         {
           "stat": "spell_blink_do_explosion",
           "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "item.stone_pauldrons",
-      "legacyIndex": 281,
-      "name": "Quarry Pauldrons",
-      "type": "shoulder_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.movementspeed",
-          "stat.attackspeed"
-        ],
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          null
-        ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.movementspeed",
-          "multiplier": -0.3
-        }
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.03
-        }
-      ]
-    },
-    {
-      "id": "item.iron_shoulder_pads",
-      "legacyIndex": 282,
-      "name": "Railing Pauldrons",
-      "type": "shoulder_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.04
-        }
-      ]
-    },
-    {
-      "id": "item.steel_shoulder_pads",
-      "legacyIndex": 283,
-      "name": "Bellsteel Pauldrons",
-      "type": "shoulder_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "item.battle_scarred_shoulder_pads",
-      "legacyIndex": 284,
-      "name": "Gougeplate Spaulders",
-      "type": "shoulder_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "item.mystery_shoulder_pads",
-      "legacyIndex": 285,
-      "name": "Ashgray Spaulders",
-      "type": "shoulder_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
-      "id": "item.stone_shield",
-      "legacyIndex": 286,
-      "name": "Slatewall Shield",
-      "type": "shield",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.movementspeed",
-          "stat.attackspeed"
-        ],
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "stat.block"
-        ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.movementspeed",
-          "multiplier": -0.3
-        }
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.03
-        }
-      ]
-    },
-    {
-      "id": "item.iron_shield",
-      "legacyIndex": 287,
-      "name": "Traybeaten Shield",
-      "type": "shield",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "stat.block"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.04
-        }
-      ]
-    },
-    {
-      "id": "item.steel_tower_shield",
-      "legacyIndex": 288,
-      "name": "Gateward Slab",
-      "type": "shield",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          "stat.armor"
-        ],
-        [
-          "stat.block"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "item.guardian",
-      "legacyIndex": 289,
-      "name": "Lidless Shield",
-      "type": "shield",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "stat.block"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "item.mystery_shield",
-      "legacyIndex": 290,
-      "name": "Vaultborn Shield",
-      "type": "shield",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.block"
-        ],
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.block",
-          "multiplier": 2.0
-        }
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
-      "id": "item.light_boot",
-      "legacyIndex": 291,
-      "name": "Whisperlace Boots",
-      "type": "boot",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.movementspeed"
-        ],
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          null
-        ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.movementspeed",
-          "multiplier": 1.3
-        }
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.03
-        }
-      ]
-    },
-    {
-      "id": "item.iron_boots",
-      "legacyIndex": 292,
-      "name": "Ironcap Stompers",
-      "type": "boot",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.movementspeed"
-        ],
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.04
-        }
-      ]
-    },
-    {
-      "id": "item.steel_boots",
-      "legacyIndex": 293,
-      "name": "Spurheel Boots",
-      "type": "boot",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.movementspeed"
-        ],
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          "stat.armor"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "item.threads",
-      "legacyIndex": 294,
-      "name": "Ragwrap Boots",
-      "type": "boot",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.movementspeed"
-        ],
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "item.mystery_boots",
-      "legacyIndex": 295,
-      "name": "Trackless Boots",
-      "type": "boot",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "stat.movementspeed"
-        ],
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
-      "id": "item.wraps",
-      "legacyIndex": 296,
-      "name": "Gauzewraps",
-      "type": "glove",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          null
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.03
-        }
-      ]
-    },
-    {
-      "id": "item.iron_gauntlet_2",
-      "legacyIndex": 297,
-      "name": "Rivetfinger Gauntlet",
-      "type": "glove",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.04
-        }
-      ]
-    },
-    {
-      "id": "item.steel_gauntlet",
-      "legacyIndex": 298,
-      "name": "Studknuckle Gauntlet",
-      "type": "glove",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "item.titanium_gauntlet",
-      "legacyIndex": 299,
-      "name": "Paleweight Gauntlet",
-      "type": "glove",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "item.mystery_gauntlet",
-      "legacyIndex": 300,
-      "name": "Jointless Gauntlet",
-      "type": "glove",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
-      "id": "item.leather_tasset",
-      "legacyIndex": 301,
-      "name": "Hide Tassets",
-      "type": "pants",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.03
-        }
-      ]
-    },
-    {
-      "id": "item.iron_tasset",
-      "legacyIndex": 302,
-      "name": "Rattleplate Tassets",
-      "type": "pants",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.04
-        }
-      ]
-    },
-    {
-      "id": "item.steel_tasset",
-      "legacyIndex": 303,
-      "name": "Hingeplate Tassets",
-      "type": "pants",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "item.black_steel_leggins",
-      "legacyIndex": 304,
-      "name": "Furnace Greaves",
-      "type": "pants",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "item.mystery_leggins",
-      "legacyIndex": 305,
-      "name": "Ageless Leggings",
-      "type": "pants",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
-      "id": "item.leather_vest",
-      "legacyIndex": 306,
-      "name": "Gutstitch Vest",
-      "type": "chest_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          null
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.03
-        }
-      ]
-    },
-    {
-      "id": "item.iron_breastplate",
-      "legacyIndex": 307,
-      "name": "Dentplate Cuirass",
-      "type": "chest_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.04
-        }
-      ]
-    },
-    {
-      "id": "item.steel_breastplate",
-      "legacyIndex": 308,
-      "name": "Ridgeline Breastplate",
-      "type": "chest_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "item.silver_armor",
-      "legacyIndex": 309,
-      "name": "Filigree Hauberk",
-      "type": "chest_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "item.mystery_breastplate",
-      "legacyIndex": 310,
-      "name": "Greycast Cuirass",
-      "type": "chest_armor",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
-      "id": "item.cloth_band",
-      "legacyIndex": 311,
-      "name": "Ragwrap Bracers",
-      "type": "bracer",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          null
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.03
-        }
-      ]
-    },
-    {
-      "id": "item.iron_wristguard",
-      "legacyIndex": 312,
-      "name": "Hingeplate Guard",
-      "type": "bracer",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.04
-        }
-      ]
-    },
-    {
-      "id": "item.steel_wristguard",
-      "legacyIndex": 313,
-      "name": "Biteproof Guard",
-      "type": "bracer",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "item.baron_wristguards",
-      "legacyIndex": 314,
-      "name": "Estate Crest Guards",
-      "type": "bracer",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "item.mystery_wristguards",
-      "legacyIndex": 315,
-      "name": "Unmarked Wristguards",
-      "type": "bracer",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
-      "id": "item.horned_helmet_2",
-      "legacyIndex": 316,
-      "name": "Ironhorn Helm",
-      "type": "helmet",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.03
-        }
-      ]
-    },
-    {
-      "id": "item.iron_helmet",
-      "legacyIndex": 317,
-      "name": "Dentbrow Helm",
-      "type": "helmet",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.04
-        }
-      ]
-    },
-    {
-      "id": "item.steel_helmet",
-      "legacyIndex": 318,
-      "name": "Slitvisor Helm",
-      "type": "helmet",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "item.armored_hood",
-      "legacyIndex": 319,
-      "name": "Scout's Coif",
-      "type": "helmet",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "*",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "item.mystery_helmet",
-      "legacyIndex": 320,
-      "name": "Dimcore Helm",
-      "type": "helmet",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 3,
-      "statPools": [
-        [
-          "*",
-          "stat.expgain",
-          "stat.magicfind"
-        ],
-        [
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.maxenergyfromagi",
-          "stat.maxhealthfromvit",
-          "stat.spelldmgfromint"
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*",
-          null
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.1
         }
       ]
     },
@@ -8786,122 +6245,6 @@
       ]
     },
     {
-      "id": "item.unnamed_3",
-      "legacyIndex": 330,
-      "name": "Furyscar Cleaver",
-      "type": "weapon",
-      "rarity": 3,
-      "minLevel": 6,
-      "maxLevel": 9,
-      "statPools": [
-        [
-          "stat.basemeleedamage",
-          "stat.basespelldamage"
-        ],
-        [
-          "stat.basemeleedamage",
-          null
-        ],
-        [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.agility"
-        ],
-        [
-          "stat.meleedamageincrease",
-          "stat.spelldamageincrease"
-        ],
-        [
-          "stat.attackspeed"
-        ],
-        [
-          "stat.criticalhitchance"
-        ],
-        [
-          "stat.criticalhitdamage"
-        ],
-        [
-          "stat.meleedmgfromstr"
-        ],
-        [
-          "stat.strength"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ]
-      ],
-      "statMultipliers": [
-        {
-          "slot": 0,
-          "stat": "stat.basemeleedamage",
-          "multiplier": 2.0
-        }
-      ],
-      "weaponModel": "great_sword",
-      "uniqueEffects": [
-        {
-          "stat": "spell_berserk_damage",
-          "op": "add",
-          "value": 1.0
-        }
-      ]
-    },
-    {
-      "id": "item.unnamed_4",
-      "legacyIndex": 331,
-      "name": "Bloodrush Pendant",
-      "type": "amulet",
-      "rarity": 3,
-      "minLevel": 6,
-      "maxLevel": 9,
-      "statPools": [
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "*"
-        ],
-        [
-          "stat.basespelldamage",
-          "stat.baserangeddamage",
-          "stat.basemeleedamage",
-          null
-        ],
-        [
-          "stat.spelldmgfromint",
-          "stat.meleedmgfromstr",
-          "stat.rangeddmgfromagi",
-          "stat.damagereduction"
-        ],
-        [
-          "stat.allattributes",
-          "stat.agility",
-          "stat.strength",
-          "stat.intelligence",
-          "stat.vitality"
-        ]
-      ],
-      "uniqueEffects": [
-        {
-          "stat": "spell_berserk_attack_speed",
-          "op": "add",
-          "value": 0.1
-        },
-        {
-          "stat": "spell_berserk_movement_speed",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
       "id": "item.unnamed_5",
       "legacyIndex": 332,
       "name": "The Pierced Heart",
@@ -9307,6 +6650,391 @@
         ],
         [
           "*",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.twine_charm",
+      "name": "Twine Charm",
+      "type": "amulet",
+      "rarity": 0,
+      "minLevel": 1,
+      "maxLevel": 4,
+      "statPools": [
+        [
+          "stat.maximumlife",
+          "stat.lesservitality"
+        ],
+        [
+          "stat.lifepersecond",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.springheel_wraps",
+      "name": "Springheel Wraps",
+      "type": "boot",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.jumppower"
+        ],
+        [
+          "stat.staminapersecond"
+        ],
+        [
+          "stat.agility",
+          "stat.lesserarmor"
+        ]
+      ]
+    },
+    {
+      "id": "item.inkstained_cuff",
+      "name": "Inkstained Cuff",
+      "type": "bracer",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.intelligence"
+        ],
+        [
+          "stat.maximumenergy",
+          "stat.energypersecond"
+        ],
+        [
+          "stat.spellcostreduction",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.fletchers_guard",
+      "name": "Fletcher's Guard",
+      "type": "bracer",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.baserangeddamage"
+        ],
+        [
+          "stat.projectilespeed",
+          "stat.rangedarmorpiercing"
+        ],
+        [
+          "stat.agility",
+          "stat.headshotdamage"
+        ],
+        [
+          "*"
+        ]
+      ]
+    },
+    {
+      "id": "item.haulers_brigandine",
+      "name": "Hauler's Brigandine",
+      "type": "chest_armor",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality"
+        ],
+        [
+          "stat.damagereduction",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.mossweave_tunic",
+      "name": "Mossweave Tunic",
+      "type": "chest_armor",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.liferegeneration"
+        ],
+        [
+          "stat.lifepersecond",
+          "stat.allhealingpercent"
+        ],
+        [
+          "stat.resistancetomagic"
+        ],
+        [
+          "*"
+        ]
+      ]
+    },
+    {
+      "id": "item.grapplers_grips",
+      "name": "Grappler's Grips",
+      "type": "glove",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.attackspeed"
+        ],
+        [
+          "stat.strength",
+          "stat.agility"
+        ],
+        [
+          "stat.lifeonhit",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.bonecrusher_knuckles",
+      "name": "Bonecrusher Knuckles",
+      "type": "glove",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.basemeleedamage"
+        ],
+        [
+          "stat.meleedamageincrease"
+        ],
+        [
+          "stat.lifeonhit",
+          "stat.criticalhitdamage"
+        ],
+        [
+          "*"
+        ]
+      ]
+    },
+    {
+      "id": "item.spotters_cap",
+      "name": "Spotter's Cap",
+      "type": "helmet",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.headshotdamage"
+        ],
+        [
+          "stat.agility",
+          "stat.criticalhitchance"
+        ],
+        [
+          "stat.projectilespeed",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.drovers_breeches",
+      "name": "Drover's Breeches",
+      "type": "pants",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.maximumlife"
+        ],
+        [
+          "stat.staminapersecond"
+        ],
+        [
+          "stat.vitality",
+          "stat.lesserarmor"
+        ]
+      ]
+    },
+    {
+      "id": "item.pinfeather_quiver",
+      "name": "Pinfeather Quiver",
+      "type": "quiver",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.projectilespeed"
+        ],
+        [
+          "stat.piercechance"
+        ],
+        [
+          "stat.agility",
+          "stat.baserangeddamage"
+        ]
+      ]
+    },
+    {
+      "id": "item.marksmans_case",
+      "name": "Marksman's Case",
+      "type": "quiver",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.criticalhitchance"
+        ],
+        [
+          "stat.headshotdamage"
+        ],
+        [
+          "stat.criticalhitdamage",
+          "stat.rangeddamageincrease"
+        ],
+        [
+          "*"
+        ]
+      ]
+    },
+    {
+      "id": "item.inkwell_ring",
+      "name": "Inkwell Ring",
+      "type": "ring",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.intelligence"
+        ],
+        [
+          "stat.energypersecond",
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.cooldownreduction",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.wardpaint_shield",
+      "name": "Wardpaint Shield",
+      "type": "shield",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.block"
+        ],
+        [
+          "stat.resistancetomagic"
+        ],
+        [
+          "stat.intelligence",
+          "stat.maximumenergy"
+        ]
+      ]
+    },
+    {
+      "id": "item.duelists_buckler",
+      "name": "Duelist's Buckler",
+      "type": "shield",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.block"
+        ],
+        [
+          "stat.dodgechance"
+        ],
+        [
+          "stat.attackspeed",
+          "stat.movementspeed"
+        ],
+        [
+          "*"
+        ]
+      ]
+    },
+    {
+      "id": "item.thornhide_mantle",
+      "name": "Thornhide Mantle",
+      "type": "shoulder_armor",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.thorns"
+        ],
+        [
+          "stat.strength",
+          "stat.vitality"
+        ],
+        [
+          "stat.lesserarmor",
+          null
+        ]
+      ]
+    },
+    {
+      "id": "item.rampart_spaulders",
+      "name": "Rampart Spaulders",
+      "type": "shoulder_armor",
+      "rarity": 2,
+      "minLevel": 1,
+      "maxLevel": 30,
+      "statPools": [
+        [
+          "stat.armor"
+        ],
+        [
+          "stat.block",
+          "stat.damagereduction"
+        ],
+        [
+          "stat.maximumlife",
+          "stat.vitality"
+        ],
+        [
+          "*"
+        ]
+      ]
+    },
+    {
+      "id": "item.tallow_almanac",
+      "name": "Tallow Almanac",
+      "type": "spell_scroll",
+      "rarity": 1,
+      "minLevel": 1,
+      "maxLevel": 10,
+      "statPools": [
+        [
+          "stat.cooldownreduction"
+        ],
+        [
+          "stat.intelligence",
+          "stat.maximumenergy"
+        ],
+        [
+          "stat.energyonhit",
           null
         ]
       ]

@@ -7,6 +7,9 @@ an item applies. Lore, descriptions and translations are not copied (the origina
 our own text lives in content/text/. The optional reference.json (keep it outside the repo) holds the
 original's mechanic notes so writers can get numbers right without reusing its wording.
 Unique effects that are not simple stat changes are flagged "manual" for COS-17.
+
+History only: the item roster was cut and reworked by hand afterwards (COS-162: 2 per rarity per type, no
+duplicate Legendaries, new items). Running this again would bring the cut items back.
 """
 import json
 import os

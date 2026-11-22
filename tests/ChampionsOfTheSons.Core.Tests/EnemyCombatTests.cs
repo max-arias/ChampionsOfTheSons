@@ -164,10 +164,10 @@ public class UniqueItemTests
     }
 
     [Fact]
-    public void Vampire_items_leech_and_stack()
+    public void Vampire_ring_leeches_and_heals_on_kill()
     {
         Assert.Equal(0, UniqueItems.LifeStealFraction(With()));
-        Assert.Equal(UniqueItems.BandLifeSteal + UniqueItems.RingLifeSteal, UniqueItems.LifeStealFraction(With(UniqueItems.VampiricBand, UniqueItems.VampireRing)), 9);
+        Assert.Equal(UniqueItems.RingLifeSteal, UniqueItems.LifeStealFraction(With(UniqueItems.VampireRing)), 9);
         Assert.Equal(UniqueItems.RingKillHeal, UniqueItems.KillHealFraction(With(UniqueItems.VampireRing)));
     }
 

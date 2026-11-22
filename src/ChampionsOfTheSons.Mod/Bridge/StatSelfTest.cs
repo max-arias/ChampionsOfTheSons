@@ -204,16 +204,16 @@ internal static class StatSelfTest
 
         // ------------------------------------------------------------------ unique items (COS-17)
 
-        SelfTest.Add(T0 + 15, "unique: Vampiric Band leeches", () =>
+        SelfTest.Add(T0 + 15, "unique: Vampire Ring leeches", () =>
         {
             Clean();
             LocalPlayer.Vitals.SetFullHealth();
-            Equip(Item(UniqueItems.VampiricBand));
+            Equip(Item(UniqueItems.VampireRing));
             LocalPlayer.Vitals.Health.SetCurrentValue(MaxHealth * 0.3f);
             _a = Health;
             double dmg = HitDamage(E[7]!, 400f);
-            double expected = dmg * UniqueItems.BandLifeSteal;
-            SelfTest.Check("band returns 3% of the damage dealt", dmg > 0 && Health - _a >= expected * 0.9 && Health - _a <= expected + 3, $"dealt {dmg:0.0}, healed {Health - _a:0.00}, expected {expected:0.00}");
+            double expected = dmg * UniqueItems.RingLifeSteal;
+            SelfTest.Check("ring returns 6% of the damage dealt", dmg > 0 && Health - _a >= expected * 0.9 && Health - _a <= expected + 3, $"dealt {dmg:0.0}, healed {Health - _a:0.00}, expected {expected:0.00}");
         });
 
         SelfTest.Add(T0 + 15.5f, "unique: Vampire Ring heals on kill", () =>

@@ -116,17 +116,68 @@ def h32(s):
     return zlib.crc32(s.encode())
 
 
+# Item names -> a small badge glyph (bottom right) when the item's type has no unused glyph left: every item gets an
+# icon no other item has (COS-162, Max 2026-11-22). Fragments match inside compound names ("Emberforge" -> fire).
+THEME = {
+    "flame": "fire", "fire": "fire", "ember": "fire", "cinder": "fire", "furnace": "furnace", "ash": "smoking-volcano",
+    "frost": "snowflake-1", "rime": "snowflake-1", "whiteout": "snowing", "blood": "drop", "vein": "drop", "bone": "bone-gnawer",
+    "skull": "skull-bolt", "gold": "gold-bar", "void": "portal", "rift": "portal", "dial": "stopwatch", "everturn": "cycle",
+    "cube": "cube", "silver": "sewing-string", "thread": "sewing-string", "spool": "sewing-string", "wire": "wire-coil",
+    "key": "key-card", "rivet": "nails", "hinge": "gears", "crest": "castle", "oath": "shaking-hands", "sworn": "shaking-hands",
+    "bell": "ringing-bell", "light": "light-bulb", "glow": "light-bulb", "quarry": "stone-block", "rail": "railway",
+    "hare": "rabbit", "leech": "leeching-worm", "spore": "mushroom-gills", "honey": "honeycomb", "stair": "stairs",
+    "penny": "coins", "smudge": "cauldron", "gaff": "meat-hook", "hide": "animal-hide", "pale": "ghost", "weight": "weight",
+    "sprint": "run", "laugh": "laughing-mask", "bloat": "puffer-fish", "curtain": "curtains", "tally": "abacus", "hung": "noose",
+    "cheap": "coins", "polymer": "3d-printer", "printed": "3d-printer", "ammo": "ammo-box", "flicker": "lightning-bolt",
+    "gouge": "claw-slashes", "gnaw": "fangs", "pierced": "arrowed", "dead": "skull-crack", "muster": "flag-objective",
+    "rust": "rusty-sword", "pine": "pine-tree", "charcoal": "candle-flame", "cave": "cave-entrance", "wreck": "crashed-helmet",
+    "glider": "hang-glider", "burlap": "swap-bag", "hush": "silenced", "stone": "stone-block", "ageless": "hourglass",
+    "rattle": "rattle", "dent": "hammer-drop", "filigree": "flower-twirl", "ridge": "mountains", "riot": "police-badge",
+    "survivor": "campfire", "render": "cauldron", "kevlar": "bullets", "hammer": "hammer-drop", "plaid": "checkered-flag",
+    "ceaseless": "infinity", "scuff": "footprint", "track": "footprint", "sinew": "muscle-up",
+    "hold": "padlock", "tray": "meal", "pot": "cooking-pot", "oak": "oak", "vault": "locked-chest", "hunt": "deer-head",
+    "kill": "skull-crack", "rush": "run", "tags": "id-card", "yoke": "chain", "knuckle": "knuckle-duster", "twin": "two-shadows",
+    "welder": "welding-torch", "scrub": "soap", "weave": "sewing-string", "steel": "anvil", "joint": "chain", "nail": "nails",
+    "unmarked": "invisible", "bite": "fangs", "steady": "balance", "wired": "wire-coil", "mother": "heart-beats", "beating": "heart-beats",
+    "estate": "castle", "bound": "chain", "quiet": "silenced", "rage": "enrage", "spring": "spring", "ink": "quill-ink",
+    "fletch": "feather", "pinfeather": "feather", "marksman": "crosshair", "thorn": "thorny-vine", "rampart": "stone-wall",
+    "moss": "vine-leaf", "haul": "wooden-crate", "grapple": "grapple", "crush": "fist", "spotter": "spyglass", "drover": "cow",
+    "twine": "rope-coil", "ward": "magic-shield", "duel": "crossed-swords", "tallow": "candle-flame", "almanac": "calendar",
+    "bandana": "abacus", "sled": "sled", "cleat": "spikes", "spike": "spikes", "zipline": "zipline", "lantern": "lantern-flame",
+    "horn": "hunting-horn", "puffer": "puffer-fish", "biker": "motorcycle", "board": "ticket",
+    "sun": "sun", "salt": "salt-shaker", "patch": "sewing-needle", "lobby": "door", "diadem": "crown",
+    "plank": "wood-beam", "lid": "cooking-pot", "manhole": "sewer", "pelt": "wolf-head", "cracked": "cracked-shield",
+    "frayed": "sewing-string", "knit": "sewing-needle", "rubber": "rubber-boot", "loop": "cycle",
+    "sandal": "sandal", "notes": "notebook", "field": "wheat", "boat": "sailboat", "locker": "padlock",
+}
+BADGES = ["sparkles", "star-swirl", "gem-chain", "crystal-growth", "lightning-bolt", "snowflake-1", "drop", "skull-crack",
+          "heart-beats", "sun", "moon", "feather", "claw-slashes", "eye-target", "crown", "fire", "leaf", "wolf-head", "spider-alt",
+          "raven", "anchor", "bell", "hourglass", "compass", "key", "padlock", "cog", "scroll-quill", "tooth", "spiral-shell"]
+
+
+def badge_choices(name, slug_key):
+    out = []
+    for w in re.sub(r"[^a-z ]", " ", name.lower()).split():
+        for frag in sorted((f for f in THEME if f in w), key=len, reverse=True):
+            k = slug_key.get(THEME[frag])
+            if k and k not in out:
+                out.append(k)
+    return out + [slug_key[b] for b in BADGES if b in slug_key and slug_key[b] not in out]
+
+
 def match(ents, overrides):
     idx = index_icons()
     by_slug = {k.split("/")[1]: k for k, _, _ in idx}
-    overrides = {i: by_slug.get(v, v) for i, v in overrides.items()}
+    overrides = {i: BADGE.join(by_slug.get(x, x) for x in v.split(BADGE)) for i, v in overrides.items()}  # "base+badge" allowed
     for v in overrides.values():
         if v == PLACEHOLDER:
             continue
-        assert (SRC / (v + ".svg")).exists(), "unknown icon " + v
+        for part in v.split(BADGE):
+            assert (SRC / (part + ".svg")).exists(), "unknown icon " + part
     used = collections.Counter()
     res = {}
-    for e in sorted(ents, key=lambda e: (-len(words(e["name"])), e["id"])):
+    items = [e for e in ents if e["kind"] == "item"]
+    for e in sorted((e for e in ents if e["kind"] != "item"), key=lambda e: (-len(words(e["name"])), e["id"])):
         if e["id"] in overrides:
             res[e["id"]] = overrides[e["id"]]
             used[overrides[e["id"]]] += 1
@@ -156,6 +207,45 @@ def match(ents, overrides):
         best = best or "lorc/magic-swirl"
         res[e["id"]] = best
         used[best] += 1
+    res.update(match_items(items, overrides, idx, by_slug))
+    return res
+
+
+def item_scores(e, idx):
+    ws = words(e["name"])
+    strong, syn = set(ws), set()
+    for w in ws:
+        syn.update(SYN.get(w, []))
+        if w.endswith("s"):
+            strong.add(w[:-1])
+    typ = set(TYPE_TOK.get(e["type"], []))
+    out = []
+    for key, toks, slug in idx:
+        if not (typ & toks) and not (e["type"] in ("material", "other", "spell_scroll") and (slug in strong or slug in syn)):
+            continue
+        s = 5 * len(strong & toks) + 3 * len(syn & toks) + 1.5 * len(typ & toks) + (4 if slug in strong else 0)
+        if s <= 0:
+            continue
+        s -= 0.3 * max(0, len(toks) - 2)
+        s += (h32(e["id"] + key) % 1000) / 4000
+        out.append((s, key))
+    return [k for _, k in sorted(out, reverse=True)]
+
+
+def match_items(items, overrides, idx, by_slug):
+    """Every item gets an icon no other item has: its hand pick or best glyph if still free, else the type's best glyph
+    with a badge from its name. Legendaries choose first, then Rare, Magic, Common."""
+    taken, res = set(), {}
+    for e in sorted(items, key=lambda e: (-e["rarity"], e["id"])):
+        ov = overrides.get(e["id"])
+        cands = ([ov] if ov and ov != PLACEHOLDER else []) + item_scores(e, idx)
+        key = next((k for k in cands if k not in taken), None)
+        if key is None:
+            base = cands[0] if cands else "lorc/magic-swirl"
+            key = next(base + BADGE + b for b in badge_choices(e["name"], by_slug) if b != base and base + BADGE + b not in taken)
+        taken.add(key)
+        res[e["id"]] = key
+    assert len(set(res.values())) == len(res), "two items share an icon"
     return res
 
 
@@ -205,13 +295,35 @@ def render_placeholder():
     return out
 
 
+BADGE = "+"  # mapping value "<base glyph>+<badge glyph>": the base with a small badge in a disc at the bottom right
+
+
 def glyph_mask(key, size):
     """White-on-black SVG -> L mask at size x size (luminance: some icons have black cut-outs)."""
     import resvg_py
     from PIL import Image
+    if BADGE in key:
+        return badge_mask(*key.split(BADGE), size)
     svg = (SRC / (key + ".svg")).read_text(encoding="utf8")
     png = bytes(resvg_py.svg_to_bytes(svg_string=svg, width=size, height=size))
     return Image.open(io.BytesIO(png)).convert("L")
+
+
+def badge_mask(base, badge, size):
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(glyph_mask(base, size), np.float32) / 255
+    bs = int(size * 0.58)
+    yy, xx = np.mgrid[0:bs, 0:bs]
+    r = np.hypot(yy - bs / 2, xx - bs / 2)
+    sub = a[size - bs:, size - bs:]
+    sub[r < bs / 2] = 0  # cut the base under the disc
+    sub[(r < bs / 2) & (r > bs / 2 - size / 64)] = 1  # ring
+    inner = int(bs * 0.18)
+    ts = bs - 2 * inner
+    t = np.asarray(glyph_mask(badge, ts), np.float32) / 255
+    sub[inner:inner + ts, inner:inner + ts] = np.maximum(sub[inner:inner + ts, inner:inner + ts], t)
+    return Image.fromarray((np.clip(a, 0, 1) * 255).astype(np.uint8))
 
 
 def render_one(e, key):
@@ -306,6 +418,12 @@ def main():
     overrides = json.load(open(ov, encoding="utf8")) if ov.exists() else {}
     if a.cmd == "match":
         m = match(ents, overrides)
+        # Perks, spells and sets keep the icon they already have unless overridden: item changes must not reshuffle them.
+        mp = HERE / "mapping.json"
+        old = json.load(open(mp, encoding="utf8")) if mp.exists() else {}
+        for e in ents:
+            if e["kind"] != "item" and e["id"] in old and e["id"] not in overrides:
+                m[e["id"]] = old[e["id"]]
         json.dump(dict(sorted(m.items())), open(HERE / "mapping.json", "w", encoding="utf8"), indent=1)
         print(len(m), "mapped,", len(set(m.values())), "distinct icons")
         return

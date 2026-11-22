@@ -11,12 +11,12 @@ AI generation (local ComfyUI, Z-Image Turbo) was dropped. Icons are recolored **
 (keep it with the icons; the mod must show "Icons made by ... from game-icons.net" somewhere, e.g. a credits screen).
 
 - `mapping.json`: entry id -> `author/icon` (generated, committed).
-- No emblem overlays: each entry shows the single glyph that best depicts it. Items of one type may share a glyph (they differ by rarity colour/glow); perks are spread over many glyphs.
+- No two items share an icon (COS-162; `match` asserts it). Each item takes its hand pick or best glyph while it is still free (Legendaries choose first, then Rare, Magic, Common); when its type has none left it gets the type's glyph with a small badge from its name in a disc at the bottom right (`THEME` in `generate_icons.py`; mapping value `<base>+<badge>`, also allowed in `overrides.json`). Perks, spells and sets keep the icon already in `mapping.json` unless overridden, and are spread over many glyphs.
 - `placeholders.md`: entries using the magenta "missing art" icon (none right now) and the weakest matches.
 - `overrides.json`: hand picks (`id -> icon slug`), win over the automatic match. Edit this to fix a bad icon.
 - Matching: keywords from the entry name and type (e.g. a weapon must match a weapon icon), synonyms, a penalty for reusing
   an icon, deterministic tie-break. Items must match their type. A few icons are banned (`BANNED`).
-- Look: white glyph -> vertical gradient in the rarity color (Common grey, Magic blue, Rare yellow, Legendary orange: the colours of the old tiers they mostly came from),
+- Look: white glyph -> vertical gradient in the rarity color (Common grey, Magic blue, Rare yellow, Legendary red, the mod's UI colours),
   dark outline, glow growing with rarity. Perks/spells/sets get a category color and a dark disc.
   Rendered at 512 px, downscaled to 128, palette-quantized (256 colors) to keep the files small.
 
