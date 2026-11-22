@@ -171,7 +171,7 @@ public sealed class LootFeature : IModFeature
     internal static Vector3 SnapToGround(Vector3 pos)
     {
         // The lowest surface just around pos: the first hit from above can be a player or corpse collider.
-        var hits = Physics.RaycastAll(pos + Vector3.up * 2f, Vector3.down, 6f);
+        var hits = Physics.RaycastAll(pos + Vector3.up * 2f, Vector3.down, 6f, ~0, QueryTriggerInteraction.Ignore);
         bool found = false;
         float y = 0;
         foreach (var h in hits)

@@ -68,7 +68,7 @@ internal static class GlowSelfTest
                 && Count(skin.Model, "cots-glow-light") == 1 && Count(skin.Model, "cots-glow-wisp") == 1, Describe(skin));
         });
         SelfTest.Add(t + 1.3f, "glow: unique screenshot", () => TestKit.Screenshot("glow-unique"));
-        SelfTest.Add(t + 2f, "glow: unique swing", () => WeaponModels.Base?.AttackButtonDown());
+        SelfTest.Add(t + 2f, "glow: unique swing", () => TestKit.TapAttack());
         SelfTest.Add(t + 2.3f, "glow: unique swing screenshot", () => TestKit.Screenshot("glow-unique-swing"));
         SelfTest.Add(t + 2.8f, "glow: hit target", () => _target = TestKit.Spawn(distance: 4f));
         SelfTest.Add(t + 3f, "glow: hit sparks", () =>

@@ -170,6 +170,45 @@ public static class TestKit
         return item;
     }
 
+    private static int _releaseAtFrame = -1;
+
+    /// <summary>
+    /// A tap of the attack button: the mouse's left button down now and up a few frames later, through the game's own
+    /// input. Holding it charges an attack and calling the controller's AttackButtonDown alone never lets go, so neither
+    /// starts a plain swing (COS-158).
+    /// </summary>
+    public static void TapAttack()
+    {
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse == null) { SelfTest.Log("tap attack: no mouse"); return; }
+        MouseButton(mouse, true);
+        _releaseAtFrame = Time.frameCount + 3;
+    }
+
+    /// <summary>Per frame while self-tests run: releases a tapped button.</summary>
+    public static void Tick()
+    {
+        if (_releaseAtFrame < 0 || Time.frameCount < _releaseAtFrame) return;
+        _releaseAtFrame = -1;
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse != null) MouseButton(mouse, false);
+    }
+
+    private static void MouseButton(UnityEngine.InputSystem.Mouse mouse, bool down)
+    {
+        try
+        {
+            var buffer = UnityEngine.InputSystem.LowLevel.StateEvent.From(mouse, out var ev, Unity.Collections.Allocator.Temp);
+            UnityEngine.InputSystem.InputControlExtensions.WriteValueIntoEvent(mouse.leftButton, down ? 1f : 0f, ev);
+            UnityEngine.InputSystem.InputSystem.QueueEvent(ev);
+            buffer.Dispose();
+        }
+        catch (Exception e)
+        {
+            SelfTest.Log("tap attack: mouse event failed " + e.Message);
+        }
+    }
+
     /// <summary>Saves a screenshot to %TEMP%\cots-ui\<name>.png and logs the path. Null if capture failed.</summary>
     public static string? Screenshot(string name)
     {

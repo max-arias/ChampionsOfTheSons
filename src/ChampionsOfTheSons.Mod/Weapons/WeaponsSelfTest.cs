@@ -230,13 +230,13 @@ internal static class WeaponsSelfTest
     private static void Attack()
     {
         _swingsBefore = WeaponModels.LocalSkin?.Swings ?? 0;
-        WeaponModels.Base?.AttackButtonDown();
+        TestKit.TapAttack();
     }
 
     /// <summary>The game drops an attack pressed while it is still busy (just after an equip): press once more.</summary>
     private static void RetryAttack()
     {
-        if ((WeaponModels.LocalSkin?.Swings ?? 0) == _swingsBefore) WeaponModels.Base?.AttackButtonDown();
+        if ((WeaponModels.LocalSkin?.Swings ?? 0) == _swingsBefore) TestKit.TapAttack();
     }
 
     private static void CheckSwingFx(string typeId)

@@ -63,6 +63,8 @@ internal static class FlickerRun
         {
             var t = hit.transform;
             if (t == null) continue;
+            // Trigger volumes (zones, interaction areas) are not walls: standing in one hid every enemy (2026-11-22).
+            if (hit.collider != null && hit.collider.isTrigger) continue;
             if (LocalPlayer.Transform != null && t.IsChildOf(LocalPlayer.Transform)) continue;
             if (t.GetComponentInParent<Sons.Ai.Vail.VailActor>() != null) continue; // an enemy's body (this one or another)
             if (hit.distance >= dist - 1f) return true; // something right at the enemy
@@ -179,7 +181,7 @@ internal static class FlickerRun
 
     private static Vector3 Ground(Vector3 at)
     {
-        foreach (var h in Physics.RaycastAll(at + Vector3.up * 3f, Vector3.down, 8f).OrderBy(h => h.distance))
+        foreach (var h in Physics.RaycastAll(at + Vector3.up * 3f, Vector3.down, 8f, ~0, QueryTriggerInteraction.Ignore).OrderBy(h => h.distance))
         {
             if (h.transform != null && LocalPlayer.Transform != null && h.transform.IsChildOf(LocalPlayer.Transform)) continue;
             if (EnemyRegistry.Live.Any(e => e.Actor != null && h.transform.IsChildOf(e.Actor.transform))) continue;

@@ -93,6 +93,7 @@ public static class SelfTest
     {
         if (Enabled) KeepAlive();
         if (!Enabled) return;
+        TestKit.Tick();
         if (Time.realtimeSinceStartup - LaunchTime > Timeout)
         {
             Log($"TIMEOUT after {Timeout}s (player in world: {LocalPlayer.IsInWorld})");

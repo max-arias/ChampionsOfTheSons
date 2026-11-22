@@ -105,7 +105,7 @@ public sealed class ItemSweepFeature : IModFeature
         var ranged = player.GetComponentInChildren<RangedWeapon>(false);
         if (ranged != null && inv.IsRightHandHolding(id)) { Try(id, "shoot", () => ranged.Shoot()); return; }
         var melee = player.GetComponentInChildren<MeleeWeaponController>(false);
-        if (melee != null && inv.IsRightHandHolding(id)) { Try(id, "swing", () => melee.AttackButtonDown()); return; }
+        if (melee != null && inv.IsRightHandHolding(id)) { Try(id, "swing", TestKit.TapAttack); return; }
         if (inv.HasInAnySlot(id)) return; // worn or held with no attack
         Try(id, "consume", () =>
         {
