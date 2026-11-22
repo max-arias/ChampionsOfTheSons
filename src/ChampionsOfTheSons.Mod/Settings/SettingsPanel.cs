@@ -240,7 +240,7 @@ internal sealed class SettingsPanel : ModalPanel
             var parts = new List<string>();
             var mod = ModKeys.ModClashes(id);
             if (mod.Count > 0) parts.Add(string.Format(UiText.T("ui.settings.clash_mod", "Also used by {0}"), string.Join(", ", mod.Select(ModKeys.Label))));
-            var game = ModKeys.GameClashes(value, id);
+            var game = ModKeys.GameClashes(value);
             if (game.Count > 0) parts.Add(string.Format(UiText.T("ui.settings.clash_game", "Game key: {0}"), string.Join(", ", game.Take(3))));
             row.Warning.Text(string.Join("  ", parts));
         }

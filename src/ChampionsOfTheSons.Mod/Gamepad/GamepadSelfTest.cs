@@ -14,20 +14,9 @@ internal static class GamepadSelfTest
         SelfTest.PhaseReset += CloseAll;
         float t = 0;
         SelfTest.Add(t += 0.2f, "pad: unpause", TestKit.Unpause);
-        SelfTest.Add(t += 0.5f, "pad: binding opens the book", () =>
+        SelfTest.Add(t += 0.5f, "pad: binding opens the perk tree", () =>
         {
-            SelfTest.Check("pad: panels closed to start", GamepadFeature.OpenPanel == null && !Book.BookHost.ModPageActive);
-            PadInput.Inject(PadButton.LeftShoulder, PadButton.DpadUp);
-        });
-        SelfTest.Add(t += 2.5f, "pad: book open", () =>
-        {
-            SelfTest.Check("pad: LeftShoulder+DpadUp opened the guide book on Gear", Book.BookHost.ModPageActive && Book.BookHost.Tab == Book.BookTab.Gear,
-                $"open {Book.BookHost.IsOpen}, tab {Book.BookHost.Tab}, last failure '{Book.BookHost.LastFailure}'");
-            Book.BookHost.Close();
-        });
-        SelfTest.Add(t += 1.5f, "pad: wait for the player to be controllable again", () =>
-        {
-            SelfTest.Log($"pad: controllable now = {HostRules.WorldRulesFeature.PlayerControllable}");
+            SelfTest.Check("pad: panels closed to start", GamepadFeature.OpenPanel == null);
             PadInput.Inject(PadButton.LeftShoulder, PadButton.DpadRight);
         });
 

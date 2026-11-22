@@ -33,7 +33,7 @@ internal static class BookSelfTest
         SelfTest.Add(5f, "book: drops are gear", CheckDrops);
         for (int i = 0; i < 14; i++) SelfTest.Add(5.5f + i * 0.35f, "book: walk over drops", WalkToNextDrop);
         SelfTest.Add(10.6f, "book: picked up", CheckPickedUp);
-        SelfTest.Add(11f, "book: open with the inventory key", () => CotsUi.ToggleInventory());
+        SelfTest.Add(11f, "book: open on Gear", () => BookHost.Open(BookTab.Gear));
         SelfTest.Add(14f, "book: gear tab", GearTab);
         SelfTest.Add(14.2f, "book: shot gear", () => TestKit.Screenshot("book-gear"));
         SelfTest.Add(14.5f, "book: bag tab", BagTab);
@@ -105,7 +105,7 @@ internal static class BookSelfTest
 
     private static void SetCursor(Vector2 screen)
     {
-        if (BookHost.Book != null) BookHost.Book._mouseScreenPosition = screen;
+        BookHost.CursorScreen = screen;
     }
 
     // COS-131: our tab slides out on its own hover only, with the game's slide animation, and the hover of the game's
@@ -194,7 +194,7 @@ internal static class BookSelfTest
 
     private static void GearTab()
     {
-        SelfTest.Check("book: the inventory key opened the book on Gear", BookHost.IsOpen && BookHost.Tab == BookTab.Gear, $"open {BookHost.IsOpen}, tab {BookHost.Tab}");
+        SelfTest.Check("book: the book opened on Gear", BookHost.IsOpen && BookHost.Tab == BookTab.Gear, $"open {BookHost.IsOpen}, tab {BookHost.Tab}");
         SelfTest.Check("book: our tab was added", BookTabs.Tabs.Count == 1, BookTabs.Tabs.Count.ToString());
         SelfTest.Check("book: the game's page actions are blocked", BookPatches.Block);
     }
@@ -233,7 +233,7 @@ internal static class BookSelfTest
         if (book == null) { SelfTest.Check("book: held", false); return; }
         var center = new Vector2(slot.X + slot.Size / 2, slot.Y + slot.Size / 2);
         var screen = BookHost.ScreenOfPagePx(center);
-        book._mouseScreenPosition = screen;
+        BookHost.CursorScreen = screen;
         bool on = BookHost.CursorOnPage(out var px);
         var hit = on ? BookPages.HitAt(px) : null;
         SelfTest.Check("book: a cursor over a slot hits that slot", hit == slot.Key, $"screen {screen} -> page {px} -> {hit ?? "nothing"}, wanted {slot.Key}");
@@ -245,7 +245,7 @@ internal static class BookSelfTest
         string r = BookPages.Click(BookTab.Bag, Inventory.Bag(0), right: false);
         SelfTest.Check("book: clicking a bag item selects it", r == "select" && BookPages.Selected == Inventory.Bag(0), r);
         // Park the cursor off the page so the card shows the selection, not a hover.
-        if (BookHost.Book != null) BookHost.Book._mouseScreenPosition = new Vector2(5, 5);
+        BookHost.CursorScreen = new Vector2(5, 5);
     }
 
     private static void CardPinned()

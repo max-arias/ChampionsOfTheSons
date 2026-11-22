@@ -26,11 +26,17 @@ internal static class BookHost
 {
     /// <summary>The game's "BlueprintBook" item (the building guide book).</summary>
     public const int GuideBookId = 552;
+    /// <summary>The game's "TutorialBook" item: a new world's starting package holds it, B raises it, and the blueprint book
+    /// switches to it (2026-11-22). Our tab and pages go on both books.</summary>
+    public const int TutorialBookId = 589;
     /// <summary>The part of the page texture the page mesh shows (COS-62 ruler).</summary>
     private static readonly Rect PageUv = Rect.MinMaxRect(0f, 0f, 0.65f, 1f);
     private const string TexProp = "_BaseColorMap";
 
-    private static BlueprintBookController? _book;
+    /// <summary>The book our pages are on: the player's blueprint book or tutorial book, whichever is up.</summary>
+    private static HeldControllerBase? _book;
+    private static BlueprintBookController? _blueprint;
+    private static TutorialBookController? _tutorial;
     private static Material? _pageMat;
     private static Texture? _gameTexture;
     private static Renderer? _pageRenderer;
@@ -51,7 +57,33 @@ internal static class BookHost
 
     public static bool ModPageActive => Tab != BookTab.None;
 
-    public static BlueprintBookController? Book => _book != null && _book.gameObject != null && _book.gameObject.activeInHierarchy ? _book : null;
+    public static HeldControllerBase? Book => Up(_book) ? _book : null;
+
+    private static bool Up(HeldControllerBase? b) => b != null && b.gameObject != null && b.gameObject.activeInHierarchy;
+
+    private static bool OnTutorial => _book != null && _tutorial != null && _book.Pointer == _tutorial.Pointer;
+
+    /// <summary>The book's virtual cursor in screen pixels (moves with mouse and pad); settable for self-tests.</summary>
+    public static Vector2 CursorScreen
+    {
+        get => Book == null ? Vector2.zero : OnTutorial ? _tutorial!._mouseScreenPosition : _blueprint!._mouseScreenPosition;
+        set
+        {
+            if (Book == null) return;
+            if (OnTutorial) _tutorial!._mouseScreenPosition = value; else _blueprint!._mouseScreenPosition = value;
+        }
+    }
+
+    private static Material? BookPageMaterial => OnTutorial ? _tutorial!._pageMaterial : _blueprint?._pageMaterial;
+
+    private static string? BookPageRendererName => OnTutorial ? _tutorial!._pageRendererName : _blueprint?._pageRendererName;
+
+    /// <summary>The game's own tabs on the book that is up.</summary>
+    internal static Il2CppSystem.Collections.Generic.List<Sons.Crafting.HeldBookInteraction>? GameTabs =>
+        Book == null ? null : OnTutorial ? _tutorial!._tabs : _blueprint?._tabs;
+
+    /// <summary>Which game book is up (for logs and self-tests).</summary>
+    public static string Which => Book == null ? "none" : OnTutorial ? "tutorial" : "blueprint";
 
     public static bool IsOpen => Book != null;
 
@@ -91,10 +123,11 @@ internal static class BookHost
         var inv = LocalPlayer.Inventory;
         if (inv == null) return Fail("no player inventory yet");
         if (Book != null) { ShowModPage(tab); return true; }
-        if (inv.AmountOf(GuideBookId, false, false) == 0) return Fail("the player has no guide book");
+        int id = inv.AmountOf(GuideBookId, false, false) > 0 ? GuideBookId : inv.AmountOf(TutorialBookId, false, false) > 0 ? TutorialBookId : 0;
+        if (id == 0) return Fail("the player has no guide book");
         _pending = tab;
         _pendingSince = Time.realtimeSinceStartup;
-        if (!inv.TryEquip(GuideBookId, false, true, false)) { _pending = BookTab.None; return Fail("the game refused to equip the guide book"); }
+        if (!inv.TryEquip(id, false, true, false)) { _pending = BookTab.None; return Fail("the game refused to equip the guide book"); }
         LastFailure = "";
         return true;
     }
@@ -108,17 +141,27 @@ internal static class BookHost
     /// <summary>Per frame: follows the held book, opens a pending tab once the book is up, keeps our texture on.</summary>
     public static void Tick()
     {
-        if (_book == null || _book.gameObject == null)
+        if (_blueprint == null || _blueprint.gameObject == null) _blueprint = null;
+        if (_tutorial == null || _tutorial.gameObject == null) _tutorial = null;
+        if (_book == null || _book.gameObject == null) _book = null;
+        // The player's own (possibly stowed) books, found once; the scene-wide search only while a tab is waiting to open
+        // (COS-132: a scene search every 15 frames cost ~65 ms each while the book was put away).
+        if ((_blueprint == null || _tutorial == null) && (_pending != BookTab.None || Time.frameCount % 15 == 0))
         {
-            _book = null;
-            // The player's own (possibly stowed) book, found once; the scene-wide search only while a tab is waiting to open
-            // (COS-132: a scene search every 15 frames cost ~65 ms each while the book was put away).
-            if (_pending != BookTab.None || Time.frameCount % 15 == 0)
+            var t = LocalPlayer.Transform;
+            if (_blueprint == null && t != null) _blueprint = t.GetComponentInChildren<BlueprintBookController>(true);
+            if (_tutorial == null && t != null) _tutorial = t.GetComponentInChildren<TutorialBookController>(true);
+            if (_pending != BookTab.None)
             {
-                var book = LocalPlayer.Transform != null ? LocalPlayer.Transform.GetComponentInChildren<BlueprintBookController>(true) : null;
-                if (book == null && _pending != BookTab.None) book = UnityEngine.Object.FindObjectOfType<BlueprintBookController>();
-                Attach(book);
+                if (_blueprint == null) _blueprint = UnityEngine.Object.FindObjectOfType<BlueprintBookController>();
+                if (_tutorial == null) _tutorial = UnityEngine.Object.FindObjectOfType<TutorialBookController>();
             }
+        }
+        // Follow whichever book is up: B raises one of them and the books switch to each other in hand.
+        if (!Up(_book))
+        {
+            if (Up(_blueprint)) Attach(_blueprint);
+            else if (Up(_tutorial)) Attach(_tutorial);
         }
         if (Book == null)
         {
@@ -143,26 +186,31 @@ internal static class BookHost
         if (ModPageActive && _pageMat != null && _rt != null && _pageMat.GetTexture(TexProp) != _rt) _pageMat.SetTexture(TexProp, _rt);
     }
 
-    private static void Attach(BlueprintBookController? book)
+    private static void Attach(HeldControllerBase? book)
     {
-        if (book == null || book == _book) return;
+        if (book == null || (_book != null && book.Pointer == _book.Pointer)) return;
+        if (Tab != BookTab.None) ShowGamePage(); // gives the old book its page texture and texts back
         _book = book;
         _ready = false;
+        _pageMat = null;
+        _gameTexture = null;
+        _pageRenderer = null;
         Tab = BookTab.None;
+        BookPatches.Block = false;
     }
 
     /// <summary>Once the book is up in the hand: its page material, page axes and our tabs (they need the final pose).</summary>
     private static void Setup()
     {
         if (_book == null) return;
-        _pageMat ??= _book._pageMaterial;
-        string pageName = string.IsNullOrEmpty(_book._pageRendererName) ? "Page" : _book._pageRendererName;
+        _pageMat ??= BookPageMaterial;
+        string pageName = string.IsNullOrEmpty(BookPageRendererName) ? "Page" : BookPageRendererName!;
         _pageRenderer = _book.GetComponentsInChildren<Renderer>(true).FirstOrDefault(r => r.gameObject.name == pageName);
         if (_pageRenderer == null) return; // the book builds its meshes a frame or two after it is enabled
         _ready = true;
         PageAxes();
         BookTabs.Attach(_book, PageUpWorld);
-        LogState($"set up: page material {(_pageMat != null)}, page renderer {(_pageRenderer != null)}, tabs {BookTabs.Tabs.Count}");
+        LogState($"set up on the {Which} book: page material {(_pageMat != null)}, page renderer {(_pageRenderer != null)}, tabs {BookTabs.Tabs.Count}");
     }
 
     // ------------------------------------------------------------------ pages
@@ -171,7 +219,7 @@ internal static class BookHost
     {
         if (Book == null) return;
         if (!_ready) Setup();
-        if (_pageMat == null) _pageMat = _book!._pageMaterial;
+        if (_pageMat == null) _pageMat = BookPageMaterial;
         if (_pageMat == null) { _pending = tab; _pendingSince = Time.realtimeSinceStartup; return; }
         EnsureRig();
         if (Tab == BookTab.None)
@@ -281,9 +329,6 @@ internal static class BookHost
     }
 
     public static Vector3 PageUpWorld => _pageRenderer != null ? _pageRenderer.transform.TransformDirection(Vector3.up) * _vSign : Vector3.up;
-
-    /// <summary>The book's virtual cursor in screen pixels (moves with mouse and pad).</summary>
-    public static Vector2 CursorScreen => Book != null ? Book._mouseScreenPosition : Vector2.zero;
 
     /// <summary>The cursor as page pixels (origin top-left), by intersecting the camera ray with the page plane.</summary>
     public static bool CursorOnPage(out Vector2 px) => CursorOnPage(CursorScreen, out px);

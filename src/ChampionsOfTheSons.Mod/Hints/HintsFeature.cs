@@ -77,11 +77,13 @@ public sealed class HintsFeature : IModFeature
     public static string Text(string id)
     {
         static string Key(string keyId) => KeyNames.Short(ModKeys.Value(keyId));
+        // The guide book opens with the game's own key (no mod inventory key since 2026-11-21).
+        static string BookKey() => KeyNames.Short(ModKeys.GameKeyOf("Book", "b"));
         return id switch
         {
-            "welcome" => string.Format(UiText.T("ui.hints.welcome", "Enemies now have levels and drop gear. Your character and bag are in the guide book ({0}); the Help tab explains the rest."), Key("inventory_key")),
+            "welcome" => string.Format(UiText.T("ui.hints.welcome", "Enemies now have levels and drop gear. Your character and bag are in the guide book ({0}); the Help tab explains the rest."), BookKey()),
             "perk_points" => string.Format(UiText.T("ui.hints.perk_points", "You have perk points to spend. Open the perk tree with {0}."), Key("perks_key")),
-            "first_loot" => string.Format(UiText.T("ui.hints.first_loot", "You picked up gear. Open your bag with {0} and equip it to raise your stats."), Key("inventory_key")),
+            "first_loot" => string.Format(UiText.T("ui.hints.first_loot", "You picked up gear. Open your bag with {0} and equip it to raise your stats."), BookKey()),
             "spell_unlocked" => string.Format(UiText.T("ui.hints.spell_unlocked", "You unlocked a spell. Put it in a slot in the perk tree ({0}) and cast it with {1}."), Key("perks_key"), Key("spell_slot_1")),
             "no_spell" => string.Format(UiText.T("ui.hints.no_spell", "Spells unlock with perks. Look for them in the perk tree ({0})."), Key("perks_key")),
             "merge" => UiText.T("ui.hints.merge", "You have enough items of one rarity to merge them into a better one. See the Merge row on the Gear page."),

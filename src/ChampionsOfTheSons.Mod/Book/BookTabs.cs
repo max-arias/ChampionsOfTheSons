@@ -51,14 +51,15 @@ internal static class BookTabs
     /// <summary>The tab the cursor was over on the last <see cref="Tick"/> (None if none).</summary>
     public static BookTab Hovered { get; private set; }
 
-    public static void Attach(BlueprintBookController book, Vector3 pageUp)
+    /// <summary>Puts our tab on a game book, or picks up the one already there (the player switches between the two books).</summary>
+    public static void Attach(HeldControllerBase book, Vector3 pageUp)
     {
         Made.Clear();
         Faces.Clear();
         Hovered = BookTab.None;
         try
         {
-            var tabs = book.GetComponentsInChildren<Renderer>(false).Where(r => r.gameObject.name == "TactiPadTab").ToList();
+            var tabs = book.GetComponentsInChildren<Renderer>(false).Where(r => r.gameObject.name == "TactiPadTab" && !IsOurs(r.transform)).ToList();
             if (Camera.main == null || tabs.Count < 2) { RLog.Warning($"Champions of the Sons book: {tabs.Count} game tabs, no tabs added"); return; }
             // Lowest tab along the page's own up axis, so the book's pose (still raising or not) does not matter.
             tabs = tabs.OrderBy(r => Vector3.Dot(r.bounds.center, pageUp)).ToList();
@@ -80,12 +81,18 @@ internal static class BookTabs
             for (int i = 0; i < Defs.Length; i++)
             {
                 var d = Defs[i];
-                var go = UnityEngine.Object.Instantiate(lowest.gameObject, holder.transform, false);
-                go.name = "CotsTab-" + d.Tab;
-                StripGameInteraction(go.transform);
+                var existing = column.Find("CotsTab-" + d.Tab);
+                var go = existing != null ? existing.gameObject : UnityEngine.Object.Instantiate(lowest.gameObject, holder.transform, false);
                 var face = go.GetComponentsInChildren<Renderer>(true).FirstOrDefault(r => r.gameObject.name == "TactiPadTab");
-                if (face == null) { UnityEngine.Object.Destroy(go); continue; }
-                Paint(face, d);
+                if (existing == null)
+                {
+                    go.name = "CotsTab-" + d.Tab;
+                    StripGameInteraction(go.transform);
+                    face = go.GetComponentsInChildren<Renderer>(true).FirstOrDefault(r => r.gameObject.name == "TactiPadTab");
+                    if (face == null) { UnityEngine.Object.Destroy(go); continue; }
+                    Paint(face, d);
+                }
+                if (face == null) continue;
                 go.transform.SetParent(column, false);
                 var le = go.GetComponent<LayoutElement>();
                 if (le == null) le = go.AddComponent<LayoutElement>();
@@ -106,6 +113,13 @@ internal static class BookTabs
         {
             RLog.Error($"Champions of the Sons book: adding tabs failed: {e}");
         }
+    }
+
+    private static bool IsOurs(Transform t)
+    {
+        for (; t != null; t = t.parent)
+            if (t.gameObject.name.StartsWith("CotsTab-", StringComparison.Ordinal)) return true;
+        return false;
     }
 
     /// <summary>The root tab (directly in the tab column) that holds a tab mesh: its topmost ancestor with a <see cref="HeldBookInteraction"/>.</summary>
@@ -241,8 +255,12 @@ internal static class BookTabs
     public static bool IsGameTab(HeldBookInteraction hbi)
     {
         var go = hbi.gameObject;
-        if (go.name.StartsWith("CotsTab-", StringComparison.Ordinal)) return false;
+        if (IsOurs(go.transform)) return false;
         if (go.name == "TactiPadTab") return true;
+        var gameTabs = BookHost.GameTabs;
+        if (gameTabs != null)
+            foreach (var t in gameTabs)
+                if (t != null && t.Pointer == hbi.Pointer) return true;
         foreach (var r in go.GetComponentsInChildren<Renderer>(true))
             if (r.gameObject.name == "TactiPadTab") return true;
         return false;

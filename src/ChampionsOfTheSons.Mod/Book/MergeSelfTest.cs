@@ -35,7 +35,7 @@ internal static class MergeSelfTest
     public static void Register()
     {
         SelfTest.Add(0.5f, "merge: setup", Setup);
-        SelfTest.Add(1f, "merge: open the book", () => CotsUi.ToggleInventory());
+        SelfTest.Add(1f, "merge: open the book", () => BookHost.Open(BookTab.Gear));
         SelfTest.Add(4f, "merge: start mode", StartMode);
         SelfTest.Add(4.3f, "merge: shot merge mode", () => TestKit.Screenshot("merge-mode"));
         SelfTest.Add(4.6f, "merge: pick and merge", PickAndMerge);

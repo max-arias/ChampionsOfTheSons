@@ -24,7 +24,8 @@ Multiplayer
 - Dedicated server: put the same files into the server's Mods folder.
 
 Keys (change them in the RedLoader mod settings, file ChampionsOfTheSons.cfg)
-  I  inventory and character      U  perk tree        K  draw weapon
+  B  guide book (the game's key): the Champions tab holds gear, bag, character and help
+  U  perk tree                    K  draw weapon
   O  host settings (extra levels) H  ping             Alt+1 to Alt+6  spell slots 1-6
   F10  mod settings (rebind any key here)
   Gamepad: LB + D-pad opens the panels.

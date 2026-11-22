@@ -25,7 +25,6 @@ public static class Config
 
     public static ConfigCategory Category { get; private set; } = null!;
 
-    public static KeybindConfigEntry InventoryKey { get; private set; } = null!;
     public static KeybindConfigEntry PerksKey { get; private set; } = null!;
     public static KeybindConfigEntry SettingsKey { get; private set; } = null!;
     public static KeybindConfigEntry WeaponKey { get; private set; } = null!;
@@ -53,9 +52,8 @@ public static class Config
     {
         Category = ConfigSystem.CreateFileCategory("ChampionsOfTheSons", "Champions of the Sons", "ChampionsOfTheSons.cfg");
 
-        InventoryKey = Category.CreateKeybindEntry("inventory_key", "i", "Inventory", "Open the Champions inventory.");
-        InventoryKey.SetScope(needsPlayerControllable: true);
-
+        // No inventory key: the game's own book key (B) opens the guide book, and the mod's pages are its tab. A mod key on I
+        // stopped the game's inventory from opening (2026-11-21).
         PerksKey = Category.CreateKeybindEntry("perks_key", PerksDefault, "Perks", "Open the perk tree.");
         PerksKey.SetScope(needsPlayerControllable: true);
 

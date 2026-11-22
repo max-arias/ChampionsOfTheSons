@@ -42,7 +42,6 @@ public sealed class BookFeature : IModFeature
             CancelDrag();
             return;
         }
-        if (BookHost.ModPageActive && Settings.ModKeys.PressedThisFrame(Config.InventoryKey)) { BookHost.Close(); return; }
         Handle(BookInput.FromDevices(Mouse.current, Gamepad.current, BookHost.CursorScreen));
     }
 

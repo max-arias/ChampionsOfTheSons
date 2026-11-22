@@ -53,7 +53,6 @@ internal sealed class GamepadFeature : IModFeature
         var cat = Config.Category;
         var defaults = new (string Name, string Binding, string Title)[]
         {
-            ("inventory", "LeftShoulder+DpadUp", "Inventory"),
             ("perks", "LeftShoulder+DpadRight", "Perks"),
             ("host_settings", "LeftShoulder+DpadLeft", "Host settings"),
             ("settings", "LeftShoulder+Select", "Mod settings"),
@@ -68,8 +67,6 @@ internal sealed class GamepadFeature : IModFeature
 
         _panels = new List<PadPanel>
         {
-            // The inventory is the guide book, which reads the pad itself (BookInput.Pad): this entry only opens it.
-            new("inventory", () => false, () => CotsUi.ToggleInventory(), () => { }, () => null),
             new("perks", () => PerksFeature.Panel.IsOpen, () => PerksFeature.Panel.Toggle(), () => PerksFeature.Panel.Close(), () => PerksFeature.Panel.PadRoot),
             new("host_settings", () => WorldRulesFeature.Settings.IsOpen, () => { if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close(); else WorldRulesFeature.Settings.Open(); }, () => WorldRulesFeature.Settings.Close(),
                 () => WorldRulesFeature.Settings.PadRoot),

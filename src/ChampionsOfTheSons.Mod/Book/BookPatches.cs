@@ -25,9 +25,20 @@ internal static class BookPatches
         nameof(BlueprintBookController.SwapPageTexture), nameof(BlueprintBookController.UpdatePageObjects),
     };
 
+    /// <summary>The tutorial book's page actions (it has no blueprints to pick; OnActivateSCREW is its switch to the other book).</summary>
+    private static readonly string[] TutorialPageActions =
+    {
+        nameof(TutorialBookController.OnCycleForward), nameof(TutorialBookController.OnCycleBackward),
+        nameof(TutorialBookController.FlipPageForward), nameof(TutorialBookController.FlipPageBackward),
+        nameof(TutorialBookController.JumpToCategory), nameof(TutorialBookController.OnActivateSCREW),
+        nameof(TutorialBookController.SwapPageTexture),
+    };
+
+    private const BindingFlags Declared = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
     private static IEnumerable<MethodBase> TargetMethods() =>
-        typeof(BlueprintBookController).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
-            .Where(m => PageActions.Contains(m.Name));
+        typeof(BlueprintBookController).GetMethods(Declared).Where(m => PageActions.Contains(m.Name))
+            .Concat(typeof(TutorialBookController).GetMethods(Declared).Where(m => TutorialPageActions.Contains(m.Name)));
 
     private static bool Prefix()
     {
@@ -38,9 +49,15 @@ internal static class BookPatches
 }
 
 /// <summary>Layout clicks: a game tab while our page shows gives the page back to the game; anything else is skipped.</summary>
-[HarmonyPatch(typeof(BlueprintBookController), nameof(BlueprintBookController.OnInteractWithLayout))]
+[HarmonyPatch]
 internal static class BookInteractPatch
 {
+    private static IEnumerable<MethodBase> TargetMethods() => new MethodBase[]
+    {
+        AccessTools.Method(typeof(BlueprintBookController), nameof(BlueprintBookController.OnInteractWithLayout)),
+        AccessTools.Method(typeof(TutorialBookController), nameof(TutorialBookController.OnInteractWithLayout)),
+    };
+
     private static bool Prefix(HeldBookInteraction heldBookInteraction)
     {
         if (!BookPatches.Block) return true;

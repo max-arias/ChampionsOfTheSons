@@ -51,7 +51,6 @@ internal static class ModKeys
     {
         var list = new List<ModKey>
         {
-            new("inventory_key", "ui.settings.key.inventory", "Inventory"),
             new("perks_key", "ui.settings.key.perks", "Perks"),
             new("ping_key", "ui.settings.key.ping", "Ping"),
             new("host_settings_key", "ui.settings.key.host_settings", "Host settings"),
@@ -196,18 +195,6 @@ internal static class ModKeys
     /// The game actions that also fire on <paramref name="key"/>. A combo clashes with the game's own combo and with a plain game binding
     /// on its base key (the game ignores modifiers), except the item hotkeys, which <see cref="Tick"/> holds back while a combo is down.
     /// </summary>
-    public static IReadOnlyList<string> GameClashes(string key, string? modKeyId) =>
-        modKeyId != null && IntendedOverlaps.TryGetValue(modKeyId, out var ok) && string.Equals(KeyCombo.Parse(key).ToString(), ok, StringComparison.OrdinalIgnoreCase)
-            ? Array.Empty<string>()
-            : GameClashes(key);
-
-    /// <summary>Mod keys that share a game key on purpose, so the settings do not warn about it. COS-115 (Max 2026-11-20): I opens the
-    /// game's inventory and guide book (the game's Open Inventory, Inventory and Open Quick Select on I), and the mod's page with it.</summary>
-    private static readonly Dictionary<string, string> IntendedOverlaps = new(StringComparer.Ordinal)
-    {
-        ["inventory_key"] = "i",
-    };
-
     public static IReadOnlyList<string> GameClashes(string key)
     {
         var c = KeyCombo.Parse(key);
@@ -296,6 +283,15 @@ internal static class ModKeys
         foreach (var o in m.actions)
             if (o.enabled) return true;
         return false;
+    }
+
+    /// <summary>The game's own key for one of its actions ("Book" -> "b"), for text that names it; <paramref name="fallback"/> when
+    /// the bindings cannot be read.</summary>
+    public static string GameKeyOf(string action, string fallback)
+    {
+        foreach (var (key, acts) in GameKeys())
+            if (!KeyCombo.Parse(key).HasModifiers && acts.Any(a => string.Equals(a, action, StringComparison.OrdinalIgnoreCase))) return key;
+        return fallback;
     }
 
     /// <summary>Re-reads the game's bindings on the next query (the player may have changed them in the game's menu).</summary>
