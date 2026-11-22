@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "一枚黑色戒指，镶着一颗缓缓胀缩的红宝石。",
  "item.vampire_ring.lore": "宝石既不会空，也不会满。部落会把佩戴者的手埋掉。",
  "item.vampire_ring.name": "胀石戒指",
- "item.vampire_ring.unique": "每次近战或远程命中获得10点耐力，暴击时翻倍。",
+ "item.vampire_ring.unique": "按造成伤害的6%为你恢复生命，每次击杀恢复最大生命值的5%。",
  "item.vestment_of_the_quiet_choir.description": "灰烬色的教团罩袍，内衬缝着一张张纸条。",
  "item.vestment_of_the_quiet_choir.lore": "字条上全是同一句话，写了几千遍：'求求你，让现在安静下来吧。'",
  "item.vestment_of_the_quiet_choir.name": "噤声罩袍",

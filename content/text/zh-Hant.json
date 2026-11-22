@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "一枚黑戒指，鑲著一顆緩緩膨脹又收縮的紅寶石。",
  "item.vampire_ring.lore": "石頭從不空，也從不滿。部落會把戴它者的手埋起來。",
  "item.vampire_ring.name": "脹石戒指",
- "item.vampire_ring.unique": "每次近戰或遠程命中獲得 10 點耐力，暴擊時加倍。",
+ "item.vampire_ring.unique": "按造成傷害的6%為你恢復生命，每次擊殺恢復最大生命值的5%。",
  "item.vestment_of_the_quiet_choir.description": "灰燼色的教團罩袍，內襯縫著一張張紙條。",
  "item.vestment_of_the_quiet_choir.lore": "字條上全是同一句話，寫了數千遍：「請讓一切現在安靜下來。」",
  "item.vestment_of_the_quiet_choir.name": "噤聲罩袍",

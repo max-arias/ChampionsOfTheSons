@@ -24,6 +24,9 @@ public static class EnemyPatches
     /// <summary>Last hit, for damage numbers and self-tests.</summary>
     public static (double Before, double After, bool Crit)? LastHit { get; private set; }
 
+    /// <summary>Self-tests: forget the last hit so a hit that never lands reads as none.</summary>
+    public static void ClearLastHit() => LastHit = null;
+
     /// <summary>Damage kind of the hit being reported by <see cref="EnemyHit"/> (damage numbers color).</summary>
     public static DamageKind LastHitKind { get; private set; }
 

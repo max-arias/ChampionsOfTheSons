@@ -6,7 +6,7 @@ Champions of the Sons is new code and text. Its rules and numbers follow the ori
 
 | Asset in the mod | Source | Author | License | Modified |
 |---|---|---|---|---|
-| Item, perk, spell and set icons (`icons/`) | https://game-icons.net | game-icons.net contributors (per icon: `CREDITS-icons.md`, `tools/icons/mapping.json`) | CC BY 3.0 (a few CC0) | recolored, resized |
+| Item, perk, spell and set icons (`icons/`) | https://game-icons.net | game-icons.net contributors (per icon: `CREDITS-icons.md`, `tools/icons/mapping.json`) | CC BY 3.0 (a few CC0) | recolored, resized; some item icons combine two glyphs |
 | Sound effects (29 clips, embedded in the DLL; source clip per cue in `tools/sounds/build_sounds.py`) | "200 Free RPG Sounds", https://clutch-assets.itch.io/200-free-rpg-sounds | Clutch Assets | free for commercial use with credit; may not be resold or claimed as one's own | trimmed, mono, converted to Ogg Vorbis |
 | Ground-drop and held-weapon models: swords, great sword, axes, hammers, bow, spear, halberd, arrows (asset bundle) | Low Poly Weapon Pack, itch.io | Kickin It Studios | free to use and modify in games; not to be resold as 3D models (pack README) | rescaled; flat colours replaced by the worn-steel texture set below on generated UVs |
 | Shield drop model (asset bundle) | KayKit Fantasy Weapons Bits 1.0, https://kaylousberg.com | Kay Lousberg | CC0 | rescaled; atlas colours mapped to the worn-steel texture set below on generated UVs |

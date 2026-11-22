@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "Un anillo negro engastado con un rubí que se hincha y se encoge lentamente.",
  "item.vampire_ring.lore": "La piedra nunca está vacía ni llena. Las tribus entierran las manos de quienes lo llevan.",
  "item.vampire_ring.name": "Anillo de Piedra Hinchada",
- "item.vampire_ring.unique": "Obtienes 10 de aguante con cada golpe cuerpo a cuerpo o a distancia, el doble con golpes críticos.",
+ "item.vampire_ring.unique": "Te cura el 6% del daño que infliges y el 5% de tu vida máxima con cada muerte.",
  "item.vestment_of_the_quiet_choir.description": "Blusón gris ceniza de la secta, forrado con tiras de papel cosidas.",
  "item.vestment_of_the_quiet_choir.lore": "Las papeletas son todas la misma frase, escrita miles de veces: 'Por favor, que ahora haya silencio.'",
  "item.vestment_of_the_quiet_choir.name": "Blusón de los Callados",

@@ -5,9 +5,12 @@ The icons in this folder are recolored renders of vector icons from **game-icons
 Creative Commons Attribution 3.0 license (https://creativecommons.org/licenses/by/3.0/);
 a few contributors publish under CC0. Changes: tinted by rarity/category with a gradient, outline and glow, resized to 128x128.
 
-Icons made by Lorc (http://lorcblog.blogspot.com), Delapouite (http://delapouite.com), Skoll, Sbed, Lucas,
-DarkZaitzev, Faithtoken, Willdabeast, Irongamer, Kier Heyl, SeregaCthtuf, Caro Asercion, Carl Olsen, Felbrigg,
-Lord Berandas, Quoting, Catsu, Zeromancer (CC0), Andy Meneely, John Colburn and other game-icons.net contributors.
+Icons made by Lorc (http://lorcblog.blogspot.com), Delapouite (http://delapouite.com), Skoll, Sbed
+(http://opengameart.org/content/95-game-icons), Lucas, Willdabeast (http://wjbstories.blogspot.com), DarkZaitzev
+(http://darkzaitzev.deviantart.com), Carl Olsen, PriorBlue, SeregaCthtuf, Zeromancer (CC0), Irongamer, Kier Heyl,
+HeavenlyDog (http://www.gnomosygoblins.blogspot.com) and Felbrigg (http://blackdogofdoom.blogspot.co.uk), plus four
+shapes from the repository's `badges` folder (no author listed there; the repository license covers it).
+Some item icons combine two of these glyphs: an item glyph with a smaller one in a disc at the bottom right (COS-162).
 The per-entry source icon is listed in `tools/icons/mapping.json` (`<author>/<icon>`).
 
 `ui.book_tab.png` (our guide-book tab): "Sparkles" by Delapouite (https://game-icons.net/1x1/delapouite/sparkles.html),

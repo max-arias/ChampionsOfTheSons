@@ -52,6 +52,11 @@ internal static class StatSelfTest
 
     private static double HitDamage(VailActor actor, float amount, ImpactType type = ImpactType.Melee, DamageNode? node = null)
     {
+        // Top the target up first: a dead one ignores the hit and the old LastHit would be read as this hit's result (COS-163).
+        var rt = EnemyRegistry.Get(actor);
+        var hp = rt?.Stats == null ? null : EnemyRegistry.Health(rt.Stats);
+        if (rt != null && hp != null) hp.SetCurrentValue((float)rt.Profile.MaxHealth);
+        EnemyPatches.ClearLastHit();
         actor.ReceivedDamage(node, type, 0, null, amount, true, false, false, Vector3.forward);
         return EnemyPatches.LastHit?.After ?? -1;
     }

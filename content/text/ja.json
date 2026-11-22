@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "ゆっくり膨らんだり縮んだりするルビーをはめた、黒い指輪。",
  "item.vampire_ring.lore": "石は決して空にならず、決して満ちない。部族は、これを着けた者の手を埋葬する。",
  "item.vampire_ring.name": "肥え石の指輪",
- "item.vampire_ring.unique": "近接または遠距離攻撃が命中するたびにスタミナを10獲得する。クリティカル時は倍になる。",
+ "item.vampire_ring.unique": "与えたダメージの6%だけ回復し、敵を倒すたびに最大ライフの5%回復する。",
  "item.vestment_of_the_quiet_choir.description": "灰色の教団の上衣。裏地には紙片が縫い込まれている。",
  "item.vestment_of_the_quiet_choir.lore": "紙片はどれも同じ一文だ。何千回も書かれている。「どうか、もう静かにしてください」。",
  "item.vestment_of_the_quiet_choir.name": "沈黙の上衣",

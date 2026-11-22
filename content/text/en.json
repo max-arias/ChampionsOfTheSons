@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "A black ring set with a ruby that slowly swells and shrinks.",
  "item.vampire_ring.lore": "The stone is never empty and never full. The tribes bury the hands of those who wear it.",
  "item.vampire_ring.name": "Bloatstone Ring",
- "item.vampire_ring.unique": "Gain 10 stamina on each melee or ranged hit, doubled on critical hits.",
+ "item.vampire_ring.unique": "Heals you for 6% of the damage you deal, and for 5% of your maximum life on each kill.",
  "item.vestment_of_the_quiet_choir.description": "Ash-gray cult smock lined with stitched slips of paper.",
  "item.vestment_of_the_quiet_choir.lore": "The slips are all the same sentence, written thousands of times: 'Please let it be quiet now.'",
  "item.vestment_of_the_quiet_choir.name": "Hushed Smock",

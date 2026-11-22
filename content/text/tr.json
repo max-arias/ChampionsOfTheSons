@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "Yavaşça şişip küçülen bir yakutla süslü siyah bir yüzük.",
  "item.vampire_ring.lore": "Taş asla boş ve asla dolu değil. Kabileler, onu takanların ellerini gömer.",
  "item.vampire_ring.name": "Şişkin Taş Yüzüğü",
- "item.vampire_ring.unique": "Her yakın dövüş ya da menzilli vuruşta 10 dayanıklılık kazan, kritik vuruşlarda iki katı.",
+ "item.vampire_ring.unique": "Verdiğin hasarın %6 kadarını iyileştirir ve her öldürmede azami canının %5 kadarını yeniler.",
  "item.vestment_of_the_quiet_choir.description": "İçi dikilmiş kâğıt parçalarıyla astarlanmış, kül grisi tarikat önlüğü.",
  "item.vestment_of_the_quiet_choir.lore": "Kâğıtların hepsi aynı cümle, binlerce kez yazılmış: 'Lütfen artık sessiz olsun.'",
  "item.vestment_of_the_quiet_choir.name": "Sessiz Önlük",

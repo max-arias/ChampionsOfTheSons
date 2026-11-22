@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "Un anello nero con un rubino che si gonfia e si restringe lentamente.",
  "item.vampire_ring.lore": "La pietra non è mai vuota e mai piena. Le tribù seppelliscono le mani di chi lo indossa.",
  "item.vampire_ring.name": "Anello Pietragonfia",
- "item.vampire_ring.unique": "Ottieni 10 stamina a ogni colpo in mischia o a distanza, raddoppiati sui colpi critici.",
+ "item.vampire_ring.unique": "Ti cura del 6% dei danni inflitti e del 5% della tua vita massima a ogni uccisione.",
  "item.vestment_of_the_quiet_choir.description": "Un camice del culto grigio cenere, foderato di strisce di carta cucite.",
  "item.vestment_of_the_quiet_choir.lore": "I foglietti riportano tutti la stessa frase, scritta migliaia di volte: 'Per favore, che ora sia silenzio.'",
  "item.vestment_of_the_quiet_choir.name": "Camice Silenzioso",

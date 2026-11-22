@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "Un anneau noir serti d'un rubis qui gonfle et dégonfle lentement.",
  "item.vampire_ring.lore": "La pierre n'est jamais vide ni jamais pleine. Les tribus enterrent les mains de ceux qui le portent.",
  "item.vampire_ring.name": "Bague Gonflepierre",
- "item.vampire_ring.unique": "Gagnez 10 d'endurance à chaque coup de mêlée ou à distance, doublé sur les coups critiques.",
+ "item.vampire_ring.unique": "Vous soigne de 6% des dégâts infligés, et de 5% de votre vie maximale à chaque élimination.",
  "item.vestment_of_the_quiet_choir.description": "Une blouse de culte gris cendre, doublée de petits bouts de papier cousus.",
  "item.vestment_of_the_quiet_choir.lore": "Les papiers portent tous la même phrase, écrite des milliers de fois : 'S'il vous plaît, que le silence se fasse, maintenant.'",
  "item.vestment_of_the_quiet_choir.name": "Blouse silencieuse",

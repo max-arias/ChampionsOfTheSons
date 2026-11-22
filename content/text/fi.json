@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "Musta sormus, jossa on rubiini, joka turpoaa ja kutistuu hitaasti.",
  "item.vampire_ring.lore": "Kivi ei ole koskaan tyhjä eikä koskaan täysi. Heimot hautaavat niiden kädet, jotka sitä käyttävät.",
  "item.vampire_ring.name": "Pöhöttyneen kiven sormus",
- "item.vampire_ring.unique": "Saat 10 kestävyyttä jokaisesta lähitaistelu- tai kaukotaisteluosumasta, kaksinkertaisena kriittisistä osumista.",
+ "item.vampire_ring.unique": "Parantaa sinua 6% tekemästäsi vahingosta ja 5% enimmäiselämästäsi jokaisesta taposta.",
  "item.vestment_of_the_quiet_choir.description": "Tuhkanharmaa kultin kauhtana, jonka vuorina on ommeltuja paperilappuja.",
  "item.vestment_of_the_quiet_choir.lore": "Kaikki laput ovat sama lause, kirjoitettu tuhansia kertoja: 'Anna nyt olla hiljaista, ole kiltti.'",
  "item.vestment_of_the_quiet_choir.name": "Hiljainen kauhtana",

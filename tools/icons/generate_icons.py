@@ -403,6 +403,27 @@ def render_book_tab():
     print("rendered ui.book_tab from", BOOK_TAB_ICON)
 
 
+# game-icons.net folder -> the name content/icons/CREDITS.md must give (their license asks for "Icons made by {author}").
+AUTHORS = {"lorc": "Lorc", "delapouite": "Delapouite", "skoll": "Skoll", "sbed": "Sbed", "lucasms": "Lucas",
+           "willdabeast": "Willdabeast", "darkzaitzev": "DarkZaitzev", "carl-olsen": "Carl Olsen", "priorblue": "PriorBlue",
+           "seregacthtuf": "SeregaCthtuf", "zeromancer": "Zeromancer", "irongamer": "Irongamer", "kier-heyl": "Kier Heyl",
+           "heavenly-dog": "HeavenlyDog", "felbrigg": "Felbrigg", "faithtoken": "Faithtoken", "caro-asercion": "Caro Asercion",
+           "lord-berandas": "Lord Berandas", "quoting": "Quoting", "catsu": "Catsu", "andymeneely": "Andy Meneely",
+           "john-colburn": "John Colburn", "john-redman": "John Redman", "viscious-speed": "Viscious Speed",
+           "cathelineau": "Cathelineau", "aussiesim": "Aussiesim", "sparker": "Sparker", "rihlsul": "Rihlsul",
+           "guard13007": "Guard13007", "spencerdub": "SpencerDub", "generalace135": "GeneralAce135", "zajkonur": "Zajkonur",
+           "starseeker": "Starseeker", "pepijn-poolman": "Pepijn Poolman", "pierre-leducq": "Pierre Leducq",
+           "badges": "badges", "various-artists": "various artists"}
+
+
+def check_credits(m):
+    """Every game-icons author in the mapping must be named in content/icons/CREDITS.md."""
+    credits = (OUT / "CREDITS.md").read_text(encoding="utf8")
+    used = sorted({part.split("/")[0] for v in m.values() for part in v.split(BADGE) if "/" in part})
+    missing = [f for f in used if AUTHORS.get(f, f) not in credits]
+    print("credits: all", len(used), "authors named" if not missing else f"MISSING in CREDITS.md: {missing}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["fetch", "match", "render", "booktab"])
@@ -426,6 +447,7 @@ def main():
                 m[e["id"]] = old[e["id"]]
         json.dump(dict(sorted(m.items())), open(HERE / "mapping.json", "w", encoding="utf8"), indent=1)
         print(len(m), "mapped,", len(set(m.values())), "distinct icons")
+        check_credits(m)
         return
     m = json.load(open(HERE / "mapping.json", encoding="utf8"))
     n = 0

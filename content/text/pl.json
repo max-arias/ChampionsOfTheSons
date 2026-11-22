@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "Czarny pierścień z rubinem, który powoli pęcznieje i się kurczy.",
  "item.vampire_ring.lore": "Kamień nigdy nie jest pusty i nigdy pełny. Plemiona grzebią dłonie tych, którzy go nosili.",
  "item.vampire_ring.name": "Pierścień Nabrzmiałego Kamienia",
- "item.vampire_ring.unique": "Zyskujesz 10 wytrzymałości przy każdym trafieniu w walce wręcz lub z dystansu, podwojone przy trafieniach krytycznych.",
+ "item.vampire_ring.unique": "Leczy cię o 6% zadanych obrażeń i o 5% maksymalnego życia przy każdym zabójstwie.",
  "item.vestment_of_the_quiet_choir.description": "Popielatoszary kitel kultu podszyty zszytymi skrawkami papieru.",
  "item.vestment_of_the_quiet_choir.lore": "Wszystkie karteczki zawierają to samo zdanie, napisane tysiące razy: 'Niech już będzie cicho.'",
  "item.vestment_of_the_quiet_choir.name": "Cichy Kitel",

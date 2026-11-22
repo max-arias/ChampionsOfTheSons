@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "서서히 부풀었다 줄어드는 루비가 박힌 검은 반지.",
  "item.vampire_ring.lore": "돌은 비는 법도 차는 법도 없다. 부족들은 이걸 낀 이들의 손을 묻는다.",
  "item.vampire_ring.name": "부푼 돌 반지",
- "item.vampire_ring.unique": "근접 또는 원거리 적중마다 스태미나 10을 얻으며, 치명타에서는 두 배.",
+ "item.vampire_ring.unique": "가한 피해의 6%만큼 회복하고, 처치할 때마다 최대 생명력의 5%를 회복합니다.",
  "item.vestment_of_the_quiet_choir.description": "종잇조각을 박음질해 안감으로 댄 잿빛 교단 작업복.",
  "item.vestment_of_the_quiet_choir.lore": "쪽지는 모두 같은 문장이다. 수천 번 쓰였다: '이제 제발 조용하게 해 주세요.'",
  "item.vestment_of_the_quiet_choir.name": "숨죽인 작업복",

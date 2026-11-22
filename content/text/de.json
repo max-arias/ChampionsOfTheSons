@@ -646,7 +646,7 @@
  "item.vampire_ring.description": "Ein schwarzer Ring mit einem Rubin, der langsam anschwillt und schrumpft.",
  "item.vampire_ring.lore": "Der Stein ist nie leer und nie voll. Die Stämme begraben die Hände derer, die ihn tragen.",
  "item.vampire_ring.name": "Blähstein-Ring",
- "item.vampire_ring.unique": "Erhalte 10 Ausdauer bei jedem Nahkampf- oder Fernkampftreffer, verdoppelt bei kritischen Treffern.",
+ "item.vampire_ring.unique": "Heilt dich um 6% des verursachten Schadens und bei jedem Kill um 5% deines maximalen Lebens.",
  "item.vestment_of_the_quiet_choir.description": "Ein aschgrauer Kultkittel, gefüttert mit eingenähten Papierstreifen.",
  "item.vestment_of_the_quiet_choir.lore": "Die Zettel enthalten alle denselben Satz, tausendfach geschrieben: 'Bitte lass es jetzt still sein.'",
  "item.vestment_of_the_quiet_choir.name": "Verstummter Kittel",
