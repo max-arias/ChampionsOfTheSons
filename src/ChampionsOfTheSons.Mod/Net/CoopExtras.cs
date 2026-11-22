@@ -44,7 +44,7 @@ public sealed class CoopExtras : IModFeature
 
     public void OnGameStart()
     {
-        PingLabels.Build();
+        if (!ServerConfig.IsDedicatedServer) PingLabels.Build(); // a dedicated server has no screen
         Pings.Clear();
         foreach (var m in PingMarkers.Values) if (m != null) UnityEngine.Object.Destroy(m);
         PingMarkers.Clear();

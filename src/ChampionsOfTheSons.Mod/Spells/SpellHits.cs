@@ -165,7 +165,8 @@ internal static class SpellHits
 
         if (Running("spell.black_flame") && Rng.Chance(SpellTuning.BlackFlameIgnite(_pendingWeapon)))
         {
-            enemy.Combat.ApplyDot("spell.black_flame", DotKind.Fire, SpellTuning.BlackFlameBurn(s, Has(PerkEffectIds.Netherflame)), SpellTuning.BlackFlameBurnSeconds);
+            var (ps, sec) = FireRules.Burn(s, SpellTuning.BlackFlameBurn(s, Has(PerkEffectIds.Netherflame)), SpellTuning.BlackFlameBurnSeconds);
+            enemy.Combat.ApplyDot("spell.black_flame", DotKind.Fire, ps, sec);
             if (Has(PerkEffectIds.Afterburn) && Rng.Chance(PerkTuning.AfterburnChance))
                 enemy.Combat.ApplyWeaken(PerkEffectIds.Afterburn, PerkTuning.AfterburnDamageTaken, PerkTuning.AfterburnSeconds);
         }

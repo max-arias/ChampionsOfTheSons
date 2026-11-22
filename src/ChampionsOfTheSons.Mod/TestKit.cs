@@ -183,13 +183,28 @@ public static class TestKit
         if (mouse == null) { SelfTest.Log("tap attack: no mouse"); return; }
         MouseButton(mouse, true);
         _releaseAtFrame = Time.frameCount + 3;
+        _releaseAtTime = -1;
+    }
+
+    private static float _releaseAtTime = -1;
+
+    /// <summary>A charged attack: the attack button held for <paramref name="seconds"/>, then released.</summary>
+    public static void HoldAttack(float seconds)
+    {
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse == null) { SelfTest.Log("hold attack: no mouse"); return; }
+        MouseButton(mouse, true);
+        _releaseAtFrame = -1;
+        _releaseAtTime = Time.realtimeSinceStartup + seconds;
     }
 
     /// <summary>Per frame while self-tests run: releases a tapped button.</summary>
     public static void Tick()
     {
-        if (_releaseAtFrame < 0 || Time.frameCount < _releaseAtFrame) return;
+        bool due = (_releaseAtFrame >= 0 && Time.frameCount >= _releaseAtFrame) || (_releaseAtTime >= 0 && Time.realtimeSinceStartup >= _releaseAtTime);
+        if (!due) return;
         _releaseAtFrame = -1;
+        _releaseAtTime = -1;
         var mouse = UnityEngine.InputSystem.Mouse.current;
         if (mouse != null) MouseButton(mouse, false);
     }

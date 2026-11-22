@@ -49,7 +49,19 @@ internal static class PerkHooksSelfTest
         SelfTest.Add(31f, "perk hooks: defense shot", () => TestKit.Screenshot("perkhooks-defense"));
         SelfTest.Add(31.5f, "perk hooks: magic tab", () => PerkPanel.Instance.ShowTab(PerkCategory.MagicOffense.ToString()));
         SelfTest.Add(32.5f, "perk hooks: magic shot", () => TestKit.Screenshot("perkhooks-magic"));
-        SelfTest.Add(33f, "perk hooks: cleanup", () =>
+        // COS-140: the flashlight is found by name while it is out, and Light the Way reaches its controller.
+        SelfTest.Add(34f, "perk hooks: flashlight out", () =>
+        {
+            Stats(new StatModifier(PerkStatIds.FlashlightIntensity, EffectOp.Add, 1), new StatModifier(PerkStatIds.FlashlightBattery, EffectOp.Add, 1));
+            TestKit.EquipGameItem(Weapons.GameItems.Find("Flashlight", 471));
+        });
+        SelfTest.Add(41f, "perk hooks: flashlight found", () =>
+        {
+            SelfTest.Check("perk hooks: the held flashlight gets Light the Way", PerkHooksFeature.FlashlightsSeen > 0, $"{PerkHooksFeature.FlashlightsSeen} seen");
+            LocalPlayer.Inventory?.StashHeldItems(false, false);
+            Stats();
+        });
+        SelfTest.Add(42f, "perk hooks: cleanup", () =>
         {
             PerkPanel.Instance.Close();
             Pc.Stats.RemoveSource(Src);

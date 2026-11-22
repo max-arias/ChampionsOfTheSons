@@ -83,7 +83,7 @@ internal sealed class WeaponSkin
         if (Type.TrailWidth > 0 && !bow) AddTrail(new Vector3(b.center.x, b.max.y - 0.08f * b.size.y, b.center.z));
         GlowParts = WeaponGlowFx.Apply(Model, Look, light: true);
         if (Trail != null) WeaponGlowFx.Brighten(Trail, Look);
-        if (stretchReach) StretchReach((float)WeaponTypes.ReachFactor(Type));
+        if (stretchReach) StretchReach(WeaponModels.WantReach(Type));
         if (!WeaponTypes.CanCutTrees(Type))
             foreach (var info in Holder.GetComponentsInChildren<weaponInfo>(true))
             {
@@ -172,8 +172,12 @@ internal sealed class WeaponSkin
     }
 
     /// <summary>Lengthens the hit boxes along the blade (holder +Z), keeping their near end where it is.</summary>
+    /// <summary>The reach factor the hit box was stretched by (1: not stretched).</summary>
+    public float Reach { get; private set; } = 1;
+
     private void StretchReach(float factor)
     {
+        Reach = factor;
         if (Mathf.Approximately(factor, 1)) return;
         foreach (var info in Holder.GetComponentsInChildren<weaponInfo>(true))
         {
@@ -271,6 +275,11 @@ internal static class WeaponModels
 
     private static float _scan;
 
+    /// <summary>The hit-box stretch for a weapon type: the type's own reach x the player's weapon size (weapon_range, COS-148).</summary>
+    public static float WantReach(WeaponTypeDef? type) =>
+        type == null || type.Base == WeaponBase.Bow ? 1f
+            : (float)(WeaponTypes.ReachFactor(type) * Math.Clamp(PlayerState.Character.Stats.Get(CombatStatIds.WeaponRange), 0.25, 4));
+
     public static void Tick(float dt)
     {
         WeaponGlowFx.Tick();
@@ -291,7 +300,8 @@ internal static class WeaponModels
         var type = WeaponTypes.Active(PlayerState.Character.Inventory, ModContent.Db, kind);
 
         var look = type != null ? GlowLook.For(PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot)) : GlowLook.None;
-        if (_local != null && (!_local.Alive || type != _local.Type || look.Key != _local.Look.Key || held == null || held.Pointer != _localHolder))
+        if (_local != null && (!_local.Alive || type != _local.Type || look.Key != _local.Look.Key || held == null || held.Pointer != _localHolder
+            || (type != null && Mathf.Abs(_local.Reach - WantReach(type)) > 1e-3f)))
         {
             if (_local.Holder != null) _local.Remove();
             _local = null;

@@ -237,19 +237,15 @@ public static class StatCoverage
         "spell_taunt_pull_enemies_in", "spell_parry_dmg_bonus", "spell_frenzy_ms", "spell_fury_swipes", "spell_bash_damage_buff",
         "spell_seeking_arrow_head_damage", "spell_seeking_arrow_damage_bonus", "spell_bia_triple_dmg", "spell_bia_stun", "spell_bia_crit",
         "spell_focus_bonus_dmg", "spell_focus_on_hs", "spell_focus_on_bs", "spell_focus_slow_amount", "spell_focus_slow_duration",
+        // COS-148: every burn the player sets (FireRules).
+        "fire_duration", "fire_tick_rate", "i_great_bow_ignites", "heavy_attack_dmg", "smash_damage", "weapon_range",
     };
 
     /// <summary>Kept in the data but deliberately without an in-game effect, with the reason.</summary>
     public static readonly Dictionary<string, string> Dropped = new()
     {
-        [CombatStatIds.WeaponRange] = "needs per-weapon collider changes; no safe hook found",
-        ["heavy_attack_dmg"] = "no verified heavy-attack signal",
-        ["smash_damage"] = "no verified heavy-attack signal",
-        ["fire_duration"] = "a test enemy could not be ignited through the game's burn API",
-        ["fire_tick_rate"] = "a test enemy could not be ignited through the game's burn API",
-        ["i_great_bow_ignites"] = "a test enemy could not be ignited through the game's burn API",
         ["i_archangel_bow"] = "needs a second player (co-op, COS-13)",
-        ["i_smokey_crossbow_quiver"] = "needs the crossbow bolt to explode; no verified hook (COS-86 can tell crossbow shots apart now)",
+        ["i_smokey_crossbow_quiver"] = "\"crossbows fire 2.5 times as fast\": needs a crossbow reload-speed hook (COS-148); its damage part is perk_crossbow_damage_mult",
         ["perk_raft_speed_multipier"] = "rafts are a vanilla survival feature we leave alone",
     };
 

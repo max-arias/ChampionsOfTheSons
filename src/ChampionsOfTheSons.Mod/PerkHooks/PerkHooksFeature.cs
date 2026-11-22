@@ -124,20 +124,22 @@ public sealed class PerkHooksFeature : IModFeature
         using var perf = Perf.Perf.Scope(PerfLights);
         var (intensity, drain) = PerkRules.Flashlight(Pc.Stats);
         AppliedLight = (intensity, drain);
-        // The game's flashlight (FlashlightHeld) is its own root object, not under the player, so finding it takes a scan of every
-        // object (~65-80 ms). Scan once and keep it; scan again (at most every 30 s) only while none is cached or one was destroyed
-        // (COS-132: was twice a second). The factors are applied to the cached list.
+        // The game's flashlight (FlashlightHeld) is its own root object, not under the player. A scan of every object cost ~60 ms;
+        // finding the active object by name costs ~5 ms (COS-140). The perk only matters while the flashlight is out (active),
+        // and once found it stays cached, so look by name every 5 s only while none is cached or one was destroyed.
         _lightSearch -= 0.5f;
         if (_lightSearch <= 0 && (OwnLights.Count == 0 || OwnLights.Exists(l => l == null)))
         {
-            _lightSearch = 30f;
-            OwnLights.Clear();
-            foreach (var l in Resources.FindObjectsOfTypeAll<FlashlightController>())
-            {
-                if (l == null) continue;
-                if (!Lights.ContainsKey(l.Pointer)) RLog.Msg($"Champions of the Sons: flashlight {l.name} under {(l.transform.root != null ? l.transform.root.name : "-")}");
-                OwnLights.Add(l);
-            }
+            _lightSearch = 5f;
+            OwnLights.RemoveAll(l => l == null);
+            var root = GameObject.Find("FlashlightHeld");
+            if (root != null)
+                foreach (var l in root.GetComponentsInChildren<FlashlightController>(true))
+                {
+                    if (l == null || OwnLights.Contains(l)) continue;
+                    if (!Lights.ContainsKey(l.Pointer)) RLog.Msg($"Champions of the Sons: flashlight {l.name} under {(l.transform.root != null ? l.transform.root.name : "-")}");
+                    OwnLights.Add(l);
+                }
         }
         foreach (var light in OwnLights)
         {

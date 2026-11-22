@@ -90,17 +90,43 @@ public sealed class CoopWeapons : IModFeature
     }
 
     /// <summary>Puts on, swaps or removes each remote player's model. No-op on a dedicated server (no bodies to dress).</summary>
+    private static float _nextScan;
+
+    /// <summary>The weapon type a remote player shows now, or null (none, or stale: they left or crashed).</summary>
+    private static Core.Content.WeaponTypeDef? WantType(Remote p)
+    {
+        ModContent.Db.WeaponTypes.TryGetValue(p.TypeId, out var type);
+        return type != null && Time.realtimeSinceStartup - p.Seen > Resend * 3 ? null : type;
+    }
+
     private static void MatchRemotes()
     {
         if (Players.Count == 0) return;
-        var candidates = HeldWeapons.Remote().ToList();
+        // Finding the remote players' held weapons is a scan of every object (~55 ms, COS-140): only when a model has to be put
+        // on or changed, at most once a second (every 2 s after a scan that found nothing).
+        bool needScan = Players.Values.Any(p =>
+        {
+            var want = WantType(p);
+            if (want == null) return false;
+            var look = GlowLook.For(p.ItemId == "" ? null : p.ItemId, (Core.Rarity)p.Rarity);
+            return p.Skin == null || !p.Skin.Alive || !p.Skin.Holder!.gameObject.activeInHierarchy || p.Skin.Type != want || p.Skin.Look.Key != look.Key;
+        });
+        List<HeldWeapons.Held> candidates;
+        if (needScan && Time.realtimeSinceStartup >= _nextScan)
+        {
+            candidates = HeldWeapons.Remote().ToList();
+            _nextScan = Time.realtimeSinceStartup + (candidates.Count == 0 ? 2f : 1f);
+        }
+        else if (needScan) return;
+        else candidates = new();
         foreach (var (id, p) in Players)
         {
-            ModContent.Db.WeaponTypes.TryGetValue(p.TypeId, out var type);
-            if (type != null && Time.realtimeSinceStartup - p.Seen > Resend * 3) type = null; // stale: they left or crashed
+            var type = WantType(p);
             HeldWeapons.Held? best = null;
             float bestDist = MatchRadius;
-            if (type != null)
+            // Nothing scanned (nothing to change): a live skin of the right type keeps its holder.
+            if (!needScan && p.Skin != null && p.Skin.Alive && p.Skin.Holder!.gameObject.activeInHierarchy) best = new HeldWeapons.Held(p.Skin.Holder, 0, Core.Rules.HeldKind.None);
+            else if (type != null)
                 foreach (var c in candidates)
                 {
                     if (!Core.Rules.WeaponTypes.Fits(type, c.Kind)) continue;

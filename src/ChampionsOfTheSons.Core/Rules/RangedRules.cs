@@ -149,6 +149,16 @@ public static class RangedRules
 /// <summary>Melee perk rules (COS-86).</summary>
 public static class MeleeRules
 {
+    public const string HeavyAttackDamage = "heavy_attack_dmg";
+    public const string SmashDamage = "smash_damage";
+
+    /// <summary>
+    /// A charged melee attack (attack held, then released: the game's heavy attack) deals x heavy attack damage; with a hammer it
+    /// is a smash and also deals x smash damage (COS-148). Plain swings are unchanged.
+    /// </summary>
+    public static double ChargedMultiplier(StatSheet s, bool charged, bool hammer) =>
+        !charged ? 1 : Math.Max(0, s.Get(HeavyAttackDamage)) * (hammer ? Math.Max(0, s.Get(SmashDamage)) : 1);
+
     /// <summary>Ember Heart: melee damage factor while Black Flame burns.</summary>
     public static double FireDanceMultiplier(StatSheet s, bool blackFlameOn) =>
         blackFlameOn && s.IsOn(RangedStatIds.FireDance) ? 1 + Math.Max(0, s.Get(StatIds.AttackSpeed)) * RangedRules.FireDanceFactor : 1;

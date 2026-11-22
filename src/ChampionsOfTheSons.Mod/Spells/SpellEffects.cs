@@ -149,7 +149,7 @@ internal static class SpellEffects
         foreach (var e in EnemiesWithin(PlayerPos, radius))
         {
             Strike(e, Hit(S("spell_parry_damage"), S("spell_parry_damage_scaling")));
-            if (Stats.IsOn("spell_parry_ignites")) e.Combat.ApplyDot("player.parry", DotKind.Fire, S("spell_parry_damage") * 0.25, 4);
+            if (Stats.IsOn("spell_parry_ignites")) { var (ps, sec) = FireRules.Burn(Stats, S("spell_parry_damage") * 0.25, 4); e.Combat.ApplyDot("player.parry", DotKind.Fire, ps, sec); }
         }
         // A parry gives stun immunity, and (with the counter-strike perks) stores a bonus for the next melee hit.
         PlayerDebuffs.Buffs.Apply(PlayerDebuffs.StunImmune, "spell.parry", SpellTuning.ParryStunImmunitySeconds);
@@ -443,7 +443,7 @@ internal static class SpellEffects
             {
                 var hit = Hit(SpellTuning.FireboltDamage, S("spell_firebolt_damage_scaling"));
                 Strike(e, hit);
-                if (e.IsActive) e.Combat.ApplyDot("player.firebolt", DotKind.Fire, hit.Amount * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds);
+                if (e.IsActive) { var (ps, sec) = FireRules.Burn(Stats, hit.Amount * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds); e.Combat.ApplyDot("player.firebolt", DotKind.Fire, ps, sec); }
                 SpellFx.Sphere(b.Pos, 0.9f, SpellFx.Fire, 0.3f);
             },
         });

@@ -173,6 +173,8 @@ public static class EnemyPatches
                 if (weapon == WeaponClass.Thrown)
                     hit = new OutgoingHit(Core.Rules.GameRules.ExplosionToEnemy(amount, Net.CoopParty.TeamExplosionDamage()), DamageKind.Physical, false, 0);
                 if (weapon == WeaponClass.Melee) hit = hit with { Amount = hit.Amount * MeleeRules.FireDanceMultiplier(sheet, PerkHooks.PerkHooksFeature.SpellRunning("spell.black_flame")) };
+                if (weapon == WeaponClass.Melee)
+                    hit = hit with { Amount = hit.Amount * MeleeRules.ChargedMultiplier(sheet, Weapons.HeavyAttack.Active, Weapons.WeaponModels.Active?.Id == "hammer") };
                 double fire = sheet.Get(StatIds.FireDamage) + runtime.Combat.FireMark;
                 if (fire > 0 && __instance.IsBodyBurning()) hit = hit with { Amount = hit.Amount * (1 + fire) };
                 hit = Followups.FollowupsFeature.OnLocalHit(hit, weapon);
@@ -228,6 +230,12 @@ public static class EnemyPatches
         if (runtime.Actor == null) return;
         var center = runtime.Actor.transform.position;
         Splash(runtime, center, RangedRules.AreaSplash(sheet, hit.Amount, Rng), sheet.Get(RangedStatIds.AreaRadius), hit.ArmorPierce);
+        // Ashglow Greatbow: its arrows set the enemy on fire (COS-148).
+        if (shot.Kind == RangedKind.Bow && sheet.IsOn(FireRules.GreatBowIgnites) && Weapons.WeaponModels.Active?.Id == "greatbow" && runtime.IsActive)
+        {
+            var (ps, sec) = FireRules.GreatBowBurn(sheet, hit.Amount);
+            runtime.Combat.ApplyDot("item.great_bow", DotKind.Fire, ps, sec);
+        }
         // Eruption Bow: a headshot splashes half its damage on enemies around the target.
         if (headshot && sheet.IsOn(UniqueFlagIds.Eruption))
             Splash(runtime, center, hit.Amount * UniqueTuning.EruptionFraction, UniqueTuning.EruptionRadius, hit.ArmorPierce);

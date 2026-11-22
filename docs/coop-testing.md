@@ -25,9 +25,26 @@ It takes the same machine-wide lock as `tools/run-selftest.ps1` (the client uses
 ./tools/run-coop-test.ps1 -NoBuild
 ```
 
-The client is started through Steam with `--cots-join <LAN IP>:8766`. On the title screen the mod opens the game's own join-by-ip dialog
+The client is started with `steam.exe -applaunch` (a `steam://run` link makes Steam wait for a "launch with these arguments?" click, and every later launch queues behind it until Steam restarts; `+connect_ds` is not passed because `-applaunch` takes `+words` as Steam console commands) with `--cots-join <LAN IP>:8766`. On the title screen the mod opens the game's own join-by-ip dialog
 (`CoopSteamManager.ShowDedicatedServerJoinByIpDialog`) and accepts it, so no one has to click through the menu. The address must be this PC's
 LAN IPv4 and the **game** port: the game finds the server through the LAN list and rejects `127.0.0.1` or the query port
 ("Couldn't find server by ip/port" in the client's `Player.log`). The script detects the LAN address; override with `-JoinAddress`.
 With `"LanOnly": true` the lookup also fails. `-Windowed` runs the client in a 640x360 window instead of `-batchmode`.
 Logs: server `D:\dev\sotf-server\_Redloader\Latest.log` (+ `unity.log`), client `_Redloader\Latest.log` in the game folder.
+
+## Playing co-op yourself on one PC, one Steam account
+
+```powershell
+./tools/start-local-coop.ps1            # Release build, deploy, start the server, start the game; it joins on its own
+./tools/start-local-coop.ps1 -Windowed -ExtraEnemyLevels 3
+```
+
+You play as a client of the local Dedicated Server: the same host-authoritative paths a friend's game would use (enemies,
+drops and difficulty from the server, your hits forwarded to it, sync of drops and enemy state). Stop the server afterwards
+with `Stop-Process -Name SonsOfTheForestDS`.
+
+What one account cannot do (tested 2026-11-22): a second game instance joining the same server. A second instance starts
+(from its own folder, with `steam_appid.txt`), but the server refuses its Steam session as a duplicate of the first
+(`No Steam Auth - Failed Status=k_EBeginAuthSessionResultDuplicateRequest`). A listen host uses the same Steam session check, so expect the same there (not tested). Seeing
+another player's body (weapon models, trails, hand effects on a remote player, COS-117/COS-122) needs a second Steam account
+that owns the game. The teammate's side of the protocol is covered by `run-coop-test.ps1`, whose server plays a simulated peer.
