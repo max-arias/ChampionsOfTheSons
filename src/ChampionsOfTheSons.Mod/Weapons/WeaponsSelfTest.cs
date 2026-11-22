@@ -204,10 +204,9 @@ internal static class WeaponsSelfTest
 
     private static void CheckBowRules(WeaponTypeDef type)
     {
-        // COS-118: per arrow when the patch is in (the global flag stays on for everything else), else the global switch.
-        bool straight = !type.NoGravity || (ProjectileDrop.PerBullet ? ProjectileDrop.HasNoGravityWeapon && ProjectileDrop.Drop != false : ProjectileDrop.Drop == false);
-        SelfTest.Check($"weapons: {type.Id} arrows don't drop (only its own)", straight,
-            $"per arrow {ProjectileDrop.PerBullet}, bow marked {ProjectileDrop.HasNoGravityWeapon}, global drop {ProjectileDrop.Drop}");
+        // COS-118: the global drop flag is off while the no-gravity bow is held.
+        bool straight = !type.NoGravity || ProjectileDrop.Drop == false;
+        SelfTest.Check($"weapons: {type.Id} arrows don't drop", straight, $"global drop {ProjectileDrop.Drop}");
         BowDraw.Tick(type);
         if (BowDraw.Current is { } cur && BowDraw.Base is { } b)
             SelfTest.Check($"weapons: {type.Id} draw animation slowed", Math.Abs(cur - b * type.DrawSpeed) < 1e-3, $"bow speed {cur:0.000}, game {b:0.000}, x{type.DrawSpeed}");
