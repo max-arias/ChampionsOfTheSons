@@ -129,6 +129,7 @@ internal static class PerksSelfTest
 
     private static void SubTabs()
     {
+        SelfTest.Check("perks: no page numbers on our sub-tabs (COS-180)", BookTabs.SubTabTexts() == 0, BookTabs.SubTabTexts().ToString());
         foreach (var tab in new[] { BookTab.Character, BookTab.Bag, BookTab.Spells, BookTab.Perks, BookTab.Help })
         {
             var at = BookTabs.SubScreenCenter(tab);

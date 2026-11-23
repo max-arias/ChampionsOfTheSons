@@ -206,7 +206,7 @@ internal static class BookTabs
             var link = chain[i];
             link.gameObject.name = "CotsSub-" + SubDefs[i].Tab;
             var visuals = link.Find("AnimRoot/Visuals");
-            if (visuals != null) visuals.gameObject.SetActive(false); // the game's page number
+            if (visuals != null) UnityEngine.Object.DestroyImmediate(visuals.gameObject); // the game's page number (COS-180: hiding was undone)
             var face = RootFace(link);
             if (face != null) Paint(face, SubColor, SubDefs[i].IconId);
         }
@@ -221,6 +221,9 @@ internal static class BookTabs
             if (!name.StartsWith("CotsSub-", StringComparison.Ordinal) || !Enum.TryParse<BookTab>(name.Substring(8), out var tab)) continue;
             var face = RootFace(sub);
             if (face == null) continue;
+            // COS-180: the game can turn its page-number text back on; our copies carry none at all.
+            var visuals = sub.Find("AnimRoot/Visuals");
+            if (visuals != null) UnityEngine.Object.Destroy(visuals.gameObject);
             var outline = sub.Find("AnimRoot/Outline/ButtonVisualRoot");
             if (outline != null) outline.gameObject.SetActive(false);
             Subs[tab] = new Ours { Face = face, Root = sub, Animator = sub.GetComponent<Animator>(), Hover = sub.GetComponent<Collider>(), Outline = outline != null ? outline.gameObject : null };
@@ -285,6 +288,10 @@ internal static class BookTabs
             o.Animator.SetBool(SlideOutParam, _pageShown);
         }
     }
+
+    /// <summary>Page-number texts still showing on our sub-tabs (self-test, COS-180).</summary>
+    public static int SubTabTexts() => Subs.Values.Where(o => o.Root != null)
+        .Sum(o => o.Root.GetComponentsInChildren<TMPro.TextMeshProUGUI>(false).Count(t => t.enabled && t.gameObject.activeInHierarchy));
 
     /// <summary>The sub-tabs made on the current book (self-tests).</summary>
     public static IReadOnlyCollection<BookTab> SubTabs => Subs.Keys;
