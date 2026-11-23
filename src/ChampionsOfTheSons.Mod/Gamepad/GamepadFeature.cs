@@ -67,7 +67,8 @@ internal sealed class GamepadFeature : IModFeature
 
         _panels = new List<PadPanel>
         {
-            new("perks", () => PerksFeature.Panel.IsOpen, () => PerksFeature.Panel.Toggle(), () => PerksFeature.Panel.Close(), () => PerksFeature.Panel.PadRoot),
+            // COS-168: perks live on the guide book now; the binding opens it on the Perks page (the book has its own pad cursor).
+            new("perks", () => false, PerksFeature.TogglePerksPage, () => { }, () => null),
             new("host_settings", () => WorldRulesFeature.Settings.IsOpen, () => { if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close(); else WorldRulesFeature.Settings.Open(); }, () => WorldRulesFeature.Settings.Close(),
                 () => WorldRulesFeature.Settings.PadRoot),
             new("settings", () => Settings.SettingsFeature.Panel.IsOpen, () => Settings.SettingsFeature.Panel.Toggle(), () => Settings.SettingsFeature.Panel.Back(),

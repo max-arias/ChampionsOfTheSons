@@ -19,7 +19,7 @@ internal static class BookGuide
         ("keys", "Keys", ""),
         ("levels", "Levels and XP",
             "Kills give XP. Kill again quickly to build a massacre streak: the XP is banked and multiplied when the streak ends.\n\n" +
-            "Each level gives a perk point and raises your attributes. Dying costs part of the XP in your current level, never a level."),
+            "Each level gives a perk point and attribute points: spend them on the Character page, and change them for free. Dying costs part of the XP in your current level, never a level."),
         ("loot", "Loot",
             "Enemies drop gear when they die; elites and bosses drop more. Walk over a drop to pick it up.\n\n" +
             "Rarity sets how strong the rolls are: Common (white), Magic (blue), Rare (yellow) and Legendary (red). " +
@@ -28,8 +28,8 @@ internal static class BookGuide
             "Turn spare gear into better gear. Select an item in the bag and press Merge, next to Sort. Items that cannot join it fade; click the ones you want to give up, then press Merge again.\n\n" +
             "3 Common of one item type make 1 Magic of that type, 5 Magic make 1 Rare, and 7 Rare make 1 Legendary. Any 3 Legendary items make 1 random Legendary of another kind. The new item takes the lowest level of the ones used and fresh stats, and lands where your first pick was, marked NEW. Cancel stops merging."),
         ("perks", "Perks and spells",
-            "Spend perk points in the perk tree ({0}). Some perks unlock spells: put them on the spell bar and cast them with the spell keys.\n\n" +
-            "Spells cost energy, which is your stamina bar, and each has a cooldown."),
+            "Spend perk points on the Perks page (its tab beside the book, or {0}). Learn spells on the Spells page, put them on the bar and cast them with the spell keys.\n\n" +
+            "Spells cost energy, which is your stamina bar, and each has a cooldown. Refunding perks, spells and attributes is free."),
         ("enemies", "Enemies",
             "Enemies match the level of the players near them. The game's difficulty adds levels and makes elites more common.\n\n" +
             "Elites, minibosses and bosses are tougher and use abilities, named on their nameplate. Look at an enemy to read more about it."),

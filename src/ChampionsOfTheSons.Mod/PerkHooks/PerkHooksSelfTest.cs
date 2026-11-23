@@ -47,7 +47,7 @@ internal static class PerkHooksSelfTest
         SelfTest.Add(28f, "perk hooks: wide reach", WideReach);
         SelfTest.Add(30f, "perk hooks: perk panel tabs", PanelShots);
         SelfTest.Add(31f, "perk hooks: defense shot", () => TestKit.Screenshot("perkhooks-defense"));
-        SelfTest.Add(31.5f, "perk hooks: magic tab", () => PerkPanel.Instance.ShowTab(PerkCategory.MagicOffense.ToString()));
+        SelfTest.Add(31.5f, "perk hooks: magic tab", () => { Book.BookPerksPage.ShowTree(PerkCategory.MagicOffense); Book.BookPages.MarkDirty(); });
         SelfTest.Add(32.5f, "perk hooks: magic shot", () => TestKit.Screenshot("perkhooks-magic"));
         // COS-140: the flashlight is found by name while it is out, and Light the Way reaches its controller.
         SelfTest.Add(34f, "perk hooks: flashlight out", () =>
@@ -63,7 +63,7 @@ internal static class PerkHooksSelfTest
         });
         SelfTest.Add(42f, "perk hooks: cleanup", () =>
         {
-            PerkPanel.Instance.Close();
+            if (Book.BookHost.IsOpen) Book.BookHost.Close();
             Pc.Stats.RemoveSource(Src);
             if (_target != null) TestKit.Kill(_target);
             ActiveAbilitySystem.Reset();
@@ -296,11 +296,10 @@ internal static class PerkHooksSelfTest
 
     // ---------------------------------------------------------------- COS-70
 
+    /// <summary>COS-70 screenshots of moved perks, now on the book's Perks page (COS-168).</summary>
     private static void PanelShots()
     {
-        var panel = PerkPanel.Instance;
-        panel.Open();
-        panel.ShowTab(PerkCategory.Defense.ToString());
-        SelfTest.Check("perk hooks: panel shows the Defense tab", panel.IsOpen && panel.CurrentTab == PerkCategory.Defense.ToString());
+        Book.BookPerksPage.ShowTree(PerkCategory.Defense);
+        SelfTest.Check("perk hooks: the book opens on the Perks page", Book.BookHost.Open(Book.BookTab.Perks), Book.BookHost.LastFailure);
     }
 }

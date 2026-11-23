@@ -385,6 +385,13 @@ def save(arr, path):
 
 
 BOOK_TAB_ICON = "delapouite/sparkles"
+BOOK_SUBTAB_ICONS = {
+    "ui.book_tab.character": "lorc/muscle-up",
+    "ui.book_tab.inventory": "lorc/knapsack",
+    "ui.book_tab.spells": "delapouite/spell-book",
+    "ui.book_tab.perks": "delapouite/skills",
+    "ui.book_tab.help": "lorc/scroll-unfurled",
+}
 
 
 def render_book_tab():
@@ -401,6 +408,15 @@ def render_book_tab():
     a[o:o + glyph, o:o + glyph] = (a[o:o + glyph, o:o + glyph] * (1 - m)).astype(np.uint8)
     Image.fromarray(a, "L").convert("RGBA").save(OUT / "ui.book_tab.png", optimize=True)
     print("rendered ui.book_tab from", BOOK_TAB_ICON)
+    # COS-168: the sub-tabs that slide out of our tab, one per mod page, in the same layout.
+    for icon_id, key in BOOK_SUBTAB_ICONS.items():
+        a = np.full((size, size), 255, np.uint8)
+        a[:frame, :] = a[-frame:, :] = 0
+        a[:, :frame] = a[:, -frame:] = 0
+        m = np.array(glyph_mask(key, glyph), np.float32) / 255
+        a[o:o + glyph, o:o + glyph] = (a[o:o + glyph, o:o + glyph] * (1 - m)).astype(np.uint8)
+        Image.fromarray(a, "L").convert("RGBA").save(OUT / f"{icon_id}.png", optimize=True)
+        print("rendered", icon_id, "from", key)
 
 
 # game-icons.net folder -> the name content/icons/CREDITS.md must give (their license asks for "Icons made by {author}").

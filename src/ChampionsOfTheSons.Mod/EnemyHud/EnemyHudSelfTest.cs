@@ -38,11 +38,11 @@ internal static class EnemyHudSelfTest
         });
         SelfTest.Add(T0 + 5.8f, "enemyhud: boss bar shows", BossBarShows);
         SelfTest.Add(T0 + 5.9f, "enemyhud: shot boss bar", () => TestKit.Screenshot("enemyhud-02-bossbar"));
-        SelfTest.Add(T0 + 6.2f, "enemyhud: open a panel", () => Perks.PerksFeature.Panel.Open());
+        SelfTest.Add(T0 + 6.2f, "enemyhud: open a panel", () => { if (!Settings.SettingsFeature.Panel.IsOpen) Settings.SettingsFeature.Panel.Toggle(); });
         SelfTest.Add(T0 + 6.8f, "enemyhud: hidden under panels", () =>
         {
             SelfTest.Check("boss bar: hidden while a panel is open", !Bars.LayerShown);
-            Perks.PerksFeature.Panel.Close();
+            Settings.SettingsFeature.Panel.Close();
         });
         SelfTest.Add(T0 + 7.5f, "enemyhud: kill the boss", () => TestKit.Kill(_boss!));
         SelfTest.Add(T0 + 8.3f, "enemyhud: gone on death", () =>

@@ -13,14 +13,17 @@ namespace ChampionsOfTheSons.Mod.Book;
 /// mouse proxy and sub-tabs are removed before it ever activates), so the game neither hovers nor clicks it; we drive
 /// its Animator's SlideOut ourselves: out while the cursor is over it or while our page shows, like the game's tabs,
 /// plus the game's white hover outline while the cursor is over it (COS-131). Clicks are found by our own hit test on the book cursor.
+/// COS-168: like the game's tabs, ours carries a chain of sub-tabs (the game nests each sub-tab under the one before it: Tab1, Tab2...
+/// under each AnimRoot); ours keeps the copied chain, makes it five long, puts an icon on each and slides them out while one of our
+/// pages shows: Character, Inventory, Spells, Perks and Help.
 /// </summary>
 internal static class BookTabs
 {
     private sealed record TabDef(BookTab Tab, string IconId, string ColorHex);
 
     /// <summary>
-    /// One tab for the mod (only one fits under the game's column); Gear, Bag and Character are sub-tabs in the page's
-    /// title bar. Keyed by <see cref="BookTab.Gear"/>; it opens the last mod page shown.
+    /// One tab for the mod (only one fits under the game's column), keyed by <see cref="BookTab.Gear"/>; it opens the last mod page shown.
+    /// Its sub-tabs (<see cref="SubDefs"/>) open each page.
     /// </summary>
     private static readonly TabDef[] Defs =
     {
@@ -37,10 +40,21 @@ internal static class BookTabs
         public Animator? Animator;
         public Collider? Hover;
         public GameObject? Outline;
-        public bool Out, Lit;
+        public bool Out, Lit, Open;
     }
 
     private static readonly Dictionary<BookTab, Ours> Made = new();
+
+    /// <summary>The sub-tabs, one per mod page (COS-168). Inventory is keyed <see cref="BookTab.Bag"/>: the root tab keeps <see cref="BookTab.Gear"/>.</summary>
+    private static readonly (BookTab Tab, string IconId)[] SubDefs =
+    {
+        (BookTab.Character, "ui.book_tab.character"), (BookTab.Bag, "ui.book_tab.inventory"), (BookTab.Spells, "ui.book_tab.spells"),
+        (BookTab.Perks, "ui.book_tab.perks"), (BookTab.Help, "ui.book_tab.help"),
+    };
+
+    private const string SubColor = "#7A4228", SubOpenColor = "#C0703F";
+    private static readonly Dictionary<BookTab, Ours> Subs = new();
+    private static BookTab _current = BookTab.None;
     private static readonly Dictionary<BookTab, Renderer> Faces = new();
     private static bool _pageShown;
     private static Collider? _neighbour;
@@ -55,6 +69,7 @@ internal static class BookTabs
     public static void Attach(HeldControllerBase book, Vector3 pageUp)
     {
         Made.Clear();
+        Subs.Clear();
         Faces.Clear();
         Hovered = BookTab.None;
         try
@@ -88,10 +103,12 @@ internal static class BookTabs
                 {
                     go.name = "CotsTab-" + d.Tab;
                     StripGameInteraction(go.transform);
-                    face = go.GetComponentsInChildren<Renderer>(true).FirstOrDefault(r => r.gameObject.name == "TactiPadTab");
+                    face = RootFace(go.transform);
                     if (face == null) { UnityEngine.Object.Destroy(go); continue; }
-                    Paint(face, d);
+                    Paint(face, d.ColorHex, d.IconId);
+                    BuildSubChain(go.transform);
                 }
+                else face = RootFace(go.transform);
                 if (face == null) continue;
                 go.transform.SetParent(column, false);
                 var le = go.GetComponent<LayoutElement>();
@@ -105,6 +122,7 @@ internal static class BookTabs
                 if (outline != null) outline.gameObject.SetActive(false);
                 Made[d.Tab] = new Ours { Face = face, Root = go.transform, Animator = an, Hover = go.GetComponent<Collider>(), Outline = outline != null ? outline.gameObject : null };
                 Faces[d.Tab] = face;
+                PickUpSubs(go.transform);
             }
             UnityEngine.Object.Destroy(holder);
             Apply();
@@ -132,25 +150,89 @@ internal static class BookTabs
     }
 
     /// <summary>
-    /// Removes what makes the copy a game tab: its sub-tabs (anything below the root that carries its own
-    /// interaction) and, on the root, the interaction and the mouse-event proxy. Keeps the Animator and the collider.
+    /// Removes what makes the copy a game tab: the interaction and the mouse-event proxy on the root and on every sub-tab of its
+    /// chain (COS-168 keeps the chain itself). Keeps the Animators and the colliders.
     /// </summary>
     private static void StripGameInteraction(Transform root)
     {
-        foreach (var sub in root.GetComponentsInChildren<HeldBookInteraction>(true).Where(h => h.transform != root).Select(h => h.gameObject).ToList())
-            UnityEngine.Object.DestroyImmediate(sub);
-        foreach (var c in root.GetComponents<Component>())
+        foreach (var c in root.GetComponentsInChildren<Component>(true).ToList())
         {
+            if (c == null) continue;
             var n = c.GetIl2CppType().Name;
             if (n is "HeldBookInteraction" or "MouseEventsProxy") UnityEngine.Object.DestroyImmediate(c);
         }
     }
 
-    private static void Paint(Renderer face, TabDef d)
+    /// <summary>The tab mesh directly under a tab's own AnimRoot (not a sub-tab's).</summary>
+    private static Renderer? RootFace(Transform tab)
+    {
+        var anim = tab.Find("AnimRoot");
+        var mesh = anim != null ? anim.Find("TactiPadTab") : null;
+        return mesh != null ? mesh.GetComponent<Renderer>() : null;
+    }
+
+    /// <summary>The sub-tab nested under a tab: a child of its AnimRoot with its own Animator and collider.</summary>
+    private static Transform? SubOf(Transform tab)
+    {
+        var anim = tab.Find("AnimRoot");
+        if (anim == null) return null;
+        for (int i = 0; i < anim.childCount; i++)
+        {
+            var c = anim.GetChild(i);
+            if (c.GetComponent<Animator>() != null && c.GetComponent<Collider>() != null) return c;
+        }
+        return null;
+    }
+
+    /// <summary>COS-168: makes the copied sub-tab chain exactly one link per mod page (cloning the last link when the game's tab
+    /// has fewer), names each, paints its icon and hides the game's page number.</summary>
+    private static void BuildSubChain(Transform root)
+    {
+        var chain = new List<Transform>();
+        for (var sub = SubOf(root); sub != null; sub = SubOf(sub)) chain.Add(sub);
+        if (chain.Count == 0) { RLog.Warning("Champions of the Sons book: the game's tab has no sub-tabs to copy; no sub-tabs added"); return; }
+        while (chain.Count > SubDefs.Length) { UnityEngine.Object.DestroyImmediate(chain[^1].gameObject); chain.RemoveAt(chain.Count - 1); }
+        while (chain.Count < SubDefs.Length)
+        {
+            var last = chain[^1];
+            var clone = UnityEngine.Object.Instantiate(last.gameObject, last.Find("AnimRoot"), false).transform;
+            clone.localPosition = last.localPosition;
+            clone.localRotation = last.localRotation;
+            clone.localScale = last.localScale;
+            chain.Add(clone);
+        }
+        for (int i = 0; i < chain.Count; i++)
+        {
+            var link = chain[i];
+            link.gameObject.name = "CotsSub-" + SubDefs[i].Tab;
+            var visuals = link.Find("AnimRoot/Visuals");
+            if (visuals != null) visuals.gameObject.SetActive(false); // the game's page number
+            var face = RootFace(link);
+            if (face != null) Paint(face, SubColor, SubDefs[i].IconId);
+        }
+    }
+
+    /// <summary>Finds our sub-tabs under the root copy (built now or on an earlier attach) and keeps them for slide, hover and hits.</summary>
+    private static void PickUpSubs(Transform root)
+    {
+        for (var sub = SubOf(root); sub != null; sub = SubOf(sub))
+        {
+            var name = sub.gameObject.name;
+            if (!name.StartsWith("CotsSub-", StringComparison.Ordinal) || !Enum.TryParse<BookTab>(name.Substring(8), out var tab)) continue;
+            var face = RootFace(sub);
+            if (face == null) continue;
+            var outline = sub.Find("AnimRoot/Outline/ButtonVisualRoot");
+            if (outline != null) outline.gameObject.SetActive(false);
+            Subs[tab] = new Ours { Face = face, Root = sub, Animator = sub.GetComponent<Animator>(), Hover = sub.GetComponent<Collider>(), Outline = outline != null ? outline.gameObject : null };
+            Faces[tab] = face;
+        }
+    }
+
+    private static void Paint(Renderer face, string colorHex, string iconId)
     {
         var mats = face.materials;
-        if (mats.Length > 0) mats[0].SetColor("_BaseColor", PageKit.Hex(d.ColorHex));
-        var icon = Face(d.IconId);
+        if (mats.Length > 0) mats[0].SetColor("_BaseColor", PageKit.Hex(colorHex));
+        var icon = Face(iconId);
         if (mats.Length > 1 && icon != null)
         {
             mats[1].SetTexture("_BaseColorMap", icon);
@@ -163,6 +245,7 @@ internal static class BookTabs
     public static void Select(BookTab tab)
     {
         _pageShown = tab != BookTab.None;
+        _current = tab == BookTab.Gear ? BookTab.Bag : tab;
         Apply();
     }
 
@@ -185,6 +268,33 @@ internal static class BookTabs
             o.Out = slide;
             o.Animator.SetBool(SlideOutParam, slide);
         }
+        // The sub-tabs slide out while one of our pages shows; the open page's tab is a lighter colour.
+        foreach (var (t, o) in Subs)
+        {
+            bool lit = Hovered == t;
+            if (o.Outline != null && o.Lit != lit) { o.Lit = lit; o.Outline.SetActive(lit); }
+            bool open = t == _current && _pageShown;
+            if (o.Face != null && o.Open != open)
+            {
+                o.Open = open;
+                var mats = o.Face.materials;
+                if (mats.Length > 0) mats[0].SetColor("_BaseColor", PageKit.Hex(open ? SubOpenColor : SubColor));
+            }
+            if (o.Animator == null || (o.Out == _pageShown && o.Animator.GetBool(SlideOutParam) == _pageShown)) continue;
+            o.Out = _pageShown;
+            o.Animator.SetBool(SlideOutParam, _pageShown);
+        }
+    }
+
+    /// <summary>The sub-tabs made on the current book (self-tests).</summary>
+    public static IReadOnlyCollection<BookTab> SubTabs => Subs.Keys;
+
+    /// <summary>Screen center of a sub-tab's collider (self-tests).</summary>
+    public static Vector2 SubScreenCenter(BookTab tab)
+    {
+        var cam = Camera.main;
+        if (cam == null || !Subs.TryGetValue(tab, out var o)) return default;
+        return cam.WorldToScreenPoint(o.Hover != null ? o.Hover.bounds.center : o.Face.bounds.center);
     }
 
     /// <summary>Whether our tab shows the hover outline (for the self-test).</summary>
@@ -224,24 +334,37 @@ internal static class BookTabs
     /// Which of our tabs is under a screen point (the book cursor), if any. Uses the tab root's collider, which does not
     /// move with the slide (like the game's own hover), so a sliding tab never slips out from under the cursor.
     /// </summary>
+    /// <summary>Sub-tabs first (only while they are slid out), the nearest one whose screen rectangle holds the point; then the root tab
+    /// (<see cref="BookTab.Gear"/>: it opens the last mod page).</summary>
     public static BookTab HitTest(Vector2 screen)
     {
         var cam = Camera.main;
         if (cam == null) return BookTab.None;
-        foreach (var (t, o) in Made)
+        if (_pageShown)
         {
-            if (o.Face == null) continue;
-            var b = o.Hover != null ? o.Hover.bounds : o.Face.bounds;
-            float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
-            for (int i = 0; i < 8; i++)
-            {
-                var c = new Vector3((i & 1) == 0 ? b.min.x : b.max.x, (i & 2) == 0 ? b.min.y : b.max.y, (i & 4) == 0 ? b.min.z : b.max.z);
-                var sp = cam.WorldToScreenPoint(c);
-                x0 = Mathf.Min(x0, sp.x); y0 = Mathf.Min(y0, sp.y); x1 = Mathf.Max(x1, sp.x); y1 = Mathf.Max(y1, sp.y);
-            }
-            if (screen.x >= x0 && screen.x <= x1 && screen.y >= y0 && screen.y <= y1) return t;
+            BookTab best = BookTab.None;
+            float bestD = float.MaxValue;
+            foreach (var (t, o) in Subs)
+                if (ScreenRect(cam, o) is Rect r && r.Contains(screen) && (r.center - screen).sqrMagnitude < bestD) { best = t; bestD = (r.center - screen).sqrMagnitude; }
+            if (best != BookTab.None) return best;
         }
+        foreach (var (t, o) in Made)
+            if (ScreenRect(cam, o) is Rect r && r.Contains(screen)) return t;
         return BookTab.None;
+    }
+
+    private static Rect? ScreenRect(Camera cam, Ours o)
+    {
+        if (o.Face == null) return null;
+        var b = o.Hover != null ? o.Hover.bounds : o.Face.bounds;
+        float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+        for (int i = 0; i < 8; i++)
+        {
+            var c = new Vector3((i & 1) == 0 ? b.min.x : b.max.x, (i & 2) == 0 ? b.min.y : b.max.y, (i & 4) == 0 ? b.min.z : b.max.z);
+            var sp = cam.WorldToScreenPoint(c);
+            x0 = Mathf.Min(x0, sp.x); y0 = Mathf.Min(y0, sp.y); x1 = Mathf.Max(x1, sp.x); y1 = Mathf.Max(y1, sp.y);
+        }
+        return Rect.MinMaxRect(x0, y0, x1, y1);
     }
 
     public static Vector2 ScreenCenter(BookTab tab)

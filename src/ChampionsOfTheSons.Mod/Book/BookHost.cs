@@ -15,6 +15,10 @@ internal enum BookTab
     Character,
     /// <summary>The in-game guide (COS-97): what the mod is, the keys, and one page per system.</summary>
     Help,
+    /// <summary>Spell list and bar slots (COS-168).</summary>
+    Spells,
+    /// <summary>Perk trees (COS-168).</summary>
+    Perks,
 }
 
 /// <summary>

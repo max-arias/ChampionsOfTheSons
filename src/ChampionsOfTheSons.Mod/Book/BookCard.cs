@@ -129,6 +129,12 @@ internal static class BookCard
         if (_built && !_hidden) { _hidden = true; _card.RectTransform.anchoredPosition = OffScreen; }
     }
 
+    /// <summary>Keys the card shows as text: a perk, a spell row or an attribute row (not their buttons).</summary>
+    public static bool ShowsText(string key) =>
+        (key.StartsWith("perk.", StringComparison.Ordinal) && ModContent.Db.Perks.ContainsKey(key))
+        || (key.StartsWith("spell.", StringComparison.Ordinal) && ModContent.Db.Spells.ContainsKey(key))
+        || (key.StartsWith("attr.", StringComparison.Ordinal) && Core.Rules.AttributePoints.Ids.Contains(key.Substring(5)));
+
     /// <summary>Shows an item (slot key) or a stat row ("row.id"). <paramref name="pinned"/>: the selected item, with actions.</summary>
     public static void Show(string key, bool pinned)
     {
@@ -151,7 +157,25 @@ internal static class BookCard
         if (key != _shownKey) _destroyArmed = false;
         _shownKey = key;
         var pc = PlayerState.Character;
-        if (key.StartsWith("row.", StringComparison.Ordinal))
+        if (ShowsText(key))
+        {
+            // COS-168: a perk, spell or attribute on its page: title and text only.
+            var bad = UiTheme.Bad;
+            var faint = UiTheme.TextFaint;
+            var (title, body) = key.StartsWith("attr.", StringComparison.Ordinal) ? Perks.PerkInfo.Attribute(key.Substring(5), faint)
+                : key.StartsWith("spell.", StringComparison.Ordinal) ? Perks.PerkInfo.Spell(key, bad, faint)
+                : Perks.PerkInfo.Perk(key, bad, faint);
+            if (title.Length == 0) { Hide(); return; }
+            _title.Text(title);
+            SetIcon(key.StartsWith("attr.", StringComparison.Ordinal) ? null : Icons.IconCache.GetSprite(key));
+            On(_sub.Root, false);
+            _body.Text(body);
+            On(_divider.Root, false);
+            On(_compare.Root, false);
+            On(_actions.Root, false);
+            On(_stackActions.Root, false);
+        }
+        else if (key.StartsWith("row.", StringComparison.Ordinal))
         {
             var row = SheetData.Build(pc).FirstOrDefault(r => r.Id == key.Substring(4));
             if (row.Id == null) { Hide(); return; }

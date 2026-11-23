@@ -445,6 +445,8 @@ internal static class BookSelfTest
 
     private static void CharacterRows()
     {
+        // COS-174: the first character page holds the attributes; stat rows start on the next one.
+        if (BookPages.CharPage == 0) { BookPages.Page(BookTab.Character, 1); BookPages.Refresh(BookTab.Character); }
         var rows = BookPages.CurrentHits.Count(h => h.Key.StartsWith("row.", StringComparison.Ordinal));
         SelfTest.Check("book: the character page lists stat rows", BookHost.Tab == BookTab.Character && rows >= 8, $"{rows} rows");
     }

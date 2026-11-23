@@ -5,8 +5,8 @@ using UnityEngine.InputSystem;
 namespace ChampionsOfTheSons.Mod.Book;
 
 /// <summary>
-/// Equipment and character pages on the game's guide book (COS-59). The book stays the game's; we add three tabs
-/// (Gear, Bag, Character), draw their pages, handle clicks with the book cursor and show a detail card beside it.
+/// The mod's pages on the game's guide book (COS-59, COS-168). The book stays the game's; we add one tab with five sub-tabs
+/// (Character, Inventory, Spells, Perks, Help), draw their pages, handle clicks with the book cursor and show a detail card beside it.
 /// </summary>
 public sealed class BookFeature : IModFeature
 {
@@ -78,7 +78,15 @@ public sealed class BookFeature : IModFeature
         if (input.Press)
         {
             var tab = BookTabs.HitTest(screen);
-            if (tab != BookTab.None) { CancelDrag(); BookHost.ShowModPage(BookPages.LastTab); LastAction = "tab " + BookPages.LastTab; return; }
+            if (tab != BookTab.None)
+            {
+                // The root tab opens the last mod page; a sub-tab its own page (COS-168).
+                var open = tab == BookTab.Gear ? BookPages.LastTab : tab;
+                CancelDrag();
+                BookHost.ShowModPage(open);
+                LastAction = "tab " + open;
+                return;
+            }
         }
         if (!BookHost.ModPageActive) { CancelDrag(); BookCard.Hide(); return; }
         var current = BookHost.Tab;
@@ -113,7 +121,7 @@ public sealed class BookFeature : IModFeature
     private static void UpdateCard(string? hover)
     {
         var inv = PlayerState.Character.Inventory;
-        bool hoverShows = hover != null && (hover.StartsWith("row.", StringComparison.Ordinal) || inv.Get(hover) != null);
+        bool hoverShows = hover != null && (hover.StartsWith("row.", StringComparison.Ordinal) || BookCard.ShowsText(hover) || inv.Get(hover) != null);
         if (hoverShows && hover != BookPages.Selected) BookCard.Show(hover!, pinned: false);
         else if (BookPages.Selected != null && inv.Get(BookPages.Selected) != null) BookCard.Show(BookPages.Selected, pinned: true);
         else BookCard.Hide();

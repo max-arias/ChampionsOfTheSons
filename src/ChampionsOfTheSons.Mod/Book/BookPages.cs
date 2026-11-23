@@ -24,9 +24,9 @@ internal sealed class PageSlot
 }
 
 /// <summary>
-/// The three mod pages on the guide book (COS-59): Gear (paper doll + set bonuses), Bag (paged 5x7 grid + sort) and
-/// Character (level, XP, stat sheet over two pages). Built once on the page canvas; refreshed when the inventory or
-/// stats change. Clicks and hover come in as page pixels from <see cref="BookFeature"/>.
+/// The mod pages on the guide book (COS-59, COS-168): Inventory (paper doll and bag), Character (attributes, level, XP, stat sheet),
+/// Spells and Perks (their own classes) and Help, each opened by its sub-tab beside the book (<see cref="BookTabs"/>). Built once on
+/// the page canvas; refreshed when the inventory or stats change. Clicks and hover come in as page pixels from <see cref="BookFeature"/>.
 /// </summary>
 internal static class BookPages
 {
@@ -43,9 +43,12 @@ internal static class BookPages
     /// <summary>The mod page the book tab opens (the last one shown).</summary>
     public static BookTab LastTab { get; private set; } = BookTab.Gear;
 
-    private static readonly (BookTab Tab, string Key, string Fallback)[] SubTabs =
+    /// <summary>Page titles (COS-168: the sub-tabs beside the book replace the tabs that were drawn in the title bar).</summary>
+    private static string TitleOf(BookTab tab) => tab switch
     {
-        (BookTab.Gear, "ui.book.tab.gear", "Gear"), (BookTab.Character, "ui.book.tab.character", "Character"), (BookTab.Help, "ui.book.tab.help", "Help"),
+        BookTab.Gear or BookTab.Bag => UiText.T("ui.book.tab.inventory", "Inventory"),
+        BookTab.Character => UiText.T("ui.book.tab.character", "Character"),
+        _ => UiText.T("ui.book.tab.help", "Help"),
     };
 
     /// <summary>Equip slots in a body shape, page pixels (x, y from the top-left, width, height).</summary>
@@ -105,7 +108,7 @@ internal static class BookPages
         return keys;
     }
 
-    private static RectTransform _gear = null!, _char = null!, _help = null!;
+    private static RectTransform _gear = null!, _char = null!, _help = null!, _spells = null!, _perksPage = null!;
     private static TextMeshProUGUI _helpTitle = null!, _helpBody = null!, _helpPager = null!;
     private static readonly List<(TextMeshProUGUI Name, TextMeshProUGUI Key)> HelpRows = new();
     private const float HelpRowH = 30;
@@ -151,37 +154,19 @@ internal static class BookPages
         BuildGear();
         BuildCharacter();
         BuildHelp();
+        _spells = BookSpellsPage.Build(page);
+        _perksPage = BookPerksPage.Build(page);
         Pc.Inventory.Changed += MarkDirty;
         Pc.Stats.Changed += MarkDirty;
         Show(BookTab.None);
     }
 
-    /// <summary>The title bar holds the three sub-tabs; the open one is paper colored, like an open tab.</summary>
+    /// <summary>The title bar: the page's name on the left, a short note on the right (returned).</summary>
     private static TextMeshProUGUI TitleBar(RectTransform root, BookTab own)
     {
         PageKit.Box(root, "titlebar", 0, 0, PageKit.W, Header - 14, PageKit.TitleBar);
-        float x = Left;
-        foreach (var (tab, key, fallback) in SubTabs)
-        {
-            bool open = tab == own;
-            PageKit.Box(root, "subtab-" + tab, x, 12, SubTabW, Header - 26, open ? PageKit.Paper : PageKit.TitleBar);
-            PageKit.Text(root, "subtab-text-" + tab, x, 12, SubTabW, Header - 26, UiText.T(key, fallback).ToUpperInvariant(), 22,
-                open ? PageKit.Ink : PageKit.TitleText, TextAlignmentOptions.Center);
-            x += SubTabW + 6;
-        }
-        return PageKit.Text(root, "title-right", PageKit.W - Right - 110, 12, 104, Header - 26, "", 20, PageKit.TitleText, TextAlignmentOptions.MidlineRight);
-    }
-
-    private const float SubTabW = 150;
-
-    private static void AddSubTabHits()
-    {
-        float x = Left;
-        foreach (var (tab, _, _) in SubTabs)
-        {
-            Hits.Add(new PageHit("tab." + tab, x, 12, SubTabW, Header - 26));
-            x += SubTabW + 6;
-        }
+        PageKit.Text(root, "title", Left, 12, 320, Header - 26, TitleOf(own).ToUpperInvariant(), 26, PageKit.TitleText);
+        return PageKit.Text(root, "title-right", PageKit.W - Right - 230, 12, 224, Header - 26, "", 20, PageKit.TitleText, TextAlignmentOptions.MidlineRight);
     }
 
     private static PageSlot Slot(RectTransform root, string key, float x, float y, float size, string? emptyLabel) =>
@@ -330,6 +315,7 @@ internal static class BookPages
         _xpFill = PageKit.Box(_char, "xp-fill", Left, Header + 62, XpW, 16, PageKit.RarityColor(3)).rectTransform;
         _xpText = PageKit.Text(_char, "xp-text", Left, Header + 80, XpW, 28, "", 20, PageKit.InkFaint, TextAlignmentOptions.Center);
         _charPager = Pager(_char);
+        BuildAttributes();
         // Page 3: the stat box and set bonuses (moved off the Gear page to make room for the bag).
         _charStats = PageKit.Fill(_char, "char-stats");
         float boxY = Header + 124;
@@ -338,6 +324,80 @@ internal static class BookPages
         float setsY = boxY + 86;
         PageKit.Text(_charStats, "sets-title", Left, setsY, 560, 30, UiText.T("ui.book.sets", "Set bonuses"), 24, PageKit.Ink);
         _sets = PageKit.Text(_charStats, "sets", Left, setsY + 34, XpW, PagerY - setsY - 44, "", 20, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
+    }
+
+    // Attributes (COS-174): the first character page. One row each: name and value, what a point gives, - and +.
+    private static RectTransform _attr = null!;
+    private static TextMeshProUGUI _attrLeft = null!, _attrResetText = null!;
+    private static Image _attrResetBg = null!;
+    private static readonly List<(string Id, TextMeshProUGUI Name, TextMeshProUGUI Value, TextMeshProUGUI Per, Image MinusBg, Image PlusBg)> AttrRows = new();
+    private const float AttrTop = Header + 124, AttrRowH = 118, AttrBtn = 52, PlusX = PageKit.W - Right - AttrBtn, MinusX = PlusX - AttrBtn - 10;
+    private const float ResetX = Left, ResetW = 230, ResetY = AttrTop + 4 * AttrRowH + 8, ResetH = 44;
+    private static bool _attrArmed;
+    private static float _attrArmedAt;
+
+    private static void BuildAttributes()
+    {
+        _attr = PageKit.Fill(_char, "attributes");
+        _attrLeft = PageKit.Text(_attr, "attr-left", Left, AttrTop - 34, XpW, 30, "", 22, PageKit.Good);
+        for (int i = 0; i < AttributePoints.Ids.Length; i++)
+        {
+            var id = AttributePoints.Ids[i];
+            float y = AttrTop + i * AttrRowH;
+            PageKit.Box(_attr, "attr-shade-" + id, Left - 6, y, XpW + 12, AttrRowH - 10, i % 2 == 0 ? new Color(0, 0, 0, 0.06f) : Color.clear);
+            var name = PageKit.Text(_attr, "attr-name-" + id, Left, y + 6, 300, 38, "", 30, PageKit.Ink);
+            var value = PageKit.Text(_attr, "attr-value-" + id, Left + 300, y + 6, MinusX - Left - 310, 38, "", 30, PageKit.TitleBar, TextAlignmentOptions.MidlineRight);
+            var per = PageKit.Text(_attr, "attr-per-" + id, Left, y + 46, MinusX - Left - 10, AttrRowH - 60, "", 16, PageKit.InkFaint, TextAlignmentOptions.TopLeft, wrap: true);
+            var minus = PageKit.Box(_attr, "attr-minus-bg-" + id, MinusX, y + 20, AttrBtn, AttrBtn, PageKit.PaperShade);
+            PageKit.Text(_attr, "attr-minus-" + id, MinusX, y + 20, AttrBtn, AttrBtn, "-", 34, PageKit.Ink, TextAlignmentOptions.Center);
+            var plus = PageKit.Box(_attr, "attr-plus-bg-" + id, PlusX, y + 20, AttrBtn, AttrBtn, PageKit.PaperShade);
+            PageKit.Text(_attr, "attr-plus-" + id, PlusX, y + 20, AttrBtn, AttrBtn, "+", 34, PageKit.Ink, TextAlignmentOptions.Center);
+            AttrRows.Add((id, name, value, per, minus, plus));
+        }
+        _attrResetBg = PageKit.Box(_attr, "attr-reset-bg", ResetX, ResetY, ResetW, ResetH, PageKit.TitleBar);
+        _attrResetText = PageKit.Text(_attr, "attr-reset", ResetX, ResetY, ResetW, ResetH, "", 20, PageKit.TitleText, TextAlignmentOptions.Center);
+        PageKit.Text(_attr, "attr-hint", ResetX + ResetW + 10, ResetY, XpW - ResetW - 10, ResetH,
+            UiText.T("ui.book.attr.hint", "Right-click + or - for 10. Free to change."), 16, PageKit.InkFaint, TextAlignmentOptions.MidlineRight);
+    }
+
+    private static void RefreshAttributes()
+    {
+        if (_attrArmed && Time.unscaledTime - _attrArmedAt > 4) _attrArmed = false;
+        int left = Pc.AttributePointsLeft;
+        _attrLeft.text = string.Format(UiText.T("ui.book.attr.left", "{0} attribute points to spend"), left);
+        _attrLeft.color = left > 0 ? PageKit.Good : PageKit.InkFaint;
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        foreach (var (id, name, value, per, minusBg, plusBg) in AttrRows)
+        {
+            float y = AttrTop + AttributePoints.Ids.ToList().IndexOf(id) * AttrRowH;
+            int spent = Pc.Attributes.Get(id);
+            name.text = Perks.PerkInfo.AttributeName(id);
+            value.text = $"{Pc.Stats.Get(id).ToString("0", inv)}  <size=18><color={PageKit.HexOf(PageKit.InkFaint)}>({spent})</color></size>";
+            per.text = Perks.PerkInfo.AttributePerPoint(id);
+            minusBg.color = spent > 0 ? PageKit.PaperShade : new Color(PageKit.PaperShade.r, PageKit.PaperShade.g, PageKit.PaperShade.b, 0.4f);
+            plusBg.color = left > 0 ? PageKit.Good : new Color(PageKit.PaperShade.r, PageKit.PaperShade.g, PageKit.PaperShade.b, 0.4f);
+            Hits.Add(new PageHit("attr.minus." + id, MinusX, y + 20, AttrBtn, AttrBtn));
+            Hits.Add(new PageHit("attr.plus." + id, PlusX, y + 20, AttrBtn, AttrBtn));
+            Hits.Add(new PageHit("attr." + id, Left, y, MinusX - Left - 10, AttrRowH - 10));
+        }
+        _attrResetText.text = _attrArmed ? UiText.T("ui.book.perks.confirm", "Click again to refund") : UiText.T("ui.book.attr.reset", "Reset attributes");
+        _attrResetBg.color = _attrArmed ? PageKit.Select : PageKit.TitleBar;
+        Hits.Add(new PageHit("attr.reset", ResetX, ResetY, ResetW, ResetH));
+    }
+
+    private static string? ClickAttribute(string key, bool right)
+    {
+        int n = right ? 10 : 1;
+        if (key.StartsWith("attr.plus.", StringComparison.Ordinal)) return "spent " + Pc.SpendAttribute(key.Substring("attr.plus.".Length), n);
+        if (key.StartsWith("attr.minus.", StringComparison.Ordinal)) return "refunded " + Pc.RefundAttribute(key.Substring("attr.minus.".Length), n);
+        if (key == "attr.reset")
+        {
+            if (!_attrArmed || Time.unscaledTime - _attrArmedAt > 4) { _attrArmed = true; _attrArmedAt = Time.unscaledTime; return "armed"; }
+            _attrArmed = false;
+            Pc.ResetAttributes();
+            return "reset";
+        }
+        return key.StartsWith("attr.", StringComparison.Ordinal) ? "row" : null;
     }
 
     private static void BuildHelp()
@@ -356,6 +416,8 @@ internal static class BookPages
         _gear.gameObject.SetActive(tab is BookTab.Gear or BookTab.Bag);
         _char.gameObject.SetActive(tab == BookTab.Character);
         _help.gameObject.SetActive(tab == BookTab.Help);
+        _spells.gameObject.SetActive(tab == BookTab.Spells);
+        _perksPage.gameObject.SetActive(tab == BookTab.Perks);
         _dirty = true;
         Refresh(tab);
     }
@@ -369,7 +431,6 @@ internal static class BookPages
     {
         _dirty = false;
         Hits.Clear();
-        AddSubTabHits();
         if (tab != BookTab.None) LastTab = tab;
         switch (tab)
         {
@@ -380,6 +441,8 @@ internal static class BookPages
                 break;
             case BookTab.Character: RefreshCharacter(); break;
             case BookTab.Help: RefreshHelp(); break;
+            case BookTab.Spells: BookSpellsPage.Refresh(Hits); break;
+            case BookTab.Perks: BookPerksPage.Refresh(Hits); break;
         }
     }
 
@@ -438,12 +501,16 @@ internal static class BookPages
         _xpText.text = $"{Math.Floor(sum.Xp).ToString("N0", inv)} / {sum.Goal.ToString("N0", inv)} XP";
 
         _sheet = SheetData.Build(Pc);
-        // Stat pages hold whole sections, up to RowsPerPage rows each (COS-97); the last page is the stat box and set bonuses.
+        // Page 1: attributes (COS-174). Then stat pages of whole sections, up to RowsPerPage rows each (COS-97); the last page is
+        // the stat box and set bonuses.
         var pages = SheetData.Paginate(_sheet, RowsPerPage);
-        CharPages = pages.Count + 1;
+        CharPages = pages.Count + 2;
         if (CharPage >= CharPages) CharPage = CharPages - 1;
+        bool attributes = CharPage == 0;
         bool statBox = CharPage == CharPages - 1;
-        var rows = statBox ? new List<SheetRow>() : pages[CharPage];
+        var rows = statBox || attributes ? new List<SheetRow>() : pages[CharPage - 1];
+        _attr.gameObject.SetActive(attributes);
+        if (attributes) RefreshAttributes();
         _charStats.gameObject.SetActive(statBox);
         if (statBox)
         {
@@ -573,6 +640,13 @@ internal static class BookPages
         if (tab is BookTab.Bag or BookTab.Gear) BagPage = (BagPage + delta + BagPages) % BagPages;
         else if (tab == BookTab.Character) CharPage = (CharPage + delta + CharPages) % CharPages;
         else if (tab == BookTab.Help) HelpPage = (HelpPage + delta + BookGuide.Pages) % BookGuide.Pages;
+        else if (tab == BookTab.Spells) BookSpellsPage.Page = (BookSpellsPage.Page + delta + BookSpellsPage.Pages) % BookSpellsPage.Pages;
+        else if (tab == BookTab.Perks)
+        {
+            // Shoulders and the wheel step through the trees.
+            int i = Array.IndexOf(Perks.PerkInfo.Trees, BookPerksPage.Current);
+            BookPerksPage.ShowTree(Perks.PerkInfo.Trees[(i + delta + Perks.PerkInfo.Trees.Length) % Perks.PerkInfo.Trees.Length]);
+        }
         _dirty = true;
     }
 
@@ -616,6 +690,8 @@ internal static class BookPages
             case "tab.Bag": BookHost.ShowModPage(BookTab.Bag); return "tab";
             case "tab.Character": BookHost.ShowModPage(BookTab.Character); return "tab";
             case "tab.Help": BookHost.ShowModPage(BookTab.Help); return "tab";
+            case "tab.Spells": BookHost.ShowModPage(BookTab.Spells); return "tab";
+            case "tab.Perks": BookHost.ShowModPage(BookTab.Perks); return "tab";
             case "prev": Page(tab, -1); return "page";
             case "next": Page(tab, +1); return "page";
             case "sort":
@@ -643,6 +719,10 @@ internal static class BookPages
                 return "filter";
         }
         if (key.StartsWith("row.", StringComparison.Ordinal)) return "row";
+        _dirty = true;
+        if (tab == BookTab.Character && ClickAttribute(key, right) is string attr) return attr;
+        if (tab == BookTab.Spells) return BookSpellsPage.Click(key) ?? "none";
+        if (tab == BookTab.Perks) return BookPerksPage.Click(key, right) ?? "none";
         var item = Pc.Inventory.Get(key);
         _dirty = true;
         BookMerge.ClearNew(item);

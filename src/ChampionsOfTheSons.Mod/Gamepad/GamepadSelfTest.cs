@@ -14,38 +14,17 @@ internal static class GamepadSelfTest
         SelfTest.PhaseReset += CloseAll;
         float t = 0;
         SelfTest.Add(t += 0.2f, "pad: unpause", TestKit.Unpause);
-        SelfTest.Add(t += 0.5f, "pad: binding opens the perk tree", () =>
+        SelfTest.Add(t += 0.5f, "pad: binding opens the perks page", () =>
         {
             SelfTest.Check("pad: panels closed to start", GamepadFeature.OpenPanel == null);
             PadInput.Inject(PadButton.LeftShoulder, PadButton.DpadRight);
         });
-
-        SelfTest.Add(t += 0.5f, "pad: perk tree by binding", () =>
+        // COS-168: the perk tree is a page of the guide book; the binding raises the book on it.
+        SelfTest.Add(t += 3f, "pad: perks page by binding", () =>
         {
-            var panel = PerksFeature.Panel;
-            SelfTest.Check("pad: perk tree opened", panel.IsOpen);
-            SelfTest.Check("pad: perk tree has focusable controls", panel.PadRoot != null && PadFocus.Count(panel.PadRoot) > 10, panel.PadRoot == null ? "no root" : PadFocus.Count(panel.PadRoot).ToString());
-            _tab = panel.CurrentTab;
-            // Start from the current tab's button (the first focus goes to whatever is nearest the pointer, often a perk node),
-            // then the d-pad moves along the tab row to the next tab.
-            var tabButton = panel.TabButton(_tab);
-            SelfTest.Check("pad: current tab is focusable", tabButton != null && panel.PadRoot != null && PadFocus.FocusOn(panel.PadRoot, tabButton));
-            SelfTest.Check("pad: pointer follows focus", PadPointer.Active);
-            PadInput.Inject(PadButton.DpadRight);
-        });
-        SelfTest.Add(t += 0.5f, "pad: focus a tab and confirm", () =>
-        {
-            PadInput.Inject(PadButton.South);
-        });
-        SelfTest.Add(t += 0.5f, "pad: A on a tab switches it", () =>
-        {
-            SelfTest.Log($"pad: tab {_tab} -> {PerksFeature.Panel.CurrentTab}");
-            SelfTest.Check("pad: perk tab changed by pad", PerksFeature.Panel.CurrentTab != _tab);
-            PadInput.Inject(PadButton.LeftShoulder, PadButton.DpadRight);
-        });
-        SelfTest.Add(t += 0.5f, "pad: same binding closes the perk tree", () =>
-        {
-            SelfTest.Check("pad: perk tree closed by its binding", !PerksFeature.Panel.IsOpen);
+            SelfTest.Check("pad: the binding opened the book on the Perks page", Book.BookHost.IsOpen && Book.BookHost.Tab == Book.BookTab.Perks,
+                $"book {Book.BookHost.IsOpen}, tab {Book.BookHost.Tab}, {Book.BookHost.LastFailure}");
+            CloseAll();
         });
         SelfTest.Add(t += 1.5f, "pad: wait 2", () =>
         {
@@ -66,7 +45,6 @@ internal static class GamepadSelfTest
     private static void CloseAll()
     {
         if (Book.BookHost.IsOpen) Book.BookHost.Close();
-        if (PerksFeature.Panel.IsOpen) PerksFeature.Panel.Close();
         if (WorldRulesFeature.Settings.IsOpen) WorldRulesFeature.Settings.Close();
         PadFocus.Clear();
         PadPointer.Release();

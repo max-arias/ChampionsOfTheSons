@@ -70,7 +70,6 @@ public class ChampionsOfTheSonsMod : SonsMod
             SelfTest.PhaseReset += () =>
             {
                 if (Book.BookHost.IsOpen) Book.BookHost.Close();
-                Perks.PerksFeature.Panel?.Close();
                 HostRules.WorldRulesFeature.Settings?.Close();
                 // Enemies from earlier phases stay in the world: switch them off so they neither cast nor take part in this phase.
                 foreach (var enemy in Bridge.EnemyRegistry.Snapshot()) enemy.TestActive = false;

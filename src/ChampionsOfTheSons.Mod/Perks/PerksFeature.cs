@@ -1,27 +1,21 @@
+using ChampionsOfTheSons.Mod.Book;
 using SonsSdk;
-using UnityEngine;
 
 namespace ChampionsOfTheSons.Mod.Perks;
 
-/// <summary>Creates the perk window and wires its key (Config.PerksKey).</summary>
+/// <summary>The perk key (Config.PerksKey, U) opens the guide book on its Perks page (COS-168: the standalone perk window is gone).</summary>
 internal sealed class PerksFeature : IModFeature
 {
-    public static PerkPanel Panel { get; private set; } = null!;
+    public void Init() => Config.PerksKey.Notify(TogglePerksPage);
 
-    public void Init()
+    /// <summary>Opens the book on the Perks page, or closes it when that page is already showing.</summary>
+    public static void TogglePerksPage()
     {
-        Panel = new PerkPanel();
-        Panel.Build();
-        Config.PerksKey.Notify(Panel.Toggle);
+        if (BookHost.IsOpen && BookHost.Tab == BookTab.Perks) BookHost.Close();
+        else BookHost.Open(BookTab.Perks);
     }
 
-    public void Update(float dt, bool inWorld)
-    {
-        Panel.Tick();
-        if (!Panel.IsOpen) return;
-        if (Input.GetKeyDown(KeyCode.Escape)) Panel.Close();
-        else if (Settings.ModKeys.PressedThisFrame(Config.PerksKey)) Panel.Toggle();
-    }
+    public void Update(float dt, bool inWorld) { }
 
     public void RegisterSelfTests() => PerksSelfTest.Register();
 }

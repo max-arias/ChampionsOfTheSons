@@ -1,181 +1,124 @@
-using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
 using ChampionsOfTheSons.Core.Rules;
-using ChampionsOfTheSons.Mod.UI;
+using ChampionsOfTheSons.Mod.Book;
 
 namespace ChampionsOfTheSons.Mod.Perks;
 
-/// <summary>Perk panel checks: level up for points, buy perks, stats change, hit-test, tabs, spell book, respec with a Untainted Heart.</summary>
+/// <summary>
+/// The book's Perks, Spells and attribute pages (COS-168, COS-170, COS-174): buying through page clicks, the stat change, free
+/// refunds of a tree, all perks and the spells, learning and slotting spells, spending and resetting attributes, the sub-tabs.
+/// </summary>
 internal static class PerksSelfTest
 {
-    private static PerkPanel Panel => PerksFeature.Panel;
     private static PlayerCharacter Pc => PlayerState.Character;
-    private static readonly List<string> Bought = new();
+    private static PerkDef? _root;
+    private static double _before;
+
+    private static string Click(BookTab tab, string key, bool right = false) => BookPages.Click(tab, key, right);
 
     public static void Register()
     {
-        SelfTest.Add(20f, "perks: fresh character + level up", LevelUp);
-        SelfTest.Add(20.5f, "perks: open panel", OpenPanel);
-        SelfTest.Add(21f, "perks: buy perks, stats change", BuyPerks);
-        SelfTest.Add(21.5f, "perks: hold to buy", HoldToBuy);
-        SelfTest.Add(22f, "perks: states, hit-test, detail", StatesAndHover);
-        SelfTest.Add(23f, "perks: shot melee", () => TestKit.Screenshot("10-perks-melee"));
-        SelfTest.Add(23.5f, "perks: tabs", Tabs);
-        SelfTest.Add(25f, "perks: shot magic", () => TestKit.Screenshot("11-perks-magic"));
-        SelfTest.Add(25.5f, "perks: shot utility", () => { Panel.ShowTab(PerkCategory.Utility.ToString()); });
-        SelfTest.Add(26.5f, "perks: shot utility 2", () => TestKit.Screenshot("12-perks-utility"));
-        SelfTest.Add(27f, "perks: spell book", SpellBookTab);
-        SelfTest.Add(27.8f, "perks: spell row hit-test", () =>
+        SelfTest.Add(20f, "perks: fresh level 30 character", () =>
         {
-            var hit = Panel.RaycastHover(Panel.ScreenPointOfSpellRow("spell.blink"));
-            SelfTest.Check("perks: spell row hit-test", hit == "spell.blink", hit ?? "null");
+            PlayerState.FromSave(new Core.Saving.PlayerSave { Level = 30 });
+            TestKit.Unpause();
         });
-        SelfTest.Add(28.5f, "perks: shot spell book", () => TestKit.Screenshot("13-perks-spellbook"));
-        SelfTest.Add(29f, "perks: respec with Untainted Heart", Respec);
-        SelfTest.Add(30f, "perks: close", () => Panel.Close());
+        SelfTest.Add(20.5f, "perks: open the book on Perks", () =>
+            SelfTest.Check("perks: the perk key's page opens", BookHost.Open(BookTab.Perks), BookHost.LastFailure));
+        SelfTest.Add(23.5f, "perks: buy by page clicks", BuyByClicks);
+        SelfTest.Add(24f, "perks: shot perks", () => TestKit.Screenshot("perks-01-melee"));
+        SelfTest.Add(24.5f, "perks: refunds", Refunds);
+        SelfTest.Add(25f, "perks: spells page", SpellsPage);
+        SelfTest.Add(25.6f, "perks: shot spells", () => TestKit.Screenshot("perks-02-spells"));
+        SelfTest.Add(26f, "perks: attributes", Attributes);
+        SelfTest.Add(26.6f, "perks: shot attributes", () => TestKit.Screenshot("perks-03-attributes"));
+        SelfTest.Add(27f, "perks: sub-tabs", SubTabs);
+        SelfTest.Add(28f, "perks: close", () => { if (BookHost.IsOpen) BookHost.Close(); });
     }
 
-    private static void LevelUp()
+    private static void BuyByClicks()
     {
-        var save = new Core.Saving.PlayerSave { Level = 1, Xp = 0 };
-        PlayerState.FromSave(save);
-        Panel.ShowTab(PerkCategory.MeleeOffense.ToString());
-        SelfTest.Check("perks: starts with no perks", Pc.Perks.SpentPoints == 0 && Pc.Perks.Bought.Count == 0);
-        int guard = 0;
-        while (Pc.Progress.Level < 30 && guard++ < 100) Pc.AddXp(XpCurve.Goal(Pc.Progress.Level));
-        int avail = Pc.Perks.AvailablePoints(Pc.Progress);
-        SelfTest.Check("perks: level up gives points", Pc.Progress.Level >= 30 && avail >= 30, $"level {Pc.Progress.Level}, points {avail}");
-    }
-
-    private static void OpenPanel()
-    {
-        Panel.Open();
-        SelfTest.Check("perks: panel open", Panel.IsOpen);
-        SelfTest.Check("perks: all perks laid out", Panel.NodeIds.Count == ModContent.Db.Perks.Count, $"{Panel.NodeIds.Count} nodes, {ModContent.Db.Perks.Count} perks");
-        SelfTest.Check("perks: points counter", Panel.PointsText.Contains("30"), Panel.PointsText);
-    }
-
-    private static void BuyPerks()
-    {
-        // Walk the melee tree: buy whatever is available and has a data effect, 8 perks, checking each one's stat moves.
-        int bought = 0, moved = 0;
-        for (int round = 0; round < 12 && bought < 8; round++)
-        {
-            var next = ModContent.Db.Perks.Values
-                .Where(p => p.Category == PerkCategory.MeleeOffense && p.Effects.Count > 0 && Pc.Perks.CanBuy(p.Id, Pc.Progress) == BuyResult.Ok)
-                .OrderBy(p => p.Y).ThenBy(p => p.X).FirstOrDefault();
-            if (next == null) break;
-            var stat = next.Effects[0].Stat;
-            double before = Pc.Stats.Get(stat);
-            var r = Panel.Buy(next.Id);
-            double after = Pc.Stats.Get(stat);
-            bought++;
-            bool ok = r == BuyResult.Ok && Math.Abs(after - before) > 1e-9;
-            if (ok) moved++;
-            Bought.Add(next.Id);
-            SelfTest.Check($"perks: buy {next.Id}", ok, $"{r}; {stat} {before:0.####} -> {after:0.####}");
-        }
-        SelfTest.Check("perks: bought several", bought >= 5 && moved == bought, $"{moved}/{bought}");
-        SelfTest.Check("perks: save has the perks", Pc.ToSave().Perks.Count == Bought.Distinct().Count());
-
-        // A locked perk can't be bought.
-        var locked = ModContent.Db.Perks.Values.FirstOrDefault(p => p.UnlockPath.Count > 0 && Pc.Perks.TimesBought(p.Id) == 0 && p.UnlockPath.All(u => Pc.Perks.TimesBought(u) == 0));
-        if (locked != null) SelfTest.Check("perks: locked perk refused", Panel.Buy(locked.Id) == BuyResult.PathLocked);
-    }
-
-    /// <summary>Holding on an available node fills it and buys at <see cref="PerkPanel.HoldSeconds"/>; a held button
-    /// does not buy again until released; locked perks never fill.</summary>
-    private static void HoldToBuy()
-    {
-        var p = ModContent.Db.Perks.Values.Where(x => Pc.Perks.CanBuy(x.Id, Pc.Progress) == BuyResult.Ok)
-            .OrderByDescending(x => x.Stackable).ThenBy(x => x.Category).ThenBy(x => x.Y).First();
-        Panel.ShowTab(p.Category.ToString());
-        int pointsBefore = Pc.Perks.AvailablePoints(Pc.Progress), times = Pc.Perks.TimesBought(p.Id);
-        float half = PerkPanel.HoldSeconds / 2;
-        var r1 = Panel.HoldStep(p.Id, true, half);
-        var hold = Panel.Hold;
-        SelfTest.Check("perks: a short hold only fills the node", r1 == null && hold.Id == p.Id && hold.Fraction > 0.4f && Pc.Perks.TimesBought(p.Id) == times, $"{r1}, {hold}");
-        var r2 = Panel.HoldStep(p.Id, true, half + 0.01f);
-        SelfTest.Check("perks: holding long enough buys", r2 == BuyResult.Ok && Pc.Perks.TimesBought(p.Id) == times + 1 && Pc.Perks.AvailablePoints(Pc.Progress) == pointsBefore - p.Cost,
-            $"{p.Id}: {r2}, x{Pc.Perks.TimesBought(p.Id)}");
-        var r3 = Panel.HoldStep(p.Id, true, PerkPanel.HoldSeconds * 2);
-        SelfTest.Check("perks: keeping the button held does not buy again", r3 == null && Pc.Perks.TimesBought(p.Id) == times + 1, $"{r3}");
-        Panel.HoldStep(p.Id, false, 0);
-        Bought.Add(p.Id);
-        var locked = ModContent.Db.Perks.Values.FirstOrDefault(x => Pc.Perks.CanBuy(x.Id, Pc.Progress) == BuyResult.PathLocked);
+        SelfTest.Check("perks: the Perks page shows", BookHost.Tab == BookTab.Perks, BookHost.Tab.ToString());
+        BookPerksPage.ShowTree(PerkCategory.MeleeOffense);
+        BookPages.Refresh(BookTab.Perks);
+        _root = ModContent.Db.Perks.Values.FirstOrDefault(p => p.Category == PerkCategory.MeleeOffense && p.UnlockPath.Count == 0 && p.Requires.Count == 0
+            && p.LevelReq <= 30 && p.Cost <= Pc.Perks.AvailablePoints(Pc.Progress) && !p.Manual && p.Effects.Count > 0);
+        if (_root == null) { SelfTest.Check("perks: a buyable melee root perk exists", false); return; }
+        var stat = _root.Effects[0].Stat;
+        _before = Pc.Stats.Get(stat);
+        SelfTest.Check("perks: the perk is on the page", BookPages.CurrentHits.Any(h => h.Key == _root.Id));
+        SelfTest.Check("perks: the first click selects", Click(BookTab.Perks, _root.Id) == "select" && Pc.Perks.TimesBought(_root.Id) == 0);
+        string second = Click(BookTab.Perks, _root.Id);
+        SelfTest.Check("perks: the second click buys and the stat changes", second == "bought" && Pc.Perks.TimesBought(_root.Id) == 1 && Pc.Stats.Get(stat) != _before,
+            $"{second}; {stat} {_before} -> {Pc.Stats.Get(stat)}");
+        var locked = ModContent.Db.Perks.Values.FirstOrDefault(p => p.Category == PerkCategory.MeleeOffense && p.UnlockPath.Count > 0
+            && p.UnlockPath.All(x => Pc.Perks.TimesBought(x) == 0));
         if (locked != null)
+            SelfTest.Check("perks: a perk behind its path is refused", Click(BookTab.Perks, locked.Id, right: true).StartsWith("refused", StringComparison.Ordinal)
+                && Pc.Perks.TimesBought(locked.Id) == 0);
+        BookPages.Refresh(BookTab.Perks);
+    }
+
+    private static void Refunds()
+    {
+        if (_root == null) return;
+        BookPerksPage.ShowTree(PerkCategory.MeleeOffense);
+        SelfTest.Check("perks: the first refund click only arms it", Click(BookTab.Perks, "perks.refund_tree") == "armed" && Pc.Perks.TimesBought(_root.Id) == 1);
+        string done = Click(BookTab.Perks, "perks.refund_tree");
+        SelfTest.Check("perks: the second click refunds the tree for free", done.StartsWith("refunded", StringComparison.Ordinal) && Pc.Perks.TimesBought(_root.Id) == 0
+            && Math.Abs(Pc.Stats.Get(_root.Effects[0].Stat) - _before) < 1e-9, done);
+        Click(BookTab.Perks, _root.Id, right: true);
+        Click(BookTab.Perks, "perks.refund_all");
+        Click(BookTab.Perks, "perks.refund_all");
+        SelfTest.Check("perks: refund all clears every perk", Pc.Perks.Bought.Count == 0);
+    }
+
+    private static void SpellsPage()
+    {
+        BookHost.ShowModPage(BookTab.Spells);
+        BookPages.Refresh(BookTab.Spells);
+        SelfTest.Check("perks: the Spells page shows", BookHost.Tab == BookTab.Spells);
+        SelfTest.Check("perks: learn a spell", Click(BookTab.Spells, "spell.learn.spell.blink") == "learned" && Pc.Perks.UnlockedSpells.Contains("spell.blink"));
+        SelfTest.Check("perks: slot it", Click(BookTab.Spells, "spell.slot.2.spell.blink") == "slotted" && Pc.Spells.Loadout[2] == "spell.blink");
+        SelfTest.Check("perks: the same slot takes it off", Click(BookTab.Spells, "spell.slot.2.spell.blink") == "unslotted" && Pc.Spells.Loadout[2] == null);
+        Click(BookTab.Spells, "spell.slot.0.spell.blink");
+        var dear = ModContent.Db.Spells.Values.OrderByDescending(s => s.EnergyCost).First();
+        SelfTest.Check("perks: a spell above max energy is flagged (COS-172)", PerkInfo.TooDear(dear), $"{dear.Id} {dear.EnergyCost} vs {Spells.SpellCaster.MaxEnergy:0}");
+        Click(BookTab.Spells, "spells.refund");
+        string done = Click(BookTab.Spells, "spells.refund");
+        SelfTest.Check("perks: refund spells unlearns and clears the bar", done == "refunded 1" && Pc.Perks.UnlockedSpells.Count == 0 && Pc.Spells.Loadout.All(s => s == null), done);
+        Click(BookTab.Spells, "spell.learn.spell.blink");
+        BookPages.Refresh(BookTab.Spells);
+    }
+
+    private static void Attributes()
+    {
+        BookHost.ShowModPage(BookTab.Character);
+        while (BookPages.CharPage != 0) BookPages.Page(BookTab.Character, 1);
+        BookPages.Refresh(BookTab.Character);
+        int left = Pc.AttributePointsLeft;
+        double hp = Derived.MaxHealth(Pc.Stats);
+        SelfTest.Check("perks: attribute points to spend at level 30", left == AttributeRules.TotalPoints(30), left.ToString());
+        SelfTest.Check("perks: + spends one", Click(BookTab.Character, "attr.plus." + StatIds.Vitality) == "spent 1" && Pc.Attributes.Get(StatIds.Vitality) == 1);
+        SelfTest.Check("perks: right-click + spends ten", Click(BookTab.Character, "attr.plus." + StatIds.Vitality, right: true) == "spent 10");
+        SelfTest.Check("perks: Vitality raises max health", Derived.MaxHealth(Pc.Stats) > hp, $"{hp:0.#} -> {Derived.MaxHealth(Pc.Stats):0.#}");
+        SelfTest.Check("perks: - takes one back", Click(BookTab.Character, "attr.minus." + StatIds.Vitality) == "refunded 1" && Pc.Attributes.Get(StatIds.Vitality) == 10);
+        Click(BookTab.Character, "attr.reset");
+        SelfTest.Check("perks: reset is free and gives every point back", Click(BookTab.Character, "attr.reset") == "reset" && Pc.AttributePointsLeft == left);
+        Pc.SpendAttribute(StatIds.Strength, 5);
+        BookPages.Refresh(BookTab.Character);
+    }
+
+    private static void SubTabs()
+    {
+        foreach (var tab in new[] { BookTab.Character, BookTab.Bag, BookTab.Spells, BookTab.Perks, BookTab.Help })
         {
-            var r4 = Panel.HoldStep(locked.Id, true, PerkPanel.HoldSeconds * 2);
-            SelfTest.Check("perks: holding a locked perk does nothing", r4 == null && Panel.Hold.Id == null, $"{r4}");
-            Panel.HoldStep(locked.Id, false, 0);
+            var at = BookTabs.SubScreenCenter(tab);
+            var hit = BookTabs.HitTest(at);
+            SelfTest.Check($"perks: the {tab} sub-tab is under its own center", hit == tab, $"{at} -> {hit}");
+            BookFeature.Handle(BookInput.MouseAt(at, down: true));
+            BookFeature.Handle(BookInput.MouseAt(at, up: true));
+            SelfTest.Check($"perks: clicking the {tab} sub-tab opens its page", BookHost.Tab == (tab == BookTab.Bag ? BookTab.Bag : tab), BookHost.Tab.ToString());
         }
-        Panel.ShowTab(PerkCategory.MeleeOffense.ToString());
-    }
-
-    private static void StatesAndHover()
-    {
-        var states = ModContent.Db.Perks.Keys.Select(Panel.StateOf).Distinct().ToList();
-        SelfTest.Check("perks: bought, available and locked states exist",
-            states.Contains(PerkState.Bought) && states.Contains(PerkState.Available) && states.Contains(PerkState.Locked), string.Join(",", states));
-
-        var id = Bought[0];
-        var screen = Panel.ScreenPointOfPerk(id);
-        var hit = Panel.RaycastHover(screen);
-        SelfTest.Check("perks: pointer hit-test finds the node", hit == id, $"{hit} at {screen}");
-        Panel.SimulateHover(id);
-        SelfTest.Check("perks: detail shows name, flavor, effect",
-            Panel.DetailName.Length > 0 && Panel.DetailFlavor.Length > 4 && Panel.DetailEffect.Length > 0,
-            $"{Panel.DetailName} | {Panel.DetailEffect}");
-        Panel.ReleaseSimulatedHover();
-        if (Bought.Count > 3) Panel.SimulateHover(Bought[3]);
-    }
-
-    private static void Tabs()
-    {
-        Panel.ReleaseSimulatedHover();
-        Panel.ShowTab(PerkCategory.MagicOffense.ToString());
-        // Buy a couple of magic perks so the screenshot has all states.
-        for (int i = 0; i < 4; i++)
-        {
-            var next = ModContent.Db.Perks.Values.Where(p => p.Category == PerkCategory.MagicOffense && Pc.Perks.CanBuy(p.Id, Pc.Progress) == BuyResult.Ok)
-                .OrderBy(p => p.Y).ThenBy(p => p.X).FirstOrDefault();
-            if (next != null) Panel.Buy(next.Id);
-        }
-        Panel.SimulateHover("perk.stronger_spells");
-        foreach (var cat in new[] { PerkCategory.RangedOffense, PerkCategory.Defense, PerkCategory.Support, PerkCategory.Utility, PerkCategory.MagicOffense })
-        {
-            Panel.ShowTab(cat.ToString());
-            SelfTest.Check($"perks: tab {cat} shows", Panel.CurrentTab == cat.ToString());
-        }
-    }
-
-    private static void SpellBookTab()
-    {
-        Panel.ReleaseSimulatedHover();
-        Panel.ShowTab(PerkPanel.SpellTab);
-        var r = Panel.UnlockSpell("spell.blink");
-        SelfTest.Check("perks: unlock Blink in the spell book", r == BuyResult.Ok && Pc.Perks.UnlockedSpells.Contains("spell.blink"), r.ToString());
-        SelfTest.Check("perks: slot Blink", Panel.SlotSpell("spell.blink", 0) && Pc.Spells.Loadout[0] == "spell.blink");
-        Panel.UnlockSpell("spell.healing_dome");
-        Panel.SlotSpell("spell.healing_dome", 1);
-        Panel.SimulateHover("spell.blink");
-        SelfTest.Check("perks: spell detail has description", Panel.DetailEffect.Contains("Teleport"), Panel.DetailEffect);
-    }
-
-    private static void Respec()
-    {
-        Panel.ReleaseSimulatedHover();
-        Panel.ShowTab(PerkCategory.MeleeOffense.ToString());
-        int spent = Pc.Perks.SpentPoints;
-        // COS-170: free, no heart needed.
-        double before = Pc.Stats.Get(ModContent.Db.Perks[Bought[0]].Effects[0].Stat);
-        string first = Panel.RespecClick();
-        SelfTest.Check("perks: the first Respec click only asks to confirm", first == "armed" && Panel.RespecArmed && Pc.Perks.SpentPoints == spent, first);
-        bool ok = Panel.RespecClick() == "done";
-        double after = Pc.Stats.Get(ModContent.Db.Perks[Bought[0]].Effects[0].Stat);
-        SelfTest.Check("perks: respec refunds everything", ok && Pc.Perks.SpentPoints == 0 && Pc.Perks.Bought.Count == 0 && Pc.Spells.Loadout.All(s => s == null),
-            $"spent {Pc.Perks.SpentPoints}");
-        SelfTest.Check("perks: respec is free and reverted stats", Math.Abs(after - before) > 1e-9,
-            $"{before:0.####} -> {after:0.####}");
     }
 }
