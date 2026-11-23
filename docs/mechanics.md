@@ -207,6 +207,8 @@ Co-op (COS-79): the host (a dedicated server too) runs every enemy's casts and a
 - Sets: a bonus marked `perPiece` applies once per equipped piece (Whiteout Regalia 1, Blood Oath 1, as COTF).
 
 ## Spells
+- Spell level scaling (COS-183, Max 2026-11-23: spells barely hurt enemies of the player's level): every spell's base damage x `EnemyScaler.HealthCurve(level) / HealthCurve(1)` (stat `spell_base_scale`, set from the caster's level), so a spell keeps its level-1 share of a same-level normal enemy at every level (Firebolt about 30% per hit). Spell-damage gear and Intelligence add on top as before. Below, "base damage" means at level 1.
+- Visuals (COS-178/179/181): aimed area spells land on the terrain under the aim (not on tree canopies). Black Flame draws 24 flames along its 6 m edge, snapped to the ground every frame, and teammates draw the same ring. Self buffs (Berserk, Golden Skin, Focus, Frenzy) tint the body and glow on it instead of a ground ring.
 - Fields: id, level requirement, energy cost, base cooldown, channeled, cast on release.
 - Loadout 6 slots; unlock costs 2 perk points.
 - Cooldown ticks at `dt × cooldownRate / cooldown`; equipping starts the cooldown. No minimum cooldown (Wide Reach is 0.4 s).
