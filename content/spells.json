@@ -8,7 +8,12 @@
       "energyCost": 350.0,
       "cooldown": 140.0,
       "castOnRelease": true,
-      "aim": "sphere"
+      "aim": "sphere",
+      "mastery": [
+        "perk.the_big_suck",
+        "perk.event_horizon_expansion",
+        "perk.event_horizon_expansion_2"
+      ]
     },
     {
       "id": "spell.healing_dome",
@@ -18,7 +23,15 @@
       "energyCost": 80.0,
       "cooldown": 70.0,
       "castOnRelease": true,
-      "aim": "sphere"
+      "aim": "sphere",
+      "mastery": [
+        "perk.energy_field",
+        "perk.temple_of_protection",
+        "perk.magic_tower",
+        "perk.safe_heaven",
+        "perk.pantheon_of_champions",
+        "perk.time_of_need"
+      ]
     },
     {
       "id": "spell.blink",
@@ -28,7 +41,12 @@
       "energyCost": 25.0,
       "cooldown": 14.0,
       "castOnRelease": true,
-      "aim": "line"
+      "aim": "line",
+      "mastery": [
+        "perk.blink_passthrough",
+        "perk.blink_wormhole",
+        "perk.quick_silver"
+      ]
     },
     {
       "id": "spell.sun_flare",
@@ -38,7 +56,10 @@
       "energyCost": 100.0,
       "cooldown": 70.0,
       "castOnRelease": true,
-      "aim": "sphere"
+      "aim": "sphere",
+      "mastery": [
+        "perk.wrath_of_the_sun"
+      ]
     },
     {
       "id": "spell.sustain_shield",
@@ -47,7 +68,11 @@
       "levelReq": 8,
       "energyCost": 50.0,
       "cooldown": 0.0,
-      "channeled": true
+      "channeled": true,
+      "mastery": [
+        "perk.autocast_shield",
+        "perk.shield_endurance"
+      ]
     },
     {
       "id": "spell.wide_reach",
@@ -64,7 +89,13 @@
       "levelReq": 21,
       "energyCost": 25.0,
       "cooldown": 2.5,
-      "toggle": true
+      "toggle": true,
+      "mastery": [
+        "perk.enchant_weapon",
+        "perk.afterburn",
+        "perk.netherflame",
+        "perk.breathing_tehniques"
+      ]
     },
     {
       "id": "spell.war_cry",
@@ -72,7 +103,10 @@
       "name": "War Cry",
       "levelReq": 14,
       "energyCost": 85.0,
-      "cooldown": 180.0
+      "cooldown": 180.0,
+      "mastery": [
+        "perk.empowered_war_cry"
+      ]
     },
     {
       "id": "spell.portal",
@@ -92,7 +126,14 @@
       "energyCost": 100.0,
       "cooldown": 20.0,
       "castOnRelease": true,
-      "aim": "sphere"
+      "aim": "sphere",
+      "mastery": [
+        "perk.exposure",
+        "perk.magic_arrow_devastation",
+        "perk.disabler",
+        "perk.magic_binding",
+        "perk.endless_stream"
+      ]
     },
     {
       "id": "spell.multishot",
@@ -101,7 +142,10 @@
       "levelReq": 40,
       "energyCost": 30.0,
       "cooldown": 12.0,
-      "toggle": true
+      "toggle": true,
+      "mastery": [
+        "perk.multishot_empower"
+      ]
     },
     {
       "id": "spell.golden_skin",
@@ -109,7 +153,11 @@
       "name": "Golden Skin",
       "levelReq": 35,
       "energyCost": 65.0,
-      "cooldown": 160.0
+      "cooldown": 160.0,
+      "mastery": [
+        "perk.golden_resolve",
+        "perk.golden_cooldown"
+      ]
     },
     {
       "id": "spell.purge",
@@ -117,7 +165,10 @@
       "name": "Purge",
       "levelReq": 7,
       "energyCost": 40.0,
-      "cooldown": 16.0
+      "cooldown": 16.0,
+      "mastery": [
+        "perk.closing_wounds"
+      ]
     },
     {
       "id": "spell.snap_freeze",
@@ -133,7 +184,11 @@
       "name": "Berserk",
       "levelReq": 25,
       "energyCost": 10.0,
-      "cooldown": 200.0
+      "cooldown": 200.0,
+      "mastery": [
+        "perk.pound_of_flesh",
+        "perk.sudden_rampage"
+      ]
     },
     {
       "id": "spell.ball_lightning",
@@ -141,7 +196,13 @@
       "name": "Ball Lightning",
       "levelReq": 44,
       "energyCost": 350.0,
-      "cooldown": 100.0
+      "cooldown": 100.0,
+      "mastery": [
+        "perk.nuke_conjuration",
+        "perk.storm_season",
+        "perk.endless_storm",
+        "perk.storm_of_the_century"
+      ]
     },
     {
       "id": "spell.bash",
@@ -149,7 +210,13 @@
       "name": "Bash",
       "levelReq": 17,
       "energyCost": 25.0,
-      "cooldown": 25.0
+      "cooldown": 25.0,
+      "mastery": [
+        "perk.concussive_bash",
+        "perk.lucky_bashes",
+        "perk.skull_basher",
+        "perk.skull_basher_ii"
+      ]
     },
     {
       "id": "spell.frenzy",
@@ -157,7 +224,12 @@
       "name": "Frenzy",
       "levelReq": 1,
       "energyCost": 0.0,
-      "cooldown": 40.0
+      "cooldown": 40.0,
+      "mastery": [
+        "perk.frenzy_haste",
+        "perk.mania",
+        "perk.fury_swipes"
+      ]
     },
     {
       "id": "spell.seeking_arrow",
@@ -165,7 +237,13 @@
       "name": "Seeking Arrow",
       "levelReq": 27,
       "energyCost": 50.0,
-      "cooldown": 5.0
+      "cooldown": 5.0,
+      "mastery": [
+        "perk.seeking_arrow_crippling_precision",
+        "perk.seeking_arrow_head_hunting",
+        "perk.seeking_arrow_improved_memory",
+        "perk.seeking_arrow_movement_impairing_arrows"
+      ]
     },
     {
       "id": "spell.focus",
@@ -173,7 +251,13 @@
       "name": "Focus",
       "levelReq": 4,
       "energyCost": 40.0,
-      "cooldown": 20.0
+      "cooldown": 20.0,
+      "mastery": [
+        "perk.focus_perfection",
+        "perk.focus_quickscope",
+        "perk.focus_quickerscope",
+        "perk.focus_cripple"
+      ]
     },
     {
       "id": "spell.parry",
@@ -181,7 +265,15 @@
       "name": "Parry",
       "levelReq": 8,
       "energyCost": 35.0,
-      "cooldown": 60.0
+      "cooldown": 60.0,
+      "mastery": [
+        "perk.counter_strike",
+        "perk.flame_guard",
+        "perk.full_counter",
+        "perk.parry_range",
+        "perk.instant_riposte",
+        "perk.parry_mastery"
+      ]
     },
     {
       "id": "spell.cataclysm",
@@ -199,7 +291,13 @@
       "name": "Blood Infused Arrow",
       "levelReq": 11,
       "energyCost": 75.0,
-      "cooldown": 8.0
+      "cooldown": 8.0,
+      "mastery": [
+        "perk.arcane_blood",
+        "perk.near_death_arrow",
+        "perk.concussive_shot",
+        "perk.critical_infusion"
+      ]
     },
     {
       "id": "spell.roaring_cheeks",
@@ -217,7 +315,11 @@
       "energyCost": 40.0,
       "cooldown": 45.0,
       "castOnRelease": true,
-      "aim": "sphere"
+      "aim": "sphere",
+      "mastery": [
+        "perk.falter",
+        "perk.line_up"
+      ]
     },
     {
       "id": "spell.firebolt",
@@ -225,7 +327,12 @@
       "name": "Firebolt",
       "levelReq": 6,
       "energyCost": 45.0,
-      "cooldown": 20.0
+      "cooldown": 20.0,
+      "mastery": [
+        "perk.firebolt_upgrade",
+        "perk.firebolt_upgrade_2",
+        "perk.firebolt_cost_reduction"
+      ]
     },
     {
       "id": "spell.snow_storm",

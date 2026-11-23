@@ -45,6 +45,9 @@ public sealed class PlayerSave
 
     /// <summary>Attribute id → points spent on it (COS-174). Missing = none spent: an older save gets all its points to spend.</summary>
     public Dictionary<string, int> Attributes { get; set; } = new();
+
+    /// <summary>Spell id → successful casts, for spell mastery (COS-176). Missing = none.</summary>
+    public Dictionary<string, int> SpellCasts { get; set; } = new();
 }
 
 public sealed class SavedItem

@@ -170,6 +170,29 @@ public sealed class PlayerCharacter
     public PerkTree Perks { get; }
     public SpellBook Spells { get; }
 
+    /// <summary>Casts per spell and the upgrades they unlock (COS-176).</summary>
+    public SpellMastery Mastery { get; }
+
+    /// <summary>Counts a successful cast. Returns the spell's new mastery level when it went up (its upgrades are granted then).</summary>
+    public int? RecordCast(string spellId)
+    {
+        var up = Mastery.AddCast(spellId);
+        if (up != null) RebuildMastery();
+        return up;
+    }
+
+    /// <summary>Admin and self-tests: sets a spell's (or every spell's) mastery level.</summary>
+    public void SetMastery(string? spellId, int level)
+    {
+        foreach (var id in spellId == null ? Content.Spells.Keys.ToList() : new List<string> { spellId }) Mastery.SetLevel(id, level);
+        RebuildMastery();
+    }
+
+    private void RebuildMastery()
+    {
+        if (Perks.Grant(Mastery.Unlocked())) Stats.SetSource("perks", Perks.Modifiers());
+    }
+
     /// <summary>Spent attribute points (COS-174).</summary>
     public AttributePoints Attributes { get; } = new();
 
@@ -208,11 +231,13 @@ public sealed class PlayerCharacter
     {
         Content = content;
         Perks = new PerkTree(content);
+        Mastery = new SpellMastery(content);
         Spells = new SpellBook(content)
         {
+            // Spell mastery (COS-176): cheaper and faster per level, on top of the perk and item factors.
+            CooldownScale = id => PerkTuning.CooldownScale(Perks, id) * Mastery.Scale(id),
             CooldownReduction = id => PerkTuning.CooldownReduction(Perks, id),
-            CooldownScale = id => PerkTuning.CooldownScale(Perks, id),
-            CostScale = (id, stats) => (id == "spell.multishot" && stats.IsOn(UniqueFlagIds.Sora) ? UniqueTuning.SoraCostScale : 1) * PerkRules.CostScale(id, stats),
+            CostScale = (id, stats) => (id == "spell.multishot" && stats.IsOn(UniqueFlagIds.Sora) ? UniqueTuning.SoraCostScale : 1) * PerkRules.CostScale(id, stats) * Mastery.Scale(id),
             CostAdd = PerkRules.CostAdd,
             CooldownRateScale = PerkRules.CooldownRate,
         };
@@ -305,6 +330,7 @@ public sealed class PlayerCharacter
     {
         RebuildLevel();
         RebuildEquipment();
+        Perks.Grant(Mastery.Unlocked());
         Stats.SetSource("perks", Perks.Modifiers());
     }
 
@@ -338,6 +364,7 @@ public sealed class PlayerCharacter
         SpellLoadout = Spells.Loadout.ToList(),
         LastGrantDay = Progress.LastGrantDay,
         Attributes = Attributes.Spent.ToDictionary(kv => kv.Key, kv => kv.Value),
+        SpellCasts = Mastery.Casts.ToDictionary(kv => kv.Key, kv => kv.Value),
     };
 
     public void Load(PlayerSave save)
@@ -346,6 +373,7 @@ public sealed class PlayerCharacter
         Perks.Restore(save.Perks, save.UnlockedSpells);
         Spells.Restore(save.SpellLoadout);
         Attributes.Restore(save.Attributes);
+        Mastery.Restore(save.SpellCasts);
         var loot = new LootRoller(Content);
         // An item's rarity is its base's (COS-109: uniques became Legendary, which a save migration cannot know).
         Inventory.Restore(save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, loot.InferSlots(WithBaseRarity(kv.Value.ToItem())))));

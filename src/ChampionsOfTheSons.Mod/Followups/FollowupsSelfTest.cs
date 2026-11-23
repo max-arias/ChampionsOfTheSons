@@ -24,9 +24,7 @@ internal static class FollowupsSelfTest
         SelfTest.Add(3f, "followups: level-up with a full bag", FullBagReward);
         SelfTest.Add(4f, "followups: hurt numbers", HurtNumbers);
         SelfTest.Add(7f, "followups: dodge perks", DodgePerks);
-        SelfTest.Add(8f, "followups: adrenaline rush", Adrenaline);
         SelfTest.Add(9f, "followups: capacity perks", Capacity);
-        SelfTest.Add(10f, "followups: daily perks", Daily);
         SelfTest.Add(11f, "followups: unique flags", UniqueFlags);
         SelfTest.Add(12f, "followups: cleanup", Cleanup);
     }
@@ -184,13 +182,13 @@ internal static class FollowupsSelfTest
         var missingDaily = UtilityPerks.All.Where(e => e.Kind == UtilityKind.DailyGrant).Select(e => e.ItemKeyword).Where(k => !FollowupsFeature.ItemsFor(k).Any()).ToList();
         SelfTest.Check("followups: every daily-grant keyword matches a game item", missingDaily.Count == 0, string.Join(", ", missingDaily));
 
-        var medKeyword = "Pills";
-        var item = FollowupsFeature.ItemsFor(medKeyword).FirstOrDefault();
+        // COS-176: the single-item carry perks were cut; More Building Resources stays (+6 sticks per stack).
+        var item = FollowupsFeature.ItemsFor("Stick").FirstOrDefault();
         if (item == null) return;
         int baseMax = item.MaxAmount;
-        SetPerks("perk.more_meds", "perk.more_meds");
+        SetPerks("perk.more_building_resources", "perk.more_building_resources");
         FollowupsFeature.ApplyCapacities(force: true);
-        SelfTest.Check("followups: More Meds raises the carry limit by 20 per stack", item.MaxAmount == baseMax + 40, $"{baseMax} -> {item.MaxAmount}");
+        SelfTest.Check("followups: More Building Resources raises the stick limit by 6 per stack", item.MaxAmount == baseMax + 12, $"{baseMax} -> {item.MaxAmount}");
         SetPerks();
         FollowupsFeature.ApplyCapacities(force: true);
         SelfTest.Check("followups: the limit goes back without the perk", item.MaxAmount == baseMax, $"{item.MaxAmount} vs {baseMax}");

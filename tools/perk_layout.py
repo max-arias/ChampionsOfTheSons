@@ -144,16 +144,52 @@ def depths(perks):
     return {p["id"]: d(p["id"]) for p in perks}
 
 
+# COS-176: small trees (about 15 perks) read better as an outline than as a coarse fill: the nodes sit along these lines.
+def circle(cx, cy, r, a0=0, a1=360, steps=40):
+    return [(cx + r * math.cos(math.radians(a0 + (a1 - a0) * i / steps)), cy + r * math.sin(math.radians(a0 + (a1 - a0) * i / steps))) for i in range(steps + 1)]
+
+
+OUTLINES = {
+    "melee_offense": [[(4.25, 0.3), (4.25, 6.3)], [(1.4, 6.8), (7.1, 6.8)], [(4.25, 7.3), (4.25, 9.6)]],
+    "ranged_offense": [circle(5.2, 5.0, 4.35, 130, 230, 30), [(0.6, 5.0), (8.3, 5.0)]],
+    "magic_offense": [[(4.25, 0.3), (5.3, 2.7), (6.3, 1.8), (7.2, 5.0), (7.0, 7.4), (5.6, 9.2), (4.25, 9.7), (2.9, 9.2), (1.5, 7.4),
+                       (1.3, 5.0), (2.2, 1.8), (3.2, 2.7), (4.25, 0.3)]],
+    "defense": [[(0.8, 0.8), (7.7, 0.8), (7.7, 5.0), (6.9, 7.3), (4.25, 9.5), (1.6, 7.3), (0.8, 5.0), (0.8, 0.8)]],
+    "support": [circle(2.6, 3.0, 2.0, 160, 360, 20) + circle(5.9, 3.0, 2.0, 180, 380, 20) + [(4.25, 9.3), (0.72, 3.6)]],
+    "utility": [circle(4.25, 5.0, 3.8, 0, 360, 48), [(4.25, 1.9), (4.25, 8.1)]],
+}
+
+
+def outline_points(cat, n):
+    """n points spaced evenly along the shape's outline lines, ordered from the shape's base."""
+    lines = OUTLINES[cat]
+    segs = [(a, b) for line in lines for a, b in zip(line, line[1:])]
+    total = sum(math.dist(a, b) for a, b in segs)
+    pts = []
+    for k in range(n):
+        d = (k + 0.5) * total / n
+        for a, b in segs:
+            L = math.dist(a, b)
+            if d <= L or (a, b) == segs[-1]:
+                t = 0 if L == 0 else min(1, d / L)
+                pts.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+                break
+            d -= L
+    return sorted(pts, key=lambda p: progress(SHAPES[cat], p))
+
+
 def layout(data):
     out = {}
     by_cat = {}
     for p in data["perks"]:
         by_cat.setdefault(p["category"], []).append(p)
     for cat, perks in by_cat.items():
+        if cat not in SHAPES:
+            continue  # spell upgrades (category "mastery", COS-176) are not in a tree
         shape = SHAPES[cat]
         dep = depths(perks)
         order = sorted(perks, key=lambda p: (dep[p["id"]], p["x"], p["y"], p["id"]))
-        pts = points_for(shape, len(order))
+        pts = outline_points(cat, len(order)) if len(order) <= 30 else points_for(shape, len(order))
         for p, (x, y) in zip(order, pts):
             out[p["id"]] = (round(x, 2), round(y, 2))
     return out
@@ -179,7 +215,8 @@ def main():
             print(ascii_view(data, pos, cat))
         return
     for p in data["perks"]:
-        p["x"], p["y"] = pos[p["id"]]
+        if p["id"] in pos:
+            p["x"], p["y"] = pos[p["id"]]
     open(PERKS, "w", encoding="utf-8", newline="\n").write(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
     print("laid out", len(pos), "perks")
 

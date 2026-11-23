@@ -184,6 +184,8 @@ public enum PerkCategory
     Defense,
     Support,
     Utility,
+    /// <summary>Spell upgrades (COS-176): not in any tree, never bought; granted by spell mastery.</summary>
+    Mastery,
 }
 
 /// <summary>A perk in the tree. <see cref="UnlockPath"/>: any one bought (empty = root). <see cref="Requires"/>: all bought.</summary>
@@ -221,6 +223,8 @@ public sealed class SpellDef
     public bool CastOnRelease { get; set; }
     /// <summary>Aim aid while held: "line" (player to the target point) or "sphere" (the effect's radius at the target); empty for none.</summary>
     public string Aim { get; set; } = "";
+    /// <summary>The spell's upgrade perks (category mastery) in the order its mastery unlocks them (COS-176).</summary>
+    public List<string> Mastery { get; set; } = new();
 }
 
 /// <summary>An item set: equipping several pieces (items whose <see cref="ItemBaseDef.Set"/> is this id) unlocks bonuses.</summary>

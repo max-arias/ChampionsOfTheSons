@@ -205,6 +205,18 @@ public sealed class ContentDb
                 if (!_perks.ContainsKey(other)) _errors.Add($"perk {perk.Id}: unknown perk '{other}'");
         }
         foreach (var id in UnreachablePerks()) _errors.Add($"perk {id}: not reachable from a root perk");
+        // COS-176: every mastery perk is the upgrade of exactly one spell; spells list only mastery perks.
+        var owner = new Dictionary<string, string>();
+        foreach (var spell in _spells.Values)
+            foreach (var id in spell.Mastery)
+            {
+                if (!_perks.TryGetValue(id, out var perk)) { _errors.Add($"spell {spell.Id}: unknown mastery perk '{id}'"); continue; }
+                if (perk.Category != PerkCategory.Mastery) _errors.Add($"spell {spell.Id}: '{id}' is not a mastery perk");
+                if (owner.TryGetValue(id, out var other)) _errors.Add($"perk {id}: mastery upgrade of both {other} and {spell.Id}");
+                owner[id] = spell.Id;
+            }
+        foreach (var perk in _perks.Values)
+            if (perk.Category == PerkCategory.Mastery && !owner.ContainsKey(perk.Id)) _errors.Add($"perk {perk.Id}: mastery perk of no spell");
     }
 
     /// <summary>Perks no sequence of purchases can reach: neither a root nor unlocked by reachable perks.</summary>

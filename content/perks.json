@@ -8,8 +8,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 4.32,
-      "y": 9.54,
+      "x": 4.25,
+      "y": 8.2,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -28,8 +28,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 4.48,
-      "y": 8.99,
+      "x": 4.25,
+      "y": 9.7,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -48,8 +48,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 0.28,
-      "y": 5.1,
+      "x": 0.65,
+      "y": 5.0,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -61,46 +61,6 @@
       ]
     },
     {
-      "id": "perk.inner_energy",
-      "legacyIndex": 3,
-      "name": "Quiet Reserves",
-      "category": "utility",
-      "cost": 0,
-      "levelReq": 1,
-      "stackable": false,
-      "x": 3.77,
-      "y": 4.77,
-      "unlockPath": [],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "energy_recovery_from_int",
-          "op": "add",
-          "value": 0.002
-        }
-      ]
-    },
-    {
-      "id": "perk.more_stamina",
-      "legacyIndex": 4,
-      "name": "Second Wind",
-      "category": "utility",
-      "cost": 0,
-      "levelReq": 1,
-      "stackable": false,
-      "x": 4.61,
-      "y": 4.77,
-      "unlockPath": [],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "max_energy_from_agi",
-          "op": "add",
-          "value": 0.5
-        }
-      ]
-    },
-    {
       "id": "perk.more_health",
       "legacyIndex": 5,
       "name": "Thick Hide",
@@ -108,8 +68,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 3.84,
-      "y": 0.77,
+      "x": 3.51,
+      "y": 0.8,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -128,8 +88,8 @@
       "cost": 1,
       "levelReq": 1,
       "stackable": true,
-      "x": 3.93,
-      "y": 8.59,
+      "x": 4.16,
+      "y": 9.15,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -148,11 +108,9 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": true,
-      "x": 3.77,
-      "y": 6.22,
-      "unlockPath": [
-        "perk.more_stamina"
-      ],
+      "x": 4.25,
+      "y": 7.1,
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -168,28 +126,6 @@
       ]
     },
     {
-      "id": "perk.breath_under_control",
-      "legacyIndex": 8,
-      "name": "Even Breathing",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 5,
-      "stackable": true,
-      "x": 4.61,
-      "y": 6.22,
-      "unlockPath": [
-        "perk.more_stamina"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "stamina_recoveryper_second",
-          "op": "add",
-          "value": 0.5
-        }
-      ]
-    },
-    {
       "id": "perk.grip_strength",
       "legacyIndex": 9,
       "name": "Whitened Grip",
@@ -197,8 +133,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": true,
-      "x": 5.31,
-      "y": 6.66,
+      "x": 6.13,
+      "y": 6.8,
       "unlockPath": [
         "perk.stronger_hits",
         "perk.arm_strength"
@@ -220,8 +156,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": false,
-      "x": 3.99,
-      "y": 6.66,
+      "x": 3.33,
+      "y": 6.8,
       "unlockPath": [
         "perk.stronger_hits",
         "perk.grip_strength",
@@ -244,8 +180,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": false,
-      "x": 3.99,
-      "y": 7.81,
+      "x": 4.27,
+      "y": 6.8,
       "unlockPath": [
         "perk.stronger_hits",
         "perk.arm_strength"
@@ -267,8 +203,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": true,
-      "x": 0.84,
-      "y": 6.07,
+      "x": 0.92,
+      "y": 4.21,
       "unlockPath": [
         "perk.stronger_projectiles"
       ],
@@ -282,50 +218,6 @@
       ]
     },
     {
-      "id": "perk.large_caliber",
-      "legacyIndex": 13,
-      "name": "Heavy Ordnance",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 4,
-      "stackable": true,
-      "x": 0.84,
-      "y": 3.17,
-      "unlockPath": [
-        "perk.stronger_projectiles"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "projectile_size",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
-      "id": "perk.speed",
-      "legacyIndex": 14,
-      "name": "Swift Flight",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 4,
-      "stackable": true,
-      "x": 1.11,
-      "y": 4.62,
-      "unlockPath": [
-        "perk.stronger_projectiles"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "projectile_speed",
-          "op": "add",
-          "value": 0.05
-        }
-      ]
-    },
-    {
       "id": "perk.transmutation",
       "legacyIndex": 15,
       "name": "Sinew Channel",
@@ -334,7 +226,7 @@
       "levelReq": 4,
       "stackable": false,
       "x": 2.69,
-      "y": 8.99,
+      "y": 8.92,
       "unlockPath": [
         "perk.stronger_spells"
       ],
@@ -355,8 +247,8 @@
       "cost": 1,
       "levelReq": 7,
       "stackable": true,
-      "x": 5.38,
-      "y": 8.99,
+      "x": 1.59,
+      "y": 7.51,
       "unlockPath": [
         "perk.stronger_spells"
       ],
@@ -370,38 +262,6 @@
       ]
     },
     {
-      "id": "perk.indestructable",
-      "legacyIndex": 17,
-      "name": "Scarwall",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 8,
-      "stackable": false,
-      "x": 6.91,
-      "y": 0.77,
-      "unlockPath": [
-        "perk.more_health"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "all_damage_taken",
-          "op": "mult",
-          "value": 0.7
-        },
-        {
-          "stat": "all_damage",
-          "op": "mult",
-          "value": 0.7
-        },
-        {
-          "stat": "thorns_dmg_mult",
-          "op": "mult",
-          "value": 1.69
-        }
-      ]
-    },
-    {
       "id": "perk.cooldown_reduction",
       "legacyIndex": 18,
       "name": "Short Fuse",
@@ -409,8 +269,8 @@
       "cost": 1,
       "levelReq": 7,
       "stackable": true,
-      "x": 5.83,
-      "y": 8.22,
+      "x": 7.14,
+      "y": 5.76,
       "unlockPath": [
         "perk.resource_cost_reduction"
       ],
@@ -431,8 +291,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": false,
-      "x": 6.28,
-      "y": 7.44,
+      "x": 1.36,
+      "y": 5.76,
       "unlockPath": [
         "perk.cooldown_reduction"
       ],
@@ -446,80 +306,6 @@
       ]
     },
     {
-      "id": "perk.all_attributes",
-      "legacyIndex": 20,
-      "name": "Well Rounded",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 1,
-      "stackable": false,
-      "x": 7.54,
-      "y": 5.5,
-      "unlockPath": [
-        "perk.inner_energy"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "strength",
-          "op": "add",
-          "value": 5.0
-        },
-        {
-          "stat": "vitality",
-          "op": "add",
-          "value": 5.0
-        },
-        {
-          "stat": "agility",
-          "op": "add",
-          "value": 5.0
-        },
-        {
-          "stat": "intelligence",
-          "op": "add",
-          "value": 5.0
-        }
-      ]
-    },
-    {
-      "id": "perk.all_attributes_2",
-      "legacyIndex": 21,
-      "name": "Weathered Veteran",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 2,
-      "stackable": false,
-      "x": 2.51,
-      "y": 8.4,
-      "unlockPath": [
-        "perk.all_attributes"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "strength",
-          "op": "add",
-          "value": 20.0
-        },
-        {
-          "stat": "vitality",
-          "op": "add",
-          "value": 20.0
-        },
-        {
-          "stat": "agility",
-          "op": "add",
-          "value": 20.0
-        },
-        {
-          "stat": "intelligence",
-          "op": "add",
-          "value": 20.0
-        }
-      ]
-    },
-    {
       "id": "perk.attack_speed",
       "legacyIndex": 22,
       "name": "Quick Hands",
@@ -527,8 +313,8 @@
       "cost": 1,
       "levelReq": 6,
       "stackable": true,
-      "x": 4.32,
-      "y": 7.24,
+      "x": 5.2,
+      "y": 6.8,
       "unlockPath": [
         "perk.body_strength"
       ],
@@ -549,11 +335,11 @@
       "cost": 1,
       "levelReq": 7,
       "stackable": true,
-      "x": 1.39,
-      "y": 3.17,
+      "x": 1.74,
+      "y": 2.37,
       "unlockPath": [
         "perk.projectile_damage",
-        "perk.speed"
+        "perk.stronger_projectiles"
       ],
       "requires": [],
       "effects": [
@@ -565,87 +351,6 @@
       ]
     },
     {
-      "id": "perk.reusability_ii",
-      "legacyIndex": 24,
-      "name": "Salvage II",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 9,
-      "stackable": false,
-      "x": 1.95,
-      "y": 5.1,
-      "unlockPath": [
-        "perk.reusability_i"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_projectile_no_consume_chance",
-          "op": "add",
-          "value": 0.13
-        }
-      ]
-    },
-    {
-      "id": "perk.reusability_iii",
-      "legacyIndex": 25,
-      "name": "Salvage III",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 12,
-      "stackable": false,
-      "x": 3.62,
-      "y": 5.1,
-      "unlockPath": [
-        "perk.reusability_ii"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_projectile_no_consume_chance",
-          "op": "add",
-          "value": 0.13
-        }
-      ]
-    },
-    {
-      "id": "perk.all_attributes_3",
-      "legacyIndex": 26,
-      "name": "Bone Deep",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 15,
-      "stackable": true,
-      "x": 7.96,
-      "y": 3.32,
-      "unlockPath": [
-        "perk.all_attributes_2"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "strength",
-          "op": "add",
-          "value": 10.0
-        },
-        {
-          "stat": "vitality",
-          "op": "add",
-          "value": 10.0
-        },
-        {
-          "stat": "agility",
-          "op": "add",
-          "value": 10.0
-        },
-        {
-          "stat": "intelligence",
-          "op": "add",
-          "value": 10.0
-        }
-      ]
-    },
-    {
       "id": "perk.jump",
       "legacyIndex": 27,
       "name": "Springheel",
@@ -653,11 +358,9 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 4.19,
-      "y": 2.6,
-      "unlockPath": [
-        "perk.inner_energy"
-      ],
+      "x": 1.65,
+      "y": 2.24,
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -675,8 +378,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": true,
-      "x": 5.87,
-      "y": 8.4,
+      "x": 5.2,
+      "y": 8.68,
       "unlockPath": [
         "perk.jump"
       ],
@@ -697,8 +400,8 @@
       "cost": 1,
       "levelReq": 2,
       "stackable": true,
-      "x": 2.3,
-      "y": 0.77,
+      "x": 1.7,
+      "y": 0.8,
       "unlockPath": [
         "perk.more_health"
       ],
@@ -719,8 +422,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 3.27,
-      "y": 7.46,
+      "x": 6.14,
+      "y": 6.29,
       "unlockPath": [
         "perk.more_healing"
       ],
@@ -741,8 +444,8 @@
       "cost": 1,
       "levelReq": 2,
       "stackable": true,
-      "x": 0.77,
-      "y": 0.77,
+      "x": 5.31,
+      "y": 0.8,
       "unlockPath": [
         "perk.more_health"
       ],
@@ -763,8 +466,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": false,
-      "x": 1.54,
-      "y": 2.1,
+      "x": 7.11,
+      "y": 0.8,
       "unlockPath": [
         "perk.armor"
       ],
@@ -778,50 +481,6 @@
       ]
     },
     {
-      "id": "perk.durability_ii",
-      "legacyIndex": 33,
-      "name": "Hardened Bones",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 35,
-      "stackable": false,
-      "x": 0.77,
-      "y": 3.43,
-      "unlockPath": [
-        "perk.durability"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "all_damage_taken",
-          "op": "mult",
-          "value": 0.85
-        }
-      ]
-    },
-    {
-      "id": "perk.durability_iii",
-      "legacyIndex": 34,
-      "name": "Scarred Bulwark",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 40,
-      "stackable": false,
-      "x": 1.54,
-      "y": 4.76,
-      "unlockPath": [
-        "perk.durability_ii"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "all_damage_taken",
-          "op": "mult",
-          "value": 0.8
-        }
-      ]
-    },
-    {
       "id": "perk.magic_resistance",
       "legacyIndex": 35,
       "name": "Hexproof",
@@ -829,8 +488,8 @@
       "cost": 1,
       "levelReq": 6,
       "stackable": true,
-      "x": 3.07,
-      "y": 2.1,
+      "x": 0.8,
+      "y": 1.7,
       "unlockPath": [
         "perk.bonus_health",
         "perk.armor"
@@ -852,10 +511,10 @@
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
-      "x": 6.91,
-      "y": 6.09,
+      "x": 6.9,
+      "y": 7.29,
       "unlockPath": [
-        "perk.durability_iii"
+        "perk.durability"
       ],
       "requires": [],
       "effects": [
@@ -874,8 +533,8 @@
       "cost": 1,
       "levelReq": 6,
       "stackable": true,
-      "x": 5.24,
-      "y": 6.33,
+      "x": 2.19,
+      "y": 5.98,
       "unlockPath": [
         "perk.more_healing"
       ],
@@ -889,72 +548,6 @@
       ]
     },
     {
-      "id": "perk.armor_piercing_edge",
-      "legacyIndex": 38,
-      "name": "Hidesplitter",
-      "category": "support",
-      "cost": 1,
-      "levelReq": 8,
-      "stackable": true,
-      "x": 1.96,
-      "y": 5.19,
-      "unlockPath": [
-        "perk.armor_penetration"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "melee_armor_piercing",
-          "op": "add",
-          "value": 12.0
-        }
-      ]
-    },
-    {
-      "id": "perk.anti_armor_projectiles",
-      "legacyIndex": 39,
-      "name": "Needle Tips",
-      "category": "support",
-      "cost": 1,
-      "levelReq": 8,
-      "stackable": true,
-      "x": 5.89,
-      "y": 5.19,
-      "unlockPath": [
-        "perk.armor_penetration"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "ranged_armor_piercing",
-          "op": "add",
-          "value": 6.0
-        }
-      ]
-    },
-    {
-      "id": "perk.more_health_regen",
-      "legacyIndex": 40,
-      "name": "Knitting Flesh",
-      "category": "support",
-      "cost": 1,
-      "levelReq": 10,
-      "stackable": false,
-      "x": 4.58,
-      "y": 5.19,
-      "unlockPath": [
-        "perk.health_regen"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "health_per_sec_rate",
-          "op": "add",
-          "value": 0.1
-        }
-      ]
-    },
-    {
       "id": "perk.energy_generation",
       "legacyIndex": 41,
       "name": "Static Trickle",
@@ -962,8 +555,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 3.27,
-      "y": 5.19,
+      "x": 1.21,
+      "y": 4.39,
       "unlockPath": [
         "perk.health_regen"
       ],
@@ -984,10 +577,10 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": 2.62,
-      "y": 4.06,
+      "x": 7.13,
+      "y": 4.71,
       "unlockPath": [
-        "perk.more_health_regen"
+        "perk.health_regen"
       ],
       "requires": [],
       "effects": [
@@ -1006,10 +599,10 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 6.55,
-      "y": 4.06,
+      "x": 4.55,
+      "y": 2.56,
       "unlockPath": [
-        "perk.more_health_regen"
+        "perk.health_regen"
       ],
       "requires": [],
       "effects": [
@@ -1028,8 +621,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 4.58,
-      "y": 2.92,
+      "x": 7.12,
+      "y": 1.42,
       "unlockPath": [
         "perk.energy_generation"
       ],
@@ -1043,151 +636,6 @@
       ]
     },
     {
-      "id": "perk.alternative_cloth_sources",
-      "legacyIndex": 45,
-      "name": "Pelt Weaver",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 5,
-      "stackable": false,
-      "x": 4.19,
-      "y": 4.05,
-      "unlockPath": [
-        "perk.more_stamina"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.demolition",
-      "legacyIndex": 46,
-      "name": "Powder Cache",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 5.03,
-      "y": 8.4,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.pockets_for_explosives",
-      "legacyIndex": 47,
-      "name": "Blasting Bandolier",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 3.35,
-      "y": 1.14,
-      "unlockPath": [
-        "perk.demolition"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.demolition_expert",
-      "legacyIndex": 48,
-      "name": "Blastsmith",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 4.61,
-      "y": 9.13,
-      "unlockPath": [
-        "perk.pockets_for_explosives"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.meds",
-      "legacyIndex": 49,
-      "name": "Field Pharmacy",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 0.84,
-      "y": 5.5,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.fuel",
-      "legacyIndex": 50,
-      "name": "Jerrycan Reserve",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 2.09,
-      "y": 7.68,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": [],
-      "manual": true
-    },
-    {
-      "id": "perk.booze",
-      "legacyIndex": 51,
-      "name": "Moonshiner",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 6.7,
-      "y": 2.6,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.more_booze",
-      "legacyIndex": 52,
-      "name": "Clinking Pockets",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 0.84,
-      "y": 6.95,
-      "unlockPath": [
-        "perk.booze"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.more_meds",
-      "legacyIndex": 53,
-      "name": "Gauze Lining",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 5.03,
-      "y": 1.14,
-      "unlockPath": [
-        "perk.meds"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
       "id": "perk.endless_quiver",
       "legacyIndex": 54,
       "name": "Bottomless Quiver",
@@ -1195,10 +643,10 @@
       "cost": 1,
       "levelReq": 37,
       "stackable": false,
-      "x": 6.41,
-      "y": 5.1,
+      "x": 7.79,
+      "y": 5.0,
       "unlockPath": [
-        "perk.reusability_iii"
+        "perk.reusability_i"
       ],
       "requires": [],
       "effects": [
@@ -1217,8 +665,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": true,
-      "x": 3.59,
-      "y": 8.99,
+      "x": 5.81,
+      "y": 8.92,
       "unlockPath": [
         "perk.stronger_spells"
       ],
@@ -1232,86 +680,6 @@
       ]
     },
     {
-      "id": "perk.more_meat",
-      "legacyIndex": 56,
-      "name": "Meat Locker",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 1.26,
-      "y": 3.32,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.more_snacks",
-      "legacyIndex": 57,
-      "name": "Sugar Stash",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 7.54,
-      "y": 4.05,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.more_bolts",
-      "legacyIndex": 58,
-      "name": "Bolt Belt",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 7.12,
-      "y": 3.32,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.corpse_collecting",
-      "legacyIndex": 59,
-      "name": "Bone Collector",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 4.19,
-      "y": 8.4,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.more_limbs",
-      "legacyIndex": 60,
-      "name": "Grisly Satchel",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 4.19,
-      "y": 1.14,
-      "unlockPath": [
-        "perk.corpse_collecting"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
       "id": "perk.more_building_resources",
       "legacyIndex": 61,
       "name": "Builder's Pack",
@@ -1319,27 +687,9 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 2.93,
-      "y": 1.87,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.more_miscellaneous_items",
-      "legacyIndex": 62,
-      "name": "Junk Drawer",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 20,
-      "stackable": true,
-      "x": 6.28,
-      "y": 7.68,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
+      "x": 4.25,
+      "y": 5.09,
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -1351,11 +701,9 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 5.45,
-      "y": 1.87,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
+      "x": 5.37,
+      "y": 1.38,
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -1367,8 +715,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 1.39,
-      "y": 5.1,
+      "x": 2.03,
+      "y": 7.98,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1389,8 +737,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 1.11,
-      "y": 6.55,
+      "x": 1.67,
+      "y": 5.0,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1411,8 +759,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 1.11,
-      "y": 3.66,
+      "x": 1.22,
+      "y": 3.24,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1433,8 +781,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 1.11,
-      "y": 5.59,
+      "x": 1.43,
+      "y": 7.17,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1451,15 +799,13 @@
       "id": "perk.temple_of_protection",
       "legacyIndex": 68,
       "name": "Stonewall Dome",
-      "category": "support",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
       "x": 1.31,
       "y": 4.06,
-      "unlockPath": [
-        "perk.more_health_regen"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1472,15 +818,13 @@
       "id": "perk.enchant_weapon",
       "legacyIndex": 69,
       "name": "Soot Brand",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 28,
       "stackable": false,
       "x": 4.04,
       "y": 8.22,
-      "unlockPath": [
-        "perk.spell_power"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -1488,15 +832,13 @@
       "id": "perk.empowered_war_cry",
       "legacyIndex": 70,
       "name": "Rallying Howl",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 14,
       "stackable": false,
       "x": 3.14,
       "y": 8.22,
-      "unlockPath": [
-        "perk.spell_power"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1513,8 +855,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 5.98,
-      "y": 6.66,
+      "x": 1.47,
+      "y": 6.8,
       "unlockPath": [
         "perk.body_strength",
         "perk.arm_strength"
@@ -1541,8 +883,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": true,
-      "x": 4.48,
-      "y": 7.44,
+      "x": 6.91,
+      "y": 7.51,
       "unlockPath": [
         "perk.transmutation",
         "perk.spell_power"
@@ -1565,15 +907,13 @@
       "id": "perk.exposure",
       "legacyIndex": 73,
       "name": "Marked Prey",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 28,
       "stackable": false,
       "x": 2.24,
       "y": 8.22,
-      "unlockPath": [
-        "perk.spell_power"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1586,15 +926,13 @@
       "id": "perk.disabler",
       "legacyIndex": 74,
       "name": "Festering Mark",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 40,
       "stackable": false,
       "x": 4.93,
       "y": 6.66,
-      "unlockPath": [
-        "perk.exposure"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1608,15 +946,13 @@
       "id": "perk.magic_binding",
       "legacyIndex": 75,
       "name": "Cold Tether",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 46,
       "stackable": false,
       "x": 2.69,
       "y": 5.89,
-      "unlockPath": [
-        "perk.disabler"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1633,8 +969,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 1.99,
-      "y": 6.66,
+      "x": 2.4,
+      "y": 6.8,
       "unlockPath": [
         "perk.arm_strength"
       ],
@@ -1655,8 +991,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 4.32,
-      "y": 3.78,
+      "x": 7.07,
+      "y": 6.8,
       "unlockPath": [
         "perk.charged_attack"
       ],
@@ -1677,8 +1013,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 4.32,
-      "y": 4.93,
+      "x": 4.25,
+      "y": 5.43,
       "unlockPath": [
         "perk.grip_strength",
         "perk.arm_strength"
@@ -1700,8 +1036,8 @@
       "cost": 1,
       "levelReq": 35,
       "stackable": false,
-      "x": 3.99,
-      "y": 3.21,
+      "x": 4.25,
+      "y": 3.57,
       "unlockPath": [
         "perk.grip_strength",
         "perk.lucky_hits"
@@ -1723,11 +1059,9 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": true,
-      "x": 4.19,
-      "y": 6.95,
-      "unlockPath": [
-        "perk.inner_energy"
-      ],
+      "x": 0.61,
+      "y": 3.92,
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1741,15 +1075,13 @@
       "id": "perk.multishot_empower",
       "legacyIndex": 81,
       "name": "Volley Surge",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 31,
       "stackable": true,
       "x": 1.39,
       "y": 4.14,
-      "unlockPath": [
-        "perk.projectile_damage"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1767,11 +1099,9 @@
       "cost": 1,
       "levelReq": 22,
       "stackable": false,
-      "x": 7.12,
-      "y": 7.68,
-      "unlockPath": [
-        "perk.fuel"
-      ],
+      "x": 0.56,
+      "y": 5.9,
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1782,40 +1112,16 @@
       ]
     },
     {
-      "id": "perk.turbo",
-      "legacyIndex": 83,
-      "name": "Overdriven Skimmer",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 23,
-      "stackable": true,
-      "x": 7.54,
-      "y": 2.6,
-      "unlockPath": [
-        "perk.transporter"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_raft_speed_multipier",
-          "op": "add",
-          "value": 0.5
-        }
-      ]
-    },
-    {
       "id": "perk.closing_wounds",
       "legacyIndex": 84,
       "name": "Purging Salve",
-      "category": "support",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
       "x": 3.93,
       "y": 6.33,
-      "unlockPath": [
-        "perk.more_healing"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -1832,8 +1138,8 @@
       "cost": 1,
       "levelReq": 24,
       "stackable": false,
-      "x": 1.35,
-      "y": 6.66,
+      "x": 6.92,
+      "y": 4.01,
       "unlockPath": [
         "perk.greater_cooldown_reduction"
       ],
@@ -1854,8 +1160,8 @@
       "cost": 1,
       "levelReq": 35,
       "stackable": false,
-      "x": 1.79,
-      "y": 5.89,
+      "x": 1.58,
+      "y": 4.01,
       "unlockPath": [
         "perk.greater_cooldown_reduction_2"
       ],
@@ -1876,8 +1182,8 @@
       "cost": 1,
       "levelReq": 46,
       "stackable": false,
-      "x": 2.24,
-      "y": 5.11,
+      "x": 3.15,
+      "y": 2.66,
       "unlockPath": [
         "perk.greater_cooldown_reduction_3"
       ],
@@ -1898,8 +1204,8 @@
       "cost": 2,
       "levelReq": 60,
       "stackable": false,
-      "x": 6.28,
-      "y": 4.33,
+      "x": 5.35,
+      "y": 2.66,
       "unlockPath": [
         "perk.greater_cooldown_reduction_4"
       ],
@@ -1919,8 +1225,8 @@
       "cost": 2,
       "levelReq": 61,
       "stackable": false,
-      "x": 3.14,
-      "y": 3.56,
+      "x": 2.06,
+      "y": 2.29,
       "unlockPath": [
         "perk.infinity"
       ],
@@ -1941,8 +1247,8 @@
       "cost": 1,
       "levelReq": 2,
       "stackable": false,
-      "x": 4.58,
-      "y": 7.46,
+      "x": 5.15,
+      "y": 7.87,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -1960,8 +1266,8 @@
       "cost": 2,
       "levelReq": 20,
       "stackable": false,
-      "x": 5.37,
-      "y": 3.43,
+      "x": 1.49,
+      "y": 7.0,
       "unlockPath": [
         "perk.magic_resistance"
       ],
@@ -1977,15 +1283,13 @@
       "id": "perk.seeking_arrow_head_hunting",
       "legacyIndex": 92,
       "name": "Seeking Arrow: Headtaker",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
       "x": 1.95,
       "y": 7.03,
-      "unlockPath": [
-        "perk.sniper"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2003,8 +1307,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": 1.67,
-      "y": 4.62,
+      "x": 3.71,
+      "y": 5.0,
       "unlockPath": [
         "perk.bow_specialization"
       ],
@@ -2021,15 +1325,13 @@
       "id": "perk.seeking_arrow_crippling_precision",
       "legacyIndex": 94,
       "name": "Seeking Arrow: Sinewcut",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
       "x": 4.74,
       "y": 5.1,
-      "unlockPath": [
-        "perk.seeking_arrow_head_hunting"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2043,15 +1345,13 @@
       "id": "perk.seeking_arrow_movement_impairing_arrows",
       "legacyIndex": 95,
       "name": "Seeking Arrow: Thorns",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
       "x": 7.24,
       "y": 4.62,
-      "unlockPath": [
-        "perk.seeking_arrow_crippling_precision"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2065,16 +1365,13 @@
       "id": "perk.focus_perfection",
       "legacyIndex": 96,
       "name": "Focus: Needlepoint",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 14,
       "stackable": false,
       "x": 1.39,
       "y": 6.07,
-      "unlockPath": [
-        "perk.target_practise",
-        "perk.large_caliber"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2088,15 +1385,13 @@
       "id": "perk.focus_quickscope",
       "legacyIndex": 97,
       "name": "Focus: Flicker",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
       "x": 1.95,
       "y": 4.14,
-      "unlockPath": [
-        "perk.focus_perfection"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2110,15 +1405,13 @@
       "id": "perk.focus_quickerscope",
       "legacyIndex": 98,
       "name": "Focus: Twitch",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
       "x": 4.18,
       "y": 5.1,
-      "unlockPath": [
-        "perk.focus_quickscope"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2132,15 +1425,13 @@
       "id": "perk.focus_cripple",
       "legacyIndex": 99,
       "name": "Focus: Kneecap",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 35,
       "stackable": false,
       "x": 6.96,
       "y": 5.1,
-      "unlockPath": [
-        "perk.focus_quickerscope"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2154,15 +1445,13 @@
       "id": "perk.afterburn",
       "legacyIndex": 100,
       "name": "Lingering Char",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 29,
       "stackable": false,
       "x": 2.69,
       "y": 7.44,
-      "unlockPath": [
-        "perk.enchant_weapon"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -2170,15 +1459,13 @@
       "id": "perk.netherflame",
       "legacyIndex": 101,
       "name": "Pitchfire",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 33,
       "stackable": false,
       "x": 2.24,
       "y": 6.66,
-      "unlockPath": [
-        "perk.afterburn"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -2186,15 +1473,13 @@
       "id": "perk.frenzy_haste",
       "legacyIndex": 102,
       "name": "Frenzy: Red Tempo",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 20,
       "stackable": false,
       "x": 3.14,
       "y": 6.66,
-      "unlockPath": [
-        "perk.overcharge"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2208,15 +1493,13 @@
       "id": "perk.concussive_bash",
       "legacyIndex": 103,
       "name": "Skullringer",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 26,
       "stackable": true,
       "x": 4.04,
       "y": 6.66,
-      "unlockPath": [
-        "perk.overcharge"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2230,15 +1513,13 @@
       "id": "perk.shield_endurance",
       "legacyIndex": 104,
       "name": "Shield: Stubborn Hold",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
       "x": 4.93,
       "y": 8.22,
-      "unlockPath": [
-        "perk.resource_cost_reduction"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2252,15 +1533,13 @@
       "id": "perk.blink_passthrough",
       "legacyIndex": 105,
       "name": "Blink: Cutthrough",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 40,
       "stackable": false,
       "x": 6.73,
       "y": 5.11,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction_3"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2271,40 +1550,16 @@
       ]
     },
     {
-      "id": "perk.inner_energy_ii",
-      "legacyIndex": 106,
-      "name": "Quiet Reserves II",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 30,
-      "stackable": false,
-      "x": 0.42,
-      "y": 6.22,
-      "unlockPath": [
-        "perk.all_attributes_2"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "energy_recovery_from_int",
-          "op": "add",
-          "value": 0.001
-        }
-      ]
-    },
-    {
       "id": "perk.flame_guard",
       "legacyIndex": 107,
       "name": "Kindled Guard",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
       "x": 3.59,
       "y": 7.44,
-      "unlockPath": [
-        "perk.resource_cost_reduction"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2317,16 +1572,13 @@
       "id": "perk.parry_range",
       "legacyIndex": 108,
       "name": "Wide Guard",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
       "x": 4.48,
       "y": 5.89,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction",
-        "perk.resource_cost_reduction"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2344,8 +1596,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": false,
-      "x": 4.19,
-      "y": 5.5,
+      "x": 3.4,
+      "y": 1.3,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -2364,8 +1616,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 4.61,
-      "y": 3.32,
+      "x": 3.21,
+      "y": 8.65,
       "unlockPath": [
         "perk.luck_enchantment"
       ],
@@ -2382,15 +1634,13 @@
       "id": "perk.near_death_arrow",
       "legacyIndex": 111,
       "name": "Desperate Draw",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 16,
       "stackable": false,
       "x": 1.67,
       "y": 2.69,
-      "unlockPath": [
-        "perk.bow_specialization"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2404,15 +1654,13 @@
       "id": "perk.arcane_blood",
       "legacyIndex": 112,
       "name": "Crimson Payoff",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 14,
       "stackable": true,
       "x": 6.73,
       "y": 6.66,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2426,15 +1674,13 @@
       "id": "perk.energy_field",
       "legacyIndex": 113,
       "name": "Humming Ground",
-      "category": "support",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
       "x": 7.2,
       "y": 2.92,
-      "unlockPath": [
-        "perk.temple_of_protection"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2451,8 +1697,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": false,
-      "x": 4.61,
-      "y": 2.1,
+      "x": 7.7,
+      "y": 2.02,
       "unlockPath": [
         "perk.bonus_health"
       ],
@@ -2473,8 +1719,8 @@
       "cost": 1,
       "levelReq": 9,
       "stackable": false,
-      "x": 6.28,
-      "y": 1.87,
+      "x": 6.92,
+      "y": 7.7,
       "unlockPath": [
         "perk.endurance"
       ],
@@ -2495,11 +1741,9 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 7.54,
-      "y": 6.95,
-      "unlockPath": [
-        "perk.more_miscellaneous_items"
-      ],
+      "x": 7.05,
+      "y": 2.44,
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -2515,54 +1759,6 @@
       ]
     },
     {
-      "id": "perk.glass_cannon",
-      "legacyIndex": 119,
-      "name": "Brittle Fury",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 8,
-      "stackable": true,
-      "x": 5.37,
-      "y": 0.77,
-      "unlockPath": [
-        "perk.more_health"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "all_damage_taken",
-          "op": "mult",
-          "value": 1.12
-        },
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.12
-        }
-      ]
-    },
-    {
-      "id": "perk.size_matters",
-      "legacyIndex": 120,
-      "name": "Heavy Calibre",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 32,
-      "stackable": false,
-      "x": 1.39,
-      "y": 7.03,
-      "unlockPath": [
-        "perk.large_caliber"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_projectile_damage_increased_by_size",
-          "op": "enable"
-        }
-      ]
-    },
-    {
       "id": "perk.momentum_transfer",
       "legacyIndex": 121,
       "name": "Rolling Landing",
@@ -2570,8 +1766,8 @@
       "cost": 1,
       "levelReq": 11,
       "stackable": false,
-      "x": 2.09,
-      "y": 1.87,
+      "x": 7.96,
+      "y": 4.19,
       "unlockPath": [
         "perk.jump"
       ],
@@ -2584,28 +1780,6 @@
       ]
     },
     {
-      "id": "perk.long_arm",
-      "legacyIndex": 122,
-      "name": "Long Reach",
-      "category": "melee_offense",
-      "cost": 1,
-      "levelReq": 4,
-      "stackable": true,
-      "x": 2.66,
-      "y": 6.66,
-      "unlockPath": [
-        "perk.attack_speed"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "weapon_range",
-          "op": "mult",
-          "value": 1.1
-        }
-      ]
-    },
-    {
       "id": "perk.bleed",
       "legacyIndex": 123,
       "name": "Red Trail",
@@ -2613,8 +1787,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": true,
-      "x": 3.99,
-      "y": 0.91,
+      "x": 4.25,
+      "y": 1.7,
       "unlockPath": [
         "perk.lucky_hits",
         "perk.overwhelming_odds"
@@ -2629,73 +1803,6 @@
       ]
     },
     {
-      "id": "perk.weaken",
-      "legacyIndex": 124,
-      "name": "Exposed Flaw",
-      "category": "melee_offense",
-      "cost": 1,
-      "levelReq": 17,
-      "stackable": true,
-      "x": 3.99,
-      "y": 4.36,
-      "unlockPath": [
-        "perk.power_swing",
-        "perk.attack_speed"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "chance_to_weaken",
-          "op": "add",
-          "value": 0.07
-        }
-      ]
-    },
-    {
-      "id": "perk.gold_medalist",
-      "legacyIndex": 125,
-      "name": "Headhunter's Toss",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 30,
-      "stackable": false,
-      "x": 1.67,
-      "y": 6.55,
-      "unlockPath": [
-        "perk.spear_specialization"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_thrown_spear_crit_chance",
-          "op": "add",
-          "value": 0.36
-        }
-      ]
-    },
-    {
-      "id": "perk.spear_gamble",
-      "legacyIndex": 126,
-      "name": "Wild Lob",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 33,
-      "stackable": false,
-      "x": 1.95,
-      "y": 2.21,
-      "unlockPath": [
-        "perk.gold_medalist"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_thrown_spear_crit_chance",
-          "op": "add",
-          "value": 0.15
-        }
-      ]
-    },
-    {
       "id": "perk.double_spears",
       "legacyIndex": 127,
       "name": "Twinfang Throw",
@@ -2703,10 +1810,10 @@
       "cost": 2,
       "levelReq": 34,
       "stackable": false,
-      "x": 5.29,
-      "y": 5.1,
+      "x": 6.77,
+      "y": 5.0,
       "unlockPath": [
-        "perk.spear_gamble"
+        "perk.spear_specialization"
       ],
       "requires": [],
       "effects": [
@@ -2718,147 +1825,6 @@
       ]
     },
     {
-      "id": "perk.spears",
-      "legacyIndex": 128,
-      "name": "Spearstorm",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 53,
-      "stackable": true,
-      "x": 7.24,
-      "y": 5.59,
-      "unlockPath": [
-        "perk.double_spears"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_thrown_spearhell_chance",
-          "op": "add",
-          "value": 0.06
-        }
-      ]
-    },
-    {
-      "id": "perk.spear_mastery",
-      "legacyIndex": 129,
-      "name": "Hurler's Edge",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 50,
-      "stackable": false,
-      "x": 5.85,
-      "y": 5.1,
-      "unlockPath": [
-        "perk.spear_gamble"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_thrown_spear_damage_mult",
-          "op": "mult",
-          "value": 2.0
-        }
-      ]
-    },
-    {
-      "id": "perk.deadeye",
-      "legacyIndex": 130,
-      "name": "Gunmetal Calm",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 45,
-      "stackable": false,
-      "x": 1.67,
-      "y": 8.48,
-      "unlockPath": [
-        "perk.pistol_specialization"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_bullet_crit_chance",
-          "op": "add",
-          "value": 0.2
-        }
-      ]
-    },
-    {
-      "id": "perk.piercing",
-      "legacyIndex": 131,
-      "name": "Plate Splitter",
-      "category": "ranged_offense",
-      "cost": 2,
-      "levelReq": 35,
-      "stackable": false,
-      "x": 7.52,
-      "y": 5.1,
-      "unlockPath": [
-        "perk.double_spears",
-        "perk.spear_mastery"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_thrown_spear_extra_armor_reduction",
-          "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "perk.bunny_hopping",
-      "legacyIndex": 132,
-      "name": "Hare Leap",
-      "category": "utility",
-      "cost": 2,
-      "levelReq": 55,
-      "stackable": false,
-      "x": 1.26,
-      "y": 7.68,
-      "unlockPath": [
-        "perk.momentum_transfer"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_bunny_hop_upgrade",
-          "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "perk.curse_of_quickening",
-      "legacyIndex": 133,
-      "name": "Hasty Hands",
-      "category": "melee_offense",
-      "cost": 2,
-      "levelReq": 77,
-      "stackable": false,
-      "x": 3.99,
-      "y": 8.96,
-      "unlockPath": [
-        "perk.armageddon"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "attack_speed",
-          "op": "add",
-          "value": 0.45
-        },
-        {
-          "stat": "melee_increased_dmg",
-          "op": "mult",
-          "value": 0.9
-        },
-        {
-          "stat": "ranged_increased_dmg",
-          "op": "mult",
-          "value": 0.8
-        }
-      ]
-    },
-    {
       "id": "perk.curse_of_strengthening",
       "legacyIndex": 134,
       "name": "Lumbering Might",
@@ -2866,8 +1832,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 4.32,
-      "y": 8.39,
+      "x": 4.25,
+      "y": 9.13,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -2886,33 +1852,6 @@
       ]
     },
     {
-      "id": "perk.curse_of_binding",
-      "legacyIndex": 135,
-      "name": "Ironfist Pact",
-      "category": "melee_offense",
-      "cost": 2,
-      "levelReq": 77,
-      "stackable": false,
-      "x": 4.65,
-      "y": 8.96,
-      "unlockPath": [
-        "perk.armageddon"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "melee_increased_dmg",
-          "op": "add",
-          "value": 3.5
-        },
-        {
-          "stat": "ranged_increased_dmg",
-          "op": "mult",
-          "value": 0.0
-        }
-      ]
-    },
-    {
       "id": "perk.melee_mastery",
       "legacyIndex": 136,
       "name": "Brawler's Craft",
@@ -2920,8 +1859,8 @@
       "cost": 2,
       "levelReq": 60,
       "stackable": false,
-      "x": 4.32,
-      "y": 1.48,
+      "x": 4.25,
+      "y": 0.77,
       "unlockPath": [
         "perk.overwhelming_odds"
       ],
@@ -2946,144 +1885,6 @@
       ]
     },
     {
-      "id": "perk.curse_of_binding_2",
-      "legacyIndex": 137,
-      "name": "Sheathed Pact",
-      "category": "ranged_offense",
-      "cost": 2,
-      "levelReq": 77,
-      "stackable": false,
-      "x": 0.56,
-      "y": 5.59,
-      "unlockPath": [
-        "perk.armageddon"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "ranged_increased_dmg",
-          "op": "mult",
-          "value": 2.0
-        },
-        {
-          "stat": "melee_increased_dmg",
-          "op": "mult",
-          "value": 0.01
-        }
-      ]
-    },
-    {
-      "id": "perk.curse_of_crippling",
-      "legacyIndex": 138,
-      "name": "Planted Feet",
-      "category": "ranged_offense",
-      "cost": 2,
-      "levelReq": 77,
-      "stackable": false,
-      "x": 0.56,
-      "y": 4.62,
-      "unlockPath": [
-        "perk.armageddon"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "ranged_increased_dmg",
-          "op": "add",
-          "value": 2.0
-        },
-        {
-          "stat": "movement_speed",
-          "op": "mult",
-          "value": 0.75
-        },
-        {
-          "stat": "jump_power",
-          "op": "add",
-          "value": -0.65
-        }
-      ]
-    },
-    {
-      "id": "perk.curse_of_quickening_2",
-      "legacyIndex": 139,
-      "name": "Redline Surge",
-      "category": "ranged_offense",
-      "cost": 2,
-      "levelReq": 77,
-      "stackable": false,
-      "x": 0.84,
-      "y": 5.1,
-      "unlockPath": [
-        "perk.armageddon"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "ranged_increased_dmg",
-          "op": "add",
-          "value": 0.5
-        },
-        {
-          "stat": "projectile_size",
-          "op": "add",
-          "value": 0.5
-        },
-        {
-          "stat": "projectile_speed",
-          "op": "add",
-          "value": 0.5
-        },
-        {
-          "stat": "crit_damage",
-          "op": "add",
-          "value": 0.5
-        },
-        {
-          "stat": "attack_speed",
-          "op": "add",
-          "value": -0.2
-        },
-        {
-          "stat": "spell_cost",
-          "op": "mult",
-          "value": 3.0
-        }
-      ]
-    },
-    {
-      "id": "perk.curse_of_size",
-      "legacyIndex": 140,
-      "name": "Hollow Reservoir",
-      "category": "magic_offense",
-      "cost": 2,
-      "levelReq": 77,
-      "stackable": false,
-      "x": 5.38,
-      "y": 2.78,
-      "unlockPath": [
-        "perk.armageddon"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "max_energy_mult",
-          "op": "mult",
-          "value": 0.65
-        },
-        {
-          "stat": "stamina_per_sec_rate",
-          "op": "mult",
-          "value": 0.65
-        },
-        {
-          "stat": "spell_increased_dmg",
-          "op": "mult",
-          "value": 2.0
-        }
-      ]
-    },
-    {
       "id": "perk.curse_of_speed",
       "legacyIndex": 141,
       "name": "Rushed Rhythm",
@@ -3091,8 +1892,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 3.59,
-      "y": 2.78,
+      "x": 4.61,
+      "y": 1.12,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -3118,8 +1919,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 2.69,
-      "y": 2.78,
+      "x": 6.44,
+      "y": 2.29,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -3146,16 +1947,13 @@
       "id": "perk.counter_strike",
       "legacyIndex": 143,
       "name": "Grudge Bank",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
       "x": 4.04,
       "y": 5.11,
-      "unlockPath": [
-        "perk.flame_guard",
-        "perk.parry_range"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3169,15 +1967,13 @@
       "id": "perk.skull_basher",
       "legacyIndex": 144,
       "name": "Dentcrown",
-      "category": "melee_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 45,
       "stackable": false,
       "x": 3.32,
       "y": 6.66,
-      "unlockPath": [
-        "perk.body_strength_ii"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3191,42 +1987,19 @@
       "id": "perk.skull_basher_ii",
       "legacyIndex": 145,
       "name": "Bone Rattler",
-      "category": "melee_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
       "x": 4.32,
       "y": 6.09,
-      "unlockPath": [
-        "perk.skull_basher"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
           "stat": "spell_bash_damage_debuff_amount",
           "op": "add",
           "value": 0.5
-        }
-      ]
-    },
-    {
-      "id": "perk.dance_of_the_firegod",
-      "legacyIndex": 146,
-      "name": "Ember Heart",
-      "category": "melee_offense",
-      "cost": 1,
-      "levelReq": 45,
-      "stackable": false,
-      "x": 4.65,
-      "y": 4.36,
-      "unlockPath": [
-        "perk.power_swing"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_dance_of_firegod",
-          "op": "enable"
         }
       ]
     },
@@ -3238,8 +2011,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": true,
-      "x": 4.65,
-      "y": 5.51,
+      "x": 4.25,
+      "y": 4.5,
       "unlockPath": [
         "perk.grip_strength"
       ],
@@ -3256,15 +2029,13 @@
       "id": "perk.mania",
       "legacyIndex": 148,
       "name": "Manic Stride",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 26,
       "stackable": false,
       "x": 6.28,
       "y": 5.89,
-      "unlockPath": [
-        "perk.frenzy_haste"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3277,15 +2048,13 @@
       "id": "perk.fury_swipes",
       "legacyIndex": 149,
       "name": "Repeat Offender",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 43,
       "stackable": false,
       "x": 5.83,
       "y": 5.11,
-      "unlockPath": [
-        "perk.mania"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3298,15 +2067,13 @@
       "id": "perk.lucky_bashes",
       "legacyIndex": 150,
       "name": "Fortunate Shove",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 27,
       "stackable": true,
       "x": 5.38,
       "y": 5.89,
-      "unlockPath": [
-        "perk.concussive_bash"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3324,8 +2091,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 0.42,
-      "y": 4.77,
+      "x": 1.52,
+      "y": 7.63,
       "unlockPath": [
         "perk.more_building_resources"
       ],
@@ -3346,8 +2113,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": 7.96,
-      "y": 4.77,
+      "x": 7.92,
+      "y": 5.99,
       "unlockPath": [
         "perk.luck_enchantment_ii"
       ],
@@ -3361,39 +2128,16 @@
       ]
     },
     {
-      "id": "perk.speed_matters",
-      "legacyIndex": 153,
-      "name": "Velocity Bite",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 30,
-      "stackable": false,
-      "x": 1.39,
-      "y": 2.21,
-      "unlockPath": [
-        "perk.speed"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_projectile_damage_increased_by_speed",
-          "op": "enable"
-        }
-      ]
-    },
-    {
       "id": "perk.magic_arrow_devastation",
       "legacyIndex": 154,
       "name": "Magic Arrow: Barbed",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
       "x": 1.79,
       "y": 7.44,
-      "unlockPath": [
-        "perk.exposure"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3406,15 +2150,13 @@
       "id": "perk.nuke_conjuration",
       "legacyIndex": 155,
       "name": "Ball Lightning: Fork",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 62,
       "stackable": false,
       "x": 5.83,
       "y": 3.56,
-      "unlockPath": [
-        "perk.infinity"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3427,15 +2169,13 @@
       "id": "perk.blink_wormhole",
       "legacyIndex": 156,
       "name": "Blink: Far Step",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 40,
       "stackable": true,
       "x": 4.93,
       "y": 3.56,
-      "unlockPath": [
-        "perk.blink_passthrough"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3453,8 +2193,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 2.62,
-      "y": 6.33,
+      "x": 3.18,
+      "y": 7.56,
       "unlockPath": [
         "perk.inner_fire"
       ],
@@ -3468,44 +2208,16 @@
       ]
     },
     {
-      "id": "perk.cursed_arrow",
-      "legacyIndex": 158,
-      "name": "Tithe Arrow",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 44,
-      "stackable": false,
-      "x": 1.95,
-      "y": 1.24,
-      "unlockPath": [
-        "perk.near_death_arrow"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "spell_bia_triple_dmg",
-          "op": "enable"
-        },
-        {
-          "stat": "all_recovery_mult",
-          "op": "mult",
-          "value": 0.75
-        }
-      ]
-    },
-    {
       "id": "perk.concussive_shot",
       "legacyIndex": 159,
       "name": "Bellringer",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 30,
       "stackable": false,
       "x": 1.95,
       "y": 8.0,
-      "unlockPath": [
-        "perk.near_death_arrow"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3522,8 +2234,8 @@
       "cost": 1,
       "levelReq": 47,
       "stackable": false,
-      "x": 0.65,
-      "y": 2.92,
+      "x": 3.4,
+      "y": 1.18,
       "unlockPath": [
         "perk.combat_energy_regen",
         "perk.combat_health_regen"
@@ -3546,16 +2258,13 @@
       "id": "perk.endless_stream",
       "legacyIndex": 161,
       "name": "Arrow Flood",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 47,
       "stackable": false,
       "x": 4.93,
       "y": 5.11,
-      "unlockPath": [
-        "perk.magic_arrow_devastation",
-        "perk.magic_binding"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -3563,15 +2272,13 @@
       "id": "perk.parry_mastery",
       "legacyIndex": 162,
       "name": "Open Guard",
-      "category": "melee_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 34,
       "stackable": false,
       "x": 4.65,
       "y": 3.21,
-      "unlockPath": [
-        "perk.lucky_hits"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3593,8 +2300,8 @@
       "cost": 1,
       "levelReq": 3,
       "stackable": false,
-      "x": 6.14,
-      "y": 2.1,
+      "x": 0.8,
+      "y": 3.51,
       "unlockPath": [
         "perk.armor"
       ],
@@ -3615,8 +2322,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": 4.61,
-      "y": 4.76,
+      "x": 7.49,
+      "y": 5.59,
       "unlockPath": [
         "perk.durability"
       ],
@@ -3635,71 +2342,6 @@
       ]
     },
     {
-      "id": "perk.anti_magic_training",
-      "legacyIndex": 165,
-      "name": "Cold Resolve",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 24,
-      "stackable": false,
-      "x": 6.91,
-      "y": 3.43,
-      "unlockPath": [
-        "perk.magic_resistance",
-        "perk.durability"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "magic_damage_taken",
-          "op": "mult",
-          "value": 0.8
-        }
-      ]
-    },
-    {
-      "id": "perk.dense_matter",
-      "legacyIndex": 166,
-      "name": "Leaden Bones",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 30,
-      "stackable": false,
-      "x": 6.14,
-      "y": 4.76,
-      "unlockPath": [
-        "perk.anti_magic_training"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_blackhole_pull_immune",
-          "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "perk.warmth",
-      "legacyIndex": 167,
-      "name": "Hearth Blood",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 30,
-      "stackable": false,
-      "x": 7.68,
-      "y": 4.76,
-      "unlockPath": [
-        "perk.anti_magic_training"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_blizzard_slow_reduced",
-          "op": "enable"
-        }
-      ]
-    },
-    {
       "id": "perk.true_aim",
       "legacyIndex": 168,
       "name": "Distant Mark",
@@ -3707,8 +2349,8 @@
       "cost": 1,
       "levelReq": 70,
       "stackable": false,
-      "x": 1.67,
-      "y": 3.66,
+      "x": 2.69,
+      "y": 5.0,
       "unlockPath": [
         "perk.bullseye"
       ],
@@ -3730,8 +2372,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": true,
-      "x": 2.3,
-      "y": 3.43,
+      "x": 7.7,
+      "y": 3.82,
       "unlockPath": [
         "perk.thorny_skin"
       ],
@@ -3748,15 +2390,13 @@
       "id": "perk.storm_season",
       "legacyIndex": 170,
       "name": "Thunderclock",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 80,
       "stackable": false,
       "x": 4.48,
       "y": 2.78,
-      "unlockPath": [
-        "perk.nuke_conjuration"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -3764,15 +2404,13 @@
       "id": "perk.endless_storm",
       "legacyIndex": 171,
       "name": "Roiling Sky",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 120,
       "stackable": false,
       "x": 4.04,
       "y": 2.0,
-      "unlockPath": [
-        "perk.storm_season"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -3780,15 +2418,13 @@
       "id": "perk.quick_silver",
       "legacyIndex": 172,
       "name": "Vanishing Habit",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 66,
       "stackable": false,
       "x": 2.24,
       "y": 3.56,
-      "unlockPath": [
-        "perk.blink_wormhole"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -3796,15 +2432,13 @@
       "id": "perk.wrath_of_the_sun",
       "legacyIndex": 173,
       "name": "Flarewright",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 44,
       "stackable": false,
       "x": 7.17,
       "y": 5.89,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction_2"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -3812,15 +2446,13 @@
       "id": "perk.full_counter",
       "legacyIndex": 174,
       "name": "Turned Blow",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
       "x": 4.48,
       "y": 4.33,
-      "unlockPath": [
-        "perk.counter_strike"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3834,15 +2466,13 @@
       "id": "perk.golden_resolve",
       "legacyIndex": 175,
       "name": "Gilded Nerve",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
       "x": 1.79,
       "y": 4.33,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction_4"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3855,15 +2485,13 @@
       "id": "perk.sudden_rampage",
       "legacyIndex": 176,
       "name": "Red Mist",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
       "x": 2.69,
       "y": 4.33,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction_4"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -3871,15 +2499,13 @@
       "id": "perk.safe_heaven",
       "legacyIndex": 177,
       "name": "Warded Ground",
-      "category": "support",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 44,
       "stackable": false,
       "x": 5.24,
       "y": 1.79,
-      "unlockPath": [
-        "perk.energy_field"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -3893,15 +2519,13 @@
       "id": "perk.time_of_need",
       "legacyIndex": 178,
       "name": "Hasty Rescue",
-      "category": "support",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 58,
       "stackable": false,
       "x": 7.86,
       "y": 4.06,
-      "unlockPath": [
-        "perk.more_health_regen"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -3909,42 +2533,18 @@
       "id": "perk.breathing_tehniques",
       "legacyIndex": 179,
       "name": "Measured Breath",
-      "category": "melee_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 46,
       "stackable": false,
       "x": 3.99,
       "y": 2.06,
-      "unlockPath": [
-        "perk.dance_of_the_firegod"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
           "stat": "perk_dance_of_firegod_atk_cap",
           "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "perk.luck_enchantment_iii",
-      "legacyIndex": 182,
-      "name": "Lucky Streak",
-      "category": "utility",
-      "cost": 2,
-      "levelReq": 55,
-      "stackable": false,
-      "x": 0.84,
-      "y": 4.05,
-      "unlockPath": [
-        "perk.luck_enchantment_ii"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "magic_find",
-          "op": "add",
-          "value": 0.15
         }
       ]
     },
@@ -3956,11 +2556,11 @@
       "cost": 1,
       "levelReq": 41,
       "stackable": false,
-      "x": 2.3,
-      "y": 6.09,
+      "x": 2.74,
+      "y": 8.25,
       "unlockPath": [
         "perk.iron_maiden",
-        "perk.durability_iii"
+        "perk.durability"
       ],
       "requires": [],
       "effects": [
@@ -3980,16 +2580,13 @@
       "id": "perk.autocast_shield",
       "legacyIndex": 184,
       "name": "Unbidden Ward",
-      "category": "defense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
       "x": 4.61,
       "y": 7.42,
-      "unlockPath": [
-        "perk.shield_endurance",
-        "perk.durability_iii"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4002,15 +2599,13 @@
       "id": "perk.seeking_arrow_improved_memory",
       "legacyIndex": 185,
       "name": "Seeking Arrow: Grudge",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
       "x": 8.08,
       "y": 5.1,
-      "unlockPath": [
-        "perk.seeking_arrow_movement_impairing_arrows"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4024,15 +2619,13 @@
       "id": "perk.storm_of_the_century",
       "legacyIndex": 186,
       "name": "Walking Tempest",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 130,
       "stackable": false,
       "x": 4.48,
       "y": 1.23,
-      "unlockPath": [
-        "perk.endless_storm"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4043,23 +2636,6 @@
       ]
     },
     {
-      "id": "perk.craftable_plane_axe",
-      "legacyIndex": 187,
-      "name": "Fuselage Axe",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 5,
-      "stackable": false,
-      "x": 1.68,
-      "y": 2.6,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
-      "requires": [],
-      "effects": [],
-      "manual": true
-    },
-    {
       "id": "perk.hawk_s_eye",
       "legacyIndex": 188,
       "name": "Keen Sight",
@@ -4067,8 +2643,8 @@
       "cost": 1,
       "levelReq": 38,
       "stackable": false,
-      "x": 1.67,
-      "y": 7.52,
+      "x": 5.75,
+      "y": 5.0,
       "unlockPath": [
         "perk.crossbow_specialization"
       ],
@@ -4089,11 +2665,9 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": true,
-      "x": 3.35,
-      "y": 8.4,
-      "unlockPath": [
-        "perk.alternative_cloth_sources"
-      ],
+      "x": 4.25,
+      "y": 3.09,
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4111,8 +2685,8 @@
       "cost": 2,
       "levelReq": 65,
       "stackable": false,
-      "x": 1.67,
-      "y": 5.59,
+      "x": 4.73,
+      "y": 5.0,
       "unlockPath": [
         "perk.bow_specialization"
       ],
@@ -4141,28 +2715,6 @@
       ]
     },
     {
-      "id": "perk.harvester",
-      "legacyIndex": 191,
-      "name": "Brush Cutter",
-      "category": "utility",
-      "cost": 1,
-      "levelReq": 5,
-      "stackable": false,
-      "x": 7.96,
-      "y": 6.22,
-      "unlockPath": [
-        "perk.more_meat",
-        "perk.more_snacks"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_double_stick_harvesting",
-          "op": "enable"
-        }
-      ]
-    },
-    {
       "id": "perk.block",
       "legacyIndex": 192,
       "name": "Stout Guard",
@@ -4170,8 +2722,8 @@
       "cost": 1,
       "levelReq": 45,
       "stackable": false,
-      "x": 3.84,
-      "y": 3.43,
+      "x": 0.9,
+      "y": 5.29,
       "unlockPath": [
         "perk.bonus_health",
         "perk.magic_resistance"
@@ -4186,50 +2738,6 @@
       ]
     },
     {
-      "id": "perk.thorny_skin_ii",
-      "legacyIndex": 193,
-      "name": "Wirevein",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 16,
-      "stackable": false,
-      "x": 3.07,
-      "y": 4.76,
-      "unlockPath": [
-        "perk.spikes"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "thorns_per_vit",
-          "op": "add",
-          "value": 1.5
-        }
-      ]
-    },
-    {
-      "id": "perk.corrosive_skin",
-      "legacyIndex": 194,
-      "name": "Rust Touch",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 17,
-      "stackable": false,
-      "x": 5.37,
-      "y": 6.09,
-      "unlockPath": [
-        "perk.thorny_skin_ii"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "thorns_armor_piercing",
-          "op": "add",
-          "value": 2.5
-        }
-      ]
-    },
-    {
       "id": "perk.pyromancy",
       "legacyIndex": 195,
       "name": "Kindler",
@@ -4237,8 +2745,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 3.93,
-      "y": 4.06,
+      "x": 7.9,
+      "y": 3.04,
       "unlockPath": [
         "perk.fiery_embrace"
       ],
@@ -4252,28 +2760,6 @@
       ]
     },
     {
-      "id": "perk.heat_surge",
-      "legacyIndex": 196,
-      "name": "Flashpoint",
-      "category": "support",
-      "cost": 1,
-      "levelReq": 70,
-      "stackable": false,
-      "x": 3.27,
-      "y": 2.92,
-      "unlockPath": [
-        "perk.pyromancy"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "fire_tick_rate",
-          "op": "add",
-          "value": 1.2
-        }
-      ]
-    },
-    {
       "id": "perk.flame_lifetime",
       "legacyIndex": 197,
       "name": "Slow Embers",
@@ -4281,8 +2767,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 5.24,
-      "y": 4.06,
+      "x": 0.62,
+      "y": 2.77,
       "unlockPath": [
         "perk.fiery_embrace"
       ],
@@ -4303,8 +2789,8 @@
       "cost": 1,
       "levelReq": 70,
       "stackable": false,
-      "x": 5.89,
-      "y": 2.92,
+      "x": 1.61,
+      "y": 1.26,
       "unlockPath": [
         "perk.flame_lifetime"
       ],
@@ -4325,8 +2811,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": 1.96,
-      "y": 2.92,
+      "x": 4.03,
+      "y": 2.29,
       "unlockPath": [
         "perk.insight"
       ],
@@ -4347,8 +2833,8 @@
       "cost": 2,
       "levelReq": 122,
       "stackable": false,
-      "x": 6.73,
-      "y": 3.56,
+      "x": 3.89,
+      "y": 1.12,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -4365,15 +2851,13 @@
       "id": "perk.the_big_suck",
       "legacyIndex": 201,
       "name": "Hungry Dark",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 2,
       "levelReq": 128,
       "stackable": false,
       "x": 6.28,
       "y": 2.78,
-      "unlockPath": [
-        "perk.the_real_armageddon"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4387,15 +2871,13 @@
       "id": "perk.event_horizon_expansion",
       "legacyIndex": 202,
       "name": "Widening Dark",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 132,
       "stackable": true,
       "x": 4.93,
       "y": 2.0,
-      "unlockPath": [
-        "perk.the_big_suck"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4409,87 +2891,19 @@
       "id": "perk.event_horizon_expansion_2",
       "legacyIndex": 203,
       "name": "Crushing Pull",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 130,
       "stackable": false,
       "x": 2.24,
       "y": 2.0,
-      "unlockPath": [
-        "perk.the_big_suck"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
           "stat": "spell_blackhole_pullforce",
           "op": "add",
           "value": 25.0
-        }
-      ]
-    },
-    {
-      "id": "perk.vitality",
-      "legacyIndex": 204,
-      "name": "Hardy Frame",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 5,
-      "stackable": false,
-      "x": 7.68,
-      "y": 2.1,
-      "unlockPath": [
-        "perk.enhanced_vitality"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "vitality",
-          "op": "add",
-          "value": 30.0
-        }
-      ]
-    },
-    {
-      "id": "perk.curse_of_thorns",
-      "legacyIndex": 205,
-      "name": "Barbwire Oath",
-      "category": "defense",
-      "cost": 2,
-      "levelReq": 77,
-      "stackable": false,
-      "x": 3.07,
-      "y": 7.42,
-      "unlockPath": [
-        "perk.armageddon"
-      ],
-      "requires": [
-        "perk.corrosive_skin"
-      ],
-      "effects": [
-        {
-          "stat": "thorns_dmg_mult",
-          "op": "mult",
-          "value": 3.0
-        },
-        {
-          "stat": "thorns_armor_piercing",
-          "op": "add",
-          "value": 3.0
-        },
-        {
-          "stat": "all_damage_taken",
-          "op": "mult",
-          "value": 0.95
-        },
-        {
-          "stat": "melee_flat_dmg",
-          "op": "mult",
-          "value": 0.8
-        },
-        {
-          "stat": "ranged_flat_dmg",
-          "op": "mult",
-          "value": 0.8
         }
       ]
     },
@@ -4501,8 +2915,8 @@
       "cost": 1,
       "levelReq": 76,
       "stackable": false,
-      "x": 6.55,
-      "y": 1.79,
+      "x": 5.36,
+      "y": 1.08,
       "unlockPath": [
         "perk.rejuvenation"
       ],
@@ -4519,15 +2933,13 @@
       "id": "perk.falter",
       "legacyIndex": 207,
       "name": "Stumblestep",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
       "x": 5.38,
       "y": 7.44,
-      "unlockPath": [
-        "perk.transmutation"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
     },
@@ -4535,15 +2947,13 @@
       "id": "perk.line_up",
       "legacyIndex": 208,
       "name": "Gathering Call",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 12,
       "stackable": false,
       "x": 5.83,
       "y": 6.66,
-      "unlockPath": [
-        "perk.falter"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4556,15 +2966,13 @@
       "id": "perk.instant_riposte",
       "legacyIndex": 210,
       "name": "Quick Retort",
-      "category": "melee_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
       "x": 4.32,
       "y": 2.63,
-      "unlockPath": [
-        "perk.lucky_hits"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4578,15 +2986,13 @@
       "id": "perk.firebolt_upgrade",
       "legacyIndex": 212,
       "name": "Firebolt: Kindling",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
       "x": 3.59,
       "y": 5.89,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4605,15 +3011,13 @@
       "id": "perk.firebolt_upgrade_2",
       "legacyIndex": 213,
       "name": "Firebolt: Overburn",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 17,
       "stackable": true,
       "x": 3.14,
       "y": 5.11,
-      "unlockPath": [
-        "perk.firebolt_upgrade"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4636,8 +3040,8 @@
       "cost": 2,
       "levelReq": 60,
       "stackable": false,
-      "x": 4.65,
-      "y": 2.06,
+      "x": 4.25,
+      "y": 2.63,
       "unlockPath": [
         "perk.super_charged_attack"
       ],
@@ -4651,62 +3055,16 @@
       ]
     },
     {
-      "id": "perk.body_strength_ii",
-      "legacyIndex": 215,
-      "name": "Iron Sinew",
-      "category": "melee_offense",
-      "cost": 1,
-      "levelReq": 40,
-      "stackable": false,
-      "x": 4.65,
-      "y": 7.81,
-      "unlockPath": [
-        "perk.body_strength"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "strength",
-          "op": "add",
-          "value": 300.0
-        }
-      ]
-    },
-    {
-      "id": "perk.steroid",
-      "legacyIndex": 216,
-      "name": "Juiced Arms",
-      "category": "melee_offense",
-      "cost": 1,
-      "levelReq": 60,
-      "stackable": false,
-      "x": 4.65,
-      "y": 6.66,
-      "unlockPath": [
-        "perk.body_strength_ii"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "melee_increased_dmg",
-          "op": "mult",
-          "value": 1.25
-        }
-      ]
-    },
-    {
       "id": "perk.firebolt_cost_reduction",
       "legacyIndex": 217,
       "name": "Firebolt: Thrift",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 60,
       "stackable": false,
       "x": 3.59,
       "y": 4.33,
-      "unlockPath": [
-        "perk.firebolt_upgrade_2"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4724,8 +3082,8 @@
       "cost": 1,
       "levelReq": 16,
       "stackable": false,
-      "x": 0.84,
-      "y": 4.14,
+      "x": 0.86,
+      "y": 5.23,
       "unlockPath": [
         "perk.stronger_projectiles"
       ],
@@ -4746,8 +3104,8 @@
       "cost": 1,
       "levelReq": 36,
       "stackable": false,
-      "x": 1.11,
-      "y": 2.69,
+      "x": 1.03,
+      "y": 6.23,
       "unlockPath": [
         "perk.target_practise"
       ],
@@ -4768,8 +3126,8 @@
       "cost": 1,
       "levelReq": 60,
       "stackable": false,
-      "x": 6.14,
-      "y": 7.42,
+      "x": 4.13,
+      "y": 9.4,
       "unlockPath": [
         "perk.dodge"
       ],
@@ -4780,42 +3138,18 @@
       "id": "perk.critical_infusion",
       "legacyIndex": 221,
       "name": "Bloodmark",
-      "category": "ranged_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 55,
       "stackable": false,
       "x": 3.06,
       "y": 5.1,
-      "unlockPath": [
-        "perk.near_death_arrow"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
           "stat": "spell_bia_crit",
           "op": "enable"
-        }
-      ]
-    },
-    {
-      "id": "perk.supersonic",
-      "legacyIndex": 222,
-      "name": "Snapflight",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 90,
-      "stackable": false,
-      "x": 1.95,
-      "y": 6.07,
-      "unlockPath": [
-        "perk.speed_matters"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "projectile_speed",
-          "op": "mult",
-          "value": 2.0
         }
       ]
     },
@@ -4827,24 +3161,8 @@
       "cost": 1,
       "levelReq": 100,
       "stackable": false,
-      "x": 5.37,
-      "y": 8.75,
-      "unlockPath": [
-        "perk.dodge"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.deployable_shield_2",
-      "legacyIndex": 224,
-      "name": "Hardened Sidestep",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 100,
-      "stackable": false,
-      "x": 3.84,
-      "y": 8.75,
+      "x": 5.52,
+      "y": 8.45,
       "unlockPath": [
         "perk.dodge"
       ],
@@ -4855,15 +3173,13 @@
       "id": "perk.pound_of_flesh",
       "legacyIndex": 225,
       "name": "Flesh Surplus",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
       "x": 5.38,
       "y": 4.33,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction_4"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4877,15 +3193,13 @@
       "id": "perk.pantheon_of_champions",
       "legacyIndex": 226,
       "name": "Rally Ring",
-      "category": "support",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 45,
       "stackable": false,
       "x": 2.62,
       "y": 1.79,
-      "unlockPath": [
-        "perk.energy_field"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4904,15 +3218,13 @@
       "id": "perk.magic_tower",
       "legacyIndex": 227,
       "name": "Hearthside Focus",
-      "category": "support",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 40,
       "stackable": false,
       "x": 1.31,
       "y": 1.79,
-      "unlockPath": [
-        "perk.energy_field"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": [
         {
@@ -4931,127 +3243,15 @@
       "id": "perk.golden_cooldown",
       "legacyIndex": 228,
       "name": "Gilded Pace",
-      "category": "magic_offense",
+      "category": "mastery",
       "cost": 1,
       "levelReq": 51,
       "stackable": false,
       "x": 4.04,
       "y": 3.56,
-      "unlockPath": [
-        "perk.greater_cooldown_reduction_4"
-      ],
+      "unlockPath": [],
       "requires": [],
       "effects": []
-    },
-    {
-      "id": "perk.adrenaline_rush",
-      "legacyIndex": 229,
-      "name": "Panic Fuel",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 37,
-      "stackable": false,
-      "x": 1.67,
-      "y": 1.73,
-      "unlockPath": [
-        "perk.bullseye"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.adrenaline_rush_ii",
-      "legacyIndex": 230,
-      "name": "Panic Engine",
-      "category": "ranged_offense",
-      "cost": 1,
-      "levelReq": 38,
-      "stackable": false,
-      "x": 2.51,
-      "y": 5.1,
-      "unlockPath": [
-        "perk.adrenaline_rush"
-      ],
-      "requires": [],
-      "effects": []
-    },
-    {
-      "id": "perk.meteorite_resistance",
-      "legacyIndex": 231,
-      "name": "Skyfall Hide",
-      "category": "defense",
-      "cost": 1,
-      "levelReq": 31,
-      "stackable": true,
-      "x": 3.84,
-      "y": 6.09,
-      "unlockPath": [
-        "perk.anti_magic_training"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "perk_meteor_damage_taken",
-          "op": "mult",
-          "value": 0.5
-        }
-      ]
-    },
-    {
-      "id": "perk.power_slowdown",
-      "legacyIndex": 232,
-      "name": "Heavy Hands",
-      "category": "melee_offense",
-      "cost": 0,
-      "levelReq": 5,
-      "stackable": true,
-      "x": 3.99,
-      "y": 5.51,
-      "unlockPath": [
-        "perk.grip_strength"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "attack_speed",
-          "op": "add",
-          "value": -0.1
-        },
-        {
-          "stat": "all_damage",
-          "op": "add",
-          "value": 0.01
-        }
-      ],
-      "canBuyManual": true
-    },
-    {
-      "id": "perk.power_slowdown_crit",
-      "legacyIndex": 233,
-      "name": "Slow Release",
-      "category": "ranged_offense",
-      "cost": 0,
-      "levelReq": 0,
-      "stackable": true,
-      "x": 1.95,
-      "y": 3.17,
-      "unlockPath": [
-        "perk.speed_matters"
-      ],
-      "requires": [],
-      "effects": [
-        {
-          "stat": "projectile_speed",
-          "op": "add",
-          "value": -0.1
-        },
-        {
-          "stat": "crit_damage",
-          "op": "add",
-          "value": 0.1
-        }
-      ],
-      "canBuyManual": true
     }
   ]
 }

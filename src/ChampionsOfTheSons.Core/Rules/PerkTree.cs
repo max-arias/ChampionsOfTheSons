@@ -25,6 +25,7 @@ public sealed class PerkTree
     private readonly ContentDb _content;
     private readonly Dictionary<string, int> _bought = new();
     private readonly HashSet<string> _spells = new();
+    private readonly HashSet<string> _granted = new();
 
     public PerkTree(ContentDb content) => _content = content;
 
@@ -36,12 +37,27 @@ public sealed class PerkTree
 
     public int AvailablePoints(Progress progress) => progress.TotalPerkPoints - SpentPoints;
 
-    public int TimesBought(string perkId) => _bought.TryGetValue(perkId, out var n) ? n : 0;
+    /// <summary>Times bought, plus one when spell mastery grants it (COS-176): granted perks count as owned everywhere.</summary>
+    public int TimesBought(string perkId) => (_bought.TryGetValue(perkId, out var n) ? n : 0) + (_granted.Contains(perkId) && !_bought.ContainsKey(perkId) ? 1 : 0);
+
+    /// <summary>Perks spell mastery grants (COS-176): owned for effects and checks, cost no points, never refunded, not saved.</summary>
+    public IReadOnlyCollection<string> Granted => _granted;
+
+    /// <summary>Sets the granted perks (spell mastery). Returns whether the set changed.</summary>
+    public bool Grant(IEnumerable<string> perkIds)
+    {
+        var next = new HashSet<string>(perkIds);
+        if (next.SetEquals(_granted)) return false;
+        _granted.Clear();
+        _granted.UnionWith(next);
+        return true;
+    }
 
     /// <summary>Why a perk can or can't be bought. <paramref name="extraCheck"/> covers perks with a custom condition.</summary>
     public BuyResult CanBuy(string perkId, Progress progress, Func<PerkDef, bool>? extraCheck = null)
     {
         if (!_content.Perks.TryGetValue(perkId, out var perk)) return BuyResult.UnknownPerk;
+        if (perk.Category == PerkCategory.Mastery) return BuyResult.NotBuyable; // unlocked by casting the spell (COS-176)
         if (TimesBought(perkId) > 0 && !perk.Stackable) return BuyResult.AlreadyBought;
         if (progress.Level < perk.LevelReq) return BuyResult.LevelTooLow;
         if (perk.UnlockPath.Count > 0 && !perk.UnlockPath.Any(p => TimesBought(p) > 0)) return BuyResult.PathLocked;
@@ -127,7 +143,8 @@ public sealed class PerkTree
     {
         _bought.Clear();
         foreach (var (id, n) in perks)
-            if (n > 0) _bought[id] = n;
+            // A spell upgrade bought before COS-176 is given back: mastery grants it now.
+            if (n > 0 && !(_content.Perks.TryGetValue(id, out var p) && p.Category == PerkCategory.Mastery)) _bought[id] = n;
         _spells.Clear();
         foreach (var s in spells) _spells.Add(s);
     }
@@ -142,6 +159,13 @@ public sealed class PerkTree
             for (int i = 0; i < times; i++)
                 foreach (var e in perk.Effects)
                     mods.Add(ItemEffects.ToModifier(e, 0));
+        }
+        // Spell mastery upgrades apply once each (COS-176).
+        foreach (var id in _granted)
+        {
+            if (_bought.ContainsKey(id) || !_content.Perks.TryGetValue(id, out var perk)) continue;
+            foreach (var e in perk.Effects)
+                mods.Add(ItemEffects.ToModifier(e, 0));
         }
         return mods;
     }
