@@ -1,5 +1,6 @@
 using ChampionsOfTheSons.Core.Rules;
 using ChampionsOfTheSons.Mod.Bridge;
+using ChampionsOfTheSons.Mod.Spells;
 using TheForest.Utils;
 
 namespace ChampionsOfTheSons.Mod.Admin;
@@ -42,10 +43,19 @@ internal static class AdminSelfTest
             SelfTest.Check("admin: giveall gives one of every item of a type", Run("giveall ring") && Pc.Inventory.Slots.Count == bag + rings,
                 $"bag {bag} -> {Pc.Inventory.Slots.Count}, {rings} rings; {AdminFeature.LastReply}");
             SelfTest.Check("admin: giveall unknown type fails", !Run("giveall nothing"));
-            SelfTest.Check("admin: playtest sets everything up", Run("playtest") && Pc.Progress.Level >= 30 && AdminState.God && AdminState.NoCooldowns,
-                AdminFeature.LastReply);
+            SelfTest.Check("admin: playtest sets everything up",
+                Run("playtest") && Pc.Progress.Level >= 30 && AdminState.God && AdminState.NoCooldowns && AdminState.InfiniteEnergy, AdminFeature.LastReply);
+            // COS-173: the dearest spell costs more than max energy; infinite energy casts it anyway, twice.
+            var dearest = ModContent.Db.Spells.Values.Where(sp => SpellCaster.IsImplemented(sp.Id) && !sp.Channeled && !sp.Toggle)
+                .OrderByDescending(sp => Pc.Spells.CostOf(sp.Id, Pc.Stats).Total).First();
+            Pc.Spells.Equip(0, dearest.Id);
+            var first = SpellCaster.Cast(0);
+            var second = SpellCaster.Cast(0);
+            SelfTest.Check("admin: infinite energy casts the dearest spell twice", first == SpellCastOutcome.Cast && second == SpellCastOutcome.Cast,
+                $"{dearest.Id} cost {Pc.Spells.CostOf(dearest.Id, Pc.Stats).Total:0} vs max {SpellCaster.MaxEnergy:0}: {first}, {second}");
             Run("god off");
             Run("nocooldowns off");
+            Run("energy off");
             Run("respec");
             Pc.Spells.Restore(new[] { "spell.blink" });
             Pc.Spells.Equip(0, "spell.blink");

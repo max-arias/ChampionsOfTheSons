@@ -341,6 +341,8 @@ public enum AdminAction : byte
     NoCooldowns = 9,
     /// <summary>Every spell unlocked for free (bonus perk points pay for them), empty slots filled (COS-166).</summary>
     LearnAllSpells = 10,
+    /// <summary><c>Amount</c> 1 = on, 0 = off: casts cost nothing and energy stays full, so every spell can be cast (COS-173).</summary>
+    InfiniteEnergy = 11,
 }
 
 /// <summary>Host → one client: an admin command applied to that player (COS-99). Clients accept it only from the host.</summary>

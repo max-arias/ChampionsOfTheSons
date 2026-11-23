@@ -56,6 +56,8 @@ internal static class SpellCaster
     {
         get
         {
+            // Admin infinite energy (COS-173): enough for any cost, even one above max energy.
+            if (Admin.AdminState.InfiniteEnergy) return Math.Max(MaxEnergy, 1e9);
             var s = LocalPlayer.Vitals?.Stamina;
             if (s == null) return 0;
             float max = s.GetMax();
@@ -73,6 +75,7 @@ internal static class SpellCaster
 
     internal static void Spend(double amount)
     {
+        if (amount > 0 && Admin.AdminState.InfiniteEnergy) return;
         var s = LocalPlayer.Vitals?.Stamina;
         if (s == null || amount == 0) return;
         float max = s.GetMax();

@@ -21,15 +21,21 @@ public static class AdminState
     /// <summary>Every slotted spell stays ready.</summary>
     public static bool NoCooldowns { get; private set; }
 
+    /// <summary>Casts cost nothing and the energy bar stays full, whatever a spell costs against max energy (COS-173).</summary>
+    public static bool InfiniteEnergy { get; private set; }
+
     public static void Reset()
     {
         God = false;
         NoCooldowns = false;
+        InfiniteEnergy = false;
     }
 
     public static void Update()
     {
         if (NoCooldowns) PlayerState.Character.Spells.ReadyAll();
+        var stamina = InfiniteEnergy ? LocalPlayer.Vitals?.Stamina : null;
+        if (stamina != null && stamina._currentValue < stamina.GetMax()) stamina.SetCurrentValue(stamina.GetMax());
         // Hits are zeroed in PlayerBridge; some game damage (seen 1 s after a hit, fall, fire) bypasses PlayerStats.Hit, so health is held at max too.
         var health = God ? LocalPlayer.Vitals?.Health : null;
         if (health != null && health._currentValue > 0 && health._currentValue < health.GetMax()) health.SetCurrentValue(health.GetMax());
@@ -69,6 +75,9 @@ public static class AdminState
                 return $"spell cooldowns {(NoCooldowns ? "off" : "on")}";
             case AdminAction.LearnAllSpells:
                 return LearnAllSpells();
+            case AdminAction.InfiniteEnergy:
+                InfiniteEnergy = g.Amount > 0;
+                return $"infinite energy {(InfiniteEnergy ? "on" : "off")}";
             default:
                 return $"unknown admin action {g.Action}";
         }

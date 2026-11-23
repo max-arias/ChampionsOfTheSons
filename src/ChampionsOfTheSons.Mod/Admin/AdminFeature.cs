@@ -157,6 +157,7 @@ public sealed class AdminFeature : IModFeature
                 "heal" => Grant(AdminAction.Heal, args, -1, sender),
                 "god" => Toggle(AdminAction.God, args, sender, AdminState.God),
                 "nocooldowns" => Toggle(AdminAction.NoCooldowns, args, sender, AdminState.NoCooldowns),
+                "energy" => Toggle(AdminAction.InfiniteEnergy, args, sender, AdminState.InfiniteEnergy),
                 "spawn" => Spawn(args, sender),
                 "extralevels" => SetExtraLevels(args),
                 "list" => List(args),
@@ -184,10 +185,11 @@ public sealed class AdminFeature : IModFeature
         ("give <item id | random[:rarity]> [level] [player]", "roll an item into the bag (rarity 0-3; level defaults to the target's)"),
         ("giveall <item type | all> [rarity 0-3] [player]", "one of every item of that type into the bag (cots list items shows types)"),
         ("learnall [player]", "every spell unlocked for free, empty spell slots filled"),
-        ("playtest [player]", "playtest setup: level 30, god mode, no cooldowns, every spell, one of every weapon"),
+        ("playtest [player]", "playtest setup: level 30, god mode, no cooldowns, infinite energy, every spell, one of every weapon"),
         ("heal [player]", "full health and energy, debuffs cleared"),
         ("god [on|off] [player]", "incoming hits do no damage"),
         ("nocooldowns [on|off] [player]", "spells are always ready"),
+        ("energy [on|off] [player]", "infinite energy: casts cost nothing, even spells above your max energy"),
         ("spawn <normal|elite|miniboss|boss> [actor type] [count]", "spawn enemies of that tier in front of you (actor type: Carl, Fingers, ...)"),
         ("extralevels <0-100>", "enemy levels added on top of the party level and the game's difficulty, for everyone"),
         ("list <items|perks|spells|stats|enemies> [filter]", "list content ids"),
@@ -379,10 +381,11 @@ public sealed class AdminFeature : IModFeature
         if (!localHigher) Step(Send(new AdminGrant(AdminAction.SetLevel, Level, ""), player, sender));
         Step(Send(new AdminGrant(AdminAction.God, 1, ""), player, sender));
         Step(Send(new AdminGrant(AdminAction.NoCooldowns, 1, ""), player, sender));
+        Step(Send(new AdminGrant(AdminAction.InfiniteEnergy, 1, ""), player, sender));
         Step(Send(new AdminGrant(AdminAction.LearnAllSpells, 0, ""), player, sender));
         Step(Send(new AdminGrant(AdminAction.Heal, 0, ""), player, sender));
         Step(GiveAll(player == null ? new[] { "weapon" } : new[] { "weapon", player }, sender));
-        lines.Add("ready: spawn targets with 'cots spawn <normal|elite|miniboss|boss>'; 'god off' and 'nocooldowns off' undo the switches");
+        lines.Add("ready: spawn targets with 'cots spawn <normal|elite|miniboss|boss>'; 'god off', 'nocooldowns off' and 'energy off' undo the switches");
         return Reply(ok, string.Join("\n", lines));
     }
 
