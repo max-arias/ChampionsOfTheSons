@@ -31,6 +31,22 @@ internal static class AdminSelfTest
             SelfTest.Check("admin: give unknown id fails", !Run("give item.does_not_exist"));
             SelfTest.Check("admin: unknown player fails", !Run("heal 99"));
             SelfTest.Check("admin: respec", Run("respec") && Pc.Perks.SpentPoints == 0, AdminFeature.LastReply);
+            // COS-166 playtest commands.
+            int points = Pc.Perks.AvailablePoints(Pc.Progress);
+            SelfTest.Check("admin: learnall unlocks every spell for free",
+                Run("learnall") && Pc.Perks.UnlockedSpells.Count == ModContent.Db.Spells.Count && Pc.Perks.AvailablePoints(Pc.Progress) == points,
+                $"{Pc.Perks.UnlockedSpells.Count}/{ModContent.Db.Spells.Count} spells, points {points} -> {Pc.Perks.AvailablePoints(Pc.Progress)}; {AdminFeature.LastReply}");
+            SelfTest.Check("admin: learnall fills empty spell slots", Pc.Spells.Loadout.All(s => s != null), string.Join(",", Pc.Spells.Loadout));
+            int rings = ModContent.Db.Items.Values.Count(d => d.Type == "ring");
+            bag = Pc.Inventory.Slots.Count;
+            SelfTest.Check("admin: giveall gives one of every item of a type", Run("giveall ring") && Pc.Inventory.Slots.Count == bag + rings,
+                $"bag {bag} -> {Pc.Inventory.Slots.Count}, {rings} rings; {AdminFeature.LastReply}");
+            SelfTest.Check("admin: giveall unknown type fails", !Run("giveall nothing"));
+            SelfTest.Check("admin: playtest sets everything up", Run("playtest") && Pc.Progress.Level >= 30 && AdminState.God && AdminState.NoCooldowns,
+                AdminFeature.LastReply);
+            Run("god off");
+            Run("nocooldowns off");
+            Run("respec");
             Pc.Spells.Restore(new[] { "spell.blink" });
             Pc.Spells.Equip(0, "spell.blink");
             SelfTest.Check("admin: nocooldowns readies spells", Run("nocooldowns on") && Pc.Spells.IsReady(0), AdminFeature.LastReply);

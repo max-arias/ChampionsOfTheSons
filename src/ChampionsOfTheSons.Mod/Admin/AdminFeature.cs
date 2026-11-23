@@ -151,6 +151,9 @@ public sealed class AdminFeature : IModFeature
                 "points" => Grant(AdminAction.AddPerkPoints, args, 0, sender, minArgs: 1),
                 "respec" => Grant(AdminAction.Respec, args, -1, sender),
                 "give" => Give(args, sender),
+                "giveall" => GiveAll(args, sender),
+                "learnall" => Grant(AdminAction.LearnAllSpells, args, -1, sender),
+                "playtest" => Playtest(args, sender),
                 "heal" => Grant(AdminAction.Heal, args, -1, sender),
                 "god" => Toggle(AdminAction.God, args, sender, AdminState.God),
                 "nocooldowns" => Toggle(AdminAction.NoCooldowns, args, sender, AdminState.NoCooldowns),
@@ -179,6 +182,9 @@ public sealed class AdminFeature : IModFeature
         ("points <n> [player]", "add permanent bonus perk points (negative removes)"),
         ("respec [player]", "refund every perk and spell"),
         ("give <item id | random[:rarity]> [level] [player]", "roll an item into the bag (rarity 0-3; level defaults to the target's)"),
+        ("giveall <item type | all> [rarity 0-3] [player]", "one of every item of that type into the bag (cots list items shows types)"),
+        ("learnall [player]", "every spell unlocked for free, empty spell slots filled"),
+        ("playtest [player]", "playtest setup: level 30, god mode, no cooldowns, every spell, one of every weapon"),
         ("heal [player]", "full health and energy, debuffs cleared"),
         ("god [on|off] [player]", "incoming hits do no damage"),
         ("nocooldowns [on|off] [player]", "spells are always ready"),
@@ -303,24 +309,81 @@ public sealed class AdminFeature : IModFeature
         string? player = args.Length > 2 ? args[2] : null;
         if (level <= 0)
         {
-            // The target's own level: the host knows its clients' levels from their position reports.
-            var targets = Targets(player, sender, out var error);
-            if (targets == null) return Reply(false, error!);
-            var lines = new List<string>();
-            foreach (var t in targets)
-            {
-                int lv = t.Local ? PlayerState.Character.Progress.Level : CoopSession.LevelOf(t.Connection!);
-                var grant = new AdminGrant(AdminAction.GiveItem, lv, id);
-                if (t.Local) lines.Add($"{t.Name}: {AdminState.Apply(grant)}");
-                else
-                {
-                    CotsNetEvent.Instance.SendTo(grant, t.Connection!);
-                    lines.Add($"{t.Name}: sent {id} at level {lv}");
-                }
-            }
-            return Reply(true, string.Join("\n", lines));
+            var lines = GiveAtOwnLevel(id, player, sender, out var error);
+            return lines == null ? Reply(false, error!) : Reply(true, string.Join("\n", lines));
         }
         return Send(new AdminGrant(AdminAction.GiveItem, level, id), player, sender);
+    }
+
+    /// <summary>Gives an item at each target's own level: the host knows its clients' levels from their position reports.</summary>
+    private static List<string>? GiveAtOwnLevel(string id, string? player, BoltConnection? sender, out string? error)
+    {
+        var targets = Targets(player, sender, out error);
+        if (targets == null) return null;
+        var lines = new List<string>();
+        foreach (var t in targets)
+        {
+            int lv = t.Local ? PlayerState.Character.Progress.Level : CoopSession.LevelOf(t.Connection!);
+            var grant = new AdminGrant(AdminAction.GiveItem, lv, id);
+            if (t.Local) lines.Add($"{t.Name}: {AdminState.Apply(grant)}");
+            else
+            {
+                CotsNetEvent.Instance.SendTo(grant, t.Connection!);
+                lines.Add($"{t.Name}: sent {id} at level {lv}");
+            }
+        }
+        return lines;
+    }
+
+    /// <summary>COS-166: one of every item of a type (optionally one rarity), each at the target's level.</summary>
+    private static bool GiveAll(string[] args, BoltConnection? sender)
+    {
+        if (args.Length < 1) return Reply(false, "giveall <item type | all> [rarity 0-3] [player]");
+        var db = ModContent.Db;
+        string type = args[0];
+        int? rarity = null;
+        int next = 1;
+        if (args.Length > 1 && args[1].Length == 1 && int.TryParse(args[1], out var r)) { rarity = r; next = 2; }
+        string? player = args.Length > next ? args[next] : null;
+        bool all = type.Equals("all", StringComparison.OrdinalIgnoreCase);
+        var defs = db.Items.Values
+            .Where(d => (all || d.Type.Equals(type, StringComparison.OrdinalIgnoreCase)) && (rarity == null || d.Rarity == rarity))
+            .OrderBy(d => d.Type, StringComparer.Ordinal).ThenBy(d => d.Rarity).ThenBy(d => d.Id, StringComparer.Ordinal).ToList();
+        if (defs.Count == 0)
+        {
+            var types = db.Items.Values.Select(d => d.Type).Distinct().OrderBy(t => t, StringComparer.Ordinal);
+            return Reply(false, $"no items of type '{type}'{(rarity == null ? "" : $" and rarity {rarity}")}; types: {string.Join(", ", types)}, all");
+        }
+        int given = 0, full = 0;
+        foreach (var def in defs)
+        {
+            var lines = GiveAtOwnLevel(def.Id, player, sender, out var error);
+            if (lines == null) return Reply(false, error!);
+            foreach (var l in lines)
+                if (l.EndsWith("bag is full", StringComparison.Ordinal)) full++;
+                else given++;
+        }
+        string what = rarity == null ? type : $"{type} rarity {rarity}";
+        return Reply(full == 0, $"giveall {what}: {given} given" + (full > 0 ? $", {full} did not fit (bag is full)" : ""));
+    }
+
+    /// <summary>COS-166: everything a hands-on playtest needs in one command.</summary>
+    private static bool Playtest(string[] args, BoltConnection? sender)
+    {
+        const int Level = 30;
+        string? player = args.Length > 0 ? args[0] : null;
+        var lines = new List<string>();
+        bool ok = true;
+        void Step(bool result) { ok &= result; lines.Add(LastReply); }
+        bool localHigher = player == null && sender == null && PlayerState.Character.Progress.Level >= Level;
+        if (!localHigher) Step(Send(new AdminGrant(AdminAction.SetLevel, Level, ""), player, sender));
+        Step(Send(new AdminGrant(AdminAction.God, 1, ""), player, sender));
+        Step(Send(new AdminGrant(AdminAction.NoCooldowns, 1, ""), player, sender));
+        Step(Send(new AdminGrant(AdminAction.LearnAllSpells, 0, ""), player, sender));
+        Step(Send(new AdminGrant(AdminAction.Heal, 0, ""), player, sender));
+        Step(GiveAll(player == null ? new[] { "weapon" } : new[] { "weapon", player }, sender));
+        lines.Add("ready: spawn targets with 'cots spawn <normal|elite|miniboss|boss>'; 'god off' and 'nocooldowns off' undo the switches");
+        return Reply(ok, string.Join("\n", lines));
     }
 
     // ------------------------------------------------------------------ world commands

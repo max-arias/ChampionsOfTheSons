@@ -339,6 +339,8 @@ public enum AdminAction : byte
     God = 8,
     /// <summary><c>Amount</c> 1 = on, 0 = off.</summary>
     NoCooldowns = 9,
+    /// <summary>Every spell unlocked for free (bonus perk points pay for them), empty slots filled (COS-166).</summary>
+    LearnAllSpells = 10,
 }
 
 /// <summary>Host → one client: an admin command applied to that player (COS-99). Clients accept it only from the host.</summary>

@@ -67,6 +67,8 @@ public static class AdminState
                 NoCooldowns = g.Amount > 0;
                 if (NoCooldowns) pc.Spells.ReadyAll();
                 return $"spell cooldowns {(NoCooldowns ? "off" : "on")}";
+            case AdminAction.LearnAllSpells:
+                return LearnAllSpells();
             default:
                 return $"unknown admin action {g.Action}";
         }
@@ -91,6 +93,22 @@ public static class AdminState
         var item = loot.RollItem(def, level, Rng);
         bool fitted = PlayerState.Character.Inventory.AddToBag(item, def.StackSize);
         return fitted ? $"gave {def.Id} (level {item.Level}, rarity {item.Rarity})" : "bag is full";
+    }
+
+    /// <summary>COS-166 playtesting: unlocks every spell, paid for with bonus perk points so the player's own points stay as they
+    /// were, and fills empty spell slots. Level requirements are skipped.</summary>
+    private static string LearnAllSpells()
+    {
+        var pc = PlayerState.Character;
+        var all = ModContent.Db.Spells.Keys.OrderBy(id => id, StringComparer.Ordinal).ToList();
+        var missing = all.Where(id => !pc.Perks.UnlockedSpells.Contains(id)).ToList();
+        pc.Progress.BonusPerkPoints += missing.Count * PerkTree.SpellUnlockCost;
+        pc.Perks.Restore(new Dictionary<string, int>(pc.Perks.Bought), pc.Perks.UnlockedSpells.Concat(missing).ToList());
+        int slotted = 0;
+        var unslotted = new Queue<string>(all.Where(id => !pc.Spells.Loadout.Contains(id)));
+        for (int slot = 0; slot < SpellBook.Slots && unslotted.Count > 0; slot++)
+            if (pc.Spells.Loadout[slot] == null && pc.Spells.Equip(slot, unslotted.Dequeue())) slotted++;
+        return $"learned {missing.Count} spell(s), {all.Count} known; {slotted} put in empty slots (swap them in the perk panel's spell list)";
     }
 
     private static string Heal()
