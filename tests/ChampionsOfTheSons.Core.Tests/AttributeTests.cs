@@ -104,7 +104,7 @@ public class AttributeTests
         Assert.Equal(6, loaded.Attributes.Get(StatIds.Intelligence));
         Assert.Equal(pc.AttributePointsLeft, loaded.AttributePointsLeft);
 
-        var old = SaveCodec.ReadPlayer("{\"version\":7,\"level\":5}");
+        var old = SaveCodec.ReadPlayer("{\"version\":1,\"level\":5}");
         Assert.Equal(PlayerSave.CurrentVersion, old.Version);
         Assert.Empty(old.Attributes);
         var fromOld = new PlayerCharacter(_db);

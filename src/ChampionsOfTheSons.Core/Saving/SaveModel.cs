@@ -2,16 +2,16 @@ namespace ChampionsOfTheSons.Core.Saving;
 
 /// <summary>
 /// Per-player progress, stored in the player's save (so each co-op client keeps their own character).
-/// Plain DTO: everything is by stable content ID. Bump <see cref="CurrentVersion"/> and add a
-/// migration in <see cref="SaveCodec"/> for any format change.
+/// Plain DTO: everything is by stable content ID. Version 1 until release (see <see cref="SaveCodec"/>); after release, bump
+/// <see cref="CurrentVersion"/> and add a migration for any format change.
 /// </summary>
 public sealed class PlayerSave
 {
-    /// <summary>2: rolled stats carry their stat slot (COS-73). 3: deleted perks removed (COS-86/COS-87). 4: four rarities (COS-109).
-    /// 5: crafting perks, materials and socket stats removed (COS-145). 6: the last daily-grant day (COS-100); the island
-    /// foods removed (COS-147). 7: health fraction, carried game items above their limit, save time (COS-100).
-    /// 8: spent attribute points (COS-174).</summary>
-    public const int CurrentVersion = 8;
+    /// <summary>1 until release (Max, 2026-11-23). Dev builds wrote 2..8 for the same format; those still load.</summary>
+    public const int CurrentVersion = 1;
+
+    /// <summary>The highest number a pre-release dev build wrote; read as version 1.</summary>
+    public const int LastDevVersion = 8;
 
     public int Version { get; set; } = CurrentVersion;
     public double Xp { get; set; }
@@ -88,7 +88,11 @@ public sealed class SavedStat
 /// <summary>World-wide settings, stored in the world save and owned by the host.</summary>
 public sealed class WorldSave
 {
-    public const int CurrentVersion = 4;
+    /// <summary>1 until release; dev builds wrote 2..4 for the same format.</summary>
+    public const int CurrentVersion = 1;
+
+    /// <summary>The highest number a pre-release dev build wrote; read as version 1.</summary>
+    public const int LastDevVersion = 4;
 
     public int Version { get; set; } = CurrentVersion;
 

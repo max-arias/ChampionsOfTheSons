@@ -39,7 +39,7 @@ public class SaveCodecTests
     }
 
     [Fact]
-    public void Health_carried_items_and_save_time_round_trip_and_default_to_not_saved_in_v6()
+    public void Health_carried_items_and_save_time_round_trip_and_default_to_not_saved()
     {
         var save = SamplePlayer();
         save.HealthFraction = 0.5;
@@ -50,7 +50,7 @@ public class SaveCodecTests
         Assert.Equal(14, loaded.CarriedItems[392]);
         Assert.Equal(1_800_000_000, loaded.SavedAt);
 
-        var old = SaveCodec.ReadPlayer("{\"version\":6,\"level\":7,\"lastGrantDay\":3}");
+        var old = SaveCodec.ReadPlayer("{\"version\":1,\"level\":7,\"lastGrantDay\":3}");
         Assert.Equal(PlayerSave.CurrentVersion, old.Version);
         Assert.Equal(-1, old.HealthFraction);
         Assert.Empty(old.CarriedItems);
@@ -83,26 +83,6 @@ public class SaveCodecTests
     }
 
     [Fact]
-    public void Version_3_worlds_get_the_default_loot_level()
-    {
-        var world = SaveCodec.ReadWorld("{\"version\":3,\"extraEnemyLevels\":2}");
-        Assert.Equal(WorldSave.CurrentVersion, world.Version);
-        Assert.Equal("Highest", world.LootLevel);
-        Assert.Equal(2, world.ExtraEnemyLevels);
-    }
-
-    [Fact]
-    public void Version_2_worlds_drop_their_difficulty_tier_and_keep_the_host_settings()
-    {
-        var world = SaveCodec.ReadWorld("{\"version\":2,\"difficulty\":\"difficulty.master\",\"extraEnemyLevels\":7,\"xp\":2,\"friendlyFire\":true}");
-        Assert.Equal(WorldSave.CurrentVersion, world.Version);
-        Assert.Equal(7, world.ExtraEnemyLevels);
-        Assert.Equal(2, world.Xp);
-        Assert.True(world.FriendlyFire);
-        Assert.DoesNotContain("difficulty", SaveCodec.Write(world));
-    }
-
-    [Fact]
     public void Save_from_a_newer_mod_version_is_refused()
     {
         var json = SaveCodec.Write(SamplePlayer()).Replace($"\"version\":{PlayerSave.CurrentVersion}", "\"version\":999");
@@ -127,34 +107,6 @@ public class SaveCodecTests
     }
 
     [Fact]
-    public void Version_1_saves_drop_deleted_perks_and_get_their_points_back()
-    {
-        string deleted = SaveCodec.DeletedPerks[0];
-        var v1 = $"{{\"version\":1,\"level\":10,\"perks\":{{\"{deleted}\":1,\"perk.root\":1}}}}";
-        var loaded = SaveCodec.ReadPlayer(v1);
-        Assert.Equal(PlayerSave.CurrentVersion, loaded.Version);
-        Assert.False(loaded.Perks.ContainsKey(deleted));
-        Assert.Equal(1, loaded.Perks["perk.root"]);
-
-        const string perks = """
-        { "perks": [ { "id": "perk.root", "name": "Root", "category": "defense", "cost": 1 } ] }
-        """;
-        var tree = new Rules.PerkTree(TestContent.Create(new() { ["perks.json"] = perks }));
-        tree.Restore(loaded.Perks, loaded.UnlockedSpells);
-        Assert.Equal(9, tree.AvailablePoints(new Rules.Progress(loaded.Level, 0, loaded.BonusPerkPoints)));
-    }
-
-    [Fact]
-    public void Version_3_saves_fold_eight_rarities_into_four()
-    {
-        var v3 = "{\"version\":3,\"level\":5,\"slots\":{\"bag.0\":{\"baseId\":\"item.a\",\"rarity\":1},\"bag.1\":{\"baseId\":\"item.b\",\"rarity\":4},\"bag.2\":{\"baseId\":\"item.c\",\"rarity\":7}}}";
-        var loaded = SaveCodec.ReadPlayer(v3);
-        Assert.Equal(new[] { 0, 2, 3 }, new[] { "bag.0", "bag.1", "bag.2" }.Select(k => loaded.Slots[k].Rarity));
-        var world = SaveCodec.ReadWorld("{\"version\":1,\"minLootRarity\":5}");
-        Assert.Equal((int)Rarity.Legendary, world.MinLootRarity);
-    }
-
-    [Fact]
     public void Loaded_items_take_their_base_rarity_so_old_uniques_become_legendary()
     {
         var db = TestContent.Create();
@@ -166,45 +118,21 @@ public class SaveCodecTests
     }
 
     [Fact]
-    public void Version_4_saves_drop_crafting_perks_materials_and_socket_stats()
-    {
-        string perk = SaveCodec.CraftingPerks[0], material = SaveCodec.DeletedItems[0];
-        var v4 = $$"""
-        { "version": 4, "level": 10, "perks": { "{{perk}}": 1, "perk.root": 1 },
-          "slots": {
-            "bag.0": { "baseId": "{{material}}", "level": 1, "rarity": 2, "amount": 7, "stats": [] },
-            "bag.1": { "baseId": "item.ring", "level": 30, "rarity": 1, "amount": 1,
-              "stats": [ { "id": "stat.max_life", "value": 40, "slot": 0 }, { "id": "stat.emptysocket", "value": 0, "slot": -1 },
-                         { "id": "stat.socket_armor", "value": 25, "slot": -1 } ] } } }
-        """;
-        var loaded = SaveCodec.ReadPlayer(v4);
-        Assert.Equal(PlayerSave.CurrentVersion, loaded.Version);
-        Assert.False(loaded.Perks.ContainsKey(perk));
-        Assert.Equal(1, loaded.Perks["perk.root"]);
-        Assert.False(loaded.Slots.ContainsKey("bag.0"));
-        Assert.Equal(new[] { "stat.max_life" }, loaded.Slots["bag.1"].Stats.Select(s => s.Id));
-    }
-
-    [Fact]
-    public void Version_5_saves_drop_the_island_foods_and_start_with_no_grant_day()
-    {
-        var v5 = """
-        { "version": 5, "level": 3,
-          "slots": {
-            "bag.0": { "baseId": "item.minibar_whiskey", "level": 12, "rarity": 0, "amount": 3, "stats": [] },
-            "bag.1": { "baseId": "item.ring", "level": 30, "rarity": 1, "amount": 1, "stats": [] } } }
-        """;
-        var loaded = SaveCodec.ReadPlayer(v5);
-        Assert.Equal(PlayerSave.CurrentVersion, loaded.Version);
-        Assert.False(loaded.Slots.ContainsKey("bag.0"));
-        Assert.True(loaded.Slots.ContainsKey("bag.1"));
-        Assert.Equal(-1, loaded.LastGrantDay);
-    }
-
-    [Fact]
     public void Last_grant_day_round_trips()
     {
         var loaded = SaveCodec.ReadPlayer(SaveCodec.Write(new PlayerSave { LastGrantDay = 17 }));
         Assert.Equal(17, loaded.LastGrantDay);
+    }
+
+    [Fact]
+    public void Saves_stay_at_version_1_and_old_dev_numbers_still_load()
+    {
+        Assert.Equal(1, PlayerSave.CurrentVersion);
+        Assert.Contains("\"version\":1", SaveCodec.Write(new PlayerSave()));
+        var dev = SaveCodec.ReadPlayer($"{{\"version\":{PlayerSave.LastDevVersion},\"level\":9}}");
+        Assert.Equal(9, dev.Level);
+        Assert.Equal(1, dev.Version);
+        Assert.Equal(1, SaveCodec.ReadWorld($"{{\"version\":{WorldSave.LastDevVersion},\"extraEnemyLevels\":2}}").Version);
+        Assert.Throws<SaveVersionException>(() => SaveCodec.ReadPlayer($"{{\"version\":{PlayerSave.LastDevVersion + 1}}}"));
     }
 }
