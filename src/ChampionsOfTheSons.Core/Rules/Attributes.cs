@@ -82,9 +82,10 @@ public static class AttributeRules
     /// <summary>Points to spend at level 1.</summary>
     public const int StartPoints = 10;
 
-    /// <summary>Points earned by <paramref name="level"/>: the start points plus what the level used to add to all four attributes
-    /// by itself (Σ round(√x) per attribute), so a player who spreads them evenly stands where the automatic gain left them.</summary>
-    public static int TotalPoints(int level) => StartPoints + 4 * (XpCurve.AttributeBase(level) - 2);
+    /// <summary>Points earned by <paramref name="level"/>: the start points plus twice what the level used to add to each attribute by
+    /// itself (Σ round(√x)), half of the old gain over all four, so an all-in build does not get four times the points through the
+    /// per-point perks (PacingSim 2026-11-23: with four times, late kills were 2-3x faster than before attributes).</summary>
+    public static int TotalPoints(int level) => StartPoints + 2 * (XpCurve.AttributeBase(level) - 2);
 
     // Per spent point.
     public const double MeleePerStrength = 0.002, CarryPerStrength = 1.0 / 25;
