@@ -25,9 +25,10 @@ Multiplayer
 
 Keys (change them in the RedLoader mod settings, file ChampionsOfTheSons.cfg)
   B  guide book (the game's key): the Champions tab holds gear, bag, character and help
-  U  perk tree                    K  draw weapon
-  O  host settings (extra levels) H  ping             Alt+1 to Alt+6  spell slots 1-6
+  U  perk tree                    O  host settings (extra levels)
+  H  ping                         Alt+1 to Alt+6  spell slots 1-6
   F10  mod settings (rebind any key here)
+  A weapon in the gear's weapon slot is in your hand at once and on a weapon key of the action bar (1-4).
   Gamepad: LB + D-pad opens the panels.
 
 Admin and cheat commands (host or server admin only)

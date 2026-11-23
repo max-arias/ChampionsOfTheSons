@@ -1613,7 +1613,6 @@
  "ui.settings.key.ping": "Метка",
  "ui.settings.key.settings": "Настройки мода",
  "ui.settings.key.spell": "Ячейка заклинания {0}",
- "ui.settings.key.weapon": "Достать оружие",
  "ui.settings.keys_hint": "Нажмите на клавишу, затем нажмите новую. Удерживайте Alt, Ctrl или Shift, чтобы задать сочетание. Esc — отмена.",
  "ui.settings.merge_damage_numbers": "Объединять числа урона",
  "ui.settings.off": "Выкл.",

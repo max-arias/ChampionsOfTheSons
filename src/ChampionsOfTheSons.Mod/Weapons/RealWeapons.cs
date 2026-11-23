@@ -12,7 +12,7 @@ namespace ChampionsOfTheSons.Mod.Weapons;
 
 /// <summary>
 /// Weapon types as real game items (COS-185, COS-186). Each type is registered in the game's item database as a copy of
-/// its base game weapon's item data (the first of the type's <c>baseItems</c>), with its own id and a held prefab cloned
+/// its game weapon's item data (the type's <c>gameItem</c>), with its own id and a held prefab cloned
 /// from the base's (animations, hit logic, sounds). The weapon slot gives and takes the item (<see cref="WeaponSlotSync"/>);
 /// the model, glow, reach and numbers go on the held clone the same way as before (<see cref="WeaponModels"/>,
 /// <c>StatBridge</c>, <c>EnemyPatches</c>).
@@ -92,14 +92,13 @@ internal static class RealWeapons
                 }
                 var type = w.Type;
                 if (type == null) { Note($"no weapon type {w.TypeId}"); continue; }
-                ItemData? baseData = null;
-                foreach (var name in type.BaseItems)
+                int gameId = GameItems.Find(type.GameItem, -1);
+                var baseData = gameId >= 0 ? ItemDatabaseManager.ItemById(gameId) : null;
+                if (baseData?._heldPrefab == null)
                 {
-                    int id = GameItems.Find(name, -1);
-                    var d = id >= 0 ? ItemDatabaseManager.ItemById(id) : null;
-                    if (d != null && d._heldPrefab != null) { baseData = d; break; }
+                    Note($"{w.TypeId}: game item '{type.GameItem}' missing or has no held prefab{(type.Base == WeaponBase.Melee ? ", using the machete" : "")}");
+                    baseData = type.Base == WeaponBase.Melee ? ItemDatabaseManager.ItemById(MacheteId) : null;
                 }
-                if (baseData == null && type.Base == WeaponBase.Melee) baseData = ItemDatabaseManager.ItemById(MacheteId);
                 if (baseData == null) { Note($"{w.TypeId}: no base item data"); continue; }
                 var data = UnityEngine.Object.Instantiate(baseData);
                 data.name = "Cots_" + w.TypeId;

@@ -94,14 +94,7 @@ public sealed class ModSweepFeature : IModFeature
                 if (!Pc.Inventory.Equip(bag, ModContent.Db)) return;
                 _equippedSlot = Pc.Inventory.Slots.FirstOrDefault(kv => !kv.Key.StartsWith("bag.", StringComparison.Ordinal) && kv.Value == item).Key;
                 if (def.Type != "weapon") return;
-                // The weapon type shows on one of the game weapons it is based on: own one and draw it.
-                if (WeaponTypes.Equipped(Pc.Inventory, ModContent.Db) is { } type)
-                    foreach (var name in type.BaseItems)
-                    {
-                        int game = GameItems.Find(name, -1);
-                        if (game >= 0 && TestKit.EnsureGameItem(game)) break;
-                    }
-                WeaponsFeature.DrawBase();
+                WeaponSlotSync.Tick(); // the slot gives its game weapon and draws it
             });
         }
         else

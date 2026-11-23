@@ -1613,7 +1613,6 @@
  "ui.settings.key.ping": "Markieren",
  "ui.settings.key.settings": "Mod-Einstellungen",
  "ui.settings.key.spell": "Zauberplatz {0}",
- "ui.settings.key.weapon": "Waffe ziehen",
  "ui.settings.keys_hint": "Klicke auf eine Taste und drücke dann die neue. Halte dabei Alt, Ctrl oder Shift für eine Kombination. Esc bricht ab.",
  "ui.settings.merge_damage_numbers": "Schadenszahlen zusammenfassen",
  "ui.settings.off": "Aus",

@@ -129,7 +129,7 @@ public sealed class CoopWeapons : IModFeature
             else if (type != null)
                 foreach (var c in candidates)
                 {
-                    if (!Core.Rules.WeaponTypes.Fits(type, c.Kind)) continue;
+                    if (RealWeapons.Get(c.ItemId)?.TypeId != type.Id) continue; // only our item of that type (COS-187)
                     float d = Vector3.Distance(c.Holder.position, p.Position);
                     if (d < bestDist) { bestDist = d; best = c; }
                 }

@@ -1613,7 +1613,6 @@
  "ui.settings.key.ping": "標記",
  "ui.settings.key.settings": "模組設定",
  "ui.settings.key.spell": "法術欄位 {0}",
- "ui.settings.key.weapon": "拔出武器",
  "ui.settings.keys_hint": "點擊一個按鍵，然後按下新鍵。同時按住 Alt、Ctrl 或 Shift 可設為組合鍵。按 Esc 取消。",
  "ui.settings.merge_damage_numbers": "合併傷害數字",
  "ui.settings.off": "關",

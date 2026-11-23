@@ -45,17 +45,14 @@ public class WeaponTypeTests
     }
 
     [Fact]
-    public void Type_applies_only_while_a_fitting_game_weapon_is_held()
+    public void The_weapon_slot_item_names_the_type()
     {
         var db = Db();
         Assert.Empty(db.Errors);
-        var inv = Wielding(db, "item.sword");
-        Assert.Equal("long_sword", WeaponTypes.Active(inv, db, HeldKind.Melee)?.Id);
-        Assert.Null(WeaponTypes.Active(inv, db, HeldKind.Bow));
-        Assert.Null(WeaponTypes.Active(inv, db, HeldKind.None));
-        Assert.Equal("greatbow", WeaponTypes.Active(Wielding(db, "item.bow"), db, HeldKind.Bow)?.Id);
-        Assert.Null(WeaponTypes.Active(Wielding(db, "item.club"), db, HeldKind.Melee));
-        Assert.Null(WeaponTypes.Active(new Inventory(), db, HeldKind.Melee));
+        Assert.Equal("long_sword", WeaponTypes.Equipped(Wielding(db, "item.sword"), db)?.Id);
+        Assert.Equal("greatbow", WeaponTypes.Equipped(Wielding(db, "item.bow"), db)?.Id);
+        Assert.Null(WeaponTypes.Equipped(Wielding(db, "item.club"), db));
+        Assert.Null(WeaponTypes.Equipped(new Inventory(), db));
     }
 
     [Fact]

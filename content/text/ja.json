@@ -1613,7 +1613,6 @@
  "ui.settings.key.ping": "ピン",
  "ui.settings.key.settings": "MOD設定",
  "ui.settings.key.spell": "呪文スロット {0}",
- "ui.settings.key.weapon": "武器を構える",
  "ui.settings.keys_hint": "キーをクリックしてから新しいキーを押してください。Alt、Ctrl、Shiftを押しながらで組み合わせになります。Escでキャンセル。",
  "ui.settings.merge_damage_numbers": "ダメージ数値をまとめる",
  "ui.settings.off": "オフ",

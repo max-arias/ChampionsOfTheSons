@@ -51,7 +51,7 @@ internal static class SettingsSelfTest
 
     private static void Defaults()
     {
-        foreach (var id in new[] { "perks_key", "settings_key", "weapon_key" }.Concat(Enumerable.Range(1, SpellBook.Slots).Select(i => $"spell_slot_{i}")))
+        foreach (var id in new[] { "perks_key", "settings_key" }.Concat(Enumerable.Range(1, SpellBook.Slots).Select(i => $"spell_slot_{i}")))
         {
             var d = ModKeys.Default(id);
             var game = ModKeys.GameClashes(d);

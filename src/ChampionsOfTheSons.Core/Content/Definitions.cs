@@ -285,15 +285,16 @@ public sealed class AnimalDef
 }
 
 /// <summary>
-/// A weapon type (COS-93): the rules and model a weapon item brings when it is equipped and a fitting game weapon is
-/// held. Items name it with <see cref="ItemBaseDef.WeaponModel"/>. Multipliers apply to the held game weapon's values.
+/// A weapon type (COS-93): the rules and model a weapon item brings while it is in the weapon slot. Each type is a game
+/// item of its own (COS-186), built on one game weapon. Items name it with <see cref="ItemBaseDef.WeaponModel"/>.
+/// Multipliers apply to that game weapon's values.
 /// </summary>
 public sealed class WeaponTypeDef
 {
     public string Id { get; set; } = "";
     public WeaponBase Base { get; set; }
-    /// <summary>Game item names the equip key tries, in order (the first one the player owns is drawn).</summary>
-    public List<string> BaseItems { get; set; } = new();
+    /// <summary>The game weapon (item database name) the type's own game item is copied from: its animations, hit logic and sounds.</summary>
+    public string GameItem { get; set; } = "";
 
     // ---- melee
     /// <summary>The type's own base hit damage, replacing the game weapon's (null = keep the game weapon's).</summary>

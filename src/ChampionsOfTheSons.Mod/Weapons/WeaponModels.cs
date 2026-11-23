@@ -8,10 +8,10 @@ using UnityEngine;
 namespace ChampionsOfTheSons.Mod.Weapons;
 
 /// <summary>
-/// Puts a weapon type's model on a held game weapon (COS-93). The game weapon stays in charge of animations, hits and
-/// sounds: its own renderers are switched off, our model is parented to its root (which follows the hand bone), and its
-/// hit volume (the BoxCollider next to <c>weaponInfo</c>) is stretched by the type's reach. Everything is put back when
-/// the type stops applying. Used for the local player and for remote players' held weapons alike.
+/// Dresses a held weapon item of ours (COS-93, COS-186) in its type's model. The item is a copy of a game weapon, which
+/// stays in charge of animations, hits and sounds: the game weapon's renderers (spawned with it, and some later) are
+/// switched off, our model is parented to its root (which follows the hand bone), and its hit volume (the BoxCollider next
+/// to <c>weaponInfo</c>) is stretched by the type's reach. Used for the local player and for remote players' held weapons.
 /// </summary>
 internal sealed class WeaponSkin
 {
@@ -142,8 +142,7 @@ internal sealed class WeaponSkin
     public void Remove()
     {
         WeaponFx.Skins.Remove(this);
-        foreach (var r in _hidden)
-            if (r != null) r.enabled = true;
+        // The game weapon's mesh stays off: the holder is one of our items, which never shows the game weapon (COS-187).
         _hidden.Clear();
         foreach (var (box, size, center) in _boxes)
             if (box != null) { box.size = size; box.center = center; }
@@ -296,13 +295,8 @@ internal static class WeaponModels
     {
         var found = HeldWeapons.Local();
         var held = found?.Holder;
-        var kind = found?.Kind ?? HeldKind.None;
-        // A real weapon item (COS-186) is its own type; a game weapon carries the slot's type only when nothing real exists
-        // for it (the overlay route, removed by COS-187).
-        var real = found is { } f ? RealWeapons.Get(f.ItemId) : null;
-        var type = real != null ? real.Type
-            : RealWeapons.ByType(WeaponTypes.Equipped(PlayerState.Character.Inventory, ModContent.Db)?.Id)?.Item != null ? null
-            : WeaponTypes.Active(PlayerState.Character.Inventory, ModContent.Db, kind);
+        // The weapon in hand is its own type (COS-186); the game's own weapons carry none.
+        var type = found is { } f ? RealWeapons.Get(f.ItemId)?.Type : null;
 
         var look = type != null ? GlowLook.For(PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot)) : GlowLook.None;
         if (_local != null && (!_local.Alive || type != _local.Type || look.Key != _local.Look.Key || held == null || held.Pointer != _localHolder

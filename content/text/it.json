@@ -1613,7 +1613,6 @@
  "ui.settings.key.ping": "Segnala",
  "ui.settings.key.settings": "Impostazioni mod",
  "ui.settings.key.spell": "Slot incantesimo {0}",
- "ui.settings.key.weapon": "Estrai arma",
  "ui.settings.keys_hint": "Clicca un tasto, poi premi quello nuovo. Tieni premuto Alt, Ctrl o Shift insieme per una combinazione. Esc annulla.",
  "ui.settings.merge_damage_numbers": "Unisci i numeri del danno",
  "ui.settings.off": "Off",

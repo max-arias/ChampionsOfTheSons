@@ -10,40 +10,17 @@ using UnityEngine;
 namespace ChampionsOfTheSons.Mod.Weapons;
 
 /// <summary>
-/// Weapon types (COS-93): an equipped weapon item puts our own model in the player's hand, on top of one of the game's
-/// weapons (its animations and hit logic), with per-type rules.
+/// Weapon types (COS-93): the weapon slot's item is a game weapon of its own (COS-186, <see cref="RealWeapons"/>) that
+/// carries our model and the type's rules.
 /// </summary>
 public sealed class WeaponsFeature : IModFeature
 {
-    private static KeybindConfigEntry? _key;
-
     public void Init()
     {
-        _key = Config.WeaponKey; // created in Config so the key move (COS-107) can reach it
-        _key.Notify(() => DrawBase());
         Bridge.EnemyPatches.LocalWeaponHit += (_, weapon) =>
         {
             if (weapon == WeaponClass.Melee) WeaponFx.LocalHit();
         };
-    }
-
-    /// <summary>
-    /// Draws the weapon slot's real weapon item (COS-186); without one, the first game weapon from the equipped type's base
-    /// list that the player owns (the overlay route, until COS-187). False if none.
-    /// </summary>
-    public static bool DrawBase()
-    {
-        var type = WeaponTypes.Equipped(PlayerState.Character.Inventory, ModContent.Db);
-        var inv = LocalPlayer.Inventory;
-        if (type == null || inv == null) return false;
-        var real = RealWeapons.ByType(type.Id);
-        if (real?.Item != null && inv.AmountOf(real.Id, true, false) > 0) return inv.TryEquip(real.Id, false, true, false);
-        foreach (var name in type.BaseItems)
-        {
-            int id = GameItems.Find(name, -1);
-            if (id >= 0 && inv.AmountOf(id, true, false) > 0) return inv.TryEquip(id, false, true, false);
-        }
-        return false;
     }
 
     public void Update(float dt, bool inWorld)

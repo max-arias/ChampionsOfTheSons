@@ -1613,7 +1613,6 @@
  "ui.settings.key.ping": "Ping",
  "ui.settings.key.settings": "Mod settings",
  "ui.settings.key.spell": "Spell slot {0}",
- "ui.settings.key.weapon": "Draw weapon",
  "ui.settings.keys_hint": "Click a key, then press the new one. Hold Alt, Ctrl or Shift with it for a combo. Esc cancels.",
  "ui.settings.merge_damage_numbers": "Merge damage numbers",
  "ui.settings.off": "Off",

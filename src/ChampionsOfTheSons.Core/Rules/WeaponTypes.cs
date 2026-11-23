@@ -14,8 +14,8 @@ public enum HeldKind
 }
 
 /// <summary>
-/// Weapon type rules (COS-93). The equipped weapon item's type is active only while the player holds a game weapon it
-/// can be built on: its model replaces the game weapon's in hand and its rules replace or scale the game weapon's.
+/// Weapon type rules (COS-93). The weapon slot item's type is a game weapon of its own (COS-186), built on one of the
+/// game's weapons: its model replaces that weapon's in hand and its rules replace or scale that weapon's.
 /// </summary>
 public static class WeaponTypes
 {
@@ -36,13 +36,6 @@ public static class WeaponTypes
         WeaponBase.Bow => held == HeldKind.Bow,
         _ => false,
     };
-
-    /// <summary>The type in effect: the equipped item's type when the held game weapon fits it, else null.</summary>
-    public static WeaponTypeDef? Active(Inventory inventory, ContentDb content, HeldKind held)
-    {
-        var type = Equipped(inventory, content);
-        return type != null && Fits(type, held) ? type : null;
-    }
 
     /// <summary>Base damage of a melee hit before the player's stats: the type's own damage, else the game weapon's.</summary>
     public static double MeleeBaseDamage(WeaponTypeDef? type, double gameDamage) =>
