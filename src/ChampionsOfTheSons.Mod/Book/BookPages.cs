@@ -331,7 +331,7 @@ internal static class BookPages
     private static TextMeshProUGUI _attrLeft = null!, _attrResetText = null!;
     private static Image _attrResetBg = null!;
     private static readonly List<(string Id, TextMeshProUGUI Name, TextMeshProUGUI Value, TextMeshProUGUI Per, Image MinusBg, Image PlusBg)> AttrRows = new();
-    private const float AttrTop = Header + 124, AttrRowH = 118, AttrBtn = 52, PlusX = PageKit.W - Right - AttrBtn, MinusX = PlusX - AttrBtn - 10;
+    private const float AttrTop = Header + 156, AttrRowH = 116, AttrBtn = 52, PlusX = PageKit.W - Right - AttrBtn, MinusX = PlusX - AttrBtn - 10;
     private const float ResetX = Left, ResetW = 230, ResetY = AttrTop + 4 * AttrRowH + 8, ResetH = 44;
     private static bool _attrArmed;
     private static float _attrArmedAt;
@@ -347,7 +347,7 @@ internal static class BookPages
             PageKit.Box(_attr, "attr-shade-" + id, Left - 6, y, XpW + 12, AttrRowH - 10, i % 2 == 0 ? new Color(0, 0, 0, 0.06f) : Color.clear);
             var name = PageKit.Text(_attr, "attr-name-" + id, Left, y + 6, 300, 38, "", 30, PageKit.Ink);
             var value = PageKit.Text(_attr, "attr-value-" + id, Left + 300, y + 6, MinusX - Left - 310, 38, "", 30, PageKit.TitleBar, TextAlignmentOptions.MidlineRight);
-            var per = PageKit.Text(_attr, "attr-per-" + id, Left, y + 46, MinusX - Left - 10, AttrRowH - 60, "", 16, PageKit.InkFaint, TextAlignmentOptions.TopLeft, wrap: true);
+            var per = PageKit.Text(_attr, "attr-per-" + id, Left, y + 46, MinusX - Left - 10, AttrRowH - 60, "", 17, PageKit.Ink, TextAlignmentOptions.TopLeft, wrap: true);
             var minus = PageKit.Box(_attr, "attr-minus-bg-" + id, MinusX, y + 20, AttrBtn, AttrBtn, PageKit.PaperShade);
             PageKit.Text(_attr, "attr-minus-" + id, MinusX, y + 20, AttrBtn, AttrBtn, "-", 34, PageKit.Ink, TextAlignmentOptions.Center);
             var plus = PageKit.Box(_attr, "attr-plus-bg-" + id, PlusX, y + 20, AttrBtn, AttrBtn, PageKit.PaperShade);
@@ -357,7 +357,7 @@ internal static class BookPages
         _attrResetBg = PageKit.Box(_attr, "attr-reset-bg", ResetX, ResetY, ResetW, ResetH, PageKit.TitleBar);
         _attrResetText = PageKit.Text(_attr, "attr-reset", ResetX, ResetY, ResetW, ResetH, "", 20, PageKit.TitleText, TextAlignmentOptions.Center);
         PageKit.Text(_attr, "attr-hint", ResetX + ResetW + 10, ResetY, XpW - ResetW - 10, ResetH,
-            UiText.T("ui.book.attr.hint", "Right-click + or - for 10. Free to change."), 16, PageKit.InkFaint, TextAlignmentOptions.MidlineRight);
+            UiText.T("ui.book.attr.hint", "Right-click + or - for 10. Free to change."), 16, PageKit.Ink, TextAlignmentOptions.MidlineRight);
     }
 
     private static void RefreshAttributes()

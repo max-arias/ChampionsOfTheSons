@@ -18,6 +18,8 @@ public class WeaponSpellTests
           { "id": "perk_multishot_projectile_count", "kind": "add", "default": 1, "integer": true },
           { "id": "perk_multishot_damage_pennalty", "kind": "mult", "default": 0.75 },
           { "id": "spell_black_flame_damage_scaling", "kind": "add", "default": 0.4 },
+          { "id": "spell_seeking_arrow_head_damage", "kind": "add", "default": 0 },
+          { "id": "spell_seeking_arrow_damage_bonus", "kind": "add", "default": 0 },
           { "id": "spell_focus_on_hs", "kind": "add", "default": 0.5 },
           { "id": "spell_focus_on_bs", "kind": "add", "default": 0.15 },
           { "id": "spell_focus_bonus_dmg", "kind": "add", "default": 0 },

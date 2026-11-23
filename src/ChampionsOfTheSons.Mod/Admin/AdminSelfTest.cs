@@ -49,7 +49,9 @@ internal static class AdminSelfTest
             var dearest = ModContent.Db.Spells.Values.Where(sp => SpellCaster.IsImplemented(sp.Id) && !sp.Channeled && !sp.Toggle)
                 .OrderByDescending(sp => Pc.Spells.CostOf(sp.Id, Pc.Stats).Total).First();
             Pc.Spells.Equip(0, dearest.Id);
+            Pc.Spells.ReadyAll(); // slotting starts the cooldown; no-cooldowns refills it next frame, the test casts now
             var first = SpellCaster.Cast(0);
+            Pc.Spells.ReadyAll();
             var second = SpellCaster.Cast(0);
             SelfTest.Check("admin: infinite energy casts the dearest spell twice", first == SpellCastOutcome.Cast && second == SpellCastOutcome.Cast,
                 $"{dearest.Id} cost {Pc.Spells.CostOf(dearest.Id, Pc.Stats).Total:0} vs max {SpellCaster.MaxEnergy:0}: {first}, {second}");

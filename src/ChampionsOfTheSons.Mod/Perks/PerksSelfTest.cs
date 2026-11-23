@@ -33,7 +33,14 @@ internal static class PerksSelfTest
         SelfTest.Add(26f, "perks: attributes", Attributes);
         SelfTest.Add(26.6f, "perks: shot attributes", () => TestKit.Screenshot("perks-03-attributes"));
         SelfTest.Add(27f, "perks: sub-tabs", SubTabs);
-        SelfTest.Add(28f, "perks: close", () => { if (BookHost.IsOpen) BookHost.Close(); });
+        // COS-169: one screenshot per tree shape, for a look by eye.
+        for (int i = 0; i < PerkInfo.Trees.Length; i++)
+        {
+            var cat = PerkInfo.Trees[i];
+            SelfTest.Add(28f + i * 0.8f, "perks: tree " + cat, () => { BookHost.ShowModPage(BookTab.Perks); BookPerksPage.ShowTree(cat); BookPages.Refresh(BookTab.Perks); });
+            SelfTest.Add(28.4f + i * 0.8f, "perks: shot tree " + cat, () => TestKit.Screenshot("perks-tree-" + cat));
+        }
+        SelfTest.Add(33.5f, "perks: close", () => { if (BookHost.IsOpen) BookHost.Close(); });
     }
 
     private static void BuyByClicks()

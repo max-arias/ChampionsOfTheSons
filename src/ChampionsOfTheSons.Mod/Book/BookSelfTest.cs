@@ -195,7 +195,7 @@ internal static class BookSelfTest
     private static void GearTab()
     {
         SelfTest.Check("book: the book opened on Gear", BookHost.IsOpen && BookHost.Tab == BookTab.Gear, $"open {BookHost.IsOpen}, tab {BookHost.Tab}");
-        SelfTest.Check("book: our tab was added", BookTabs.Tabs.Count == 1, BookTabs.Tabs.Count.ToString());
+        SelfTest.Check("book: our tab and its five sub-tabs were added (COS-168)", BookTabs.Tabs.Count == 6 && BookTabs.SubTabs.Count == 5, $"{BookTabs.Tabs.Count} tabs, {BookTabs.SubTabs.Count} sub-tabs");
         SelfTest.Check("book: the game's page actions are blocked", BookPatches.Block);
     }
 

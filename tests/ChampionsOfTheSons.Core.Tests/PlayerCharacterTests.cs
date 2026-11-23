@@ -79,13 +79,14 @@ public class PlayerCharacterTests
     }
 
     [Fact]
-    public void Level_ups_raise_attributes()
+    public void Level_ups_give_attribute_points_but_raise_no_attribute_by_themselves()
     {
         var c = NewCharacter();
-        Assert.Equal(1, c.Stats.Get("strength"));
+        double strength = c.Stats.Get("strength");
         c.AddXp(Enumerable.Range(1, 9).Sum(XpCurve.Goal));
         Assert.Equal(10, c.Progress.Level);
-        Assert.Equal(XpCurve.AttributeBase(10) - 1, c.Stats.Get("strength"));
+        Assert.Equal(strength, c.Stats.Get("strength")); // COS-174: the player spends the points
+        Assert.Equal(AttributeRules.TotalPoints(10), c.AttributePointsLeft);
     }
 
     [Fact]

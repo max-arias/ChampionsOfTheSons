@@ -59,7 +59,7 @@ internal static class BookSpellsPage
                 Shade = PageKit.Box(_root, "spell-shade-" + i, Left - 6, y, RowW + 12, RowH - 6, i % 2 == 0 ? new Color(0, 0, 0, 0.06f) : Color.clear),
                 Icon = PageKit.Box(_root, "spell-icon-" + i, Left, y + 10, 64, 64, Color.white),
                 Name = PageKit.Text(_root, "spell-name-" + i, Left + 74, y + 4, SlotsX - Left - 80, 32, "", 24, PageKit.Ink),
-                Meta = PageKit.Text(_root, "spell-meta-" + i, Left + 74, y + 36, SlotsX - Left - 80, 24, "", 16, PageKit.InkFaint),
+                Meta = PageKit.Text(_root, "spell-meta-" + i, Left + 74, y + 36, SlotsX - Left - 80, 24, "", 17, PageKit.Ink),
                 Warn = PageKit.Text(_root, "spell-warn-" + i, Left + 74, y + 60, RowW - 80, 26, "", 15, PageKit.Select, wrap: true),
                 ActionBg = PageKit.Box(_root, "spell-act-bg-" + i, LearnX, y + 18, LearnW, 44, PageKit.PaperShade),
                 ActionText = PageKit.Text(_root, "spell-act-" + i, LearnX, y + 18, LearnW, 44, "", 18, PageKit.Ink, TextAlignmentOptions.Center),

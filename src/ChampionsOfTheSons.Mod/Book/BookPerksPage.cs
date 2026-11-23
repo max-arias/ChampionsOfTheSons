@@ -132,7 +132,7 @@ internal static class BookPerksPage
         PerkState.Bought => PageKit.Hex("#B8923A"),
         PerkState.Available => PageKit.Good,
         PerkState.NeedPoints => PageKit.Hex("#8A7A4A"),
-        _ => PageKit.InkFaint,
+        _ => PageKit.Hex("#6A5E50"), // locked: darker than faint ink so the shape still reads on a lit page
     };
 
     public static void Refresh(List<PageHit> hits)
@@ -158,11 +158,11 @@ internal static class BookPerksPage
             foreach (var f in n.Frame) f.color = frame;
             foreach (var f in n.Picked) f.enabled = Selected == n.Def.Id;
             n.Bg.color = state == PerkState.Bought ? PageKit.Paper : PageKit.PaperShade;
-            n.Icon.color = state == PerkState.Locked ? new Color(0.45f, 0.45f, 0.45f, 0.8f) : Color.white;
+            n.Icon.color = state == PerkState.Locked ? new Color(0.35f, 0.35f, 0.35f, 1f) : Color.white;
             n.Count.text = times > 1 || (times == 1 && n.Def.Stackable) ? "×" + times : "";
-            hits.Add(new PageHit("perk." + n.Def.Id, n.X, n.Y, n.Size, n.Size));
+            hits.Add(new PageHit(n.Def.Id, n.X, n.Y, n.Size, n.Size)); // perk ids already start with "perk."
         }
-        foreach (var (from, line) in t.Edges) line.color = Pc.Perks.TimesBought(from) > 0 ? PageKit.Hex("#B8923A") : PageKit.InkFaint;
+        foreach (var (from, line) in t.Edges) line.color = Pc.Perks.TimesBought(from) > 0 ? PageKit.Hex("#B8923A") : PageKit.Hex("#8A7E70");
 
         _refundTreeText.text = _armed == "tree" ? UiText.T("ui.book.perks.confirm", "Click again to refund")
             : string.Format(UiText.T("ui.book.perks.refund_tree", "Refund {0}"), PerkInfo.CategoryName(Current));
