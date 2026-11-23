@@ -231,6 +231,7 @@ internal static class SpellWorld
             var sustain = pc.Spells.SustainTick(dt, SpellCaster.Energy, Stats);
             SpellCaster.Spend(sustain.Spent);
             foreach (int slot in sustain.Stopped) SpellEffects.Stopped(slot);
+            SpellEffects.Sustained(dt);
         }
         SpellHits.Tick(dt);
 

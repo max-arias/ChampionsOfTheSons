@@ -222,22 +222,23 @@ internal static class Spells2SelfTest
         Case("parry", () =>
         {
             var foe = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 2 + Vector3.up);
-            if (!Ok("spell.parry")) return;
-            float hpBefore = Hp(foe);
+            var far = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 12 + Vector3.up);
+            float hpBefore = Hp(foe), farBefore = Hp(far);
             var health = LocalPlayer.Vitals.Health;
             health.SetCurrentValue(health.GetMax() * 0.5f);
             float playerBefore = health._currentValue;
+            // COS-171: the cast itself strikes; no blow, block or weapon needed.
+            if (!Ok("spell.parry")) return;
+            SelfTest.Check("spells2: Parry strikes around the player when cast", Hp(foe) < hpBefore, $"{hpBefore:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: Parry leaves enemies out of range alone", Math.Abs(Hp(far) - farBefore) < 0.01, $"{farBefore:0.#} -> {Hp(far):0.#}");
+            SelfTest.Check("spells2: Parry heals, buffs and gives stun immunity",
+                health._currentValue > playerBefore + 5 && SpellWorld.Buffs.Has("parry") && PlayerDebuffs.Buffs.Has(PlayerDebuffs.StunImmune), $"health {health._currentValue:0.#}");
+            float healed = health._currentValue;
             LocalPlayer.Stats.Hit(20f);
-            SelfTest.Check("spells2: Parry negates the hit", health._currentValue >= playerBefore - 0.01f, $"{playerBefore:0.#} -> {health._currentValue:0.#}");
-            SelfTest.Check("spells2: Parry strikes back", Hp(foe) < hpBefore, $"{hpBefore:0.#} -> {Hp(foe):0.#}");
-            SelfTest.Check("spells2: Parry heals and buffs", health._currentValue > playerBefore + 5 && SpellWorld.Buffs.Has("parry"), $"health {health._currentValue:0.#}");
+            SelfTest.Check("spells2: Parry negates the next blow", health._currentValue >= healed - 0.01f, $"{healed:0.#} -> {health._currentValue:0.#}");
             float after = health._currentValue;
             LocalPlayer.Stats.Hit(20f);
-            SelfTest.Check("spells2: only one hit is parried", health._currentValue < after - 1, $"{after:0.#} -> {health._currentValue:0.#}");
-            // Passive (COS-84): a parry the game reports (a timed block) with Parry in the loadout strikes back and gives stun immunity.
-            float hp2 = Hp(foe);
-            SpellHits.OnParried(timedParry: true);
-            SelfTest.Check("spells2: a real parry strikes back and gives stun immunity", Hp(foe) < hp2 && PlayerDebuffs.Buffs.Has(PlayerDebuffs.StunImmune), $"{hp2:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: only one blow is negated", health._currentValue < after - 1, $"{after:0.#} -> {health._currentValue:0.#}");
         });
         Case("sustain shield", () =>
         {
@@ -365,11 +366,11 @@ internal static class Spells2SelfTest
             float d1 = Vector3.Distance(rt.Actor!.transform.position, LocalPlayer.Transform.position);
             SelfTest.Check("spells2: Bash damages, weakens and slows", Hp(foe) < before && rt.Combat.HasWeaken && rt.Combat.HasSlow, $"{before:0.#} -> {Hp(foe):0.#}");
             SelfTest.Check("spells2: Bash knocks the enemy back", d1 > d0 + 1, $"{d0:0.##} m -> {d1:0.##} m");
-            // Passive (COS-84): with Bash in the loadout every real melee hit weakens and slows.
+            // COS-171: Bash has no passive on weapon hits any more.
             var other = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 6 + Vector3.up);
             TestKit.Hit(other, 5f);
             var rt2 = Rt(other)!;
-            SelfTest.Check("spells2: a melee hit weakens and slows while Bash is slotted", rt2.Combat.HasWeaken && rt2.Combat.HasSlow);
+            SelfTest.Check("spells2: a melee hit with Bash slotted does not weaken or slow", !rt2.Combat.HasWeaken && !rt2.Combat.HasSlow);
         });
         Case("snap freeze", () =>
         {
@@ -412,40 +413,39 @@ internal static class Spells2SelfTest
         });
         Case("seeking arrow", () =>
         {
+            // COS-171: its own homing bolt, off to the side of the view (it turns to find the target).
             var eye = SpellWorld.Eye;
             var dir = Quaternion.AngleAxis(30, Vector3.up) * eye.forward;
-            var foe = Put(Foe(), eye.position + dir * 3);
+            var foe = Put(Foe(), eye.position + dir * 8);
+            float before = Hp(foe);
             if (!Ok("spell.seeking_arrow")) return;
-            SelfTest.Check("spells2: Seeking Arrow arms a mark and fires nothing itself", SpellHits.SeekArmed.Has && SpellWorld.BoltCount == 0);
-            PerkHooks.ShotTracker.RecordKind(RangedKind.Bow);
-            TestKit.Hit(foe, 5f, ImpactType.Projectile); // the next real arrow marks its target
-            SelfTest.Check("spells2: the next arrow that hits marks its target", SpellHits.SeekTarget == Rt(foe) && !SpellHits.SeekArmed.Has);
-            SelfTest.Check("spells2: arrows now leave aimed at the mark", SpellHits.SeekAim(eye.position) != null);
-            TestKit.Hit(foe, 5f, ImpactType.Projectile);
-            SelfTest.Check("spells2: a body hit on the mark slows it", Rt(foe)!.Combat.HasSlow);
+            SelfTest.Check("spells2: Seeking Arrow fires its own bolt", SpellWorld.BoltCount == 1);
+            Advance(1.5f);
+            SelfTest.Check("spells2: the seeking bolt finds the target, hurts and slows it", Hp(foe) < before && Rt(foe)!.Combat.HasSlow, $"{before:0.#} -> {Hp(foe):0.#}");
         });
         Case("blood infused arrow", () =>
         {
             var foe = Put(Foe(), OnRay(15));
             var health = LocalPlayer.Vitals.Health;
+            float before = Hp(foe);
             if (!Ok("spell.blood_infused_arrow")) return;
             SelfTest.Check("spells2: Blood Infused Arrow costs health", health._currentValue < health.GetMax() * 0.6f, $"{health._currentValue:0.#} / {health.GetMax():0.#}");
-            SelfTest.Check("spells2: it stores damage for the next arrow", SpellHits.BloodArrows.Has && SpellHits.BloodArrows.Value > 50, $"{SpellHits.BloodArrows.Value:0.#}");
-            float before = Hp(foe);
-            PerkHooks.ShotTracker.RecordKind(RangedKind.Bow);
-            TestKit.Hit(foe, 5f, ImpactType.Projectile);
-            SelfTest.Check("spells2: the next real arrow carries it", Hp(foe) < before - 50 && !SpellHits.BloodArrows.Has, $"{before:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: it fires its own bolt", SpellWorld.BoltCount >= 1);
+            Advance(0.6f);
+            SelfTest.Check("spells2: the blood bolt hits hard", Hp(foe) < before - 50, $"{before:0.#} -> {Hp(foe):0.#}");
         });
 
         // ---- toggles
         Case("black flame", () =>
         {
+            // COS-171: an aura; no weapon hit needed.
             var foe = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 4 + Vector3.up);
+            var far = Put(Foe(), LocalPlayer.Transform.position + Flat(SpellWorld.Eye.forward) * 14 + Vector3.up);
+            float before = Hp(foe), farBefore = Hp(far);
             if (!Ok("spell.black_flame")) return;
             Advance(2.2f);
-            SelfTest.Check("spells2: Black Flame has no aura of its own now", Rt(foe)!.Combat.DotCount == 0);
-            TestKit.Hit(foe, 5f); // a melee hit always ignites
-            SelfTest.Check("spells2: a melee hit sets the enemy burning while Black Flame is on", Rt(foe)!.Combat.DotCount > 0, $"dots {Rt(foe)!.Combat.DotCount}");
+            SelfTest.Check("spells2: Black Flame burns an enemy in its radius", Hp(foe) < before, $"{before:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: Black Flame leaves an enemy outside its radius alone", Math.Abs(Hp(far) - farBefore) < 0.01, $"{farBefore:0.#} -> {Hp(far):0.#}");
             SelfTest.Check("spells2: switching it off starts the cooldown", SpellCaster.Cast(0) == SpellCastOutcome.Stopped && !Pc.Spells.IsReady(0));
         });
         Case("multishot", () =>

@@ -41,7 +41,7 @@ public static class SpellTuning
     /// <summary>Multishot: energy per shot is <c>base x extra^1.5</c>; the extra arrows fan out this many degrees apart.</summary>
     public const double MultishotShotEnergy = 5, MultishotShotExponent = 1.5, MultishotSpreadDegrees = 4;
     /// <summary>Black Flame: seconds a weapon hit's burn lasts, the chance an arrow ignites (melee always).</summary>
-    public const double BlackFlameBurnSeconds = 5, BlackFlameArrowChance = 0.5;
+    public const double BlackFlameBurnSeconds = 5;
     /// <summary>Frenzy: seconds a stack lasts (every attack refreshes it); casting spends the stacks for energy, per stack and second, as a share of max energy.</summary>
     public const double FrenzyStackSeconds = 4, FrenzyBurstShare = 0.01, FrenzyMoveSpeedPerStack = 0.05;
     /// <summary>Repeat Offender: flat damage per earlier hit on the same target while Frenzy has stacks.</summary>
@@ -51,8 +51,7 @@ public static class SpellTuning
     /// <summary>Parry: stun immunity after a parry, seconds the stored counter-strike bonus waits for the next melee hit.</summary>
     public const double ParryStunImmunitySeconds = 10, ParryStoredSeconds = 20;
     /// <summary>Bash (passive): most hits that stack on one enemy, the extra damage per stack per point of <c>spell_bash_damage_buff</c>.</summary>
-    public const int BashMaxStacks = 5;
-    public const double BashStackDamage = 0.1;
+    public const double LuckyBashCritDamage = 1, LuckyBashSeconds = 2, BloodArrowStunSeconds = 5;
     /// <summary>Seeking Arrow: ranged damage factor while a mark is up; the armed mark and Blood Infused Arrow's stored damage wait this long.</summary>
     public const double SeekingRangedMult = 0.9, ArrowChargeSeconds = 30;
     /// <summary>Blood Infused Arrow with the triple perk: damage x3 and an energy leak.</summary>
@@ -129,7 +128,8 @@ public static class SpellTuning
         * Derived.SpellMultiplier(s);
 
     /// <summary>Black Flame: chance a weapon hit ignites (melee always, arrows half the time).</summary>
-    public static double BlackFlameIgnite(WeaponClass weapon) => weapon == WeaponClass.Melee ? 1 : BlackFlameArrowChance;
+    /// <summary>Black Flame's damage per tick to each enemy in its radius, before spell damage scaling (COS-171).</summary>
+    public static double BlackFlameTickDamage(bool nether) => BlackFlameDamage * (nether ? PerkTuning.NetherflameDamage : 1);
 
     /// <summary>Focus: the bonus a shot stores for the next one, by where it hit (headshot or body).</summary>
     public static double FocusBonus(StatSheet s, bool head) =>
@@ -146,8 +146,16 @@ public static class SpellTuning
     public static double ParryStoredMult(StatSheet s) => Math.Max(1, s.Get("spell_parry_dmg_bonus"));
 
     /// <summary>Bash (passive): the melee hit's factor with <paramref name="stacks"/> earlier Bash hits on the enemy.</summary>
-    public static double BashStackFactor(StatSheet s, int stacks) =>
-        1 + Math.Min(Math.Max(0, stacks), BashMaxStacks) * BashStackDamage * s.Get("spell_bash_damage_buff");
+    /// <summary>Lucky Bashes: after a Bash that hit, crit damage +100% per perk stack for <see cref="LuckyBashSeconds"/> s. Null without the perk.</summary>
+    public static StatModifier[]? LuckyBash(StatSheet s)
+    {
+        double stacks = s.Get("spell_bash_damage_buff");
+        return stacks <= 0 ? null : new[] { new StatModifier(StatIds.CritDamage, EffectOp.Add, LuckyBashCritDamage * stacks) };
+    }
+
+    /// <summary>Seeking Arrow's bolt: Head Hunting (perk, <c>spell_seeking_arrow_head_damage</c>) adds its share to every hit.</summary>
+    public static OutgoingHit SeekingArrowHit(OutgoingHit hit, StatSheet s) =>
+        hit with { Amount = hit.Amount * (1 + s.Get("spell_seeking_arrow_damage_bonus")) * (1 + Math.Max(0, s.Get("spell_seeking_arrow_head_damage"))) };
 
     /// <summary>Seeking Arrow: the factor on a headshot while a mark is up (<c>spell_seeking_arrow_head_damage</c>, at most 1).</summary>
     public static double SeekingHeadMult(StatSheet s) => Math.Clamp(s.Get("spell_seeking_arrow_head_damage"), 0, 1);

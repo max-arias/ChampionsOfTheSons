@@ -112,21 +112,28 @@ public class WeaponSpellTests
     }
 
     [Fact]
-    public void Black_flame_burn_grows_with_spell_power_and_netherflame_and_melee_always_ignites()
+    public void Black_flame_aura_tick_is_stronger_with_netherflame()
     {
-        double plain = SpellTuning.BlackFlameBurn(Sheet(), nether: false);
-        Assert.True(SpellTuning.BlackFlameBurn(Sheet(), nether: true) > plain);
-        Assert.True(SpellTuning.BlackFlameBurn(Sheet(new StatModifier("spell_flat_dmg", EffectOp.Add, 50)), false) > plain);
-        Assert.Equal(1, SpellTuning.BlackFlameIgnite(WeaponClass.Melee));
-        Assert.True(SpellTuning.BlackFlameIgnite(WeaponClass.Ranged) < 1);
+        Assert.True(SpellTuning.BlackFlameTickDamage(nether: true) > SpellTuning.BlackFlameTickDamage(nether: false));
+        Assert.True(SpellTuning.BlackFlameTickDamage(nether: false) > 0);
     }
 
     [Fact]
-    public void Bash_stacks_raise_melee_damage_only_with_the_perk_and_stop_at_the_cap()
+    public void Lucky_bashes_raises_crit_damage_per_perk_stack_and_is_nothing_without_it()
     {
-        Assert.Equal(1, SpellTuning.BashStackFactor(Sheet(), 4), 6);
-        var perk = Sheet(new StatModifier("spell_bash_damage_buff", EffectOp.Add, 1));
-        Assert.True(SpellTuning.BashStackFactor(perk, 2) > SpellTuning.BashStackFactor(perk, 1));
-        Assert.Equal(SpellTuning.BashStackFactor(perk, SpellTuning.BashMaxStacks), SpellTuning.BashStackFactor(perk, 99), 6);
+        Assert.Null(SpellTuning.LuckyBash(Sheet()));
+        var one = SpellTuning.LuckyBash(Sheet(new StatModifier("spell_bash_damage_buff", EffectOp.Add, 1)))!;
+        var two = SpellTuning.LuckyBash(Sheet(new StatModifier("spell_bash_damage_buff", EffectOp.Add, 2)))!;
+        Assert.Equal(StatIds.CritDamage, one[0].Stat);
+        Assert.True(two[0].Value > one[0].Value);
+    }
+
+    [Fact]
+    public void Seeking_arrow_head_hunting_adds_to_every_hit()
+    {
+        var hit = new OutgoingHit(100, DamageKind.Physical, false, 0);
+        double plain = SpellTuning.SeekingArrowHit(hit, Sheet()).Amount;
+        double perk = SpellTuning.SeekingArrowHit(hit, Sheet(new StatModifier("spell_seeking_arrow_head_damage", EffectOp.Add, 0.5))).Amount;
+        Assert.True(perk > plain);
     }
 }

@@ -11,11 +11,13 @@ internal static class SpellPatches
     public static float Incoming(float damage)
     {
         if (damage <= 0) return damage;
-        if (SpellWorld.Parry.TryParry() || ParryOnHit())
+        // Parry (COS-171) strikes when cast; its open window only negates the next blow. Alexander's Shield casts Parry from the hit.
+        if (ParryOnHit())
         {
             SpellEffects.Riposte();
             return 0;
         }
+        if (SpellWorld.Parry.TryParry()) return 0;
         return (float)SpellWorld.Shield.Absorb(damage);
     }
 

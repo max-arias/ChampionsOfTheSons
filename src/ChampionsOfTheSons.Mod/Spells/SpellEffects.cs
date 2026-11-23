@@ -9,7 +9,8 @@ using static ChampionsOfTheSons.Mod.Spells.SpellWorld;
 namespace ChampionsOfTheSons.Mod.Spells;
 
 /// <summary>
-/// What each of the 26 spells besides Blink does when cast. Numbers come from <see cref="SpellTuning"/> and the character's
+/// What each of the 26 spells besides Blink does when cast. No spell needs a weapon hit (COS-171, Max 2026-11-23): damage and area
+/// spells act on their own when cast or while they run; only Frenzy, Focus, Berserk and Multishot buff the player's own attacks. Numbers come from <see cref="SpellTuning"/> and the character's
 /// <c>spell_*</c> stats, so perks that edit a spell change it here. Visuals are placeholders (<see cref="SpellFx"/>).
 /// Enemy damage goes through <see cref="SpellWorld.Strike"/>, the bridge's forced-hit path, so armor, shields and caps apply.
 /// </summary>
@@ -47,11 +48,13 @@ internal static class SpellEffects
     };
 
     private static GameObject? _shieldFx, _flameFx, _multishotFx;
+    private static float _flameTimer;
     private static double _warCryArmor;
 
     public static void ResetState()
     {
         _shieldFx = _flameFx = _multishotFx = null;
+        _flameTimer = 0;
     }
 
     // ---------------------------------------------------------------- player buffs
@@ -70,7 +73,7 @@ internal static class SpellEffects
         // Teammates in range get the damage and attack speed part (COS-23); the armor perks stay the caster's own.
         Net.CoopExtras.SendTeamSpell("spell.war_cry", Feet(), TeamSpells.WarCryRadius, (float)SpellTuning.WarCryDuration,
             Math.Max(1, Stats.Get("spell_war_cry_damage")), Math.Max(1, Stats.Get("spell_war_cry_atk_speed")));
-        SpellFx.Disc(Feet(), 3f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
+        SpellFx.Disc(Feet(), (float)TeamSpells.WarCryRadius, SpellFx.Holy, 1.2f, LocalPlayer.Transform, SpellFx.Look.Ring);
         return true;
     }
 
@@ -134,15 +137,18 @@ internal static class SpellEffects
         return true;
     }
 
+    /// <summary>Parry (COS-171): the cast strikes everything around the player at once (no block or weapon needed), and the next
+    /// blow within the window is negated.</summary>
     private static bool ParryCast()
     {
         double window = SpellTuning.ParryWindowFor(Stats);
         Parry.Cast(window);
         SpellFx.Sphere(PlayerPos + Vector3.up * 1.2f, 1.1f, SpellFx.Steel, (float)window, LocalPlayer.Transform);
+        Riposte();
         return true;
     }
 
-    /// <summary>An incoming hit was parried: strike back around the player, heal and refund energy, buff attack speed.</summary>
+    /// <summary>Parry's strike: hits around the player, heals and refunds energy, buffs attack speed.</summary>
     public static void Riposte()
     {
         float radius = S("spell_parry_radius");
@@ -161,7 +167,7 @@ internal static class SpellEffects
             new StatModifier(StatIds.AttackSpeed, EffectOp.Mult, Math.Max(1, S("spell_parry_attack_speed"))),
             new StatModifier(StatIds.AllDamage, EffectOp.Mult, 1 + S("spell_parry_buff_damage")),
         });
-        SpellFx.Disc(Feet(), Math.Max(1, radius), SpellFx.Steel, 0.6f, LocalPlayer.Transform);
+        SpellFx.Disc(Feet(), Math.Max(1, radius), SpellFx.Steel, 0.6f, LocalPlayer.Transform, SpellFx.Look.Ring);
     }
 
     private static bool Purge()
@@ -174,6 +180,7 @@ internal static class SpellEffects
         if (purge > 1) Buffs.Apply("purgatory", PerkRules.PurgeSeconds, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, purge) });
         Net.CoopExtras.SendTeamSpell("spell.purge", Feet(), TeamSpells.PurgeRadius, 0, Stats.IsOn("spell_purge_heal") ? SpellTuning.PurgeHealFraction : 0);
         SpellFx.Disc(Feet(), 3f, SpellFx.Heal, 1f, LocalPlayer.Transform, SpellFx.Look.Glyph);
+        SpellFx.Disc(Feet(), (float)TeamSpells.PurgeRadius, SpellFx.Heal, 1f, LocalPlayer.Transform, SpellFx.Look.Ring);
         return true;
     }
 
@@ -334,6 +341,7 @@ internal static class SpellEffects
     private static void LaunchBallLightning(Vector3 start, Vector3 dir)
     {
         var ball = SpellFx.Sphere(start, 0.8f, SpellFx.Storm, 1e6f);
+        if (ball != null) SpellFx.Disc(start, (float)SpellTuning.BallLightningRadius, SpellFx.Storm, 1e6f, ball.transform, SpellFx.Look.Ring);
         AddZone(new SpellZone
         {
             Id = "ball_lightning", Center = start, Radius = (float)SpellTuning.BallLightningRadius, Left = (float)SpellTuning.BallLightningSeconds,
@@ -360,7 +368,7 @@ internal static class SpellEffects
     {
         var eye = Eye;
         PerkHooks.WideReachPickup.Cast();
-        SpellFx.Sphere(eye.position + eye.forward * 3f, 1.4f, SpellFx.Steel, 0.2f);
+        SpellFx.Disc(Feet(), PerkHooks.WideReachPickup.Radius, SpellFx.Steel, 0.5f, LocalPlayer.Transform, SpellFx.Look.Ring);
         return true;
     }
 
@@ -368,9 +376,11 @@ internal static class SpellEffects
     {
         var eye = Eye;
         var flat = new Vector3(eye.forward.x, 0, eye.forward.z).normalized;
+        int struck = 0;
         foreach (var e in InCone(PlayerPos + Vector3.up, flat, (float)SpellTuning.BashRange, (float)SpellTuning.BashAngle / 2))
         {
             if (!e.IsActive) continue;
+            struck++;
             Strike(e, Hit(SpellTuning.BashDamage, SpellTuning.BashScaling));
             BashItems(e, EnemyPatches.LastHit?.After ?? 0);
             if (!e.IsActive) continue;
@@ -380,7 +390,10 @@ internal static class SpellEffects
             away.y = 0;
             Knock(e, away.normalized * (float)SpellTuning.BashKnockback);
         }
+        // Lucky Bashes (perk): a Bash that hit raises crit damage for a moment.
+        if (struck > 0 && SpellTuning.LuckyBash(Stats) is StatModifier[] lucky) Buffs.Apply("lucky_bashes", SpellTuning.LuckyBashSeconds, lucky);
         SpellFx.Sphere(PlayerPos + flat * 2.2f + Vector3.up, 1.2f, SpellFx.Steel, 0.2f);
+        SpellFx.Disc(Feet(), (float)SpellTuning.BashRange, SpellFx.Steel, 0.4f, LocalPlayer.Transform, SpellFx.Look.Ring);
         return true;
     }
 
@@ -510,32 +523,66 @@ internal static class SpellEffects
         GreedCasts++;
     }
 
-    /// <summary>Seeking Arrow arms a mark: the next real arrow that hits an enemy marks it, and for <c>spell_seeking_arrow_duration</c> s the
-    /// player's arrows leave aimed at it (<see cref="SpellHits"/>; the game's arrows cannot be steered in flight).</summary>
+    /// <summary>Seeking Arrow (COS-171): its own homing bolt at the nearest enemy within 60 degrees of the view; it hunts for
+    /// <c>spell_seeking_arrow_duration</c> s, then slows what it hits.</summary>
     private static bool SeekingArrow()
     {
-        SpellHits.ArmSeeking();
-        SpellFx.Sphere(Eye.position + Eye.forward * 1.5f, 0.3f, SpellFx.Steel, 0.8f);
+        var eye = Eye;
+        var target = Nearest(eye.position, (float)SpellTuning.SeekingArrowRange, e => Vector3.Angle(eye.forward, Center(e) - eye.position) < 60);
+        AddBolt(new SpellBolt
+        {
+            Id = "seeking_arrow", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.SeekingArrowSpeed,
+            Range = 1000, Life = S("spell_seeking_arrow_duration"), Homing = true, Target = target, Radius = 1f,
+            Visual = SpellFx.Sphere(eye.position + eye.forward, 0.25f, SpellFx.Steel, 1e6f),
+            OnHit = (b, e) =>
+            {
+                Strike(e, SpellTuning.SeekingArrowHit(Hit(SpellTuning.SeekingArrowDamage, SpellTuning.SeekingArrowScaling), Stats));
+                if (e.IsActive) e.Combat.ApplySlow("spell.seeking_arrow", S("spell_seeking_arrow_slow_amount"), S("spell_seeking_arrow_slow_duration"));
+                SpellFx.Sphere(b.Pos, 0.7f, SpellFx.Steel, 0.3f);
+            },
+        });
         return true;
     }
 
-    /// <summary>Blood Infused Arrow pays its health and stores the damage as flat damage for the next real arrow (the Withered Crown stores
-    /// it for five); with the triple perk it is tripled and an energy leak follows.</summary>
+    /// <summary>Blood Infused Arrow (COS-171): pays its health and fires its own bolt with the damage (the Withered Crown fans out extra
+    /// bolts for the one cost); with the triple perk it is tripled and an energy leak follows.</summary>
     private static bool BloodInfusedArrow()
     {
         var health = LocalPlayer.Vitals.Health;
-        var (cost, hit) = SpellTuning.BloodArrow(Stats, health._currentValue, Rng.FromTime());
+        var rng = Rng.FromTime();
+        var (cost, hit) = SpellTuning.BloodArrow(Stats, health._currentValue, rng);
         health.SetCurrentValue(Mathf.Max(1, health._currentValue - (float)cost));
+        hit = hit with { Amount = SpellTuning.BloodArrowStored(Stats, hit) };
+        if (!hit.Crit && Stats.IsOn("spell_bia_crit")) hit = hit with { Crit = true, Amount = hit.Amount * (1 + Stats.Get(StatIds.CritDamage)) };
         int arrows = 1 + (Stats.IsOn(UniqueFlagIds.WitheredCrown) ? UniqueTuning.CrownExtraArrows : 0);
-        SpellHits.BloodArrows.Store(SpellTuning.BloodArrowStored(Stats, hit), SpellTuning.ArrowChargeSeconds, arrows);
+        var eye = Eye;
+        for (int i = 0; i < arrows; i++)
+        {
+            float yaw = arrows == 1 ? 0 : (i - (arrows - 1) / 2f) * 5f;
+            FireBloodArrow(eye.position, Quaternion.AngleAxis(yaw, Vector3.up) * eye.forward, hit);
+        }
         if (Stats.IsOn("spell_bia_triple_dmg"))
             PlayerDebuffs.Buffs.Apply(PlayerDebuffs.EnergyLeak, "spell.blood_arrow", SpellTuning.BloodArrowLeakSeconds, SpellTuning.BloodArrowLeakPerSecond);
-        SpellFx.Sphere(Eye.position + Eye.forward * 1.5f, 0.35f, SpellFx.Blood, 0.8f);
         BloodArrowsFired += arrows;
         return true;
     }
 
-    /// <summary>Blood Infused Arrow charges stored (self-test: Withered Crown).</summary>
+    private static void FireBloodArrow(Vector3 from, Vector3 dir, OutgoingHit hit)
+    {
+        AddBolt(new SpellBolt
+        {
+            Id = "blood_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.BloodArrowSpeed, Range = (float)SpellTuning.BloodArrowRange, Radius = 1f,
+            Visual = SpellFx.Sphere(from + dir, 0.3f, SpellFx.Blood, 1e6f),
+            OnHit = (b, e) =>
+            {
+                Strike(e, hit);
+                if (e.IsActive && hit.Crit && Stats.IsOn("spell_bia_stun")) e.Combat.ApplyStun(SpellTuning.BloodArrowStunSeconds);
+                SpellFx.Sphere(b.Pos, 0.9f, SpellFx.Blood, 0.3f);
+            },
+        });
+    }
+
+    /// <summary>Blood Infused Arrows fired (self-test: Withered Crown).</summary>
     public static int BloodArrowsFired { get; private set; }
 
     // ---------------------------------------------------------------- channeled and toggle spells
@@ -549,13 +596,34 @@ internal static class SpellEffects
 
     private static bool Has(string perkId) => Pc.Perks.TimesBought(perkId) > 0;
 
+    /// <summary>Black Flame (COS-171): while it burns, everything within <see cref="SpellTuning.BlackFlameRadius"/> of the player takes fire
+    /// damage every <see cref="SpellTuning.BlackFlameTick"/> s; no weapon hit needed. The ring shows the radius.</summary>
     private static bool StartBlackFlame()
     {
+        _flameTimer = 0;
         // Enchant Weapon (perk): all damage x1.33 for as long as the flame burns.
         if (Has(PerkEffectIds.EnchantWeapon))
             Buffs.Apply("enchant_weapon", 1e6, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, PerkTuning.EnchantWeaponDamage) });
-        _flameFx = SpellFx.Disc(Feet(), 1.2f, SpellFx.Dark, 1e6f, LocalPlayer.Transform, SpellFx.Look.Ring);
+        _flameFx = SpellFx.Disc(Feet(), (float)SpellTuning.BlackFlameRadius, SpellFx.Dark, 1e6f, LocalPlayer.Transform, SpellFx.Look.Ring);
         return true;
+    }
+
+    /// <summary>Per-frame work of the running toggle spells (SpellWorld.Step).</summary>
+    public static void Sustained(float dt)
+    {
+        if (!SpellHits.Running("spell.black_flame")) { _flameTimer = 0; return; }
+        _flameTimer += dt;
+        while (_flameTimer >= SpellTuning.BlackFlameTick)
+        {
+            _flameTimer -= (float)SpellTuning.BlackFlameTick;
+            bool afterburn = Has(PerkEffectIds.Afterburn);
+            foreach (var e in EnemiesWithin(PlayerPos, (float)SpellTuning.BlackFlameRadius))
+            {
+                Strike(e, Hit(SpellTuning.BlackFlameTickDamage(Has(PerkEffectIds.Netherflame)), S("spell_black_flame_damage_scaling")));
+                if (afterburn && e.IsActive && UnityEngine.Random.value < PerkTuning.AfterburnChance)
+                    e.Combat.ApplyWeaken(PerkEffectIds.Afterburn, PerkTuning.AfterburnDamageTaken, PerkTuning.AfterburnSeconds);
+            }
+        }
     }
 
     private static bool StartMultishot()

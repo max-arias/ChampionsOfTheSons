@@ -36,7 +36,9 @@
       "name": "Sun Flare",
       "levelReq": 10,
       "energyCost": 100.0,
-      "cooldown": 70.0
+      "cooldown": 70.0,
+      "castOnRelease": true,
+      "aim": "sphere"
     },
     {
       "id": "spell.sustain_shield",
@@ -231,7 +233,9 @@
       "name": "Snow Storm",
       "levelReq": 9,
       "energyCost": 120.0,
-      "cooldown": 20.0
+      "cooldown": 20.0,
+      "castOnRelease": true,
+      "aim": "sphere"
     },
     {
       "id": "spell.flicker_strike",

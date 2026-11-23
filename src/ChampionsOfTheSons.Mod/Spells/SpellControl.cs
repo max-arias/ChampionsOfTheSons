@@ -101,6 +101,8 @@ internal static class SpellControl
         {
             case "spell.black_hole": return (eye.position, AimGround(40) + Vector3.up * 1.5f, S("spell_blackhole_radius"), false);
             case "spell.cataclysm": return (eye.position, AimGround(50), S("spell_cataclysm_radius"), false);
+            case "spell.sun_flare": return (eye.position, AimGround(30), S("spell_flare_radius"), false);
+            case "spell.snow_storm": return (eye.position, AimGround(30), (float)(SpellTuning.SnowStormRadius * Math.Sqrt(SpellTuning.SnowStormScale(PlayerState.Character.Stats))), false);
             case "spell.healing_dome": return (eye.position, (PlayerPos + Vector3.up * 0.1f), (float)SpellTuning.HealingDomeRadius, false);
             case "spell.magic_arrow": return (eye.position, AimPoint((float)SpellTuning.MagicArrowRange), 1f, false);
             case "spell.taunt": return (eye.position, AimGround((float)SpellTuning.TauntAimRange), (float)SpellTuning.TauntRadius, false);
