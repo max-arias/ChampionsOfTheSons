@@ -174,6 +174,8 @@ public sealed class FollowupsFeature : IModFeature
         var totals = UtilityPerks.Totals(Pc.Perks, UtilityKind.Capacity);
         foreach (var (name, amount) in ItemCarry.Totals(Pc.Inventory.Equipped.Select(kv => kv.Value)))
             totals[name] = totals.GetValueOrDefault(name) + amount;
+        foreach (var (name, amount) in ItemCarry.FromStrength(Pc.Attributes.Get(StatIds.Strength)))
+            totals[name] = totals.GetValueOrDefault(name) + amount;
         string sig = string.Join(";", totals.OrderBy(kv => kv.Key).Select(kv => $"{kv.Key}={kv.Value}"));
         if (!force && sig == _capacitySig) return;
         _capacitySig = sig;

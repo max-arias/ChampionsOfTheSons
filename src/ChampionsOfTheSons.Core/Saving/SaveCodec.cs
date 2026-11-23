@@ -25,6 +25,7 @@ public static class SaveCodec
         RemoveCraftingContent, // 4 → 5 (COS-145)
         RemoveIslandFoods, // 5 → 6 (COS-147; the grant day defaults to none, COS-100)
         _ => { }, // 6 → 7 (COS-100): health, carried items and save time are new and default to "not saved"
+        _ => { }, // 7 → 8 (COS-174): attribute points are new; none spent, so the player gets them all to spend
     };
 
     /// <summary>The four island foods never had a use and are gone (COS-147, Max: remove).</summary>

@@ -263,8 +263,29 @@ sealed class Sim
         if (_lastKitLevel >= 0 && l < _lastKitLevel + _a.KitEveryLevels && Hours < _lastKitHours + _a.KitEveryHours) return;
         _lastKitLevel = l;
         _lastKitHours = Hours;
+        SpendAttributes();
         BuyPerks();
         RollKit();
+    }
+
+    /// <summary>COS-174: spends the attribute points greedily, a chunk at a time, on whatever raises the score most (Vitality when none does).</summary>
+    private void SpendAttributes()
+    {
+        while (Pc.AttributePointsLeft > 0)
+        {
+            int chunk = Math.Max(1, Pc.AttributePointsLeft / 8);
+            double baseScore = Score();
+            string best = StatIds.Vitality;
+            double bestGain = 0;
+            foreach (var id in AttributePoints.Ids)
+            {
+                int n = Pc.SpendAttribute(id, chunk);
+                double gain = Score() - baseScore;
+                Pc.RefundAttribute(id, n);
+                if (gain > bestGain) { bestGain = gain; best = id; }
+            }
+            if (Pc.SpendAttribute(best, chunk) == 0) break;
+        }
     }
 
     // ---- fighting ----

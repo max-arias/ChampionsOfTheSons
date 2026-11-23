@@ -15,7 +15,7 @@
         [
           "stat.lesserarmor",
           null,
-          "stat.lesserstrength",
+          "stat.basemeleedamage",
           "stat.jumppower",
           "stat.explosiondamage"
         ]
@@ -34,13 +34,13 @@
           "stat.lesserarmor"
         ],
         [
-          "stat.lesservitality",
+          "stat.maximumlife",
           "stat.staminapersecond"
         ],
         [
           "stat.lesserarmor",
-          "stat.vitality",
-          "stat.agility"
+          "stat.maximumlife",
+          "stat.baserangeddamage"
         ],
         [
           "stat.lesserarmor",
@@ -59,12 +59,12 @@
       "maxLevel": 2,
       "statPools": [
         [
-          "stat.lesserintelligence",
+          "stat.basespelldamage",
           null
         ],
         [
-          "stat.lesseragility",
-          "stat.lesservitality",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.baserangeddamage",
           "stat.basemeleedamage",
           "stat.explosiondamage"
@@ -89,10 +89,10 @@
           "stat.lifepersecond"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           "stat.basespelldamage",
           "stat.basemeleedamage",
@@ -149,10 +149,10 @@
         ],
         [
           "stat.lesserarmor",
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ]
       ]
     },
@@ -172,13 +172,13 @@
           "stat.lesserarmor",
           "stat.armor",
           null,
-          "stat.lesservitality"
+          "stat.maximumlife"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           "stat.energypersecond",
           null,
@@ -206,10 +206,10 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.thorns"
@@ -218,10 +218,9 @@
           "stat.lesserarmor",
           "stat.armor",
           null,
-          "stat.lesservitality",
-          "stat.vitality",
-          "stat.agility",
-          "stat.strength"
+          "stat.maximumlife",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
         ],
         [
           "stat.maximumenergy",
@@ -234,10 +233,10 @@
           "stat.allhealingpercent"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           "stat.energypersecond",
           null,
@@ -264,19 +263,19 @@
           "stat.cooldownreduction"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.spelldmgfromint"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.spelldmgfromint"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.spelldmgfromint"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -286,7 +285,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -296,7 +295,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -306,7 +305,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -316,7 +315,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -326,7 +325,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -336,7 +335,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -363,17 +362,17 @@
       "maxLevel": 8,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.dodgechance",
-          "stat.intelligence",
+          "stat.basespelldamage",
           null,
           null,
           null
@@ -381,10 +380,10 @@
         [
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife"
         ],
         [
@@ -407,18 +406,18 @@
           "stat.percentmaximumenergy"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangeddamageincrease",
           "stat.baserangeddamage"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangeddamageincrease",
           "stat.baserangeddamage",
           "stat.projectilespeed"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangeddamageincrease",
           "stat.baserangeddamage",
           "stat.massacreduration",
@@ -460,7 +459,7 @@
       "statPools": [
         [
           null,
-          "stat.lesserintelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.block"
@@ -470,7 +469,7 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
+          "stat.basemeleedamage",
           null
         ]
       ]
@@ -485,16 +484,15 @@
       "maxLevel": 6,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          null,
-          "stat.lesserintelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
+          null
         ],
         [
           null,
-          "stat.lesserintelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.block"
@@ -550,10 +548,10 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.resistancetomagic"
@@ -610,7 +608,7 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.lesserstrength",
+          "stat.basemeleedamage",
           "stat.energyonhit",
           "stat.maximumlife",
           "stat.maximumenergy",
@@ -639,10 +637,10 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           "stat.criticalhitchance",
           "stat.criticalhitdamage"
@@ -662,10 +660,10 @@
           "stat.criticalhitchance"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           "stat.criticalhitchance",
           "stat.criticalhitdamage"
@@ -688,10 +686,10 @@
           "*"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
@@ -710,10 +708,10 @@
           "stat.damagereduction"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.spelldamageincrease",
           "stat.meleedamageincrease",
           "stat.rangeddamageincrease",
@@ -736,10 +734,10 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor"
         ],
         [
@@ -760,8 +758,7 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.baserangeddamage",
-          "stat.lesseragility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.lesserarmor"
@@ -778,10 +775,10 @@
       "maxLevel": 10,
       "statPools": [
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor"
         ],
         [
@@ -833,7 +830,7 @@
       "maxLevel": 10,
       "statPools": [
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.staminapersecond",
@@ -841,7 +838,7 @@
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
           "stat.projectilespeed",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.rangeddamageincrease",
@@ -863,10 +860,10 @@
       "maxLevel": 30,
       "statPools": [
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.agility",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.baserangeddamage",
+          "stat.basespelldamage"
         ],
         [
           "stat.criticalhitchance",
@@ -914,7 +911,7 @@
           "stat.attackspeed",
           "stat.movementspeed",
           "stat.attackcostreduction",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.rangeddamageincrease",
@@ -930,13 +927,13 @@
           "stat.expgain",
           "stat.cooldownreduction",
           "stat.energyonhit",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.maximumenergy"
         ],
         [
           "stat.spelldmgfromint",
           "stat.spellcostreduction",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.thorns"
@@ -959,7 +956,7 @@
       "maxLevel": 8,
       "statPools": [
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.criticalhitchance",
@@ -1012,7 +1009,7 @@
           "stat.cooldownreduction"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           null
         ],
         [
@@ -1084,7 +1081,7 @@
           "stat.stunonhit"
         ],
         [
-          "stat.strength",
+          "stat.basemeleedamage",
           "stat.chanceonhittoslow",
           "stat.chanceonhittobleed",
           "stat.chanceonhittoweaken"
@@ -1118,8 +1115,8 @@
           "stat.stunonhit"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
           "stat.chanceonhittoslow",
           "stat.chanceonhittobleed",
           "stat.chanceonhittoweaken"
@@ -1129,7 +1126,7 @@
           "stat.armor"
         ],
         [
-          "stat.lesserstrength",
+          "stat.basemeleedamage",
           "stat.allhealingpercent",
           "stat.lesserarmor",
           null,
@@ -1138,7 +1135,6 @@
         [
           "stat.basemeleedamage",
           "stat.meleedamageincrease",
-          "stat.strength",
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
           "stat.maximumlife",
@@ -1168,9 +1164,9 @@
           "stat.baserangeddamage"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.maximumenergy",
-          "stat.intelligence"
+          "stat.basespelldamage"
         ]
       ]
     },
@@ -1188,17 +1184,17 @@
           "stat.baserangeddamage"
         ],
         [
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence"
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
-          "stat.lesseragility",
+          "stat.baserangeddamage",
           "stat.armor",
           "stat.headshotdamage"
         ],
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ]
       ]
     },
@@ -1216,7 +1212,7 @@
         ],
         [
           "stat.rangeddamageincrease",
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangedarmorpiercing"
         ],
         [
@@ -1225,12 +1221,11 @@
           "stat.firedamage"
         ],
         [
-          "stat.lesseragility",
-          "stat.lesservitality",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.armor",
           "stat.maximumlife",
-          "stat.maximumenergy",
-          "stat.lesseragility"
+          "stat.maximumenergy"
         ],
         [
           "*"
@@ -1252,7 +1247,7 @@
           "stat.cooldownreduction"
         ],
         [
-          "stat.lesserintelligence",
+          "stat.basespelldamage",
           "stat.maximumenergy",
           "stat.resistancetomagic",
           "stat.firedamage"
@@ -1261,7 +1256,7 @@
           "*"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           null
         ]
       ]
@@ -1281,17 +1276,17 @@
         ],
         [
           "stat.lesserarmor",
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.lesserarmor",
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.lesserarmor",
@@ -1311,13 +1306,13 @@
       "maxLevel": 28,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
-          "stat.strength",
+          "stat.basemeleedamage",
           "stat.maximumlife"
         ],
         [
@@ -1334,10 +1329,9 @@
           "stat.lifeonhit",
           "stat.maximumlife",
           "stat.maximumenergy",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.basespelldamage"
         ],
         [
           "stat.lifepersecond",
@@ -1351,8 +1345,8 @@
         ],
         [
           "stat.allhealingpercent",
-          "stat.strength",
-          "stat.vitality"
+          "stat.basemeleedamage",
+          "stat.maximumlife"
         ],
         [
           "*"
@@ -1393,10 +1387,10 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.armor",
           "stat.resistancetomagic"
         ],
@@ -1405,10 +1399,10 @@
           "stat.movementspeed"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.maximumlife",
@@ -1421,8 +1415,8 @@
         ],
         [
           "stat.staminapersecond",
-          "stat.intelligence",
-          "stat.agility",
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
           "stat.staminaregeneration"
         ],
         [
@@ -1457,17 +1451,17 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor"
         ]
       ]
@@ -1485,10 +1479,10 @@
           "stat.damagereduction"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.armor"
@@ -1518,10 +1512,10 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.criticalhitchance",
@@ -1546,9 +1540,9 @@
           "stat.cooldownreduction"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.basespelldamage"
         ]
       ],
       "uniqueEffects": [
@@ -1669,8 +1663,7 @@
           "stat.spellcostreduction"
         ],
         [
-          "stat.lesserintelligence",
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.energypersecond"
@@ -1693,13 +1686,13 @@
       "maxLevel": 6,
       "statPools": [
         [
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.maximumlife",
@@ -1729,7 +1722,7 @@
           "*"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.attackspeed",
           "stat.lifepersecond",
           "stat.staminapersecond",
@@ -1762,13 +1755,13 @@
       "maxLevel": 6,
       "statPools": [
         [
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.maximumlife",
@@ -1795,7 +1788,7 @@
           "stat.resistancetomagic"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.attackspeed",
           "stat.lifepersecond",
           "stat.staminapersecond",
@@ -1834,29 +1827,28 @@
       "maxLevel": 6,
       "statPools": [
         [
-          "stat.basespelldamage",
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.baserangeddamage",
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.spelldamageincrease",
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.rangeddamageincrease",
-          "stat.agility",
+          "stat.baserangeddamage",
           null,
           null,
           null,
           null
         ],
         [
-          "stat.agility",
-          "stat.intelligence",
-          "stat.allattributes",
+          "stat.baserangeddamage",
+          "stat.basespelldamage",
+          "stat.maximumlife",
           "stat.armor"
         ],
         [
@@ -1912,10 +1904,9 @@
         ],
         [
           "stat.energypersecond",
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumenergy",
-          "stat.staminaregeneration",
-          "stat.intelligence"
+          "stat.staminaregeneration"
         ],
         [
           "stat.energyonhit",
@@ -1950,7 +1941,7 @@
           "stat.spellcostreduction"
         ],
         [
-          "stat.lesserintelligence",
+          "stat.basespelldamage",
           "stat.basespelldamage"
         ]
       ]
@@ -2006,7 +1997,7 @@
           "*"
         ],
         [
-          "stat.lesserintelligence",
+          "stat.basespelldamage",
           "stat.lesserarmor"
         ],
         [
@@ -2049,22 +2040,20 @@
           "stat.raftspeed"
         ],
         [
-          "stat.allattributes",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.maximumlife",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.basespelldamage"
         ],
         [
           "stat.movementspeed",
           "stat.percentmaximumlife",
           "stat.percentmaximumenergy",
           "stat.dodgechance",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.allattributes",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.damagereduction",
           "stat.lifeonhit",
           "stat.lifepersecond",
@@ -2073,10 +2062,10 @@
         ],
         [
           "stat.staminapersecond",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.staminaregeneration",
           "stat.maximumlife",
           "stat.maximumenergy"
@@ -2112,10 +2101,10 @@
       "maxLevel": 17,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.attackspeed"
@@ -2129,10 +2118,10 @@
           "stat.chanceonhittoweaken"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumenergy",
           "stat.armorpiercing"
         ]
@@ -2156,10 +2145,10 @@
       "maxLevel": 4,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "*"
@@ -2191,17 +2180,17 @@
       "maxLevel": 8,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.dodgechance",
-          "stat.intelligence",
+          "stat.basespelldamage",
           null,
           null,
           null
@@ -2209,10 +2198,10 @@
         [
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife"
         ],
         [
@@ -2235,18 +2224,18 @@
           "stat.percentmaximumenergy"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangeddamageincrease",
           "stat.baserangeddamage"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangeddamageincrease",
           "stat.baserangeddamage",
           "stat.projectilespeed"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangeddamageincrease",
           "stat.baserangeddamage",
           "stat.massacreduration",
@@ -2287,15 +2276,14 @@
         ],
         [
           "stat.meleedamageincrease",
-          "stat.strength",
+          "stat.basemeleedamage",
           "stat.attackspeed"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.maxenergyfromagi",
@@ -2364,11 +2352,10 @@
       "maxLevel": 5,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.attackspeed"
@@ -2447,11 +2434,10 @@
           "stat.meleedamageincrease"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.maxenergyfromagi",
@@ -2538,7 +2524,7 @@
           "stat.rangeddmgfromagi"
         ],
         [
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "*"
@@ -2594,18 +2580,18 @@
       "maxLevel": 12,
       "statPools": [
         [
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.criticalhitchance",
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.armor",
           "stat.percentmaximumlife",
           "stat.percentmaximumenergy"
         ],
         [
           "stat.criticalhitdamage",
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.chanceonhittoslow",
           "stat.chanceonhittoweaken"
         ],
@@ -2621,12 +2607,12 @@
         ],
         [
           "stat.damagereduction",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.meleedmgfromstr",
-          "stat.strength",
-          "stat.allattributes"
+          "stat.basemeleedamage",
+          "stat.maximumlife"
         ],
         [
           "*"
@@ -2659,9 +2645,9 @@
       "maxLevel": 12,
       "statPools": [
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.damagereduction",
@@ -2677,9 +2663,9 @@
           "stat.rangeddmgfromagi"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.damagereduction",
@@ -2696,15 +2682,14 @@
         ],
         [
           "stat.criticalhitdamage",
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.chanceonhittoslow",
           "stat.chanceonhittoweaken"
         ],
         [
           "stat.baserangeddamage",
-          "stat.agility",
           "stat.movementspeed",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.armorpiercing"
         ],
         [
@@ -2717,7 +2702,7 @@
         ],
         [
           "stat.rangeddmgfromagi",
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.armorpiercing"
         ],
         [
@@ -2756,7 +2741,7 @@
           "stat.firedamage"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           null,
           null,
           null
@@ -2764,15 +2749,14 @@
         [
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
-          "stat.agility",
-          "stat.lesseragility",
+          "stat.baserangeddamage",
           "stat.armor"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           null,
           null
@@ -2780,7 +2764,6 @@
         [
           "stat.rangeddamageincrease",
           "stat.baserangeddamage",
-          "stat.agility",
           "stat.piercechance"
         ],
         [
@@ -2797,9 +2780,9 @@
           "*"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.damagereduction",
@@ -2851,22 +2834,21 @@
           "stat.rangeddmgfromagi"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.maximumlife"
         ],
         [
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
-          "stat.agility",
-          "stat.lesseragility",
+          "stat.baserangeddamage",
           "stat.armor"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           "stat.piercechance"
         ],
@@ -2894,9 +2876,9 @@
           "*"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.damagereduction",
@@ -2938,9 +2920,9 @@
       "maxLevel": 12,
       "statPools": [
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.damagereduction",
@@ -2956,9 +2938,9 @@
           "stat.rangeddmgfromagi"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.damagereduction",
@@ -2975,15 +2957,14 @@
         ],
         [
           "stat.criticalhitdamage",
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.chanceonhittoslow",
           "stat.chanceonhittoweaken"
         ],
         [
           "stat.baserangeddamage",
-          "stat.agility",
           "stat.movementspeed",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.armorpiercing"
         ],
         [
@@ -3001,8 +2982,8 @@
         ],
         [
           "stat.meleedmgfromstr",
-          "stat.strength",
-          "stat.allattributes"
+          "stat.basemeleedamage",
+          "stat.maximumlife"
         ],
         [
           "stat.maximumlife"
@@ -3094,8 +3075,8 @@
       "maxLevel": 2,
       "statPools": [
         [
-          "stat.intelligence",
-          "stat.vitality",
+          "stat.basespelldamage",
+          "stat.maximumlife",
           "stat.maximumenergy"
         ],
         [
@@ -3105,7 +3086,7 @@
         ],
         [
           "stat.spelldmgfromint",
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.armor",
@@ -3164,11 +3145,10 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.allattributes",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.meleearmorpiercing",
           "stat.rangedarmorpiercing",
           "stat.armorpiercing"
@@ -3243,13 +3223,12 @@
       "maxLevel": 6,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
           "stat.maximumlife",
-          "stat.maximumenergy",
-          "stat.allattributes"
+          "stat.basespelldamage",
+          "stat.maximumlife",
+          "stat.maximumenergy"
         ],
         [
           "*"
@@ -3287,15 +3266,15 @@
           "stat.cooldownreduction"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.spelldmgfromint"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.spelldmgfromint"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -3305,7 +3284,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -3315,7 +3294,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -3325,7 +3304,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -3335,7 +3314,7 @@
           "stat.staminaregeneration"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.resistancetomagic",
           "stat.maximumenergy",
           "stat.energypersecond",
@@ -3351,14 +3330,14 @@
         ],
         [
           "stat.blackholelifetime",
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.spelldmgfromint",
           "stat.basespelldamage",
           "stat.spelldamageincrease"
         ],
         [
           "stat.blackholegravitationalforce",
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.blackholedamage",
@@ -3395,10 +3374,7 @@
           "stat.rangeddamageincrease",
           "stat.basespelldamage",
           "stat.basemeleedamage",
-          "stat.baserangeddamage",
-          "stat.strength",
-          "stat.agility",
-          "stat.intelligence"
+          "stat.baserangeddamage"
         ],
         [
           "stat.criticalhitchance",
@@ -3420,8 +3396,7 @@
           "stat.firedamage"
         ],
         [
-          "stat.maximumlife",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "*"
@@ -3463,22 +3438,21 @@
           "stat.rangeddmgfromagi"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.maximumlife"
         ],
         [
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
-          "stat.agility",
-          "stat.lesseragility",
+          "stat.baserangeddamage",
           "stat.armor"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           null,
           null
@@ -3507,9 +3481,9 @@
           "*"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.damagereduction",
@@ -3561,22 +3535,21 @@
           "stat.rangeddmgfromagi"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.maximumlife"
         ],
         [
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
-          "stat.agility",
-          "stat.lesseragility",
+          "stat.baserangeddamage",
           "stat.armor"
         ],
         [
-          "stat.lesserstrength",
-          "stat.lesseragility",
-          "stat.lesservitality",
-          "stat.lesserintelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.lesserarmor",
           null,
           null
@@ -3605,9 +3578,9 @@
           "*"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.damagereduction",
@@ -3652,8 +3625,7 @@
         ],
         [
           "stat.rangeddamageincrease",
-          "stat.baserangeddamage",
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.rangeddamageincrease",
@@ -3677,8 +3649,7 @@
         ],
         [
           "stat.movementspeed",
-          "stat.agility",
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangedarmorpiercing"
         ],
         [
@@ -3688,8 +3659,8 @@
         [
           "stat.armor",
           "stat.rangeddamageincrease",
-          "stat.agility",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy"
         ],
@@ -3725,10 +3696,10 @@
           "stat.thorns"
         ],
         [
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
-          "stat.vitality"
+          "stat.maximumlife"
         ],
         [
           "stat.maximumlife",
@@ -3749,9 +3720,9 @@
           "stat.meleedamageincrease"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.allhealingpercent"
         ],
@@ -3792,7 +3763,7 @@
       "maxLevel": 16,
       "statPools": [
         [
-          "stat.strength"
+          "stat.basemeleedamage"
         ]
       ],
       "weaponModel": "polearm"
@@ -3807,11 +3778,11 @@
       "maxLevel": 22,
       "statPools": [
         [
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
-          "stat.strength",
-          "stat.allattributes",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
           "stat.meleearmorpiercing",
           "stat.meleedamageincrease",
           "stat.cooldownreduction",
@@ -3819,9 +3790,7 @@
         ],
         [
           "stat.maximumlife",
-          "stat.vitality",
-          "stat.percentmaximumlife",
-          "stat.allattributes"
+          "stat.percentmaximumlife"
         ],
         [
           "stat.meleedamageincrease",
@@ -3831,12 +3800,12 @@
           "stat.thorns"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.lifepersecond",
           "stat.liferegeneration"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.lifepersecond",
           "stat.liferegeneration",
           "stat.thorns"
@@ -3857,8 +3826,8 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.basespelldamage",
           "stat.armor",
           "stat.armorpiercing",
           "stat.thorns"
@@ -3882,8 +3851,8 @@
       "maxLevel": 22,
       "statPools": [
         [
-          "stat.intelligence",
-          "stat.agility"
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.magicfind",
@@ -3903,13 +3872,12 @@
           "stat.armor"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.lifepersecond",
           "stat.liferegeneration",
-          "stat.intelligence",
-          "stat.agility",
-          "stat.strength",
-          "stat.allattributes"
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
         ],
         [
           "stat.cooldownreduction",
@@ -3957,8 +3925,8 @@
       "maxLevel": 22,
       "statPools": [
         [
-          "stat.intelligence",
-          "stat.agility"
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.criticalhitchance"
@@ -3967,13 +3935,12 @@
           "stat.criticalhitdamage"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.lifepersecond",
           "stat.liferegeneration",
-          "stat.intelligence",
-          "stat.agility",
-          "stat.strength",
-          "stat.allattributes"
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
         ],
         [
           "stat.cooldownreduction",
@@ -4027,7 +3994,7 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.lesserstrength",
+          "stat.basemeleedamage",
           null
         ],
         [
@@ -4049,12 +4016,10 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.strength",
-          "stat.lesserstrength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.maximumlife",
-          "stat.vitality",
           "stat.meleedmgfromstr",
           "stat.armor"
         ],
@@ -4079,7 +4044,6 @@
         ],
         [
           "stat.maximumlife",
-          "stat.vitality",
           "stat.meleedamageincrease",
           "stat.basemeleedamage"
         ],
@@ -4098,8 +4062,7 @@
           "*"
         ],
         [
-          "stat.strength",
-          "stat.lesserstrength"
+          "stat.basemeleedamage"
         ]
       ]
     },
@@ -4127,7 +4090,7 @@
           "stat.criticalhitchance"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.maxhealthfromvit",
           "stat.maximumlife",
           "stat.percentmaximumlife",
@@ -4156,21 +4119,19 @@
           "stat.maxenergyfromagi"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.staminapersecond",
           "stat.staminaregeneration"
         ],
         [
           "stat.basespelldamage",
           "stat.spelldamageincrease",
-          "stat.intelligence",
           "stat.basemeleedamage",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.basespelldamage",
           "stat.spelldamageincrease",
-          "stat.intelligence",
           "stat.damagereduction"
         ],
         [
@@ -4220,22 +4181,20 @@
           "stat.spellcostreduction",
           "stat.spellcosttostamina",
           "stat.armor",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.basespelldamage",
           "stat.spelldamageincrease",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.basespelldamage",
           "stat.spelldamageincrease",
-          "stat.intelligence",
           "stat.damagereduction"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.maxhealthfromvit",
           "stat.maximumlife",
           "stat.percentmaximumlife",
@@ -4263,10 +4222,10 @@
           "stat.maxenergyfromagi"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.staminapersecond",
           "stat.staminaregeneration",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.allhealingpercent"
         ],
         [
@@ -4290,7 +4249,7 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           null
         ],
         [
@@ -4310,7 +4269,7 @@
           "stat.spellcostreduction",
           "stat.spellcosttostamina",
           "stat.armor",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.armor",
@@ -4318,14 +4277,14 @@
           "stat.resistancetomagic"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.lifepersecond",
           "stat.spelldamageincrease",
           "stat.basespelldamage"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.maximumlife",
           "stat.percentmaximumlife",
           "stat.lifepersecond",
@@ -4353,10 +4312,10 @@
           "stat.maxhealthfromvit"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.staminapersecond",
           "stat.staminaregeneration",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.allhealingpercent"
         ]
       ],
@@ -4372,7 +4331,7 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           null
         ],
         [
@@ -4390,7 +4349,7 @@
           "stat.spellcostreduction",
           "stat.spellcosttostamina",
           "stat.armor",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.armor",
@@ -4400,14 +4359,14 @@
           "stat.basespelldamage"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.lifepersecond",
           "stat.spelldamageincrease",
           "stat.basespelldamage"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.maximumlife",
           "stat.percentmaximumlife",
           "stat.lifepersecond",
@@ -4435,10 +4394,10 @@
           "stat.maxhealthfromvit"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.staminapersecond",
           "stat.staminaregeneration",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.allhealingpercent"
         ]
       ],
@@ -4454,7 +4413,7 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           null
         ],
         [
@@ -4471,7 +4430,7 @@
           "stat.spellcostreduction",
           "stat.spellcosttostamina",
           "stat.armor",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.armor",
@@ -4480,7 +4439,7 @@
           "stat.resistancetomagic"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.lifepersecond"
         ],
@@ -4514,10 +4473,10 @@
           "stat.maxhealthfromvit"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.staminapersecond",
           "stat.staminaregeneration",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.allhealingpercent"
         ]
       ],
@@ -4533,7 +4492,7 @@
       "maxLevel": 3,
       "statPools": [
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           null
         ],
         [
@@ -4550,7 +4509,7 @@
           "stat.spellcostreduction",
           "stat.spellcosttostamina",
           "stat.armor",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.armor",
@@ -4559,7 +4518,7 @@
           "stat.resistancetomagic"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.lifepersecond"
         ],
@@ -4593,10 +4552,10 @@
           "stat.maxhealthfromvit"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.staminapersecond",
           "stat.staminaregeneration",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.allhealingpercent"
         ]
       ],
@@ -4616,13 +4575,12 @@
           "stat.movementspeed"
         ],
         [
-          "stat.intelligence",
-          "stat.strength",
-          "stat.agility"
+          "stat.basespelldamage",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
-          "stat.allattributes",
-          "stat.vitality"
+          "stat.maximumlife"
         ],
         [
           "stat.armor"
@@ -4674,11 +4632,10 @@
           "stat.damagereduction"
         ],
         [
-          "stat.allattributes",
-          "stat.agility",
-          "stat.strength",
-          "stat.intelligence",
-          "stat.vitality"
+          "stat.maximumlife",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage",
+          "stat.basespelldamage"
         ]
       ],
       "uniqueEffects": [
@@ -4722,11 +4679,10 @@
           "stat.criticalhitdamage"
         ],
         [
-          "stat.allattributes",
-          "stat.agility",
-          "stat.strength",
-          "stat.intelligence",
-          "stat.vitality"
+          "stat.maximumlife",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage",
+          "stat.basespelldamage"
         ]
       ],
       "uniqueEffects": [
@@ -4759,8 +4715,8 @@
           "stat.stunonhit"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
           "stat.chanceonhittoslow",
           "stat.chanceonhittobleed",
           "stat.chanceonhittoweaken"
@@ -4772,7 +4728,6 @@
         [
           "stat.basemeleedamage",
           "stat.meleedamageincrease",
-          "stat.strength",
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
           "stat.maximumlife",
@@ -4808,7 +4763,7 @@
           "stat.meleedmgfromstr"
         ],
         [
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.basemeleedamage"
@@ -4823,8 +4778,7 @@
           null
         ],
         [
-          "stat.allattributes",
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.meleedamageincrease",
           "stat.meleearmorpiercing"
         ]
@@ -4891,32 +4845,31 @@
       "statPools": [
         [
           "stat.spelldamageincrease",
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.basespelldamage"
         ],
         [
           "stat.spelldamageincrease",
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.basespelldamage"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.lifepersecond",
           "stat.liferegeneration",
-          "stat.intelligence",
-          "stat.agility",
-          "stat.strength",
-          "stat.allattributes"
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
         ],
         [
           "stat.cooldownreduction",
           "stat.spellcostreduction",
           "stat.spellcosttostamina",
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.damagereduction"
         ],
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "*"
@@ -4966,17 +4919,17 @@
           "stat.projectilespeed",
           "stat.projectilesize",
           "stat.piercechance",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.armor",
           "stat.lifeonhit"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.maximumlife",
           "stat.maximumenergy",
           "stat.lifepersecond",
@@ -5021,8 +4974,7 @@
           "stat.projectilespeed"
         ],
         [
-          "stat.agility",
-          "stat.lesseragility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.headshotdamage"
@@ -5041,41 +4993,37 @@
           "stat.baserangeddamage",
           "stat.criticalhitchance",
           "stat.criticalhitdamage",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.maxenergyfromagi"
         ],
         [
           "stat.rangeddamageincrease",
           "stat.baserangeddamage",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.criticalhitchance",
           "stat.criticalhitdamage"
         ],
         [
           "stat.rangeddamageincrease",
           "stat.baserangeddamage",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.headshotdamage"
         ],
         [
-          "stat.intelligence",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.allattributes",
+          "stat.basespelldamage",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.maximumlife",
           "stat.maximumenergy"
         ],
         [
-          "stat.intelligence",
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.allattributes",
+          "stat.basespelldamage",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
           "stat.lifeonhit",
           "stat.energyonhit",
           "stat.energypersecond",
@@ -5132,28 +5080,24 @@
           "stat.maximumlife",
           "stat.maxhealthfromvit",
           "stat.damagereduction",
-          "stat.vitality",
-          "stat.strength",
-          "stat.allattributes"
+          "stat.basemeleedamage"
         ],
         [
           "stat.armor",
           "stat.maximumlife",
           "stat.maxhealthfromvit",
           "stat.damagereduction",
-          "stat.vitality",
-          "stat.strength",
-          "stat.allattributes",
+          "stat.basemeleedamage",
           "stat.thorns"
         ],
         [
           "stat.thorns",
           "stat.meleedamageincrease",
-          "stat.vitality",
-          "stat.strength"
+          "stat.maximumlife",
+          "stat.basemeleedamage"
         ],
         [
-          "stat.strength",
+          "stat.basemeleedamage",
           "stat.armor",
           "stat.meleearmorpiercing"
         ],
@@ -5196,7 +5140,7 @@
         ],
         [
           "stat.block",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.armor",
@@ -5210,27 +5154,23 @@
           "stat.armor",
           "stat.maximumlife",
           "stat.damagereduction",
-          "stat.vitality",
-          "stat.strength",
-          "stat.allattributes"
+          "stat.basemeleedamage"
         ],
         [
           "stat.armor",
           "stat.maximumlife",
           "stat.damagereduction",
-          "stat.vitality",
-          "stat.strength",
-          "stat.allattributes",
+          "stat.basemeleedamage",
           "stat.thorns"
         ],
         [
           "stat.thorns",
           "stat.meleedamageincrease",
-          "stat.vitality",
-          "stat.strength"
+          "stat.maximumlife",
+          "stat.basemeleedamage"
         ],
         [
-          "stat.strength",
+          "stat.basemeleedamage",
           "stat.armor",
           "stat.meleearmorpiercing"
         ],
@@ -5291,22 +5231,20 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.intelligence",
-          "stat.agility",
+          "stat.basemeleedamage",
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
           "stat.spellcostreduction"
         ],
         [
           "stat.spelldamageincrease",
           "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.spelldamageincrease",
           "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "*"
@@ -5375,9 +5313,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.intelligence",
-          "stat.agility",
+          "stat.basemeleedamage",
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
           "stat.spellcostreduction",
           "stat.projectilespeed",
           "stat.projectilesize"
@@ -5385,14 +5323,12 @@
         [
           "stat.spelldamageincrease",
           "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.spelldamageincrease",
           "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "*"
@@ -5450,9 +5386,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.intelligence",
-          "stat.agility",
+          "stat.basemeleedamage",
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
           "stat.spellcostreduction",
           "stat.cooldownreduction",
           "stat.spellcosttostamina"
@@ -5460,14 +5396,12 @@
         [
           "stat.spelldamageincrease",
           "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.spelldamageincrease",
           "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "*"
@@ -5514,9 +5448,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.intelligence",
-          "stat.agility",
+          "stat.basemeleedamage",
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
           "stat.spellcostreduction",
           "stat.cooldownreduction",
           "stat.spellcosttostamina"
@@ -5524,14 +5458,12 @@
         [
           "stat.spelldamageincrease",
           "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.spelldamageincrease",
           "stat.basespelldamage",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "*"
@@ -5589,14 +5521,12 @@
         [
           "stat.meleedamageincrease",
           "stat.meleeweaponrange",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.meleedamageincrease",
           "stat.attackspeed",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.criticalhitchance",
@@ -5609,9 +5539,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.attackspeed",
           "stat.attackcostreduction",
           "stat.cooldownreduction"
@@ -5660,14 +5590,12 @@
         [
           "stat.meleedamageincrease",
           "stat.meleeweaponrange",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.meleedamageincrease",
           "stat.attackspeed",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.maximumlife"
@@ -5678,9 +5606,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.attackspeed",
           "stat.attackcostreduction",
           "stat.cooldownreduction"
@@ -5705,7 +5633,7 @@
         [
           "stat.armor",
           "stat.damagereduction",
-          "stat.allattributes"
+          "stat.maximumlife"
         ]
       ],
       "set": "set.berserk"
@@ -5731,14 +5659,12 @@
         [
           "stat.meleedamageincrease",
           "stat.meleeweaponrange",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.meleedamageincrease",
           "stat.attackspeed",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.maximumlife"
@@ -5749,9 +5675,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.attackspeed",
           "stat.attackcostreduction",
           "stat.cooldownreduction"
@@ -5776,7 +5702,7 @@
         [
           "stat.armor",
           "stat.damagereduction",
-          "stat.allattributes"
+          "stat.maximumlife"
         ]
       ],
       "set": "set.berserk"
@@ -5802,14 +5728,12 @@
         [
           "stat.meleedamageincrease",
           "stat.meleeweaponrange",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.meleedamageincrease",
           "stat.attackspeed",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.maximumlife"
@@ -5820,9 +5744,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.attackspeed",
           "stat.attackcostreduction",
           "stat.cooldownreduction"
@@ -5847,7 +5771,7 @@
         [
           "stat.armor",
           "stat.damagereduction",
-          "stat.allattributes"
+          "stat.maximumlife"
         ]
       ],
       "set": "set.berserk"
@@ -5873,14 +5797,12 @@
         [
           "stat.meleedamageincrease",
           "stat.meleeweaponrange",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.meleedamageincrease",
           "stat.attackspeed",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.maximumlife"
@@ -5891,9 +5813,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.attackspeed",
           "stat.attackcostreduction",
           "stat.cooldownreduction"
@@ -5918,7 +5840,7 @@
         [
           "stat.armor",
           "stat.damagereduction",
-          "stat.allattributes"
+          "stat.maximumlife"
         ]
       ],
       "set": "set.berserk"
@@ -5944,14 +5866,12 @@
         [
           "stat.meleedamageincrease",
           "stat.meleeweaponrange",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.meleedamageincrease",
           "stat.attackspeed",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.maximumlife"
@@ -5962,9 +5882,9 @@
           "stat.percentmaximumlife"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           "stat.attackspeed",
           "stat.attackcostreduction",
           "stat.cooldownreduction"
@@ -5989,7 +5909,7 @@
         [
           "stat.armor",
           "stat.damagereduction",
-          "stat.allattributes"
+          "stat.maximumlife"
         ]
       ],
       "set": "set.berserk"
@@ -6017,18 +5937,15 @@
         ],
         [
           "stat.meleedamageincrease",
-          "stat.basemeleedamage",
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.rangeddamageincrease",
-          "stat.baserangeddamage",
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.spelldamageincrease",
-          "stat.basespelldamage",
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "*"
@@ -6043,11 +5960,10 @@
           "stat.percentmaximumenergy"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.agility",
-          "stat.allattributes",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
+          "stat.baserangeddamage",
           "stat.attackspeed",
           "stat.attackcostreduction",
           "stat.spellcostreduction",
@@ -6073,7 +5989,7 @@
         [
           "stat.armor",
           "stat.damagereduction",
-          "stat.allattributes",
+          "stat.maximumlife",
           null
         ]
       ],
@@ -6093,10 +6009,10 @@
           "stat.criticalhitdamage"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
         ],
         [
           "*"
@@ -6167,10 +6083,10 @@
           "stat.basespelldamage"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.intelligence",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.meleedamageincrease",
@@ -6240,11 +6156,10 @@
       "maxLevel": 62,
       "statPools": [
         [
-          "stat.strength",
-          "stat.vitality",
-          "stat.agility",
-          "stat.allattributes",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.maximumlife",
+          "stat.baserangeddamage",
+          "stat.basespelldamage"
         ],
         [
           "stat.maxenergyfromagi",
@@ -6351,22 +6266,20 @@
           "stat.spellcostreduction",
           "stat.spellcosttostamina",
           "stat.armor",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.basespelldamage",
           "stat.spelldamageincrease",
-          "stat.intelligence",
-          "stat.allattributes"
+          "stat.maximumlife"
         ],
         [
           "stat.basespelldamage",
           "stat.spelldamageincrease",
-          "stat.intelligence",
           "stat.damagereduction"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.maxhealthfromvit",
           "stat.maximumlife",
           "stat.percentmaximumlife",
@@ -6392,10 +6305,10 @@
           "stat.maxenergyfromagi"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.staminapersecond",
           "stat.staminaregeneration",
-          "stat.allattributes",
+          "stat.maximumlife",
           "stat.allhealingpercent"
         ],
         [
@@ -6432,9 +6345,9 @@
           "stat.movementspeed"
         ],
         [
-          "stat.agility",
-          "stat.vitality",
-          "stat.lesserstrength"
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basemeleedamage"
         ],
         [
           "stat.armor",
@@ -6453,10 +6366,10 @@
       "maxLevel": 10,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.armor"
@@ -6486,10 +6399,10 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence",
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage",
           null
         ]
       ]
@@ -6508,7 +6421,7 @@
           "stat.cooldownreduction"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumenergy",
           "stat.energypersecond"
         ],
@@ -6530,10 +6443,10 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.vitality",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.maximumlife",
+          "stat.basespelldamage"
         ],
         [
           "stat.maximumlife",
@@ -6562,9 +6475,9 @@
           "stat.criticalhitchance"
         ],
         [
-          "stat.strength",
-          "stat.agility",
-          "stat.intelligence"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage",
+          "stat.basespelldamage"
         ],
         [
           "stat.armor",
@@ -6594,7 +6507,7 @@
         ],
         [
           "stat.rangeddamageincrease",
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.rangedarmorpiercing"
         ],
         [
@@ -6627,8 +6540,8 @@
           "stat.damagereduction"
         ],
         [
-          "stat.strength",
-          "stat.vitality",
+          "stat.basemeleedamage",
+          "stat.maximumlife",
           "stat.thorns"
         ],
         [
@@ -6649,8 +6562,7 @@
       "maxLevel": 4,
       "statPools": [
         [
-          "stat.maximumlife",
-          "stat.lesservitality"
+          "stat.maximumlife"
         ],
         [
           "stat.lifepersecond",
@@ -6673,7 +6585,7 @@
           "stat.staminapersecond"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.lesserarmor"
         ]
       ]
@@ -6687,7 +6599,7 @@
       "maxLevel": 10,
       "statPools": [
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.maximumenergy",
@@ -6715,7 +6627,7 @@
           "stat.rangedarmorpiercing"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.headshotdamage"
         ],
         [
@@ -6735,8 +6647,8 @@
           "stat.armor"
         ],
         [
-          "stat.strength",
-          "stat.vitality"
+          "stat.basemeleedamage",
+          "stat.maximumlife"
         ],
         [
           "stat.damagereduction",
@@ -6779,8 +6691,8 @@
           "stat.attackspeed"
         ],
         [
-          "stat.strength",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.lifeonhit",
@@ -6823,7 +6735,7 @@
           "stat.headshotdamage"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.criticalhitchance"
         ],
         [
@@ -6847,7 +6759,7 @@
           "stat.staminapersecond"
         ],
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.lesserarmor"
         ]
       ]
@@ -6867,7 +6779,7 @@
           "stat.piercechance"
         ],
         [
-          "stat.agility",
+          "stat.baserangeddamage",
           "stat.baserangeddamage"
         ]
       ]
@@ -6904,7 +6816,7 @@
       "maxLevel": 10,
       "statPools": [
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.energypersecond",
@@ -6931,7 +6843,7 @@
           "stat.resistancetomagic"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumenergy"
         ]
       ]
@@ -6971,8 +6883,8 @@
           "stat.thorns"
         ],
         [
-          "stat.strength",
-          "stat.vitality"
+          "stat.basemeleedamage",
+          "stat.maximumlife"
         ],
         [
           "stat.lesserarmor",
@@ -6996,8 +6908,7 @@
           "stat.damagereduction"
         ],
         [
-          "stat.maximumlife",
-          "stat.vitality"
+          "stat.maximumlife"
         ],
         [
           "*"
@@ -7016,7 +6927,7 @@
           "stat.cooldownreduction"
         ],
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumenergy"
         ],
         [

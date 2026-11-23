@@ -145,6 +145,8 @@ internal static class SheetData
         var carry = UtilityPerks.Totals(pc.Perks, UtilityKind.Capacity);
         foreach (var (name, amount) in ItemCarry.Totals(pc.Inventory.Equipped.Select(kv => kv.Value)))
             carry[name] = carry.GetValueOrDefault(name) + amount;
+        foreach (var (name, amount) in ItemCarry.FromStrength(pc.Attributes.Get(StatIds.Strength)))
+            carry[name] = carry.GetValueOrDefault(name) + amount;
         var daily = UtilityPerks.Totals(pc.Perks, UtilityKind.DailyGrant);
         if (carry.Count > 0 || daily.Count > 0)
         {

@@ -169,6 +169,35 @@ public sealed class PlayerCharacter
     public Inventory Inventory { get; } = new();
     public PerkTree Perks { get; }
     public SpellBook Spells { get; }
+
+    /// <summary>Spent attribute points (COS-174).</summary>
+    public AttributePoints Attributes { get; } = new();
+
+    /// <summary>Attribute points earned by the current level and not spent yet.</summary>
+    public int AttributePointsLeft => AttributeRules.TotalPoints(Progress.Level) - Attributes.Total;
+
+    /// <summary>Spends up to <paramref name="amount"/> of the points left on one attribute. Returns how many.</summary>
+    public int SpendAttribute(string attribute, int amount = 1)
+    {
+        int n = Attributes.Spend(attribute, amount, AttributePointsLeft);
+        if (n > 0) RebuildAttributes();
+        return n;
+    }
+
+    /// <summary>Free refund of up to <paramref name="amount"/> points from one attribute. Returns how many.</summary>
+    public int RefundAttribute(string attribute, int amount = 1)
+    {
+        int n = Attributes.Refund(attribute, amount);
+        if (n > 0) RebuildAttributes();
+        return n;
+    }
+
+    /// <summary>Free reset of every attribute point.</summary>
+    public void ResetAttributes()
+    {
+        Attributes.Reset();
+        RebuildAttributes();
+    }
     public StatSheet Stats { get; }
     public Massacre Massacre { get; } = new();
 
@@ -279,17 +308,15 @@ public sealed class PlayerCharacter
         Stats.SetSource("perks", Perks.Modifiers());
     }
 
+    /// <summary>The level no longer raises attributes by itself (COS-174): it earns points the player spends. A level that went down
+    /// (admin) takes back what no longer fits.</summary>
     private void RebuildLevel()
     {
-        double gain = XpCurve.AttributeBase(Progress.Level) - 2; // Σ round(√x) for x = 2..level: 0 at level 1
-        Stats.SetSource("level", new[]
-        {
-            new StatModifier(StatIds.Strength, EffectOp.Add, gain),
-            new StatModifier(StatIds.Agility, EffectOp.Add, gain),
-            new StatModifier(StatIds.Vitality, EffectOp.Add, gain),
-            new StatModifier(StatIds.Intelligence, EffectOp.Add, gain),
-        });
+        Attributes.FitTo(AttributeRules.TotalPoints(Progress.Level));
+        RebuildAttributes();
     }
+
+    private void RebuildAttributes() => Stats.SetSource("attributes", AttributeRules.Modifiers(Attributes));
 
     private void RebuildEquipment()
     {
@@ -310,6 +337,7 @@ public sealed class PlayerCharacter
         UnlockedSpells = Perks.UnlockedSpells.ToList(),
         SpellLoadout = Spells.Loadout.ToList(),
         LastGrantDay = Progress.LastGrantDay,
+        Attributes = Attributes.Spent.ToDictionary(kv => kv.Key, kv => kv.Value),
     };
 
     public void Load(PlayerSave save)
@@ -317,6 +345,7 @@ public sealed class PlayerCharacter
         Progress = new Progress(save.Level, save.Xp, save.BonusPerkPoints) { LastGrantDay = save.LastGrantDay };
         Perks.Restore(save.Perks, save.UnlockedSpells);
         Spells.Restore(save.SpellLoadout);
+        Attributes.Restore(save.Attributes);
         var loot = new LootRoller(Content);
         // An item's rarity is its base's (COS-109: uniques became Legendary, which a save migration cannot know).
         Inventory.Restore(save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, loot.InferSlots(WithBaseRarity(kv.Value.ToItem())))));

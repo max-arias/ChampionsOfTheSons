@@ -15,6 +15,17 @@ public static class ItemCarry
         ["stat.extracarriedfood"] = new[] { "Meat", "Fish", "EnergyBar" },
     };
 
+    /// <summary>COS-174: Strength points carry more of every kind the carry stats name.</summary>
+    public static Dictionary<string, int> FromStrength(int strengthPoints)
+    {
+        var totals = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        int bonus = AttributeRules.CarryBonus(strengthPoints);
+        if (bonus <= 0) return totals;
+        foreach (var names in ItemsByStat.Values)
+            foreach (var name in names) totals[name] = bonus;
+        return totals;
+    }
+
     /// <summary>Carry-limit change per item keyword from the worn items; each rolled value counts rounded, as in COTF.</summary>
     public static Dictionary<string, int> Totals(IEnumerable<ItemInstance> equipped)
     {

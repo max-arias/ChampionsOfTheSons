@@ -23,7 +23,9 @@ public sealed class LootRoller
     public LootRoller(ContentDb content)
     {
         _content = content;
-        _commonStats = content.ItemStats.Values.Where(s => CommonLegacyStatIds.Contains(s.LegacyId)).OrderBy(s => s.LegacyId).ToArray();
+        // Gear gives no attributes (COS-174): "*" never expands to an attribute stat.
+        _commonStats = content.ItemStats.Values.Where(s => CommonLegacyStatIds.Contains(s.LegacyId) && !s.Effects.Any(e => AttributePoints.Ids.Contains(e.Stat)))
+            .OrderBy(s => s.LegacyId).ToArray();
         _byRarity = content.Items.Values.GroupBy(i => i.Rarity).ToDictionary(g => g.Key, g => g.OrderBy(i => i.LegacyIndex).ToArray());
     }
 

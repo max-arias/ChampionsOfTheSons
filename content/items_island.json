@@ -9,7 +9,7 @@
       "maxLevel": 102,
       "statPools": [
         [
-          "stat.intelligence",
+          "stat.basespelldamage",
           "stat.maximumenergy"
         ],
         [
@@ -22,7 +22,7 @@
         ],
         [
           null,
-          "stat.lesserintelligence"
+          "stat.basespelldamage"
         ],
         [
           "*"
@@ -40,11 +40,11 @@
       "maxLevel": 106,
       "statPools": [
         [
-          "stat.vitality",
+          "stat.maximumlife",
           "stat.maximumlife"
         ],
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.resistancetomagic",
@@ -74,8 +74,8 @@
       "maxLevel": 110,
       "statPools": [
         [
-          "stat.intelligence",
-          "stat.agility"
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.firedamage",
@@ -105,11 +105,11 @@
       "maxLevel": 114,
       "statPools": [
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.maximumenergy",
-          "stat.lesserintelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.energypersecond",
@@ -135,8 +135,8 @@
       "maxLevel": 118,
       "statPools": [
         [
-          "stat.intelligence",
-          "stat.vitality"
+          "stat.basespelldamage",
+          "stat.maximumlife"
         ],
         [
           "stat.maximumenergy"
@@ -165,7 +165,7 @@
       "maxLevel": 122,
       "statPools": [
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.rangeddamageincrease",
@@ -199,8 +199,8 @@
       "maxLevel": 126,
       "statPools": [
         [
-          "stat.vitality",
-          "stat.agility"
+          "stat.maximumlife",
+          "stat.baserangeddamage"
         ],
         [
           "stat.armor"
@@ -236,8 +236,8 @@
       "maxLevel": 130,
       "statPools": [
         [
-          "stat.agility",
-          "stat.intelligence"
+          "stat.baserangeddamage",
+          "stat.basespelldamage"
         ],
         [
           "stat.rangedarmorpiercing",
@@ -267,7 +267,7 @@
       "maxLevel": 134,
       "statPools": [
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.movementspeed",
@@ -297,8 +297,8 @@
       "maxLevel": 138,
       "statPools": [
         [
-          "stat.vitality",
-          "stat.strength"
+          "stat.maximumlife",
+          "stat.basemeleedamage"
         ],
         [
           "stat.armor",
@@ -331,8 +331,8 @@
       "maxLevel": 148,
       "statPools": [
         [
-          "stat.vitality",
-          "stat.strength"
+          "stat.maximumlife",
+          "stat.basemeleedamage"
         ],
         [
           "stat.armor"
@@ -368,7 +368,7 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.vitality"
+          "stat.maximumlife"
         ],
         [
           "stat.armor"
@@ -407,8 +407,8 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.vitality",
-          "stat.strength"
+          "stat.maximumlife",
+          "stat.basemeleedamage"
         ],
         [
           "stat.armor"
@@ -440,8 +440,8 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.armor"
@@ -474,8 +474,8 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.vitality",
-          "stat.agility"
+          "stat.maximumlife",
+          "stat.baserangeddamage"
         ],
         [
           "stat.armor"
@@ -508,8 +508,8 @@
       "maxLevel": 64,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.basemeleedamage",
@@ -540,8 +540,8 @@
       "maxLevel": 68,
       "statPools": [
         [
-          "stat.vitality",
-          "stat.agility"
+          "stat.maximumlife",
+          "stat.baserangeddamage"
         ],
         [
           "stat.armor",
@@ -570,8 +570,8 @@
       "maxLevel": 72,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.headshotdamage",
@@ -597,8 +597,8 @@
       "maxLevel": 76,
       "statPools": [
         [
-          "stat.agility",
-          "stat.strength"
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
         ],
         [
           "stat.armor",
@@ -628,7 +628,7 @@
       "maxLevel": 90,
       "statPools": [
         [
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.basemeleedamage",
@@ -663,8 +663,8 @@
       "maxLevel": 94,
       "statPools": [
         [
-          "stat.strength",
-          "stat.vitality"
+          "stat.basemeleedamage",
+          "stat.maximumlife"
         ],
         [
           "stat.armor"
@@ -696,8 +696,8 @@
       "maxLevel": 98,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.maximumlife",
@@ -726,8 +726,8 @@
       "maxLevel": 102,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.basemeleedamage"
@@ -760,8 +760,8 @@
       "maxLevel": 92,
       "statPools": [
         [
-          "stat.intelligence",
-          "stat.agility"
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.armor",
@@ -817,7 +817,7 @@
         ],
         [
           null,
-          "stat.lesservitality"
+          "stat.maximumlife"
         ]
       ],
       "legacyIndex": 10024
@@ -831,7 +831,7 @@
       "maxLevel": 125,
       "statPools": [
         [
-          "stat.vitality"
+          "stat.maximumlife"
         ],
         [
           "stat.armor"
@@ -874,8 +874,8 @@
       "maxLevel": 78,
       "statPools": [
         [
-          "stat.vitality",
-          "stat.agility"
+          "stat.maximumlife",
+          "stat.baserangeddamage"
         ],
         [
           "stat.armor"
@@ -929,7 +929,7 @@
       "maxLevel": 88,
       "statPools": [
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.jumppower",
@@ -969,8 +969,8 @@
       "maxLevel": 72,
       "statPools": [
         [
-          "stat.intelligence",
-          "stat.vitality"
+          "stat.basespelldamage",
+          "stat.maximumlife"
         ],
         [
           "stat.armor",
@@ -999,7 +999,7 @@
       "maxLevel": 130,
       "statPools": [
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.jumppower",
@@ -1055,7 +1055,7 @@
         ],
         [
           null,
-          "stat.lesserstrength"
+          "stat.basemeleedamage"
         ]
       ],
       "legacyIndex": 10031
@@ -1069,8 +1069,8 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.intelligence",
-          "stat.agility"
+          "stat.basespelldamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.spelldamageincrease",
@@ -1133,7 +1133,7 @@
         ],
         [
           null,
-          "stat.lesservitality"
+          "stat.maximumlife"
         ]
       ],
       "legacyIndex": 10033
@@ -1147,7 +1147,7 @@
       "maxLevel": 140,
       "statPools": [
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.maximumenergy",
@@ -1190,7 +1190,7 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.vitality"
+          "stat.maximumlife"
         ],
         [
           "stat.percentmaximumlife",
@@ -1243,8 +1243,8 @@
       "maxLevel": 98,
       "statPools": [
         [
-          "stat.agility",
-          "stat.vitality"
+          "stat.baserangeddamage",
+          "stat.maximumlife"
         ],
         [
           "stat.dodgechance",
@@ -1283,8 +1283,8 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.meleedamageincrease",
@@ -1340,7 +1340,7 @@
         ],
         [
           null,
-          "stat.lesserstrength"
+          "stat.basemeleedamage"
         ]
       ],
       "legacyIndex": 10038,
@@ -1355,7 +1355,7 @@
       "maxLevel": 75,
       "statPools": [
         [
-          "stat.strength"
+          "stat.basemeleedamage"
         ],
         [
           "stat.basemeleedamage",
@@ -1381,8 +1381,8 @@
       "maxLevel": 100,
       "statPools": [
         [
-          "stat.strength",
-          "stat.agility"
+          "stat.basemeleedamage",
+          "stat.baserangeddamage"
         ],
         [
           "stat.basemeleedamage",
@@ -1426,8 +1426,8 @@
       "maxLevel": 128,
       "statPools": [
         [
-          "stat.agility",
-          "stat.strength"
+          "stat.baserangeddamage",
+          "stat.basemeleedamage"
         ],
         [
           "stat.basemeleedamage",
@@ -1479,7 +1479,7 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.baserangeddamage",
@@ -1552,7 +1552,7 @@
       "maxLevel": 102,
       "statPools": [
         [
-          "stat.vitality"
+          "stat.maximumlife"
         ],
         [
           "stat.armor",
@@ -1599,7 +1599,7 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.vitality"
+          "stat.maximumlife"
         ],
         [
           "stat.armor",
@@ -1648,7 +1648,7 @@
       "maxLevel": 135,
       "statPools": [
         [
-          "stat.agility"
+          "stat.baserangeddamage"
         ],
         [
           "stat.rangeddamageincrease",
@@ -1697,7 +1697,7 @@
       "maxLevel": 96,
       "statPools": [
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.spelldamageincrease",
@@ -1738,7 +1738,7 @@
       "maxLevel": 126,
       "statPools": [
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.spelldamageincrease",
@@ -1787,7 +1787,7 @@
       "maxLevel": 150,
       "statPools": [
         [
-          "stat.intelligence"
+          "stat.basespelldamage"
         ],
         [
           "stat.spelldamageincrease"
