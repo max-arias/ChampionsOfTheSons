@@ -34,7 +34,10 @@ public static class PlayerState
 {
     private static PlayerCharacter? _character;
 
-    public static PlayerCharacter Character => _character ??= new PlayerCharacter(ModContent.Db);
+    /// <summary>Built on first use. Touching it before <see cref="ModContent.Load"/> throws instead of caching a character with no
+    /// content, which would fail on every later stat read (COS-161).</summary>
+    public static PlayerCharacter Character => _character ??= new PlayerCharacter(ModContent.Db
+        ?? throw new InvalidOperationException("PlayerState.Character used before content was loaded"));
 
     public static PlayerSave ToSave()
     {

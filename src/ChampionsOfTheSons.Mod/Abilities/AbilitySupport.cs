@@ -196,6 +196,7 @@ internal static class AbilityForcePatch
     [HarmonyPostfix]
     private static void AfterTargetVelocity(ref Vector3 __result)
     {
+        if (Net.ServerConfig.OnDedicatedServer) return; // no local player there, and it runs before content loads (COS-161)
         using var perf = Perf.Perf.Scope(PerfAfterTargetVelocity);
         float m = AbilityForces.SpeedMultiplier;
         if (!Mathf.Approximately(m, 1)) __result = new Vector3(__result.x * m, __result.y, __result.z * m);

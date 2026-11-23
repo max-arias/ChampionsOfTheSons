@@ -25,7 +25,7 @@ public class ChampionsOfTheSonsMod : SonsMod
     {
         float dt = UnityEngine.Time.deltaTime;
         bool inWorld = TheForest.Utils.LocalPlayer.IsInWorld;
-        if (inWorld)
+        if (inWorld && !Net.ServerConfig.OnDedicatedServer) // a dedicated server has no local character (COS-161)
         {
             using (Perf.Perf.Scope(PlayerBridgeSlot)) Bridge.PlayerBridge.Update(dt);
             using (Perf.Perf.Scope(CharacterTickSlot)) PlayerState.Character.Tick(dt);
