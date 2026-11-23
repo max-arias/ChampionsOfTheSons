@@ -12,109 +12,119 @@ using UnityEngine;
 namespace ChampionsOfTheSons.Mod.Weapons;
 
 /// <summary>
-/// COS-93 checks: put each weapon type's model on its game weapon, check the type's rules (swing, damage, trees, throw,
-/// arrow drop, draw), swing it for real to check the sound and trail, and take screenshots.
+/// COS-93 and COS-186 checks: the weapon slot gives each type's real game item (owned once, in hand, on an action bar key,
+/// with its own icon), the type's rules hold (swing, damage, trees, throw, arrow drop, draw), a real swing plays the sound
+/// and trail and hits an enemy, the hotkey draws it, the game's inventory save never holds it, and a drop doesn't lose it.
 /// </summary>
 internal static class WeaponsSelfTest
 {
     private static PlayerCharacter Pc => PlayerState.Character;
 
-    /// <summary>One typed item per melee type, from items.json.</summary>
-    private static readonly (string Item, string Type)[] MeleeItems =
-    {
-        ("item.dull_longsword", "long_sword"), ("item.rage", "great_sword"), ("item.relic_hammer", "hammer"), ("item.axe_of_swiftness", "axe"),
-    };
+    private static int _spearsBefore, _swingsBefore, _hits;
+    private static bool _listening;
+    private static Sons.Ai.Vail.VailActor? _enemy;
 
-    private static int _spearsBefore, _swingsBefore;
+    /// <summary>Game weapons the test save might own: none may be in play, the slot alone gives the weapon (COS-186).</summary>
+    private static readonly int[] VanillaWeapons = { 359, 367, 356, 379, 431, 477, 380, 525, 449, 474, 443, 360 };
 
     /// <summary>Registers the steps; returns the time after the last one, so later tests in the phase start after it.</summary>
     public static float Register()
     {
-        SelfTest.Add(1f, "weapons: equip machete", () =>
+        SelfTest.Add(1f, "weapons: real items registered", () =>
         {
             TestKit.Unpause();
-            int id = GameItems.Find("Machete", 359);
+            foreach (var n in RealWeapons.Notes) SelfTest.Log("weapons: " + n);
+            var missing = RealWeapons.All.Where(w => w.Item == null || w.BaseId <= 0).Select(w => w.TypeId).ToList();
+            SelfTest.Check("weapons: one game item per type", RealWeapons.Registered && missing.Count == 0, "missing " + string.Join(", ", missing));
+            SelfTest.Check("weapons: registered before the world loaded", RealWeapons.RegisteredBeforeWorld);
+            SelfTest.Log("weapons: bases " + string.Join(", ", RealWeapons.All.Select(w => $"{w.TypeId}={w.BaseId}")));
+            if (!_listening)
+            {
+                _listening = true;
+                EnemyPatches.LocalWeaponHit += (_, weapon) => { if (weapon != WeaponClass.Ranged) _hits++; };
+            }
             var inv = LocalPlayer.Inventory;
-            bool equipped = TestKit.EquipGameItem(id);
-            if (!equipped) SelfTest.Log("weapons: equip refused; " + GameInventoryDiag(inv, id));
-            SelfTest.Check("weapons: machete equipped", equipped, $"item {id}");
-        });
-        SelfTest.Add(5f, "weapons: game weapon", () =>
-        {
-            var held = HeldWeapons.LocalMelee();
-            SelfTest.Check("weapons: held melee controller found", held != null);
-            if (held == null) return;
-            var d = held._meleeWeaponData;
-            SelfTest.Log($"weapons: held {Chain(held.transform)} data damage={d?.Damage} swing={d?.SwingSpeed} stamina={d?.StaminaCost} weight={d?.Weight}");
-        });
-
-        // The game swallows the first attacks of a session: a warm-up round with a typed weapon, not checked.
-        SelfTest.Add(5.5f, "weapons: warm-up", () =>
-        {
-            EquipItem("item.axe_of_swiftness", "axe");
-            WeaponModels.Scan();
-        });
-        SelfTest.Add(6.5f, "weapons: warm-up swing", Attack);
-        SelfTest.Add(8f, "weapons: warm-up swing 2", Attack);
-        SelfTest.Add(9.5f, "weapons: warm-up swing 3", Attack);
-
-        float t = 11.5f;
-        foreach (var (itemId, typeId) in MeleeItems)
-        {
-            SelfTest.Add(t, $"weapons: {typeId} on", () =>
-            {
-                EquipItem(itemId, typeId);
-                WeaponModels.Scan();
-                if (CheckActive(typeId) is { } type) CheckMeleeRules(type);
-            });
-            SelfTest.Add(t + 1.5f, $"weapons: {typeId} swing", Attack);
-            SelfTest.Add(t + 1.75f, $"weapons: {typeId} screenshot", () => TestKit.Screenshot("weapons-" + typeId));
-            // COS-120: under load the game swallows early presses; keep pressing (only while no swing has registered).
-            for (int r = 0; r < SwingRetries; r++)
-                SelfTest.Add(t + 2.6f + r * 0.8f, $"weapons: {typeId} swing retry {r + 1}", RetryAttack);
-            SelfTest.Add(t + 3.8f + (SwingRetries - 1) * 0.8f, $"weapons: {typeId} swing fx", () => CheckSwingFx(typeId));
-            t += 4f + (SwingRetries - 1) * 0.8f;
-        }
-
-        // Spear and bow: the draw key path (equip the type's base game weapon), then the same checks.
-        foreach (var (itemId, typeId, gameName) in new[] { ("item.rusty_polearm", "polearm", "CraftedSpear"), ("item.soulstring", "greatbow", "CraftedBow") })
-        {
-            SelfTest.Add(t, $"weapons: draw {gameName}", () =>
-            {
-                Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
-                EquipItem(itemId, typeId);
-                int id = GameItems.Find(gameName, -1);
-                TestKit.EnsureGameItem(id);
-                TestKit.FreeHands();
-                SelfTest.Check($"weapons: draw key equips {gameName}", WeaponsFeature.DrawBase(), $"item {id}; " + GameInventoryDiag(LocalPlayer.Inventory, id));
-            });
-            SelfTest.Add(t + 4f, $"weapons: {typeId} on", () =>
-            {
-                WeaponModels.Scan();
-                var type = CheckActive(typeId);
-                if (type?.Base == WeaponBase.Spear) CheckMeleeRules(type);
-                if (type?.Base == WeaponBase.Bow) CheckBowRules(type);
-            });
-            SelfTest.Add(t + 5f, $"weapons: {typeId} screenshot", () => TestKit.Screenshot("weapons-" + typeId));
-            t += 6f;
-        }
-
-        // The polearm can't be thrown: aim, then attack, and the spear must still be in hand. Then a real stab.
-        SelfTest.Add(t, "weapons: re-draw polearm", () =>
-        {
             Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
-            EquipItem("item.rusty_polearm", "polearm");
-            TestKit.EnsureGameItem(GameItems.Find("CraftedSpear", 474));
+            foreach (int id in VanillaWeapons)
+            {
+                int n = inv.AmountOf(id, true, false);
+                if (n > 0) inv.RemoveItem(id, n, false, false, true, null, true);
+            }
             TestKit.FreeHands();
-            SelfTest.Check("weapons: draw key equips CraftedSpear again", WeaponsFeature.DrawBase());
+            inv.StashHeldItems(false, true);
         });
+
+        // Weapon in the slot: owned once and in hand at once, on a weapon key of the action bar with its own icon.
+        SelfTest.Add(2f, "weapons: slot gives the long sword", () => Wield("item.dull_longsword", "long_sword"));
+        SelfTest.Add(5f, "weapons: long sword in hand", () =>
+        {
+            CheckOwned("long_sword");
+            var w = RealWeapons.ByType("long_sword")!;
+            int key = WeaponSlotSync.HotkeyIndexOf(w.Id);
+            var cell = key >= 0 ? HotkeyBridge.At(key) : default;
+            SelfTest.Check("weapons: on an action bar weapon key", key >= 0 && ActionBar.ActionBarConfig.WeaponHotkeys.Contains(key), $"key index {key}; {HotkeyBridge.Describe()}");
+            SelfTest.Check("weapons: action bar cell lit while in hand", cell.Held && cell.Amount == 1, $"held {cell.Held}, amount {cell.Amount}");
+            var icon = HotkeyBridge.Icon(w.Id);
+            var own = Icons.IconCache.GetTexture("item.dull_longsword");
+            SelfTest.Check("weapons: the item's own icon", icon != null && own != null && icon.Pointer == own.Pointer, icon == null ? "no icon" : icon.name);
+            TestKit.Screenshot("weapons-slot-long-sword");
+        });
+
+        // The game swallows the first attacks of a session: a warm-up round, not checked.
+        SelfTest.Add(5.5f, "weapons: warm-up swing", Attack);
+        SelfTest.Add(6.7f, "weapons: warm-up swing 2", Attack);
+        SelfTest.Add(7.9f, "weapons: warm-up swing 3", Attack);
+
+        float t = 9.5f;
+        // Every type through the slot: the swap replaces the item, the type's rules hold, and a hit lands on an enemy.
+        foreach (var (itemId, typeId) in Typed)
+        {
+            SelfTest.Add(t, $"weapons: swap to {typeId}", () => Wield(itemId, typeId));
+            SelfTest.Add(t + 3f, $"weapons: {typeId} on", () =>
+            {
+                WeaponModels.Scan();
+                CheckOwned(typeId);
+                if (CheckActive(typeId) is not { } type) return;
+                if (type.Base == WeaponBase.Bow) { CheckBowRules(type); return; }
+                CheckMeleeRules(type);
+                _hits = 0;
+                TestKit.FaceOpenGround(new[] { (1.1f, 0f) });
+                _enemy = TestKit.Spawn(Sons.Ai.Vail.VailActorTypeId.Carl, 1.1f);
+            });
+            if (typeId == "greatbow")
+            {
+                SelfTest.Add(t + 3.5f, "weapons: greatbow screenshot", () => TestKit.Screenshot("weapons-greatbow"));
+                t += 4.5f;
+                continue;
+            }
+            SelfTest.Add(t + 4f, $"weapons: {typeId} swing", Attack);
+            SelfTest.Add(t + 4.25f, $"weapons: {typeId} screenshot", () => TestKit.Screenshot("weapons-" + typeId));
+            // COS-120: under load the game swallows early presses; keep pressing (only while no swing has registered).
+            // The spear's draw takes longest: up to six retries, each only while no swing has registered yet.
+            for (int r = 0; r < SwingRetries; r++)
+                SelfTest.Add(t + 5.1f + r * 0.8f, $"weapons: {typeId} swing retry {r + 1}", RetryAttack);
+            float after = t + 5.1f + SwingRetries * 0.8f;
+            SelfTest.Add(after, $"weapons: {typeId} extra swing", TestKit.TapAttack);
+            SelfTest.Add(after + 1.1f, $"weapons: {typeId} extra swing 2", TestKit.TapAttack);
+            SelfTest.Add(after + 2.2f, $"weapons: {typeId} swing fx and hits", () =>
+            {
+                CheckSwingFx(typeId);
+                SelfTest.Check($"weapons: {typeId} hits land", _hits > 0, $"{_hits} hits, animator moved to the base id {RealWeapons.AnimatorFixes}x");
+                if (_enemy != null) TestKit.Kill(_enemy);
+                _enemy = null;
+            });
+            t = after + 3f;
+        }
+
+        // The polearm can't be thrown: aim, then attack, and the spear must still be in hand.
+        SelfTest.Add(t, "weapons: polearm again", () => Wield("item.rusty_polearm", "polearm"));
         SelfTest.Add(t + 3f, "weapons: polearm try throw", () =>
         {
             WeaponModels.Scan();
             var spear = WeaponModels.Base?.TryCast<SpearWeaponController>();
             SelfTest.Check("weapons: polearm not throwable", spear != null && WeaponPatches.NoThrow(spear), spear == null ? "no spear controller" : "");
             if (spear == null) return;
-            _spearsBefore = LocalPlayer.Inventory.AmountOf(GameItems.Find("CraftedSpear", 474), true, false);
+            _spearsBefore = LocalPlayer.Inventory.AmountOf(RealWeapons.ByType("polearm")!.Id, true, false);
             spear.BlockStart();
             spear.UpdateBlock();
             spear.AttackButtonDown();
@@ -122,30 +132,103 @@ internal static class WeaponsSelfTest
         SelfTest.Add(t + 5.5f, "weapons: polearm still in hand", () =>
         {
             var held = HeldWeapons.Local();
-            int count = LocalPlayer.Inventory.AmountOf(GameItems.Find("CraftedSpear", 474), true, false);
+            int count = LocalPlayer.Inventory.AmountOf(RealWeapons.ByType("polearm")!.Id, true, false);
             SelfTest.Check("weapons: polearm kept after aim + attack", held?.Kind == HeldKind.Spear && count == _spearsBefore,
-                $"held {held?.Kind}, spears {_spearsBefore} -> {count}");
+                $"held {held?.Kind}, polearms {_spearsBefore} -> {count}");
         });
-        SelfTest.Add(t + 6.5f, "weapons: polearm swing", Attack);
-        SelfTest.Add(t + 6.75f, "weapons: polearm swing screenshot", () => TestKit.Screenshot("weapons-polearm-swing"));
-        for (int r = 0; r < SwingRetries; r++)
-            SelfTest.Add(t + 7.6f + r * 0.8f, $"weapons: polearm swing retry {r + 1}", RetryAttack);
-        SelfTest.Add(t + 8.8f + (SwingRetries - 1) * 0.8f, "weapons: polearm swing fx", () => CheckSwingFx("polearm"));
-        t += 10f + (SwingRetries - 1) * 0.8f;
+        t += 6.5f;
+
+        // The hotkey draws it again after it was put away; the game save never holds it; it can't be dropped.
+        SelfTest.Add(t, "weapons: put away", () => LocalPlayer.Inventory.StashHeldItems(false, true));
+        SelfTest.Add(t + 2f, "weapons: hotkey", () =>
+        {
+            int key = WeaponSlotSync.HotkeyIndexOf(RealWeapons.ByType("polearm")!.Id);
+            SelfTest.Check("weapons: polearm kept its hotkey through the swaps", key >= 0, HotkeyBridge.Describe());
+            if (key >= 0) HotkeyBridge.Trigger(key);
+        });
+        SelfTest.Add(t + 5f, "weapons: hotkey draws it", () =>
+        {
+            var held = HeldWeapons.Local();
+            SelfTest.Check("weapons: hotkey draws the polearm", held?.ItemId == RealWeapons.ByType("polearm")!.Id, held == null ? "nothing held" : $"holding {held.Value.ItemId}");
+        });
+        SelfTest.Add(t + 5.5f, "weapons: save data", CheckSaveData);
+        SelfTest.Add(t + 6f, "weapons: drop", () =>
+        {
+            try { LocalPlayer.Inventory.DropRightHandItem(false); }
+            catch (Exception e) { SelfTest.Log("weapons: drop threw " + e.Message); }
+        });
+        SelfTest.Add(t + 7.5f, "weapons: drop leaves nothing", () =>
+        {
+            WeaponSlotSync.Tick();
+            int id = RealWeapons.ByType("polearm")!.Id;
+            int owned = LocalPlayer.Inventory.AmountOf(id, true, false);
+            SelfTest.Check("weapons: still owned once after a drop", owned == 1, $"amount {owned}");
+        });
+        t += 9f;
 
         SelfTest.Add(t, "weapons: unequip", () =>
         {
-            var skin = WeaponModels.LocalSkin;
-            var holder = skin?.Holder;
             Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
+            WeaponSlotSync.Tick();
+            var owned = RealWeapons.All.Where(w => LocalPlayer.Inventory.AmountOf(w.Id, true, false) > 0).Select(w => w.TypeId).ToList();
+            SelfTest.Check("weapons: no weapon item without the slot item", owned.Count == 0, string.Join(", ", owned));
+        });
+        SelfTest.Add(t + 2f, "weapons: hand empty", () =>
+        {
             WeaponModels.Scan();
+            var held = HeldWeapons.Local();
+            SelfTest.Check("weapons: no slot weapon in hand", held == null || !RealWeapons.IsReal(held.Value.ItemId), held == null ? "" : $"holding {held.Value.ItemId}");
             SelfTest.Check("weapons: no type without the item", WeaponModels.Active == null);
-            bool restored = holder != null && holder.Find(WeaponSkin.ModelName) == null
-                && holder.GetComponentsInChildren<Renderer>(true).Any(r => r.enabled);
-            SelfTest.Check("weapons: game model restored", restored);
             SelfTest.Check("weapons: projectile drop back on", ProjectileDrop.Drop != false, $"drop {ProjectileDrop.Drop}");
         });
-        return t + 1f;
+        return t + 3f;
+    }
+
+    /// <summary>One typed item per weapon type, from items.json.</summary>
+    private static readonly (string Item, string Type)[] Typed =
+    {
+        ("item.rage", "great_sword"), ("item.relic_hammer", "hammer"), ("item.axe_of_swiftness", "axe"),
+        ("item.rusty_polearm", "polearm"), ("item.soulstring", "greatbow"), ("item.dull_longsword", "long_sword"),
+    };
+
+    /// <summary>Puts a typed item in the weapon slot and lets the slot sync give and draw its game item.</summary>
+    internal static void Wield(string itemId, string typeId, Rarity rarity = Rarity.Rare)
+    {
+        EquipItem(itemId, typeId, rarity);
+        TestKit.FreeHands();
+        WeaponSlotSync.Tick();
+    }
+
+    /// <summary>Exactly the type's game item is owned, once, and it is in hand.</summary>
+    private static void CheckOwned(string typeId)
+    {
+        var inv = LocalPlayer.Inventory;
+        var want = RealWeapons.ByType(typeId)!;
+        var owned = RealWeapons.All.Select(w => (w.TypeId, N: inv.AmountOf(w.Id, true, false))).Where(x => x.N > 0).ToList();
+        SelfTest.Check($"weapons: {typeId} owned alone, once", owned.Count == 1 && owned[0].TypeId == typeId && owned[0].N == 1,
+            string.Join(", ", owned.Select(x => $"{x.TypeId} x{x.N}")));
+        var held = HeldWeapons.Local();
+        SelfTest.Check($"weapons: {typeId} in hand from the slot", held?.ItemId == want.Id,
+            held == null ? "nothing held; " + GameInventoryDiag(inv, want.Id) : $"holding {held.Value.ItemId}");
+    }
+
+    /// <summary>The inventory save data the game would write holds none of our ids; the live game keeps them.</summary>
+    private static void CheckSaveData()
+    {
+        var inv = LocalPlayer.Inventory;
+        try
+        {
+            var data = inv.Sons_Save_ISaveGameSerializer_TheForest_Items_Inventory_PlayerInventory_PlayerInventorySaveData__OnSerialize();
+            string json = data == null ? "" : Newtonsoft.Json.JsonConvert.SerializeObject(data);
+            var inSave = RealWeapons.All.Where(w => json.Contains(w.Id.ToString(), StringComparison.Ordinal)).Select(w => w.Id).ToList();
+            SelfTest.Check("weapons: inventory save holds no weapon item", data != null && inSave.Count == 0, string.Join(", ", inSave));
+            int id = RealWeapons.ByType("polearm")!.Id;
+            SelfTest.Check("weapons: live game keeps it", inv.AmountOf(id, true, false) == 1 && WeaponSlotSync.HotkeyIndexOf(id) >= 0);
+        }
+        catch (Exception e)
+        {
+            SelfTest.Check("weapons: save data readable", false, e.Message);
+        }
     }
 
     /// <summary>COS-129 diagnosis: what the game's inventory says about an item and the hand slots.</summary>
@@ -224,7 +307,7 @@ internal static class WeaponsSelfTest
         SelfTest.Check($"weapons: {type.Id} sounds registered", !ModAudio.Ready || missing.Count == 0, string.Join(", ", missing));
     }
 
-    private const int SwingRetries = 3;
+    private const int SwingRetries = 6;
 
     /// <summary>A real attack through the game weapon: its swing event plays the type's sound and lights the trail.</summary>
     private static void Attack()

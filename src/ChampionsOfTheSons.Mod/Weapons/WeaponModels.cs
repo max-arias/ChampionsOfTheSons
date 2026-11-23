@@ -297,7 +297,12 @@ internal static class WeaponModels
         var found = HeldWeapons.Local();
         var held = found?.Holder;
         var kind = found?.Kind ?? HeldKind.None;
-        var type = WeaponTypes.Active(PlayerState.Character.Inventory, ModContent.Db, kind);
+        // A real weapon item (COS-186) is its own type; a game weapon carries the slot's type only when nothing real exists
+        // for it (the overlay route, removed by COS-187).
+        var real = found is { } f ? RealWeapons.Get(f.ItemId) : null;
+        var type = real != null ? real.Type
+            : RealWeapons.ByType(WeaponTypes.Equipped(PlayerState.Character.Inventory, ModContent.Db)?.Id)?.Item != null ? null
+            : WeaponTypes.Active(PlayerState.Character.Inventory, ModContent.Db, kind);
 
         var look = type != null ? GlowLook.For(PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot)) : GlowLook.None;
         if (_local != null && (!_local.Alive || type != _local.Type || look.Key != _local.Look.Key || held == null || held.Pointer != _localHolder

@@ -65,11 +65,20 @@ internal static class HotkeyBridge
         return new Slot(id, amount, held);
     }
 
-    /// <summary>Self-tests: puts an item on a hotkey the way the game's save data holds it (the game's own setters need the inventory view).</summary>
-    public static void SetForTest(int index, int itemId)
+    /// <summary>Puts an item on a hotkey (0: clears it) the way the game's save data holds it (the game's own setters need the inventory view).</summary>
+    public static void Set(int index, int itemId)
     {
         var ids = Controller?._hotkeySaveData?.RightHandItemIds;
         if (ids != null && index >= 0 && index < ids.Count) ids[index] = itemId;
+    }
+
+    public static void SetForTest(int index, int itemId) => Set(index, itemId);
+
+    /// <summary>Drops the cached icon and name of an item whose game data changed (the real weapon items, COS-186).</summary>
+    public static void Forget(int itemId)
+    {
+        Icons.Remove(itemId);
+        Names.Remove(itemId);
     }
 
     /// <summary>Does what pressing the hotkey's number does (equip / toggle / eat).</summary>

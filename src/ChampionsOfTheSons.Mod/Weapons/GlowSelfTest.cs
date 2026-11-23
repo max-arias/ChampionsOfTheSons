@@ -23,11 +23,7 @@ internal static class GlowSelfTest
 
     public static void Register(float t)
     {
-        SelfTest.Add(t, "glow: draw machete", () =>
-        {
-            PlayerState.Character.Inventory.Remove(WeaponTypes.WeaponSlot);
-            SelfTest.Check("glow: machete in hand", TestKit.EquipGameItem(GameItems.Find("Machete", 359)));
-        });
+        SelfTest.Add(t, "glow: draw long sword", () => WeaponsSelfTest.Wield("item.dull_longsword", "long_sword", Rarity.Common));
         t += 6f; // the draw animation takes several seconds on a loaded machine
 
         SelfTest.Add(t, "glow: common", () =>
@@ -58,6 +54,8 @@ internal static class GlowSelfTest
         }
 
         // A unique rolled Common still gets the full Legendary look; swing it into an enemy for the trail and sparks.
+        SelfTest.Add(t, "glow: draw unique", () => WeaponsSelfTest.Wield("item.rage", "great_sword", Rarity.Common));
+        t += 3f; // a new type is a new game item: its draw animation
         SelfTest.Add(t, "glow: unique", () =>
         {
             Equip("item.rage", "great_sword", Rarity.Common);
@@ -84,6 +82,8 @@ internal static class GlowSelfTest
         });
         t += 4f;
 
+        SelfTest.Add(t, "glow: draw unique style", () => WeaponsSelfTest.Wield("item.frost_giant", "hammer", Rarity.Rare));
+        t += 3f;
         SelfTest.Add(t, "glow: unique style", () =>
         {
             Equip("item.frost_giant", "hammer", Rarity.Rare);
@@ -140,10 +140,15 @@ internal static class GlowSelfTest
         t += 4f;
 
         bool reducedBefore = false;
-        SelfTest.Add(t, "glow: reduced effects", () =>
+        SelfTest.Add(t, "glow: draw for reduced effects", () =>
         {
             reducedBefore = VisualsFeature.ReduceHeavyEffects;
             VisualsFeature.SetReduceHeavyEffects(true);
+            WeaponsSelfTest.Wield("item.rage", "great_sword", Rarity.Common);
+        });
+        t += 3f;
+        SelfTest.Add(t, "glow: reduced effects", () =>
+        {
             WeaponModels.Reset();
             Equip("item.rage", "great_sword", Rarity.Common);
             var skin = WeaponModels.LocalSkin;
@@ -156,6 +161,11 @@ internal static class GlowSelfTest
             foreach (var id in Drops) LootFeature.Ground.Remove(id);
             Drops.Clear();
             PlayerState.Character.Inventory.Remove(WeaponTypes.WeaponSlot);
+            WeaponSlotSync.Tick();
+        });
+        // The game takes the held weapon away over a few frames.
+        SelfTest.Add(t + 2.5f, "glow: gone with the weapon", () =>
+        {
             WeaponModels.Scan();
             SelfTest.Check("glow: gone with the weapon", WeaponModels.LocalSkin == null);
         });
@@ -168,9 +178,11 @@ internal static class GlowSelfTest
         return LootFeature.Ground.Add(item, p.x, p.y, p.z).Id;
     }
 
+    /// <summary>The item in the slot, same type as the one in hand (a new type needs <see cref="WeaponsSelfTest.Wield"/> first).</summary>
     private static void Equip(string itemId, string typeId, Rarity rarity)
     {
         WeaponsSelfTest.EquipItem(itemId, typeId, rarity);
+        WeaponSlotSync.Tick();
         WeaponModels.Scan();
     }
 

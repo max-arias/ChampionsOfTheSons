@@ -33,7 +33,7 @@ internal static class WeaponPatches
     [HarmonyPostfix]
     private static void Swing(MeleeWeaponController __instance)
     {
-        if (__instance != null && RealWeapons.Item != null) RealWeapons.OnSwing(__instance);
+        if (__instance != null && RealWeapons.Registered) RealWeapons.OnSwing(__instance);
         Event(__instance);
     }
 

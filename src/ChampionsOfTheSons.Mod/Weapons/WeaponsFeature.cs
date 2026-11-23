@@ -27,12 +27,17 @@ public sealed class WeaponsFeature : IModFeature
         };
     }
 
-    /// <summary>Equips the first game weapon from the equipped type's base list that the player owns. False if none.</summary>
+    /// <summary>
+    /// Draws the weapon slot's real weapon item (COS-186); without one, the first game weapon from the equipped type's base
+    /// list that the player owns (the overlay route, until COS-187). False if none.
+    /// </summary>
     public static bool DrawBase()
     {
         var type = WeaponTypes.Equipped(PlayerState.Character.Inventory, ModContent.Db);
         var inv = LocalPlayer.Inventory;
         if (type == null || inv == null) return false;
+        var real = RealWeapons.ByType(type.Id);
+        if (real?.Item != null && inv.AmountOf(real.Id, true, false) > 0) return inv.TryEquip(real.Id, false, true, false);
         foreach (var name in type.BaseItems)
         {
             int id = GameItems.Find(name, -1);
@@ -88,7 +93,8 @@ internal static class HeldWeapons
     private static readonly HashSet<int> BowIds = new() { 443, 360 };
 
     public static HeldKind Classify(int itemId) =>
-        MeleeIds.Contains(itemId) || RealWeapons.IsReal(itemId) ? HeldKind.Melee : SpearIds.Contains(itemId) ? HeldKind.Spear : BowIds.Contains(itemId) ? HeldKind.Bow : HeldKind.Other;
+        RealWeapons.IsReal(itemId) ? RealWeapons.KindOf(itemId)
+        : MeleeIds.Contains(itemId) ? HeldKind.Melee : SpearIds.Contains(itemId) ? HeldKind.Spear : BowIds.Contains(itemId) ? HeldKind.Bow : HeldKind.Other;
 
     public readonly record struct Held(Transform Holder, int ItemId, HeldKind Kind);
 
