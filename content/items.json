@@ -1559,20 +1559,6 @@
       ]
     },
     {
-      "id": "item.heart_of_purity",
-      "legacyIndex": 103,
-      "name": "Clearpulse Heart",
-      "type": "other",
-      "rarity": 3,
-      "minLevel": 1,
-      "maxLevel": 2,
-      "statPools": [],
-      "stackSize": 100,
-      "consumable": true,
-      "uniqueEffects": [],
-      "manual": true
-    },
-    {
       "id": "item.dull_longsword",
       "legacyIndex": 108,
       "name": "Blunt Machete",

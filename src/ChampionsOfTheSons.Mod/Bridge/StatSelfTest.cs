@@ -254,18 +254,19 @@ internal static class StatSelfTest
             LocalPlayer.Vitals.SetFullHealth();
         });
 
-        SelfTest.Add(T0 + 19, "unique: Untainted Heart respecs", () =>
+        SelfTest.Add(T0 + 19, "unique: Writhing Heart gives a perk point", () =>
         {
             Clean();
             var save = new Core.Saving.PlayerSave { Level = 6 };
             PlayerState.FromSave(save);
-            var perk = Db.Perks.Values.First(p => p.UnlockPath.Count == 0 && p.Requires.Count == 0 && p.Cost <= 1 && p.LevelReq <= 1 && !p.Manual);
-            SelfTest.Check("bought a perk", Pc.BuyPerk(perk.Id) == BuyResult.Ok);
-            Pc.Inventory.AddToBag(new ItemInstance { BaseId = UniqueItems.HeartOfPurity, Amount = 2 }, 100);
-            var slot = Pc.Inventory.Slots.First(kv => kv.Value.BaseId == UniqueItems.HeartOfPurity).Key;
+            // COS-170: respec is free, so the respec heart is gone; the Use path is checked on the perk-point heart.
+            int points = Pc.Progress.TotalPerkPoints;
+            var heart = new Core.Rules.LootRoller(Db).RollItem(Db.Items[Progress.GreaterMutatedHeart], 25, new Core.Rng(3)) with { Amount = 2 };
+            Pc.Inventory.AddToBag(heart, 100);
+            var slot = Pc.Inventory.Slots.First(kv => kv.Value.BaseId == Progress.GreaterMutatedHeart).Key;
             SelfTest.Check("used a heart", Consumables.Use(Pc, slot));
-            SelfTest.Check("perks were respecced", Pc.Perks.Bought.Count == 0 && Pc.Perks.AvailablePoints(Pc.Progress) == Pc.Progress.TotalPerkPoints);
-            SelfTest.Check("one heart is left", Pc.Inventory.Slots.Values.Where(i => i.BaseId == UniqueItems.HeartOfPurity).Sum(i => i.Amount) == 1);
+            SelfTest.Check("it gave a permanent perk point", Pc.Progress.TotalPerkPoints > points, $"{points} -> {Pc.Progress.TotalPerkPoints}");
+            SelfTest.Check("one heart is left", Pc.Inventory.Slots.Values.Where(i => i.BaseId == Progress.GreaterMutatedHeart).Sum(i => i.Amount) == 1);
             Clean();
             Pc.Stats.RemoveSource("test.nocrit");
         });

@@ -256,6 +256,22 @@ public sealed class PlayerCharacter
         Stats.SetSource("perks", Perks.Modifiers());
     }
 
+    /// <summary>Free refund of one perk tree (COS-170); perks elsewhere that depended on it go too.</summary>
+    public int RespecTree(PerkCategory category)
+    {
+        int n = Perks.RespecCategory(category);
+        Stats.SetSource("perks", Perks.Modifiers());
+        return n;
+    }
+
+    /// <summary>Free refund of every spell (COS-170): unlearned and taken off the bar.</summary>
+    public int RespecSpells()
+    {
+        int n = Perks.RespecSpells();
+        Spells.Restore(Array.Empty<string?>());
+        return n;
+    }
+
     public void RebuildAll()
     {
         RebuildLevel();

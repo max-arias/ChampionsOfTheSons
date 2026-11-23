@@ -29,7 +29,6 @@ public enum PerkState
 internal sealed class PerkPanel
 {
     public const string PanelId = "cots-perks";
-    public const string HeartOfPurity = "item.heart_of_purity";
     public const string SpellTab = "spells";
 
     private const float BodyTop = 116, BodyH = WinH - BodyTop - 20;
@@ -449,12 +448,9 @@ internal sealed class PerkPanel
         _points.Text($"{UiText.T("ui.perks.points", "Points")}: <color={(avail > 0 ? UiTheme.Good : UiTheme.TextDim)}><b>{avail}</b></color> / {pc.Progress.TotalPerkPoints}   " +
                      $"<color={UiTheme.TextDim}>{UiText.T("ui.sheet.level", "Level")} {pc.Progress.Level}</color>");
 
-        int hearts = Count(pc.Inventory, HeartOfPurity);
         bool spent = pc.Perks.SpentPoints > 0;
-        _respec.Color(C(hearts > 0 && spent ? "#4A3036" : "#232A33"), C("#6A3A42"));
-        _respecNote.Text(hearts > 0
-            ? $"{UiText.T("ui.perks.heart_have", "Untainted Heart")} ×{hearts}"
-            : UiText.T("ui.perks.heart_need", "Respec needs a Untainted Heart"));
+        _respec.Color(C(spent ? "#4A3036" : "#232A33"), C("#6A3A42"));
+        _respecNote.Text(UiText.T("ui.perks.respec_free", "Free: refunds every perk and spell"));
 
         if (_tab == SpellTab) RefreshSpells();
         else RefreshTree(_tab);
@@ -645,17 +641,11 @@ internal sealed class PerkPanel
         _dirty = true;
     }
 
-    /// <summary>Respec: consumes one Untainted Heart and refunds every perk and spell. False when there is no heart or nothing to refund.</summary>
+    /// <summary>Respec (free since COS-170): refunds every perk and spell. False when there is nothing to refund.</summary>
     public bool TryRespec()
     {
         var pc = Pc;
         if (pc.Perks.SpentPoints == 0) return false;
-        if (!ConsumeOne(pc.Inventory, HeartOfPurity))
-        {
-            _lastMessage = $"<color={UiTheme.Bad}>{UiText.T("ui.perks.heart_need", "Respec needs a Untainted Heart")}</color>";
-            RefreshDetail();
-            return false;
-        }
         pc.Respec();
         Audio.ModAudio.Play(Audio.SoundCues.Craft); // COTF used its crafting sound for respec too
         _dirty = false;

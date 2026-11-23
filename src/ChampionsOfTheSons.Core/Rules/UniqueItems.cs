@@ -8,7 +8,6 @@ namespace ChampionsOfTheSons.Core.Rules;
 /// </summary>
 public static class UniqueItems
 {
-    public const string HeartOfPurity = "item.heart_of_purity";
     public const string BloodBag = "item.lama_mega_s_blood_bag";
     public const string VampireRing = "item.vampire_ring";
     public const string UndyingPromise = "item.undying_promise";

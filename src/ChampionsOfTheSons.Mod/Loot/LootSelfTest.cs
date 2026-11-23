@@ -266,7 +266,7 @@ internal static class LootSelfTest
     /// <summary>COS-96: a stack gets Drop 1 and Split stack on the book card, and its Drop reads "Drop all".</summary>
     private static void StackMenu()
     {
-        var heart = new ItemInstance { BaseId = "item.heart_of_purity", Level = 1, Amount = 6 };
+        var heart = new ItemInstance { BaseId = Progress.GreaterMutatedHeart, Level = 1, Amount = 6 };
         Pc.Inventory.Restore(new[] { new KeyValuePair<string, ItemInstance>("bag.0", heart) });
         SelfTest.Check("loot: a stack gets the stack actions, and Drop all", InventoryActions.IsStack("bag.0")
             && InventoryActions.DropLabel("bag.0") == UiText.T("ui.inventory.menu.drop_all", "Drop all"), InventoryActions.DropLabel("bag.0"));

@@ -73,12 +73,12 @@ internal static class FollowupsSelfTest
     {
         LootFeature.ClearAll();
         Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>());
-        int hearts(PlayerCharacter p) => p.Inventory.Slots.Where(kv => kv.Value.BaseId == Progress.HeartOfPurity).Sum(kv => kv.Value.Amount);
+        int hearts(PlayerCharacter p) => p.Inventory.Slots.Where(kv => kv.Value.BaseId == Progress.GreaterMutatedHeart).Sum(kv => kv.Value.Amount);
         double need = 0;
-        for (int l = Pc.Progress.Level; l < 20; l++) need += XpCurve.Goal(l);
+        for (int l = Pc.Progress.Level; l < 25; l++) need += XpCurve.Goal(l);
         Pc.AddXp(need / Math.Max(0.01, Pc.Stats.Get(StatIds.ExpGain)));
-        SelfTest.Check("followups: reached level 20", Pc.Progress.Level >= 20, Pc.Progress.Level.ToString());
-        SelfTest.Check("followups: level 20 put a Heart of Purity in the bag", hearts(Pc) >= 1, $"{hearts(Pc)} hearts");
+        SelfTest.Check("followups: reached level 25", Pc.Progress.Level >= 25, Pc.Progress.Level.ToString());
+        SelfTest.Check("followups: level 25 put a Writhing Heart in the bag", hearts(Pc) >= 1, $"{hearts(Pc)} hearts");
     }
 
     private static void FullBagReward()

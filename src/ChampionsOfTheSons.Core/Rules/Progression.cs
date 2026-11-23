@@ -53,7 +53,6 @@ public sealed record LevelUpResult(int OldLevel, int NewLevel, IReadOnlyList<str
 /// <summary>Level, XP into the current level and permanent bonus perk points.</summary>
 public sealed class Progress
 {
-    public const string HeartOfPurity = "item.heart_of_purity";
     public const string GreaterMutatedHeart = "item.greater_mutated_heart";
 
     public int Level { get; private set; } = 1;
@@ -97,8 +96,7 @@ public sealed class Progress
         {
             Xp -= XpCurve.Goal(Level);
             Level++;
-            if (Level % 10 == 0) rewards.Add(HeartOfPurity);
-            else if (Level >= 10 && Level % 20 == 5) rewards.Add(GreaterMutatedHeart);
+            if (Level >= 10 && Level % 20 == 5) rewards.Add(GreaterMutatedHeart); // respec is free since COS-170: no respec heart
         }
         return new LevelUpResult(old, Level, rewards);
     }

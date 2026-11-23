@@ -167,10 +167,7 @@ internal static class PerksSelfTest
         Panel.ReleaseSimulatedHover();
         Panel.ShowTab(PerkCategory.MeleeOffense.ToString());
         int spent = Pc.Perks.SpentPoints;
-        Pc.Inventory.Restore(Array.Empty<KeyValuePair<string, ItemInstance>>()); // leveling now puts the reward hearts (COS-43) in the bag
-        SelfTest.Check("perks: respec refused without a heart", !Panel.TryRespec() && Pc.Perks.SpentPoints == spent);
-        TestKit.Give(PerkPanel.HeartOfPurity, 4, 1);
-        SelfTest.Check("perks: heart in bag", PanelKit.Count(Pc.Inventory, PerkPanel.HeartOfPurity) == 1);
+        // COS-170: free, no heart needed.
         double before = Pc.Stats.Get(ModContent.Db.Perks[Bought[0]].Effects[0].Stat);
         string first = Panel.RespecClick();
         SelfTest.Check("perks: the first Respec click only asks to confirm", first == "armed" && Panel.RespecArmed && Pc.Perks.SpentPoints == spent, first);
@@ -178,7 +175,7 @@ internal static class PerksSelfTest
         double after = Pc.Stats.Get(ModContent.Db.Perks[Bought[0]].Effects[0].Stat);
         SelfTest.Check("perks: respec refunds everything", ok && Pc.Perks.SpentPoints == 0 && Pc.Perks.Bought.Count == 0 && Pc.Spells.Loadout.All(s => s == null),
             $"spent {Pc.Perks.SpentPoints}");
-        SelfTest.Check("perks: respec consumed the heart and reverted stats", PanelKit.Count(Pc.Inventory, PerkPanel.HeartOfPurity) == 0 && Math.Abs(after - before) > 1e-9,
+        SelfTest.Check("perks: respec is free and reverted stats", Math.Abs(after - before) > 1e-9,
             $"{before:0.####} -> {after:0.####}");
     }
 }

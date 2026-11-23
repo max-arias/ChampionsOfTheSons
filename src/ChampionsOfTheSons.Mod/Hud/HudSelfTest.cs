@@ -198,7 +198,6 @@ internal static class HudSelfTest
         SelfTest.Check("hud: massacre payout popup shown", p.PayoutBanner.Visible && p.PayoutBanner.Body.Contains("XP"), p.PayoutBanner.Body);
         SelfTest.Check("hud: massacre counter hidden after payout", !p.MassacreVisible);
         SelfTest.Check("hud: level-up notice shown", p.LevelBanner.Visible && p.LevelBanner.Body.Contains(Pc.Progress.Level.ToString()), p.LevelBanner.Body);
-        SelfTest.Check("hud: level-up notice lists the reward item", p.LevelBanner.Body.Contains(HudText.ItemName(Progress.HeartOfPurity)), p.LevelBanner.Body);
     }
 
     /// <summary>COS-95: the health line, the three spell slot states, merged damage numbers.</summary>

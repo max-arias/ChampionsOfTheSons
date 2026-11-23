@@ -33,7 +33,6 @@ public class ItemSlotAndConsumableTests
         "statPools": [ ["stat.permanentperkpoints"] ] },
       { "id": "item.lesser_mutated_heart", "name": "Xp Heart", "type": "other", "rarity": 3, "minLevel": 1, "maxLevel": 1,
         "statPools": [ ["stat.experience"] ] },
-      { "id": "item.heart_of_purity", "name": "Respec Heart", "type": "other", "rarity": 2, "minLevel": 1, "maxLevel": 1, "stackSize": 100, "statPools": [] },
       { "id": "item.pebble", "name": "Pebble", "type": "other", "rarity": 0, "minLevel": 1, "maxLevel": 1, "statPools": [] }
     ] }
     """;
@@ -170,16 +169,11 @@ public class ItemSlotAndConsumableTests
     }
 
     [Fact]
-    public void Respec_heart_respecs_and_unusable_items_do_nothing()
+    public void Unusable_items_do_nothing()
     {
         var pc = new PlayerCharacter(_db);
-        pc.Inventory.AddToBag(new ItemInstance { BaseId = "item.heart_of_purity" });
         pc.Inventory.AddToBag(new ItemInstance { BaseId = "item.pebble" });
-        Assert.False(Consumables.Use(pc, "bag.0")); // nothing to respec yet: the heart is kept
-        Assert.Equal(BuyResult.Ok, pc.BuyPerk("perk.tough"));
-        Assert.True(Consumables.Use(pc, "bag.0"));
-        Assert.Equal(0, pc.Perks.SpentPoints);
-        Assert.False(Consumables.CanUse(pc.Inventory.Get("bag.1")!));
-        Assert.False(Consumables.Use(pc, "bag.1"));
+        Assert.False(Consumables.CanUse(pc.Inventory.Get("bag.0")!));
+        Assert.False(Consumables.Use(pc, "bag.0"));
     }
 }

@@ -162,4 +162,46 @@ public class PerkAndSpellTests
         Assert.True(book.IsReady(0));
         Assert.Equal(CastResult.EmptySlot, book.TryCast(5, 100, stats, out _));
     }
+
+    [Fact]
+    public void Tree_refund_returns_that_trees_points_and_keeps_other_trees()
+    {
+        var tree = new PerkTree(_db);
+        var p = new Progress(10, 0, 0);
+        tree.Buy("perk.root", p);
+        tree.Buy("perk.branch", p);
+        tree.Buy("perk.stack", p);
+        tree.UnlockSpell("spell.frenzy", p);
+        int before = tree.AvailablePoints(p);
+        Assert.Equal(2, tree.RespecCategory(PerkCategory.MeleeOffense));
+        Assert.Equal(before + 3, tree.AvailablePoints(p)); // root 1 + branch 2
+        Assert.Equal(1, tree.TimesBought("perk.stack"));
+        Assert.Contains("spell.frenzy", tree.UnlockedSpells);
+    }
+
+    [Fact]
+    public void Tree_refund_also_drops_perks_in_other_trees_that_needed_it()
+    {
+        var tree = new PerkTree(_db);
+        var p = new Progress(10, 0, 0);
+        tree.Buy("perk.root", p);
+        tree.Buy("perk.stack", p);
+        tree.Buy("perk.both", p); // utility, requires the melee root and the defense stack
+        Assert.Equal(2, tree.RespecCategory(PerkCategory.MeleeOffense));
+        Assert.Equal(0, tree.TimesBought("perk.both"));
+        Assert.Equal(1, tree.TimesBought("perk.stack"));
+    }
+
+    [Fact]
+    public void Spell_refund_unlearns_spells_and_keeps_perks()
+    {
+        var tree = new PerkTree(_db);
+        var p = new Progress(10, 0, 0);
+        tree.Buy("perk.root", p);
+        tree.UnlockSpell("spell.frenzy", p);
+        tree.UnlockSpell("spell.blink", p);
+        Assert.Equal(2, tree.RespecSpells());
+        Assert.Empty(tree.UnlockedSpells);
+        Assert.Equal(1, tree.TimesBought("perk.root"));
+    }
 }

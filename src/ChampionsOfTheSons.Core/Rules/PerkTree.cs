@@ -81,6 +81,47 @@ public sealed class PerkTree
         _spells.Clear();
     }
 
+    /// <summary>Free respec of one tree (COS-170): unbuys every perk of <paramref name="category"/>, then any perk in another tree whose unlock
+    /// path or requirements no longer hold, so what stays bought is still reachable. Spells stay. Returns how many perks were unbought.</summary>
+    public int RespecCategory(PerkCategory category)
+    {
+        int removed = 0;
+        foreach (var id in _bought.Keys.Where(id => _content.Perks.TryGetValue(id, out var p) && p.Category == category).ToList())
+        {
+            _bought.Remove(id);
+            removed++;
+        }
+        return removed + DropUnreachable();
+    }
+
+    /// <summary>Free respec of the spells (COS-170): every unlocked spell is unlearned. Returns how many.</summary>
+    public int RespecSpells()
+    {
+        int n = _spells.Count;
+        _spells.Clear();
+        return n;
+    }
+
+    private int DropUnreachable()
+    {
+        int removed = 0;
+        for (bool changed = true; changed;)
+        {
+            changed = false;
+            foreach (var id in _bought.Keys.ToList())
+            {
+                if (!_content.Perks.TryGetValue(id, out var p)) continue; // unknown ids are kept, like Restore does
+                bool path = p.UnlockPath.Count == 0 || p.UnlockPath.Any(x => TimesBought(x) > 0);
+                bool requires = p.Requires.All(x => TimesBought(x) > 0);
+                if (path && requires) continue;
+                _bought.Remove(id);
+                removed++;
+                changed = true;
+            }
+        }
+        return removed;
+    }
+
     /// <summary>Restores saved state without checks (unknown IDs are kept so a content update can't wipe them).</summary>
     public void Restore(IReadOnlyDictionary<string, int> perks, IEnumerable<string> spells)
     {
