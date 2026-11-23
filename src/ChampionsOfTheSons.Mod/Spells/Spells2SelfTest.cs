@@ -154,9 +154,10 @@ internal static class Spells2SelfTest
 
     private static void RunAll()
     {
-        // COS-183: spell damage grows with the caster's level; at level 1 the cases' small test numbers hold (an earlier phase can
-        // leave the character at a high level, where every spell kills the test enemy before its slow or burn can be read).
-        Pc.SetLevel(1);
+        // COS-183: spell damage grows with the caster's level; the cases' small test numbers hold at the level-1 scale (an earlier phase
+        // can leave the character at a high level, where every spell kills the test enemy before its slow or burn can be read).
+        // Only the scale is neutralised: changing the level would refund perks and spells that later checks rely on.
+        Pc.Stats.SetSource("spell_level", new[] { new StatModifier(StatIds.SpellBaseScale, EffectOp.Mult, 1) });
         var hp = LocalPlayer.Vitals.Health;
         hp.SetCurrentValue(hp.GetMax());
         SpellCaster.Casted += _ => _castEvents++;
@@ -500,6 +501,7 @@ internal static class Spells2SelfTest
         });
 
         SelfTest.Check("spells2: casts raised the cast event", _castEvents >= 20, _castEvents.ToString());
+        Pc.Stats.SetSource("spell_level", new[] { new StatModifier(StatIds.SpellBaseScale, EffectOp.Mult, SpellTuning.SpellLevelScale(Pc.Progress.Level)) });
         SpellWorld.Reset();
     }
 }
