@@ -498,7 +498,7 @@ internal sealed class PerkPanel
             bool levelOk = pc.Progress.Level >= r.Def.LevelReq;
             r.Name.Text(ModContent.Text.Get(r.Def.Id + ".name", r.Def.Name));
             r.Info.Text(SpellMeta(r.Def));
-            r.Name.TextObject.color = C(unlocked ? UiTheme.Gold : levelOk ? UiTheme.Text : UiTheme.TextFaint);
+            r.Name.TextObject.color = C(TooDear(r.Def) ? UiTheme.Bad : unlocked ? UiTheme.Gold : levelOk ? UiTheme.Text : UiTheme.TextFaint);
             r.Unlock.Active(!unlocked);
             foreach (var s in r.Slots) s.Active(unlocked);
             if (!unlocked)
@@ -677,7 +677,18 @@ internal sealed class PerkPanel
         string Was(double now, double baseValue, string fmt) =>
             Math.Abs(now - baseValue) < 0.05 ? "" : $" <color={UiTheme.TextFaint}>({baseValue.ToString(fmt, System.Globalization.CultureInfo.InvariantCulture)})</color>";
         var inv = System.Globalization.CultureInfo.InvariantCulture;
-        return $"{UiText.T("ui.sheet.level", "Level")} {def.LevelReq}  ·  {cost.ToString("0", inv)}{Was(cost, def.EnergyCost, "0")} {UiText.T("ui.spells.energy", "energy")}"
+        string meta = $"{UiText.T("ui.sheet.level", "Level")} {def.LevelReq}  ·  {cost.ToString("0", inv)}{Was(cost, def.EnergyCost, "0")} {UiText.T("ui.spells.energy", "energy")}"
             + $"  ·  {cd.ToString("0.#", inv)} s{Was(cd, def.Cooldown, "0.#")}";
+        if (TooDear(def))
+            meta += "\n" + $"<color={UiTheme.Bad}>" + string.Format(UiText.T("ui.spells.needs_energy", "Costs more than your max energy ({0}): raise max energy to cast it"),
+                Spells.SpellCaster.MaxEnergy.ToString("0", inv)) + "</color>";
+        return meta;
+    }
+
+    /// <summary>COS-172: the spell costs more than the whole energy bar, so it can never be cast as things stand.</summary>
+    private static bool TooDear(SpellDef def)
+    {
+        var pc = PlayerState.Character;
+        return pc.Spells.CostOf(def.Id, pc.Stats).Total > Spells.SpellCaster.MaxEnergy + 0.01;
     }
 }
