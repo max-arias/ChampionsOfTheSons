@@ -218,6 +218,11 @@
       "percent": true
     },
     {
+      "id": "spell_base_scale",
+      "kind": "mult",
+      "default": 1.0
+    },
+    {
       "id": "melee_armor_piercing",
       "legacyName": "meleeArmorPiercing",
       "kind": "add",

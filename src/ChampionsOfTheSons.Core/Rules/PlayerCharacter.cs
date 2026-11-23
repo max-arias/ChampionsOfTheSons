@@ -342,7 +342,11 @@ public sealed class PlayerCharacter
         RebuildAttributes();
     }
 
-    private void RebuildAttributes() => Stats.SetSource("attributes", AttributeRules.Modifiers(Attributes));
+    private void RebuildAttributes()
+    {
+        Stats.SetSource("attributes", AttributeRules.Modifiers(Attributes));
+        Stats.SetSource("spell_level", new[] { new StatModifier(StatIds.SpellBaseScale, EffectOp.Mult, SpellTuning.SpellLevelScale(Progress.Level)) });
+    }
 
     private void RebuildEquipment()
     {

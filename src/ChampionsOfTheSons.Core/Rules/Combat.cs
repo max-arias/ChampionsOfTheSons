@@ -61,7 +61,10 @@ public static class PlayerAttack
     public static OutgoingHit Spell(StatSheet s, double baseDamage, double flatScaling, Rng rng, bool canCrit = false)
     {
         bool crit = canCrit && rng.Chance(s.Get(StatIds.CritChance));
-        double d = (baseDamage + s.Get(StatIds.SpellFlatDmg) * flatScaling) * Derived.SpellMultiplier(s);
+        // COS-183: base damage grows with the caster's level like enemy health does (a sheet without the stat counts as 1).
+        double levelScale = s.Get(StatIds.SpellBaseScale);
+        if (levelScale <= 0) levelScale = 1;
+        double d = (baseDamage * levelScale + s.Get(StatIds.SpellFlatDmg) * flatScaling) * Derived.SpellMultiplier(s);
         if (crit) d *= 1 + s.Get(StatIds.CritDamage);
         return new OutgoingHit(Math.Max(0, d), DamageKind.Magic, crit, 0);
     }

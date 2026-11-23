@@ -138,4 +138,12 @@ public class WeaponSpellTests
         double perk = SpellTuning.SeekingArrowHit(hit, Sheet(new StatModifier("spell_seeking_arrow_head_damage", EffectOp.Add, 0.5))).Amount;
         Assert.True(perk > plain);
     }
+
+    [Fact]
+    public void Spell_base_damage_grows_with_level_like_enemy_health()
+    {
+        Assert.Equal(1, SpellTuning.SpellLevelScale(1), 6);
+        Assert.True(SpellTuning.SpellLevelScale(30) > SpellTuning.SpellLevelScale(10));
+        Assert.Equal(EnemyScaler.MaxHealth(40, 100, 1) / EnemyScaler.MaxHealth(1, 100, 1), SpellTuning.SpellLevelScale(40), 6);
+    }
 }

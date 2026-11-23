@@ -19,6 +19,8 @@ public static class StatIds
     public const string MeleeIncreasedDmg = "melee_increased_dmg";
     public const string RangedIncreasedDmg = "ranged_increased_dmg";
     public const string SpellIncreasedDmg = "spell_increased_dmg";
+    /// <summary>Factor on every spell's base damage from the player's level (COS-183, <see cref="SpellTuning.SpellLevelScale"/>).</summary>
+    public const string SpellBaseScale = "spell_base_scale";
     public const string MeleeDmgFromStr = "melee_dmg_from_str";
     public const string RangedDmgFromAgi = "ranged_dmg_from_agi";
     public const string SpellDmgFromInt = "spell_dmg_from_int";

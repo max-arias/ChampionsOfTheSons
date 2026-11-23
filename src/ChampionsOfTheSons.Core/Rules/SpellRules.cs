@@ -203,6 +203,11 @@ public static class SpellTuning
     // Damage ---------------------------------------------------------------------------------------------------------
 
     /// <summary>A spell hit: (base + spellFlat × scaling) × spell multiplier, magic damage.</summary>
+    /// <summary>COS-183 (Max: spells were barely denting enemies of the player's level): every spell's base damage is multiplied by how
+    /// much tougher a normal enemy of the caster's level is than one of level 1, so a spell keeps its level-1 share of a same-level
+    /// enemy's health at every level. Spell-damage gear and Intelligence add on top.</summary>
+    public static double SpellLevelScale(int level) => EnemyScaler.HealthCurve.At(Math.Max(1, level)) / EnemyScaler.HealthCurve.At(1);
+
     public static OutgoingHit Hit(StatSheet s, double baseDamage, double scaling, Rng rng, bool canCrit = false) =>
         PlayerAttack.Spell(s, baseDamage, scaling, rng, canCrit);
 
