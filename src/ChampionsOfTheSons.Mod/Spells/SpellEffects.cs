@@ -340,7 +340,7 @@ internal static class SpellEffects
     private static void LaunchBallLightning(Vector3 start, Vector3 dir)
     {
         var ball = SpellFx.Sphere(start, 0.8f, SpellFx.Storm, 1e6f);
-        if (ball != null) SpellFx.Disc(start, (float)SpellTuning.BallLightningRadius, SpellFx.Storm, 1e6f, ball.transform, SpellFx.Look.Ring);
+        var ring = ball != null ? SpellFx.Disc(start, (float)SpellTuning.BallLightningRadius, SpellFx.Storm, 1e6f, ball.transform, SpellFx.Look.Ring) : null;
         AddZone(new SpellZone
         {
             Id = "ball_lightning", Center = start, Radius = (float)SpellTuning.BallLightningRadius, Left = (float)SpellTuning.BallLightningSeconds,
@@ -350,6 +350,7 @@ internal static class SpellEffects
                 z.Center += dir * (float)SpellTuning.BallLightningSpeed * dt;
                 if (z.Visual != null) z.Visual.transform.position = z.Center;
             },
+            End = z => SpellFx.Remove(ring), // the radius ring rides the ball and goes with it (COS-178)
             Pulse = z =>
             {
                 foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, SpellTuning.BallLightningZap(Stats, Rng.FromTime()));

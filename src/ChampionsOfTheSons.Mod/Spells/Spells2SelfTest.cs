@@ -26,6 +26,12 @@ internal static class Spells2SelfTest
     {
         SelfTest.Add(T0, "spells2: spawn the target pool", Spawn);
         SelfTest.Add(T0 + 5, "spells2: cast every spell", RunAll);
+        // COS-178: objects are destroyed at the end of a frame, so the scene is counted a moment after the leak case ran.
+        SelfTest.Add(T0 + 20, "spells2: nothing left in the scene", () =>
+        {
+            int after = LeftoverRoots();
+            SelfTest.Check("spells2: no cots effect object is left in the scene", after <= _rootsBefore, $"{_rootsBefore} -> {after}: {string.Join(", ", LeftoverNames().Take(8))}");
+        });
     }
 
     // ---------------------------------------------------------------- harness
@@ -144,8 +150,13 @@ internal static class Spells2SelfTest
 
     // ---------------------------------------------------------------- the spells
 
+    private static int _rootsBefore;
+
     private static void RunAll()
     {
+        // COS-183: spell damage grows with the caster's level; at level 1 the cases' small test numbers hold (an earlier phase can
+        // leave the character at a high level, where every spell kills the test enemy before its slow or burn can be read).
+        Pc.SetLevel(1);
         var hp = LocalPlayer.Vitals.Health;
         hp.SetCurrentValue(hp.GetMax());
         SpellCaster.Casted += _ => _castEvents++;
@@ -453,6 +464,7 @@ internal static class Spells2SelfTest
             if (!Ok("spell.black_flame")) return;
             Advance(2.2f);
             SelfTest.Check("spells2: Black Flame burns an enemy in its radius", Hp(foe) < before, $"{before:0.#} -> {Hp(foe):0.#}");
+            TestKit.Screenshot("spells2-black-flame-ring");
             SelfTest.Check("spells2: Black Flame stands a ring of flames on the ground (COS-179)", !Visuals.FxKit.Available || SpellEffects.FlameRingFlames == Visuals.FlameRing.Count,
                 $"{SpellEffects.FlameRingFlames} flames");
             SelfTest.Check("spells2: Black Flame leaves an enemy outside its radius alone", Math.Abs(Hp(far) - farBefore) < 0.01, $"{farBefore:0.#} -> {Hp(far):0.#}");
@@ -471,9 +483,8 @@ internal static class Spells2SelfTest
             }
             Advance(200, 0.25f);
             SelfTest.Check("spells2: no spell effect is still alive after its time", SpellFx.LiveCount <= before && SpellWorld.ZoneCount == 0 && SpellWorld.BoltCount == 0
-                && SpellPortals.Count == 0 && !SpellPortals.HasPending, $"fx {before} -> {SpellFx.LiveCount}, zones {SpellWorld.ZoneCount}, bolts {SpellWorld.BoltCount}, portals {SpellPortals.Count}, pending {SpellPortals.HasPending}");
-            int after = LeftoverRoots();
-            SelfTest.Check("spells2: no cots effect object is left in the scene", after <= roots, $"{roots} -> {after}: {string.Join(", ", LeftoverNames().Take(8))}");
+                && SpellPortals.Count == 0 && !SpellPortals.HasPending, $"fx {before} -> {SpellFx.LiveCount} [{SpellFx.LiveNames}], zones {SpellWorld.ZoneCount}, bolts {SpellWorld.BoltCount}, portals {SpellPortals.Count}, pending {SpellPortals.HasPending}");
+            _rootsBefore = roots;
         });
         Case("multishot", () =>
         {

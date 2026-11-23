@@ -223,6 +223,9 @@ internal static class SpellFx
     /// <summary>Effects alive now (self-tests, COS-178).</summary>
     public static int LiveCount => Items.Count(i => i.Go != null);
 
+    /// <summary>Names and time left of the effects alive now (self-tests, COS-178).</summary>
+    public static string LiveNames => string.Join(", ", Items.Where(i => i.Go != null).Select(i => $"{i.Go.name} {i.Left:0}s{(i.Follow != null ? " following " + i.Follow.name : "")}"));
+
     /// <summary>Removes one effect early.</summary>
     public static void Remove(GameObject? go)
     {

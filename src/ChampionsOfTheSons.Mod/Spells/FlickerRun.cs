@@ -161,7 +161,7 @@ internal static class FlickerRun
             var hit = SpellWorld.Hit(FlickerStrikeRules.BaseDamage, FlickerStrikeRules.Scaling, canCrit: true);
             Strike(e, hit with { Amount = hit.Amount * combo });
             var c = Center(e);
-            FxKit.Spawn(FxKit.Burst, c, hit.Crit ? 1.8f : 1.1f, hit.Crit ? Color.white : SpellFx.Steel);
+            SpellFx.Disc(c, hit.Crit ? 1.8f : 1.1f, hit.Crit ? Color.white : SpellFx.Steel, 0.7f, look: SpellFx.Look.Burst); // tracked: it expires (COS-178)
             SpellFx.Column(c, hit.Crit ? 0.09f : 0.05f, hit.Crit ? 2.4f : 1.6f, hit.Crit ? Color.white : SpellFx.Steel, 0.35f); // the slash
             alive++;
         }
