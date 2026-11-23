@@ -8,8 +8,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 1.5,
-      "y": 0.0,
+      "x": 4.32,
+      "y": 9.54,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -28,8 +28,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 1.5,
-      "y": 0.0,
+      "x": 4.48,
+      "y": 8.99,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -48,8 +48,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 1.5,
-      "y": 0.0,
+      "x": 0.28,
+      "y": 5.1,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -68,8 +68,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 1.5,
-      "y": 0.0,
+      "x": 3.77,
+      "y": 4.77,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -88,8 +88,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": -1.5,
-      "y": 0.0,
+      "x": 4.61,
+      "y": 4.77,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -108,8 +108,8 @@
       "cost": 0,
       "levelReq": 1,
       "stackable": false,
-      "x": 1.5,
-      "y": 0.0,
+      "x": 3.84,
+      "y": 0.77,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -128,8 +128,8 @@
       "cost": 1,
       "levelReq": 1,
       "stackable": true,
-      "x": -1.5,
-      "y": 0.0,
+      "x": 3.93,
+      "y": 8.59,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -148,8 +148,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": true,
-      "x": -2.0,
-      "y": 0.75,
+      "x": 3.77,
+      "y": 6.22,
       "unlockPath": [
         "perk.more_stamina"
       ],
@@ -175,8 +175,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": true,
-      "x": -2.0,
-      "y": -0.75,
+      "x": 4.61,
+      "y": 6.22,
       "unlockPath": [
         "perk.more_stamina"
       ],
@@ -197,8 +197,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": true,
-      "x": 2.0,
-      "y": 0.75,
+      "x": 5.31,
+      "y": 6.66,
       "unlockPath": [
         "perk.stronger_hits",
         "perk.arm_strength"
@@ -220,8 +220,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": false,
-      "x": 2.5,
-      "y": 0.0,
+      "x": 3.99,
+      "y": 6.66,
       "unlockPath": [
         "perk.stronger_hits",
         "perk.grip_strength",
@@ -244,8 +244,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": false,
-      "x": 2.0,
-      "y": -0.75,
+      "x": 3.99,
+      "y": 7.81,
       "unlockPath": [
         "perk.stronger_hits",
         "perk.arm_strength"
@@ -267,8 +267,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": true,
-      "x": 2.0,
-      "y": -0.75,
+      "x": 0.84,
+      "y": 6.07,
       "unlockPath": [
         "perk.stronger_projectiles"
       ],
@@ -289,8 +289,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": true,
-      "x": 2.0,
-      "y": 0.75,
+      "x": 0.84,
+      "y": 3.17,
       "unlockPath": [
         "perk.stronger_projectiles"
       ],
@@ -311,8 +311,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": true,
-      "x": 2.5,
-      "y": 0.0,
+      "x": 1.11,
+      "y": 4.62,
       "unlockPath": [
         "perk.stronger_projectiles"
       ],
@@ -333,8 +333,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": false,
-      "x": 2.5,
-      "y": 0.0,
+      "x": 2.69,
+      "y": 8.99,
       "unlockPath": [
         "perk.stronger_spells"
       ],
@@ -355,8 +355,8 @@
       "cost": 1,
       "levelReq": 7,
       "stackable": true,
-      "x": 2.0,
-      "y": 0.75,
+      "x": 5.38,
+      "y": 8.99,
       "unlockPath": [
         "perk.stronger_spells"
       ],
@@ -377,8 +377,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": false,
-      "x": 2.0,
-      "y": 0.75,
+      "x": 6.91,
+      "y": 0.77,
       "unlockPath": [
         "perk.more_health"
       ],
@@ -409,8 +409,8 @@
       "cost": 1,
       "levelReq": 7,
       "stackable": true,
-      "x": 2.5,
-      "y": 1.5,
+      "x": 5.83,
+      "y": 8.22,
       "unlockPath": [
         "perk.resource_cost_reduction"
       ],
@@ -431,8 +431,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": false,
-      "x": 3.0,
-      "y": 2.25,
+      "x": 6.28,
+      "y": 7.44,
       "unlockPath": [
         "perk.cooldown_reduction"
       ],
@@ -453,8 +453,8 @@
       "cost": 1,
       "levelReq": 1,
       "stackable": false,
-      "x": 2.5,
-      "y": 0.0,
+      "x": 7.54,
+      "y": 5.5,
       "unlockPath": [
         "perk.inner_energy"
       ],
@@ -490,8 +490,8 @@
       "cost": 1,
       "levelReq": 2,
       "stackable": false,
-      "x": 3.5,
-      "y": 0.0,
+      "x": 2.51,
+      "y": 8.4,
       "unlockPath": [
         "perk.all_attributes"
       ],
@@ -527,8 +527,8 @@
       "cost": 1,
       "levelReq": 6,
       "stackable": true,
-      "x": 2.5,
-      "y": -1.5,
+      "x": 4.32,
+      "y": 7.24,
       "unlockPath": [
         "perk.body_strength"
       ],
@@ -549,8 +549,8 @@
       "cost": 1,
       "levelReq": 7,
       "stackable": true,
-      "x": 3.0,
-      "y": -0.75,
+      "x": 1.39,
+      "y": 3.17,
       "unlockPath": [
         "perk.projectile_damage",
         "perk.speed"
@@ -572,8 +572,8 @@
       "cost": 1,
       "levelReq": 9,
       "stackable": false,
-      "x": 3.5,
-      "y": -1.5,
+      "x": 1.95,
+      "y": 5.1,
       "unlockPath": [
         "perk.reusability_i"
       ],
@@ -594,8 +594,8 @@
       "cost": 1,
       "levelReq": 12,
       "stackable": false,
-      "x": 4.0,
-      "y": -2.25,
+      "x": 3.62,
+      "y": 5.1,
       "unlockPath": [
         "perk.reusability_ii"
       ],
@@ -616,8 +616,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": true,
-      "x": 4.0,
-      "y": 0.75,
+      "x": 7.96,
+      "y": 3.32,
       "unlockPath": [
         "perk.all_attributes_2"
       ],
@@ -653,8 +653,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 2.0,
-      "y": 0.75,
+      "x": 4.19,
+      "y": 2.6,
       "unlockPath": [
         "perk.inner_energy"
       ],
@@ -675,8 +675,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": true,
-      "x": 1.5,
-      "y": 1.5,
+      "x": 5.87,
+      "y": 8.4,
       "unlockPath": [
         "perk.jump"
       ],
@@ -697,8 +697,8 @@
       "cost": 1,
       "levelReq": 2,
       "stackable": true,
-      "x": 2.0,
-      "y": -0.75,
+      "x": 2.3,
+      "y": 0.77,
       "unlockPath": [
         "perk.more_health"
       ],
@@ -719,8 +719,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": -2.5,
-      "y": 0.0,
+      "x": 3.27,
+      "y": 7.46,
       "unlockPath": [
         "perk.more_healing"
       ],
@@ -741,8 +741,8 @@
       "cost": 1,
       "levelReq": 2,
       "stackable": true,
-      "x": 2.5,
-      "y": 0.0,
+      "x": 0.77,
+      "y": 0.77,
       "unlockPath": [
         "perk.more_health"
       ],
@@ -763,8 +763,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": false,
-      "x": 3.5,
-      "y": 0.0,
+      "x": 1.54,
+      "y": 2.1,
       "unlockPath": [
         "perk.armor"
       ],
@@ -785,8 +785,8 @@
       "cost": 1,
       "levelReq": 35,
       "stackable": false,
-      "x": 4.0,
-      "y": 0.75,
+      "x": 0.77,
+      "y": 3.43,
       "unlockPath": [
         "perk.durability"
       ],
@@ -807,8 +807,8 @@
       "cost": 1,
       "levelReq": 40,
       "stackable": false,
-      "x": 4.5,
-      "y": 1.5,
+      "x": 1.54,
+      "y": 4.76,
       "unlockPath": [
         "perk.durability_ii"
       ],
@@ -829,8 +829,8 @@
       "cost": 1,
       "levelReq": 6,
       "stackable": true,
-      "x": 3.0,
-      "y": -0.75,
+      "x": 3.07,
+      "y": 2.1,
       "unlockPath": [
         "perk.bonus_health",
         "perk.armor"
@@ -852,8 +852,8 @@
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
-      "x": 5.0,
-      "y": 2.25,
+      "x": 6.91,
+      "y": 6.09,
       "unlockPath": [
         "perk.durability_iii"
       ],
@@ -874,8 +874,8 @@
       "cost": 1,
       "levelReq": 6,
       "stackable": true,
-      "x": -2.0,
-      "y": 0.75,
+      "x": 5.24,
+      "y": 6.33,
       "unlockPath": [
         "perk.more_healing"
       ],
@@ -896,8 +896,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": true,
-      "x": -1.5,
-      "y": 1.5,
+      "x": 1.96,
+      "y": 5.19,
       "unlockPath": [
         "perk.armor_penetration"
       ],
@@ -918,8 +918,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": true,
-      "x": -2.5,
-      "y": 1.5,
+      "x": 5.89,
+      "y": 5.19,
       "unlockPath": [
         "perk.armor_penetration"
       ],
@@ -940,8 +940,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": -3.5,
-      "y": 0.0,
+      "x": 4.58,
+      "y": 5.19,
       "unlockPath": [
         "perk.health_regen"
       ],
@@ -962,8 +962,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": -3.0,
-      "y": -0.75,
+      "x": 3.27,
+      "y": 5.19,
       "unlockPath": [
         "perk.health_regen"
       ],
@@ -984,8 +984,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": -4.5,
-      "y": 0.0,
+      "x": 2.62,
+      "y": 4.06,
       "unlockPath": [
         "perk.more_health_regen"
       ],
@@ -1006,8 +1006,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -4.0,
-      "y": -0.75,
+      "x": 6.55,
+      "y": 4.06,
       "unlockPath": [
         "perk.more_health_regen"
       ],
@@ -1028,8 +1028,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -2.5,
-      "y": -1.5,
+      "x": 4.58,
+      "y": 2.92,
       "unlockPath": [
         "perk.energy_generation"
       ],
@@ -1050,8 +1050,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": false,
-      "x": -2.5,
-      "y": 0.0,
+      "x": 4.19,
+      "y": 4.05,
       "unlockPath": [
         "perk.more_stamina"
       ],
@@ -1066,8 +1066,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -3.5,
-      "y": 0.0,
+      "x": 5.03,
+      "y": 8.4,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1082,8 +1082,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -4.0,
-      "y": 0.75,
+      "x": 3.35,
+      "y": 1.14,
       "unlockPath": [
         "perk.demolition"
       ],
@@ -1098,8 +1098,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -4.5,
-      "y": 1.5,
+      "x": 4.61,
+      "y": 9.13,
       "unlockPath": [
         "perk.pockets_for_explosives"
       ],
@@ -1114,8 +1114,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -4.5,
-      "y": 0.0,
+      "x": 0.84,
+      "y": 5.5,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1130,8 +1130,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -6.5,
-      "y": 0.0,
+      "x": 2.09,
+      "y": 7.68,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1147,8 +1147,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -5.5,
-      "y": 0.0,
+      "x": 6.7,
+      "y": 2.6,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1163,8 +1163,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -6.0,
-      "y": -0.75,
+      "x": 0.84,
+      "y": 6.95,
       "unlockPath": [
         "perk.booze"
       ],
@@ -1179,8 +1179,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -4.0,
-      "y": -0.75,
+      "x": 5.03,
+      "y": 1.14,
       "unlockPath": [
         "perk.meds"
       ],
@@ -1195,8 +1195,8 @@
       "cost": 1,
       "levelReq": 37,
       "stackable": false,
-      "x": 4.5,
-      "y": -3.0,
+      "x": 6.41,
+      "y": 5.1,
       "unlockPath": [
         "perk.reusability_iii"
       ],
@@ -1217,8 +1217,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": true,
-      "x": 2.0,
-      "y": -0.75,
+      "x": 3.59,
+      "y": 8.99,
       "unlockPath": [
         "perk.stronger_spells"
       ],
@@ -1239,8 +1239,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -7.5,
-      "y": 0.0,
+      "x": 1.26,
+      "y": 3.32,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1255,8 +1255,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -8.5,
-      "y": 0.0,
+      "x": 7.54,
+      "y": 4.05,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1271,8 +1271,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -13.5,
-      "y": 0.0,
+      "x": 7.12,
+      "y": 3.32,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1287,8 +1287,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -9.5,
-      "y": 0.0,
+      "x": 4.19,
+      "y": 8.4,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1303,8 +1303,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -10.0,
-      "y": 0.75,
+      "x": 4.19,
+      "y": 1.14,
       "unlockPath": [
         "perk.corpse_collecting"
       ],
@@ -1319,8 +1319,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -10.5,
-      "y": 0.0,
+      "x": 2.93,
+      "y": 1.87,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1335,8 +1335,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -11.5,
-      "y": 0.0,
+      "x": 6.28,
+      "y": 7.68,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1351,8 +1351,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": -12.5,
-      "y": 0.0,
+      "x": 5.45,
+      "y": 1.87,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -1367,8 +1367,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 1.5,
-      "y": -1.5,
+      "x": 1.39,
+      "y": 5.1,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1389,8 +1389,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 1.0,
-      "y": -2.25,
+      "x": 1.11,
+      "y": 6.55,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1411,8 +1411,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 0.5,
-      "y": -3.0,
+      "x": 1.11,
+      "y": 3.66,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1433,8 +1433,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 0.0,
-      "y": -3.75,
+      "x": 1.11,
+      "y": 5.59,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1455,8 +1455,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": -4.0,
-      "y": 0.75,
+      "x": 1.31,
+      "y": 4.06,
       "unlockPath": [
         "perk.more_health_regen"
       ],
@@ -1476,8 +1476,8 @@
       "cost": 1,
       "levelReq": 28,
       "stackable": false,
-      "x": 1.5,
-      "y": -1.5,
+      "x": 4.04,
+      "y": 8.22,
       "unlockPath": [
         "perk.spell_power"
       ],
@@ -1492,8 +1492,8 @@
       "cost": 1,
       "levelReq": 14,
       "stackable": false,
-      "x": 2.5,
-      "y": -1.5,
+      "x": 3.14,
+      "y": 8.22,
       "unlockPath": [
         "perk.spell_power"
       ],
@@ -1513,8 +1513,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 3.0,
-      "y": -0.75,
+      "x": 5.98,
+      "y": 6.66,
       "unlockPath": [
         "perk.body_strength",
         "perk.arm_strength"
@@ -1541,8 +1541,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": true,
-      "x": 3.0,
-      "y": -0.75,
+      "x": 4.48,
+      "y": 7.44,
       "unlockPath": [
         "perk.transmutation",
         "perk.spell_power"
@@ -1569,8 +1569,8 @@
       "cost": 1,
       "levelReq": 28,
       "stackable": false,
-      "x": 3.0,
-      "y": -2.25,
+      "x": 2.24,
+      "y": 8.22,
       "unlockPath": [
         "perk.spell_power"
       ],
@@ -1590,8 +1590,8 @@
       "cost": 2,
       "levelReq": 40,
       "stackable": false,
-      "x": 4.0,
-      "y": -2.25,
+      "x": 4.93,
+      "y": 6.66,
       "unlockPath": [
         "perk.exposure"
       ],
@@ -1612,8 +1612,8 @@
       "cost": 2,
       "levelReq": 46,
       "stackable": false,
-      "x": 5.0,
-      "y": -2.25,
+      "x": 2.69,
+      "y": 5.89,
       "unlockPath": [
         "perk.disabler"
       ],
@@ -1633,8 +1633,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 3.5,
-      "y": 0.0,
+      "x": 1.99,
+      "y": 6.66,
       "unlockPath": [
         "perk.arm_strength"
       ],
@@ -1655,8 +1655,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 4.5,
-      "y": 0.0,
+      "x": 4.32,
+      "y": 3.78,
       "unlockPath": [
         "perk.charged_attack"
       ],
@@ -1677,8 +1677,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 3.0,
-      "y": 0.75,
+      "x": 4.32,
+      "y": 4.93,
       "unlockPath": [
         "perk.grip_strength",
         "perk.arm_strength"
@@ -1700,8 +1700,8 @@
       "cost": 1,
       "levelReq": 35,
       "stackable": false,
-      "x": 2.5,
-      "y": 1.5,
+      "x": 3.99,
+      "y": 3.21,
       "unlockPath": [
         "perk.grip_strength",
         "perk.lucky_hits"
@@ -1723,8 +1723,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": true,
-      "x": 2.0,
-      "y": -0.75,
+      "x": 4.19,
+      "y": 6.95,
       "unlockPath": [
         "perk.inner_energy"
       ],
@@ -1745,8 +1745,8 @@
       "cost": 1,
       "levelReq": 31,
       "stackable": true,
-      "x": 2.5,
-      "y": -1.5,
+      "x": 1.39,
+      "y": 4.14,
       "unlockPath": [
         "perk.projectile_damage"
       ],
@@ -1767,8 +1767,8 @@
       "cost": 1,
       "levelReq": 22,
       "stackable": false,
-      "x": -7.0,
-      "y": 0.75,
+      "x": 7.12,
+      "y": 7.68,
       "unlockPath": [
         "perk.fuel"
       ],
@@ -1789,8 +1789,8 @@
       "cost": 1,
       "levelReq": 23,
       "stackable": true,
-      "x": -7.5,
-      "y": 1.5,
+      "x": 7.54,
+      "y": 2.6,
       "unlockPath": [
         "perk.transporter"
       ],
@@ -1811,8 +1811,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": -2.0,
-      "y": -0.75,
+      "x": 3.93,
+      "y": 6.33,
       "unlockPath": [
         "perk.more_healing"
       ],
@@ -1832,8 +1832,8 @@
       "cost": 1,
       "levelReq": 24,
       "stackable": false,
-      "x": 2.5,
-      "y": 3.0,
+      "x": 1.35,
+      "y": 6.66,
       "unlockPath": [
         "perk.greater_cooldown_reduction"
       ],
@@ -1854,8 +1854,8 @@
       "cost": 1,
       "levelReq": 35,
       "stackable": false,
-      "x": 2.0,
-      "y": 3.75,
+      "x": 1.79,
+      "y": 5.89,
       "unlockPath": [
         "perk.greater_cooldown_reduction_2"
       ],
@@ -1876,8 +1876,8 @@
       "cost": 1,
       "levelReq": 46,
       "stackable": false,
-      "x": 1.5,
-      "y": 4.5,
+      "x": 2.24,
+      "y": 5.11,
       "unlockPath": [
         "perk.greater_cooldown_reduction_3"
       ],
@@ -1898,8 +1898,8 @@
       "cost": 2,
       "levelReq": 60,
       "stackable": false,
-      "x": 1.0,
-      "y": 5.25,
+      "x": 6.28,
+      "y": 4.33,
       "unlockPath": [
         "perk.greater_cooldown_reduction_4"
       ],
@@ -1919,8 +1919,8 @@
       "cost": 2,
       "levelReq": 61,
       "stackable": false,
-      "x": 0.5,
-      "y": 6.0,
+      "x": 3.14,
+      "y": 3.56,
       "unlockPath": [
         "perk.infinity"
       ],
@@ -1941,8 +1941,8 @@
       "cost": 1,
       "levelReq": 2,
       "stackable": false,
-      "x": 1.5,
-      "y": 0.0,
+      "x": 4.58,
+      "y": 7.46,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -1960,8 +1960,8 @@
       "cost": 2,
       "levelReq": 20,
       "stackable": false,
-      "x": 3.5,
-      "y": -1.5,
+      "x": 5.37,
+      "y": 3.43,
       "unlockPath": [
         "perk.magic_resistance"
       ],
@@ -1981,8 +1981,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": -2.0,
-      "y": -3.75,
+      "x": 1.95,
+      "y": 7.03,
       "unlockPath": [
         "perk.sniper"
       ],
@@ -2003,8 +2003,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": -1.0,
-      "y": -3.75,
+      "x": 1.67,
+      "y": 4.62,
       "unlockPath": [
         "perk.bow_specialization"
       ],
@@ -2025,8 +2025,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": -3.0,
-      "y": -3.75,
+      "x": 4.74,
+      "y": 5.1,
       "unlockPath": [
         "perk.seeking_arrow_head_hunting"
       ],
@@ -2047,8 +2047,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": -4.0,
-      "y": -3.75,
+      "x": 7.24,
+      "y": 4.62,
       "unlockPath": [
         "perk.seeking_arrow_crippling_precision"
       ],
@@ -2069,8 +2069,8 @@
       "cost": 1,
       "levelReq": 14,
       "stackable": false,
-      "x": 2.5,
-      "y": 1.5,
+      "x": 1.39,
+      "y": 6.07,
       "unlockPath": [
         "perk.target_practise",
         "perk.large_caliber"
@@ -2092,8 +2092,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": 3.5,
-      "y": 1.5,
+      "x": 1.95,
+      "y": 4.14,
       "unlockPath": [
         "perk.focus_perfection"
       ],
@@ -2114,8 +2114,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": 4.5,
-      "y": 1.5,
+      "x": 4.18,
+      "y": 5.1,
       "unlockPath": [
         "perk.focus_quickscope"
       ],
@@ -2136,8 +2136,8 @@
       "cost": 1,
       "levelReq": 35,
       "stackable": false,
-      "x": 5.5,
-      "y": 1.5,
+      "x": 6.96,
+      "y": 5.1,
       "unlockPath": [
         "perk.focus_quickerscope"
       ],
@@ -2158,8 +2158,8 @@
       "cost": 1,
       "levelReq": 29,
       "stackable": false,
-      "x": 1.0,
-      "y": -2.25,
+      "x": 2.69,
+      "y": 7.44,
       "unlockPath": [
         "perk.enchant_weapon"
       ],
@@ -2174,8 +2174,8 @@
       "cost": 1,
       "levelReq": 33,
       "stackable": false,
-      "x": 1.5,
-      "y": -3.0,
+      "x": 2.24,
+      "y": 6.66,
       "unlockPath": [
         "perk.afterburn"
       ],
@@ -2190,8 +2190,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": false,
-      "x": 4.0,
-      "y": -0.75,
+      "x": 3.14,
+      "y": 6.66,
       "unlockPath": [
         "perk.overcharge"
       ],
@@ -2212,8 +2212,8 @@
       "cost": 1,
       "levelReq": 26,
       "stackable": true,
-      "x": 3.5,
-      "y": -1.5,
+      "x": 4.04,
+      "y": 6.66,
       "unlockPath": [
         "perk.overcharge"
       ],
@@ -2234,8 +2234,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 1.5,
-      "y": 1.5,
+      "x": 4.93,
+      "y": 8.22,
       "unlockPath": [
         "perk.resource_cost_reduction"
       ],
@@ -2256,8 +2256,8 @@
       "cost": 1,
       "levelReq": 40,
       "stackable": false,
-      "x": 3.0,
-      "y": 3.75,
+      "x": 6.73,
+      "y": 5.11,
       "unlockPath": [
         "perk.greater_cooldown_reduction_3"
       ],
@@ -2278,8 +2278,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 4.0,
-      "y": -0.75,
+      "x": 0.42,
+      "y": 6.22,
       "unlockPath": [
         "perk.all_attributes_2"
       ],
@@ -2300,8 +2300,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": 3.0,
-      "y": 0.75,
+      "x": 3.59,
+      "y": 7.44,
       "unlockPath": [
         "perk.resource_cost_reduction"
       ],
@@ -2321,8 +2321,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 3.5,
-      "y": 1.5,
+      "x": 4.48,
+      "y": 5.89,
       "unlockPath": [
         "perk.greater_cooldown_reduction",
         "perk.resource_cost_reduction"
@@ -2344,8 +2344,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": false,
-      "x": -0.75,
-      "y": -1.1,
+      "x": 4.19,
+      "y": 5.5,
       "unlockPath": [],
       "requires": [],
       "effects": [
@@ -2364,8 +2364,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": -1.25,
-      "y": -1.85,
+      "x": 4.61,
+      "y": 3.32,
       "unlockPath": [
         "perk.luck_enchantment"
       ],
@@ -2386,8 +2386,8 @@
       "cost": 1,
       "levelReq": 16,
       "stackable": false,
-      "x": 1.0,
-      "y": -3.75,
+      "x": 1.67,
+      "y": 2.69,
       "unlockPath": [
         "perk.bow_specialization"
       ],
@@ -2408,8 +2408,8 @@
       "cost": 1,
       "levelReq": 14,
       "stackable": true,
-      "x": 2.0,
-      "y": 2.25,
+      "x": 6.73,
+      "y": 6.66,
       "unlockPath": [
         "perk.greater_cooldown_reduction"
       ],
@@ -2430,8 +2430,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": false,
-      "x": -4.5,
-      "y": 1.5,
+      "x": 7.2,
+      "y": 2.92,
       "unlockPath": [
         "perk.temple_of_protection"
       ],
@@ -2451,8 +2451,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": false,
-      "x": 1.5,
-      "y": -1.5,
+      "x": 4.61,
+      "y": 2.1,
       "unlockPath": [
         "perk.bonus_health"
       ],
@@ -2473,8 +2473,8 @@
       "cost": 1,
       "levelReq": 9,
       "stackable": false,
-      "x": 1.5,
-      "y": -1.5,
+      "x": 6.28,
+      "y": 1.87,
       "unlockPath": [
         "perk.endurance"
       ],
@@ -2495,8 +2495,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -12.0,
-      "y": -0.75,
+      "x": 7.54,
+      "y": 6.95,
       "unlockPath": [
         "perk.more_miscellaneous_items"
       ],
@@ -2522,8 +2522,8 @@
       "cost": 1,
       "levelReq": 8,
       "stackable": true,
-      "x": 1.5,
-      "y": 1.5,
+      "x": 5.37,
+      "y": 0.77,
       "unlockPath": [
         "perk.more_health"
       ],
@@ -2549,8 +2549,8 @@
       "cost": 1,
       "levelReq": 32,
       "stackable": false,
-      "x": 3.0,
-      "y": 0.75,
+      "x": 1.39,
+      "y": 7.03,
       "unlockPath": [
         "perk.large_caliber"
       ],
@@ -2570,8 +2570,8 @@
       "cost": 1,
       "levelReq": 11,
       "stackable": false,
-      "x": 3.0,
-      "y": 0.75,
+      "x": 2.09,
+      "y": 1.87,
       "unlockPath": [
         "perk.jump"
       ],
@@ -2591,8 +2591,8 @@
       "cost": 1,
       "levelReq": 4,
       "stackable": true,
-      "x": 3.0,
-      "y": -2.25,
+      "x": 2.66,
+      "y": 6.66,
       "unlockPath": [
         "perk.attack_speed"
       ],
@@ -2613,8 +2613,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": true,
-      "x": 3.5,
-      "y": 1.5,
+      "x": 3.99,
+      "y": 0.91,
       "unlockPath": [
         "perk.lucky_hits",
         "perk.overwhelming_odds"
@@ -2636,8 +2636,8 @@
       "cost": 1,
       "levelReq": 17,
       "stackable": true,
-      "x": 3.5,
-      "y": -1.5,
+      "x": 3.99,
+      "y": 4.36,
       "unlockPath": [
         "perk.power_swing",
         "perk.attack_speed"
@@ -2659,8 +2659,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 0.5,
-      "y": -1.5,
+      "x": 1.67,
+      "y": 6.55,
       "unlockPath": [
         "perk.spear_specialization"
       ],
@@ -2681,8 +2681,8 @@
       "cost": 1,
       "levelReq": 33,
       "stackable": false,
-      "x": 0.0,
-      "y": -2.25,
+      "x": 1.95,
+      "y": 2.21,
       "unlockPath": [
         "perk.gold_medalist"
       ],
@@ -2703,8 +2703,8 @@
       "cost": 2,
       "levelReq": 34,
       "stackable": false,
-      "x": -1.0,
-      "y": -2.25,
+      "x": 5.29,
+      "y": 5.1,
       "unlockPath": [
         "perk.spear_gamble"
       ],
@@ -2725,8 +2725,8 @@
       "cost": 1,
       "levelReq": 53,
       "stackable": true,
-      "x": -2.0,
-      "y": -2.25,
+      "x": 7.24,
+      "y": 5.59,
       "unlockPath": [
         "perk.double_spears"
       ],
@@ -2747,8 +2747,8 @@
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
-      "x": -0.5,
-      "y": -3.0,
+      "x": 5.85,
+      "y": 5.1,
       "unlockPath": [
         "perk.spear_gamble"
       ],
@@ -2769,8 +2769,8 @@
       "cost": 1,
       "levelReq": 45,
       "stackable": false,
-      "x": 2.0,
-      "y": -2.25,
+      "x": 1.67,
+      "y": 8.48,
       "unlockPath": [
         "perk.pistol_specialization"
       ],
@@ -2791,8 +2791,8 @@
       "cost": 2,
       "levelReq": 35,
       "stackable": false,
-      "x": -1.5,
-      "y": -3.0,
+      "x": 7.52,
+      "y": 5.1,
       "unlockPath": [
         "perk.double_spears",
         "perk.spear_mastery"
@@ -2813,8 +2813,8 @@
       "cost": 2,
       "levelReq": 55,
       "stackable": false,
-      "x": 3.5,
-      "y": 1.5,
+      "x": 1.26,
+      "y": 7.68,
       "unlockPath": [
         "perk.momentum_transfer"
       ],
@@ -2834,8 +2834,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 7.0,
-      "y": -0.75,
+      "x": 3.99,
+      "y": 8.96,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -2866,8 +2866,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 8.0,
-      "y": -0.75,
+      "x": 4.32,
+      "y": 8.39,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -2893,8 +2893,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 7.5,
-      "y": 0.0,
+      "x": 4.65,
+      "y": 8.96,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -2920,8 +2920,8 @@
       "cost": 2,
       "levelReq": 60,
       "stackable": false,
-      "x": 2.0,
-      "y": 2.25,
+      "x": 4.32,
+      "y": 1.48,
       "unlockPath": [
         "perk.overwhelming_odds"
       ],
@@ -2953,8 +2953,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 8.5,
-      "y": -1.5,
+      "x": 0.56,
+      "y": 5.59,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -2980,8 +2980,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 8.0,
-      "y": -0.75,
+      "x": 0.56,
+      "y": 4.62,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -3012,8 +3012,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 9.0,
-      "y": -0.75,
+      "x": 0.84,
+      "y": 5.1,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -3059,8 +3059,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 9.0,
-      "y": -0.75,
+      "x": 5.38,
+      "y": 2.78,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -3091,8 +3091,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 8.5,
-      "y": 0.0,
+      "x": 3.59,
+      "y": 2.78,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -3118,8 +3118,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 9.5,
-      "y": 0.0,
+      "x": 2.69,
+      "y": 2.78,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -3150,8 +3150,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": 4.0,
-      "y": 0.75,
+      "x": 4.04,
+      "y": 5.11,
       "unlockPath": [
         "perk.flame_guard",
         "perk.parry_range"
@@ -3173,8 +3173,8 @@
       "cost": 1,
       "levelReq": 45,
       "stackable": false,
-      "x": 1.0,
-      "y": -2.25,
+      "x": 3.32,
+      "y": 6.66,
       "unlockPath": [
         "perk.body_strength_ii"
       ],
@@ -3195,8 +3195,8 @@
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
-      "x": 0.5,
-      "y": -3.0,
+      "x": 4.32,
+      "y": 6.09,
       "unlockPath": [
         "perk.skull_basher"
       ],
@@ -3217,8 +3217,8 @@
       "cost": 1,
       "levelReq": 45,
       "stackable": false,
-      "x": 4.0,
-      "y": -0.75,
+      "x": 4.65,
+      "y": 4.36,
       "unlockPath": [
         "perk.power_swing"
       ],
@@ -3238,8 +3238,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": true,
-      "x": 1.5,
-      "y": 1.5,
+      "x": 4.65,
+      "y": 5.51,
       "unlockPath": [
         "perk.grip_strength"
       ],
@@ -3260,8 +3260,8 @@
       "cost": 1,
       "levelReq": 26,
       "stackable": false,
-      "x": 5.0,
-      "y": -0.75,
+      "x": 6.28,
+      "y": 5.89,
       "unlockPath": [
         "perk.frenzy_haste"
       ],
@@ -3281,8 +3281,8 @@
       "cost": 1,
       "levelReq": 43,
       "stackable": false,
-      "x": 6.0,
-      "y": -0.75,
+      "x": 5.83,
+      "y": 5.11,
       "unlockPath": [
         "perk.mania"
       ],
@@ -3302,8 +3302,8 @@
       "cost": 1,
       "levelReq": 27,
       "stackable": true,
-      "x": 4.5,
-      "y": -1.5,
+      "x": 5.38,
+      "y": 5.89,
       "unlockPath": [
         "perk.concussive_bash"
       ],
@@ -3324,8 +3324,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": -11.0,
-      "y": -0.75,
+      "x": 0.42,
+      "y": 4.77,
       "unlockPath": [
         "perk.more_building_resources"
       ],
@@ -3346,8 +3346,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": -0.75,
-      "y": -2.6,
+      "x": 7.96,
+      "y": 4.77,
       "unlockPath": [
         "perk.luck_enchantment_ii"
       ],
@@ -3368,8 +3368,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 3.5,
-      "y": 0.0,
+      "x": 1.39,
+      "y": 2.21,
       "unlockPath": [
         "perk.speed"
       ],
@@ -3389,8 +3389,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 3.5,
-      "y": -3.0,
+      "x": 1.79,
+      "y": 7.44,
       "unlockPath": [
         "perk.exposure"
       ],
@@ -3410,8 +3410,8 @@
       "cost": 2,
       "levelReq": 62,
       "stackable": false,
-      "x": 1.5,
-      "y": 6.0,
+      "x": 5.83,
+      "y": 3.56,
       "unlockPath": [
         "perk.infinity"
       ],
@@ -3431,8 +3431,8 @@
       "cost": 1,
       "levelReq": 40,
       "stackable": true,
-      "x": 4.0,
-      "y": 3.75,
+      "x": 4.93,
+      "y": 3.56,
       "unlockPath": [
         "perk.blink_passthrough"
       ],
@@ -3453,8 +3453,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": true,
-      "x": 2.5,
-      "y": 0.0,
+      "x": 2.62,
+      "y": 6.33,
       "unlockPath": [
         "perk.inner_fire"
       ],
@@ -3475,8 +3475,8 @@
       "cost": 1,
       "levelReq": 44,
       "stackable": false,
-      "x": 2.0,
-      "y": -3.75,
+      "x": 1.95,
+      "y": 1.24,
       "unlockPath": [
         "perk.near_death_arrow"
       ],
@@ -3501,8 +3501,8 @@
       "cost": 2,
       "levelReq": 30,
       "stackable": false,
-      "x": 1.5,
-      "y": -4.5,
+      "x": 1.95,
+      "y": 8.0,
       "unlockPath": [
         "perk.near_death_arrow"
       ],
@@ -3522,8 +3522,8 @@
       "cost": 1,
       "levelReq": 47,
       "stackable": false,
-      "x": -3.5,
-      "y": -1.5,
+      "x": 0.65,
+      "y": 2.92,
       "unlockPath": [
         "perk.combat_energy_regen",
         "perk.combat_health_regen"
@@ -3550,8 +3550,8 @@
       "cost": 2,
       "levelReq": 47,
       "stackable": false,
-      "x": 4.5,
-      "y": -3.0,
+      "x": 4.93,
+      "y": 5.11,
       "unlockPath": [
         "perk.magic_arrow_devastation",
         "perk.magic_binding"
@@ -3567,8 +3567,8 @@
       "cost": 1,
       "levelReq": 34,
       "stackable": false,
-      "x": 4.0,
-      "y": 0.75,
+      "x": 4.65,
+      "y": 3.21,
       "unlockPath": [
         "perk.lucky_hits"
       ],
@@ -3593,8 +3593,8 @@
       "cost": 1,
       "levelReq": 3,
       "stackable": false,
-      "x": 3.0,
-      "y": 0.75,
+      "x": 6.14,
+      "y": 2.1,
       "unlockPath": [
         "perk.armor"
       ],
@@ -3615,8 +3615,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": 4.5,
-      "y": 0.0,
+      "x": 4.61,
+      "y": 4.76,
       "unlockPath": [
         "perk.durability"
       ],
@@ -3642,8 +3642,8 @@
       "cost": 1,
       "levelReq": 24,
       "stackable": false,
-      "x": 4.0,
-      "y": -0.75,
+      "x": 6.91,
+      "y": 3.43,
       "unlockPath": [
         "perk.magic_resistance",
         "perk.durability"
@@ -3665,8 +3665,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 4.5,
-      "y": -1.5,
+      "x": 6.14,
+      "y": 4.76,
       "unlockPath": [
         "perk.anti_magic_training"
       ],
@@ -3686,8 +3686,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 5.0,
-      "y": -2.25,
+      "x": 7.68,
+      "y": 4.76,
       "unlockPath": [
         "perk.anti_magic_training"
       ],
@@ -3707,8 +3707,8 @@
       "cost": 1,
       "levelReq": 70,
       "stackable": false,
-      "x": 0.0,
-      "y": 2.25,
+      "x": 1.67,
+      "y": 3.66,
       "unlockPath": [
         "perk.bullseye"
       ],
@@ -3730,8 +3730,8 @@
       "cost": 1,
       "levelReq": 15,
       "stackable": true,
-      "x": 3.5,
-      "y": 1.5,
+      "x": 2.3,
+      "y": 3.43,
       "unlockPath": [
         "perk.thorny_skin"
       ],
@@ -3752,8 +3752,8 @@
       "cost": 1,
       "levelReq": 80,
       "stackable": false,
-      "x": 2.0,
-      "y": 6.75,
+      "x": 4.48,
+      "y": 2.78,
       "unlockPath": [
         "perk.nuke_conjuration"
       ],
@@ -3768,8 +3768,8 @@
       "cost": 2,
       "levelReq": 120,
       "stackable": false,
-      "x": 3.0,
-      "y": 6.75,
+      "x": 4.04,
+      "y": 2.0,
       "unlockPath": [
         "perk.storm_season"
       ],
@@ -3784,8 +3784,8 @@
       "cost": 2,
       "levelReq": 66,
       "stackable": false,
-      "x": 5.0,
-      "y": 3.75,
+      "x": 2.24,
+      "y": 3.56,
       "unlockPath": [
         "perk.blink_wormhole"
       ],
@@ -3800,8 +3800,8 @@
       "cost": 2,
       "levelReq": 44,
       "stackable": false,
-      "x": 3.5,
-      "y": 3.0,
+      "x": 7.17,
+      "y": 5.89,
       "unlockPath": [
         "perk.greater_cooldown_reduction_2"
       ],
@@ -3816,8 +3816,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 4.5,
-      "y": 1.5,
+      "x": 4.48,
+      "y": 4.33,
       "unlockPath": [
         "perk.counter_strike"
       ],
@@ -3838,8 +3838,8 @@
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
-      "x": 2.5,
-      "y": 4.5,
+      "x": 1.79,
+      "y": 4.33,
       "unlockPath": [
         "perk.greater_cooldown_reduction_4"
       ],
@@ -3859,8 +3859,8 @@
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
-      "x": 0.5,
-      "y": 4.5,
+      "x": 2.69,
+      "y": 4.33,
       "unlockPath": [
         "perk.greater_cooldown_reduction_4"
       ],
@@ -3875,8 +3875,8 @@
       "cost": 1,
       "levelReq": 44,
       "stackable": false,
-      "x": -5.5,
-      "y": 1.5,
+      "x": 5.24,
+      "y": 1.79,
       "unlockPath": [
         "perk.energy_field"
       ],
@@ -3897,8 +3897,8 @@
       "cost": 1,
       "levelReq": 58,
       "stackable": false,
-      "x": -3.0,
-      "y": 0.75,
+      "x": 7.86,
+      "y": 4.06,
       "unlockPath": [
         "perk.more_health_regen"
       ],
@@ -3913,8 +3913,8 @@
       "cost": 1,
       "levelReq": 46,
       "stackable": false,
-      "x": 5.0,
-      "y": -0.75,
+      "x": 3.99,
+      "y": 2.06,
       "unlockPath": [
         "perk.dance_of_the_firegod"
       ],
@@ -3934,8 +3934,8 @@
       "cost": 2,
       "levelReq": 55,
       "stackable": false,
-      "x": -1.75,
-      "y": -2.6,
+      "x": 0.84,
+      "y": 4.05,
       "unlockPath": [
         "perk.luck_enchantment_ii"
       ],
@@ -3956,8 +3956,8 @@
       "cost": 1,
       "levelReq": 41,
       "stackable": false,
-      "x": 5.0,
-      "y": 0.75,
+      "x": 2.3,
+      "y": 6.09,
       "unlockPath": [
         "perk.iron_maiden",
         "perk.durability_iii"
@@ -3984,8 +3984,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": 5.5,
-      "y": 1.5,
+      "x": 4.61,
+      "y": 7.42,
       "unlockPath": [
         "perk.shield_endurance",
         "perk.durability_iii"
@@ -4006,8 +4006,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": -5.0,
-      "y": -3.75,
+      "x": 8.08,
+      "y": 5.1,
       "unlockPath": [
         "perk.seeking_arrow_movement_impairing_arrows"
       ],
@@ -4028,8 +4028,8 @@
       "cost": 2,
       "levelReq": 130,
       "stackable": false,
-      "x": 3.5,
-      "y": 7.5,
+      "x": 4.48,
+      "y": 1.23,
       "unlockPath": [
         "perk.endless_storm"
       ],
@@ -4050,8 +4050,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": false,
-      "x": -3.0,
-      "y": 0.75,
+      "x": 1.68,
+      "y": 2.6,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -4067,8 +4067,8 @@
       "cost": 1,
       "levelReq": 38,
       "stackable": false,
-      "x": 1.5,
-      "y": -3.0,
+      "x": 1.67,
+      "y": 7.52,
       "unlockPath": [
         "perk.crossbow_specialization"
       ],
@@ -4089,8 +4089,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": true,
-      "x": -3.0,
-      "y": -0.75,
+      "x": 3.35,
+      "y": 8.4,
       "unlockPath": [
         "perk.alternative_cloth_sources"
       ],
@@ -4111,8 +4111,8 @@
       "cost": 2,
       "levelReq": 65,
       "stackable": false,
-      "x": -0.5,
-      "y": -4.5,
+      "x": 1.67,
+      "y": 5.59,
       "unlockPath": [
         "perk.bow_specialization"
       ],
@@ -4148,8 +4148,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": false,
-      "x": -8.0,
-      "y": -0.75,
+      "x": 7.96,
+      "y": 6.22,
       "unlockPath": [
         "perk.more_meat",
         "perk.more_snacks"
@@ -4170,8 +4170,8 @@
       "cost": 1,
       "levelReq": 45,
       "stackable": false,
-      "x": 2.5,
-      "y": -1.5,
+      "x": 3.84,
+      "y": 3.43,
       "unlockPath": [
         "perk.bonus_health",
         "perk.magic_resistance"
@@ -4193,8 +4193,8 @@
       "cost": 1,
       "levelReq": 16,
       "stackable": false,
-      "x": 3.0,
-      "y": 2.25,
+      "x": 3.07,
+      "y": 4.76,
       "unlockPath": [
         "perk.spikes"
       ],
@@ -4215,8 +4215,8 @@
       "cost": 1,
       "levelReq": 17,
       "stackable": false,
-      "x": 3.5,
-      "y": 3.0,
+      "x": 5.37,
+      "y": 6.09,
       "unlockPath": [
         "perk.thorny_skin_ii"
       ],
@@ -4237,8 +4237,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 3.0,
-      "y": -0.75,
+      "x": 3.93,
+      "y": 4.06,
       "unlockPath": [
         "perk.fiery_embrace"
       ],
@@ -4259,8 +4259,8 @@
       "cost": 1,
       "levelReq": 70,
       "stackable": false,
-      "x": 4.0,
-      "y": -0.75,
+      "x": 3.27,
+      "y": 2.92,
       "unlockPath": [
         "perk.pyromancy"
       ],
@@ -4281,8 +4281,8 @@
       "cost": 1,
       "levelReq": 20,
       "stackable": true,
-      "x": 3.0,
-      "y": 0.75,
+      "x": 5.24,
+      "y": 4.06,
       "unlockPath": [
         "perk.fiery_embrace"
       ],
@@ -4303,8 +4303,8 @@
       "cost": 1,
       "levelReq": 70,
       "stackable": false,
-      "x": 4.0,
-      "y": 0.75,
+      "x": 5.89,
+      "y": 2.92,
       "unlockPath": [
         "perk.flame_lifetime"
       ],
@@ -4325,8 +4325,8 @@
       "cost": 1,
       "levelReq": 25,
       "stackable": false,
-      "x": -5.5,
-      "y": 0.0,
+      "x": 1.96,
+      "y": 2.92,
       "unlockPath": [
         "perk.insight"
       ],
@@ -4347,8 +4347,8 @@
       "cost": 2,
       "levelReq": 122,
       "stackable": false,
-      "x": -0.5,
-      "y": 6.0,
+      "x": 6.73,
+      "y": 3.56,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -4369,8 +4369,8 @@
       "cost": 2,
       "levelReq": 128,
       "stackable": false,
-      "x": -1.5,
-      "y": 6.0,
+      "x": 6.28,
+      "y": 2.78,
       "unlockPath": [
         "perk.the_real_armageddon"
       ],
@@ -4391,8 +4391,8 @@
       "cost": 1,
       "levelReq": 132,
       "stackable": true,
-      "x": -2.5,
-      "y": 6.0,
+      "x": 4.93,
+      "y": 2.0,
       "unlockPath": [
         "perk.the_big_suck"
       ],
@@ -4413,8 +4413,8 @@
       "cost": 1,
       "levelReq": 130,
       "stackable": false,
-      "x": -2.0,
-      "y": 5.25,
+      "x": 2.24,
+      "y": 2.0,
       "unlockPath": [
         "perk.the_big_suck"
       ],
@@ -4435,8 +4435,8 @@
       "cost": 1,
       "levelReq": 5,
       "stackable": false,
-      "x": 0.5,
-      "y": -1.5,
+      "x": 7.68,
+      "y": 2.1,
       "unlockPath": [
         "perk.enhanced_vitality"
       ],
@@ -4457,8 +4457,8 @@
       "cost": 2,
       "levelReq": 77,
       "stackable": false,
-      "x": 4.0,
-      "y": 3.75,
+      "x": 3.07,
+      "y": 7.42,
       "unlockPath": [
         "perk.armageddon"
       ],
@@ -4501,8 +4501,8 @@
       "cost": 1,
       "levelReq": 76,
       "stackable": false,
-      "x": -4.0,
-      "y": -2.25,
+      "x": 6.55,
+      "y": 1.79,
       "unlockPath": [
         "perk.rejuvenation"
       ],
@@ -4523,8 +4523,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": 3.5,
-      "y": 0.0,
+      "x": 5.38,
+      "y": 7.44,
       "unlockPath": [
         "perk.transmutation"
       ],
@@ -4539,8 +4539,8 @@
       "cost": 1,
       "levelReq": 12,
       "stackable": false,
-      "x": 4.5,
-      "y": 0.0,
+      "x": 5.83,
+      "y": 6.66,
       "unlockPath": [
         "perk.falter"
       ],
@@ -4560,8 +4560,8 @@
       "cost": 1,
       "levelReq": 30,
       "stackable": false,
-      "x": 4.5,
-      "y": 1.5,
+      "x": 4.32,
+      "y": 2.63,
       "unlockPath": [
         "perk.lucky_hits"
       ],
@@ -4582,8 +4582,8 @@
       "cost": 1,
       "levelReq": 10,
       "stackable": false,
-      "x": 4.0,
-      "y": 2.25,
+      "x": 3.59,
+      "y": 5.89,
       "unlockPath": [
         "perk.greater_cooldown_reduction"
       ],
@@ -4609,8 +4609,8 @@
       "cost": 1,
       "levelReq": 17,
       "stackable": true,
-      "x": 5.0,
-      "y": 2.25,
+      "x": 3.14,
+      "y": 5.11,
       "unlockPath": [
         "perk.firebolt_upgrade"
       ],
@@ -4636,8 +4636,8 @@
       "cost": 2,
       "levelReq": 60,
       "stackable": false,
-      "x": 5.0,
-      "y": 0.75,
+      "x": 4.65,
+      "y": 2.06,
       "unlockPath": [
         "perk.super_charged_attack"
       ],
@@ -4658,8 +4658,8 @@
       "cost": 1,
       "levelReq": 40,
       "stackable": false,
-      "x": 1.5,
-      "y": -1.5,
+      "x": 4.65,
+      "y": 7.81,
       "unlockPath": [
         "perk.body_strength"
       ],
@@ -4680,8 +4680,8 @@
       "cost": 1,
       "levelReq": 60,
       "stackable": false,
-      "x": 0.5,
-      "y": -1.5,
+      "x": 4.65,
+      "y": 6.66,
       "unlockPath": [
         "perk.body_strength_ii"
       ],
@@ -4702,8 +4702,8 @@
       "cost": 1,
       "levelReq": 60,
       "stackable": false,
-      "x": 6.0,
-      "y": 2.25,
+      "x": 3.59,
+      "y": 4.33,
       "unlockPath": [
         "perk.firebolt_upgrade_2"
       ],
@@ -4724,8 +4724,8 @@
       "cost": 1,
       "levelReq": 16,
       "stackable": false,
-      "x": 1.5,
-      "y": 1.5,
+      "x": 0.84,
+      "y": 4.14,
       "unlockPath": [
         "perk.stronger_projectiles"
       ],
@@ -4746,8 +4746,8 @@
       "cost": 1,
       "levelReq": 36,
       "stackable": false,
-      "x": 1.0,
-      "y": 2.25,
+      "x": 1.11,
+      "y": 2.69,
       "unlockPath": [
         "perk.target_practise"
       ],
@@ -4768,8 +4768,8 @@
       "cost": 1,
       "levelReq": 60,
       "stackable": false,
-      "x": 6.0,
-      "y": 2.25,
+      "x": 6.14,
+      "y": 7.42,
       "unlockPath": [
         "perk.dodge"
       ],
@@ -4784,8 +4784,8 @@
       "cost": 1,
       "levelReq": 55,
       "stackable": false,
-      "x": 2.5,
-      "y": -4.5,
+      "x": 3.06,
+      "y": 5.1,
       "unlockPath": [
         "perk.near_death_arrow"
       ],
@@ -4805,8 +4805,8 @@
       "cost": 1,
       "levelReq": 90,
       "stackable": false,
-      "x": 4.5,
-      "y": 0.0,
+      "x": 1.95,
+      "y": 6.07,
       "unlockPath": [
         "perk.speed_matters"
       ],
@@ -4827,8 +4827,8 @@
       "cost": 1,
       "levelReq": 100,
       "stackable": false,
-      "x": 8.0,
-      "y": 2.25,
+      "x": 5.37,
+      "y": 8.75,
       "unlockPath": [
         "perk.dodge"
       ],
@@ -4843,8 +4843,8 @@
       "cost": 1,
       "levelReq": 100,
       "stackable": false,
-      "x": 7.0,
-      "y": 2.25,
+      "x": 3.84,
+      "y": 8.75,
       "unlockPath": [
         "perk.dodge"
       ],
@@ -4859,8 +4859,8 @@
       "cost": 1,
       "levelReq": 50,
       "stackable": false,
-      "x": 0.0,
-      "y": 3.75,
+      "x": 5.38,
+      "y": 4.33,
       "unlockPath": [
         "perk.greater_cooldown_reduction_4"
       ],
@@ -4881,8 +4881,8 @@
       "cost": 1,
       "levelReq": 45,
       "stackable": false,
-      "x": -5.0,
-      "y": 2.25,
+      "x": 2.62,
+      "y": 1.79,
       "unlockPath": [
         "perk.energy_field"
       ],
@@ -4908,8 +4908,8 @@
       "cost": 1,
       "levelReq": 40,
       "stackable": false,
-      "x": -4.0,
-      "y": 2.25,
+      "x": 1.31,
+      "y": 1.79,
       "unlockPath": [
         "perk.energy_field"
       ],
@@ -4935,8 +4935,8 @@
       "cost": 1,
       "levelReq": 51,
       "stackable": false,
-      "x": 3.5,
-      "y": 4.5,
+      "x": 4.04,
+      "y": 3.56,
       "unlockPath": [
         "perk.greater_cooldown_reduction_4"
       ],
@@ -4951,8 +4951,8 @@
       "cost": 1,
       "levelReq": 37,
       "stackable": false,
-      "x": 1.5,
-      "y": 3.0,
+      "x": 1.67,
+      "y": 1.73,
       "unlockPath": [
         "perk.bullseye"
       ],
@@ -4967,8 +4967,8 @@
       "cost": 1,
       "levelReq": 38,
       "stackable": false,
-      "x": 2.0,
-      "y": 3.75,
+      "x": 2.51,
+      "y": 5.1,
       "unlockPath": [
         "perk.adrenaline_rush"
       ],
@@ -4983,8 +4983,8 @@
       "cost": 1,
       "levelReq": 31,
       "stackable": true,
-      "x": 5.5,
-      "y": -1.5,
+      "x": 3.84,
+      "y": 6.09,
       "unlockPath": [
         "perk.anti_magic_training"
       ],
@@ -5005,8 +5005,8 @@
       "cost": 0,
       "levelReq": 5,
       "stackable": true,
-      "x": 0.5,
-      "y": 1.5,
+      "x": 3.99,
+      "y": 5.51,
       "unlockPath": [
         "perk.grip_strength"
       ],
@@ -5033,8 +5033,8 @@
       "cost": 0,
       "levelReq": 0,
       "stackable": true,
-      "x": 5.5,
-      "y": 0.0,
+      "x": 1.95,
+      "y": 3.17,
       "unlockPath": [
         "perk.speed_matters"
       ],
