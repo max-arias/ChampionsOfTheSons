@@ -75,6 +75,13 @@ public static class AdminState
                 return $"spell cooldowns {(NoCooldowns ? "off" : "on")}";
             case AdminAction.LearnAllSpells:
                 return LearnAllSpells();
+            case AdminAction.SetMastery:
+            {
+                string? spell = g.Arg == "all" ? null : g.Arg;
+                if (spell != null && !ModContent.Db.Spells.ContainsKey(spell)) return $"unknown spell '{g.Arg}'";
+                pc.SetMastery(spell, (int)g.Amount);
+                return $"mastery {(int)g.Amount} for {(spell ?? "every spell")}";
+            }
             case AdminAction.InfiniteEnergy:
                 InfiniteEnergy = g.Amount > 0;
                 return $"infinite energy {(InfiniteEnergy ? "on" : "off")}";

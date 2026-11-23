@@ -108,7 +108,9 @@ internal static class BookSpellsPage
             r.Name.text = PerkInfo.Name(def.Id, def.Name);
             r.Name.color = tooDear ? PageKit.Select : learned ? PageKit.TitleBar : PageKit.Ink;
             r.Meta.text = PerkInfo.SpellMeta(def, faint);
-            r.Warn.text = tooDear ? PerkInfo.TooDearText() : "";
+            // COS-176: mastery on the third line, the energy warning wins the line when there is one.
+            r.Warn.text = tooDear ? PerkInfo.TooDearText() : PerkInfo.MasteryLine(def.Id);
+            r.Warn.color = tooDear ? PageKit.Select : PageKit.Good;
             r.ActionBg.enabled = r.ActionText.enabled = !learned;
             foreach (var (bg, text) in r.Slots) bg.enabled = text.enabled = learned;
             if (!learned)

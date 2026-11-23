@@ -343,6 +343,8 @@ public enum AdminAction : byte
     LearnAllSpells = 10,
     /// <summary><c>Amount</c> 1 = on, 0 = off: casts cost nothing and energy stays full, so every spell can be cast (COS-173).</summary>
     InfiniteEnergy = 11,
+    /// <summary><c>Arg</c> = spell id or "all", <c>Amount</c> = mastery level (COS-176).</summary>
+    SetMastery = 12,
 }
 
 /// <summary>Host → one client: an admin command applied to that player (COS-99). Clients accept it only from the host.</summary>

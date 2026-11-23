@@ -125,6 +125,8 @@ internal static class SpellCaster
             RLog.Error($"Champions of the Sons: spell {id} failed: {e}");
         }
         var shapes = SpellNet.EndCast(castId);
+        // Spell mastery (COS-176): every successful cast counts; a new level says what it unlocked.
+        if (pc.RecordCast(id) is int level) Loot.LootFeature.Message(Perks.PerkInfo.MasteryUpText(id, level));
         bool toggledOn = pc.Spells.IsActive(slot);
         if (toggledOn) SpellNet.ToggleOn(id, castId);
         LastSync = new SpellCastSync(id, castId, toggledOn, shapes);

@@ -92,13 +92,41 @@ internal static class PerkInfo
     public static string TooDearText() =>
         string.Format(UiText.T("ui.spells.needs_energy", "Costs more than your max energy ({0}): raise max energy to cast it"), Spells.SpellCaster.MaxEnergy.ToString("0", Inv));
 
-    /// <summary>Card text for a spell.</summary>
+    /// <summary>Card text for a spell: its numbers, description, mastery and its upgrades (COS-176).</summary>
     public static (string Title, string Body) Spell(string id, string bad, string faint)
     {
         if (!ModContent.Db.Spells.TryGetValue(id, out var def)) return ("", "");
         var body = $"<color={faint}>{SpellMeta(def, faint)}</color>\n" + ModContent.Text.Get(id + ".description", "");
         if (TooDear(def)) body += $"\n\n<color={bad}>{TooDearText()}</color>";
+        body += "\n\n" + MasteryLine(def.Id);
+        int level = Pc.Mastery.Level(def.Id);
+        for (int i = 0; i < def.Mastery.Count; i++)
+        {
+            string perk = def.Mastery[i];
+            int at = SpellMastery.UnlockLevel(i, def.Mastery.Count);
+            string line = $"{Name(perk, perk)}: {ModContent.Text.Get(perk + ".effect", "")}";
+            body += level >= at ? $"\n<color=#3E6B2A>+ {line}</color>" : $"\n<color={faint}>{string.Format(UiText.T("ui.book.mastery.at", "At mastery {0}"), at)}: {line}</color>";
+        }
         return ($"<b>{Name(id, def.Name)}</b>", body);
+    }
+
+    /// <summary>"Mastery 2/5 · 12/35 casts" (COS-176).</summary>
+    public static string MasteryLine(string spellId)
+    {
+        int casts = Pc.Mastery.CastsOf(spellId), level = SpellMastery.LevelFor(casts);
+        var next = SpellMastery.NextThreshold(level);
+        return string.Format(UiText.T("ui.book.mastery.line", "Mastery {0}/{1}"), level, SpellMastery.MaxLevel)
+            + "  ·  " + (next is int n ? string.Format(UiText.T("ui.book.mastery.casts", "{0}/{1} casts"), casts, n) : UiText.T("ui.book.mastery.max", "fully mastered"));
+    }
+
+    /// <summary>The message when a spell reaches a mastery level, with what it unlocked.</summary>
+    public static string MasteryUpText(string spellId, int level)
+    {
+        var def = ModContent.Db.Spells[spellId];
+        var unlocked = Enumerable.Range(0, def.Mastery.Count).Where(i => SpellMastery.UnlockLevel(i, def.Mastery.Count) == level)
+            .Select(i => Name(def.Mastery[i], def.Mastery[i])).ToList();
+        string text = string.Format(UiText.T("ui.book.mastery.up", "{0}: mastery {1}"), Name(spellId, def.Name), level);
+        return unlocked.Count == 0 ? text : text + " - " + string.Join(", ", unlocked);
     }
 
     // ------------------------------------------------------------------ attributes (COS-174)

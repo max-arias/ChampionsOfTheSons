@@ -154,6 +154,7 @@ public sealed class AdminFeature : IModFeature
                 "giveall" => GiveAll(args, sender),
                 "learnall" => Grant(AdminAction.LearnAllSpells, args, -1, sender),
                 "playtest" => Playtest(args, sender),
+                "mastery" => Mastery(args, sender),
                 "heal" => Grant(AdminAction.Heal, args, -1, sender),
                 "god" => Toggle(AdminAction.God, args, sender, AdminState.God),
                 "nocooldowns" => Toggle(AdminAction.NoCooldowns, args, sender, AdminState.NoCooldowns),
@@ -185,7 +186,8 @@ public sealed class AdminFeature : IModFeature
         ("give <item id | random[:rarity]> [level] [player]", "roll an item into the bag (rarity 0-3; level defaults to the target's)"),
         ("giveall <item type | all> [rarity 0-3] [player]", "one of every item of that type into the bag (cots list items shows types)"),
         ("learnall [player]", "every spell unlocked for free, empty spell slots filled"),
-        ("playtest [player]", "playtest setup: level 30, god mode, no cooldowns, infinite energy, every spell, one of every weapon"),
+        ("playtest [player]", "playtest setup: level 30, god mode, no cooldowns, infinite energy, every spell fully mastered, one of every weapon"),
+        ("mastery <spell id | all> <0-5> [player]", "set spell mastery: its cost and cooldown cuts and upgrades"),
         ("heal [player]", "full health and energy, debuffs cleared"),
         ("god [on|off] [player]", "incoming hits do no damage"),
         ("nocooldowns [on|off] [player]", "spells are always ready"),
@@ -369,6 +371,14 @@ public sealed class AdminFeature : IModFeature
         return Reply(full == 0, $"giveall {what}: {given} given" + (full > 0 ? $", {full} did not fit (bag is full)" : ""));
     }
 
+    /// <summary>COS-176: sets spell mastery for a spell or all of them.</summary>
+    private static bool Mastery(string[] args, BoltConnection? sender)
+    {
+        if (args.Length < 2 || !int.TryParse(args[1], out int level) || level < 0 || level > SpellMastery.MaxLevel)
+            return Reply(false, $"mastery <spell id | all> <0-{SpellMastery.MaxLevel}> [player]");
+        return Send(new AdminGrant(AdminAction.SetMastery, level, args[0]), args.Length > 2 ? args[2] : null, sender);
+    }
+
     /// <summary>COS-166: everything a hands-on playtest needs in one command.</summary>
     private static bool Playtest(string[] args, BoltConnection? sender)
     {
@@ -383,6 +393,7 @@ public sealed class AdminFeature : IModFeature
         Step(Send(new AdminGrant(AdminAction.NoCooldowns, 1, ""), player, sender));
         Step(Send(new AdminGrant(AdminAction.InfiniteEnergy, 1, ""), player, sender));
         Step(Send(new AdminGrant(AdminAction.LearnAllSpells, 0, ""), player, sender));
+        Step(Send(new AdminGrant(AdminAction.SetMastery, SpellMastery.MaxLevel, "all"), player, sender));
         Step(Send(new AdminGrant(AdminAction.Heal, 0, ""), player, sender));
         Step(GiveAll(player == null ? new[] { "weapon" } : new[] { "weapon", player }, sender));
         lines.Add("ready: spawn targets with 'cots spawn <normal|elite|miniboss|boss>'; 'god off', 'nocooldowns off' and 'energy off' undo the switches");

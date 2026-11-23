@@ -95,6 +95,17 @@ internal static class PerksSelfTest
         string done = Click(BookTab.Spells, "spells.refund");
         SelfTest.Check("perks: refund spells unlearns and clears the bar", done == "refunded 1" && Pc.Perks.UnlockedSpells.Count == 0 && Pc.Spells.Loadout.All(s => s == null), done);
         Click(BookTab.Spells, "spell.learn.spell.blink");
+        // COS-176: spell mastery. Casting Black Hole five times reaches mastery 1 and grants its first upgrade, for free.
+        Pc.SetMastery(null, 0);
+        int points = Pc.Perks.AvailablePoints(Pc.Progress);
+        var hole = ModContent.Db.Spells["spell.black_hole"];
+        int? up = null;
+        for (int i = 0; i < SpellMastery.Thresholds[0]; i++) up = Pc.RecordCast(hole.Id) ?? up;
+        SelfTest.Check("perks: five casts reach mastery 1", up == 1 && Pc.Mastery.Level(hole.Id) == 1, $"{up}, level {Pc.Mastery.Level(hole.Id)}");
+        SelfTest.Check("perks: mastery 1 grants the spell's first upgrade for free", hole.Mastery.Count > 0 && Pc.Perks.TimesBought(hole.Mastery[0]) == 1
+            && Pc.Perks.AvailablePoints(Pc.Progress) == points, string.Join(",", hole.Mastery));
+        SelfTest.Check("perks: the mastery message names the upgrade", PerkInfo.MasteryUpText(hole.Id, 1).Contains(PerkInfo.Name(hole.Mastery[0], "")));
+        Pc.SetMastery("spell.blink", 3);
         BookPages.Refresh(BookTab.Spells);
     }
 
