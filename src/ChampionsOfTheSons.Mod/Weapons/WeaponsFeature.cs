@@ -88,7 +88,7 @@ internal static class HeldWeapons
     private static readonly HashSet<int> BowIds = new() { 443, 360 };
 
     public static HeldKind Classify(int itemId) =>
-        MeleeIds.Contains(itemId) ? HeldKind.Melee : SpearIds.Contains(itemId) ? HeldKind.Spear : BowIds.Contains(itemId) ? HeldKind.Bow : HeldKind.Other;
+        MeleeIds.Contains(itemId) || RealWeapons.IsReal(itemId) ? HeldKind.Melee : SpearIds.Contains(itemId) ? HeldKind.Spear : BowIds.Contains(itemId) ? HeldKind.Bow : HeldKind.Other;
 
     public readonly record struct Held(Transform Holder, int ItemId, HeldKind Kind);
 

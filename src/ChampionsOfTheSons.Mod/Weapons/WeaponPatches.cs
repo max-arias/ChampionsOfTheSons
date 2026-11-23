@@ -31,7 +31,11 @@ internal static class WeaponPatches
 
     [HarmonyPatch(typeof(MeleeWeaponController), nameof(MeleeWeaponController.OnSwingWeapon))]
     [HarmonyPostfix]
-    private static void Swing(MeleeWeaponController __instance) => Event(__instance);
+    private static void Swing(MeleeWeaponController __instance)
+    {
+        if (__instance != null && RealWeapons.Item != null) RealWeapons.OnSwing(__instance);
+        Event(__instance);
+    }
 
     [HarmonyPatch(typeof(SpearWeaponController), nameof(SpearWeaponController.OnMeleeAttackEvent))]
     [HarmonyPostfix]
