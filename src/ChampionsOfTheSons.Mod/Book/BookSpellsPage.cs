@@ -21,12 +21,13 @@ internal static class BookSpellsPage
     private const float RefundX = Left, RefundW = 210;
     private const float SlotW = 34, SlotGap = 4, SlotsX = Left + RowW - SpellBook.Slots * (SlotW + SlotGap), LearnW = 190, LearnX = Left + RowW - LearnW;
     public const int RowsPerPage = 8;
+    private const float ActionY = 52, ActionH = 38;
     private const float ArmSeconds = 4;
 
     private sealed class Row
     {
         public Image Shade = null!, Icon = null!, ActionBg = null!;
-        public TextMeshProUGUI Name = null!, Meta = null!, Warn = null!, ActionText = null!;
+        public TextMeshProUGUI Name = null!, Short = null!, Meta = null!, Warn = null!, ActionText = null!;
         public (Image Bg, TextMeshProUGUI Text)[] Slots = new (Image, TextMeshProUGUI)[SpellBook.Slots];
     }
 
@@ -58,18 +59,20 @@ internal static class BookSpellsPage
             {
                 Shade = PageKit.Box(_root, "spell-shade-" + i, Left - 6, y, RowW + 12, RowH - 6, i % 2 == 0 ? new Color(0, 0, 0, 0.06f) : Color.clear),
                 Icon = PageKit.Box(_root, "spell-icon-" + i, Left, y + 10, 64, 64, Color.white),
-                Name = PageKit.Text(_root, "spell-name-" + i, Left + 74, y + 4, SlotsX - Left - 80, 32, "", 24, PageKit.Ink),
-                Meta = PageKit.Text(_root, "spell-meta-" + i, Left + 74, y + 36, SlotsX - Left - 80, 24, "", 17, PageKit.Ink),
-                Warn = PageKit.Text(_root, "spell-warn-" + i, Left + 74, y + 60, RowW - 80, 26, "", 15, PageKit.Select, wrap: true),
-                ActionBg = PageKit.Box(_root, "spell-act-bg-" + i, LearnX, y + 18, LearnW, 44, PageKit.PaperShade),
-                ActionText = PageKit.Text(_root, "spell-act-" + i, LearnX, y + 18, LearnW, 44, "", 18, PageKit.Ink, TextAlignmentOptions.Center),
+                // COS-177: name, then a one-sentence summary across the row, then numbers and mastery left of the bar slots.
+                Name = PageKit.Text(_root, "spell-name-" + i, Left + 74, y + 2, RowW - 80, 30, "", 24, PageKit.Ink),
+                Short = PageKit.Text(_root, "spell-short-" + i, Left + 74, y + 30, RowW - 80, 22, "", 16, PageKit.Ink),
+                Meta = PageKit.Text(_root, "spell-meta-" + i, Left + 74, y + 52, SlotsX - Left - 80, 20, "", 15, PageKit.Ink),
+                Warn = PageKit.Text(_root, "spell-warn-" + i, Left + 74, y + 72, SlotsX - Left - 80, 20, "", 15, PageKit.Select),
+                ActionBg = PageKit.Box(_root, "spell-act-bg-" + i, LearnX, y + ActionY, LearnW, ActionH, PageKit.PaperShade),
+                ActionText = PageKit.Text(_root, "spell-act-" + i, LearnX, y + ActionY, LearnW, ActionH, "", 17, PageKit.Ink, TextAlignmentOptions.Center),
             };
             r.Icon.preserveAspect = true;
             for (int s = 0; s < SpellBook.Slots; s++)
             {
                 float x = SlotsX + s * (SlotW + SlotGap);
-                r.Slots[s] = (PageKit.Box(_root, $"spell-slot-bg-{i}-{s}", x, y + 18, SlotW, 44, PageKit.PaperShade),
-                    PageKit.Text(_root, $"spell-slot-{i}-{s}", x, y + 18, SlotW, 44, (s + 1).ToString(), 20, PageKit.Ink, TextAlignmentOptions.Center));
+                r.Slots[s] = (PageKit.Box(_root, $"spell-slot-bg-{i}-{s}", x, y + ActionY, SlotW, ActionH, PageKit.PaperShade),
+                    PageKit.Text(_root, $"spell-slot-{i}-{s}", x, y + ActionY, SlotW, ActionH, (s + 1).ToString(), 20, PageKit.Ink, TextAlignmentOptions.Center));
             }
             Rows.Add(r);
         }
@@ -107,6 +110,7 @@ internal static class BookSpellsPage
             r.Icon.enabled = sprite != null;
             r.Name.text = PerkInfo.Name(def.Id, def.Name);
             r.Name.color = tooDear ? PageKit.Select : learned ? PageKit.TitleBar : PageKit.Ink;
+            r.Short.text = ModContent.Text.Get(def.Id + ".short", "");
             r.Meta.text = PerkInfo.SpellMeta(def, faint);
             // COS-176: mastery on the third line, the energy warning wins the line when there is one.
             r.Warn.text = tooDear ? PerkInfo.TooDearText() : PerkInfo.MasteryLine(def.Id);
@@ -122,7 +126,7 @@ internal static class BookSpellsPage
                     : UiText.T("ui.spells.need_points", "Not enough points");
                 r.ActionBg.color = res == BuyResult.Ok ? PageKit.Good : PageKit.PaperShade;
                 r.ActionText.color = res == BuyResult.Ok ? PageKit.TitleText : PageKit.InkFaint;
-                hits.Add(new PageHit("spell.learn." + def.Id, LearnX, y + 18, LearnW, 44));
+                hits.Add(new PageHit("spell.learn." + def.Id, LearnX, y + ActionY, LearnW, ActionH));
             }
             else
             {
@@ -131,7 +135,7 @@ internal static class BookSpellsPage
                     bool here = Pc.Spells.Loadout[s] == def.Id;
                     r.Slots[s].Bg.color = here ? PageKit.TitleBar : PageKit.PaperShade;
                     r.Slots[s].Text.color = here ? PageKit.TitleText : PageKit.Ink;
-                    hits.Add(new PageHit($"spell.slot.{s}.{def.Id}", SlotsX + s * (SlotW + SlotGap), y + 18, SlotW, 44));
+                    hits.Add(new PageHit($"spell.slot.{s}.{def.Id}", SlotsX + s * (SlotW + SlotGap), y + ActionY, SlotW, ActionH));
                 }
             }
             hits.Add(new PageHit(def.Id, Left, y, RowW, RowH - 6)); // the row itself: hover shows the spell on the card
@@ -149,7 +153,7 @@ internal static class BookSpellsPage
     private static void Show(Row r, bool on)
     {
         r.Shade.enabled = r.Icon.enabled = on;
-        r.Name.enabled = r.Meta.enabled = r.Warn.enabled = on;
+        r.Name.enabled = r.Short.enabled = r.Meta.enabled = r.Warn.enabled = on;
         r.ActionBg.enabled = r.ActionText.enabled = on;
         foreach (var (bg, text) in r.Slots) bg.enabled = text.enabled = on;
     }
