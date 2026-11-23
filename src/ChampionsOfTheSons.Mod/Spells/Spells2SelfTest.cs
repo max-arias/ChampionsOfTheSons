@@ -77,6 +77,14 @@ internal static class Spells2SelfTest
 
     private static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0, v.z).normalized;
 
+    /// <summary>Scene roots our effects create, not riding on the player (COS-178).</summary>
+    private static IEnumerable<string> LeftoverNames() =>
+        UnityEngine.Object.FindObjectsOfType<Transform>()
+            .Where(t => t.parent == null && (t.name.StartsWith("cots-fx-", StringComparison.Ordinal) || t.name.StartsWith("cots-flame-ring", StringComparison.Ordinal)))
+            .Select(t => t.name);
+
+    private static int LeftoverRoots() => LeftoverNames().Count();
+
     private static void Advance(double seconds, float step = 0.1f)
     {
         for (double t = 0; t < seconds - 1e-4; t += step)
@@ -445,8 +453,27 @@ internal static class Spells2SelfTest
             if (!Ok("spell.black_flame")) return;
             Advance(2.2f);
             SelfTest.Check("spells2: Black Flame burns an enemy in its radius", Hp(foe) < before, $"{before:0.#} -> {Hp(foe):0.#}");
+            SelfTest.Check("spells2: Black Flame stands a ring of flames on the ground (COS-179)", !Visuals.FxKit.Available || SpellEffects.FlameRingFlames == Visuals.FlameRing.Count,
+                $"{SpellEffects.FlameRingFlames} flames");
             SelfTest.Check("spells2: Black Flame leaves an enemy outside its radius alone", Math.Abs(Hp(far) - farBefore) < 0.01, $"{farBefore:0.#} -> {Hp(far):0.#}");
             SelfTest.Check("spells2: switching it off starts the cooldown", SpellCaster.Cast(0) == SpellCastOutcome.Stopped && !Pc.Spells.IsReady(0));
+        });
+        // COS-178: every spell, cast back to back with nothing reset between, leaves nothing behind once its time is up.
+        Case("nothing lingers", () =>
+        {
+            int before = SpellFx.LiveCount, roots = LeftoverRoots();
+            foreach (var id in ModContent.Db.Spells.Keys.Where(SpellCaster.IsImplemented).OrderBy(i => i, StringComparer.Ordinal))
+            {
+                if (id is "spell.flicker_strike" or "spell.sustain_shield") continue; // a run with targets / a held channel
+                CastSpell(id);
+                for (int s = 0; s < SpellBook.Slots; s++)
+                    if (Pc.Spells.IsActive(s)) { Pc.Spells.Stop(s); SpellEffects.Stopped(s); } // toggles off again
+            }
+            Advance(200, 0.25f);
+            SelfTest.Check("spells2: no spell effect is still alive after its time", SpellFx.LiveCount <= before && SpellWorld.ZoneCount == 0 && SpellWorld.BoltCount == 0
+                && SpellPortals.Count == 0 && !SpellPortals.HasPending, $"fx {before} -> {SpellFx.LiveCount}, zones {SpellWorld.ZoneCount}, bolts {SpellWorld.BoltCount}, portals {SpellPortals.Count}, pending {SpellPortals.HasPending}");
+            int after = LeftoverRoots();
+            SelfTest.Check("spells2: no cots effect object is left in the scene", after <= roots, $"{roots} -> {after}: {string.Join(", ", LeftoverNames().Take(8))}");
         });
         Case("multishot", () =>
         {

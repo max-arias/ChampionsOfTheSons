@@ -220,6 +220,9 @@ internal static class SpellFx
         return Track(go, seconds, follow);
     }
 
+    /// <summary>Effects alive now (self-tests, COS-178).</summary>
+    public static int LiveCount => Items.Count(i => i.Go != null);
+
     /// <summary>Removes one effect early.</summary>
     public static void Remove(GameObject? go)
     {

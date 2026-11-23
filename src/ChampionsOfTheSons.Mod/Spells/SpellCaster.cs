@@ -168,6 +168,14 @@ internal static class SpellCaster
     }
 
     /// <summary>Height of the first thing below <paramref name="from"/>, ignoring the player's own colliders.</summary>
+    /// <summary>Height of the terrain itself under a point (not trees, rocks or buildings), if any (COS-178).</summary>
+    public static float? TerrainY(Vector3 from)
+    {
+        foreach (var h in Physics.RaycastAll(from, Vector3.down, 400f, ~0, QueryTriggerInteraction.Ignore))
+            if (h.collider != null && h.collider.TryCast<TerrainCollider>() != null) return h.point.y;
+        return null;
+    }
+
     public static float? GroundY(Vector3 from)
     {
         var self = LocalPlayer.Transform != null ? LocalPlayer.Transform.root : null;

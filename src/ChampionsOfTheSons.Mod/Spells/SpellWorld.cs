@@ -100,10 +100,13 @@ internal static class SpellWorld
     }
 
     /// <summary>The aim point put on the ground below it.</summary>
+    /// <summary>Where an aimed area spell lands: the aimed point brought down to the ground. COS-178: the terrain under it wins over
+    /// anything higher (tree canopies caught spells in the treetops, where their visuals hung in the air).</summary>
     public static Vector3 AimGround(float range)
     {
         var p = AimPoint(range);
-        if (SpellCaster.GroundY(p + Vector3.up * 3) is float gy && gy <= p.y + 4) p.y = gy;
+        if (SpellCaster.TerrainY(p + Vector3.up * 3) is float ty) p.y = ty;
+        else if (SpellCaster.GroundY(p + Vector3.up * 3) is float gy && gy <= p.y + 4) p.y = gy;
         return p;
     }
 

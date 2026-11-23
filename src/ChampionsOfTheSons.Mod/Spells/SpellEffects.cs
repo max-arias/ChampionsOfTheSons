@@ -47,13 +47,16 @@ internal static class SpellEffects
         ["spell.flicker_strike"] = () => FlickerRun.Start(FlickerRun.Reachable()),
     };
 
-    private static GameObject? _shieldFx, _flameFx, _multishotFx;
+    private static GameObject? _shieldFx, _multishotFx;
+    private static Visuals.FlameRing? _flameRing;
     private static float _flameTimer;
     private static double _warCryArmor;
 
     public static void ResetState()
     {
-        _shieldFx = _flameFx = _multishotFx = null;
+        _shieldFx = _multishotFx = null;
+        _flameRing?.Destroy();
+        _flameRing = null;
         _flameTimer = 0;
     }
 
@@ -80,21 +83,18 @@ internal static class SpellEffects
     private static bool Berserk()
     {
         Buffs.Apply("berserk", S("spell_berserk_duration"), SpellTuning.Berserk(Stats));
-        SpellFx.Disc(Feet(), 2.2f, SpellFx.Blood, 1.2f, LocalPlayer.Transform);
         return true;
     }
 
     private static bool GoldenSkin()
     {
         Buffs.Apply("golden_skin", SpellTuning.GoldenSkinDuration, SpellTuning.GoldenSkin(Stats));
-        SpellFx.Disc(Feet(), 2.2f, SpellFx.Holy, 1.2f, LocalPlayer.Transform);
         return true;
     }
 
     private static bool Focus()
     {
         Buffs.Apply("focus", S("spell_focus_on_atk_speed_duration") > 0 ? S("spell_focus_on_atk_speed_duration") : SpellTuning.FocusDuration, SpellTuning.Focus(Stats));
-        SpellFx.Disc(Feet(), 1.6f, SpellFx.Steel, 1f, LocalPlayer.Transform);
         return true;
     }
 
@@ -109,7 +109,6 @@ internal static class SpellEffects
         double crit = Stats.Get(PerkStatIds.FrenzyCrit);
         if (crit > 0) mods.Add(new StatModifier(StatIds.CritChance, EffectOp.Add, crit));
         if (mods.Count > 0) Buffs.Apply("frenzy_burst", SpellTuning.FrenzyDuration, mods);
-        SpellFx.Disc(Feet(), 1.8f, SpellFx.Fire, 1f, LocalPlayer.Transform);
         return true;
     }
 
@@ -604,14 +603,21 @@ internal static class SpellEffects
         // Enchant Weapon (perk): all damage x1.33 for as long as the flame burns.
         if (Has(PerkEffectIds.EnchantWeapon))
             Buffs.Apply("enchant_weapon", 1e6, new[] { new StatModifier(StatIds.AllDamage, EffectOp.Mult, PerkTuning.EnchantWeaponDamage) });
-        _flameFx = SpellFx.Disc(Feet(), (float)SpellTuning.BlackFlameRadius, SpellFx.Dark, 1e6f, LocalPlayer.Transform, SpellFx.Look.Ring);
+        // COS-179: flames along the edge that follow the ground, no disc (teammates draw the same ring, StateTints).
+        _flameRing?.Destroy();
+        _flameRing = new Visuals.FlameRing();
+        _flameRing.Update(PlayerPos, (float)SpellTuning.BlackFlameRadius);
         return true;
     }
+
+    /// <summary>Flames in the local Black Flame ring (self-tests).</summary>
+    public static int FlameRingFlames => _flameRing?.Flames ?? 0;
 
     /// <summary>Per-frame work of the running toggle spells (SpellWorld.Step).</summary>
     public static void Sustained(float dt)
     {
         if (!SpellHits.Running("spell.black_flame")) { _flameTimer = 0; return; }
+        _flameRing?.Update(PlayerPos, (float)SpellTuning.BlackFlameRadius);
         _flameTimer += dt;
         while (_flameTimer >= SpellTuning.BlackFlameTick)
         {
@@ -649,8 +655,8 @@ internal static class SpellEffects
                 _shieldFx = null;
                 break;
             case "spell.black_flame":
-                SpellFx.Remove(_flameFx);
-                _flameFx = null;
+                _flameRing?.Destroy();
+                _flameRing = null;
                 Buffs.Remove("enchant_weapon");
                 break;
         }

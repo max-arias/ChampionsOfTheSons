@@ -34,9 +34,10 @@ internal static class FxKit
     /// An instance of <paramref name="prefab"/> at <paramref name="pos"/>, scaled and tinted, or null (no bundle, or a decorative
     /// effect while reduced). <paramref name="parent"/>: keep world position and follow it.
     /// </summary>
-    public static GameObject? Spawn(string prefab, Vector3 pos, Vector3 scale, Color tint, Transform? parent = null)
+    /// <param name="essential">Shown even under "reduce heavy effects" (an area the player must see, like Black Flame's ring).</param>
+    public static GameObject? Spawn(string prefab, Vector3 pos, Vector3 scale, Color tint, Transform? parent = null, bool essential = false)
     {
-        if (Reduced && Decorative.Contains(prefab)) return null;
+        if (Reduced && !essential && Decorative.Contains(prefab)) return null;
         var holder = new GameObject("cots-fx-" + prefab);
         holder.transform.position = pos;
         var go = CotsBundle.Spawn(prefab, holder.transform);
@@ -53,8 +54,8 @@ internal static class FxKit
         return holder;
     }
 
-    public static GameObject? Spawn(string prefab, Vector3 pos, float radius, Color tint, Transform? parent = null) =>
-        Spawn(prefab, pos, Vector3.one * radius, tint, parent);
+    public static GameObject? Spawn(string prefab, Vector3 pos, float radius, Color tint, Transform? parent = null, bool essential = false) =>
+        Spawn(prefab, pos, Vector3.one * radius, tint, parent, essential);
 
     /// <summary>The prefab's authored tint per material instance, so re-tinting (traps arming) never compounds.</summary>
     private static readonly Dictionary<int, Color> AuthoredTint = new();

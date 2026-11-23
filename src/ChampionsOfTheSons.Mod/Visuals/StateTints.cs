@@ -23,6 +23,8 @@ public sealed class StateTintsFeature : IModFeature
     public static readonly Color ShieldTint = new(0.22f, 0.22f, 0.3f);
     public static readonly Color UndeadTint = new(0.5f, 1f, 0.5f);
     public static readonly Color GoldTint = new(1f, 0.78f, 0.3f);
+    public static readonly Color BerserkTint = new(1f, 0.45f, 0.4f), FocusTint = new(0.75f, 0.85f, 1f), FrenzyTint = new(1f, 0.7f, 0.45f);
+    private static Color? _localTint;
 
     private static readonly Dictionary<IntPtr, EnemyStateFlags> Shown = new();
     private static readonly Dictionary<ulong, EnemyStateFlags> FromHost = new();
@@ -31,6 +33,7 @@ public sealed class StateTintsFeature : IModFeature
 
     private sealed class RemotePlayer
     {
+        public FlameRing? Ring;
         public PlayerStateFlags Flags;
         public Vector3 Position;
         public float Seen;
@@ -157,11 +160,17 @@ public sealed class StateTintsFeature : IModFeature
     private static void LocalPlayerState(float dt)
     {
         var flags = LocalFlags();
-        bool gold = flags.HasFlag(PlayerStateFlags.GoldenSkin);
-        if (gold != _goldOn && LocalPlayer.Transform != null)
+        // COS-181: the self buff with the highest priority tints the first-person arms and body.
+        Color? tint = flags.HasFlag(PlayerStateFlags.GoldenSkin) ? GoldTint
+            : flags.HasFlag(PlayerStateFlags.Berserk) ? BerserkTint
+            : SpellWorld.Buffs.Has("focus") ? FocusTint
+            : SpellWorld.Buffs.Has("frenzy_burst") ? FrenzyTint
+            : null;
+        _goldOn = flags.HasFlag(PlayerStateFlags.GoldenSkin);
+        if (tint != _localTint && LocalPlayer.Transform != null)
         {
-            _goldOn = gold;
-            Tint(LocalPlayer.Transform.gameObject, gold ? GoldTint : null); // first-person arms and body
+            _localTint = tint;
+            Tint(LocalPlayer.Transform.gameObject, tint);
         }
         if (!CoopSession.Active || LocalPlayer.Transform == null) return;
         _sendTimer -= dt;
@@ -226,8 +235,8 @@ public sealed class StateTintsFeature : IModFeature
                     {
                         PlayerStateFlags.BlackFlame => FxKit.Spawn(FxKit.Flame, r.Position, 0.14f, new Color(0.55f, 0.2f, 1f)),
                         PlayerStateFlags.Multishot => FxKit.Spawn(FxKit.Glyph, r.Position, 0.16f, SpellFx.Arcane),
-                        PlayerStateFlags.Berserk => FxKit.Spawn(FxKit.Ring, r.Position, 0.9f, SpellFx.Blood),
-                        _ => FxKit.Spawn(FxKit.Ring, r.Position, 0.75f, GoldTint),
+                        PlayerStateFlags.Berserk => FxKit.Spawn(FxKit.Flame, r.Position + Vector3.up, new Vector3(0.6f, 1.2f, 0.6f), SpellFx.Blood),
+                        _ => FxKit.Spawn(FxKit.Flame, r.Position + Vector3.up, new Vector3(0.6f, 1.2f, 0.6f), GoldTint),
                     };
                     if (go != null) r.Fx[f] = go;
                 }
@@ -239,14 +248,21 @@ public sealed class StateTintsFeature : IModFeature
                 if (on && go != null)
                     go.transform.position = f is PlayerStateFlags.BlackFlame or PlayerStateFlags.Multishot
                         ? (hand != null ? hand.position : r.Position + Vector3.up * 1.3f)
-                        : r.Position;
+                        : r.Position + Vector3.up;
             }
+            // COS-179: a teammate's Black Flame shows the same ground ring as the caster's own.
+            bool ring = flags.HasFlag(PlayerStateFlags.BlackFlame);
+            if (ring && r.Ring == null) r.Ring = new FlameRing();
+            else if (!ring && r.Ring != null) { r.Ring.Destroy(); r.Ring = null; }
+            r.Ring?.Update(r.Position, (float)Core.Rules.SpellTuning.BlackFlameRadius);
         }
     }
 
     private static void ClearFx(RemotePlayer r)
     {
         foreach (var go in r.Fx.Values) if (go != null) UnityEngine.Object.Destroy(go);
+        r.Ring?.Destroy();
+        r.Ring = null;
         r.Fx.Clear();
     }
 

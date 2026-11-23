@@ -6,7 +6,7 @@ namespace ChampionsOfTheSons.Mod.Visuals;
 
 /// <summary>
 /// Effects that last as long as a toggle or buff (COS-102): Black Flame burns and Multishot turns a glyph at the
-/// weapon hand (first person: a fixed spot low right of the camera), Berserk and Golden Skin ring the player's feet.
+/// weapon hand (first person: a fixed spot low right of the camera); Berserk and Golden Skin glow on the body (COS-181).
 /// Hand effects are decorative and hidden under "reduce heavy effects".
 /// </summary>
 internal static class PlayerStateFx
@@ -27,8 +27,9 @@ internal static class PlayerStateFx
     {
         new State { Id = "black_flame", IsOn = () => ToggleOn("spell.black_flame"), Make = () => AtHand(FxKit.Flame, 0.12f, Violet) },
         new State { Id = "multishot", IsOn = () => ToggleOn("spell.multishot"), Make = () => HandGlyph() },
-        new State { Id = "berserk", IsOn = () => SpellWorld.Buffs.Has("berserk"), Make = () => AtFeet(0.9f, SpellFx.Blood) },
-        new State { Id = "golden_skin", IsOn = () => SpellWorld.Buffs.Has("golden_skin"), Make = () => AtFeet(0.75f, Gold) },
+        // COS-181: self buffs glow on the body (plus a body tint, StateTints), no ring at the feet.
+        new State { Id = "berserk", IsOn = () => SpellWorld.Buffs.Has("berserk"), Make = () => OnBody(SpellFx.Blood) },
+        new State { Id = "golden_skin", IsOn = () => SpellWorld.Buffs.Has("golden_skin"), Make = () => OnBody(Gold) },
     };
 
     private static bool _reduced;
@@ -92,9 +93,9 @@ internal static class PlayerStateFx
         return go;
     }
 
-    private static GameObject? AtFeet(float radius, Color color)
+    private static GameObject? OnBody(Color color)
     {
         var t = LocalPlayer.Transform;
-        return t == null ? null : FxKit.Spawn(FxKit.Ring, t.position, radius, color, t);
+        return t == null ? null : BodyAura.On(t, color);
     }
 }
