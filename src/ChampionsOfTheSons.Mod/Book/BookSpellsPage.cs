@@ -15,24 +15,33 @@ namespace ChampionsOfTheSons.Mod.Book;
 internal static class BookSpellsPage
 {
     private const float Left = 62, Right = 16, Header = 80;
-    private const float ListY = Header + 10, RowH = 96, RowW = PageKit.W - Left - Right;
+    private const float ListY = Header + 10, RowH = 110, RowW = PageKit.W - Left - Right;
     private const float FootY = PageKit.H - 92 - 50, FootH = 44;
     private const float NextX = PageKit.W - Right - 56, PrevX = NextX - 56 - 90;
     private const float RefundX = Left, RefundW = 210;
-    private const float SlotW = 34, SlotGap = 4, SlotsX = Left + RowW - SpellBook.Slots * (SlotW + SlotGap), LearnW = 190, LearnX = Left + RowW - LearnW;
-    public const int RowsPerPage = 8;
-    private const float ActionY = 52, ActionH = 38;
+    // COS-182: the bar slots are a small copy of the action bar: six frames, each with its key underneath.
+    private const float SlotW = 40, SlotGap = 4, SlotsX = Left + RowW - SpellBook.Slots * (SlotW + SlotGap), LearnW = 190, LearnX = Left + RowW - LearnW;
+    public const int RowsPerPage = 7;
+    private const float ActionY = 50, ActionH = 40, KeyY = ActionY + ActionH + 1, KeyH = 16;
+    private static readonly Color SlotFrame = PageKit.Hex("#3A2E24"), SlotLit = PageKit.Hex("#C8942E"), SlotEmpty = PageKit.Hex("#5A4A3A");
     private const float ArmSeconds = 4;
 
     private sealed class Row
     {
         public Image Shade = null!, Icon = null!, ActionBg = null!;
         public TextMeshProUGUI Name = null!, Short = null!, Meta = null!, Warn = null!, ActionText = null!;
-        public (Image Bg, TextMeshProUGUI Text)[] Slots = new (Image, TextMeshProUGUI)[SpellBook.Slots];
+        public BarSlot[] Slots = new BarSlot[SpellBook.Slots];
+    }
+
+    private sealed class BarSlot
+    {
+        public Image Bg = null!, Icon = null!;
+        public Image[] Frame = null!;
+        public TextMeshProUGUI Key = null!;
     }
 
     private static RectTransform _root = null!;
-    private static TextMeshProUGUI _points = null!, _pager = null!, _refundText = null!;
+    private static TextMeshProUGUI _points = null!, _pager = null!, _refundText = null!, _barHint = null!;
     private static Image _refundBg = null!;
     private static readonly List<Row> Rows = new();
     private static bool _armed;
@@ -71,8 +80,18 @@ internal static class BookSpellsPage
             for (int s = 0; s < SpellBook.Slots; s++)
             {
                 float x = SlotsX + s * (SlotW + SlotGap);
-                r.Slots[s] = (PageKit.Box(_root, $"spell-slot-bg-{i}-{s}", x, y + ActionY, SlotW, ActionH, PageKit.PaperShade),
-                    PageKit.Text(_root, $"spell-slot-{i}-{s}", x, y + ActionY, SlotW, ActionH, (s + 1).ToString(), 20, PageKit.Ink, TextAlignmentOptions.Center));
+                var slot = new BarSlot
+                {
+                    Bg = PageKit.Box(_root, $"spell-slot-bg-{i}-{s}", x, y + ActionY, SlotW, ActionH, SlotFrame),
+                    Icon = PageKit.Box(_root, $"spell-slot-icon-{i}-{s}", x + 4, y + ActionY + 4, SlotW - 8, ActionH - 8, Color.white),
+                    Frame = PageKit.Frame(_root, x, y + ActionY, SlotW, ActionH, SlotEmpty, 3),
+                    Key = PageKit.Text(_root, $"spell-slot-key-{i}-{s}", x - 2, y + KeyY, SlotW + 4, KeyH, "", 12, PageKit.Ink, TextAlignmentOptions.Center),
+                };
+                slot.Icon.preserveAspect = true;
+                slot.Key.enableAutoSizing = true;
+                slot.Key.fontSizeMin = 9;
+                slot.Key.fontSizeMax = 12;
+                r.Slots[s] = slot;
             }
             Rows.Add(r);
         }
@@ -81,6 +100,7 @@ internal static class BookSpellsPage
         PageKit.Box(_root, "next-bg", NextX, FootY, 56, FootH, PageKit.TitleBar);
         PageKit.Text(_root, "next", NextX, FootY, 56, FootH, ">", 30, PageKit.TitleText, TextAlignmentOptions.Center);
         _pager = PageKit.Text(_root, "pager", PrevX + 56, FootY, 90, FootH, "", 26, PageKit.Ink, TextAlignmentOptions.Center);
+        _barHint = PageKit.Text(_root, "bar-hint", Left, FootY - 26, RowW, 22, "", 15, PageKit.Ink, TextAlignmentOptions.MidlineRight);
         _refundBg = PageKit.Box(_root, "refund-bg", RefundX, FootY, RefundW, FootH, PageKit.TitleBar);
         _refundText = PageKit.Text(_root, "refund", RefundX, FootY, RefundW, FootH, "", 20, PageKit.TitleText, TextAlignmentOptions.Center);
         return _root;
@@ -92,6 +112,8 @@ internal static class BookSpellsPage
         int avail = Pc.Perks.AvailablePoints(Pc.Progress);
         var faint = PageKit.HexOf(PageKit.InkFaint);
         _points.text = $"{UiText.T("ui.perks.points", "Points")}: <b>{avail}</b>   {UiText.T("ui.book.spells.energy", "Max energy")} <b>{MaxEnergyText()}</b>";
+        _barHint.text = string.Format(UiText.T("ui.book.spells.bar_hint", "Click a slot on the right to put a spell on your bar ({0} - {1})."),
+            ChampionsOfTheSons.Mod.Spells.SpellKeys.Label(0), ChampionsOfTheSons.Mod.Spells.SpellKeys.Label(SpellBook.Slots - 1));
         var all = AllSpells();
         Page = Math.Clamp(Page, 0, Pages - 1);
         for (int i = 0; i < Rows.Count; i++)
@@ -116,7 +138,7 @@ internal static class BookSpellsPage
             r.Warn.text = tooDear ? PerkInfo.TooDearText() : PerkInfo.MasteryLine(def.Id);
             r.Warn.color = tooDear ? PageKit.Select : PageKit.Good;
             r.ActionBg.enabled = r.ActionText.enabled = !learned;
-            foreach (var (bg, text) in r.Slots) bg.enabled = text.enabled = learned;
+            foreach (var sl in r.Slots) ShowSlot(sl, learned);
             if (!learned)
             {
                 var res = Pc.Perks.CanUnlockSpell(def.Id, Pc.Progress);
@@ -132,9 +154,17 @@ internal static class BookSpellsPage
             {
                 for (int s = 0; s < SpellBook.Slots; s++)
                 {
-                    bool here = Pc.Spells.Loadout[s] == def.Id;
-                    r.Slots[s].Bg.color = here ? PageKit.TitleBar : PageKit.PaperShade;
-                    r.Slots[s].Text.color = here ? PageKit.TitleText : PageKit.Ink;
+                    // Lit with this spell's icon where it sits; another spell's icon dimmed where that one sits; plain when empty.
+                    var sl = r.Slots[s];
+                    var occupant = Pc.Spells.Loadout[s];
+                    bool here = occupant == def.Id;
+                    var occSprite = occupant != null ? Icons.IconCache.GetSprite(occupant) : null;
+                    sl.Icon.sprite = occSprite;
+                    sl.Icon.enabled = occSprite != null;
+                    sl.Icon.color = here ? Color.white : new Color(1, 1, 1, 0.3f);
+                    foreach (var f in sl.Frame) f.color = here ? SlotLit : SlotEmpty;
+                    sl.Key.text = ChampionsOfTheSons.Mod.Spells.SpellKeys.Label(s);
+                    sl.Key.color = here ? SlotLit : PageKit.Ink;
                     hits.Add(new PageHit($"spell.slot.{s}.{def.Id}", SlotsX + s * (SlotW + SlotGap), y + ActionY, SlotW, ActionH));
                 }
             }
@@ -155,7 +185,14 @@ internal static class BookSpellsPage
         r.Shade.enabled = r.Icon.enabled = on;
         r.Name.enabled = r.Short.enabled = r.Meta.enabled = r.Warn.enabled = on;
         r.ActionBg.enabled = r.ActionText.enabled = on;
-        foreach (var (bg, text) in r.Slots) bg.enabled = text.enabled = on;
+        foreach (var sl in r.Slots) ShowSlot(sl, on);
+    }
+
+    private static void ShowSlot(BarSlot sl, bool on)
+    {
+        sl.Bg.enabled = sl.Key.enabled = on;
+        if (!on) sl.Icon.enabled = false;
+        foreach (var f in sl.Frame) f.enabled = on;
     }
 
     /// <summary>A click on this page; null when the key is not ours.</summary>
