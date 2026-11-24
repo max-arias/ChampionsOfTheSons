@@ -13,10 +13,10 @@ internal static class FxKit
 {
     public const string Ring = "Fx_Ring", Burst = "Fx_Burst", Orb = "Fx_Orb", Bubble = "Fx_Bubble", Dome = "Fx_Dome", Column = "Fx_Column",
         BlackHole = "Fx_BlackHole", Snow = "Fx_Snow", Portal = "Fx_Portal", Beam = "Fx_Beam", Chain = "Fx_Chain", Flame = "Fx_Flame",
-        Glyph = "Fx_Glyph", Gas = "Fx_Gas";
+        Glyph = "Fx_Glyph", Gas = "Fx_Gas", BallLightning = "Fx_BallLightning";
 
     /// <summary>Every effect prefab name (self-tests, the frame-cost check).</summary>
-    public static readonly string[] All = { Ring, Burst, Orb, Bubble, Dome, Column, BlackHole, Snow, Portal, Beam, Chain, Flame, Glyph, Gas };
+    public static readonly string[] All = { Ring, Burst, Orb, Bubble, Dome, Column, BlackHole, Snow, Portal, Beam, Chain, Flame, Glyph, Gas, BallLightning };
 
     /// <summary>Effects that only decorate (hand flames, hand glyphs): hidden under "reduce heavy effects".</summary>
     private static readonly HashSet<string> Decorative = new() { Flame, Glyph };

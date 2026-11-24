@@ -339,18 +339,19 @@ internal static class SpellEffects
 
     private static void LaunchBallLightning(Vector3 start, Vector3 dir)
     {
-        var ball = SpellFx.Sphere(start, 0.8f, SpellFx.Storm, 1e6f);
-        var ring = ball != null ? SpellFx.Disc(start, (float)SpellTuning.BallLightningRadius, SpellFx.Storm, 1e6f, ball.transform, SpellFx.Look.Ring) : null;
+        float seconds = (float)SpellTuning.BallLightningSeconds;
+        // No radius ring (Max, 2026-11-23): the ball itself, crackling and striking down, is the effect. It flies straight through
+        // everything (nothing here collides) and dwindles away over its last moments.
+        var ball = SpellFx.Sphere(start, 0.8f, SpellFx.Lightning, seconds, look: SpellFx.Look.BallLightning);
         AddZone(new SpellZone
         {
-            Id = "ball_lightning", Center = start, Radius = (float)SpellTuning.BallLightningRadius, Left = (float)SpellTuning.BallLightningSeconds,
+            Id = "ball_lightning", Center = start, Radius = (float)SpellTuning.BallLightningRadius, Left = seconds,
             Interval = (float)SpellTuning.BallLightningTick, Visual = ball,
             Frame = (z, dt) =>
             {
                 z.Center += dir * (float)SpellTuning.BallLightningSpeed * dt;
                 if (z.Visual != null) z.Visual.transform.position = z.Center;
             },
-            End = z => SpellFx.Remove(ring), // the radius ring rides the ball and goes with it (COS-178)
             Pulse = z =>
             {
                 foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, SpellTuning.BallLightningZap(Stats, Rng.FromTime()));

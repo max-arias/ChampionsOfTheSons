@@ -13,7 +13,7 @@ public static class CotsFxPrefabs
 {
     private static Texture2D? _dot;
     private static Mesh _disc = null!, _sphere = null!, _hemisphere = null!, _cylinder = null!;
-    private static Texture2D _white = null!, _ring = null!, _fill = null!, _smoke = null!, _flame = null!, _glyph = null!, _noise = null!, _swirl = null!, _chain = null!;
+    private static Texture2D _white = null!, _ring = null!, _fill = null!, _smoke = null!, _flame = null!, _glyph = null!, _noise = null!, _swirl = null!, _chain = null!, _bolt = null!;
 
     public static void Generate()
     {
@@ -66,6 +66,27 @@ public static class CotsFxPrefabs
             return White(1 - CotsGen.Smooth(0.08f, 0.2f, d));
         }, repeat: true);
 
+        _bolt = CotsGen.Tex("FxBolt", 256, (u, v) =>
+        {
+            // One jagged lightning bolt running top (v = 1, centred) to bottom, with a fainter fork halfway down.
+            // Straight segments between random points (value noise sampled at its cell corners), so it is jagged, not wavy.
+            float Jag(float y, int cells, int seed)
+            {
+                float t = y * cells;
+                int i = Mathf.FloorToInt(t);
+                return Mathf.Lerp(CotsGen.Noise(0.37f, (i + 0.01f) / cells, cells, seed), CotsGen.Noise(0.37f, (i + 1.01f) / cells, cells, seed), t - i) - 0.5f;
+            }
+            float Off(float y) => (Jag(y, 7, 21) * 0.45f + Jag(y, 19, 22) * 0.16f) * (1 - CotsGen.Smooth(0.85f, 1f, y));
+            float x = u - 0.5f - Off(v);
+            float a = Mathf.Exp(-Mathf.Pow(x / 0.016f, 2)) + 0.3f * Mathf.Exp(-Mathf.Pow(x / 0.06f, 2));
+            if (v < 0.6f && v > 0.22f)
+            {
+                float fx = u - 0.5f - Off(0.6f) - (0.6f - v) * 0.5f - Jag(v, 14, 23) * 0.12f * (1 - CotsGen.Smooth(0.5f, 0.6f, v));
+                a += 0.6f * Mathf.Exp(-Mathf.Pow(fx / 0.012f, 2)) * CotsGen.Smooth(0.22f, 0.3f, v);
+            }
+            return White(Mathf.Clamp01(a * CotsGen.Smooth(0f, 0.06f, v)));
+        });
+
         _disc = Disc();
         _sphere = Sphere("FxSphereMesh", 24, 16, false);
         _hemisphere = Sphere("FxHemisphereMesh", 24, 8, true);
@@ -74,6 +95,7 @@ public static class CotsFxPrefabs
         Ring();
         Burst();
         Orb();
+        BallLightning();
         Bubble();
         Dome();
         Column();
@@ -467,6 +489,67 @@ public static class CotsFxPrefabs
         sh.radius = 0.4f;
         Shrink(trail);
         FadeOut(trail);
+        CotsGen.SavePrefab(go);
+    }
+
+    /// <summary>
+    /// Ball Lightning, ball radius 1: a white-hot core in a glow, bolts crackling through it in every direction, bolts striking
+    /// down from it (2.4 units, to the ground under a ball flying at chest height) and sparks falling away.
+    /// </summary>
+    private static void BallLightning()
+    {
+        var go = new GameObject("Fx_BallLightning");
+        var core = Particles(Sub(go, "core"), CotsGen.Fx("FxBallCore", SoftDot(), Color.white, 6f));
+        Steady(core, 30, 0.2f, 1.7f);
+        var halo = Particles(Sub(go, "halo"), CotsGen.Fx("FxBallHalo", SoftDot(), Color.white, 0.8f));
+        Steady(halo, 10, 0.35f, 5f);
+
+        var boltMat = CotsGen.Fx("FxBallBolt", _bolt, Color.white, 5f);
+        var arcs = Particles(Sub(go, "arcs"), boltMat);
+        var am = arcs.main;
+        am.startLifetime = new ParticleSystem.MinMaxCurve(0.05f, 0.13f);
+        am.startSpeed = 0;
+        am.startSize = new ParticleSystem.MinMaxCurve(2.4f, 4.2f);
+        am.startRotation = new ParticleSystem.MinMaxCurve(0, Mathf.PI * 2);
+        am.maxParticles = 12;
+        { var em = arcs.emission; em.rateOverTime = 26; }
+        arcs.GetComponent<ParticleSystemRenderer>().flip = new Vector3(0.5f, 0, 0);
+        FadeOut(arcs);
+
+        var strikes = Particles(Sub(go, "strikes"), boltMat, ParticleSystemRenderMode.VerticalBillboard);
+        strikes.transform.localPosition = new Vector3(0, -1.2f, 0);
+        var sm = strikes.main;
+        sm.startLifetime = new ParticleSystem.MinMaxCurve(0.07f, 0.16f);
+        sm.startSpeed = 0;
+        sm.startSize3D = true;
+        sm.startSizeX = new ParticleSystem.MinMaxCurve(1.2f, 2.2f);
+        sm.startSizeY = 2.4f;
+        sm.startSizeZ = 1;
+        sm.maxParticles = 6;
+        { var em = strikes.emission; em.rateOverTime = 7; }
+        var ssh = strikes.shape;
+        ssh.enabled = true;
+        ssh.shapeType = ParticleSystemShapeType.Circle;
+        ssh.radius = 0.35f;
+        ssh.rotation = new Vector3(90, 0, 0);
+        strikes.GetComponent<ParticleSystemRenderer>().flip = new Vector3(0.5f, 0, 0);
+        FadeOut(strikes);
+
+        var sparks = Particles(Sub(go, "sparks"), CotsGen.Fx("FxBallSparks", SoftDot(), Color.white, 3f), ParticleSystemRenderMode.Stretch);
+        var pm = sparks.main;
+        pm.simulationSpace = ParticleSystemSimulationSpace.World;
+        pm.startLifetime = new ParticleSystem.MinMaxCurve(0.3f, 0.55f);
+        pm.startSpeed = new ParticleSystem.MinMaxCurve(1.5f, 4f);
+        pm.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.1f);
+        pm.gravityModifier = 1f;
+        pm.maxParticles = 40;
+        { var em = sparks.emission; em.rateOverTime = 30; }
+        var psh = sparks.shape;
+        psh.enabled = true;
+        psh.shapeType = ParticleSystemShapeType.Sphere;
+        psh.radius = 0.6f;
+        sparks.GetComponent<ParticleSystemRenderer>().velocityScale = 0.1f;
+        FadeOut(sparks);
         CotsGen.SavePrefab(go);
     }
 

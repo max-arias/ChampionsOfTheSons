@@ -16,7 +16,7 @@ internal static class SpellFx
     /// Which effect a call draws. <see cref="Look.Auto"/> picks from the shape and lifetime: a short disc or sphere is a
     /// burst, a lasting disc an area ring, a lasting small sphere an orb, a lasting sphere that follows the player a bubble.
     /// </summary>
-    public enum Look { Auto, Burst, Ring, Dome, Orb, Bubble, BlackHole, Snow, Gas, Glyph, Flame, SunFlare }
+    public enum Look { Auto, Burst, Ring, Dome, Orb, Bubble, BlackHole, Snow, Gas, Glyph, Flame, SunFlare, BallLightning }
 
     private sealed class Item
     {
@@ -26,7 +26,27 @@ internal static class SpellFx
         public Vector3 Offset;
         public Vector3 Velocity;
         public Transform? Homing;
+        /// <summary>Shrinks to nothing over its last seconds instead of popping out (0: no fade).</summary>
+        public float Fade;
+        public Vector3 FullScale;
     }
+
+    /// <summary>
+    /// <paramref name="go"/> lives <paramref name="seconds"/> from now and shrinks away over the last <paramref name="fade"/> of them
+    /// (particles scale with the transform, so the whole effect dwindles).
+    /// </summary>
+    public static void SetLife(GameObject? go, float seconds, float fade)
+    {
+        if (go == null) return;
+        var it = Items.FirstOrDefault(x => x.Go == go);
+        if (it == null) return;
+        it.Left = seconds;
+        it.Fade = fade;
+        it.FullScale = go.transform.localScale;
+    }
+
+    /// <summary>How long Ball Lightning takes to dwindle away at the end of its flight.</summary>
+    public const float BallLightningFade = 1.5f;
 
     /// <summary>A flying visual turns toward <paramref name="target"/> at the caster's bolt turn rate (a teammate's Seeking Arrow).</summary>
     public static void SetHoming(GameObject? go, Transform target)
@@ -42,7 +62,7 @@ internal static class SpellFx
 
     public static readonly Color Fire = new(1f, 0.45f, 0.1f), Ice = new(0.55f, 0.85f, 1f), Arcane = new(0.7f, 0.35f, 1f),
         Holy = new(1f, 0.9f, 0.4f), Heal = new(0.4f, 1f, 0.5f), Blood = new(0.75f, 0.05f, 0.1f), Dark = new(0.12f, 0.05f, 0.2f),
-        Storm = new(0.6f, 0.8f, 1f), Steel = new(0.8f, 0.85f, 0.95f);
+        Storm = new(0.6f, 0.8f, 1f), Lightning = new(1f, 0.9f, 0.45f), Steel = new(0.8f, 0.85f, 0.95f);
 
     /// <summary>Lifetime below which a disc or sphere counts as a one-shot burst.</summary>
     private const float BurstSeconds = 2f;
@@ -145,6 +165,13 @@ internal static class SpellFx
             case Look.Bubble:
                 go = FxKit.Spawn(FxKit.Bubble, pos, radius, color);
                 break;
+            case Look.BallLightning:
+                go = FxKit.Spawn(FxKit.BallLightning, pos, radius, color) ?? FxKit.Spawn(FxKit.Orb, pos, radius, color);
+                if (go == null) break;
+                FxKit.AddLight(go, color, 14, 120);
+                Track(go, seconds, follow);
+                SetLife(go, seconds, BallLightningFade);
+                return go;
             case Look.BlackHole:
                 // radius = the dark core's; the prefab's core is 0.22 of its unit size, the pull swirl reaches the rest.
                 go = FxKit.Spawn(FxKit.BlackHole, pos, radius / 0.22f, color);
@@ -257,6 +284,7 @@ internal static class SpellFx
                 it.Go.transform.position += it.Velocity * dt;
             }
             it.Left -= dt;
+            if (it.Fade > 0 && it.Left < it.Fade) it.Go.transform.localScale = it.FullScale * Mathf.Max(0.01f, it.Left / it.Fade);
             if (it.Left > 0) continue;
             Spells.SpellNet.Expired(it.Go);
             UnityEngine.Object.Destroy(it.Go);
