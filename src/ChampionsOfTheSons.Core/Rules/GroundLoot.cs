@@ -9,6 +9,8 @@ public enum DropSource : byte
     Thrown,
     /// <summary>Did not fit a full bag (a reward or a co-op pickup remainder).</summary>
     Overflow,
+    /// <summary>A weapon thrown at something (a polearm): it lies where it landed until it is fetched.</summary>
+    ThrownWeapon,
 }
 
 /// <summary>One item lying in the world. Positions are plain floats so the class stays game-agnostic.</summary>
@@ -47,10 +49,14 @@ public sealed class GroundLoot
     /// the old eight-step rarity each of the four mostly came from (Common 0, Magic 2, Rare 3, Legendary 5): +0, +8, +18, +50 s.</summary>
     public static double LifetimeFor(DropSource source, Rarity rarity)
     {
+        if (source == DropSource.ThrownWeapon) return ThrownWeaponSeconds;
         double baseSeconds = source switch { DropSource.Thrown => 60, DropSource.Overflow => 900, _ => 120 };
         int tier = LegacyTier[Rarities.Clamp((int)rarity)];
         return baseSeconds + 2 * tier * tier;
     }
+
+    /// <summary>A thrown weapon does not expire (ten years).</summary>
+    public const double ThrownWeaponSeconds = 10 * 365 * 86400.0;
 
     private static readonly int[] LegacyTier = { 0, 2, 3, 5 };
 

@@ -41,6 +41,7 @@ internal static class RealWeapons
     {
         new("long_sword", 47101), new("great_sword", 47102), new("hammer", 47103),
         new("axe", 47104), new("polearm", 47105), new("greatbow", 47106),
+        new("dagger", 47107), new("golf_club", 47108), new("chainsaw", 47109),
     };
 
     private static readonly Dictionary<int, Weapon> ById = All.ToDictionary(w => w.Id);
@@ -178,6 +179,9 @@ internal static class RealWeapons
             var held = UnityEngine.Object.Instantiate(src.gameObject, _templateRoot.transform);
             held.name = $"Cots_{w.TypeId}_Held";
             foreach (var id in held.GetComponentsInChildren<HeldItemIdentifier>(true)) id._itemId = w.Id;
+            // COS-204: a ranged weapon looks its own item up by this id (its ammo lives on that item): the base bow's id found
+            // nothing the player owns, so the bow never held an arrow and asked for its ammo type again every frame.
+            foreach (var ranged in held.GetComponentsInChildren<Sons.Weapon.RangedWeapon>(true)) ranged._weaponItemId = w.Id;
             w.Template = held.transform;
             w.Item!._heldPrefab = held.transform;
         }
@@ -226,6 +230,63 @@ internal static class RealWeapons
         AnimatorFixes++;
     }
 
+    private static Weapon? _inHand;
+
+    /// <summary>Times a weapon's animator flags were cleared after it left the hand (self-test).</summary>
+    public static int FlagClears { get; private set; }
+
+    /// <summary>
+    /// COS-204: every frame, the animator flags of the weapon in the local player's right hand. A held item switches flags on
+    /// the player animator (axeHeld, spearHeld, bowHeld...) that pick the arms' pose; the game switches them off again when
+    /// the item leaves the hand, but not for ours (the animator carries the base weapon's id, see
+    /// <see cref="KeepAnimatorsOnBase"/>). They piled up: after an axe and a spear, the bow's arms stayed in the axe pose and
+    /// the bow never drew. Ours are switched off when the weapon leaves the hand, and the next one's are switched on again
+    /// (two weapons can share a flag).
+    /// </summary>
+    /// <summary>Switches an item's equipped animator flags on or off: its list of flags, each an index into the game's table of
+    /// parameter hashes. (The game's own <c>ApplyAnimVars</c> left ours on when asked to switch them off.)</summary>
+    private static void SetFlags(Animator anim, ItemData item, bool on)
+    {
+        var vars = item._equippedAnimVars;
+        var hashes = TheForest.Utils.Items.ItemAnimatorHashHelper._hashes;
+        if (vars == null || hashes == null) return;
+        foreach (var v in vars)
+        {
+            int i = (int)v;
+            if (i >= 0 && i < hashes.Length) anim.SetBool(hashes[i], on);
+        }
+    }
+
+    public static void KeepAnimatorFlags()
+    {
+        var anim = LocalPlayer.Animator;
+        var inv = LocalPlayer.Inventory;
+        if (anim == null || inv == null) return;
+        var right = inv.RightHandItem;
+        var now = right != null ? Get(right._itemID) : null;
+        if (now == _inHand) return;
+        try
+        {
+            if (_inHand?.Item != null)
+            {
+                SetFlags(anim, _inHand.Item, false);
+                // Nothing in the hand: the base id we put on the animator goes too.
+                if (right == null && anim.GetInteger(RightIdParam) == _inHand.BaseId)
+                {
+                    anim.SetInteger(RightIdParam, -1);
+                    anim.SetFloat(RightIdFloatParam, -1);
+                }
+                FlagClears++;
+            }
+            if (now?.Item != null) SetFlags(anim, now.Item, true);
+        }
+        catch (Exception e)
+        {
+            Note("animator flags failed: " + e);
+        }
+        _inHand = now;
+    }
+
     /// <summary>Swing events of our held weapons (self-test).</summary>
     public static int Swings { get; private set; }
 
@@ -246,7 +307,9 @@ public sealed class RealWeaponsFeature : IModFeature
         RealWeapons.TryRegister(inWorld);
         if (!inWorld) return;
         RealWeapons.EnsureWorld();
+        PolearmThrow.Tick(); // before the slot sync: a thrown weapon leaves the slot, it is not handed back
         RealWeapons.KeepAnimatorsOnBase();
+        RealWeapons.KeepAnimatorFlags();
         WeaponBarKeys.Tick();
         _sync -= dt;
         if (_sync > 0) return;
@@ -254,5 +317,9 @@ public sealed class RealWeaponsFeature : IModFeature
         WeaponSlotSync.Tick();
     }
 
-    public void OnGameStart() => WeaponSlotSync.Reset();
+    public void OnGameStart()
+    {
+        WeaponSlotSync.Reset();
+        PolearmThrow.Reset();
+    }
 }

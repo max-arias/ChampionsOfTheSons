@@ -21,10 +21,8 @@ internal sealed class ActionBar
     public const float ItemCell = 52, ItemGap = 5, ClaspW = 28, Pad = 36, PadY = 12;
     public const float WeaponGroupW = WeaponSlots * ItemCell + (WeaponSlots - 1) * ItemGap;
     public const float ConsumableGroupW = ConsumableSlots * ItemCell + (ConsumableSlots - 1) * ItemGap;
-    /// <summary>The main-hand and off-hand cells left of the weapon group (COS-193).</summary>
-    public const float HandsW = 2 * ItemCell + ItemGap;
     /// <summary>Width of the groups and clasps; the XP strap below has the same width.</summary>
-    public const float InnerWidth = HandsW + ClaspW + WeaponGroupW + ConsumableGroupW + 2 * ClaspW + SpellBar.Width;
+    public const float InnerWidth = WeaponGroupW + ConsumableGroupW + 2 * ClaspW + SpellBar.Width;
     public const float Width = InnerWidth + 2 * Pad;
     public const float Height = SpellBar.Height + 2 * PadY;
     /// <summary>Bottom edge above the screen bottom: just over the XP strap (<see cref="ProgressHud"/>).</summary>
@@ -35,7 +33,6 @@ internal sealed class ActionBar
     private SPanelOptions _root = null!;
     private readonly SpellBar _spells = new();
     public readonly ItemGroup Weapons = new(weapons: true), Consumables = new(weapons: false);
-    public readonly HandCells Hands = new();
     private float _itemTimer;
     private SLabelOptions _vitals = null!;
     private string _vitalsShown = "";
@@ -54,10 +51,6 @@ internal sealed class ActionBar
         bar.Add(HudArt.Piece(HudArt.Backing, 0.7f, "#1A110CD8").Anchor(AnchorType.Fill));
 
         float x = Pad, itemY = (Height - ItemCell) / 2;
-        Hands.Build(bar, x, itemY);
-        x += HandsW;
-        bar.Add(HudArt.Piece(HudArt.Clasp, 1, UiTheme.BoneDark).TopLeft(x + 4, 4).Size(ClaspW - 8, Height - 8));
-        x += ClaspW;
         float weaponsX = x;
         Weapons.Build(bar, x, itemY);
         x += WeaponGroupW;
@@ -89,7 +82,6 @@ internal sealed class ActionBar
         RefreshVitals();
         Weapons.Refresh();
         Consumables.Refresh();
-        Hands.Refresh();
     }
 
     private void RefreshVitals()
@@ -292,54 +284,4 @@ internal sealed class ItemGroup
     public void Pick(int pos) => Picked = pos;
 
     public int PickedIndex() => Picked < 0 ? -1 : IndexAt(Picked);
-}
-
-/// <summary>COS-193: the main-hand (weapon slot) and off-hand items, left of the weapon bar; the main-hand cell is lit while the
-/// weapon is drawn.</summary>
-internal sealed class HandCells
-{
-    private readonly BarSlot[] _cells = new BarSlot[2];
-    private readonly string[] _shown = { "", "" };
-    private static readonly string[] Slots = { Core.Rules.WeaponTypes.WeaponSlot, "equip.offhand" };
-
-    public BarSlot Cell(int i) => _cells[i];
-
-    /// <summary>The item shown in a cell ("" none; self-test).</summary>
-    public string ShownItem(int i) => _shown[i];
-
-    public void Build(SContainerOptions parent, float x, float y)
-    {
-        for (int i = 0; i < 2; i++)
-        {
-            _cells[i] = new BarSlot(parent, x + i * (ActionBar.ItemCell + ActionBar.ItemGap), y, ActionBar.ItemCell, 22);
-            _cells[i].Plate.Active(false);
-            _cells[i].Key.Text("");
-        }
-    }
-
-    public void Refresh()
-    {
-        var inv = PlayerState.Character.Inventory;
-        for (int i = 0; i < 2; i++)
-        {
-            var c = _cells[i];
-            var item = inv.Get(Slots[i]);
-            string id = item == null ? "" : $"{item.BaseId}|{item.Level}|{(int)item.Rarity}";
-            if (id != _shown[i])
-            {
-                _shown[i] = id;
-                c.Root.Active(item != null);
-                if (item != null)
-                {
-                    bool icon = c.ShowContentIcon(item.BaseId);
-                    c.Name.Text(UiText.ItemName(item));
-                    c.Name.Active(!icon);
-                    c.Count.Text("");
-                    c.SetIconColor("#FFFFFF");
-                }
-            }
-            bool drawn = i == 0 && item != null && Weapons.WeaponModels.Active != null;
-            c.SetGlow(item == null ? null : drawn ? UiTheme.EmberGlow : UiTheme.RarityHex(item.Rarity) + "80");
-        }
-    }
 }

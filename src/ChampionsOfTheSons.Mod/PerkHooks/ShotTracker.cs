@@ -40,6 +40,8 @@ internal static class ShotTracker
     public static RangedKind KindOfItem(int itemId)
     {
         string? name = null;
+        // A mod weapon is its base game weapon here: its own item name ("Cots_polearm") says nothing of the kind.
+        if (Weapons.RealWeapons.Get(itemId) is { BaseId: > 0 } real) itemId = real.BaseId;
         try
         {
             if (ItemDatabaseManager.TryFindItemById(itemId, out var data) && data != null) name = data.Name;

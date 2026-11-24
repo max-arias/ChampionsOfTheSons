@@ -29,7 +29,7 @@ Keys (change them in the RedLoader mod settings, file ChampionsOfTheSons.cfg)
   H  ping                         Alt+1 to Alt+6  spell slots 1-6
   F10  mod settings (rebind any key here)
   1 to 6  weapon bar: in the book, hover a weapon and press a number to put it on that key; in the world the key
-          equips and draws it, pressed again it puts it away. 7 to 0 stay the game's item hotkeys.
+          equips and draws it, pressed again it puts it away. A weapon you equip in the book goes on key 1. 7 to 0 stay the game's item hotkeys.
   Gamepad: LB + D-pad opens the panels.
 
 Admin and cheat commands (host or server admin only)

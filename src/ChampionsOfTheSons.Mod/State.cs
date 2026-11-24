@@ -42,6 +42,7 @@ public static class PlayerState
     public static PlayerSave ToSave()
     {
         var save = Character.ToSave();
+        Weapons.PolearmThrow.AddToSave(save); // a thrown weapon lying in the world is saved as owned
         Saves.SaveExtrasFeature.Capture(save);
         return save;
     }

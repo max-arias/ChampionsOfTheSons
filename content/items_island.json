@@ -529,7 +529,7 @@
       ],
       "set": "set.back_nine",
       "legacyIndex": 10015,
-      "weaponModel": "hammer"
+      "weaponModel": "golf_club"
     },
     {
       "id": "item.plaid_trousers_of_quiet_rage",
@@ -1344,7 +1344,8 @@
         ]
       ],
       "legacyIndex": 10038,
-      "weaponModel": "polearm"
+      "weaponModel": "polearm",
+      "gameModelTint": "#6A584A"
     },
     {
       "id": "item.rebar_greatsword",
@@ -1415,7 +1416,7 @@
         }
       ],
       "legacyIndex": 10040,
-      "weaponModel": "great_sword"
+      "weaponModel": "chainsaw"
     },
     {
       "id": "item.sacrificial_kris",
@@ -1468,7 +1469,7 @@
         }
       ],
       "legacyIndex": 10041,
-      "weaponModel": "long_sword"
+      "weaponModel": "dagger"
     },
     {
       "id": "item.longbow_of_the_last_hunt",

@@ -178,6 +178,7 @@ public sealed class ContentDb
             if (w.SwingSpeed <= 0 || w.Reach <= 0 || w.StaminaCost < 0 || w.Length <= 0) _errors.Add($"weapon type {w.Id}: swing speed, reach and length must be > 0");
             if (w.StunSlow is < 0 or > 1) _errors.Add($"weapon type {w.Id}: stunSlow must be in 0..1");
             if (w.DrawSpeed <= 0 || w.SoundPitch <= 0 || w.TrailWidth < 0) _errors.Add($"weapon type {w.Id}: drawSpeed and soundPitch must be > 0, trailWidth >= 0");
+            if (w.ThrowDamage <= 0) _errors.Add($"weapon type {w.Id}: throwDamage must be > 0");
         }
         foreach (var set in _sets.Values)
             foreach (var bonus in set.Bonuses)

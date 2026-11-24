@@ -1581,7 +1581,8 @@
           "multiplier": -3.0
         }
       ],
-      "weaponModel": "long_sword"
+      "weaponModel": "long_sword",
+      "gameModelTint": "#8C5A3A"
     },
     {
       "id": "item.the_great_iron_horn",
@@ -3766,7 +3767,8 @@
           "stat.basemeleedamage"
         ]
       ],
-      "weaponModel": "polearm"
+      "weaponModel": "polearm",
+      "gameModelTint": "#8C5A3A"
     },
     {
       "id": "item.fists_of_nails",

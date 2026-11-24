@@ -144,27 +144,53 @@ internal static class WeaponsSelfTest
             t = after + 3f;
         }
 
-        // The polearm can't be thrown: aim, then attack, and the spear must still be in hand.
+        // The polearm is thrown like the game's spear (COS-206, its own self-test: PolearmThrowFeature); here it is only drawn again.
         SelfTest.Add(t, "weapons: polearm again", () => Wield("item.rusty_polearm", "polearm"));
-        SelfTest.Add(t + 3f, "weapons: polearm try throw", () =>
+        SelfTest.Add(t + 3f, "weapons: polearm throwable", () =>
         {
             WeaponModels.Scan();
             var spear = WeaponModels.Base?.TryCast<SpearWeaponController>();
-            SelfTest.Check("weapons: polearm not throwable", spear != null && WeaponPatches.NoThrow(spear), spear == null ? "no spear controller" : "");
-            if (spear == null) return;
-            _spearsBefore = LocalPlayer.Inventory.AmountOf(RealWeapons.ByType("polearm")!.Id, true, false);
-            spear.BlockStart();
-            spear.UpdateBlock();
-            spear.AttackButtonDown();
-        });
-        SelfTest.Add(t + 5.5f, "weapons: polearm still in hand", () =>
-        {
-            var held = HeldWeapons.Local();
-            int count = LocalPlayer.Inventory.AmountOf(RealWeapons.ByType("polearm")!.Id, true, false);
-            SelfTest.Check("weapons: polearm kept after aim + attack", held?.Kind == HeldKind.Spear && count == _spearsBefore,
-                $"held {held?.Kind}, polearms {_spearsBefore} -> {count}");
+            SelfTest.Check("weapons: polearm can be thrown", spear != null && !WeaponPatches.NoThrow(spear), spear == null ? "no spear controller" : "");
         });
         t += 6.5f;
+
+        // The polearm goes away by its key, also after the aim button was held (it has no aim), and the book opens over it.
+        SelfTest.Add(t, "weapons: polearm key holsters", () => { SpearState("before holster"); WeaponBarKeys.Press(Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot)); });
+        SelfTest.Add(t + 2.5f, "weapons: polearm holstered", () =>
+        {
+            SelfTest.Check("weapons: polearm holstered by its key", !WeaponBarKeys.WeaponInHand(), WeaponBarKeys.LastAction + "; " + HandState());
+            WeaponSlotSync.Draw();
+        });
+        SelfTest.Add(t + 5.5f, "weapons: polearm aim button", () => TestKit.HoldAim(0.6f));
+        SelfTest.Add(t + 6f, "weapons: polearm while aim held", () => SpearState("aim held"));
+        SelfTest.Add(t + 7f, "weapons: polearm holster after aim", () => { SpearState("after aim"); WeaponBarKeys.Press(Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot)); });
+        SelfTest.Add(t + 9.5f, "weapons: polearm holstered after aim", () =>
+        {
+            SelfTest.Check("weapons: polearm holstered after the aim button", !WeaponBarKeys.WeaponInHand(), WeaponBarKeys.LastAction + "; " + HandState());
+            WeaponSlotSync.Draw();
+        });
+        SelfTest.Add(t + 12.5f, "weapons: book over the polearm", () =>
+        {
+            _bookSearches = Book.BookHost.SceneSearches;
+            _bookFrames = Time.frameCount;
+            _bookAsked = Time.realtimeSinceStartup;
+            SelfTest.Check("weapons: book asked for with the polearm in hand", Book.BookHost.Open(Book.BookTab.Bag), Book.BookHost.LastFailure);
+        });
+        // COS-200: while the polearm is put away for the book, the game must not crawl (a scene search ran every frame).
+        SelfTest.Add(t + 14.5f, "weapons: no crawl while the book comes up", () =>
+        {
+            float secs = Time.realtimeSinceStartup - _bookAsked;
+            int searches = Book.BookHost.SceneSearches - _bookSearches, frames = Time.frameCount - _bookFrames;
+            SelfTest.Check("weapons: few scene searches while the book comes up", searches <= secs * 2 + 1, $"{searches} searches, {frames} frames in {secs:0.0} s");
+        });
+        SelfTest.Add(t + 18.5f, "weapons: book up over the polearm", () =>
+        {
+            SelfTest.Check("weapons: the book came up over the polearm", Book.BookHost.IsOpen && Book.BookHost.ModPageActive, $"{Book.BookHost.Which}, {Book.BookHost.LastFailure}; {HandState()}");
+            Book.BookHost.Close();
+        });
+        SelfTest.Add(t + 22f, "weapons: book away again", () =>
+            SelfTest.Check("weapons: book put away, player in control", !Book.BookHost.IsOpen && SonsSdk.GameState.IsPlayerControllable, HandState()));
+        t += 23f;
 
         // COS-192: a bag weapon on a key swaps into the slot and is drawn by the key; the key again holsters it.
         SelfTest.Add(t, "weapons: bind a bag hammer to a weapon key", () =>
@@ -247,7 +273,8 @@ internal static class WeaponsSelfTest
     private static readonly (string Item, string Type)[] Typed =
     {
         ("item.rage", "great_sword"), ("item.relic_hammer", "hammer"), ("item.axe_of_swiftness", "axe"),
-        ("item.rusty_polearm", "polearm"), ("item.soulstring", "greatbow"), ("item.dull_longsword", "long_sword"),
+        ("item.rusty_polearm", "polearm"), ("item.soulstring", "greatbow"),
+        ("item.sacrificial_kris", "dagger"), ("item.nine_iron_of_last_resort", "golf_club"), ("item.dull_longsword", "long_sword"),
     };
 
     /// <summary>Puts a typed item in the weapon slot, lets the slot sync give its game item and draws it as its weapon bar key does.</summary>
@@ -265,6 +292,27 @@ internal static class WeaponsSelfTest
     {
         int id = ArrowId();
         if (id > 0 && LocalPlayer.Inventory.AmountOf(id, true, false) < 5) LocalPlayer.Inventory.AddItem(id, 10, true, false, null);
+    }
+
+    private static int _bookSearches, _bookFrames;
+    private static float _bookAsked;
+
+    private static string HandState()
+    {
+        var inv = LocalPlayer.Inventory;
+        var right = inv?.RightHandItem;
+        return $"right hand {(right == null ? "empty" : right._itemID.ToString())}, held-only {(inv?.HeldOnlyItemController != null)}";
+    }
+
+    /// <summary>Logs what the held spear says about itself (the polearm has no aim: nothing may be left held or mid-throw).</summary>
+    private static void SpearState(string when)
+    {
+        WeaponModels.Scan();
+        var spear = WeaponModels.Base?.TryCast<SpearWeaponController>();
+        if (spear == null) { SelfTest.Log($"weapons: spear state ({when}): no spear controller; {HandState()}"); return; }
+        SelfTest.Log($"weapons: spear state ({when}): idle {spear.IsItemIdle()}, weapon idle {spear.WeaponIsIdle()}, holding block {spear._isHoldingBlocking}, "
+            + $"blocking {spear.IsBlocking()}, block damage {spear._isBlockDamageActive}, throwing {spear._isThrowing}, mid throw {spear._inMidThrow}, "
+            + $"thrown {spear._itemWasThrown}, unequipping {spear._isUnequipping}, stashing {spear._isStashing}");
     }
 
     /// <summary>The first arrow item in the game's database (-1 when none).</summary>
@@ -420,6 +468,13 @@ internal static class WeaponsSelfTest
         var ours = skin.Model.GetComponentsInChildren<Renderer>(true);
         // Models of earlier types are destroyed at the end of the frame: skip anything of ours.
         var game = skin.Holder.GetComponentsInChildren<Renderer>(true).Where(r => !IsOurs(r.transform, skin.Holder) && r.TryCast<ParticleSystemRenderer>() == null).ToList();
+        if (skin.GameTint != null)
+        {
+            // COS-207: an item held as the game's own weapon, tinted (the Blunt Machete): the game mesh shows, nothing of ours.
+            SelfTest.Check($"weapons: {typeId} held as the game's own weapon, tinted", skin.Source.StartsWith("game:", StringComparison.Ordinal)
+                && game.Any(r => r.enabled) && !ours.Any(r => r.enabled && r.TryCast<TrailRenderer>() == null && r.TryCast<ParticleSystemRenderer>() == null), $"{skin.Source}, {game.Count(r => r.enabled)} of {game.Count} game renderers on, tint {skin.GameTint}");
+            return type;
+        }
         SelfTest.Check($"weapons: {typeId} model from the bundle", skin.Source.StartsWith("bundle:", StringComparison.Ordinal), skin.Source);
         SelfTest.Check($"weapons: {typeId} model shown, game mesh hidden", ours.Any(r => r.enabled) && game.All(r => !r.enabled),
             $"{game.Count} game renderers, model size {Size(skin.Model):0.00} m, at {skin.Model.transform.localPosition} scale {skin.Model.transform.localScale.x:0.000}");

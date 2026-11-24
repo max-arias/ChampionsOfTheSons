@@ -15,16 +15,26 @@ internal static class InventoryActions
     {
         var inv = Pc.Inventory;
         if (inv.Get(key) == null) return false;
-        if (key.StartsWith("bag.", StringComparison.Ordinal)) return inv.Equip(key, ModContent.Db);
+        if (key.StartsWith("bag.", StringComparison.Ordinal)) return Equipping(() => inv.Equip(key, ModContent.Db));
         var free = FirstFreeBagSlot(inv);
         return free != null && inv.Move(key, free, ModContent.Db);
     }
 
+    /// <summary>Runs an inventory move; a weapon it put into the weapon slot goes on the weapon bar's first key (key 1).</summary>
+    private static bool Equipping(Func<bool> move)
+    {
+        var before = Pc.Inventory.Get(WeaponTypes.WeaponSlot);
+        if (!move()) return false;
+        var now = Pc.Inventory.Get(WeaponTypes.WeaponSlot);
+        if (now != null && !ReferenceEquals(now, before)) Weapons.WeaponSlotSync.BindSlotToFirstKey();
+        return true;
+    }
+
     /// <summary>Moves a bag item into a chosen equip slot (or swaps). False when it does not fit.</summary>
-    public static bool EquipInto(string bagKey, string equipKey) => bagKey != equipKey && Pc.Inventory.Move(bagKey, equipKey, ModContent.Db);
+    public static bool EquipInto(string bagKey, string equipKey) => bagKey != equipKey && Equipping(() => Pc.Inventory.Move(bagKey, equipKey, ModContent.Db));
 
     /// <summary>Moves (or swaps) any slot to any other: bag, equip slot, either way. False when an item does not fit.</summary>
-    public static bool MoveTo(string from, string to) => from != to && Pc.Inventory.MoveOrMerge(from, to, ModContent.Db); // equal stacks merge (COS-96)
+    public static bool MoveTo(string from, string to) => from != to && Equipping(() => Pc.Inventory.MoveOrMerge(from, to, ModContent.Db)); // equal stacks merge (COS-96)
 
     public static string? FirstFreeBagSlot(Inventory inv)
     {

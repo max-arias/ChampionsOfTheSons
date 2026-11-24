@@ -345,6 +345,8 @@ public enum AdminAction : byte
     InfiniteEnergy = 11,
     /// <summary><c>Arg</c> = spell id or "all", <c>Amount</c> = mastery level (COS-176).</summary>
     SetMastery = 12,
+    /// <summary><c>Amount</c> = how many arrows (the game's own item) go into the player's game inventory.</summary>
+    GiveArrows = 13,
 }
 
 /// <summary>Host → one client: an admin command applied to that player (COS-99). Clients accept it only from the host.</summary>

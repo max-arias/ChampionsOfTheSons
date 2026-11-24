@@ -54,6 +54,15 @@ internal static class BookTabs
     /// <summary>How fast the sub-tabs spread along the edge, per second (COS-195).</summary>
     private const float SubSlideRate = 4f;
     private static float _subT;
+    /// <summary>The sub-tabs stay out this long after the cursor leaves our tabs, so crossing the gap between two never folds them.</summary>
+    private const float HoverLinger = 0.35f;
+    /// <summary>How far out the sub-tabs must be before the cursor can hit them.</summary>
+    private const float SubHitAt = 0.95f;
+    private static float _hoverUntil;
+
+    /// <summary>Whether the sub-tabs are wanted out: one of our pages shows, or the cursor is (or just was) over one of our tabs,
+    /// as the game's tabs spread theirs on hover.</summary>
+    private static bool SpreadWanted => _pageShown || Time.unscaledTime < _hoverUntil;
     private static GameObject? _firstSub;
 
     /// <summary>A hovered sub-tab's face grows to this scale, at this rate per second (COS-194).</summary>
@@ -89,6 +98,8 @@ internal static class BookTabs
         Faces.Clear();
         _firstSub = null;
         _subT = 0;
+        _hoverUntil = 0;
+        _pageShown = BookHost.ModPageActive;
         Hovered = BookTab.None;
         try
         {
@@ -222,7 +233,20 @@ internal static class BookTabs
     {
         var chain = new List<Transform>();
         for (var sub = SubOf(root); sub != null; sub = SubOf(sub)) chain.Add(sub);
-        if (chain.Count == 0) { RLog.Warning("Champions of the Sons book: the game's tab has no sub-tabs to copy; no sub-tabs added"); return; }
+        if (chain.Count == 0)
+        {
+            // The tutorial book's tabs carry no sub-tabs: the first link is a copy of the root tab itself (same parts: Animator,
+            // collider, AnimRoot with the tab mesh and outline), sitting exactly on it.
+            var anim = root.Find("AnimRoot");
+            if (anim == null) { RLog.Warning("Champions of the Sons book: the game's tab has no AnimRoot; no sub-tabs added"); return; }
+            var first = UnityEngine.Object.Instantiate(root.gameObject, anim, false).transform;
+            first.localPosition = Vector3.zero;
+            first.localRotation = Quaternion.identity;
+            first.localScale = Vector3.one;
+            var layout = first.GetComponent<LayoutElement>();
+            if (layout != null) UnityEngine.Object.DestroyImmediate(layout);
+            chain.Add(first);
+        }
         while (chain.Count > SubDefs.Length) { UnityEngine.Object.DestroyImmediate(chain[^1].gameObject); chain.RemoveAt(chain.Count - 1); }
         while (chain.Count < SubDefs.Length)
         {
@@ -299,6 +323,16 @@ internal static class BookTabs
         Apply();
     }
 
+    /// <summary>The book was put away: nothing of ours shows or is hovered when it comes up again.</summary>
+    public static void Closed()
+    {
+        _pageShown = false;
+        _current = BookTab.None;
+        _hoverUntil = 0;
+        _subT = 0;
+        Hovered = BookTab.None;
+    }
+
     /// <summary>Per frame while the book is open: hover from the book cursor.</summary>
     public static void Tick(Vector2 cursor)
     {
@@ -308,21 +342,23 @@ internal static class BookTabs
 
     private static void Apply()
     {
+        if (Hovered != BookTab.None) _hoverUntil = Time.unscaledTime + HoverLinger;
+        bool wanted = SpreadWanted;
         foreach (var (t, o) in Made)
         {
             // The game's hovered tab also shows its input-prompt frame (Outline/ButtonVisualRoot, a white outline).
             bool lit = Hovered == t;
             if (o.Outline != null && o.Lit != lit) { o.Lit = lit; o.Outline.SetActive(lit); }
-            bool slide = _pageShown || Hovered == t;
+            bool slide = wanted;
             if (o.Animator == null || o.Root == null || (o.Out == slide && o.Animator.GetBool(SlideOutParam) == slide)) continue;
             o.Out = slide;
             o.Animator.SetBool(SlideOutParam, slide);
         }
-        // The sub-tabs spread along the top edge while one of our pages shows (each rides on the one before it, so one step each
-        // makes a row) and hide behind the root tab otherwise; the open page's tab is a lighter colour. COS-194: the hovered one
+        // The sub-tabs spread along the top edge while one of our pages shows or the cursor is over our tabs (each rides on the one
+        // before it, so one step each makes a row) and hide behind the root tab otherwise, like the game's; the open page's tab is a lighter colour. COS-194: the hovered one
         // grows, eased, as the game's hovered tabs pop out.
         float step = Mathf.Clamp01(Time.unscaledDeltaTime * HoverGrowRate);
-        _subT = Mathf.MoveTowards(_subT, _pageShown ? 1 : 0, Time.unscaledDeltaTime * SubSlideRate);
+        _subT = Mathf.MoveTowards(_subT, wanted ? 1 : 0, Time.unscaledDeltaTime * SubSlideRate);
         float spread = Mathf.SmoothStep(0, 1, _subT);
         // Tucked in, the links sit exactly on each other: off, so they don't flicker through the root tab.
         if (_firstSub != null && _firstSub.activeSelf != (_subT > 0)) _firstSub.SetActive(_subT > 0);
@@ -341,11 +377,11 @@ internal static class BookTabs
             {
                 var ft = o.Face.transform;
                 if (o.BaseScale == Vector3.zero) o.BaseScale = ft.localScale;
-                o.Grow = Mathf.MoveTowards(o.Grow, lit && _pageShown ? 1 : 0, step);
+                o.Grow = Mathf.MoveTowards(o.Grow, lit ? 1 : 0, step);
                 float k = 1 + (HoverScale - 1) * Mathf.SmoothStep(0, 1, o.Grow);
                 ft.localScale = o.BaseScale * k;
             }
-            o.Out = _pageShown;
+            o.Out = wanted;
             if (o.Root != null) o.Root.localPosition = o.Rest + o.Offset * spread;
             // The game's slide moves each link's AnimRoot, and the next link rides on it: ours stay level with the link itself.
             if (o.Anim != null) o.Anim.localPosition = Vector3.zero;
@@ -414,19 +450,18 @@ internal static class BookTabs
     /// (<see cref="BookTab.Gear"/>: it opens the last mod page).</summary>
     public static BookTab HitTest(Vector2 screen)
     {
+        // Tucked in or still moving, the sub-tabs sit on the root tab: only the root is hit then.
         var cam = Camera.main;
         if (cam == null) return BookTab.None;
-        if (_pageShown)
-        {
-            BookTab best = BookTab.None;
-            float bestD = float.MaxValue;
+        // The screen rectangles of neighbours overlap a little: the tab whose centre is nearest wins, root tab included.
+        BookTab best = BookTab.None;
+        float bestD = float.MaxValue;
+        if (_subT >= SubHitAt)
             foreach (var (t, o) in Subs)
                 if (ScreenRect(cam, o) is Rect r && r.Contains(screen) && (r.center - screen).sqrMagnitude < bestD) { best = t; bestD = (r.center - screen).sqrMagnitude; }
-            if (best != BookTab.None) return best;
-        }
         foreach (var (t, o) in Made)
-            if (ScreenRect(cam, o) is Rect r && r.Contains(screen)) return t;
-        return BookTab.None;
+            if (ScreenRect(cam, o) is Rect r && r.Contains(screen) && (r.center - screen).sqrMagnitude < bestD) { best = t; bestD = (r.center - screen).sqrMagnitude; }
+        return best;
     }
 
     private static Rect? ScreenRect(Camera cam, Ours o)

@@ -34,11 +34,20 @@ internal static class LootVisuals
 
     public static IReadOnlyDictionary<int, Visual> All => ById;
 
+    /// <summary>COS-206: the next drop created shows this model at this place and angle (a thrown weapon stuck where it landed)
+    /// instead of its drop model lying on the ground; an empty model name shows no model at all. Set right before the drop is
+    /// added, cleared right after.</summary>
+    public static (Vector3 Pos, Quaternion Rot, string Model, float Length)? NextPose;
+
+    /// <summary>Drops shown stuck at an angle (self-test).</summary>
+    public static readonly HashSet<int> Stuck = new();
+
     public static Color ColorOf(Rarity r) => ColorUtility.TryParseHtmlString(UiTheme.RarityHex(r), out var c) ? c : Color.white;
 
     public static void Create(GroundDrop drop)
     {
         Destroy(drop.Id);
+        Stuck.Remove(drop.Id);
         var pos = new Vector3(drop.X, drop.Y, drop.Z);
         var color = ColorOf(drop.Item.Rarity);
         // Size grows with rarity on the old 0..7 scale, so a Legendary drop is as big as a Primal one was (COS-109).
@@ -50,7 +59,23 @@ internal static class LootVisuals
 
         // The item type's model when the asset bundle has it (COS-63), else the bundled crystal marker (COS-5), else a primitive gem.
         GameObject? gem = null;
-        if (DropPrefabFor(drop.Item.BaseId) is string model && Bundles.CotsBundle.Spawn(model, root.transform) is GameObject m)
+        if (NextPose is { Model: "" })
+        {
+            // Something else in the world is this drop's look (the game's own stuck spear): the beam marks it, no model of ours.
+            gem = new GameObject("cots-drop-look");
+            gem.transform.SetParent(root.transform, false);
+            Stuck.Add(drop.Id);
+        }
+        else if (NextPose is { } pose && Bundles.CotsBundle.Spawn(pose.Model, root.transform) is GameObject stuck)
+        {
+            gem = stuck;
+            foreach (var r in gem.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            if (Bounds(gem.transform) is { } sb && sb.size.y > 1e-4f) gem.transform.localScale = Vector3.one * (pose.Length / sb.size.y);
+            gem.transform.SetPositionAndRotation(pose.Pos, pose.Rot);
+            Weapons.WeaponGlowFx.Apply(gem, Weapons.GlowLook.For(drop.Item), light: false);
+            Stuck.Add(drop.Id);
+        }
+        else if (DropPrefabFor(drop.Item.BaseId) is string model && Bundles.CotsBundle.Spawn(model, root.transform) is GameObject m)
         {
             gem = m;
             foreach (var r in gem.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;

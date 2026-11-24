@@ -45,6 +45,9 @@ internal static class AdminSelfTest
             SelfTest.Check("admin: giveall unknown type fails", !Run("giveall nothing"));
             SelfTest.Check("admin: playtest sets everything up",
                 Run("playtest") && Pc.Progress.Level >= 30 && AdminState.God && AdminState.NoCooldowns && AdminState.InfiniteEnergy, AdminFeature.LastReply);
+            int arrow = AdminState.ArrowItemId();
+            int arrows = arrow >= 0 ? TheForest.Utils.LocalPlayer.Inventory.AmountOf(arrow, true, false) : 0;
+            SelfTest.Check("admin: playtest gives arrows for the bows", arrows > 0, $"arrow item {arrow} ({(arrow >= 0 ? Bridge.HotkeyBridge.Name(arrow) : "none")}), {arrows} owned");
             // COS-173: the dearest spell costs more than max energy; infinite energy casts it anyway, twice.
             var dearest = ModContent.Db.Spells.Values.Where(sp => SpellCaster.IsImplemented(sp.Id) && !sp.Channeled && !sp.Toggle)
                 .OrderByDescending(sp => Pc.Spells.CostOf(sp.Id, Pc.Stats).Total).First();

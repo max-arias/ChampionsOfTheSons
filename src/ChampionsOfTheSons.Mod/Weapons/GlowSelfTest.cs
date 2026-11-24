@@ -23,12 +23,12 @@ internal static class GlowSelfTest
 
     public static void Register(float t)
     {
-        SelfTest.Add(t, "glow: draw long sword", () => WeaponsSelfTest.Wield("item.dull_longsword", "long_sword", Rarity.Common));
+        SelfTest.Add(t, "glow: draw long sword", () => WeaponsSelfTest.Wield("item.axe_of_swiftness", "axe", Rarity.Common));
         t += 6f; // the draw animation takes several seconds on a loaded machine
 
         SelfTest.Add(t, "glow: common", () =>
         {
-            Equip("item.dull_longsword", "long_sword", Rarity.Common);
+            Equip("item.axe_of_swiftness", "axe", Rarity.Common);
             var skin = WeaponModels.LocalSkin;
             SelfTest.Check("glow: common look has no glow", skin != null && !skin.Look.Glows && Count(skin.Model, "cots-glow") == 0, Describe(skin));
         });
@@ -40,7 +40,7 @@ internal static class GlowSelfTest
         {
             SelfTest.Add(t, $"glow: {level}", () =>
             {
-                Equip("item.dull_longsword", "long_sword", rarity);
+                Equip("item.axe_of_swiftness", "axe", rarity);
                 var skin = WeaponModels.LocalSkin;
                 bool extras = level == GlowLevel.Legendary;
                 SelfTest.Check($"glow: {rarity} shows the {level} look", skin != null && skin.Look.Level == level && Count(skin.Model, "cots-glow-edge") > 0

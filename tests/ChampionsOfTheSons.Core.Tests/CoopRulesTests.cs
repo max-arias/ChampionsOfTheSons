@@ -123,6 +123,15 @@ public class CoopPickupTests
         Assert.Equal(seconds, GroundLoot.LifetimeFor(source, rarity));
 
     [Fact]
+    public void A_thrown_weapon_lies_there_until_it_is_fetched()
+    {
+        var ground = new GroundLoot();
+        var polearm = ground.Add(Item with { Rarity = Rarity.Common }, 0, 0, 0, source: DropSource.ThrownWeapon);
+        ground.Tick(30 * 86400.0); // a month
+        Assert.NotNull(ground.Get(polearm.Id));
+    }
+
+    [Fact]
     public void Each_drop_expires_on_its_own_lifetime_and_a_mirror_keeps_the_hosts_remaining_time()
     {
         var ground = new GroundLoot();

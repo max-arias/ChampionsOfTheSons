@@ -228,6 +228,7 @@ public sealed class LootFeature : IModFeature
         var result = Ground.TryPickup(id, PlayerState.Character.Inventory);
         if (result == PickupResult.Ok && item != null)
         {
+            Weapons.PolearmThrow.OnPickedUp(id, item);
             if (SelfTest.Enabled) SelfTest.Log($"loot: picked up {item.BaseId}");
             Message(string.Format(UI.UiText.T("ui.followups.picked_up", "Picked up {0}"), UI.UiText.ItemName(item)));
         }

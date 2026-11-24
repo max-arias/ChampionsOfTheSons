@@ -53,6 +53,12 @@ internal static class BookHost
     private static BookTab _pending;
     private static float _pendingSince;
     private static bool _ready;
+    /// <summary>The book item <see cref="Open"/> equipped and is waiting for, and when the searches for it may run next.</summary>
+    private static int _pendingId;
+    private static float _nextSearch, _nextSceneSearch;
+
+    /// <summary>Scene-wide book searches run so far (self-test, COS-200).</summary>
+    public static int SceneSearches { get; private set; }
 
     /// <summary>The page canvas content (page pixels, origin top-left), built once.</summary>
     public static RectTransform? Page { get; private set; }
@@ -130,7 +136,9 @@ internal static class BookHost
         int id = inv.AmountOf(GuideBookId, false, false) > 0 ? GuideBookId : inv.AmountOf(TutorialBookId, false, false) > 0 ? TutorialBookId : 0;
         if (id == 0) return Fail("the player has no guide book");
         _pending = tab;
+        _pendingId = id;
         _pendingSince = Time.realtimeSinceStartup;
+        _nextSceneSearch = _pendingSince + 0.3f; // the held book is normally found under the player first
         if (!inv.TryEquip(id, false, true, false)) { _pending = BookTab.None; return Fail("the game refused to equip the guide book"); }
         LastFailure = "";
         return true;
@@ -148,17 +156,23 @@ internal static class BookHost
         if (_blueprint == null || _blueprint.gameObject == null) _blueprint = null;
         if (_tutorial == null || _tutorial.gameObject == null) _tutorial = null;
         if (_book == null || _book.gameObject == null) _book = null;
-        // The player's own (possibly stowed) books, found once; the scene-wide search only while a tab is waiting to open
-        // (COS-132: a scene search every 15 frames cost ~65 ms each while the book was put away).
-        if ((_blueprint == null || _tutorial == null) && (_pending != BookTab.None || Time.frameCount % 15 == 0))
+        // The player's own (possibly stowed) books, found once; the scene-wide search only while a tab is waiting to open, only
+        // for the book that was asked for, and twice a second at most (COS-132: a scene search costs ~65 ms. COS-200: a player
+        // owns one of the two books, so the search for the other ran every frame while the weapon in hand was being put away,
+        // and the game crawled at ~7 fps until the book was up: longest with the spear, whose put-away takes longest).
+        float now = Time.realtimeSinceStartup;
+        if ((_blueprint == null || _tutorial == null) && (_pending != BookTab.None ? now >= _nextSearch : Time.frameCount % 15 == 0))
         {
+            _nextSearch = now + 0.1f;
             var t = LocalPlayer.Transform;
             if (_blueprint == null && t != null) _blueprint = t.GetComponentInChildren<BlueprintBookController>(true);
             if (_tutorial == null && t != null) _tutorial = t.GetComponentInChildren<TutorialBookController>(true);
-            if (_pending != BookTab.None)
+            if (_pending != BookTab.None && now >= _nextSceneSearch)
             {
-                if (_blueprint == null) _blueprint = UnityEngine.Object.FindObjectOfType<BlueprintBookController>();
-                if (_tutorial == null) _tutorial = UnityEngine.Object.FindObjectOfType<TutorialBookController>();
+                _nextSceneSearch = now + 0.5f;
+                SceneSearches++;
+                if (_pendingId == GuideBookId && _blueprint == null) _blueprint = UnityEngine.Object.FindObjectOfType<BlueprintBookController>();
+                if (_pendingId == TutorialBookId && _tutorial == null) _tutorial = UnityEngine.Object.FindObjectOfType<TutorialBookController>();
             }
         }
         // Follow whichever book is up: B raises one of them and the books switch to each other in hand.
@@ -170,6 +184,8 @@ internal static class BookHost
         if (Book == null)
         {
             if (Tab != BookTab.None) { Tab = BookTab.None; BookPatches.Block = false; }
+            // Put away with one of our pages up: the tabs must not come back spread over the game's page.
+            BookTabs.Closed();
             if (_pending != BookTab.None && Time.realtimeSinceStartup - _pendingSince > 5)
             {
                 _pending = BookTab.None;

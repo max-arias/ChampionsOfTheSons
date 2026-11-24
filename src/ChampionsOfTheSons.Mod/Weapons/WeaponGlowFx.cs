@@ -138,6 +138,81 @@ internal static class WeaponGlowFx
         return parts;
     }
 
+    /// <summary>
+    /// COS-210: the glow on a game weapon's own mesh (items shown as the game's weapon have no model of ours): the same
+    /// additive edge shell over the biggest game meshes, the light and the particles. The game's materials are left alone.
+    /// Everything made is added to <paramref name="made"/>, for the caller to remove with the weapon.
+    /// </summary>
+    public static int ApplyToGameMesh(Transform holder, GameObject lightHost, GlowLook look, List<GameObject> made)
+    {
+        if (!look.Glows) return 0;
+        if (_emissive < 0)
+        {
+            _emissive = Shader.PropertyToID("_EmissiveColor");
+            _fresnel = Shader.PropertyToID("_Fresnel");
+            _intensity = Shader.PropertyToID("_Intensity");
+        }
+        var tint = new Color(look.Color.r * look.Strength, look.Color.g * look.Strength, look.Color.b * look.Strength, Mathf.Clamp01(0.4f + look.Strength));
+        // The weapon's body: meshes at least a third as long as the longest (a chainsaw's chain links and dials are left out).
+        var meshes = new List<(MeshFilter Mf, float Len)>();
+        foreach (var mf in holder.GetComponentsInChildren<MeshFilter>(false))
+        {
+            if (mf == null || mf.sharedMesh == null || mf.name.StartsWith("cots-", StringComparison.Ordinal) || IsGlow(mf.transform, holder)) continue;
+            var r = mf.GetComponent<MeshRenderer>();
+            if (r == null || !r.enabled) continue;
+            meshes.Add((mf, Vector3.Scale(mf.sharedMesh.bounds.size, mf.transform.lossyScale).magnitude));
+        }
+        if (meshes.Count == 0) return 0;
+        float longestLen = meshes.Max(m => m.Len);
+        int parts = 0;
+        MeshFilter? longest = null;
+        foreach (var (mf, len) in meshes)
+        {
+            if (len < longestLen / 3f) continue;
+            if (len >= longestLen) longest = mf;
+            var shell = Bundles.CotsBundle.Spawn(Edge, mf.transform);
+            if (shell == null) continue;
+            shell.name = "cots-glow-edge";
+            shell.transform.localPosition = Vector3.zero;
+            shell.transform.localRotation = Quaternion.identity;
+            shell.transform.localScale = Vector3.one * 1.02f;
+            var smf = shell.GetComponentInChildren<MeshFilter>();
+            if (smf != null) smf.sharedMesh = mf.sharedMesh;
+            FxKit.Tint(shell, tint);
+            foreach (var sr in shell.GetComponentsInChildren<Renderer>(true))
+            {
+                var sm = sr.material;
+                Owned.Add((shell, sm));
+                if (sm.HasProperty(_fresnel)) sm.SetFloat(_fresnel, 1.1f);
+                if (sm.HasProperty(_intensity)) sm.SetFloat(_intensity, 1.3f + look.Strength);
+                // A game mesh has several parts (sub-meshes): the shell's one material on each, or only the first glows.
+                int subs = mf.sharedMesh.subMeshCount;
+                if (subs > 1)
+                {
+                    var all = new Material[subs];
+                    for (int i = 0; i < subs; i++) all[i] = sm;
+                    sr.sharedMaterials = all;
+                }
+            }
+            Spawned.Add(shell);
+            made.Add(shell);
+            parts++;
+        }
+        if (!look.Extras || FxKit.Reduced) return parts;
+        if (FxKit.AddLight(lightHost, look.Color, LightRange, LightIntensity) is { } l)
+        {
+            l.gameObject.name = "cots-glow-light";
+            Pulsing.Add((l, LightIntensity));
+            parts++;
+        }
+        if (longest != null)
+        {
+            int before = Spawned.Count;
+            if (AddParticles(longest, look)) { parts++; if (Spawned.Count > before) made.Add(Spawned[^1]); }
+        }
+        return parts;
+    }
+
     /// <summary>Per frame: Legendary lights breathe.</summary>
     public static void Tick()
     {

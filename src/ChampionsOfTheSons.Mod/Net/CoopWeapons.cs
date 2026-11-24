@@ -143,7 +143,7 @@ public sealed class CoopWeapons : IModFeature
             }
             if (p.Skin == null && best != null && type != null)
             {
-                p.Skin = new WeaponSkin(best.Value.Holder, type, look);
+                p.Skin = new WeaponSkin(best.Value.Holder, type, look, WeaponSkin.GameLookFor(type, p.ItemId == "" ? null : p.ItemId));
                 // Reach stays the wielder's business: their own client computes their hits.
                 p.Skin.Apply(stretchReach: false);
                 RealWeapons.TrackRemote(best.Value.Holder); // their animator needs the base weapon's id too (COS-186)

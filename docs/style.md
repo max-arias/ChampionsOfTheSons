@@ -74,7 +74,7 @@ Names follow classic action-RPG conventions (Diablo, Path of Exile) on top of th
 
 ## UI (COS-57, COS-59)
 
-- Equipment, bag and character live on the game's own guide book: the real book in hand, our page drawn into its page texture, one mod tab under the game's tab column, and Gear / Bag / Character as sub-tabs in the page's title bar (`src/ChampionsOfTheSons.Mod/Book/`). There is no other inventory screen (Max 2026-11-21): when the book cannot open, the log says why.
+- Equipment, bag and character live on the game's own guide book: the real book in hand, our page drawn into its page texture, one mod tab on the page's top edge whose sub-tabs (one per mod page) spread along the edge on hover or while a mod page shows, as the game's tabs do, on the blueprint book and the tutorial book (`src/ChampionsOfTheSons.Mod/Book/`). There is no other inventory screen (Max 2026-11-21): when the book cannot open, the log says why.
 - Page look follows the game's guide book, a little darker: cream paper `#D9CFB8`, slot shade `#C9BEA4`, ink `#2A2622`, brown title bar `#5A4636` with paper-colored open tab, red selection `#B8322A`.
 - Slots: ruled squares, a rarity tape tab in the corner (muted: `#9A968C`, `#4F7FA6`, `#C9982A`, `#B8282A` for Common, Magic, Rare, Legendary; full colours white, blue, yellow, red), level top right, `xN` bottom right. Slots never glow; held and dropped weapons do (COS-108).
 - Keep clear of the spiral (left ~62 px of the page) and the thumb (bottom-left ~92 px): pagers and buttons sit bottom right.

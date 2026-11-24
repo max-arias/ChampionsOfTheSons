@@ -202,19 +202,35 @@ public static class TestKit
     public static void Tick()
     {
         bool due = (_releaseAtFrame >= 0 && Time.frameCount >= _releaseAtFrame) || (_releaseAtTime >= 0 && Time.realtimeSinceStartup >= _releaseAtTime);
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (_aimReleaseAt >= 0 && Time.realtimeSinceStartup >= _aimReleaseAt)
+        {
+            _aimReleaseAt = -1;
+            if (mouse != null) MouseButton(mouse, false, right: true);
+        }
         if (!due) return;
         _releaseAtFrame = -1;
         _releaseAtTime = -1;
-        var mouse = UnityEngine.InputSystem.Mouse.current;
         if (mouse != null) MouseButton(mouse, false);
     }
 
-    private static void MouseButton(UnityEngine.InputSystem.Mouse mouse, bool down)
+    private static float _aimReleaseAt = -1;
+
+    /// <summary>The aim/block button (right mouse) held for <paramref name="seconds"/>, then released.</summary>
+    public static void HoldAim(float seconds)
+    {
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (mouse == null) { SelfTest.Log("hold aim: no mouse"); return; }
+        MouseButton(mouse, true, right: true);
+        _aimReleaseAt = Time.realtimeSinceStartup + seconds;
+    }
+
+    private static void MouseButton(UnityEngine.InputSystem.Mouse mouse, bool down, bool right = false)
     {
         try
         {
             var buffer = UnityEngine.InputSystem.LowLevel.StateEvent.From(mouse, out var ev, Unity.Collections.Allocator.Temp);
-            UnityEngine.InputSystem.InputControlExtensions.WriteValueIntoEvent(mouse.leftButton, down ? 1f : 0f, ev);
+            UnityEngine.InputSystem.InputControlExtensions.WriteValueIntoEvent(right ? mouse.rightButton : mouse.leftButton, down ? 1f : 0f, ev);
             UnityEngine.InputSystem.InputSystem.QueueEvent(ev);
             buffer.Dispose();
         }

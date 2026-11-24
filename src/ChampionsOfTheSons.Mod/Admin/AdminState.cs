@@ -66,6 +66,8 @@ public static class AdminState
                 return GiveItem(g.Arg, Math.Max(1, (int)g.Amount));
             case AdminAction.Heal:
                 return Heal();
+            case AdminAction.GiveArrows:
+                return GiveArrows(Math.Max(1, (int)g.Amount));
             case AdminAction.God:
                 God = g.Amount > 0;
                 return $"god mode {(God ? "on" : "off")}";
@@ -125,6 +127,28 @@ public static class AdminState
         for (int slot = 0; slot < SpellBook.Slots && unslotted.Count > 0; slot++)
             if (pc.Spells.Loadout[slot] == null && pc.Spells.Equip(slot, unslotted.Dequeue())) slotted++;
         return $"learned {missing.Count} spell(s), {all.Count} known; {slotted} put in empty slots (swap them in the perk panel's spell list)";
+    }
+
+    /// <summary>The game's arrow item bows shoot: the crafted arrow, else the first arrow in the item database (-1: none).</summary>
+    public static int ArrowItemId()
+    {
+        int id = Weapons.GameItems.Find("CraftedArrow", -1);
+        if (id >= 0) return id;
+        var list = Sons.Items.Core.ItemDatabaseManager.Items;
+        for (int i = 0; i < list.Count; i++)
+            if (list[i] != null && list[i].Name.Contains("arrow", StringComparison.OrdinalIgnoreCase)) return list[i].Id;
+        return -1;
+    }
+
+    /// <summary>Tops the player's arrows up to <paramref name="count"/> (bows shoot the player's own arrows, COS-189).</summary>
+    private static string GiveArrows(int count)
+    {
+        var inv = LocalPlayer.Inventory;
+        int id = ArrowItemId();
+        if (inv == null || id < 0) return "no arrows given: " + (inv == null ? "no local player" : "the game has no arrow item");
+        int have = inv.AmountOf(id, true, false);
+        if (have < count) inv.AddItem(id, count - have, true, false, null);
+        return $"arrows: {inv.AmountOf(id, true, false)}";
     }
 
     private static string Heal()

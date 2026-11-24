@@ -162,8 +162,11 @@ public static class EnemyPatches
                     // A mod bow's arrows hit for the bow's own damage and pierce (COS-191); anything else as before.
                     bool modBow = Weapons.WeaponModels.Active?.Base == Core.Content.WeaponBase.Bow && shot.Kind == RangedKind.Bow
                         && Weapons.WeaponModels.ModWeaponDamage is double;
+                    // A thrown mod polearm hits for its own damage times the type's throw factor (COS-206).
+                    var thrown = shot.Kind == RangedKind.ThrownSpear ? Weapons.PolearmThrow.ThrownHit : null;
                     var ranged = modBow
                         ? RangedRules.Hit(sheet, Weapons.WeaponModels.ModWeaponDamage!.Value, shot, Rng, weaponPierce: Weapons.WeaponModels.ModWeaponPierce)
+                        : thrown is { } th ? RangedRules.Hit(sheet, th.Damage, shot, Rng, weaponPierce: th.Pierce)
                         : RangedRules.Hit(sheet, WeaponTypes.RangedBaseDamage(Weapons.WeaponModels.Active, amount), shot, Rng);
                     hit = ranged.Hit;
                     _extraHits = ranged.ExtraHits;

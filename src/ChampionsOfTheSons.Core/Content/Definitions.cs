@@ -142,6 +142,10 @@ public sealed class ItemBaseDef
     /// roll attack speed as a penalty).</summary>
     public List<SlotMultiplier> StatMultipliers { get; set; } = new();
     public string? WeaponModel { get; set; }
+    /// <summary>Weapons: when set (a colour, "#RRGGBB"), the item is held as the game's own weapon of its type (the machete
+    /// under a long sword), tinted with this colour and dulled, instead of the type's model (COS-207: the Blunt Machete,
+    /// rust brown).</summary>
+    public string? GameModelTint { get; set; }
     /// <summary>A unique weapon's own glow look (COS-108); null = the rarity's colour and the default wisp.</summary>
     public GlowDef? Glow { get; set; }
     public string? Set { get; set; }
@@ -306,6 +310,8 @@ public sealed class WeaponTypeDef
     public bool CutsTrees { get; set; } = true;
     /// <summary>Spear types: whether the game's throw (aim, then attack) is allowed.</summary>
     public bool CanThrow { get; set; } = true;
+    /// <summary>Spears: a thrown hit does the weapon's damage times this (COS-206).</summary>
+    public double ThrowDamage { get; set; } = 1;
     /// <summary>With the hammer stun stat: every hit slows the enemy to this speed (0 = no slow) ...</summary>
     public double StunSlow { get; set; }
     /// <summary>... for this many seconds.</summary>
@@ -322,10 +328,20 @@ public sealed class WeaponTypeDef
     // ---- model
     /// <summary>Bundle prefab name (COS-5): real size, origin at the end of the grip (bows: grip centre), +Y toward the head.</summary>
     public string Model { get; set; } = "";
+    /// <summary>COS-209: the type shows its game weapon's own mesh, untouched, instead of a model of ours (the chainsaw, the
+    /// golf club, the knife). <see cref="Model"/> is then unused.</summary>
+    public bool GameModel { get; set; }
     /// <summary>Length of the model in hand, in metres.</summary>
     public double Length { get; set; } = 1;
-    /// <summary>Where the hand holds the model: metres from the end of the grip (bows: offset from the grip centre).</summary>
+    /// <summary>Where the hand holds the model: metres from the end of the handle (bows: unused, see <see cref="GripDepth"/>).</summary>
     public double Grip { get; set; }
+    /// <summary>Melee: where the handle's axis sits across the model's width (its X), as a fraction of that width from the
+    /// middle of the model's bounds; the head or blade leans to the other side (COS-208: the axe's handle is 0.078 off the
+    /// middle, measured from the model's vertices at the handle end). 0: the handle is in the middle.</summary>
+    public double HandleOffset { get; set; }
+    /// <summary>Bows: where the grip sits in the model's depth (the axis the arrow flies along), as a fraction of that depth
+    /// from the middle of the model's bounds; negative is the side away from the string's.</summary>
+    public double GripDepth { get; set; }
     /// <summary>Width of the swing trail at the tip, in metres (0 = no trail).</summary>
     public double TrailWidth { get; set; }
 
