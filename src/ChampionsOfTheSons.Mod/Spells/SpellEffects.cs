@@ -434,7 +434,7 @@ internal static class SpellEffects
             away.y = 0;
             Knock(e, away.normalized * S("spell_fart_knockback") * (float)SpellTuning.RoarKnockbackScale);
         }
-        SpellFx.Disc(Feet(), radius, SpellFx.Dark, 1f, look: SpellFx.Look.Gas);
+        SpellFx.Disc(Feet(), radius, SpellFx.Poison, 1f, look: SpellFx.Look.Gas);
         return true;
     }
 
@@ -637,7 +637,7 @@ internal static class SpellEffects
     private static bool StartMultishot()
     {
         // A ring at the feet while it runs, so teammates see it on and off (COS-80).
-        _multishotFx = SpellFx.Disc(Feet(), 1.2f, SpellFx.Steel, 1e6f, LocalPlayer.Transform, SpellFx.Look.Ring);
+        _multishotFx = SpellFx.Disc(Feet(), 1.2f, SpellFx.Arcane, 1e6f, LocalPlayer.Transform, SpellFx.Look.Ring);
         return true;
     }
 

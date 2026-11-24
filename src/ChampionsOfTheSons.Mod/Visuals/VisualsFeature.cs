@@ -195,7 +195,7 @@ public sealed class VisualsFeature : IModFeature
         var fwd = Flat(cam.forward);
         var right = Vector3.Cross(Vector3.up, fwd);
         var ground = cam.position + Vector3.down * 1.6f;
-        Color[] tints = { SpellFx.Holy, SpellFx.Fire, SpellFx.Arcane, SpellFx.Ice, SpellFx.Heal, SpellFx.Storm, SpellFx.Blood };
+        Color[] tints = { SpellFx.Holy, SpellFx.Fire, SpellFx.Arcane, SpellFx.Ice, SpellFx.Heal, SpellFx.Lightning, SpellFx.Blood };
         int missing = 0, broken = 0;
         for (int i = 0; i < FxKit.All.Length; i++)
         {

@@ -60,9 +60,12 @@ internal static class SpellFx
     private static Shader? _unlit;
     private static bool _looked;
 
+    // One colour per kind of magic, so a spell reads at a glance (Max, 2026-11-24): fire orange, ice blue-white, lightning
+    // yellow, arcane violet, holy gold, healing green, blood red, dark violet-black, poison green; plain physical effects
+    // (shields, blade work, shoves) a neutral silver-white that cannot be taken for ice.
     public static readonly Color Fire = new(1f, 0.45f, 0.1f), Ice = new(0.55f, 0.85f, 1f), Arcane = new(0.7f, 0.35f, 1f),
         Holy = new(1f, 0.9f, 0.4f), Heal = new(0.4f, 1f, 0.5f), Blood = new(0.75f, 0.05f, 0.1f), Dark = new(0.12f, 0.05f, 0.2f),
-        Storm = new(0.6f, 0.8f, 1f), Lightning = new(1f, 0.9f, 0.45f), Steel = new(0.8f, 0.85f, 0.95f);
+        Lightning = new(1f, 0.9f, 0.45f), Poison = new(0.5f, 0.75f, 0.15f), Steel = new(0.92f, 0.92f, 0.9f);
 
     /// <summary>Lifetime below which a disc or sphere counts as a one-shot burst.</summary>
     private const float BurstSeconds = 2f;
