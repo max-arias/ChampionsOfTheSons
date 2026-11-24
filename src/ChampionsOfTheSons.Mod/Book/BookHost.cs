@@ -213,7 +213,7 @@ internal static class BookHost
         if (_pageRenderer == null) return; // the book builds its meshes a frame or two after it is enabled
         _ready = true;
         PageAxes();
-        BookTabs.Attach(_book, PageUpWorld);
+        BookTabs.Attach(_book, PageUpWorld, PageRightWorld, PagePointWorld(1, 1));
         LogState($"set up on the {Which} book: page material {(_pageMat != null)}, page renderer {(_pageRenderer != null)}, tabs {BookTabs.Tabs.Count}");
     }
 
@@ -333,6 +333,20 @@ internal static class BookHost
     }
 
     public static Vector3 PageUpWorld => _pageRenderer != null ? _pageRenderer.transform.TransformDirection(Vector3.up) * _vSign : Vector3.up;
+
+    public static Vector3 PageRightWorld => _pageRenderer != null ? _pageRenderer.transform.TransformDirection(Vector3.right) * _uSign : Vector3.right;
+
+    /// <summary>A point of the page in world space: u 0..1 left to right, v 0..1 bottom to top.</summary>
+    public static Vector3 PagePointWorld(float u, float v)
+    {
+        if (_pageRenderer == null) return default;
+        if (_uSign < 0) u = 1 - u;
+        if (_vSign < 0) v = 1 - v;
+        var local = _pageLocal.center;
+        local[_uAxis] = _pageLocal.min[_uAxis] + u * _pageLocal.size[_uAxis];
+        local[_vAxis] = _pageLocal.min[_vAxis] + v * _pageLocal.size[_vAxis];
+        return _pageRenderer.transform.TransformPoint(local);
+    }
 
     /// <summary>The cursor as page pixels (origin top-left), by intersecting the camera ray with the page plane.</summary>
     public static bool CursorOnPage(out Vector2 px) => CursorOnPage(CursorScreen, out px);

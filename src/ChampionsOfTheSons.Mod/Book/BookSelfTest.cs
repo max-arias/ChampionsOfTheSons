@@ -208,6 +208,11 @@ internal static class BookSelfTest
         SelfTest.Check("book: the book opened on Gear", BookHost.IsOpen && BookHost.Tab == BookTab.Gear, $"open {BookHost.IsOpen}, tab {BookHost.Tab}");
         SelfTest.Check("book: our tab and its five sub-tabs were added (COS-168)", BookTabs.Tabs.Count == 6 && BookTabs.SubTabs.Count == 5, $"{BookTabs.Tabs.Count} tabs, {BookTabs.SubTabs.Count} sub-tabs");
         SelfTest.Check("book: the game's page actions are blocked", BookPatches.Block);
+        // COS-195: our tabs stand on the page's top edge (the thumb covered the place under the game's column).
+        var page = BookHost.PageScreenRect();
+        var at = new[] { BookTabs.ScreenCenter(BookTab.Gear) }.Concat(BookTabs.SubTabs.Select(BookTabs.SubScreenCenter)).ToList();
+        SelfTest.Check("book: our tab and sub-tabs are above the page's top edge (COS-195)", at.All(p => p.y > page.yMax && p.x > page.xMin && p.x < page.xMax),
+            $"page {page}, tabs {string.Join(" ", at.Select(p => $"({p.x:0},{p.y:0})"))}");
     }
 
     private static void BagTab()

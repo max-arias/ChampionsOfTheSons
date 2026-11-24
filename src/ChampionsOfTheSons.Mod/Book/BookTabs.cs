@@ -8,21 +8,22 @@ namespace ChampionsOfTheSons.Mod.Book;
 
 /// <summary>
 /// Our tab on the guide book: a copy of the game's lowest root tab (its object with the slide Animator, the
-/// AnimRoot it animates and the tab mesh), placed one tab step below it as a sibling in the book's tab column, with a
-/// muted tab color and our own icon face. The copy has no game interaction (its <see cref="HeldBookInteraction"/>,
+/// AnimRoot it animates and the tab mesh), a sibling in the book's tab column but turned a quarter and placed on the page's
+/// top edge near the right corner (COS-195: below the column the thumb covered it), with a muted tab color and our own icon face. The copy has no game interaction (its <see cref="HeldBookInteraction"/>,
 /// mouse proxy and sub-tabs are removed before it ever activates), so the game neither hovers nor clicks it; we drive
 /// its Animator's SlideOut ourselves: out while the cursor is over it or while our page shows, like the game's tabs,
 /// plus the game's white hover outline while the cursor is over it (COS-131). Clicks are found by our own hit test on the book cursor.
 /// COS-168: like the game's tabs, ours carries a chain of sub-tabs (the game nests each sub-tab under the one before it: Tab1, Tab2...
-/// under each AnimRoot); ours keeps the copied chain, makes it five long, puts an icon on each and slides them out while one of our
-/// pages shows: Character, Inventory, Spells, Perks and Help.
+/// under each AnimRoot); ours keeps the copied chain, makes it five long, puts an icon on each and, while one of our pages shows,
+/// spreads them leftward along the top edge (COS-195; we move the links ourselves, their Animators are off):
+/// Character, Inventory, Spells, Perks and Help.
 /// </summary>
 internal static class BookTabs
 {
     private sealed record TabDef(BookTab Tab, string IconId, string ColorHex);
 
     /// <summary>
-    /// One tab for the mod (only one fits under the game's column), keyed by <see cref="BookTab.Gear"/>; it opens the last mod page shown.
+    /// One tab for the mod, keyed by <see cref="BookTab.Gear"/>; it opens the last mod page shown.
     /// Its sub-tabs (<see cref="SubDefs"/>) open each page.
     /// </summary>
     private static readonly TabDef[] Defs =
@@ -44,7 +45,16 @@ internal static class BookTabs
         /// <summary>Hover growth 0..1 and the face's own scale (COS-194).</summary>
         public float Grow;
         public Vector3 BaseScale;
+        /// <summary>A sub-tab's place under its parent when tucked behind the tab before it, and one step along the top edge (COS-195).</summary>
+        public Vector3 Rest, Offset;
+        /// <summary>A sub-tab's AnimRoot; its Animator is off and we hold it at the link's own place (COS-195).</summary>
+        public Transform? Anim;
     }
+
+    /// <summary>How fast the sub-tabs spread along the edge, per second (COS-195).</summary>
+    private const float SubSlideRate = 4f;
+    private static float _subT;
+    private static GameObject? _firstSub;
 
     /// <summary>A hovered sub-tab's face grows to this scale, at this rate per second (COS-194).</summary>
     private const float HoverScale = 1.18f, HoverGrowRate = 8f;
@@ -72,11 +82,13 @@ internal static class BookTabs
     public static BookTab Hovered { get; private set; }
 
     /// <summary>Puts our tab on a game book, or picks up the one already there (the player switches between the two books).</summary>
-    public static void Attach(HeldControllerBase book, Vector3 pageUp)
+    public static void Attach(HeldControllerBase book, Vector3 pageUp, Vector3 pageRight, Vector3 pageTopRight)
     {
         Made.Clear();
         Subs.Clear();
         Faces.Clear();
+        _firstSub = null;
+        _subT = 0;
         Hovered = BookTab.None;
         try
         {
@@ -94,7 +106,14 @@ internal static class BookTabs
             var column = lowest.parent;
             _neighbour = lowest.GetComponent<Collider>();
             _neighbourAnimator = lowest.GetComponent<Animator>();
-            var step = lowest.localPosition - next.localPosition;
+            // COS-195: the top edge. The tab's centre sits as far above the top edge as the game's tabs sit right of the right
+            // edge, and as far in from the corner as the game's top tab is; a quarter turn makes the tab's "out" the page's up.
+            var highest = RootTab(tabs[^1].transform, book.transform) ?? next;
+            Vector3 c0 = Centre(lowest), fromCorner = c0 - pageTopRight;
+            float past = Vector3.Dot(fromCorner, pageRight), inset = Vector3.Dot(pageTopRight - Centre(highest), pageUp);
+            var target = c0 - pageRight * (past + inset) + pageUp * (past - Vector3.Dot(fromCorner, pageUp));
+            var turn = Quaternion.FromToRotation(pageRight, pageUp);
+            float stepLen = (lowest.position - next.position).magnitude;
             // Built under an inactive holder so the copy never runs Awake/OnEnable of the game's tab scripts.
             var holder = new GameObject("CotsTabHolder");
             holder.SetActive(false);
@@ -120,15 +139,15 @@ internal static class BookTabs
                 var le = go.GetComponent<LayoutElement>();
                 if (le == null) le = go.AddComponent<LayoutElement>();
                 le.ignoreLayout = true;
-                go.transform.localPosition = lowest.localPosition + step * (i + 1);
-                go.transform.localRotation = lowest.localRotation;
                 go.transform.localScale = lowest.localScale;
+                go.transform.rotation = turn * lowest.rotation;
+                go.transform.position = target - pageRight * (stepLen * i) - turn * (c0 - lowest.position);
                 var an = go.GetComponent<Animator>();
                 var outline = go.transform.Find("AnimRoot/Outline/ButtonVisualRoot");
                 if (outline != null) outline.gameObject.SetActive(false);
                 Made[d.Tab] = new Ours { Face = face, Root = go.transform, Animator = an, Hover = go.GetComponent<Collider>(), Outline = outline != null ? outline.gameObject : null };
                 Faces[d.Tab] = face;
-                PickUpSubs(go.transform);
+                PickUpSubs(go.transform, pageUp, -pageRight * stepLen);
             }
             UnityEngine.Object.Destroy(holder);
             Apply();
@@ -137,6 +156,13 @@ internal static class BookTabs
         {
             RLog.Error($"Champions of the Sons book: adding tabs failed: {e}");
         }
+    }
+
+    /// <summary>The middle of a root tab: its collider's centre, from the transform (bounds lag while the book moves).</summary>
+    private static Vector3 Centre(Transform tab)
+    {
+        var box = tab.GetComponent<BoxCollider>();
+        return box != null ? tab.TransformPoint(box.center) : tab.position;
     }
 
     private static bool IsOurs(Transform t)
@@ -209,17 +235,20 @@ internal static class BookTabs
         }
         for (int i = 0; i < chain.Count; i++)
         {
+            // COS-195: the chain runs leftward from the root tab, so the last link is the first page: the row reads left to right.
             var link = chain[i];
-            link.gameObject.name = "CotsSub-" + SubDefs[i].Tab;
+            var def = SubDefs[chain.Count - 1 - i];
+            link.gameObject.name = "CotsSub-" + def.Tab;
             var visuals = link.Find("AnimRoot/Visuals");
             if (visuals != null) UnityEngine.Object.DestroyImmediate(visuals.gameObject); // the game's page number (COS-180: hiding was undone)
             var face = RootFace(link);
-            if (face != null) Paint(face, SubColor, SubDefs[i].IconId);
+            if (face != null) Paint(face, SubColor, def.IconId);
         }
     }
 
-    /// <summary>Finds our sub-tabs under the root copy (built now or on an earlier attach) and keeps them for slide, hover and hits.</summary>
-    private static void PickUpSubs(Transform root)
+    /// <summary>Finds our sub-tabs under the root copy (built now or on an earlier attach) and keeps them for slide, hover and hits.
+    /// COS-195: each link rests exactly behind the one before it and moves one <paramref name="edgeStep"/> (world) along the top edge.</summary>
+    private static void PickUpSubs(Transform root, Vector3 pageUp, Vector3 edgeStep)
     {
         for (var sub = SubOf(root); sub != null; sub = SubOf(sub))
         {
@@ -230,9 +259,21 @@ internal static class BookTabs
             // COS-180: the game can turn its page-number text back on; our copies carry none at all.
             var visuals = sub.Find("AnimRoot/Visuals");
             if (visuals != null) UnityEngine.Object.Destroy(visuals.gameObject);
+            // COS-195: with the link's Animator off nothing hides a leftover number text; ours show none.
+            foreach (var text in sub.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
+                if (text != null) text.enabled = false;
             var outline = sub.Find("AnimRoot/Outline/ButtonVisualRoot");
             if (outline != null) outline.gameObject.SetActive(false);
-            Subs[tab] = new Ours { Face = face, Root = sub, Animator = sub.GetComponent<Animator>(), Hover = sub.GetComponent<Collider>(), Outline = outline != null ? outline.gameObject : null };
+            var along = sub.parent.InverseTransformVector(edgeStep);
+            Vector3 alongDir = along.normalized, outDir = sub.parent.InverseTransformVector(pageUp).normalized;
+            var rest = sub.localPosition;
+            rest -= alongDir * Vector3.Dot(rest, alongDir);
+            rest -= outDir * Vector3.Dot(rest, outDir);
+            sub.localPosition = rest;
+            _firstSub ??= sub.gameObject;
+            var animator = sub.GetComponent<Animator>();
+            if (animator != null) animator.enabled = false;
+            Subs[tab] = new Ours { Face = face, Root = sub, Animator = sub.GetComponent<Animator>(), Hover = sub.GetComponent<Collider>(), Outline = outline != null ? outline.gameObject : null, Rest = rest, Offset = along, Anim = sub.Find("AnimRoot") };
             Faces[tab] = face;
         }
     }
@@ -277,9 +318,14 @@ internal static class BookTabs
             o.Out = slide;
             o.Animator.SetBool(SlideOutParam, slide);
         }
-        // The sub-tabs slide out while one of our pages shows (each rides on the one before it, so they move together); the open
-        // page's tab is a lighter colour. COS-194: the hovered one grows, eased, as the game's hovered tabs pop out.
+        // The sub-tabs spread along the top edge while one of our pages shows (each rides on the one before it, so one step each
+        // makes a row) and hide behind the root tab otherwise; the open page's tab is a lighter colour. COS-194: the hovered one
+        // grows, eased, as the game's hovered tabs pop out.
         float step = Mathf.Clamp01(Time.unscaledDeltaTime * HoverGrowRate);
+        _subT = Mathf.MoveTowards(_subT, _pageShown ? 1 : 0, Time.unscaledDeltaTime * SubSlideRate);
+        float spread = Mathf.SmoothStep(0, 1, _subT);
+        // Tucked in, the links sit exactly on each other: off, so they don't flicker through the root tab.
+        if (_firstSub != null && _firstSub.activeSelf != (_subT > 0)) _firstSub.SetActive(_subT > 0);
         foreach (var (t, o) in Subs)
         {
             bool lit = Hovered == t;
@@ -299,9 +345,10 @@ internal static class BookTabs
                 float k = 1 + (HoverScale - 1) * Mathf.SmoothStep(0, 1, o.Grow);
                 ft.localScale = o.BaseScale * k;
             }
-            if (o.Animator == null || (o.Out == _pageShown && o.Animator.GetBool(SlideOutParam) == _pageShown)) continue;
             o.Out = _pageShown;
-            o.Animator.SetBool(SlideOutParam, _pageShown);
+            if (o.Root != null) o.Root.localPosition = o.Rest + o.Offset * spread;
+            // The game's slide moves each link's AnimRoot, and the next link rides on it: ours stay level with the link itself.
+            if (o.Anim != null) o.Anim.localPosition = Vector3.zero;
         }
     }
 
@@ -323,8 +370,8 @@ internal static class BookTabs
     /// <summary>Whether our tab shows the hover outline (for the self-test).</summary>
     public static bool OutlineShown(BookTab tab) => Made.TryGetValue(tab, out var o) && o.Outline != null && o.Outline.activeSelf;
 
-    /// <summary>Whether a sub-tab's Animator is set to slide out (self-test).</summary>
-    public static bool SubSlidOut(BookTab tab) => Subs.TryGetValue(tab, out var o) && o.Animator != null && o.Animator.GetBool(SlideOutParam);
+    /// <summary>Whether a sub-tab is out on the top edge (self-test).</summary>
+    public static bool SubSlidOut(BookTab tab) => Subs.TryGetValue(tab, out var o) && o.Out && _subT >= 1;
 
     /// <summary>How far a sub-tab's hover growth has gone, 0..1 (self-test, COS-194).</summary>
     public static float SubGrow(BookTab tab) => Subs.TryGetValue(tab, out var o) ? o.Grow : 0;
@@ -432,7 +479,18 @@ internal static class BookTabs
         if (src != null && src.isReadable)
         {
             result = new Texture2D(src.width, src.height, TextureFormat.RGBA32, true) { name = "cots-tab-" + iconId };
-            result.SetPixels32(src.GetPixels32());
+            var px = src.GetPixels32();
+            // COS-195: the tab is turned a quarter to stand on the top edge; the icon is turned back so it reads upright.
+            if (src.width == src.height)
+            {
+                int n = src.width;
+                var turned = new Color32[px.Length];
+                for (int v = 0; v < n; v++)
+                    for (int u = 0; u < n; u++)
+                        turned[v * n + u] = px[u * n + (n - 1 - v)];
+                px = turned;
+            }
+            result.SetPixels32(px);
             result.Apply(true);
             result.filterMode = FilterMode.Trilinear;
             result.wrapMode = TextureWrapMode.Clamp;
