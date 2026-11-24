@@ -252,12 +252,7 @@ public sealed class RealWeaponsFeature : IModFeature
         if (_sync > 0) return;
         _sync = 0.2f;
         WeaponSlotSync.Tick();
-        FreeArrows.Tick();
     }
 
-    public void OnGameStart()
-    {
-        WeaponSlotSync.Reset();
-        FreeArrows.Reset();
-    }
+    public void OnGameStart() => WeaponSlotSync.Reset();
 }

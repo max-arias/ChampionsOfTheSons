@@ -15,7 +15,7 @@ namespace ChampionsOfTheSons.Mod.Weapons;
 /// COS-93, COS-186 and COS-192 checks: the weapon slot gives each type's real game item (owned once, on a weapon bar key, with its
 /// own icon) without drawing it; the weapon bar key draws, holsters and swaps weapons; the type's rules hold (swing, damage,
 /// trees, throw, arrow drop, draw), a real swing plays the sound and trail and hits an enemy for the weapon's own damage
-/// (COS-191), a unique bow's arrows are free (COS-189), the game's inventory save never holds it, and a drop doesn't lose it.
+/// (COS-191), the game's inventory save never holds it, and a drop doesn't lose it.
 /// </summary>
 internal static class WeaponsSelfTest
 {
@@ -103,7 +103,7 @@ internal static class WeaponsSelfTest
                 WeaponModels.Scan();
                 CheckOwned(typeId);
                 if (CheckActive(typeId) is not { } type) return;
-                if (type.Base == WeaponBase.Bow) { CheckBowRules(type); CheckFreeArrows(); return; }
+                if (type.Base == WeaponBase.Bow) { CheckBowRules(type); GiveArrows(); return; }
                 CheckMeleeRules(type);
                 _hits = 0;
                 TestKit.FaceOpenGround(new[] { (1.1f, 0f) });
@@ -112,7 +112,16 @@ internal static class WeaponsSelfTest
             if (typeId == "greatbow")
             {
                 SelfTest.Add(t + 3.5f, "weapons: greatbow screenshot", () => TestKit.Screenshot("weapons-greatbow"));
-                t += 4.5f;
+                // COS-188: the bow held drawn (attack held), so its facing shows.
+                // The game swallows the first press after an equip: a short one first, then the held draw.
+                SelfTest.Add(t + 3.7f, "weapons: greatbow warm-up press", () => TestKit.HoldAttack(0.3f));
+                SelfTest.Add(t + 5f, "weapons: greatbow draw", () => TestKit.HoldAttack(4f));
+                SelfTest.Add(t + 7f, "weapons: greatbow drawn screenshot", () =>
+                {
+                    TestKit.Screenshot("weapons-greatbow-drawn");
+                    SelfTest.Log($"weapons: greatbow arrows {LocalPlayer.Inventory.AmountOf(ArrowId(), true, false)}");
+                });
+                t += 9.5f;
                 continue;
             }
             SelfTest.Add(t + 4f, $"weapons: {typeId} swing", Attack);
@@ -222,8 +231,6 @@ internal static class WeaponsSelfTest
             WeaponSlotSync.Tick();
             var owned = RealWeapons.All.Where(w => LocalPlayer.Inventory.AmountOf(w.Id, true, false) > 0).Select(w => w.TypeId).ToList();
             SelfTest.Check("weapons: no weapon item without the slot item", owned.Count == 0, string.Join(", ", owned));
-            FreeArrows.Tick();
-            SelfTest.Check("weapons: granted arrows taken back", FreeArrows.Granted == 0, $"granted {FreeArrows.Granted}");
         });
         SelfTest.Add(t + 2f, "weapons: hand empty", () =>
         {
@@ -253,23 +260,20 @@ internal static class WeaponsSelfTest
 
     private static int _barKey;
 
-    /// <summary>COS-189: a unique bow in hand is given the best arrow when the player has none, and a spent arrow comes back.</summary>
-    private static void CheckFreeArrows()
+    /// <summary>COS-189: bows use the player's own arrows; the test gives some so the greatbow can draw.</summary>
+    private static void GiveArrows()
     {
-        var inv = LocalPlayer.Inventory;
-        int best = FreeArrows.BestArrowId;
-        SelfTest.Log($"weapons: arrows {GameItems.Matching("arrow")}; free arrow {best}");
-        if (best <= 0) { SelfTest.Check("weapons: an arrow item exists", false); return; }
-        int have = inv.AmountOf(best, true, false);
-        if (have > 0) inv.RemoveItem(best, have, false, false, false, null, true);
-        FreeArrows.Tick();
-        SelfTest.Check("weapons: unique bow is given an arrow", FreeArrows.Active && inv.AmountOf(best, true, false) >= 1 && FreeArrows.Granted >= 1,
-            $"active {FreeArrows.Active}, arrows {inv.AmountOf(best, true, false)}, granted {FreeArrows.Granted}");
-        int before = inv.AmountOf(best, true, false), shots = FreeArrows.FreeShots;
-        inv.RemoveItem(best, 1, false, false, false, null, true); // the game spending one
-        bool refunded = FreeArrows.OnAmmoSpent(best);
-        SelfTest.Check("weapons: a spent arrow comes back", refunded && inv.AmountOf(best, true, false) == before && FreeArrows.FreeShots == shots + 1,
-            $"{before} -> {inv.AmountOf(best, true, false)}, refunded {refunded}");
+        int id = ArrowId();
+        if (id > 0 && LocalPlayer.Inventory.AmountOf(id, true, false) < 5) LocalPlayer.Inventory.AddItem(id, 10, true, false, null);
+    }
+
+    /// <summary>The first arrow item in the game's database (-1 when none).</summary>
+    private static int ArrowId()
+    {
+        var list = Sons.Items.Core.ItemDatabaseManager.Items;
+        for (int i = 0; i < list.Count; i++)
+            if (list[i] != null && list[i].Name.Contains("arrow", StringComparison.OrdinalIgnoreCase)) return list[i].Id;
+        return -1;
     }
 
     /// <summary>Exactly the type's game item is owned, once, and it is in hand.</summary>
