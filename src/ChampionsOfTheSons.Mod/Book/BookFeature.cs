@@ -111,9 +111,20 @@ public sealed class BookFeature : IModFeature
             CancelDrag();
         }
         else if (input.Alt && key != null) LastAction = key + ": " + BookPages.Click(current, key, true);
+        // COS-192: a number key over a weapon puts it on the weapon bar (the key's own weapon comes off it).
+        if (input.Number >= 0 && key != null && IsItemSlot(key)) LastAction = key + ": " + BindToBar(input.Number, key);
 
         BookPages.Tick(current);
         UpdateCard(Dragging != null ? null : key);
+    }
+
+    private static string BindToBar(int index, string key)
+    {
+        var pc = PlayerState.Character;
+        if (!ActionBar.ActionBarConfig.WeaponHotkeys.Contains(index)) return $"key {Bridge.HotkeyBridge.KeyLabel(index)} is not a weapon bar key";
+        if (!pc.WeaponBar.Bind(index, key, pc.Inventory, ModContent.Db)) return "not a weapon";
+        BookPages.MarkDirty();
+        return "bound to key " + Bridge.HotkeyBridge.KeyLabel(index);
     }
 
     private static bool IsItemSlot(string key) => key.StartsWith("bag.", StringComparison.Ordinal) || key.StartsWith("equip.", StringComparison.Ordinal);
@@ -136,6 +147,9 @@ public sealed class BookFeature : IModFeature
 /// </summary>
 internal readonly record struct BookInput(Vector2 Screen, bool Press, bool Held, bool Release, bool Alt, int Page)
 {
+    /// <summary>The hotkey index of a number key pressed this frame (-1 none): binds a hovered weapon to the weapon bar (COS-192).</summary>
+    public int Number { get; init; } = -1;
+
     public static BookInput FromDevices(Mouse? mouse, Gamepad? pad, Vector2 screen)
     {
         float wheel = mouse != null ? mouse.scroll.ReadValue().y : 0;
@@ -143,7 +157,8 @@ internal readonly record struct BookInput(Vector2 Screen, bool Press, bool Held,
             mouse != null && mouse.leftButton.wasPressedThisFrame, mouse != null && mouse.leftButton.isPressed, mouse != null && mouse.leftButton.wasReleasedThisFrame,
             mouse != null && mouse.rightButton.wasPressedThisFrame, wheel,
             pad != null && pad.buttonSouth.wasPressedThisFrame, pad != null && pad.buttonSouth.isPressed, pad != null && pad.buttonSouth.wasReleasedThisFrame,
-            pad != null && pad.buttonWest.wasPressedThisFrame, pad != null && pad.leftShoulder.wasPressedThisFrame, pad != null && pad.rightShoulder.wasPressedThisFrame);
+            pad != null && pad.buttonWest.wasPressedThisFrame, pad != null && pad.leftShoulder.wasPressedThisFrame, pad != null && pad.rightShoulder.wasPressedThisFrame)
+            with { Number = Weapons.WeaponBarKeys.PressedNumber() };
     }
 
     /// <summary>The mapping from raw buttons, so self-tests can drive the pad path without a pad.</summary>

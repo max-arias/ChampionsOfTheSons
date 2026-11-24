@@ -41,7 +41,13 @@ internal static class BookTabs
         public Collider? Hover;
         public GameObject? Outline;
         public bool Out, Lit, Open;
+        /// <summary>Hover growth 0..1 and the face's own scale (COS-194).</summary>
+        public float Grow;
+        public Vector3 BaseScale;
     }
+
+    /// <summary>A hovered sub-tab's face grows to this scale, at this rate per second (COS-194).</summary>
+    private const float HoverScale = 1.18f, HoverGrowRate = 8f;
 
     private static readonly Dictionary<BookTab, Ours> Made = new();
 
@@ -271,7 +277,9 @@ internal static class BookTabs
             o.Out = slide;
             o.Animator.SetBool(SlideOutParam, slide);
         }
-        // The sub-tabs slide out while one of our pages shows; the open page's tab is a lighter colour.
+        // The sub-tabs slide out while one of our pages shows (each rides on the one before it, so they move together); the open
+        // page's tab is a lighter colour. COS-194: the hovered one grows, eased, as the game's hovered tabs pop out.
+        float step = Mathf.Clamp01(Time.unscaledDeltaTime * HoverGrowRate);
         foreach (var (t, o) in Subs)
         {
             bool lit = Hovered == t;
@@ -282,6 +290,14 @@ internal static class BookTabs
                 o.Open = open;
                 var mats = o.Face.materials;
                 if (mats.Length > 0) mats[0].SetColor("_BaseColor", PageKit.Hex(open ? SubOpenColor : SubColor));
+            }
+            if (o.Face != null)
+            {
+                var ft = o.Face.transform;
+                if (o.BaseScale == Vector3.zero) o.BaseScale = ft.localScale;
+                o.Grow = Mathf.MoveTowards(o.Grow, lit && _pageShown ? 1 : 0, step);
+                float k = 1 + (HoverScale - 1) * Mathf.SmoothStep(0, 1, o.Grow);
+                ft.localScale = o.BaseScale * k;
             }
             if (o.Animator == null || (o.Out == _pageShown && o.Animator.GetBool(SlideOutParam) == _pageShown)) continue;
             o.Out = _pageShown;
@@ -306,6 +322,12 @@ internal static class BookTabs
 
     /// <summary>Whether our tab shows the hover outline (for the self-test).</summary>
     public static bool OutlineShown(BookTab tab) => Made.TryGetValue(tab, out var o) && o.Outline != null && o.Outline.activeSelf;
+
+    /// <summary>Whether a sub-tab's Animator is set to slide out (self-test).</summary>
+    public static bool SubSlidOut(BookTab tab) => Subs.TryGetValue(tab, out var o) && o.Animator != null && o.Animator.GetBool(SlideOutParam);
+
+    /// <summary>How far a sub-tab's hover growth has gone, 0..1 (self-test, COS-194).</summary>
+    public static float SubGrow(BookTab tab) => Subs.TryGetValue(tab, out var o) ? o.Grow : 0;
 
     /// <summary>Whether our tab's Animator is set to slide out (for the self-test).</summary>
     public static bool SlidOut(BookTab tab) => Made.TryGetValue(tab, out var o) && o.Animator != null && o.Animator.GetBool(SlideOutParam);

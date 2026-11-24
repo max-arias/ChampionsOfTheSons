@@ -2,26 +2,38 @@ using RedLoader;
 
 namespace ChampionsOfTheSons.Mod.ActionBar;
 
-/// <summary>Which of the game's hotkeys (keys 1-9, 0) the weapon and consumable groups show; config text like "1,2,3,4".</summary>
+/// <summary>Which hotkeys (keys 1-9, 0) the weapon group (the weapon bar, COS-192) and the consumable group show; config text like
+/// "1,2,3,4,5,6".</summary>
 internal static class ActionBarConfig
 {
-    private const string WeaponDefault = "1,2,3,4", ConsumableDefault = "5,6,7,8";
+    private const string WeaponDefault = "1,2,3,4,5,6", ConsumableDefault = "7,8,9,0";
+    /// <summary>The defaults before COS-192: a config still on them moves to the new ones.</summary>
+    private const string OldWeaponDefault = "1,2,3,4", OldConsumableDefault = "5,6,7,8";
     private static ConfigEntry<string>? _weapons, _consumables;
     private static string _weaponsText = "", _consumablesText = "";
-    private static List<int> _weaponIdx = Parse(WeaponDefault), _consumableIdx = Parse(ConsumableDefault);
+    private static List<int> _weaponIdx = Parse(WeaponDefault, ActionBar.WeaponSlots), _consumableIdx = Parse(ConsumableDefault, ActionBar.ConsumableSlots);
 
     public static void Init()
     {
         _weapons = Config.Category.CreateEntry("actionbar_weapon_keys", WeaponDefault, "Action bar: weapon keys",
-            "The game's item hotkeys (1-9, 0) shown on the left of the action bar, up to 4, e.g. 1,2,3,4.");
+            $"The weapon bar's keys (1-9, 0) on the left of the action bar, up to {ActionBar.WeaponSlots}, e.g. 1,2,3,4,5,6.");
         _consumables = Config.Category.CreateEntry("actionbar_consumable_keys", ConsumableDefault, "Action bar: consumable keys",
-            "The game's item hotkeys (1-9, 0) shown on the right of the action bar, up to 4, e.g. 5,6,7,8.");
+            $"The game's item hotkeys (1-9, 0) shown on the right of the action bar, up to {ActionBar.ConsumableSlots}, e.g. 7,8,9,0.");
+        try
+        {
+            if (_weapons.Value == OldWeaponDefault && _consumables.Value == OldConsumableDefault)
+            {
+                _weapons.Value = WeaponDefault;
+                _consumables.Value = ConsumableDefault;
+            }
+        }
+        catch { /* the defaults stand */ }
     }
 
-    public static IReadOnlyList<int> WeaponHotkeys => Current(_weapons, WeaponDefault, ref _weaponsText, ref _weaponIdx);
-    public static IReadOnlyList<int> ConsumableHotkeys => Current(_consumables, ConsumableDefault, ref _consumablesText, ref _consumableIdx);
+    public static IReadOnlyList<int> WeaponHotkeys => Current(_weapons, WeaponDefault, ActionBar.WeaponSlots, ref _weaponsText, ref _weaponIdx);
+    public static IReadOnlyList<int> ConsumableHotkeys => Current(_consumables, ConsumableDefault, ActionBar.ConsumableSlots, ref _consumablesText, ref _consumableIdx);
 
-    private static List<int> Current(ConfigEntry<string>? entry, string fallback, ref string text, ref List<int> parsed)
+    private static List<int> Current(ConfigEntry<string>? entry, string fallback, int max, ref string text, ref List<int> parsed)
     {
         string now;
         try
@@ -35,13 +47,13 @@ internal static class ActionBarConfig
         if (now != text)
         {
             text = now;
-            parsed = Parse(now);
+            parsed = Parse(now, max);
         }
         return parsed;
     }
 
-    /// <summary>"1,2,3,4" to hotkey indices 0..3 (key 0 is index 9); unknown entries are skipped, at most 4.</summary>
-    public static List<int> Parse(string text)
+    /// <summary>"1,2,3,4" to hotkey indices 0..3 (key 0 is index 9); unknown entries are skipped, at most <paramref name="max"/>.</summary>
+    public static List<int> Parse(string text, int max)
     {
         var list = new List<int>();
         foreach (var part in text.Split(',', ' ', ';'))
@@ -49,7 +61,7 @@ internal static class ActionBarConfig
             if (!int.TryParse(part.Trim(), out int key) || key is < 0 or > 9) continue;
             int index = key == 0 ? 9 : key - 1;
             if (!list.Contains(index)) list.Add(index);
-            if (list.Count == ActionBar.GroupSlots) break;
+            if (list.Count == max) break;
         }
         return list;
     }

@@ -48,6 +48,9 @@ public sealed class PlayerSave
 
     /// <summary>Spell id → successful casts, for spell mastery (COS-176). Missing = none.</summary>
     public Dictionary<string, int> SpellCasts { get; set; } = new();
+
+    /// <summary>Weapon bar (COS-192): hotkey index (0-9, 9 = key 0) → inventory slot of the bound weapon. Missing = none bound.</summary>
+    public Dictionary<int, string> WeaponBar { get; set; } = new();
 }
 
 public sealed class SavedItem

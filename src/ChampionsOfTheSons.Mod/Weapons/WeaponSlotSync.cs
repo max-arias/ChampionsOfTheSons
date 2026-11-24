@@ -10,23 +10,35 @@ namespace ChampionsOfTheSons.Mod.Weapons;
 /// <summary>
 /// The weapon slot drives the game inventory (COS-186): the player owns exactly the real weapon item of the slot item's
 /// type, one of it, and none while the slot is empty. A wanted-state check a few times a second, so load, respawn and
-/// joining a co-op game need nothing of their own. A new weapon goes into the hand at once and onto a hotkey.
+/// joining a co-op game need nothing of their own. Equipping never draws (COS-192): the weapon bar key does
+/// (<see cref="WeaponBarKeys"/>). A slot weapon on no key gets the first free one; the game's hotkey of that key holds the
+/// real item so the game's own hotkey state matches.
 /// </summary>
 internal static class WeaponSlotSync
 {
-    private static int _wanted;
     private static string _lookKey = "";
-    private static bool _fresh = true;
 
     /// <summary>Times the sync added, removed or equipped an item (self-test).</summary>
     public static int Gives { get; private set; }
     public static int Takes { get; private set; }
 
-    public static void Reset()
+    public static void Reset() => _lookKey = "";
+
+    /// <summary>Syncs now and puts the slot's weapon in the hand (the weapon bar key). False when there is none to draw.</summary>
+    public static bool Draw()
     {
-        _wanted = 0;
-        _lookKey = "";
-        _fresh = true;
+        Tick();
+        var want = Wanted();
+        var inv = LocalPlayer.Inventory;
+        if (want == null || inv == null || inv.AmountOf(want.Id, true, false) <= 0) return false;
+        return inv.TryEquip(want.Id, false, true, false);
+    }
+
+    private static RealWeapons.Weapon? Wanted()
+    {
+        var type = WeaponTypes.Equipped(PlayerState.Character.Inventory, ModContent.Db);
+        var want = RealWeapons.ByType(type?.Id);
+        return want?.Item == null ? null : want;
     }
 
     public static void Tick()
@@ -35,17 +47,13 @@ internal static class WeaponSlotSync
         if (inv == null || !RealWeapons.Registered) return;
         try
         {
-            var slotItem = PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot);
-            var type = WeaponTypes.Equipped(PlayerState.Character.Inventory, ModContent.Db);
-            var want = RealWeapons.ByType(type?.Id);
-            if (want?.Item == null) want = null;
+            var pc = PlayerState.Character;
+            var slotItem = pc.Inventory.Get(WeaponTypes.WeaponSlot);
+            var want = Wanted();
 
-            // The hotkey the previous weapon sat on, so a swap keeps the key.
-            int hotkey = -1;
             foreach (var w in RealWeapons.All)
             {
                 int i = HotkeyIndexOf(w.Id);
-                if (hotkey < 0 && i >= 0) hotkey = i;
                 if (w == want) continue;
                 int n = inv.AmountOf(w.Id, true, false);
                 if (n > 0)
@@ -56,33 +64,21 @@ internal static class WeaponSlotSync
                 if (i >= 0) HotkeyBridge.Set(i, 0);
             }
 
-            if (want == null)
-            {
-                _wanted = 0;
-                _fresh = false;
-                return;
-            }
+            if (want == null) return;
 
             string look = slotItem != null ? $"{slotItem.BaseId}" : "";
-            if (look != _lookKey || want.Id != _wanted) Label(want, slotItem);
+            if (look != _lookKey) Label(want, slotItem);
 
             int have = inv.AmountOf(want.Id, true, false);
             if (have > 1) inv.RemoveItem(want.Id, have - 1, false, false, true, null, true);
-            bool added = false;
-            if (have == 0)
-            {
-                added = inv.AddItem(want.Id, 1, true, false, null);
-                if (added) Gives++;
-            }
-            if (HotkeyIndexOf(want.Id) < 0) HotkeyBridge.Set(hotkey >= 0 ? hotkey : FreeWeaponHotkey(), want.Id);
-
-            // A newly chosen weapon goes into the hand at once; the one given back on the first check after a load does not.
-            if (want.Id != _wanted)
-            {
-                _wanted = want.Id;
-                if (!_fresh) inv.TryEquip(want.Id, false, true, false);
-            }
-            _fresh = false;
+            if (have == 0 && inv.AddItem(want.Id, 1, true, false, null)) Gives++;
+            // The slot weapon is on a weapon bar key (the first free one if it was on none); the game's hotkey there holds the
+            // real item, and no other game hotkey does.
+            int key = pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot);
+            if (key < 0 && FreeWeaponKey(pc.WeaponBar) is int free && pc.WeaponBar.Bind(free, WeaponTypes.WeaponSlot, pc.Inventory, ModContent.Db)) key = free;
+            for (int i = 0; i < HotkeyBridge.Count; i++)
+                if (i != key && HotkeyBridge.ItemIdAt(i) == want.Id) HotkeyBridge.Set(i, 0);
+            if (key >= 0 && HotkeyBridge.ItemIdAt(key) != want.Id) HotkeyBridge.Set(key, want.Id);
         }
         catch (Exception e)
         {
@@ -112,12 +108,15 @@ internal static class WeaponSlotSync
         return -1;
     }
 
-    /// <summary>The first empty key of the action bar's weapon group, else its first key.</summary>
-    private static int FreeWeaponHotkey()
+    /// <summary>The first weapon bar key with no weapon bound and no game item on it, else the first with no weapon bound; null when
+    /// every key has a weapon.</summary>
+    private static int? FreeWeaponKey(WeaponBar bar)
     {
         var keys = ActionBarConfig.WeaponHotkeys;
         foreach (int i in keys)
-            if (HotkeyBridge.ItemIdAt(i) <= 0) return i;
-        return keys.Count > 0 ? keys[0] : 0;
+            if (bar.SlotOf(i) == null && HotkeyBridge.ItemIdAt(i) <= 0) return i;
+        foreach (int i in keys)
+            if (bar.SlotOf(i) == null) return i;
+        return null;
     }
 }

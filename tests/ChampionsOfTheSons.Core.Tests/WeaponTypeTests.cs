@@ -98,4 +98,75 @@ public class WeaponTypeTests
         Assert.Equal(2, WeaponTypes.ShotDelayFactor(db.WeaponTypes["greatbow"]));
         Assert.Equal(1, WeaponTypes.ShotDelayFactor(new Content.WeaponTypeDef { Base = WeaponBase.Melee, DrawSpeed = 0.5 }));
     }
+
+    [Fact]
+    public void A_weapon_alone_kills_an_on_level_enemy_in_the_same_hits_at_every_level()
+    {
+        var sword = Db().WeaponTypes["long_sword"]; // the reference damage
+        foreach (int level in new[] { 1, 10, 31, 60, 120 })
+        {
+            double hits = EnemyScaler.MaxHealth(level + WeaponTypes.OnLevelExtra, 100, 1) / WeaponTypes.WeaponDamage(sword, level, Rarity.Legendary);
+            Assert.InRange(hits, WeaponTypes.LegendaryHitsToKill - 0.01, WeaponTypes.LegendaryHitsToKill + 0.01);
+            double strip = EnemyScaler.MeanArmor(level + WeaponTypes.OnLevelExtra) / WeaponTypes.WeaponPierce(level, Rarity.Legendary);
+            Assert.InRange(strip, WeaponTypes.LegendaryHitsToStrip - 0.01, WeaponTypes.LegendaryHitsToStrip + 0.01);
+        }
+    }
+
+    [Fact]
+    public void Weapon_damage_grows_with_rarity_level_and_type_damage()
+    {
+        var db = Db();
+        var sword = db.WeaponTypes["long_sword"];
+        double Damage(Rarity r, int level) => WeaponTypes.WeaponDamage(sword, level, r);
+        Assert.True(Damage(Rarity.Common, 30) < Damage(Rarity.Magic, 30));
+        Assert.True(Damage(Rarity.Magic, 30) < Damage(Rarity.Rare, 30));
+        Assert.True(Damage(Rarity.Rare, 30) < Damage(Rarity.Legendary, 30));
+        Assert.True(Damage(Rarity.Legendary, 30) < Damage(Rarity.Legendary, 31));
+        var heavy = new WeaponTypeDef { Base = WeaponBase.Melee, Damage = 40 };
+        Assert.Equal(2 * Damage(Rarity.Rare, 30), WeaponTypes.WeaponDamage(heavy, 30, Rarity.Rare), 6);
+        Assert.True(WeaponTypes.WeaponPierce(30, Rarity.Common) < WeaponTypes.WeaponPierce(30, Rarity.Legendary));
+    }
+
+    [Fact]
+    public void A_bound_weapon_keeps_its_key_when_equipping_swaps_slots()
+    {
+        var db = Db();
+        var inv = new Inventory();
+        var bar = new WeaponBar();
+        inv.Swapped += bar.OnSwapped;
+        inv.Emptied += bar.OnEmptied;
+        inv.AddToBag(new ItemInstance { BaseId = "item.sword", Level = 1 });
+        inv.AddToBag(new ItemInstance { BaseId = "item.bow", Level = 1 });
+        inv.AddToBag(new ItemInstance { BaseId = "item.ring_like", Level = 1 });
+        Assert.True(bar.Bind(1, "bag.0", inv, db));
+        Assert.True(bar.Bind(2, "bag.1", inv, db));
+        Assert.False(bar.Bind(3, "bag.2", inv, db)); // not a weapon
+        Assert.False(bar.Bind(WeaponBar.Keys, "bag.0", inv, db));
+
+        Assert.True(inv.Move("bag.0", WeaponTypes.WeaponSlot, db)); // sword equipped
+        Assert.Equal(WeaponTypes.WeaponSlot, bar.SlotOf(1));
+        Assert.True(inv.Move("bag.1", WeaponTypes.WeaponSlot, db)); // bow over sword: they swap
+        Assert.Equal("bag.1", bar.SlotOf(1));
+        Assert.Equal("item.sword", inv.Get(bar.SlotOf(1)!)!.BaseId);
+        Assert.Equal("item.bow", inv.Get(bar.SlotOf(2)!)!.BaseId);
+
+        Assert.True(bar.Bind(2, "bag.1", inv, db)); // rebinding moves the weapon to the new key
+        Assert.Null(bar.SlotOf(1));
+        inv.Remove("bag.1");
+        Assert.Null(bar.SlotOf(2));
+    }
+
+    [Fact]
+    public void Weapon_bar_bindings_survive_a_save_and_drop_what_no_longer_fits()
+    {
+        var db = Db();
+        var inv = new Inventory();
+        inv.AddToBag(new ItemInstance { BaseId = "item.sword", Level = 1 });
+        var save = new Saving.PlayerSave { WeaponBar = { [0] = "bag.0", [4] = "bag.7", [12] = "bag.0" } };
+        var loaded = Saving.SaveCodec.ReadPlayer(Saving.SaveCodec.Write(save));
+        var bar = new WeaponBar();
+        bar.Restore(loaded.WeaponBar, inv, db);
+        Assert.Equal("bag.0", bar.SlotOf(0));
+        Assert.Single(bar.Bindings);
+    }
 }

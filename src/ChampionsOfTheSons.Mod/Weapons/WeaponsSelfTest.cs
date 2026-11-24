@@ -12,9 +12,10 @@ using UnityEngine;
 namespace ChampionsOfTheSons.Mod.Weapons;
 
 /// <summary>
-/// COS-93 and COS-186 checks: the weapon slot gives each type's real game item (owned once, in hand, on an action bar key,
-/// with its own icon), the type's rules hold (swing, damage, trees, throw, arrow drop, draw), a real swing plays the sound
-/// and trail and hits an enemy, the hotkey draws it, the game's inventory save never holds it, and a drop doesn't lose it.
+/// COS-93, COS-186 and COS-192 checks: the weapon slot gives each type's real game item (owned once, on a weapon bar key, with its
+/// own icon) without drawing it; the weapon bar key draws, holsters and swaps weapons; the type's rules hold (swing, damage,
+/// trees, throw, arrow drop, draw), a real swing plays the sound and trail and hits an enemy for the weapon's own damage
+/// (COS-191), a unique bow's arrows are free (COS-189), the game's inventory save never holds it, and a drop doesn't lose it.
 /// </summary>
 internal static class WeaponsSelfTest
 {
@@ -52,9 +53,26 @@ internal static class WeaponsSelfTest
             }
             TestKit.FreeHands();
             inv.StashHeldItems(false, true);
+            foreach (int k in Pc.WeaponBar.Bindings.Keys.ToList()) Pc.WeaponBar.Unbind(k);
         });
 
-        // Weapon in the slot: owned once and in hand at once, on a weapon key of the action bar with its own icon.
+        // COS-192: equipping puts the weapon on a weapon bar key but not in the hand.
+        SelfTest.Add(1.5f, "weapons: equipping does not draw", () =>
+        {
+            EquipItem("item.dull_longsword", "long_sword");
+            TestKit.FreeHands();
+            WeaponSlotSync.Tick();
+            var w = RealWeapons.ByType("long_sword")!;
+            int key = Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot);
+            SelfTest.Check("weapons: equipped weapon owned but not drawn", LocalPlayer.Inventory.AmountOf(w.Id, true, false) == 1 && !WeaponBarKeys.WeaponInHand(),
+                $"owned {LocalPlayer.Inventory.AmountOf(w.Id, true, false)}, in hand {WeaponBarKeys.WeaponInHand()}");
+            SelfTest.Check("weapons: equipped weapon gets a weapon bar key", key >= 0 && ActionBar.ActionBarConfig.WeaponHotkeys.Contains(key) && HotkeyBridge.ItemIdAt(key) == w.Id,
+                $"key {key}; {HotkeyBridge.Describe()}");
+            SelfTest.Check("weapons: the weapon bar keys are held back from the game", WeaponBarKeys.HeldBackKeys().Contains(HotkeyBridge.KeyLabel(Math.Max(0, key))),
+                string.Join(",", WeaponBarKeys.HeldBackKeys()));
+        });
+
+        // Weapon in the slot drawn by its key: owned once, in hand, on a weapon key of the action bar with its own icon.
         SelfTest.Add(2f, "weapons: slot gives the long sword", () => Wield("item.dull_longsword", "long_sword"));
         SelfTest.Add(5f, "weapons: long sword in hand", () =>
         {
@@ -85,7 +103,7 @@ internal static class WeaponsSelfTest
                 WeaponModels.Scan();
                 CheckOwned(typeId);
                 if (CheckActive(typeId) is not { } type) return;
-                if (type.Base == WeaponBase.Bow) { CheckBowRules(type); return; }
+                if (type.Base == WeaponBase.Bow) { CheckBowRules(type); CheckFreeArrows(); return; }
                 CheckMeleeRules(type);
                 _hits = 0;
                 TestKit.FaceOpenGround(new[] { (1.1f, 0f) });
@@ -110,6 +128,7 @@ internal static class WeaponsSelfTest
             {
                 CheckSwingFx(typeId);
                 SelfTest.Check($"weapons: {typeId} hits land", _hits > 0, $"{_hits} hits, animator moved to the base id {RealWeapons.AnimatorFixes}x");
+                SelfTest.Log($"weapons: {typeId} last hit {EnemyPatches.LastHit}, weapon damage {WeaponModels.ModWeaponDamage:0}");
                 if (_enemy != null) TestKit.Kill(_enemy);
                 _enemy = null;
             });
@@ -137,6 +156,37 @@ internal static class WeaponsSelfTest
                 $"held {held?.Kind}, polearms {_spearsBefore} -> {count}");
         });
         t += 6.5f;
+
+        // COS-192: a bag weapon on a key swaps into the slot and is drawn by the key; the key again holsters it.
+        SelfTest.Add(t, "weapons: bind a bag hammer to a weapon key", () =>
+        {
+            var hammer = new ItemInstance { BaseId = "item.relic_hammer", Level = 10, Rarity = Rarity.Rare, Stats = Array.Empty<RolledStat>() };
+            Pc.Inventory.AddToBag(hammer);
+            var bag = Pc.Inventory.Slots.First(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && kv.Value == hammer).Key;
+            _barKey = ActionBar.ActionBarConfig.WeaponHotkeys.First(k => Pc.WeaponBar.SlotOf(k) == null);
+            SelfTest.Check("weapons: bag hammer bound", Pc.WeaponBar.Bind(_barKey, bag, Pc.Inventory, ModContent.Db), $"key {_barKey}");
+            SelfTest.Check("weapons: key press swaps it in", WeaponBarKeys.Press(_barKey), WeaponBarKeys.LastAction);
+        });
+        SelfTest.Add(t + 3f, "weapons: the key drew the hammer", () =>
+        {
+            var held = HeldWeapons.Local();
+            SelfTest.Check("weapons: hammer in the slot and in hand", Pc.WeaponBar.SlotOf(_barKey) == WeaponTypes.WeaponSlot
+                && Pc.Inventory.Get(WeaponTypes.WeaponSlot)?.BaseId == "item.relic_hammer" && held?.ItemId == RealWeapons.ByType("hammer")!.Id,
+                $"{WeaponBarKeys.LastAction}; holding {held?.ItemId}");
+            var polearmSlot = Pc.Inventory.Slots.FirstOrDefault(kv => kv.Value.BaseId == "item.rusty_polearm").Key;
+            SelfTest.Check("weapons: the polearm went to the bag and kept its key", polearmSlot != null && polearmSlot.StartsWith("bag.", StringComparison.Ordinal)
+                && Pc.WeaponBar.KeyOf(polearmSlot) >= 0, $"polearm in {polearmSlot}, key {(polearmSlot == null ? -1 : Pc.WeaponBar.KeyOf(polearmSlot))}");
+            TestKit.Screenshot("weapons-bar-hammer");
+            WeaponBarKeys.Press(_barKey);
+        });
+        SelfTest.Add(t + 5f, "weapons: the key again holsters it", () =>
+            SelfTest.Check("weapons: hammer holstered", !WeaponBarKeys.WeaponInHand(), WeaponBarKeys.LastAction));
+        SelfTest.Add(t + 5.5f, "weapons: polearm back by its key", () =>
+        {
+            var slot = Pc.Inventory.Slots.First(kv => kv.Value.BaseId == "item.rusty_polearm").Key;
+            SelfTest.Check("weapons: polearm key pressed", WeaponBarKeys.Press(Pc.WeaponBar.KeyOf(slot)), WeaponBarKeys.LastAction);
+        });
+        t += 8.5f;
 
         // The hotkey draws it again after it was put away; the game save never holds it; it can't be dropped.
         SelfTest.Add(t, "weapons: put away", () => LocalPlayer.Inventory.StashHeldItems(false, true));
@@ -172,6 +222,8 @@ internal static class WeaponsSelfTest
             WeaponSlotSync.Tick();
             var owned = RealWeapons.All.Where(w => LocalPlayer.Inventory.AmountOf(w.Id, true, false) > 0).Select(w => w.TypeId).ToList();
             SelfTest.Check("weapons: no weapon item without the slot item", owned.Count == 0, string.Join(", ", owned));
+            FreeArrows.Tick();
+            SelfTest.Check("weapons: granted arrows taken back", FreeArrows.Granted == 0, $"granted {FreeArrows.Granted}");
         });
         SelfTest.Add(t + 2f, "weapons: hand empty", () =>
         {
@@ -191,12 +243,33 @@ internal static class WeaponsSelfTest
         ("item.rusty_polearm", "polearm"), ("item.soulstring", "greatbow"), ("item.dull_longsword", "long_sword"),
     };
 
-    /// <summary>Puts a typed item in the weapon slot and lets the slot sync give and draw its game item.</summary>
+    /// <summary>Puts a typed item in the weapon slot, lets the slot sync give its game item and draws it as its weapon bar key does.</summary>
     internal static void Wield(string itemId, string typeId, Rarity rarity = Rarity.Rare)
     {
         EquipItem(itemId, typeId, rarity);
         TestKit.FreeHands();
-        WeaponSlotSync.Tick();
+        WeaponSlotSync.Draw();
+    }
+
+    private static int _barKey;
+
+    /// <summary>COS-189: a unique bow in hand is given the best arrow when the player has none, and a spent arrow comes back.</summary>
+    private static void CheckFreeArrows()
+    {
+        var inv = LocalPlayer.Inventory;
+        int best = FreeArrows.BestArrowId;
+        SelfTest.Log($"weapons: arrows {GameItems.Matching("arrow")}; free arrow {best}");
+        if (best <= 0) { SelfTest.Check("weapons: an arrow item exists", false); return; }
+        int have = inv.AmountOf(best, true, false);
+        if (have > 0) inv.RemoveItem(best, have, false, false, false, null, true);
+        FreeArrows.Tick();
+        SelfTest.Check("weapons: unique bow is given an arrow", FreeArrows.Active && inv.AmountOf(best, true, false) >= 1 && FreeArrows.Granted >= 1,
+            $"active {FreeArrows.Active}, arrows {inv.AmountOf(best, true, false)}, granted {FreeArrows.Granted}");
+        int before = inv.AmountOf(best, true, false), shots = FreeArrows.FreeShots;
+        inv.RemoveItem(best, 1, false, false, false, null, true); // the game spending one
+        bool refunded = FreeArrows.OnAmmoSpent(best);
+        SelfTest.Check("weapons: a spent arrow comes back", refunded && inv.AmountOf(best, true, false) == before && FreeArrows.FreeShots == shots + 1,
+            $"{before} -> {inv.AmountOf(best, true, false)}, refunded {refunded}");
     }
 
     /// <summary>Exactly the type's game item is owned, once, and it is in hand.</summary>
@@ -275,9 +348,11 @@ internal static class WeaponsSelfTest
         float game = data != null ? data.Damage : WeaponModels.Base?._weaponInfo?._weaponDamage ?? 0;
         var box = infos.SelectMany(w => w.GetComponents<BoxCollider>()).FirstOrDefault();
         SelfTest.Log($"weapons: {type.Id} hit box {box?.size} center {box?.center}, game damage {game} (data {data != null}), factor {WeaponModels.MeleeDamageFactor:0.00}");
-        if (type.Damage is double d)
-            SelfTest.Check($"weapons: {type.Id} damage", game > 0 && Math.Abs(WeaponModels.MeleeDamageFactor * game - d) < 0.05,
-                $"{game} x {WeaponModels.MeleeDamageFactor:0.00}, want {d}");
+        // COS-191: a hit's base is the weapon's own damage (the slot item's level and rarity).
+        var slotItem = Pc.Inventory.Get(WeaponTypes.WeaponSlot)!;
+        double d = WeaponTypes.WeaponDamage(type, slotItem.Level, slotItem.Rarity);
+        SelfTest.Check($"weapons: {type.Id} damage", game > 0 && Math.Abs(WeaponModels.MeleeDamageFactor * game - d) < 0.05 && WeaponModels.ModWeaponPierce > 0,
+            $"{game} x {WeaponModels.MeleeDamageFactor:0.00}, want {d:0.0}; pierce {WeaponModels.ModWeaponPierce:0}");
         float tree = WeaponModels.Base != null ? WeaponModels.Base.GetTreeCutDamageMultiplier() : -1;
         bool flag = infos.Length > 0 && infos.All(i => i.noTreeCut);
         SelfTest.Check($"weapons: {type.Id} tree cutting {(type.CutsTrees ? "on" : "off")}", type.CutsTrees ? tree > 0 : tree == 0 && flag,

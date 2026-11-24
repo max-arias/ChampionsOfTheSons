@@ -3,7 +3,7 @@
 // would decide (kill pace, weapon damage, enemy mix) is an assumption listed in Assumptions and printed with the tables.
 // COS-130: enemies roll at the player's level plus the game difficulty's offset; one run per game difficulty.
 //
-//   dotnet run --project tools/PacingSim -c Release -- [content folder] [--profile hunting|casual] [--seeds N] [--xp X] [--fixed-kit]
+//   dotnet run --project tools/PacingSim -c Release -- [content folder] [--profile hunting|casual] [--seeds N] [--xp X] [--fixed-kit] [--weapon-only]
 using System.Globalization;
 using ChampionsOfTheSons.Core;
 using ChampionsOfTheSons.Core.Content;
@@ -18,6 +18,7 @@ var a = Assumptions.Hunting;
 int seeds = 3;
 double xpMul = 1;
 bool fixedKit = false;
+bool weaponOnly = false;
 double dropMul = 1;
 double worthMul = 1;
 for (int i = 0; i < args.Length; i++)
@@ -28,6 +29,7 @@ for (int i = 0; i < args.Length; i++)
         case "--seeds": seeds = int.Parse(args[++i]); break;
         case "--xp": xpMul = double.Parse(args[++i]); break;
         case "--fixed-kit": fixedKit = true; break;
+        case "--weapon-only": weaponOnly = true; break;
         case "--drops": dropMul = double.Parse(args[++i]); break;
         case "--worth": worthMul = double.Parse(args[++i]); break;
         default: folder = Path.GetFullPath(args[i]); break;
@@ -43,6 +45,7 @@ Console.WriteLine(a.Describe());
 
 int[] marks = { 10, 25, 50, 75, 100, 125 };
 var modes = new[] { GameMode.Peaceful, GameMode.Normal, GameMode.Hard, GameMode.HardSurvival }.Select(m => GameDifficulty.For(m)).ToList();
+if (weaponOnly) { WeaponOnlyTable(); return 0; }
 Console.WriteLine("\nEnemies roll at the player's level (COS-130): level = player +-1 + kind extra + game offset; elite chance by game difficulty.");
 
 // 1. Leveling from level 1 on each game difficulty.
@@ -97,7 +100,32 @@ foreach (var g in modes.Where(m => m.Mode is GameMode.Normal or GameMode.HardSur
         Console.WriteLine($"| {lvl}{(reached ? "" : "*")} | {sim.EnemyLevel} | {Sec(t[EnemyTier.Normal])} | {Sec(t[EnemyTier.Elite])} | {Sec(t[EnemyTier.Miniboss])} | {Sec(t[EnemyTier.Boss])} | {sim.HitsToDie():0.#} | {xp:N0} | {goal:N0} | {goal / xp:0.#} |");
     }
 }
+
+WeaponOnlyTable();
 return 0;
+
+// 4. COS-191: a bare character (no perks, no attributes, no other gear) with one on-level melee weapon: hits to kill.
+void WeaponOnlyTable()
+{
+    var g = modes.First(m => m.Mode == GameMode.Normal);
+    Console.WriteLine("\n## 4. Normal: hits to kill with one on-level melee weapon and nothing else (mean of 20 weapons)");
+    Console.WriteLine("| Player lvl | Rarity | Normal hits | Elite hits |");
+    Console.WriteLine("|---|---|---|---|");
+    foreach (int lvl in new[] { 10, 31, 60, 100 })
+        foreach (var rarity in new[] { Rarity.Common, Rarity.Rare, Rarity.Legendary })
+        {
+            var sim = new Sim(content, a, 4000, g);
+            double normal = 0, elite = 0;
+            const int weapons = 20;
+            for (int i = 0; i < weapons; i++)
+            {
+                sim.SetUpWeaponOnly(lvl, rarity);
+                normal += sim.MeanHits(EnemyTier.Normal, 20);
+                elite += sim.MeanHits(EnemyTier.Elite, 10);
+            }
+            Console.WriteLine($"| {lvl} | {rarity} | {normal / weapons:0.#} | {elite / weapons:0.#} |");
+        }
+}
 
 static string Hours(double h) => h < 1 ? $"{h * 60:0} min" : $"{h:0.#} h";
 static string Sec(double? s) => s is double v ? (v >= 600 ? $"{v / 60:0} min" : $"{v:0.#}") : "n/a";
@@ -248,6 +276,20 @@ sealed class Sim
         Refresh();
     }
 
+    /// <summary>COS-191 (table 4): a bare character of the level with one rolled melee weapon of the rarity in the weapon slot.</summary>
+    public void SetUpWeaponOnly(int level, Rarity rarity)
+    {
+        Pc = new PlayerCharacter(_content);
+        Pc.Load(new PlayerSave { Level = level });
+        var def = _loot.PickBase((int)rarity, level, _rng, b => LootRoller.SlotsFor(b.Type).Contains(WeaponTypes.WeaponSlot)
+            && b.WeaponModel != null && _content.WeaponTypes.TryGetValue(b.WeaponModel, out var t) && t.Base != WeaponBase.Bow);
+        if (def != null)
+            Pc.Inventory.Restore(new Dictionary<string, ItemInstance> { [WeaponTypes.WeaponSlot] = _loot.RollItem(def, level, _rng) });
+    }
+
+    /// <summary>Mean swings to kill an enemy of the tier.</summary>
+    public double MeanHits(EnemyTier tier, int samples) => MeanKillSeconds(tier, samples) / SwingSeconds;
+
     /// <summary>Puts back the character a run had at some level (table 3).</summary>
     public void SetUpFrom(PlayerSave save)
     {
@@ -330,7 +372,16 @@ sealed class Sim
         }
     }
 
-    private double SwingSeconds => _a.SwingSeconds / Math.Max(0.1, Pc.Stats.Get(StatIds.AttackSpeed));
+    private double SwingSeconds => _a.SwingSeconds / Math.Max(0.1, Pc.Stats.Get(StatIds.AttackSpeed) * WeaponTypes.SwingSpeedFactor(WeaponTypes.Equipped(Pc.Inventory, Pc.Content)));
+
+    /// <summary>COS-191: a mod weapon in the weapon slot hits for its own damage and pierce; without one, the assumed game weapon.</summary>
+    private (double Damage, double Pierce) WeaponHit()
+    {
+        var type = WeaponTypes.Equipped(Pc.Inventory, Pc.Content);
+        var item = Pc.Inventory.Get(WeaponTypes.WeaponSlot);
+        if (type == null || item == null || type.Base == WeaponBase.Bow) return (_a.WeaponDamage, 0);
+        return (WeaponTypes.WeaponDamage(type, item.Level, item.Rarity), WeaponTypes.WeaponPierce(item.Level, item.Rarity));
+    }
 
     /// <summary>Swings a melee weapon until the enemy dies (real hit, armor, pierce, cap and Undead rules).</summary>
     public double KillSeconds(EnemyProfile p, out bool killed)
@@ -340,7 +391,8 @@ sealed class Sim
         const int cap = 3000;
         while (!state.Dead && hits < cap)
         {
-            state.TakeHit(PlayerAttack.Weapon(Pc.Stats, WeaponClass.Melee, _a.WeaponDamage, _rng));
+            var (dmg, pierce) = WeaponHit();
+            state.TakeHit(PlayerAttack.Weapon(Pc.Stats, WeaponClass.Melee, dmg, _rng, weaponPierce: pierce));
             hits++;
         }
         killed = state.Dead;
@@ -414,8 +466,9 @@ sealed class Sim
     private double Score()
     {
         var s = Pc.Stats;
-        double armor = Math.Max(0, MeanArmor() - Derived.MeleeArmorPierce(s));
-        double hit = (_a.WeaponDamage + s.Get(StatIds.MeleeFlatDmg)) * Derived.MeleeMultiplier(s)
+        var (weaponDamage, weaponPierce) = WeaponHit();
+        double armor = Math.Max(0, MeanArmor() - Derived.MeleeArmorPierce(s) - weaponPierce);
+        double hit = (weaponDamage + s.Get(StatIds.MeleeFlatDmg)) * Derived.MeleeMultiplier(s)
                      * (1 + Math.Clamp(s.Get(StatIds.CritChance), 0, 1) * s.Get(StatIds.CritDamage)) * (1 - ArmorMath.Reduction(armor));
         double dps = hit * Math.Max(0.1, s.Get(StatIds.AttackSpeed));
         double taken = Math.Max(0.05, s.Get(StatIds.AllDamageTaken)) * (1 - ArmorMath.Reduction(s.Get(StatIds.Armor))) * Math.Clamp(s.Get(StatIds.GetHitChance), 0.05, 1);

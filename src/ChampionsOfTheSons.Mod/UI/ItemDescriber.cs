@@ -48,6 +48,7 @@ internal static class ItemDescriber
         string subtitle = Color(rarityHex, UiText.RarityName(item.Rarity)) + Color(UiTheme.TextDim, rest.ToString());
 
         var body = new StringBuilder();
+        AppendWeapon(body, item, def, pc, slot);
         AppendStats(body, item);
         AppendUnique(body, item);
         AppendSet(body, def, pc);
@@ -71,6 +72,19 @@ internal static class ItemDescriber
     {
         foreach (var s in item.Stats.Where(s => !LootRoller.IsSocketStat(s.StatId)).OrderByDescending(s => StatRarity(s.StatId)))
             sb.Append(Color(UiTheme.StatHex(StatRarity(s.StatId)), $"{UiText.StatValue(s.StatId, s.Value)} {UiText.StatName(s.StatId)}")).Append('\n');
+    }
+
+    /// <summary>A mod weapon's own damage and armor pierce (COS-191) and its weapon bar key (COS-192).</summary>
+    private static void AppendWeapon(StringBuilder sb, ItemInstance item, Core.Content.ItemBaseDef? def, PlayerCharacter pc, string? slot)
+    {
+        if (def?.WeaponModel == null || !pc.Content.WeaponTypes.TryGetValue(def.WeaponModel, out var type)) return;
+        double damage = WeaponTypes.WeaponDamage(type, item.Level, item.Rarity);
+        double pierce = WeaponTypes.WeaponPierce(item.Level, item.Rarity);
+        sb.Append(Color(UiTheme.Gold, $"<b>{damage:N0}</b> {UiText.T("ui.weapons.damage", "Weapon damage")}")).Append('\n');
+        sb.Append(Color(UiTheme.TextDim, $"{pierce:N0} {UiText.T("ui.weapons.pierce", "Weapon armor piercing")}")).Append('\n');
+        int key = slot != null ? pc.WeaponBar.KeyOf(slot) : -1;
+        string bar = key >= 0 ? $"{UiText.T("ui.weapons.on_key", "On key")} {(key + 1) % 10}" : UiText.T("ui.weapons.bind_hint", "Hover and press a number key to put it on the weapon bar");
+        sb.Append(Color(UiTheme.TextFaint, bar)).Append("\n\n");
     }
 
     private static void AppendUnique(StringBuilder sb, ItemInstance item)

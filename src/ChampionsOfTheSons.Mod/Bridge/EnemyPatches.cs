@@ -159,7 +159,12 @@ public static class EnemyPatches
                     bool head = IsHead(__args.Length > 0 ? __args[0] as DamageNode : null);
                     double distance = LocalPlayer.Transform != null ? Vector3.Distance(LocalPlayer.Transform.position, __instance.transform.position) : 0;
                     var shot = new RangedShot(PerkHooks.ShotTracker.KindForHit(), distance, head);
-                    var ranged = RangedRules.Hit(sheet, WeaponTypes.RangedBaseDamage(Weapons.WeaponModels.Active, amount), shot, Rng);
+                    // A mod bow's arrows hit for the bow's own damage and pierce (COS-191); anything else as before.
+                    bool modBow = Weapons.WeaponModels.Active?.Base == Core.Content.WeaponBase.Bow && shot.Kind == RangedKind.Bow
+                        && Weapons.WeaponModels.ModWeaponDamage is double;
+                    var ranged = modBow
+                        ? RangedRules.Hit(sheet, Weapons.WeaponModels.ModWeaponDamage!.Value, shot, Rng, weaponPierce: Weapons.WeaponModels.ModWeaponPierce)
+                        : RangedRules.Hit(sheet, WeaponTypes.RangedBaseDamage(Weapons.WeaponModels.Active, amount), shot, Rng);
                     hit = ranged.Hit;
                     _extraHits = ranged.ExtraHits;
                     _headshot = ranged.Headshot;
@@ -167,9 +172,10 @@ public static class EnemyPatches
                 }
                 else
                 {
-                    // Weapon types (COS-93): the type's melee damage factor.
-                    double baseDamage = weapon == WeaponClass.Melee ? amount * Weapons.WeaponModels.MeleeDamageFactor : amount;
-                    hit = PlayerAttack.Weapon(sheet, weapon, baseDamage, Rng);
+                    // Mod weapons (COS-191): the weapon's own damage, kept in ratio with the game's hit, and its own pierce.
+                    bool melee = weapon == WeaponClass.Melee;
+                    double baseDamage = melee ? amount * Weapons.WeaponModels.MeleeDamageFactor : amount;
+                    hit = PlayerAttack.Weapon(sheet, weapon, baseDamage, Rng, weaponPierce: melee ? Weapons.WeaponModels.ModWeaponPierce : 0);
                 }
                 // Explosions (bombs, molotovs): COTF's fixed 40..850 by the game's falloff, times (1 + explosion damage), so a
                 // bomb never one-shots a scaled enemy (COS-92). Thrown spears are projectiles and get their own multiplier.

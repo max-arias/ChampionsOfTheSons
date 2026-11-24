@@ -96,8 +96,19 @@ internal static class BookSelfTest
         SelfTest.Add(30.4f, "book: the neighbour's hover leaves our tab", NeighbourHovered);
         SelfTest.Add(30.5f, "book: shot neighbour hover", () => TestKit.Screenshot("book-tab-neighbour-hover"));
         SelfTest.Add(30.7f, "book: the game's tab back", () => BookTabs.SlideNeighbourForTest(false));
-        SelfTest.Add(30.8f, "book: close", () => BookHost.Close());
-        SelfTest.Add(32.3f, "book: closed and cleanup", Cleanup);
+        // COS-194: with a mod page open the sub-tabs are out; the hovered one grows, the others keep their size.
+        SelfTest.Add(30.75f, "book: help page for the sub-tab hover", () => BookHost.ShowModPage(BookTab.Help));
+        SelfTest.Add(31.4f, "book: cursor on the Spells sub-tab", () => SetCursor(BookTabs.SubScreenCenter(BookTab.Spells)));
+        SelfTest.Add(31.7f, "book: cursor kept on the Spells sub-tab", () => SetCursor(BookTabs.SubScreenCenter(BookTab.Spells))); // COS-135 drift
+        SelfTest.Add(32f, "book: hovered sub-tab grows", () =>
+        {
+            SelfTest.Check("book: hovering a sub-tab grows it (COS-194)", BookTabs.Hovered == BookTab.Spells && BookTabs.SubGrow(BookTab.Spells) > 0.9f
+                && BookTabs.SubGrow(BookTab.Help) < 0.1f && BookTabs.SubSlidOut(BookTab.Help) && BookTabs.SubSlidOut(BookTab.Bag),
+                $"hovered {BookTabs.Hovered}, grow spells {BookTabs.SubGrow(BookTab.Spells):0.00} help {BookTabs.SubGrow(BookTab.Help):0.00}");
+            TestKit.Screenshot("book-subtab-hover");
+        });
+        SelfTest.Add(32.3f, "book: close", () => BookHost.Close());
+        SelfTest.Add(33.8f, "book: closed and cleanup", Cleanup);
     }
 
     private static (Vector3 Face, Vector3 Root) _tabIdle;

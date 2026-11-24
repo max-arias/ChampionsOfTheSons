@@ -186,7 +186,7 @@ public sealed class AdminFeature : IModFeature
         ("give <item id | random[:rarity]> [level] [player]", "roll an item into the bag (rarity 0-3; level defaults to the target's)"),
         ("giveall <item type | all> [rarity 0-3] [player]", "one of every item of that type into the bag (cots list items shows types)"),
         ("learnall [player]", "every spell unlocked for free, empty spell slots filled"),
-        ("playtest [player]", "playtest setup: level 30, god mode, no cooldowns, infinite energy, every spell fully mastered, one of every weapon"),
+        ("playtest [player]", "playtest setup: level 30, god mode, no cooldowns, infinite energy, every spell fully mastered, one of every weapon and every Legendary armor piece"),
         ("mastery <spell id | all> <0-5> [player]", "set spell mastery: its cost and cooldown cuts and upgrades"),
         ("heal [player]", "full health and energy, debuffs cleared"),
         ("god [on|off] [player]", "incoming hits do no damage"),
@@ -380,6 +380,9 @@ public sealed class AdminFeature : IModFeature
     }
 
     /// <summary>COS-166: everything a hands-on playtest needs in one command.</summary>
+    /// <summary>Armor types <c>playtest</c> gives every Legendary piece of (next to every weapon).</summary>
+    private static readonly string[] PlaytestArmor = { "helmet", "chest_armor", "pants", "boot", "shoulder_armor", "glove" };
+
     private static bool Playtest(string[] args, BoltConnection? sender)
     {
         const int Level = 30;
@@ -396,6 +399,9 @@ public sealed class AdminFeature : IModFeature
         Step(Send(new AdminGrant(AdminAction.SetMastery, SpellMastery.MaxLevel, "all"), player, sender));
         Step(Send(new AdminGrant(AdminAction.Heal, 0, ""), player, sender));
         Step(GiveAll(player == null ? new[] { "weapon" } : new[] { "weapon", player }, sender));
+        // Every armor piece of every rarity would not fit the bag next to the weapons: the Legendary ones.
+        foreach (var type in PlaytestArmor)
+            Step(GiveAll(player == null ? new[] { type, "3" } : new[] { type, "3", player }, sender));
         lines.Add("ready: spawn targets with 'cots spawn <normal|elite|miniboss|boss>'; 'god off', 'nocooldowns off' and 'energy off' undo the switches");
         return Reply(ok, string.Join("\n", lines));
     }

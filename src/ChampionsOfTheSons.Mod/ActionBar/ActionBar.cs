@@ -16,11 +16,15 @@ namespace ChampionsOfTheSons.Mod.ActionBar;
 internal sealed class ActionBar
 {
     public const string PanelId = "cots-actionbar";
-    public const int GroupSlots = 4;
+    /// <summary>Weapon bar keys (COS-192) and consumable keys.</summary>
+    public const int WeaponSlots = 6, ConsumableSlots = 4;
     public const float ItemCell = 52, ItemGap = 5, ClaspW = 28, Pad = 36, PadY = 12;
-    public const float GroupW = GroupSlots * ItemCell + (GroupSlots - 1) * ItemGap;
-    /// <summary>Width of the three groups and clasps; the XP strap below has the same width.</summary>
-    public const float InnerWidth = 2 * GroupW + 2 * ClaspW + SpellBar.Width;
+    public const float WeaponGroupW = WeaponSlots * ItemCell + (WeaponSlots - 1) * ItemGap;
+    public const float ConsumableGroupW = ConsumableSlots * ItemCell + (ConsumableSlots - 1) * ItemGap;
+    /// <summary>The main-hand and off-hand cells left of the weapon group (COS-193).</summary>
+    public const float HandsW = 2 * ItemCell + ItemGap;
+    /// <summary>Width of the groups and clasps; the XP strap below has the same width.</summary>
+    public const float InnerWidth = HandsW + ClaspW + WeaponGroupW + ConsumableGroupW + 2 * ClaspW + SpellBar.Width;
     public const float Width = InnerWidth + 2 * Pad;
     public const float Height = SpellBar.Height + 2 * PadY;
     /// <summary>Bottom edge above the screen bottom: just over the XP strap (<see cref="ProgressHud"/>).</summary>
@@ -31,6 +35,7 @@ internal sealed class ActionBar
     private SPanelOptions _root = null!;
     private readonly SpellBar _spells = new();
     public readonly ItemGroup Weapons = new(weapons: true), Consumables = new(weapons: false);
+    public readonly HandCells Hands = new();
     private float _itemTimer;
     private SLabelOptions _vitals = null!;
     private string _vitalsShown = "";
@@ -49,8 +54,13 @@ internal sealed class ActionBar
         bar.Add(HudArt.Piece(HudArt.Backing, 0.7f, "#1A110CD8").Anchor(AnchorType.Fill));
 
         float x = Pad, itemY = (Height - ItemCell) / 2;
+        Hands.Build(bar, x, itemY);
+        x += HandsW;
+        bar.Add(HudArt.Piece(HudArt.Clasp, 1, UiTheme.BoneDark).TopLeft(x + 4, 4).Size(ClaspW - 8, Height - 8));
+        x += ClaspW;
+        float weaponsX = x;
         Weapons.Build(bar, x, itemY);
-        x += GroupW;
+        x += WeaponGroupW;
         bar.Add(HudArt.Piece(HudArt.Clasp, 1, UiTheme.BoneDark).TopLeft(x + 4, 4).Size(ClaspW - 8, Height - 8));
         x += ClaspW;
         _spells.Build(bar, x, PadY, _root.Root);
@@ -59,7 +69,7 @@ internal sealed class ActionBar
         x += ClaspW;
         Consumables.Build(bar, x, itemY);
         // COS-95: health and the absorb shield as numbers, a thin line over the spell group (the game's own gauges stay as they are).
-        _vitals = HudKit.Label("", 13, UiTheme.Bone, TMPro.TextAlignmentOptions.Center).TopLeft(Pad + GroupW + ClaspW, -20).Size(SpellBar.Width, 18);
+        _vitals = HudKit.Label("", 13, UiTheme.Bone, TMPro.TextAlignmentOptions.Center).TopLeft(weaponsX + WeaponGroupW + ClaspW, -20).Size(SpellBar.Width, 18);
         _vitals.TextObject.fontStyle = TMPro.FontStyles.Bold;
         BarSlot.Outline(_vitals, 0.3f);
         bar.Add(_vitals);
@@ -79,6 +89,7 @@ internal sealed class ActionBar
         RefreshVitals();
         Weapons.Refresh();
         Consumables.Refresh();
+        Hands.Refresh();
     }
 
     private void RefreshVitals()
@@ -106,7 +117,7 @@ internal sealed class ActionBar
     public void NextWeapon()
     {
         int index = Weapons.NextFilled(Weapons.HeldPosition());
-        if (index >= 0) HotkeyBridge.Trigger(index);
+        if (index >= 0 && !Mod.Weapons.WeaponBarKeys.Press(index)) HotkeyBridge.Trigger(index);
         Dirty();
     }
 
@@ -126,15 +137,30 @@ internal sealed class ActionBar
     }
 }
 
-/// <summary>Four slots mirroring the game's item hotkeys named in the config (<see cref="ActionBarConfig"/>).</summary>
+/// <summary>
+/// The keys named in the config (<see cref="ActionBarConfig"/>). Consumables mirror the game's item hotkeys; the weapon group is the
+/// weapon bar (COS-192): a key with a bound mod weapon shows that weapon, any other key the game's hotkey.
+/// </summary>
 internal sealed class ItemGroup
 {
     private readonly bool _weapons;
-    private readonly BarSlot[] _slots = new BarSlot[ActionBar.GroupSlots];
-    private readonly HotkeyBridge.Slot[] _shown = new HotkeyBridge.Slot[ActionBar.GroupSlots];
-    private readonly int[] _shownIndex = new int[ActionBar.GroupSlots];
+    private readonly BarSlot[] _slots;
+    private readonly HotkeyBridge.Slot[] _shown;
+    private readonly int[] _shownIndex;
+    private readonly string?[] _boundShown;
 
-    public ItemGroup(bool weapons) => _weapons = weapons;
+    public ItemGroup(bool weapons)
+    {
+        _weapons = weapons;
+        int n = weapons ? ActionBar.WeaponSlots : ActionBar.ConsumableSlots;
+        _slots = new BarSlot[n];
+        _shown = new HotkeyBridge.Slot[n];
+        _shownIndex = new int[n];
+        _boundShown = new string?[n];
+    }
+
+    /// <summary>The weapon bar item shown on position <paramref name="pos"/>'s cell (null: none, the game's hotkey shows).</summary>
+    public string? BoundShown(int pos) => _boundShown[pos];
 
     /// <summary>The slot position the pad picked (consumables); -1 none.</summary>
     public int Picked { get; private set; } = -1;
@@ -164,6 +190,7 @@ internal sealed class ItemGroup
         {
             var s = _slots[i];
             int index = IndexAt(i);
+            if (_weapons && RefreshBound(i, s, index)) continue;
             var now = index >= 0 ? HotkeyBridge.At(index) : default;
             if (index != _shownIndex[i])
             {
@@ -191,13 +218,51 @@ internal sealed class ItemGroup
         if (!_weapons && (Picked < 0 || _shown[Picked].Empty)) Picked = NextFilledPosition(Picked);
     }
 
+    /// <summary>A weapon bar key with a bound mod weapon: shows the rolled item (icon, name), lit while it is in hand. False when
+    /// the key has none (the game's hotkey shows).</summary>
+    private bool RefreshBound(int i, BarSlot s, int index)
+    {
+        var bound = index >= 0 ? Weapons.WeaponBarKeys.Bound(index) : null;
+        if (bound == null)
+        {
+            if (_boundShown[i] != null)
+            {
+                _boundShown[i] = null;
+                _shown[i] = new HotkeyBridge.Slot(-1, -1, false); // the game's hotkey part redraws
+                _shownIndex[i] = -2;
+            }
+            return false;
+        }
+        var (slot, item, held) = bound.Value;
+        if (index != _shownIndex[i])
+        {
+            _shownIndex[i] = index;
+            s.Key.Text(HotkeyBridge.KeyLabel(index));
+            s.Plate.Active(true);
+        }
+        string id = $"{slot}|{item.BaseId}|{item.Level}|{(int)item.Rarity}";
+        if (id != _boundShown[i])
+        {
+            _boundShown[i] = id;
+            bool icon = s.ShowContentIcon(item.BaseId);
+            s.Name.Text(UiText.ItemName(item));
+            s.Name.Active(!icon);
+            s.SetPlateDim(false);
+            s.Count.Text("");
+            s.SetIconColor("#FFFFFF");
+        }
+        _shown[i] = new HotkeyBridge.Slot(held ? Weapons.RealWeapons.ByType(Weapons.WeaponModels.Active?.Id)?.Id ?? 0 : 0, 1, held);
+        s.SetGlow(held ? UiTheme.EmberGlow : null);
+        return true;
+    }
+
     /// <summary>Position of the held item in this group (-1 none).</summary>
     public int HeldPosition()
     {
         for (int i = 0; i < _slots.Length; i++)
         {
             int index = IndexAt(i);
-            if (index >= 0 && HotkeyBridge.At(index).Held) return i;
+            if (index >= 0 && (_weapons && Weapons.WeaponBarKeys.Bound(index) is { } b ? b.Held : HotkeyBridge.At(index).Held)) return i;
         }
         return -1;
     }
@@ -210,6 +275,7 @@ internal sealed class ItemGroup
             int pos = ((from < 0 ? -1 : from) + step + _slots.Length) % _slots.Length;
             int index = IndexAt(pos);
             if (index < 0) continue;
+            if (_weapons && Weapons.WeaponBarKeys.Bound(index) != null && pos != from) return pos;
             var slot = HotkeyBridge.At(index);
             if (!slot.Empty && slot.Amount > 0 && pos != from) return pos;
         }
@@ -226,4 +292,54 @@ internal sealed class ItemGroup
     public void Pick(int pos) => Picked = pos;
 
     public int PickedIndex() => Picked < 0 ? -1 : IndexAt(Picked);
+}
+
+/// <summary>COS-193: the main-hand (weapon slot) and off-hand items, left of the weapon bar; the main-hand cell is lit while the
+/// weapon is drawn.</summary>
+internal sealed class HandCells
+{
+    private readonly BarSlot[] _cells = new BarSlot[2];
+    private readonly string[] _shown = { "", "" };
+    private static readonly string[] Slots = { Core.Rules.WeaponTypes.WeaponSlot, "equip.offhand" };
+
+    public BarSlot Cell(int i) => _cells[i];
+
+    /// <summary>The item shown in a cell ("" none; self-test).</summary>
+    public string ShownItem(int i) => _shown[i];
+
+    public void Build(SContainerOptions parent, float x, float y)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            _cells[i] = new BarSlot(parent, x + i * (ActionBar.ItemCell + ActionBar.ItemGap), y, ActionBar.ItemCell, 22);
+            _cells[i].Plate.Active(false);
+            _cells[i].Key.Text("");
+        }
+    }
+
+    public void Refresh()
+    {
+        var inv = PlayerState.Character.Inventory;
+        for (int i = 0; i < 2; i++)
+        {
+            var c = _cells[i];
+            var item = inv.Get(Slots[i]);
+            string id = item == null ? "" : $"{item.BaseId}|{item.Level}|{(int)item.Rarity}";
+            if (id != _shown[i])
+            {
+                _shown[i] = id;
+                c.Root.Active(item != null);
+                if (item != null)
+                {
+                    bool icon = c.ShowContentIcon(item.BaseId);
+                    c.Name.Text(UiText.ItemName(item));
+                    c.Name.Active(!icon);
+                    c.Count.Text("");
+                    c.SetIconColor("#FFFFFF");
+                }
+            }
+            bool drawn = i == 0 && item != null && Weapons.WeaponModels.Active != null;
+            c.SetGlow(item == null ? null : drawn ? UiTheme.EmberGlow : UiTheme.RarityHex(item.Rarity) + "80");
+        }
+    }
 }

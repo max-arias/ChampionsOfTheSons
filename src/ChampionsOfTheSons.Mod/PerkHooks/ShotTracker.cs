@@ -98,7 +98,8 @@ internal static class ShotTracker
         {
             var weapon = __instance._rangedWeapon;
             if (weapon == null || !weapon._isLocalPlayer) return;
-            TryRefund(weapon.GetAmmo()?._type ?? 0);
+            int ammo = weapon.GetAmmo()?._type ?? 0;
+            if (!Weapons.FreeArrows.OnAmmoSpent(ammo)) TryRefund(ammo); // a unique mod bow's arrows are free (COS-189)
         }
         catch (Exception e)
         {

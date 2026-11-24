@@ -94,7 +94,7 @@ public sealed class ModSweepFeature : IModFeature
                 if (!Pc.Inventory.Equip(bag, ModContent.Db)) return;
                 _equippedSlot = Pc.Inventory.Slots.FirstOrDefault(kv => !kv.Key.StartsWith("bag.", StringComparison.Ordinal) && kv.Value == item).Key;
                 if (def.Type != "weapon") return;
-                WeaponSlotSync.Tick(); // the slot gives its game weapon and draws it
+                WeaponSlotSync.Draw(); // the slot gives its game weapon; drawn as its weapon bar key would (COS-192)
             });
         }
         else

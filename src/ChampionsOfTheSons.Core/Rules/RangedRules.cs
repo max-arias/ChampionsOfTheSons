@@ -112,7 +112,7 @@ public static class RangedRules
     /// A bullet or thrown spear also counts as a headshot with its rolled chance. Spears with the armor-strip perk pierce
     /// <c>3 × ranged pierce + melee pierce</c>.
     /// </summary>
-    public static RangedHit Hit(StatSheet s, double baseDamage, RangedShot shot, Rng rng, int multishotIndex = 0)
+    public static RangedHit Hit(StatSheet s, double baseDamage, RangedShot shot, Rng rng, int multishotIndex = 0, double weaponPierce = 0)
     {
         bool crit = rng.Chance(s.Get(StatIds.CritChance));
         double critMult = 1;
@@ -134,6 +134,7 @@ public static class RangedRules
         double pierce = Derived.RangedArmorPierce(s);
         if (shot.Kind == RangedKind.ThrownSpear && s.IsOn(RangedStatIds.SpearArmorStrip))
             pierce = 3 * Derived.RangedArmorPierce(s) + Derived.MeleeArmorPierce(s);
+        pierce += Math.Max(0, weaponPierce); // a mod bow's own pierce (COS-191)
         return new RangedHit(new OutgoingHit(Math.Max(0, d), DamageKind.Physical, crit, pierce), extra, headshot);
     }
 

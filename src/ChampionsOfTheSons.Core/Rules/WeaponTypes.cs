@@ -45,6 +45,40 @@ public static class WeaponTypes
     public static double RangedBaseDamage(WeaponTypeDef? type, double gameDamage) =>
         type == null || type.Base != WeaponBase.Bow ? gameDamage : (gameDamage + type.RangedFlatDamage) * type.RangedDamageMult;
 
+    /// <summary>The type damage <see cref="WeaponDamage"/> is measured against (a type with this damage gets the curve itself).</summary>
+    public const double ReferenceTypeDamage = 20;
+
+    /// <summary>Hits an on-level Legendary weapon of reference damage needs, alone, on a plain on-level enemy (COS-191, Max).</summary>
+    public const double LegendaryHitsToKill = 10;
+
+    /// <summary>Hits in which a Legendary weapon's own pierce strips a plain on-level enemy's mean armor (COS-191).</summary>
+    public const double LegendaryHitsToStrip = 2;
+
+    /// <summary>Levels a plain "on-level" enemy has above the player: the default kind extra of <see cref="EnemyScaler.RollLevel"/>.</summary>
+    public const int OnLevelExtra = 1;
+
+    private static double RarityShare(Rarity rarity) =>
+        LootRoller.RarityMultiplier[Rarities.Clamp((int)rarity)] / LootRoller.RarityMultiplier[Rarities.Max];
+
+    /// <summary>
+    /// COS-191: base damage of a hit with a mod weapon, before the player's stats: it grows with the item's level like enemy
+    /// health, so an on-level Legendary alone kills a plain on-level enemy (100 vanilla health) in about
+    /// <see cref="LegendaryHitsToKill"/> hits once its armor is stripped, at every level. Lower rarities take the loot rarity
+    /// ratio; the type's damage scales it (a bow uses the reference damage times its ranged multiplier).
+    /// </summary>
+    public static double WeaponDamage(WeaponTypeDef? type, int itemLevel, Rarity rarity)
+    {
+        double typeScale = type == null ? 1
+            : type.Base == WeaponBase.Bow ? type.RangedDamageMult
+            : (type.Damage ?? ReferenceTypeDamage) / ReferenceTypeDamage;
+        return typeScale * RarityShare(rarity) * EnemyScaler.HealthCurve.At(Math.Max(1, itemLevel) + OnLevelExtra) / LegendaryHitsToKill;
+    }
+
+    /// <summary>COS-191: armor pierce of each hit with a mod weapon: an on-level Legendary strips a plain enemy's mean armor in
+    /// <see cref="LegendaryHitsToStrip"/> hits; lower rarities take the loot rarity ratio.</summary>
+    public static double WeaponPierce(int itemLevel, Rarity rarity) =>
+        RarityShare(rarity) * EnemyScaler.MeanArmor(Math.Max(1, itemLevel) + OnLevelExtra) / LegendaryHitsToStrip;
+
     public static double SwingSpeedFactor(WeaponTypeDef? type) => type == null || type.Base == WeaponBase.Bow ? 1 : type.SwingSpeed;
     public static double StaminaCostFactor(WeaponTypeDef? type) => type == null || type.Base == WeaponBase.Bow ? 1 : type.StaminaCost;
     public static double ReachFactor(WeaponTypeDef? type) => type == null || type.Base == WeaponBase.Bow ? 1 : type.Reach;

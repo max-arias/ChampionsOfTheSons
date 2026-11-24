@@ -39,7 +39,9 @@ internal static class ActionBarSelfTest
             for (int i = 0; i < HotkeyBridge.Count; i++) HotkeyBridge.SetForTest(i, -1);
             HotkeyBridge.SetForTest(0, _machete);
             HotkeyBridge.SetForTest(1, _spear);
-            if (_food > 0) HotkeyBridge.SetForTest(4, _food);
+            if (_food > 0) HotkeyBridge.SetForTest(ActionBarConfig.ConsumableHotkeys[0], _food);
+            foreach (int k in PlayerState.Character.WeaponBar.Bindings.Keys.ToList()) PlayerState.Character.WeaponBar.Unbind(k);
+            PlayerState.Character.Inventory.Remove(Core.Rules.WeaponTypes.WeaponSlot); // the weapon bar shows only game hotkeys here
             HotkeyBridge.Trigger(0);
             Bar.Dirty();
         });
@@ -103,8 +105,8 @@ internal static class ActionBarSelfTest
         });
         SelfTest.Add(t += 0.2f, "actionbar: group keys parse", () =>
         {
-            SelfTest.Check("actionbar: '1,2,0' is indices 0,1,9", ActionBarConfig.Parse("1, 2,0").SequenceEqual(new[] { 0, 1, 9 }));
-            SelfTest.Check("actionbar: at most 4 keys, junk skipped", ActionBarConfig.Parse("5,x,6,7,8,9").SequenceEqual(new[] { 4, 5, 6, 7 }));
+            SelfTest.Check("actionbar: '1,2,0' is indices 0,1,9", ActionBarConfig.Parse("1, 2,0", 4).SequenceEqual(new[] { 0, 1, 9 }));
+            SelfTest.Check("actionbar: at most 4 keys, junk skipped", ActionBarConfig.Parse("5,x,6,7,8,9", 4).SequenceEqual(new[] { 4, 5, 6, 7 }));
         });
     }
 }

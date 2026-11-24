@@ -72,6 +72,8 @@ internal sealed class WeaponSkin
         bool limbsX = b.size.x >= b.size.y;
         var rot = !bow ? Quaternion.LookRotation(new Vector3(1, 0, 0), new Vector3(0, 0, 1))
             : limbsX ? Quaternion.LookRotation(new Vector3(0, 0, 1), new Vector3(1, 0, 0)) : Quaternion.identity;
+        // COS-188: our bow models face the other way from the game's: half a turn about the limbs puts the string toward the player.
+        if (bow) rot = Quaternion.AngleAxis(180, Vector3.up) * rot;
         t.localRotation = rot;
         float holderScale = Mathf.Max(1e-4f, Holder.lossyScale.z);
         float len = bow ? Mathf.Max(b.size.x, b.size.y) : b.size.y;
@@ -256,12 +258,24 @@ internal static class WeaponModels
     /// <summary>Raised when the local active type changes (co-op tells the others).</summary>
     public static event Action<WeaponTypeDef?>? Changed;
 
-    /// <summary>Melee damage multiplier for the local player's hits: the type's damage over the game weapon's own.</summary>
+    /// <summary>COS-191: the base damage of a hit with the held mod weapon (the weapon slot item's level and rarity), or null when
+    /// no mod weapon is in hand.</summary>
+    public static double? ModWeaponDamage =>
+        Active != null && PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot) is { } item
+            ? WeaponTypes.WeaponDamage(Active, item.Level, item.Rarity) : null;
+
+    /// <summary>COS-191: the held mod weapon's own armor pierce per hit (0 without one).</summary>
+    public static double ModWeaponPierce =>
+        Active != null && PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot) is { } item
+            ? WeaponTypes.WeaponPierce(item.Level, item.Rarity) : 0;
+
+    /// <summary>Melee damage multiplier for the local player's hits: the mod weapon's damage (COS-191) over the game weapon's
+    /// own, so the game's own variations (combo hits) keep their ratio.</summary>
     public static double MeleeDamageFactor
     {
         get
         {
-            if (Active?.Damage is not double d || Base == null) return 1;
+            if (Active == null || Active.Base == WeaponBase.Bow || ModWeaponDamage is not double d || Base == null) return 1;
             // Melee weapons carry their damage in their weapon data; the spear has none, only its hit script's damage.
             var data = Base._meleeWeaponData;
             var info = Base._weaponInfo;

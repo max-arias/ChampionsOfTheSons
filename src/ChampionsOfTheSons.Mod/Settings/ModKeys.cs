@@ -209,8 +209,9 @@ internal static class ModKeys
 
     /// <summary>
     /// Each frame: while the player plays and holds the modifiers of a mod combo, the game's item hotkey actions on that combo's key are
-    /// disabled, so Alt+1 casts the spell without also equipping hotkey 1 or setting it (the game binds Alt+number to SetHotkey). Plain
-    /// 1-9, and Alt+number while a menu or the inventory is open, reach the game as before.
+    /// disabled, so Alt+1 casts the spell without also equipping hotkey 1 or setting it (the game binds Alt+number to SetHotkey). The
+    /// weapon bar's keys are held back the same way (<see cref="Weapons.WeaponBarKeys.HeldBackKeys"/>). Other plain 1-9, and Alt+number
+    /// while a menu or the inventory is open, reach the game as before.
     /// </summary>
     public static void Tick()
     {
@@ -227,6 +228,8 @@ internal static class ModKeys
                     if (c.HasModifiers && c.ModifiersHeld(ctrl, shift, alt)) keys.Add(c.Key);
                 }
         }
+        // The weapon bar's keys (COS-192): bound keys in the world, every weapon key while a mod book page shows.
+        foreach (var k in Weapons.WeaponBarKeys.HeldBackKeys()) keys.Add(k);
         for (int i = _heldBack.Count - 1; i >= 0; i--)
         {
             var a = _heldBack[i];

@@ -10,6 +10,12 @@ public sealed class Inventory
 
     public event Action? Changed;
 
+    /// <summary>Two slots swapped contents (<see cref="Move"/>), so whatever points at a slot can follow its item.</summary>
+    public event Action<string, string>? Swapped;
+
+    /// <summary>A slot was emptied (taken, removed, merged away).</summary>
+    public event Action<string>? Emptied;
+
     public IReadOnlyDictionary<string, ItemInstance> Slots => _slots;
 
     public static string Bag(int i) => "bag." + i;
@@ -55,13 +61,14 @@ public sealed class Inventory
     {
         if (!_slots.TryGetValue(slot, out var item)) return;
         if (item.Amount > 1) _slots[slot] = item with { Amount = item.Amount - 1 };
-        else _slots.Remove(slot);
+        else { _slots.Remove(slot); Emptied?.Invoke(slot); }
         Changed?.Invoke();
     }
 
     public ItemInstance? Remove(string slot)
     {
         if (!_slots.Remove(slot, out var item)) return null;
+        Emptied?.Invoke(slot);
         Changed?.Invoke();
         return item;
     }
@@ -76,6 +83,7 @@ public sealed class Inventory
         _slots[to] = a;
         if (b != null) _slots[from] = b;
         else _slots.Remove(from);
+        Swapped?.Invoke(from, to);
         Changed?.Invoke();
         return true;
     }
@@ -99,7 +107,7 @@ public sealed class Inventory
         if (moved <= 0) return Move(from, to, content); // the target stack is full: swap as before
         _slots[to] = b with { Amount = b.Amount + moved };
         if (a.Amount - moved > 0) _slots[from] = a with { Amount = a.Amount - moved };
-        else _slots.Remove(from);
+        else { _slots.Remove(from); Emptied?.Invoke(from); }
         Changed?.Invoke();
         return true;
     }
@@ -167,6 +175,9 @@ public sealed class PlayerCharacter
     public ContentDb Content { get; }
     public Progress Progress { get; private set; } = new();
     public Inventory Inventory { get; } = new();
+
+    /// <summary>Weapons bound to number keys (COS-192).</summary>
+    public WeaponBar WeaponBar { get; } = new();
     public PerkTree Perks { get; }
     public SpellBook Spells { get; }
 
@@ -243,6 +254,8 @@ public sealed class PlayerCharacter
         };
         Stats = new StatSheet(content);
         Inventory.Changed += RebuildEquipment;
+        Inventory.Swapped += WeaponBar.OnSwapped;
+        Inventory.Emptied += WeaponBar.OnEmptied;
         RebuildAll();
     }
 
@@ -369,6 +382,7 @@ public sealed class PlayerCharacter
         LastGrantDay = Progress.LastGrantDay,
         Attributes = Attributes.Spent.ToDictionary(kv => kv.Key, kv => kv.Value),
         SpellCasts = Mastery.Casts.ToDictionary(kv => kv.Key, kv => kv.Value),
+        WeaponBar = WeaponBar.Bindings.ToDictionary(kv => kv.Key, kv => kv.Value),
     };
 
     public void Load(PlayerSave save)
@@ -381,6 +395,7 @@ public sealed class PlayerCharacter
         var loot = new LootRoller(Content);
         // An item's rarity is its base's (COS-109: uniques became Legendary, which a save migration cannot know).
         Inventory.Restore(save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, loot.InferSlots(WithBaseRarity(kv.Value.ToItem())))));
+        WeaponBar.Restore(save.WeaponBar, Inventory, Content);
         Massacre.Reset();
         RebuildAll();
     }

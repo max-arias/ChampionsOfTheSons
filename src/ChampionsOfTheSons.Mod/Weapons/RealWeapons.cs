@@ -236,7 +236,7 @@ internal static class RealWeapons
     }
 }
 
-/// <summary>Wiring of the real weapon items: registration, world setup, the animator fix and the slot sync.</summary>
+/// <summary>Wiring of the real weapon items: registration, world setup, the animator fix, the weapon bar keys and the slot sync.</summary>
 public sealed class RealWeaponsFeature : IModFeature
 {
     private float _sync;
@@ -247,11 +247,17 @@ public sealed class RealWeaponsFeature : IModFeature
         if (!inWorld) return;
         RealWeapons.EnsureWorld();
         RealWeapons.KeepAnimatorsOnBase();
+        WeaponBarKeys.Tick();
         _sync -= dt;
         if (_sync > 0) return;
         _sync = 0.2f;
         WeaponSlotSync.Tick();
+        FreeArrows.Tick();
     }
 
-    public void OnGameStart() => WeaponSlotSync.Reset();
+    public void OnGameStart()
+    {
+        WeaponSlotSync.Reset();
+        FreeArrows.Reset();
+    }
 }

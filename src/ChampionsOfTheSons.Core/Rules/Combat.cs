@@ -33,9 +33,11 @@ public static class ArmorMath
 /// <summary>Player → enemy damage.</summary>
 public static class PlayerAttack
 {
-    /// <summary>A weapon hit (melee, ranged or thrown). <paramref name="baseDamage"/> is the game weapon's own damage.</summary>
+    /// <summary>A weapon hit (melee, ranged or thrown). <paramref name="baseDamage"/> is the weapon's own damage (the game
+    /// weapon's, or a mod weapon's <see cref="WeaponTypes.WeaponDamage"/>); <paramref name="weaponPierce"/> is the weapon's
+    /// own armor pierce, added to the player's.</summary>
     public static OutgoingHit Weapon(StatSheet s, WeaponClass weapon, double baseDamage, Rng rng,
-        bool heavy = false, bool headshot = false, int multishotIndex = 0)
+        bool heavy = false, bool headshot = false, int multishotIndex = 0, double weaponPierce = 0)
     {
         bool crit = rng.Chance(s.Get(StatIds.CritChance));
         double critMult = crit ? 1 + s.Get(StatIds.CritDamage) : 1;
@@ -54,7 +56,7 @@ public static class PlayerAttack
             if (headshot) d *= s.Get(StatIds.HeadShotDamage);
             pierce = Derived.RangedArmorPierce(s);
         }
-        return new OutgoingHit(Math.Max(0, d), DamageKind.Physical, crit, pierce);
+        return new OutgoingHit(Math.Max(0, d), DamageKind.Physical, crit, pierce + Math.Max(0, weaponPierce));
     }
 
     /// <summary>A spell hit: (base + spellFlat × scaling) × spell multiplier, magic damage. Crit only if the spell allows it.</summary>
