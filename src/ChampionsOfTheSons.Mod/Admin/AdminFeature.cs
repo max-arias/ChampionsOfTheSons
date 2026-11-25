@@ -124,7 +124,44 @@ public sealed class AdminFeature : IModFeature
                 // endpoint without a Steam id
             }
         }
+        // A direct-IP join carries no Steam id on its endpoint (COS-127, found by the co-op test): ask the game's own player table.
+        foreach (var c in CoopSession.Peers)
+        {
+            try
+            {
+                if (SteamIdOf(c.ConnectionId) == steamId) return c;
+            }
+            catch
+            {
+                // the game's table is not ready
+            }
+        }
         return null;
+    }
+
+    private static System.Reflection.MethodInfo? _steamIdOf;
+    private static object? _serverInfo;
+
+    /// <summary>The Steam id the game's CoopServerInfo (Sons.dll; bolt.user has a type of the same name) knows for a connection, or 0.</summary>
+    private static ulong SteamIdOf(uint connectionId)
+    {
+        if (_steamIdOf == null)
+        {
+            var type = typeof(Sons.Multiplayer.Gui.ActivePlayerList).Assembly.GetType("CoopServerInfo");
+            _steamIdOf = type?.GetMethod("TryGetSteamIdFromConnectionId", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+            if (_steamIdOf == null) return 0;
+            if (!_steamIdOf.IsStatic)
+            {
+                var inst = type!.GetProperty("Instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null)
+                    ?? type.GetProperty("_instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)?.GetValue(null);
+                _serverInfo = inst;
+                if (inst == null) RLog.Warning($"{Tag} CoopServerInfo instance not found");
+            }
+        }
+        if (!_steamIdOf.IsStatic && _serverInfo == null) return 0;
+        var args = new object[] { connectionId, 0UL };
+        bool ok = (bool)_steamIdOf.Invoke(_steamIdOf.IsStatic ? null : _serverInfo, args)!;
+        return ok ? (ulong)args[1] : 0;
     }
 
     /// <summary>
