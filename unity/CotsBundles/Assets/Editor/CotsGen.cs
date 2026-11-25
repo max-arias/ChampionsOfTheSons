@@ -111,6 +111,19 @@ public static class CotsGen
         return SaveMat(m);
     }
 
+    /// <summary>COS-106: a Cots/Lens material, the scene behind pulled in and swirled around the centre (gravitational lensing).</summary>
+    public static Material Lens(string name, float strength, float swirl, float blur, float spin, float darken)
+    {
+        var m = new Material(Shader.Find("Cots/Lens")) { name = name };
+        m.SetFloat("_Strength", strength);
+        m.SetFloat("_Swirl", swirl);
+        m.SetFloat("_Blur", blur);
+        m.SetFloat("_Spin", spin);
+        m.SetFloat("_Darken", darken);
+        m.renderQueue = 3000; // transparent: after HDRP has built the colour pyramid
+        return SaveMat(m);
+    }
+
     /// <summary>A Cots/Fx material: additive glow, or alpha blend when <paramref name="additive"/> is false.</summary>
     public static Material Fx(string name, Texture2D tex, Color tint, float intensity = 1, bool additive = true, float fresnel = 0,
         bool fresnelInvert = false, Vector2 scroll = default, float pulse = 0, bool cullBack = false, bool overlay = false, bool fadeEnds = false, float desaturate = 0)

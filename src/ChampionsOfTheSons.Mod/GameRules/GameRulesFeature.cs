@@ -39,6 +39,9 @@ public sealed class GameRulesFeature : IModFeature
         Patch(typeof(PlayerStats), nameof(PlayerStats.HitFromTrap), nameof(BeforeTrap), nameof(AfterTrap));
         Patch(typeof(FirstPersonCharacter), nameof(FirstPersonCharacter.DoFallDamage), nameof(BeforeFall), nameof(AfterFall));
         Patch(typeof(Vitals), nameof(Vitals.ApplyHealing), nameof(BeforeHealing), null);
+        // COS-216: drowning hits come from the underwater breathing update; cold takes max vitality away.
+        Patch(typeof(PlayerStats), nameof(PlayerStats.UpdateUnderwaterBreathing), nameof(BeforeDrowning), nameof(AfterDrowning));
+        Patch(typeof(PlayerStats), nameof(PlayerStats.GetVitalityLostFromColdFactor), null, nameof(AfterColdVitality));
         Patch(typeof(Sons.Wearable.Armour.PlayerArmourSystem), nameof(Sons.Wearable.Armour.PlayerArmourSystem.CalculateRemainingDamageAfterArmourHit), null, nameof(AfterArmour));
         // Not BaseTrapController.TryTriggerTrapMechanics: patching it crashes the game as the save loads (2026-11-21).
         // Traps are polled instead (PollTraps).
@@ -97,6 +100,34 @@ public sealed class GameRulesFeature : IModFeature
     private static void AfterSkunk() => Unmark();
     private static void BeforeTrap() => Mark(PlayerDamageSource.Trap);
     private static void AfterTrap() => Unmark();
+    private static void BeforeDrowning() => Mark(PlayerDamageSource.Drowning);
+    private static void AfterDrowning() => Unmark();
+
+    /// <summary>Self-test: a hit as the game's underwater breathing update makes it.</summary>
+    internal static void HitAsDrowning(float damage)
+    {
+        BeforeDrowning();
+        try { LocalPlayer.Stats.Hit(damage); }
+        finally { AfterDrowning(); }
+    }
+
+    /// <summary>Self-test: the cold vitality loss before and after the max-health scaling.</summary>
+    public static (double Game, double Final) LastCold { get; private set; }
+
+    private static void AfterColdVitality(ref float __result)
+    {
+        try
+        {
+            if (Net.ServerConfig.OnDedicatedServer) return;
+            double scaled = Core.Rules.GameRules.ColdVitalityLoss(__result, Derived.MaxHealth(PlayerState.Character.Stats));
+            LastCold = (__result, scaled);
+            __result = (float)scaled;
+        }
+        catch (Exception e)
+        {
+            RLog.Error($"Champions of the Sons: cold rule failed: {e}");
+        }
+    }
 
     private static void BeforeFall(FirstPersonCharacter __instance)
     {

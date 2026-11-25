@@ -31,6 +31,17 @@ internal static class SheetData
             rows.Add(new SheetRow(id, UiText.T("ui.sheet." + id, label), value, false, text + live));
         }
 
+        // COS-216: two summary numbers first, like COTF's ratings. DPS is for the drawn weapon (or a plain reference weapon).
+        Header("ratings", "Ratings");
+        var weaponType = WeaponTypes.Selected(pc);
+        var weapon = pc.SelectedWeapon;
+        double baseDamage = weaponType != null && weapon != null ? WeaponTypes.WeaponDamage(weaponType, weapon.Level, weapon.Rarity) : WeaponTypes.ReferenceTypeDamage;
+        double swings = weaponType?.SwingSpeed is double sw && sw > 0 ? sw : 1;
+        Row("dps", "Melee DPS", Int(Ratings.MeleeDps(s, baseDamage, swings)),
+            "Expected melee damage per second with your selected weapon (or a plain one): its damage plus flat damage, crit chance times crit damage, the melee multiplier, attack speed and the weapon's swing speed. Before enemy armor.");
+        Row("toughness", "Toughness", Int(Ratings.Toughness(s)),
+            "How much enemy attack damage you can take from full health: max health through damage taken, armor and dodge.");
+
         Header("attributes", "Attributes");
         Row("strength", "Strength", Int(s.Get(StatIds.Strength)),
             "Raises melee damage (1 + Strength × the melee bonus per point). Each level also adds attribute points.");

@@ -408,7 +408,10 @@ public sealed record AbilityEvent(ulong EnemyNetId, string Ability, AbilityPhase
 
 /// <summary>Player → everyone (the host relays with <paramref name="PlayerId"/> set), every few seconds: name, level, magic
 /// find and position, for the party list, name tags and team magic find (COS-81).</summary>
-public sealed record PlayerInfo(uint PlayerId, string Name, int Level, float MagicFind, Vec3 Position, float ExplosionDamage = 0) : IMessage
+/// <summary>A player's level, magic find, position and the stats that stack across the team (explosion damage, COS-114; fire tick
+/// rate and fire duration, COS-216).</summary>
+public sealed record PlayerInfo(uint PlayerId, string Name, int Level, float MagicFind, Vec3 Position, float ExplosionDamage = 0,
+    float FireTickRate = 0, float FireDuration = 0) : IMessage
 {
     public MessageType Type => MessageType.PlayerInfo;
 }

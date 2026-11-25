@@ -599,6 +599,9 @@ public static class CotsFxPrefabs
         CotsGen.Child(go, "core", _sphere, CotsGen.Fx("FxHoleCore", _white, new Color(0.02f, 0.01f, 0.03f, 1), 1, additive: false, fresnel: 1.2f, fresnelInvert: true, cullBack: true),
             scale: Vector3.one * 0.22f);
         CotsGen.Child(go, "rim", _sphere, CotsGen.Fx("FxHoleRim", _white, Color.white, 2.5f, fresnel: 3f, cullBack: true), scale: Vector3.one * 0.26f);
+        // COS-106: gravitational lensing. A sphere around the core shows the scene behind it pulled in and swirled (Cots/Lens
+        // reads HDRP's colour pyramid), strongest at the hole, nothing at its own rim.
+        CotsGen.Child(go, "lens", _sphere, CotsGen.Lens("FxHoleLensMat", 0.35f, 0.15f, 0.5f, 0f, 0.25f), scale: Vector3.one * 0.7f);
         var swirl = Particles(Sub(go, "swirl"), CotsGen.Fx("FxHoleSwirl", _swirl, Color.white, 1.5f));
         Steady(swirl, 1.2f, 2.5f, 1.4f);
         Spin(swirl, 160);

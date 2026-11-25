@@ -19,7 +19,7 @@ public static class MessageCodec
     /// new <see cref="DropRequest"/>: a client's thrown items reach everyone (COS-14); <see cref="AuraPulse"/> carries two amounts (COS-23);
     /// <see cref="FxShape"/> carries a homing target and <see cref="PlayerInfo"/> the explosion stat (COS-114);
     /// new <see cref="EnemyAware"/> (COS-116).</remarks>
-    public const int ProtocolVersion = 10; // 9: Wave 8 (ping Clear, enemy state, player state, flat XP). 10: WorldHit, PlayerSpellHit, WorldSettings carries the game's PvP mode (COS-213)
+    public const int ProtocolVersion = 11; // 9: Wave 8 (ping Clear, enemy state, player state, flat XP). 10: WorldHit, PlayerSpellHit, WorldSettings carries the game's PvP mode (COS-213). 11: PlayerInfo carries fire tick rate and duration (COS-216)
 
     public static byte[] Encode(IMessage message)
     {
@@ -73,7 +73,7 @@ public static class MessageCodec
                 WriteShapes(w, m.Shapes);
                 break;
             case AbilityEvent m: w.UInt64(m.EnemyNetId).String(m.Ability).Byte((byte)m.Phase); WriteVec(w, m.Point); w.UInt64(m.Seed).Bool(m.TargetIsYou); break;
-            case PlayerInfo m: w.VarUInt(m.PlayerId).String(m.Name).VarInt(m.Level).Float(m.MagicFind); WriteVec(w, m.Position); w.Float(m.ExplosionDamage); break;
+            case PlayerInfo m: w.VarUInt(m.PlayerId).String(m.Name).VarInt(m.Level).Float(m.MagicFind); WriteVec(w, m.Position); w.Float(m.ExplosionDamage).Float(m.FireTickRate).Float(m.FireDuration); break;
             case Announce m: w.Byte((byte)m.Kind).VarUInt(m.PlayerId).String(m.Name).VarInt(m.Level); break;
             case Ping m: w.VarUInt(m.PlayerId).Byte((byte)m.Kind); WriteVec(w, m.Position); w.UInt64(m.TargetId); break;
             case AdminGrant m: w.Byte((byte)m.Action).UInt64(unchecked((ulong)BitConverter.DoubleToInt64Bits(m.Amount))).String(m.Arg); break;
@@ -116,7 +116,7 @@ public static class MessageCodec
             MessageType.SpellCast => new SpellCast(r.VarUInt(), r.String() ?? "", ReadVec(r), ReadVec(r), r.UInt64(), (SpellCastMode)r.Byte(), r.VarUInt(), ReadShapes(r)),
             MessageType.SpellFxEvent => ReadSpellFxEvent(r),
             MessageType.AbilityEvent => new AbilityEvent(r.UInt64(), r.String() ?? "", (AbilityPhase)r.Byte(), ReadVec(r), r.UInt64(), r.Bool()),
-            MessageType.PlayerInfo => new PlayerInfo(r.VarUInt(), r.String() ?? "", r.VarInt(), r.Float(), ReadVec(r), r.Float()),
+            MessageType.PlayerInfo => new PlayerInfo(r.VarUInt(), r.String() ?? "", r.VarInt(), r.Float(), ReadVec(r), r.Float(), r.Float(), r.Float()),
             MessageType.Announce => new Announce((AnnounceKind)r.Byte(), r.VarUInt(), r.String() ?? "", r.VarInt()),
             MessageType.Ping => new Ping(r.VarUInt(), (PingKind)r.Byte(), ReadVec(r), r.UInt64()),
             MessageType.AdminGrant => new AdminGrant((AdminAction)r.Byte(), BitConverter.Int64BitsToDouble(unchecked((long)r.UInt64())), r.String() ?? ""),

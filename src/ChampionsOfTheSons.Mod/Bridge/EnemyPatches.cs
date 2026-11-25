@@ -247,7 +247,7 @@ public static class EnemyPatches
         // Ashglow Greatbow: its arrows set the enemy on fire (COS-148).
         if (shot.Kind == RangedKind.Bow && sheet.IsOn(FireRules.GreatBowIgnites) && Weapons.WeaponModels.Active?.Id == "greatbow" && runtime.IsActive)
         {
-            var (ps, sec) = FireRules.GreatBowBurn(sheet, hit.Amount);
+            var (ps, sec) = FireRules.GreatBowBurn(Net.CoopParty.TeamFireTickRate(), Net.CoopParty.TeamFireDuration(), hit.Amount);
             runtime.Combat.ApplyDot("item.great_bow", DotKind.Fire, ps, sec);
         }
         // Eruption Bow: a headshot splashes half its damage on enemies around the target.

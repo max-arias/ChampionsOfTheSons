@@ -13,6 +13,8 @@ param(
     [string]$JoinAddress = '',
     [string]$GameAddress = '',
     [int]$ServerExtraLevels = 3,
+    # The test account is listed in the server's ownerswhitelist.txt: the admin chat check (COS-127) expects /cots to work.
+    [switch]$Admin,
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
 $ErrorActionPreference = 'Stop'
@@ -68,6 +70,7 @@ try {
     # which Steam fills for steam://run URLs (not for steam.exe -applaunch).
     # No +connect_ds: steam.exe -applaunch takes +words as its own console commands. --cots-join opens the game's join-by-ip dialog.
     $launchArgs = @('--cots-join', $JoinAddress, '--cots-expect-extra-levels', "$ServerExtraLevels")
+    if ($Admin) { $launchArgs += '--cots-expect-admin' }
     $launchArgs += if ($Windowed) { @('-screen-fullscreen', '0', '-screen-width', '640', '-screen-height', '360') } else { @('-batchmode') }
     # steam.exe -applaunch, like run-selftest.ps1: a steam://run link makes Steam ask before passing the arguments.
     & $steam -applaunch 1326470 @launchArgs

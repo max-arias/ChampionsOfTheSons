@@ -37,9 +37,9 @@ public sealed class CoopExtras : IModFeature
         CotsNetEvent.Received += OnNet;
         Pings.Added += OnPingAdded;
         Pings.Expired += OnPingExpired;
-        _pingKey = Config.Category.CreateKeybindEntry("ping_key", "h", "Ping", "Ping what you are looking at: every player sees the marker. Ping your own marker (or the sky) to clear it.");
+        _pingKey = Config.Category.CreateKeybindEntry("ping_key", "h", "Ping", "Ping what you are looking at: hold to preview the marker, release to place it; every player sees it. Ping your own marker (or the sky) to clear it.");
         _pingKey.SetScope(needsPlayerControllable: true);
-        _pingKey.Notify(PingLookedAt);
+        _pingKey.Notify(() => Previewing = true); // COS-216: held shows a preview, the release places the ping
     }
 
     public void OnGameStart()
@@ -61,6 +61,7 @@ public sealed class CoopExtras : IModFeature
                 && PingLabels.Shown.ContainsKey(ping.PlayerId))
                 FollowPillar(ping, pillar);
         Auras.Prune(now);
+        TickPreview(inWorld);
         if (!CoopSession.Active || !inWorld) return;
 
         if (CoopSession.IsClient && CoopFeature.Accepted)
@@ -83,11 +84,53 @@ public sealed class CoopExtras : IModFeature
     /// id when it relays, and never sends a client its own ping back).
     public static uint LocalPingId => CoopSession.IsClient ? uint.MaxValue : CoopSession.HostId;
 
-    private static void PingLookedAt()
+    /// <summary>The ping key is held: a local preview marker shows what the release will ping (COTF's hold-to-preview, COS-216).</summary>
+    public static bool Previewing { get; private set; }
+
+    private static GameObject? _preview;
+
+    private static void TickPreview(bool inWorld)
     {
-        if (!LocalPlayer.IsInWorld) return;
+        if (!Previewing) { HidePreview(); return; }
+        bool held = false, controllable = false;
+        try { held = _pingKey?.GetAction().IsPressed() == true; controllable = SonsSdk.GameState.IsPlayerControllable; } catch { /* no input yet */ }
+        if (!inWorld || !controllable) { Previewing = false; HidePreview(); return; }
+        if (!held)
+        {
+            Previewing = false;
+            HidePreview();
+            PingLookedAt();
+            return;
+        }
+        var aim = Aim();
+        if (aim == null) { HidePreview(); return; }
+        if (_preview == null)
+        {
+            _preview = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            _preview.name = "CotsPingPreview";
+            var col = _preview.GetComponent<Collider>();
+            if (col != null) UnityEngine.Object.Destroy(col);
+            _preview.transform.localScale = new Vector3(0.18f, 1.5f, 0.18f);
+        }
+        _preview.SetActive(true);
+        _preview.transform.position = (aim.Value.At ?? LocalPlayer.Transform.position) + Vector3.up * 1.5f;
+        var r = _preview.GetComponent<Renderer>();
+        if (r != null) r.material.color = ColorOf(aim.Value.Kind) * 0.7f;
+    }
+
+    private static void HidePreview()
+    {
+        if (_preview != null) _preview.SetActive(false);
+    }
+
+    private static Color ColorOf(PingKind kind) =>
+        kind switch { PingKind.Enemy => new Color(1f, 0.25f, 0.2f), PingKind.Item => new Color(1f, 0.85f, 0.2f), _ => new Color(0.3f, 0.8f, 1f) };
+
+    /// <summary>What the camera looks at: an enemy, a drop, or a place (null without a camera).</summary>
+    private static (PingKind Kind, Vector3? At, ulong Target, Sons.Ai.Vail.VailActor? Actor)? Aim()
+    {
         var cam = LocalPlayer.MainCam != null ? LocalPlayer.MainCam : Camera.main;
-        if (cam == null) return;
+        if (cam == null) return null;
         var ray = new Ray(cam.transform.position, cam.transform.forward);
         var kind = PingKind.Location;
         ulong target = 0;
@@ -109,6 +152,14 @@ public sealed class CoopExtras : IModFeature
                 if (near.Count > 0) { kind = PingKind.Item; target = (ulong)near[0]; }
             }
         }
+        return (kind, at, target, actor);
+    }
+
+    private static void PingLookedAt()
+    {
+        if (!LocalPlayer.IsInWorld) return;
+        if (Aim() is not { } aim) return;
+        var (kind, at, target, actor) = aim;
         var press = Pings.PressKind(LocalPingId, kind, at is { } p ? CoopSession.ToVec(p) : null, target);
         if (press == null) return;
         if (press == PingKind.Enemy) PingLabels.LocalTarget = actor;
@@ -144,7 +195,7 @@ public sealed class CoopExtras : IModFeature
             if (col != null) UnityEngine.Object.Destroy(col);
             go.transform.position = CoopSession.ToUnity(ping.Position) + Vector3.up * 3f;
             go.transform.localScale = new Vector3(0.25f, 3f, 0.25f);
-            var color = ping.Kind switch { PingKind.Enemy => new Color(1f, 0.25f, 0.2f), PingKind.Item => new Color(1f, 0.85f, 0.2f), _ => new Color(0.3f, 0.8f, 1f) };
+            var color = ColorOf(ping.Kind);
             var r = go.GetComponent<Renderer>();
             if (r != null) r.material.color = color;
             PingMarkers[ping.PlayerId] = go;

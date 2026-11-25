@@ -59,6 +59,7 @@ public class MessageCodecTests
         new AbilityEvent(43UL, "Meteor", AbilityPhase.Begin, new Vec3(-1, 0, 9), 7UL, false),
         new PlayerInfo(2u, "Wanderer ünï", 87, 2.35f, new Vec3(1, 2, 3)),
         new PlayerInfo(3u, "Second", 12, 1f, new Vec3(1, 2, 3), 0.75f),
+        new PlayerInfo(4u, "Third", 40, 1.2f, new Vec3(4, 5, 6), 0.5f, 0.2f, 1.5f),
         new Announce(AnnounceKind.LevelUp, 2u, "Wanderer", 88),
         new Announce(AnnounceKind.Left, 0u, "", 0),
         new Ping(3u, PingKind.Enemy, new Vec3(10, 20, 30), 42UL),

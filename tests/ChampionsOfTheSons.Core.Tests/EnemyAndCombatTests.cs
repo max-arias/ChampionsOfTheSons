@@ -281,6 +281,24 @@ public class CombatTests
         Assert.False(PlayerDefense.Incoming(s, 100, DamageKind.Magic, rng).Dodged);
     }
 
+    [Fact]
+    public void Ratings_are_expected_values_of_the_hit_and_defense_rules()
+    {
+        var s = new StatSheet(TestContent.Create(new() { ["player_stats.json"] = CombatStats }));
+        s.SetSource("gear", new[]
+        {
+            new StatModifier(StatIds.MeleeFlatDmg, Content.EffectOp.Add, 10),
+            new StatModifier(StatIds.CritChance, Content.EffectOp.Add, 0.5),
+            new StatModifier(StatIds.Armor, Content.EffectOp.Add, 500),
+            new StatModifier(StatIds.GetHitChance, Content.EffectOp.Mult, 0.5),
+        });
+        // (40 + 10) × (1 + 0.5 × 0.5) × melee 1, then × attack speed 1 × 2 swings a second
+        Assert.Equal(62.5, Ratings.MeleeHit(s, 40), 6);
+        Assert.Equal(125, Ratings.MeleeDps(s, 40, swingsPerSecond: 2), 6);
+        // max health over (1 - (500/1000)²) × half the hits landing
+        Assert.Equal(Derived.MaxHealth(s) / (0.75 * 0.5), Ratings.Toughness(s), 6);
+    }
+
     private const string CombatStats = """
     { "playerStats": [
       { "id": "strength", "kind": "add", "default": 1 },
@@ -299,7 +317,8 @@ public class CombatTests
       { "id": "magic_damage_taken", "kind": "mult", "default": 1 },
       { "id": "get_hit_chance", "kind": "mult", "default": 1 },
       { "id": "max_health", "kind": "add", "default": 0 },
-      { "id": "i_infinity_loop", "kind": "bool", "default": 0 }
+      { "id": "i_infinity_loop", "kind": "bool", "default": 0 },
+      { "id": "attack_speed", "kind": "mult", "default": 1 }
     ] }
     """;
 }

@@ -54,6 +54,7 @@ internal static class BookSelfTest
         SelfTest.Add(20.5f, "book: empty-slot labels fit", LabelsFit);
         SelfTest.Add(20.6f, "book: quickbar strip (COS-212)", Quickbar);
         SelfTest.Add(20.7f, "book: shot quickbar", () => TestKit.Screenshot("book-quickbar"));
+        SelfTest.Add(20.75f, "book: drag off the page drops (COS-46)", DragOffPage);
         for (int f = 1; f <= 3; f++)
         {
             int filter = f;
@@ -371,6 +372,22 @@ internal static class BookSelfTest
 
         BookPages.Click(BookTab.Gear, "filter.0", false);
         BookPages.Refresh(BookTab.Gear);
+    }
+
+    /// <summary>COS-46: an item dragged off the page lands in the world as a ground drop.</summary>
+    private static void DragOffPage()
+    {
+        ShowBagFirstPage();
+        var src = BookPages.Slots(BookTab.Bag).FirstOrDefault(s => s.Shown != null);
+        if (src == null) { SelfTest.Check("book: drag off the page: a bag item", false); return; }
+        var item = src.Shown!;
+        string key = src.Key;
+        var page = BookHost.PageScreenRect();
+        var outside = new Vector2(Mathf.Min(Screen.width - 5, page.xMax + 0.6f * (Screen.width - page.xMax)), page.yMin + 10);
+        Drag(ScreenOf(src), outside);
+        bool gone = Pc.Inventory.Get(key) == null || !ReferenceEquals(Pc.Inventory.Get(key), item);
+        bool lies = LootFeature.Ground.All.Any(d => ReferenceEquals(d.Item, item) || Equals(d.Item, item));
+        SelfTest.Check("book: dragging an item off the page drops it into the world", gone && lies, BookFeature.LastAction);
     }
 
     private static void ShowBagFirstPage()

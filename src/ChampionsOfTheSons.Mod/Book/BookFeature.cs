@@ -93,7 +93,8 @@ public sealed class BookFeature : IModFeature
 
         if (input.Page != 0) BookPages.Page(current, input.Page);
 
-        string? key = BookHost.CursorOnPage(screen, out var px) ? BookPages.HitAt(px) : null;
+        bool onPage = BookHost.CursorOnPage(screen, out var px);
+        string? key = onPage ? BookPages.HitAt(px) : null;
         if (input.Press)
         {
             var action = BookCard.ActionAt(screen);
@@ -106,7 +107,14 @@ public sealed class BookFeature : IModFeature
         if (Dragging != null) BookPages.SetDragGhost(BookPages.ItemAt(Dragging), px);
         if (input.Release && _pressed)
         {
-            if (Dragging != null) LastAction = Dragging + " -> " + (key ?? "nothing") + ": " + BookPages.Drop(Dragging, key);
+            // COS-46: an item dragged off the page (not onto the card) drops into the world; a quickbar cell only comes off its key.
+            if (Dragging != null && !onPage && BookCard.ActionAt(screen) == null && IsItemSlot(Dragging))
+            {
+                BookPages.Selected = null;
+                LastAction = Dragging + " -> world: " + (UI.InventoryActions.Drop(Dragging) ? "dropped" : "failed");
+                BookPages.MarkDirty();
+            }
+            else if (Dragging != null) LastAction = Dragging + " -> " + (key ?? "nothing") + ": " + BookPages.Drop(Dragging, key);
             else if (key != null && key == _pressKey) LastAction = key + ": " + BookPages.Click(current, key, false);
             CancelDrag();
         }

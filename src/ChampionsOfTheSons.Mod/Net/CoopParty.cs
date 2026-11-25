@@ -24,7 +24,7 @@ public sealed class CoopParty : IModFeature
         public string Name = "";
         public int Level = 1;
         public float MagicFind = 1;
-        public float ExplosionDamage;
+        public float ExplosionDamage, FireTickRate, FireDuration;
         public Vector3 Position;
         public float Seen;
     }
@@ -120,7 +120,8 @@ public sealed class CoopParty : IModFeature
 
     private static PlayerInfo MyInfo() =>
         new(CoopSession.HostId, LocalName, PlayerState.Character.Progress.Level, (float)LocalMagicFind, CoopSession.ToVec(LocalPlayer.Transform.position),
-            (float)PlayerState.Character.Stats.Get(CombatStatIds.ExplosionDamage));
+            (float)PlayerState.Character.Stats.Get(CombatStatIds.ExplosionDamage),
+            (float)PlayerState.Character.Stats.Get(FireRules.TickRate), (float)PlayerState.Character.Stats.Get(FireRules.Duration));
 
     /// <summary>Explosion damage bonus for the local player's explosions: in co-op, every player's bonus summed, as in COTF (COS-114).</summary>
     public static double TeamExplosionDamage()
@@ -129,6 +130,18 @@ public sealed class CoopParty : IModFeature
         if (CoopSession.Active) sum += Others.Sum(m => (double)m.ExplosionDamage);
         return sum;
     }
+
+    /// <summary>Fire tick rate for the local player's burns: every player's summed in co-op (COS-216, "stacks with other players").</summary>
+    public static double TeamFireTickRate() =>
+        PlayerState.Character.Stats.Get(FireRules.TickRate) + (CoopSession.Active ? Others.Sum(m => (double)m.FireTickRate) : 0);
+
+    /// <summary>Fire duration for the local player's burns: every player's summed in co-op (COS-216).</summary>
+    public static double TeamFireDuration() =>
+        PlayerState.Character.Stats.Get(FireRules.Duration) + (CoopSession.Active ? Others.Sum(m => (double)m.FireDuration) : 0);
+
+    /// <summary>A burn the local player sets, after the team's fire stats.</summary>
+    public static (double PerSecond, double Seconds) TeamBurn(double perSecond, double seconds) =>
+        FireRules.Burn(TeamFireTickRate(), TeamFireDuration(), perSecond, seconds);
 
     /// <summary>The local player's own line: shown here, sent to everyone (the host relays).</summary>
     private static void Send(Announce line, bool sendInfo)
@@ -164,6 +177,8 @@ public sealed class CoopParty : IModFeature
         m.MagicFind = float.IsFinite(info.MagicFind) ? Mathf.Clamp(info.MagicFind, 0, 1000) : 1;
         m.Position = CoopSession.ToUnity(info.Position);
         m.ExplosionDamage = float.IsFinite(info.ExplosionDamage) ? Mathf.Clamp(info.ExplosionDamage, 0, 100) : 0;
+        m.FireTickRate = float.IsFinite(info.FireTickRate) ? Mathf.Clamp(info.FireTickRate, 0, 100) : 0;
+        m.FireDuration = float.IsFinite(info.FireDuration) ? Mathf.Clamp(info.FireDuration, 0, 100) : 0;
         m.Seen = Time.realtimeSinceStartup;
     }
 

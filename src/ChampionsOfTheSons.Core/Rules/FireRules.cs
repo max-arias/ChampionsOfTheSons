@@ -11,11 +11,16 @@ public static class FireRules
     public const string TickRate = "fire_tick_rate";
     public const string GreatBowIgnites = "i_great_bow_ignites";
 
-    /// <summary>A burn of <paramref name="perSecond"/> for <paramref name="seconds"/> after the player's fire stats.</summary>
+    /// <summary>A burn of <paramref name="perSecond"/> for <paramref name="seconds"/> after the player's own fire stats.</summary>
     public static (double PerSecond, double Seconds) Burn(StatSheet stats, double perSecond, double seconds) =>
-        (perSecond * (1 + Math.Max(0, stats.Get(TickRate))), seconds * (1 + Math.Max(0, stats.Get(Duration))));
+        Burn(stats.Get(TickRate), stats.Get(Duration), perSecond, seconds);
+
+    /// <summary>A burn after given fire stats: in co-op every player's fire tick rate and duration add up, as in COTF ("stacks
+    /// with other players", COS-216).</summary>
+    public static (double PerSecond, double Seconds) Burn(double tickRate, double duration, double perSecond, double seconds) =>
+        (perSecond * (1 + Math.Max(0, tickRate)), seconds * (1 + Math.Max(0, duration)));
 
     /// <summary>The greatbow's burn from an arrow hit: Firebolt's share of the hit per second, for Firebolt's time.</summary>
-    public static (double PerSecond, double Seconds) GreatBowBurn(StatSheet stats, double hitDamage) =>
-        Burn(stats, hitDamage * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds);
+    public static (double PerSecond, double Seconds) GreatBowBurn(double tickRate, double duration, double hitDamage) =>
+        Burn(tickRate, duration, hitDamage * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds);
 }

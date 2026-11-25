@@ -34,6 +34,30 @@ internal static class GameRulesSelfTest
             Pc.Stats.RemoveSource("test.dodge");
             h.SetCurrentValue(h.GetMax());
         });
+        SelfTest.Add(1.5f, "rules: drowning and cold (COS-216)", () =>
+        {
+            var h = LocalPlayer.Vitals.Health;
+            h.SetCurrentValue(h.GetMax());
+            GameRulesFeature.HitAsDrowning(5);
+            var drown = GameRulesFeature.LastHit;
+            double max = Derived.MaxHealth(Pc.Stats);
+            SelfTest.Check("rules: drowning takes 3 + 10% of max health", drown.Source == PlayerDamageSource.Drowning && Math.Abs(drown.Final - (3 + 0.1 * max)) < 1,
+                $"{drown.Source} {drown.Game:0.#} -> {drown.Final:0.#} (max {max:0})");
+            h.SetCurrentValue(h.GetMax());
+            float before = LocalPlayer.Stats.ColdFactor;
+            LocalPlayer.Stats.ColdFactor = 1;
+            float small = LocalPlayer.Stats.GetVitalityLostFromColdFactor();
+            var c1 = GameRulesFeature.LastCold;
+            Pc.Stats.SetSource("test.tank", new[] { new StatModifier(StatIds.MaxHealth, EffectOp.Add, 4900) });
+            double bigMax = Derived.MaxHealth(Pc.Stats);
+            float big = LocalPlayer.Stats.GetVitalityLostFromColdFactor();
+            var c2 = GameRulesFeature.LastCold;
+            Pc.Stats.RemoveSource("test.tank");
+            LocalPlayer.Stats.ColdFactor = before;
+            SelfTest.Log($"rules: cold vitality loss at max {max:0}: game {c1.Game:0.###} -> {small:0.###}; at max {bigMax:0}: game {c2.Game:0.###} -> {big:0.###}");
+            SelfTest.Check("rules: cold's vitality loss scales with max health", c2.Game > 0 && Math.Abs(big - c2.Game * bigMax / 100) < 0.01 * big,
+                $"game {c2.Game:0.###} -> {big:0.###} at max {bigMax:0}");
+        });
         SelfTest.Add(2f, "rules: a heal scales with max health", () =>
         {
             Pc.Stats.SetSource("test.tank", new[] { new StatModifier(StatIds.MaxHealth, EffectOp.Add, 4900) });

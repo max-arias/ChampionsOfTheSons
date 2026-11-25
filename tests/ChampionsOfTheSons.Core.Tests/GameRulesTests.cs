@@ -37,6 +37,9 @@ public class GameRulesTests
         Assert.Equal((3 + 50) * 0.5, GameRules.PlayerHit(PlayerDamageSource.Fire, 10, 5000, fireTaken: 0.5), 6);
         Assert.Equal(1000, GameRules.PlayerHit(PlayerDamageSource.Thirst, 1, 5000), 6);
         Assert.Equal(17, GameRules.PlayerHit(PlayerDamageSource.Environment, 17, 5000), 6);
+        // Cold takes the same share of max vitality as in the game's own 100-health world, never less than the game's amount.
+        Assert.Equal(25, GameRules.ColdVitalityLoss(0.5, 5000), 6);
+        Assert.Equal(0.5, GameRules.ColdVitalityLoss(0.5, 60), 6);
     }
 
     [Fact]

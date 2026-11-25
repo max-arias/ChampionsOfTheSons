@@ -92,6 +92,17 @@ public static class GameRules
     /// <summary>Cold: 1.5% of max health per tick.</summary>
     public static double FrostDamage(double maxHealth) => 0.015 * maxHealth;
 
+    /// <summary>The game's player health before the mod (cold's vitality loss is measured against it).</summary>
+    public const double VanillaMaxHealth = 100;
+
+    /// <summary>
+    /// Cold (COS-216): Sons of the Forest's cold takes away max vitality rather than dealing damage. The game's loss is sized for
+    /// its own 100 health, so it scales with the player's max health to bite the same share (COTF's environment damage scales with
+    /// max health too).
+    /// </summary>
+    public static double ColdVitalityLoss(double gameLoss, double maxHealth) =>
+        Math.Max(0, gameLoss) * Math.Max(1, maxHealth / VanillaMaxHealth);
+
     /// <summary>Bad water: 1% of max health per unit drunk.</summary>
     public static double BadWaterDamage(double maxHealth, double units) => 0.01 * maxHealth * Math.Max(0, units);
 

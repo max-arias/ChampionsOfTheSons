@@ -112,6 +112,9 @@ public sealed class WorldXpFeature : IModFeature
         return TreesPaid.Any(t => Vector3.Distance(t.At, at) < 3f);
     }
 
+    /// <summary>Co-op test: flat XP grants from other players that paid here (COS-154).</summary>
+    public static int FlatXpReceived { get; private set; }
+
     private static void OnNet(IMessage message, BoltConnection from)
     {
         if (message is not FlatXpGranted flat) return;
@@ -123,7 +126,7 @@ public sealed class WorldXpFeature : IModFeature
                 CoopSession.SendToPeers(flat, except: from);
             }
             var at = CoopSession.ToUnity(flat.Source);
-            if (LocalPlayer.IsInWorld && !AlreadyPaid(at)) PayTree(at);
+            if (LocalPlayer.IsInWorld && !AlreadyPaid(at)) { PayTree(at); FlatXpReceived++; }
         }
         catch (Exception e)
         {

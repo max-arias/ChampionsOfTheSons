@@ -72,6 +72,31 @@ public static class PlayerAttack
     }
 }
 
+/// <summary>
+/// The character sheet's summary numbers (COS-216, after COTF's DPS and toughness ratings): expected values, no dice.
+/// </summary>
+public static class Ratings
+{
+    /// <summary>The expected melee hit for a weapon of <paramref name="baseDamage"/>: flat damage, crit chance × crit damage
+    /// folded in, the melee multiplier.</summary>
+    public static double MeleeHit(StatSheet s, double baseDamage) =>
+        Math.Max(0, (baseDamage + s.Get(StatIds.MeleeFlatDmg)) * (1 + Math.Clamp(s.Get(StatIds.CritChance), 0, 1) * s.Get(StatIds.CritDamage))
+            * Derived.MeleeMultiplier(s));
+
+    /// <summary>Melee damage per second: the expected hit × attack speed × the weapon's swings per second.</summary>
+    public static double MeleeDps(StatSheet s, double baseDamage, double swingsPerSecond = 1) =>
+        MeleeHit(s, baseDamage) * Math.Max(0, s.Get(StatIds.AttackSpeed)) * Math.Max(0, swingsPerSecond);
+
+    /// <summary>Effective health against enemy attacks: max health over what reaches it after damage taken, armor and dodge
+    /// (block left out: it is flat per hit).</summary>
+    public static double Toughness(StatSheet s)
+    {
+        double taken = Math.Max(1e-6, s.Get(StatIds.AllDamageTaken)) * (1 - ArmorMath.Reduction(s.Get(StatIds.Armor)))
+            * Math.Clamp(s.Get(StatIds.GetHitChance), 0.05, 1);
+        return Derived.MaxHealth(s) / Math.Max(1e-6, taken);
+    }
+}
+
 /// <summary>Enemy defenses as a pure function, for when the game owns the health value.</summary>
 public static class EnemyDefense
 {

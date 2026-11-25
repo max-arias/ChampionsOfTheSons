@@ -22,6 +22,12 @@ public sealed class CoopSelfTest : IModFeature
 {
     public static bool ServerDriver { get; } = Environment.GetCommandLineArgs().Contains("--cots-coop-test");
 
+    /// <summary>The runner says the test account is an owner on the server (COS-127: admin chat commands then work).</summary>
+    private static bool ExpectAdmin => Environment.GetCommandLineArgs().Contains("--cots-expect-admin");
+
+    private static int _chatState, _levelBefore;
+    private static float _chatAt;
+
     private static int? ExpectedExtraLevels
     {
         get
@@ -119,7 +125,11 @@ public sealed class CoopSelfTest : IModFeature
                 EnemyRegistry.TestProfileOverride = null;
                 var rt = EnemyRegistry.Get(_enemy);
                 if (rt != null)
+                {
                     RLog.Msg($"{CoopTestJoin.Tag} server: enemy net id {EnemySyncFeature.NetIdOf(_enemy)} level {rt.Profile.Level} tier {rt.Profile.Tier} maxHealth {rt.Profile.MaxHealth:F0}");
+                    rt.Combat.ForceShieldForTest(); // COS-154: the shield state (its tint) goes to the client as EnemyState
+                    RLog.Msg($"{CoopTestJoin.Tag} server: shield up {rt.Combat.ShieldUp}, actor {(rt.Actor != null)}, in registry {EnemyRegistry.Live.Contains(rt)}");
+                }
                 else
                     RLog.Error($"{CoopTestJoin.Tag} server: the spawned enemy has no profile");
                 Next(now);
@@ -141,19 +151,24 @@ public sealed class CoopSelfTest : IModFeature
                 RLog.Msg($"{CoopTestJoin.Tag} server: drop {_drop.Id} left the ground: {(LootFeature.Ground.Get(_drop.Id) == null ? "claimed" : "STILL THERE")}");
                 Next(now);
                 break;
-            case 5: // ping, spell, damage number, aura to the client
+            case 5: // ping, spell, damage number, aura, tree XP to the client
                 CoopExtras.SendPing(PingKind.Location, at + new Vector3(5, 0, 5), 0);
+                _pingAt = now;
+                CoopSession.Broadcast(new FlatXpGranted(250, CoopSession.ToVec(at + new Vector3(40, 0, 40)))); // COS-154: tree XP to every player
                 CoopExtras.SendSpell("spell.blink", at, Vector3.forward * 5);
                 CoopSession.SendToPeers(new DamageShown(99, 1, CoopSession.ToVec(at + Vector3.up * 2), 1234, HitFlags.Crit));
                 Next(now);
                 break;
-            case 6: // aura pulses for 6 s, then stop
+            case 6: // aura pulses for 6 s, then stop; the ping is cleared by its owner after 4 s (COS-154)
+                if (_pingAt > 0 && now - _pingAt > 4) { CoopExtras.SendPing(PingKind.Clear, at, 0); _pingAt = 0; }
                 if (now - _stageAt < 6) { if ((int)(now * 2) % 2 == 0) CoopSession.SendToPeers(new AuraPulse(99, "buff.coop_test", CoopSession.ToVec(at), 20, 2f)); break; }
                 RLog.Msg($"{CoopTestJoin.Tag} server: aura pulses stopped");
                 Next(now);
                 break;
         }
     }
+
+    private static float _pingAt;
 
     private static void Next(float now)
     {
@@ -194,6 +209,11 @@ public sealed class CoopSelfTest : IModFeature
             var actor = EnemySyncFeature.ActorOf(id);
             var mirrored = EnemyRegistry.Get(actor);
             if (mirrored == null) return false; // not mirrored yet: keep polling (the step's timeout reports a failure)
+            if (_syncSince == 0) _syncSince = Time.realtimeSinceStartup;
+            if (!Visuals.StateTintsFeature.HostFlagsOf(id).HasFlag(EnemyStateFlags.ShieldUp) && Time.realtimeSinceStartup - _syncSince < 10)
+                return false; // the host raises the shield a few seconds after the enemy appears
+            CoopTest.Check("enemy state: the host's shield state reaches the client (tint)", Visuals.StateTintsFeature.HostFlagsOf(id).HasFlag(EnemyStateFlags.ShieldUp),
+                Visuals.StateTintsFeature.HostFlagsOf(id).ToString());
             CoopTest.Check("enemy sync: client sees the host's profile", mirrored.Profile.Level == sync.Level && sync.Level >= 1,
                 $"host level {sync.Level} tier {sync.Tier} hp {sync.Health:F0}/{sync.MaxHealth:F0}; client nameplate level {mirrored.Profile.Level}");
             return true;
@@ -298,10 +318,14 @@ public sealed class CoopSelfTest : IModFeature
         {
             if (!CoopExtras.Pings.Active.Any())
             {
-                if (_pingSeen) { CoopTest.Check("ping: expired", true); return true; }
-                return false;
+                if (!_pingSeen) return false;
+                // COS-154: the host clears its ping after 4 s, well before the 30 s lifetime.
+                float shown = Time.realtimeSinceStartup - _pingSeenAt;
+                CoopTest.Check("ping: cleared by its owner before it expired", shown < 20, $"{shown:0.0} s");
+                CoopTest.Check("world xp: a teammate's tree XP paid here too", World.WorldXpFeature.FlatXpReceived > 0, World.WorldXpFeature.FlatXpReceived.ToString());
+                return true;
             }
-            if (!_pingSeen) { _pingSeen = true; CoopTest.Check("ping: showed up from the host", true); }
+            if (!_pingSeen) { _pingSeen = true; _pingSeenAt = Time.realtimeSinceStartup; CoopTest.Check("ping: showed up from the host", true); }
             return false;
         }, 40);
 
@@ -325,6 +349,35 @@ public sealed class CoopSelfTest : IModFeature
 
         CoopSyncSelfTest.RegisterClientSteps(); // wave 5 sync checks (COS-79/80/81), before the version check ends the run
 
+        // COS-127: "/cots level N" typed into the server chat. An owner's command changes the sender's level; anyone else's is refused.
+        CoopTest.Add("admin chat: /cots in the dedicated server's chat", () =>
+        {
+            var pc = PlayerState.Character;
+            if (_chatState == 0)
+            {
+                var box = UnityEngine.Object.FindObjectOfType<TheForest.UI.Multiplayer.ChatBox>();
+                if (box == null) { CoopTest.Check("admin chat: the game's chat box exists", false); return true; }
+                _levelBefore = pc.Progress.Level;
+                int want = _levelBefore == 23 ? 24 : 23;
+                box.SendLine($"/cots level {want}");
+                RLog.Msg($"{CoopTestJoin.Tag} client: sent '/cots level {want}' to the server chat (admin expected: {ExpectAdmin})");
+                _chatAt = Time.realtimeSinceStartup;
+                _chatState = 1;
+                return false;
+            }
+            bool changed = pc.Progress.Level != _levelBefore;
+            if (ExpectAdmin)
+            {
+                if (!changed && Time.realtimeSinceStartup - _chatAt < 8) return false;
+                CoopTest.Check("admin chat: an owner's /cots level changes their level", changed, $"level {_levelBefore} -> {pc.Progress.Level}");
+                if (changed) pc.SetLevel(_levelBefore);
+                return true;
+            }
+            if (Time.realtimeSinceStartup - _chatAt < 4) return false;
+            CoopTest.Check("admin chat: a non-admin's /cots is refused", !changed, $"level {_levelBefore} -> {pc.Progress.Level}");
+            return true;
+        }, 20);
+
         CoopTest.Add("version check: a wrong version is refused", () =>
         {
             if (!_badHelloSent)
@@ -340,6 +393,7 @@ public sealed class CoopSelfTest : IModFeature
     }
 
     private static bool _pingSeen, _auraSeen, _badHelloSent;
+    private static float _pingSeenAt, _syncSince;
     private static int _spellState, _sentBefore;
     private static int _hitState;
     private static float _h0, _h1;

@@ -32,7 +32,7 @@ public class FireRulesTests
 
     [Fact]
     public void Greatbow_burn_is_a_share_of_the_hit() =>
-        Assert.Equal((100 * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds), FireRules.GreatBowBurn(Sheet(0, 0), 100));
+        Assert.Equal((100 * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds), FireRules.GreatBowBurn(0, 0, 100));
 }
 
 /// <summary>COS-148: charged melee attacks and hammer smashes.</summary>

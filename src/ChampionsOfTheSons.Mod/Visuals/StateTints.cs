@@ -28,7 +28,11 @@ public sealed class StateTintsFeature : IModFeature
 
     private static readonly Dictionary<IntPtr, EnemyStateFlags> Shown = new();
     private static readonly Dictionary<ulong, EnemyStateFlags> FromHost = new();
-    private static readonly Dictionary<IntPtr, EnemyStateFlags> Sent = new();
+
+    private static readonly Dictionary<ulong, EnemyStateFlags> EverFromHost = new();
+
+    /// <summary>Co-op test: every state flag the host has sent for an enemy so far (a shield is up only a few seconds, COS-154).</summary>
+    public static EnemyStateFlags HostFlagsOf(ulong enemyNetId) => EverFromHost.GetValueOrDefault(enemyNetId);
     private float _scan;
 
     private sealed class RemotePlayer
@@ -57,7 +61,7 @@ public sealed class StateTintsFeature : IModFeature
     {
         Shown.Clear();
         FromHost.Clear();
-        Sent.Clear();
+        EverFromHost.Clear();
         foreach (var r in Remotes.Values) ClearFx(r);
         Remotes.Clear();
         _goldOn = false;
@@ -90,10 +94,7 @@ public sealed class StateTintsFeature : IModFeature
     {
         if (CoopSession.IsClient)
             return e.Actor != null && FromHost.TryGetValue(EnemySyncFeature.NetIdOf(e.Actor), out var f) ? f : EnemyStateFlags.None;
-        var flags = EnemyStateFlags.None;
-        if (e.Combat.ShieldUp) flags |= EnemyStateFlags.ShieldUp;
-        if (e.Revived) flags |= EnemyStateFlags.Revived;
-        return flags;
+        return Net.StateNetFeature.StateOf(e);
     }
 
     private static void ScanEnemies()
@@ -102,13 +103,7 @@ public sealed class StateTintsFeature : IModFeature
         {
             if (e.Actor == null) continue;
             var key = e.Actor.Pointer;
-            var flags = StateOf(e);
-            if (CoopSession.IsHost && Sent.GetValueOrDefault(key) != flags)
-            {
-                Sent[key] = flags;
-                ulong id = EnemySyncFeature.NetIdOf(e.Actor);
-                if (id != 0) CoopSession.SendToPeers(new EnemyState(id, flags));
-            }
+            var flags = StateOf(e); // the host's EnemyState messages are Net.StateNetFeature's
             if (Shown.GetValueOrDefault(key) == flags) continue;
             Shown[key] = flags;
             Tint(e.Actor.gameObject, flags.HasFlag(EnemyStateFlags.ShieldUp) ? ShieldTint : flags.HasFlag(EnemyStateFlags.Revived) ? UndeadTint : null);
@@ -188,13 +183,13 @@ public sealed class StateTintsFeature : IModFeature
             {
                 case EnemyState s when CoopSession.IsClient:
                     FromHost[s.EnemyNetId] = s.Flags;
+                    EverFromHost[s.EnemyNetId] = EverFromHost.GetValueOrDefault(s.EnemyNetId) | s.Flags;
                     break;
                 case PlayerStateNet p:
                     if (CoopSession.IsHost)
                     {
                         if (!CoopFeature.Verified.Contains(from)) return;
-                        p = p with { PlayerId = CoopSession.IdOf(from) };
-                        CoopSession.SendToPeers(p, except: from);
+                        p = p with { PlayerId = CoopSession.IdOf(from) }; // Net.StateNetFeature relays it to the others
                     }
                     if (!Remotes.TryGetValue(p.PlayerId, out var r)) Remotes[p.PlayerId] = r = new RemotePlayer();
                     r.Flags = p.Flags;
