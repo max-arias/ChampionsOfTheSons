@@ -183,12 +183,10 @@ public sealed class CoopSelfTest : IModFeature
         CoopTest.Add("enemy sync: client sees the host's profile", () =>
         {
             if (EnemySyncFeature.Received.Count == 0) return false;
-            // The host's test enemy is the living one nearest this player (it spawns 8 m away); world enemies scaled at load are
-            // in the list too once content loads early (COS-165), so the first entry is not ours.
-            var me = TheForest.Utils.LocalPlayer.Transform?.position ?? Vector3.zero;
+            // The host's test enemy is the one with its sturdy test health (at least 20000, see the host half); world enemies
+            // scaled at load are in the list too since content loads early (COS-165) and may arrive first, so wait for it.
             var near = EnemySyncFeature.Received
-                .Where(kv => kv.Value.Health > 0 && EnemySyncFeature.ActorOf(kv.Key) != null)
-                .OrderBy(kv => Vector3.Distance(EnemySyncFeature.ActorOf(kv.Key)!.transform.position, me))
+                .Where(kv => kv.Value.Health > 0 && kv.Value.MaxHealth >= 20000 && EnemySyncFeature.ActorOf(kv.Key) != null)
                 .Select(kv => (KeyValuePair<ulong, EnemySync>?)kv).FirstOrDefault();
             if (near == null) return false;
             var (id, sync) = near.Value;
