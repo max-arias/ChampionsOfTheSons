@@ -52,7 +52,9 @@ public static class EnemyPatches
 
             float vanillaMax = health.GetMax();
             if (vanillaMax <= 0) return;
-            float ratio = Mathf.Clamp01(health._currentValue / vanillaMax);
+            // An enemy set up at world load (or while dormant far away) gets its max before its current health: 0 then means
+            // "not filled yet", not "dead", or it would keep 0 of its new max (COS-165).
+            float ratio = health._currentValue <= 0 && !__instance.IsDead() ? 1f : Mathf.Clamp01(health._currentValue / vanillaMax);
             var runtime = EnemyRegistry.GetOrRoll(statsManager, kind, vanillaMax, __instance);
             float newMax = (float)runtime.Profile.MaxHealth;
             health.SetMax(newMax);

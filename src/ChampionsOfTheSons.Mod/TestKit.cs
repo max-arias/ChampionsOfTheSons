@@ -23,15 +23,25 @@ public static class TestKit
         Sons.Gui.PauseMenu._instance?.Close();
     }
 
+    /// <summary>Points the camera level, straight ahead. Earlier phases and the test save can leave it pitched, which puts
+    /// enemies spawned in front off the screen (COS-175).</summary>
+    public static void LookLevel() => LocalPlayer.CamRotator?.SetTargetAngles(0, 0);
+
     /// <summary>Spawns an enemy <paramref name="distance"/> m in front of the player, optionally under temporary rules.</summary>
-    public static VailActor? Spawn(VailActorTypeId type = VailActorTypeId.Carl, float distance = 6, float sideways = 0, WorldRules? rules = null)
+    public static VailActor? Spawn(VailActorTypeId type = VailActorTypeId.Carl, float distance = 6, float sideways = 0, WorldRules? rules = null,
+        bool inView = false)
     {
         var t = LocalPlayer.Transform;
+        // inView: along where the camera looks, not the body's facing. They can differ by tens of degrees after a phase turned
+        // the body (the game keeps the camera's own heading), which puts spawns off the screen (COS-175).
+        var cam = inView && Camera.main != null ? Camera.main.transform : null;
+        var fwd = cam != null ? Vector3.ProjectOnPlane(cam.forward, Vector3.up).normalized : t.forward;
+        var right = cam != null ? Vector3.Cross(Vector3.up, fwd) : t.right;
         var saved = WorldState.Rules;
         if (rules != null) WorldState.SetRulesForTest(rules);
         try
         {
-            return ActorTools.Spawn(type, t.position + t.forward * distance + t.right * sideways);
+            return ActorTools.Spawn(type, t.position + fwd * distance + right * sideways);
         }
         finally
         {

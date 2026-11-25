@@ -1,6 +1,6 @@
 # Icons
 
-`content/icons/<id>.png` (128x128 RGBA, transparent) for every item, perk, spell and set: 662 files, about 5 MB.
+`content/icons/<id>.png` (128x128 RGBA, transparent) for every item, perk, spell and set: 426 files, about 4 MB.
 They ship to `Mods\ChampionsOfTheSons\icons\` (CopyToGame target in the mod csproj) and load through `Icons/IconCache.cs`
 (`GetTexture(id)` / `GetSprite(id)`, null when missing).
 

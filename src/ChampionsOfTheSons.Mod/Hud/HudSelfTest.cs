@@ -89,9 +89,10 @@ internal static class HudSelfTest
     {
         var hell = WorldState.Rules with { PartyLevelOverride = Difficulties.Hell.BaseLevelMin, ForcedTier = EnemyTier.Elite }; // an Elite keeps its plate (a Boss gets the boss bar instead)
         var plain = WorldState.Rules with { AllowElites = false }; // COS-112: _a and _b must never roll a tier or affixes
-        _a = TestKit.Spawn(VailActorTypeId.Carl, 7, -2.5f, plain);
-        _b = TestKit.Spawn(VailActorTypeId.Carl, 9, 2.5f, plain);
-        _elite = TestKit.Spawn(VailActorTypeId.Carl, 11, 0, hell);
+        TestKit.LookLevel(); // COS-175
+        _a = TestKit.Spawn(VailActorTypeId.Carl, 7, -2.5f, plain, inView: true);
+        _b = TestKit.Spawn(VailActorTypeId.Carl, 9, 2.5f, plain, inView: true);
+        _elite = TestKit.Spawn(VailActorTypeId.Carl, 11, 0, hell, inView: true);
         SelfTest.Check("hud: spawned three enemies", _a != null && _b != null && _elite != null);
     }
 

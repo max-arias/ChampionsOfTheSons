@@ -90,7 +90,7 @@ internal static class EnemyHudSelfTest
         };
         try
         {
-            var v = TestKit.Spawn(VailActorTypeId.Carl, distance, sideways, rules);
+            var v = TestKit.Spawn(VailActorTypeId.Carl, distance, sideways, rules, inView: true);
             var r = TestKit.Profile(v);
             if (r != null)
             {
@@ -118,8 +118,9 @@ internal static class EnemyHudSelfTest
             PartyLevelOverride = Difficulties.Hell.BaseLevelMin,
             DisabledAbilities = Enum.GetValues<EnemyAbility>().Where(a => !Passive.Contains(a)).ToArray(),
         };
-        _elite = TestKit.Spawn(VailActorTypeId.Carl, 7, 0, elites);
-        _plain = TestKit.Spawn(VailActorTypeId.Carl, 9, 4, WorldState.Rules with { AllowElites = false });
+        TestKit.LookLevel(); // COS-175
+        _elite = TestKit.Spawn(VailActorTypeId.Carl, 7, 0, elites, inView: true);
+        _plain = TestKit.Spawn(VailActorTypeId.Carl, 9, 4, WorldState.Rules with { AllowElites = false }, inView: true);
         _boss = SpawnBoss(14, -5);
         SelfTest.Check("enemyhud: spawned elite, plain and boss", _elite != null && _plain != null && _boss != null);
         SelfTest.Check("enemyhud: spawned boss is Boss tier", TestKit.Profile(_boss)?.Profile.Tier == EnemyTier.Boss);

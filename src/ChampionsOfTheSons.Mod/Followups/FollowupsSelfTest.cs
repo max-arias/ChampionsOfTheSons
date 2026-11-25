@@ -40,6 +40,18 @@ internal static class FollowupsSelfTest
 
     private static void FullHealth() => LocalPlayer.Vitals.Health.SetCurrentValue(MaxHealth);
 
+    private static Sons.Ai.Vail.VailActor? _attacker;
+
+    /// <summary>A hit from an enemy's attack. A bare PlayerStats.Hit with no recent attacker counts as world damage since COS-92
+    /// (Pure, never dodged), so the test names a spawned enemy as the attacker first (COS-175).</summary>
+    private static void EnemyHit(float damage)
+    {
+        _attacker ??= TestKit.Spawn(distance: 30, rules: new WorldRules { PartyLevelOverride = 1, AllowElites = false });
+        if (TestKit.Profile(_attacker) is { } rt) PlayerEffects.LastAttacker = (rt, UnityEngine.Time.time);
+        else SelfTest.Check("followups: test attacker spawned", false);
+        LocalPlayer.Stats.Hit(damage);
+    }
+
     // ---------------------------------------------------------------- probe (facts for the design notes)
 
     private static void Probe()
@@ -101,13 +113,13 @@ internal static class FollowupsSelfTest
         var hud = HudFeature.Instance!;
         FullHealth();
         int n = hud.Numbers.Spawned;
-        LocalPlayer.Stats.Hit(7f);
+        EnemyHit(7f);
         SelfTest.Check("followups: taking damage shows a number", hud.Numbers.Spawned == n + 1, $"'{hud.Numbers.LastText}', incoming {PlayerBridge.LastIncoming}");
         SelfTest.Check("followups: hurt number is red", hud.Numbers.LastColor == DamageNumbers.HurtColor);
 
         Pc.Stats.SetSource("test.alwaysdodge", new[] { new StatModifier(StatIds.GetHitChance, EffectOp.Mult, 0) });
         n = hud.Numbers.Spawned;
-        LocalPlayer.Stats.Hit(7f);
+        EnemyHit(7f);
         Pc.Stats.RemoveSource("test.alwaysdodge");
         SelfTest.Check("followups: a dodge shows 'Dodge'", hud.Numbers.Spawned == n + 1 && hud.Numbers.LastText == UiText.T("ui.followups.dodge", "Dodge"), hud.Numbers.LastText);
 
@@ -126,7 +138,7 @@ internal static class FollowupsSelfTest
         LocalPlayer.Vitals.Health.SetCurrentValue(MaxHealth * 0.5f);
         float before = Health;
         Pc.Stats.SetSource("test.alwaysdodge", new[] { new StatModifier(StatIds.GetHitChance, EffectOp.Mult, 0) });
-        LocalPlayer.Stats.Hit(5f);
+        EnemyHit(5f);
         Pc.Stats.RemoveSource("test.alwaysdodge");
         SelfTest.Check("followups: Improved Dodges heals 5% of max health on a dodge", Health - before >= MaxHealth * 0.045f, $"{before:0} -> {Health:0} of {MaxHealth:0}");
         double shield = FollowupsFeature.Shield.Amount;
@@ -134,13 +146,13 @@ internal static class FollowupsSelfTest
 
         FullHealth();
         float hp = Health;
-        LocalPlayer.Stats.Hit(3f);
+        EnemyHit(3f);
         SelfTest.Check("followups: the shield soaks the next hit", Health >= hp - 0.01f && FollowupsFeature.Shield.Amount < shield, $"health {hp:0} -> {Health:0}, shield {FollowupsFeature.Shield.Amount:0.#}");
 
         SetPerks(PerkEffectIds.DeployableShield, PerkEffectIds.DeployableShield2);
         FollowupsFeature.Shield.Reset();
         Pc.Stats.SetSource("test.alwaysdodge", new[] { new StatModifier(StatIds.GetHitChance, EffectOp.Mult, 0) });
-        LocalPlayer.Stats.Hit(5f);
+        EnemyHit(5f);
         Pc.Stats.RemoveSource("test.alwaysdodge");
         double s2 = FollowupsFeature.Shield.Amount;
         SelfTest.Check("followups: Bulwark Reflex strengthens the shield to 25%", Math.Abs(s2 - MaxHealth * 0.25) < 1, $"{s2:0.#} of {MaxHealth:0}");
@@ -254,7 +266,7 @@ internal static class FollowupsSelfTest
         float a0 = Health;
         double armor = Pc.Stats.Get(StatIds.Armor);
         Pc.Stats.SetSource("test.alwaysdodge", new[] { new StatModifier(StatIds.GetHitChance, EffectOp.Mult, 0) });
-        LocalPlayer.Stats.Hit(4f);
+        EnemyHit(4f);
         Pc.Stats.RemoveSource("test.alwaysdodge");
         SelfTest.Check("followups: Wind Armor: +2000 armor and 5% heal after a dodge", Pc.Stats.Get(StatIds.Armor) - armor >= 1999 && Health - a0 >= MaxHealth * 0.045f, $"armor +{Pc.Stats.Get(StatIds.Armor) - armor:0}, health {a0:0} -> {Health:0}");
         FollowupsFeature.Frame(6f);
@@ -315,5 +327,7 @@ internal static class FollowupsSelfTest
         FollowupsFeature.SyncSources();
         FullHealth();
         LootFeature.ClearAll();
+        if (_attacker != null) TestKit.Kill(_attacker);
+        _attacker = null;
     }
 }

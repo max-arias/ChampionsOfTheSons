@@ -11,6 +11,8 @@ public static class ModContent
 {
     public static ContentDb Db { get; private set; } = null!;
 
+    public static bool Loaded => Db != null;
+
     public static void Load()
     {
         var asm = Assembly.GetExecutingAssembly();

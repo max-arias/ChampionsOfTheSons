@@ -87,8 +87,7 @@ internal sealed class WeaponSkin
             Source = "game:" + (frame?.Source ?? "mesh");
             Placement = GameTint == Untinted ? "the game's own weapon" : "the game's own weapon, tinted " + GameTint;
             // The swing trail at the game weapon's tip, and the rarity light (the edge glow needs a model of ours).
-            if (Type.TrailWidth > 0 && frame is { } gf)
-                AddTrail(gf.Hand + gf.Along * (((float)Type.Length - (float)Type.Grip) * 0.92f / Mathf.Max(1e-4f, Holder.lossyScale.z)));
+            TryGameTrail(frame);
             // COS-210: the rarity glow on the game's own mesh (edge shell, light, particles), as on our models.
             GlowParts = WeaponGlowFx.ApplyToGameMesh(Holder, Model, Look, _gameGlow);
             if (Trail != null) WeaponGlowFx.Brighten(Trail, Look);
@@ -316,8 +315,24 @@ internal sealed class WeaponSkin
     public void Rescan()
     {
         if (Holder == null) return;
-        if (GameTint != null) ShowGameMesh();
+        if (GameTint != null)
+        {
+            ShowGameMesh();
+            // The spear's mesh arrives after the skin, so its frame (and the trail at its tip) may only exist now.
+            if (Trail == null && TryGameTrail(GameFrame())) WeaponGlowFx.Brighten(Trail!, Look);
+        }
         else HideGameRenderers();
+    }
+
+    /// <summary>The swing trail at the game weapon's tip. False when the type has none or the game mesh is not there yet.</summary>
+    private bool _gameTrailTried;
+
+    private bool TryGameTrail(Frame? frame)
+    {
+        if (_gameTrailTried || Type.TrailWidth <= 0 || frame is not { } gf) return false;
+        _gameTrailTried = true; // one try once the mesh is there: a failed spawn must not repeat every scan
+        AddTrail(gf.Hand + gf.Along * (((float)Type.Length - (float)Type.Grip) * 0.92f / Mathf.Max(1e-4f, Holder.lossyScale.z)));
+        return Trail != null;
     }
 
     public void Remove()

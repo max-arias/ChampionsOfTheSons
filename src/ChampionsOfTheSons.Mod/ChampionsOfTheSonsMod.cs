@@ -38,6 +38,9 @@ public class ChampionsOfTheSonsMod : SonsMod
     protected override void OnInitializeMod()
     {
         Config.Init();
+        // Content first: a dedicated server never raises OnSdkInitialized and creates the world's enemies before OnGameStart,
+        // so scaling them needs content loaded here (COS-165, as other RedLoader mods load their data).
+        ModContent.Load();
     }
 
     private static bool _initialized;
@@ -53,7 +56,7 @@ public class ChampionsOfTheSonsMod : SonsMod
         if (_initialized) return;
         _initialized = true;
         bool server = Net.ServerConfig.IsDedicatedServer;
-        ModContent.Load();
+        if (!ModContent.Loaded) ModContent.Load();
 
         SonsSaveTools.Register(new PlayerProgressSaveable());
         SonsSaveTools.Register(new WorldSettingsSaveable());
