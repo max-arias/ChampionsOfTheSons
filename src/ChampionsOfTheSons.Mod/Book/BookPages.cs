@@ -19,6 +19,9 @@ internal sealed class PageSlot
     public Image Dim = null!, TickBg = null!, NewBg = null!;
     public Image[] TickMarks = null!;
     public TextMeshProUGUI NewText = null!;
+    /// <summary>The quickbar key number (COS-212): on a bag weapon that is bound, and always on a quickbar cell.</summary>
+    public Image BadgeBg = null!;
+    public TextMeshProUGUI Badge = null!;
     public ItemInstance? Shown;
     public bool Rendered, WasSelected;
 }
@@ -64,9 +67,27 @@ internal static class BookPages
         ("equip.amulet", 400, 164, 72, 72),
         ("equip.bracer", 400, 244, 72, 72),
         ("equip.ring2", 412, 324, 56, 56),
-        ("equip.weapon", 92, 176, 82, 170),
         ("equip.offhand", 490, 176, 82, 170),
     };
+
+    /// <summary>The quickbar strip (COS-212): one cell per weapon key, down the left of the doll where the weapon slot was.</summary>
+    private const float QbX = 102, QbTop = 104, QbCell = 52, QbGap = 7;
+    private static readonly List<(int Index, PageSlot Slot)> QuickbarCells = new();
+
+    /// <summary>A quickbar cell's page key ("qb.N", N the game hotkey index) and back.</summary>
+    public static string CellKey(int index) => "qb." + index;
+    public static int CellIndex(string key) => key.StartsWith("qb.", StringComparison.Ordinal) && int.TryParse(key.AsSpan(3), out var i) ? i : -1;
+
+    /// <summary>The inventory slot a page key stands for: a bag or equip slot itself, a quickbar cell's bound bag slot, or null.</summary>
+    public static string? SlotOf(string? key)
+    {
+        if (key == null) return null;
+        int i = CellIndex(key);
+        return i >= 0 ? Pc.WeaponBar.SlotOf(i) : key;
+    }
+
+    /// <summary>The item under a page key (quickbar cells resolve to their bound weapon).</summary>
+    public static ItemInstance? ItemAt(string? key) => SlotOf(key) is { } slot ? Pc.Inventory.Get(slot) : null;
 
     private static TextMeshProUGUI _gearStats = null!;
     private static Image _ghost = null!;
@@ -133,6 +154,9 @@ internal static class BookPages
     /// <summary>The selected slot key (equip.* or bag.N), shown with a red frame.</summary>
     public static string? Selected { get; set; }
 
+    /// <summary>The quickbar cells on the Gear page (self-tests).</summary>
+    public static IEnumerable<PageSlot> QuickbarSlots => QuickbarCells.Select(c => c.Slot).Where(s => s.Key.Length > 0);
+
     public static IReadOnlyList<PageSlot> Slots(BookTab tab) => tab == BookTab.Gear ? GearSlots : tab == BookTab.Bag ? BagSlots : Array.Empty<PageSlot>();
 
     public static IReadOnlyList<PageHit> CurrentHits => Hits;
@@ -158,6 +182,8 @@ internal static class BookPages
         _perksPage = BookPerksPage.Build(page);
         Pc.Inventory.Changed += MarkDirty;
         Pc.Stats.Changed += MarkDirty;
+        Pc.WeaponBar.Changed += MarkDirty;
+        Pc.SelectionChanged += MarkDirty;
         Show(BookTab.None);
     }
 
@@ -209,6 +235,10 @@ internal static class BookPages
         s.NewText = PageKit.Text(root, key + "-new-text", x + 3, y + h - 21, 42, 18, UiText.T("ui.merge.new", "NEW"), 14, PageKit.TitleText, TextAlignmentOptions.Center);
         s.NewBg.enabled = false;
         s.NewText.enabled = false;
+        s.BadgeBg = PageKit.Box(root, key + "-badge", x + 2, y + h - 22, 20, 20, PageKit.TitleBar);
+        s.Badge = PageKit.Text(root, key + "-badge-text", x + 2, y + h - 22, 20, 20, "", 15, PageKit.TitleText, TextAlignmentOptions.Center);
+        s.BadgeBg.enabled = false;
+        s.Badge.enabled = false;
         return s;
     }
 
@@ -219,6 +249,7 @@ internal static class BookPages
         // shoulders/gloves/ring on one side, neck/bracer/ring on the other, weapon and off-hand as tall slots outside.
         foreach (var (key, x, y, w, h) in BodyLayout)
             GearSlots.Add(Slot(_gear, key, x, y, w, h, UiText.SlotName(key)));
+        PageKit.Text(_gear, "qb-title", QbX - 20, QbTop - 26, QbCell + 40, 22, UiText.T("ui.quickbar.title", "Quickbar"), 16, PageKit.InkFaint, TextAlignmentOptions.Center);
         // The bag on the same page (layout D): a rule, the filter chips, a 6x4 grid, then Sort and the pager.
         PageKit.Box(_gear, "bag-rule", Left, 470, PageKit.W - Left - Right, 2, PageKit.InkFaint);
         float cx = BagX;
@@ -453,7 +484,37 @@ internal static class BookPages
             RenderSlot(s, Pc.Inventory.Get(s.Key));
             Hits.Add(new PageHit(s.Key, s.X, s.Y, s.W, s.H));
         }
+        RefreshQuickbar();
         _gearCount.text = $"{UiText.T("ui.book.tab.bag", "Bag")} {InventoryActions.BagCount()}/{LootRoller.BagSlots}";
+    }
+
+    /// <summary>The quickbar cells follow the configured weapon keys (built on first use, one per key, up to six).</summary>
+    private static void RefreshQuickbar()
+    {
+        var keys = ActionBar.ActionBarConfig.WeaponHotkeys;
+        Pc.WeaponBar.WeaponKeys = keys;
+        while (QuickbarCells.Count < Math.Min(keys.Count, 6))
+        {
+            int n = QuickbarCells.Count;
+            float y = QbTop + n * (QbCell + QbGap);
+            QuickbarCells.Add((-1, Slot(_gear, "qb-cell-" + n, QbX, y, QbCell, QbCell, "")));
+        }
+        for (int n = 0; n < QuickbarCells.Count; n++)
+        {
+            var s = QuickbarCells[n].Slot;
+            if (n >= keys.Count) { s.Key = ""; RenderSlot(s, null, force: true); s.Fallback.text = ""; continue; }
+            int index = keys[n];
+            QuickbarCells[n] = (index, s);
+            s.Key = CellKey(index);
+            var slot = Pc.WeaponBar.SlotOf(index);
+            RenderSlot(s, slot != null ? Pc.Inventory.Get(slot) : null, force: true);
+            if (slot == null) s.Fallback.text = Bridge.HotkeyBridge.KeyLabel(index);
+            s.BadgeBg.enabled = s.Badge.enabled = slot != null;
+            s.Badge.text = Bridge.HotkeyBridge.KeyLabel(index);
+            bool drawn = slot != null && slot == Pc.SelectedSlot && Pc.Drawn;
+            foreach (var f in s.Frame) f.color = drawn ? PageKit.Good : PageKit.InkFaint;
+            Hits.Add(new PageHit(s.Key, s.X, s.Y, s.W, s.H));
+        }
     }
 
     private static void RefreshBag()
@@ -603,6 +664,15 @@ internal static class BookPages
         foreach (var m in s.TickMarks) m.enabled = picked;
         s.NewBg.enabled = s.NewText.enabled = isNew;
         s.Bg.color = merging && !dim ? PageKit.Paper : PageKit.PaperShade;
+        // A bound bag weapon shows its quickbar key; the drawn one is framed in green (COS-212).
+        if (s.Key.StartsWith("bag.", StringComparison.Ordinal) || s.Key.Length == 0)
+        {
+            int qk = item != null && s.Key.Length > 0 ? Pc.WeaponBar.KeyOf(s.Key) : -1;
+            s.BadgeBg.enabled = s.Badge.enabled = qk >= 0;
+            if (qk >= 0) s.Badge.text = Bridge.HotkeyBridge.KeyLabel(qk);
+            bool drawn = item != null && s.Key == Pc.SelectedSlot && Pc.Drawn;
+            foreach (var f in s.Frame) f.color = drawn ? PageKit.Good : PageKit.InkFaint;
+        }
         if (!force && s.Rendered && Equals(item, s.Shown)) return;
         s.Rendered = true;
         s.Shown = item;
@@ -671,7 +741,17 @@ internal static class BookPages
     {
         _dirty = true;
         Selected = null;
-        if (to == null || to == from || BookMerge.Active) return "cancel";
+        if (BookMerge.Active) return "cancel";
+        // The quickbar (COS-212): a bag weapon dropped on a cell takes that key; cell to cell swaps keys; a cell dropped
+        // anywhere else comes off the bar (the weapon stays in the bag).
+        int fromCell = CellIndex(from), toCell = to != null ? CellIndex(to) : -1;
+        if (fromCell >= 0)
+        {
+            if (toCell >= 0) return Pc.WeaponBar.SwapKeys(fromCell, toCell) ? "swapped keys" : "cancel";
+            return Pc.WeaponBar.Unbind(fromCell) ? "unbound" : "cancel";
+        }
+        if (toCell >= 0) return InventoryActions.BindToKey(from, toCell) ? "bound" : "not a weapon";
+        if (to == null || to == from) return "cancel";
         bool fromItem = from.StartsWith("bag.", StringComparison.Ordinal) || from.StartsWith("equip.", StringComparison.Ordinal);
         bool toItem = to.StartsWith("bag.", StringComparison.Ordinal) || to.StartsWith("equip.", StringComparison.Ordinal);
         if (!fromItem || !toItem || Pc.Inventory.Get(from) == null) return "cancel";
@@ -723,6 +803,22 @@ internal static class BookPages
         if (tab == BookTab.Character && ClickAttribute(key, right) is string attr) return attr;
         if (tab == BookTab.Spells) return BookSpellsPage.Click(key) ?? "none";
         if (tab == BookTab.Perks) return BookPerksPage.Click(key, right) ?? "none";
+        int cell = CellIndex(key);
+        if (cell >= 0)
+        {
+            // Right-click (pad West) takes the weapon off the key; a click with a bag weapon selected puts it on (pad: South on
+            // the weapon, then South on the cell).
+            _dirty = true;
+            if (right) { Selected = null; return Pc.WeaponBar.Unbind(cell) ? "unbound" : "none"; }
+            if (Selected != null && InventoryActions.IsBagWeapon(Selected))
+            {
+                bool ok = InventoryActions.BindToKey(Selected, cell);
+                Selected = null;
+                return ok ? "bound" : "not a weapon";
+            }
+            Selected = null;
+            return "cell";
+        }
         var item = Pc.Inventory.Get(key);
         _dirty = true;
         BookMerge.ClearNew(item);
@@ -730,6 +826,7 @@ internal static class BookPages
         if (right)
         {
             Selected = null;
+            if (InventoryActions.IsBagWeapon(key)) return "quickbar " + InventoryActions.ToggleQuickbar(key);
             return item != null && InventoryActions.ToggleEquip(key) ? "toggle" : "none";
         }
         if (Selected != null && Selected.StartsWith("bag.", StringComparison.Ordinal) && key.StartsWith("equip.", StringComparison.Ordinal))

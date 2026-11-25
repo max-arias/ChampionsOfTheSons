@@ -150,6 +150,7 @@ public sealed class CoopLoot : IModFeature
             LootFeature.Message(UI.UiText.T("ui.loot.bag_full", "Your bag is full."));
             if (rest != null && TheForest.Utils.LocalPlayer.IsInWorld) RequestDrop(rest, TheForest.Utils.LocalPlayer.Transform.position, DropSource.Overflow);
         }
+        else LootFeature.AutoBind(grant.Item);
         RLog.Msg($"{CoopTestJoin.Tag} client: picked up {grant.Item.BaseId} (granted by the host)");
         CoopTest.Check("loot: client was granted the pickup", true, grant.Item.BaseId);
     }

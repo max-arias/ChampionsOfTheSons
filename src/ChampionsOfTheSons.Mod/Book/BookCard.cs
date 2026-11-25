@@ -215,7 +215,11 @@ internal static class BookCard
                 bool equipped = key.StartsWith("equip.", StringComparison.Ordinal);
                 _equip.Text(InventoryActions.IsUsable(key)
                     ? UiText.T("ui.catalog.use", "Use")
-                    : UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
+                    : InventoryActions.IsBagWeapon(key)
+                        ? PlayerState.Character.WeaponBar.KeyOf(key) >= 0
+                            ? UiText.T("ui.quickbar.remove", "Remove from quickbar")
+                            : UiText.T("ui.quickbar.assign", "Assign to quickbar")
+                        : UiText.T(equipped ? "ui.inventory.menu.unequip" : "ui.inventory.menu.equip", equipped ? "Unequip" : "Equip"));
                 _drop.Text(InventoryActions.DropLabel(key));
                 _destroy.Text(_destroyArmed ? UiText.T("ui.book.destroy_confirm", "Again to destroy") : UiText.T("ui.inventory.menu.destroy", "Destroy"));
             }

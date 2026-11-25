@@ -27,6 +27,20 @@ public static class TestKit
     /// enemies spawned in front off the screen (COS-175).</summary>
     public static void LookLevel() => LocalPlayer.CamRotator?.SetTargetAngles(0, 0);
 
+    /// <summary>Takes the selected quickbar weapon out of the bag (COS-212: what removing the weapon slot item used to do).</summary>
+    public static void Unwield()
+    {
+        var pc = PlayerState.Character;
+        if (pc.SelectedSlot is { } slot) pc.Inventory.Remove(slot);
+    }
+
+    /// <summary>The quickbar key of the selected weapon, or -1.</summary>
+    public static int SelectedKey()
+    {
+        var pc = PlayerState.Character;
+        return pc.SelectedSlot is { } slot ? pc.WeaponBar.KeyOf(slot) : -1;
+    }
+
     /// <summary>Spawns an enemy <paramref name="distance"/> m in front of the player, optionally under temporary rules.</summary>
     public static VailActor? Spawn(VailActorTypeId type = VailActorTypeId.Carl, float distance = 6, float sideways = 0, WorldRules? rules = null,
         bool inView = false)

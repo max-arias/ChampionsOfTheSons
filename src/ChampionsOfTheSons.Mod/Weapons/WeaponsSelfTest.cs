@@ -45,7 +45,7 @@ internal static class WeaponsSelfTest
                 EnemyPatches.LocalWeaponHit += (_, weapon) => { if (weapon != WeaponClass.Ranged) _hits++; };
             }
             var inv = LocalPlayer.Inventory;
-            Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
+            TestKit.Unwield();
             foreach (int id in VanillaWeapons)
             {
                 int n = inv.AmountOf(id, true, false);
@@ -63,7 +63,7 @@ internal static class WeaponsSelfTest
             TestKit.FreeHands();
             WeaponSlotSync.Tick();
             var w = RealWeapons.ByType("long_sword")!;
-            int key = Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot);
+            int key = TestKit.SelectedKey();
             SelfTest.Check("weapons: equipped weapon owned but not drawn", LocalPlayer.Inventory.AmountOf(w.Id, true, false) == 1 && !WeaponBarKeys.WeaponInHand(),
                 $"owned {LocalPlayer.Inventory.AmountOf(w.Id, true, false)}, in hand {WeaponBarKeys.WeaponInHand()}");
             SelfTest.Check("weapons: equipped weapon gets a weapon bar key", key >= 0 && ActionBar.ActionBarConfig.WeaponHotkeys.Contains(key) && HotkeyBridge.ItemIdAt(key) == w.Id,
@@ -155,7 +155,7 @@ internal static class WeaponsSelfTest
         t += 6.5f;
 
         // The polearm goes away by its key, also after the aim button was held (it has no aim), and the book opens over it.
-        SelfTest.Add(t, "weapons: polearm key holsters", () => { SpearState("before holster"); WeaponBarKeys.Press(Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot)); });
+        SelfTest.Add(t, "weapons: polearm key holsters", () => { SpearState("before holster"); WeaponBarKeys.Press(TestKit.SelectedKey()); });
         SelfTest.Add(t + 2.5f, "weapons: polearm holstered", () =>
         {
             SelfTest.Check("weapons: polearm holstered by its key", !WeaponBarKeys.WeaponInHand(), WeaponBarKeys.LastAction + "; " + HandState());
@@ -163,7 +163,7 @@ internal static class WeaponsSelfTest
         });
         SelfTest.Add(t + 5.5f, "weapons: polearm aim button", () => TestKit.HoldAim(0.6f));
         SelfTest.Add(t + 6f, "weapons: polearm while aim held", () => SpearState("aim held"));
-        SelfTest.Add(t + 7f, "weapons: polearm holster after aim", () => { SpearState("after aim"); WeaponBarKeys.Press(Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot)); });
+        SelfTest.Add(t + 7f, "weapons: polearm holster after aim", () => { SpearState("after aim"); WeaponBarKeys.Press(TestKit.SelectedKey()); });
         SelfTest.Add(t + 9.5f, "weapons: polearm holstered after aim", () =>
         {
             SelfTest.Check("weapons: polearm holstered after the aim button", !WeaponBarKeys.WeaponInHand(), WeaponBarKeys.LastAction + "; " + HandState());
@@ -205,8 +205,8 @@ internal static class WeaponsSelfTest
         SelfTest.Add(t + 3f, "weapons: the key drew the hammer", () =>
         {
             var held = HeldWeapons.Local();
-            SelfTest.Check("weapons: hammer in the slot and in hand", Pc.WeaponBar.SlotOf(_barKey) == WeaponTypes.WeaponSlot
-                && Pc.Inventory.Get(WeaponTypes.WeaponSlot)?.BaseId == "item.relic_hammer" && held?.ItemId == RealWeapons.ByType("hammer")!.Id,
+            SelfTest.Check("weapons: hammer selected and in hand", Pc.WeaponBar.SlotOf(_barKey) == Pc.SelectedSlot
+                && Pc.SelectedWeapon?.BaseId == "item.relic_hammer" && held?.ItemId == RealWeapons.ByType("hammer")!.Id,
                 $"{WeaponBarKeys.LastAction}; holding {held?.ItemId}");
             var polearmSlot = Pc.Inventory.Slots.FirstOrDefault(kv => kv.Value.BaseId == "item.rusty_polearm").Key;
             SelfTest.Check("weapons: the polearm went to the bag and kept its key", polearmSlot != null && polearmSlot.StartsWith("bag.", StringComparison.Ordinal)
@@ -253,10 +253,10 @@ internal static class WeaponsSelfTest
 
         SelfTest.Add(t, "weapons: unequip", () =>
         {
-            Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
+            TestKit.Unwield();
             WeaponSlotSync.Tick();
             var owned = RealWeapons.All.Where(w => LocalPlayer.Inventory.AmountOf(w.Id, true, false) > 0).Select(w => w.TypeId).ToList();
-            SelfTest.Check("weapons: no weapon item without the slot item", owned.Count == 0, string.Join(", ", owned));
+            SelfTest.Check("weapons: no weapon item without a selected weapon", owned.Count == 0, string.Join(", ", owned));
         });
         SelfTest.Add(t + 2f, "weapons: hand empty", () =>
         {
@@ -378,13 +378,15 @@ internal static class WeaponsSelfTest
         return sb.ToString();
     }
 
+    /// <summary>A typed weapon into the bag, onto a quickbar key and selected (COS-212), as picking it up and pressing its key does.</summary>
     internal static void EquipItem(string itemId, string typeId, Rarity rarity = Rarity.Rare)
     {
-        Pc.Inventory.Remove(WeaponTypes.WeaponSlot);
+        TestKit.Unwield();
         var item = new ItemInstance { BaseId = itemId, Level = 10, Rarity = rarity, Stats = Array.Empty<RolledStat>() };
         Pc.Inventory.AddToBag(item);
         var slot = Pc.Inventory.Slots.First(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && kv.Value == item).Key;
-        SelfTest.Check($"weapons: {typeId} item equipped", Pc.Inventory.Equip(slot, ModContent.Db));
+        int key = WeaponSlotSync.BindPickup(slot);
+        SelfTest.Check($"weapons: {typeId} item on the quickbar and selected", key >= 0 && Pc.Select(slot), $"key {key}");
     }
 
     /// <summary>Swing speed, damage, the hit box, tree cutting, and the type's sounds being registered cues.</summary>
@@ -401,7 +403,7 @@ internal static class WeaponsSelfTest
         var box = infos.SelectMany(w => w.GetComponents<BoxCollider>()).FirstOrDefault();
         SelfTest.Log($"weapons: {type.Id} hit box {box?.size} center {box?.center}, game damage {game} (data {data != null}), factor {WeaponModels.MeleeDamageFactor:0.00}");
         // COS-191: a hit's base is the weapon's own damage (the slot item's level and rarity).
-        var slotItem = Pc.Inventory.Get(WeaponTypes.WeaponSlot)!;
+        var slotItem = Pc.SelectedWeapon!;
         double d = WeaponTypes.WeaponDamage(type, slotItem.Level, slotItem.Rarity);
         SelfTest.Check($"weapons: {type.Id} damage", game > 0 && Math.Abs(WeaponModels.MeleeDamageFactor * game - d) < 0.05 && WeaponModels.ModWeaponPierce > 0,
             $"{game} x {WeaponModels.MeleeDamageFactor:0.00}, want {d:0.0}; pierce {WeaponModels.ModWeaponPierce:0}");

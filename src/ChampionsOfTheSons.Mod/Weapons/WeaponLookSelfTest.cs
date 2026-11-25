@@ -66,7 +66,7 @@ internal static class WeaponLookSelfTest
         // The game's own bow first, as the reference for how a bow sits in the hands, draws and shoots.
         SelfTest.Add(2f, "look: game bow", () =>
         {
-            PlayerState.Character.Inventory.Remove(WeaponTypes.WeaponSlot);
+            TestKit.Unwield();
             WeaponSlotSync.Tick();
             int arrow = Admin.AdminState.ArrowItemId();
             if (arrow >= 0 && LocalPlayer.Inventory.AmountOf(arrow, true, false) < 10) LocalPlayer.Inventory.AddItem(arrow, 10, true, false, null);

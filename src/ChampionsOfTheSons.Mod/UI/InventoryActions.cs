@@ -10,31 +10,51 @@ internal static class InventoryActions
 {
     private static PlayerCharacter Pc => PlayerState.Character;
 
-    /// <summary>Bag item -> equip it; equipped item -> back into the first free bag slot.</summary>
+    /// <summary>Bag item -> equip it; equipped item -> back into the first free bag slot. A bag weapon goes on or off the
+    /// quickbar instead (COS-212).</summary>
     public static bool ToggleEquip(string key)
     {
         var inv = Pc.Inventory;
         if (inv.Get(key) == null) return false;
-        if (key.StartsWith("bag.", StringComparison.Ordinal)) return Equipping(() => inv.Equip(key, ModContent.Db));
+        if (IsBagWeapon(key)) return ToggleQuickbar(key) != QuickbarResult.NotAWeapon;
+        if (key.StartsWith("bag.", StringComparison.Ordinal)) return inv.Equip(key, ModContent.Db);
         var free = FirstFreeBagSlot(inv);
         return free != null && inv.Move(key, free, ModContent.Db);
     }
 
-    /// <summary>Runs an inventory move; a weapon it put into the weapon slot goes on the weapon bar's first key (key 1).</summary>
-    private static bool Equipping(Func<bool> move)
+    public enum QuickbarResult { Bound, Unbound, Full, NotAWeapon }
+
+    public static bool IsBagWeapon(string key) =>
+        key.StartsWith("bag.", StringComparison.Ordinal) && WeaponTypes.IsWeapon(Pc.Inventory.Get(key), ModContent.Db);
+
+    /// <summary>Right-click (or pad West) on a bag weapon: off the quickbar when bound, else onto the first free key. A full bar
+    /// says how to replace one.</summary>
+    public static QuickbarResult ToggleQuickbar(string key)
     {
-        var before = Pc.Inventory.Get(WeaponTypes.WeaponSlot);
-        if (!move()) return false;
-        var now = Pc.Inventory.Get(WeaponTypes.WeaponSlot);
-        if (now != null && !ReferenceEquals(now, before)) Weapons.WeaponSlotSync.BindSlotToFirstKey();
-        return true;
+        if (!IsBagWeapon(key)) return QuickbarResult.NotAWeapon;
+        var bar = Pc.WeaponBar;
+        bar.WeaponKeys = ActionBar.ActionBarConfig.WeaponHotkeys;
+        bool was = bar.KeyOf(key) >= 0;
+        int now = bar.Toggle(key, Pc.Inventory, ModContent.Db);
+        if (was) return QuickbarResult.Unbound;
+        if (now >= 0) return QuickbarResult.Bound;
+        LootFeature.Message(UiText.T("ui.quickbar.full", "Quickbar full: drag onto a key to replace."));
+        return QuickbarResult.Full;
+    }
+
+    /// <summary>Puts a bag weapon on a quickbar key (index into the game's hotkeys), replacing that key's weapon.</summary>
+    public static bool BindToKey(string key, int index)
+    {
+        var bar = Pc.WeaponBar;
+        bar.WeaponKeys = ActionBar.ActionBarConfig.WeaponHotkeys;
+        return bar.Bind(index, key, Pc.Inventory, ModContent.Db);
     }
 
     /// <summary>Moves a bag item into a chosen equip slot (or swaps). False when it does not fit.</summary>
-    public static bool EquipInto(string bagKey, string equipKey) => bagKey != equipKey && Equipping(() => Pc.Inventory.Move(bagKey, equipKey, ModContent.Db));
+    public static bool EquipInto(string bagKey, string equipKey) => bagKey != equipKey && Pc.Inventory.Move(bagKey, equipKey, ModContent.Db);
 
     /// <summary>Moves (or swaps) any slot to any other: bag, equip slot, either way. False when an item does not fit.</summary>
-    public static bool MoveTo(string from, string to) => from != to && Equipping(() => Pc.Inventory.MoveOrMerge(from, to, ModContent.Db)); // equal stacks merge (COS-96)
+    public static bool MoveTo(string from, string to) => from != to && Pc.Inventory.MoveOrMerge(from, to, ModContent.Db); // equal stacks merge (COS-96)
 
     public static string? FirstFreeBagSlot(Inventory inv)
     {
@@ -93,21 +113,28 @@ internal static class InventoryActions
         int SlotOrder(ItemInstance it)
         {
             if (!db.Items.TryGetValue(it.BaseId, out var def)) return 999;
+            if (def.Type == WeaponTypes.WeaponType) return -1; // weapons first (COS-212: they live in the bag)
             var slots = LootRoller.SlotsFor(def.Type);
             return slots.Count == 0 ? 998 : LootRoller.EquipSlots.ToList().IndexOf(slots[0]);
         }
-        var bag = inv.Slots.Where(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal)).Select(kv => kv.Value)
-            .OrderBy(SlotOrder).ThenByDescending(i => (int)i.Rarity).ThenByDescending(i => i.Level).ThenBy(i => i.BaseId, StringComparer.Ordinal).ToList();
+        var bag = inv.Slots.Where(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal))
+            .OrderBy(kv => SlotOrder(kv.Value)).ThenByDescending(kv => (int)kv.Value.Rarity).ThenByDescending(kv => kv.Value.Level)
+            .ThenBy(kv => kv.Value.BaseId, StringComparer.Ordinal).ToList();
         var slotsOut = inv.Slots.Where(kv => !kv.Key.StartsWith("bag.", StringComparison.Ordinal)).ToList();
-        for (int i = 0; i < bag.Count; i++) slotsOut.Add(new KeyValuePair<string, ItemInstance>(Inventory.Bag(i), bag[i]));
-        inv.Restore(slotsOut);
+        var moved = new Dictionary<string, string>();
+        for (int i = 0; i < bag.Count; i++)
+        {
+            slotsOut.Add(new KeyValuePair<string, ItemInstance>(Inventory.Bag(i), bag[i].Value));
+            moved[bag[i].Key] = Inventory.Bag(i);
+        }
+        Pc.RearrangeBag(slotsOut, moved); // quickbar keys and the selected weapon follow their items
     }
 
     /// <summary>Equipped set pieces and their bonuses as rich text (active bonuses in <paramref name="activeHex"/>).</summary>
     public static string SetBonusText(string titleHex, string activeHex, string inactiveHex)
     {
         var pc = Pc;
-        var counts = ItemEffects.SetCounts(pc.Inventory.Equipped.Select(kv => kv.Value), pc.Content);
+        var counts = ItemEffects.SetCounts(pc.ActiveGear(), pc.Content);
         var sb = new StringBuilder();
         foreach (var (setId, have) in counts)
         {

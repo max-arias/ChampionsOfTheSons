@@ -45,7 +45,7 @@ public sealed class CoopWeapons : IModFeature
     {
         if (!CoopSession.Active || !inWorld || LocalPlayer.Transform == null) return;
         string type = WeaponModels.Active?.Id ?? "";
-        var item = type != "" ? PlayerState.Character.Inventory.Get(Core.Rules.WeaponTypes.WeaponSlot) : null;
+        var item = type != "" ? PlayerState.Character.SelectedWeapon : null;
         string itemId = item?.BaseId ?? "";
         int rarity = (int)(item?.Rarity ?? 0);
         _sendTimer -= dt;

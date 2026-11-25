@@ -178,6 +178,76 @@ public sealed class PlayerCharacter
 
     /// <summary>Weapons bound to number keys (COS-192).</summary>
     public WeaponBar WeaponBar { get; } = new();
+
+    /// <summary>The bag slot of the selected weapon: the one the last quickbar key picked (COS-212), null for none. It follows its
+    /// item when slots swap and clears when the slot empties.</summary>
+    public string? SelectedSlot { get; private set; }
+
+    /// <summary>Whether the selected weapon is in hand. Its stats (and its set piece) count only then (COS-212).</summary>
+    public bool Drawn { get; private set; }
+
+    /// <summary>The selected weapon, or null.</summary>
+    public ItemInstance? SelectedWeapon => SelectedSlot != null ? Inventory.Get(SelectedSlot) : null;
+
+    /// <summary>Raised when the selected weapon or its drawn state changes.</summary>
+    public event Action? SelectionChanged;
+
+    /// <summary>Selects the weapon in a bag slot (null clears). False when the slot holds no weapon.</summary>
+    public bool Select(string? slot)
+    {
+        if (slot != null && !WeaponTypes.IsWeapon(Inventory.Get(slot), Content)) return false;
+        if (slot == SelectedSlot) return true;
+        SelectedSlot = slot;
+        if (slot == null) Drawn = false;
+        RebuildEquipment();
+        SelectionChanged?.Invoke();
+        return true;
+    }
+
+    /// <summary>The game reports whether the selected weapon is in hand.</summary>
+    public void SetDrawn(bool drawn)
+    {
+        drawn &= SelectedSlot != null;
+        if (drawn == Drawn) return;
+        Drawn = drawn;
+        RebuildEquipment();
+        SelectionChanged?.Invoke();
+    }
+
+    /// <summary>The gear whose stats count now: the equipment slots plus the weapon in hand.</summary>
+    public IEnumerable<ItemInstance> ActiveGear()
+    {
+        foreach (var (_, item) in Inventory.Equipped) yield return item;
+        if (Drawn && SelectedWeapon is { } w) yield return w;
+    }
+
+    /// <summary>Items a load could not place (a legacy weapon-slot item with the bag full); the mod drops them at the player.</summary>
+    public List<ItemInstance> LoadOverflow { get; } = new();
+
+    /// <summary>Rearranges the bag (sort): <paramref name="moved"/> maps each old bag slot to its new one; the quickbar and the
+    /// selected weapon follow their items.</summary>
+    public void RearrangeBag(IEnumerable<KeyValuePair<string, ItemInstance>> slots, IReadOnlyDictionary<string, string> moved)
+    {
+        Inventory.Restore(slots);
+        WeaponBar.Remap(moved);
+        if (SelectedSlot != null && moved.TryGetValue(SelectedSlot, out var to)) SelectedSlot = to;
+    }
+
+    private void OnSlotsSwapped(string a, string b)
+    {
+        WeaponBar.OnSwapped(a, b);
+        if (SelectedSlot == a) SelectedSlot = b;
+        else if (SelectedSlot == b) SelectedSlot = a;
+    }
+
+    private void OnSlotEmptied(string slot)
+    {
+        WeaponBar.OnEmptied(slot);
+        if (slot != SelectedSlot) return;
+        SelectedSlot = null;
+        Drawn = false;
+        SelectionChanged?.Invoke();
+    }
     public PerkTree Perks { get; }
     public SpellBook Spells { get; }
 
@@ -254,8 +324,8 @@ public sealed class PlayerCharacter
         };
         Stats = new StatSheet(content);
         Inventory.Changed += RebuildEquipment;
-        Inventory.Swapped += WeaponBar.OnSwapped;
-        Inventory.Emptied += WeaponBar.OnEmptied;
+        Inventory.Swapped += OnSlotsSwapped;
+        Inventory.Emptied += OnSlotEmptied;
         RebuildAll();
     }
 
@@ -367,7 +437,9 @@ public sealed class PlayerCharacter
             Stats.RemoveSource(source);
         foreach (var (slot, item) in Inventory.Equipped)
             Stats.SetSource(slot, ItemEffects.For(item, Content));
-        Stats.SetSource("sets", ItemEffects.SetBonuses(Inventory.Equipped.Select(kv => kv.Value), Content));
+        // The weapon counts only while it is in hand (COS-212).
+        if (Drawn && SelectedWeapon is { } weapon) Stats.SetSource("equip.drawn", ItemEffects.For(weapon, Content));
+        Stats.SetSource("sets", ItemEffects.SetBonuses(ActiveGear(), Content));
     }
 
     public PlayerSave ToSave() => new()
@@ -394,8 +466,27 @@ public sealed class PlayerCharacter
         Mastery.Restore(save.SpellCasts);
         var loot = new LootRoller(Content);
         // An item's rarity is its base's (COS-109: uniques became Legendary, which a save migration cannot know).
-        Inventory.Restore(save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, loot.InferSlots(WithBaseRarity(kv.Value.ToItem())))));
-        WeaponBar.Restore(save.WeaponBar, Inventory, Content);
+        var slots = save.Slots.Select(kv => new KeyValuePair<string, ItemInstance>(kv.Key, loot.InferSlots(WithBaseRarity(kv.Value.ToItem())))).ToList();
+        var bar = new Dictionary<int, string>(save.WeaponBar);
+        LoadOverflow.Clear();
+        // COS-212: the weapon slot is gone. A weapon still in it moves to the first free bag slot and keeps its key.
+        int legacy = slots.FindIndex(kv => kv.Key == WeaponTypes.LegacyWeaponSlot);
+        if (legacy >= 0)
+        {
+            var item = slots[legacy].Value;
+            slots.RemoveAt(legacy);
+            var used = slots.Select(kv => kv.Key).ToHashSet();
+            string? free = Enumerable.Range(0, LootRoller.BagSlots).Select(Inventory.Bag).FirstOrDefault(k => !used.Contains(k));
+            if (free != null) slots.Add(new KeyValuePair<string, ItemInstance>(free, item));
+            else LoadOverflow.Add(item);
+            foreach (var k in bar.Where(kv => kv.Value == WeaponTypes.LegacyWeaponSlot).Select(kv => kv.Key).ToList())
+                if (free != null) bar[k] = free;
+                else bar.Remove(k);
+        }
+        SelectedSlot = null;
+        Drawn = false;
+        Inventory.Restore(slots);
+        WeaponBar.Restore(bar, Inventory, Content);
         Massacre.Reset();
         RebuildAll();
     }

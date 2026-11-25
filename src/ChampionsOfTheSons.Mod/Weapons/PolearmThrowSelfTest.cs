@@ -67,7 +67,7 @@ internal static class PolearmThrowSelfTest
             TestKit.Unpause();
             _start = LocalPlayer.Transform.position;
             TestKit.FaceOpenGround(new[] { (8f, 0f) });
-            PlayerState.Character.Inventory.Remove(WeaponTypes.WeaponSlot);
+            TestKit.Unwield();
             WeaponSlotSync.Tick();
             var inv = LocalPlayer.Inventory;
             if (inv.AmountOf(SpearId, true, false) < 2) inv.AddItem(SpearId, 2, true, false, null);
@@ -102,8 +102,8 @@ internal static class PolearmThrowSelfTest
             TestKit.FaceOpenGround(new[] { (8f, 0f) });
             WeaponsSelfTest.Wield("item.rusty_polearm", "polearm");
             _spears = LocalPlayer.Inventory.AmountOf(SpearId, true, false);
-            _thrown = Pc.Inventory.Get(WeaponTypes.WeaponSlot);
-            _key = Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot);
+            _thrown = Pc.SelectedWeapon;
+            _key = TestKit.SelectedKey();
             if (!_listening)
             {
                 _listening = true;
@@ -115,8 +115,8 @@ internal static class PolearmThrowSelfTest
         SelfTest.Add(20f, "throw: polearm left the hand", () =>
         {
             int own = LocalPlayer.Inventory.AmountOf(RealWeapons.ByType("polearm")!.Id, true, false);
-            SelfTest.Check("throw: the thrown polearm left the weapon slot", PolearmThrow.Out != null && Pc.Inventory.Get(WeaponTypes.WeaponSlot) == null && own == 0,
-                $"{PolearmThrow.Last}; slot {(Pc.Inventory.Get(WeaponTypes.WeaponSlot)?.BaseId ?? "empty")}, game item owned {own}");
+            SelfTest.Check("throw: the thrown polearm left the bag", PolearmThrow.Out != null && Pc.SelectedWeapon == null && own == 0,
+                $"{PolearmThrow.Last}; slot {(Pc.SelectedWeapon?.BaseId ?? "empty")}, game item owned {own}");
             Flight("polearm +1.5s");
         });
         SelfTest.Add(24f, "throw: polearm landed", () =>
@@ -130,7 +130,9 @@ internal static class PolearmThrowSelfTest
                 $"game spears {_spears} -> {LocalPlayer.Inventory.AmountOf(SpearId, true, false)}, polearm items {own}");
             SelfTest.Check("throw: a thrown weapon does not expire", drop != null && drop.Remaining > 86400, $"{drop?.Remaining:0} s left");
             var save = PlayerState.ToSave();
-            SelfTest.Check("throw: a save made now still owns it", save.Slots.TryGetValue(WeaponTypes.WeaponSlot, out var saved) && saved.BaseId == _thrown?.BaseId, string.Join(",", save.Slots.Keys.Where(k => k.StartsWith("equip."))));
+            var savedSlot = save.Slots.FirstOrDefault(kv => kv.Value.BaseId == _thrown?.BaseId).Key;
+            SelfTest.Check("throw: a save made now still owns it, on its key", savedSlot != null && save.WeaponBar.TryGetValue(_key, out var keyed) && keyed == savedSlot,
+                $"in {savedSlot ?? "none"}, key {_key} -> {(save.WeaponBar.TryGetValue(_key, out var k) ? k : "none")}");
             Flight("polearm landed");
             if (drop != null)
             {
@@ -144,9 +146,9 @@ internal static class PolearmThrowSelfTest
         SelfTest.Add(27f, "throw: polearm fetched", () =>
         {
             WeaponSlotSync.Tick();
-            SelfTest.Check("throw: walking onto it puts it back in the weapon slot on its key",
-                ReferenceEquals(Pc.Inventory.Get(WeaponTypes.WeaponSlot), _thrown) && Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot) == _key && PolearmThrow.Out == null,
-                $"{PolearmThrow.Last}; slot {(Pc.Inventory.Get(WeaponTypes.WeaponSlot)?.BaseId ?? "empty")}, key {Pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot)} (was {_key})");
+            SelfTest.Check("throw: walking onto it puts it back on its key, selected",
+                ReferenceEquals(Pc.SelectedWeapon, _thrown) && TestKit.SelectedKey() == _key && PolearmThrow.Out == null,
+                $"{PolearmThrow.Last}; slot {(Pc.SelectedWeapon?.BaseId ?? "empty")}, key {TestKit.SelectedKey()} (was {_key})");
         });
 
         // ---- thrown at an enemy: the hit is the weapon's damage times the throw factor.

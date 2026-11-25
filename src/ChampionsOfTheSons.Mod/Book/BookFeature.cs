@@ -100,10 +100,10 @@ public sealed class BookFeature : IModFeature
             if (action != null && BookPages.Selected != null) LastAction = action + ": " + BookCard.Act(action, BookPages.Selected);
             else { _pressed = true; _pressKey = key; _pressAt = screen; }
         }
-        if (_pressed && input.Held && Dragging == null && !BookMerge.Active && _pressKey != null && IsItemSlot(_pressKey)
-            && PlayerState.Character.Inventory.Get(_pressKey) != null && (screen - _pressAt).magnitude >= DragThreshold)
+        if (_pressed && input.Held && Dragging == null && !BookMerge.Active && _pressKey != null && (IsItemSlot(_pressKey) || BookPages.CellIndex(_pressKey) >= 0)
+            && BookPages.ItemAt(_pressKey) != null && (screen - _pressAt).magnitude >= DragThreshold)
             Dragging = _pressKey;
-        if (Dragging != null) BookPages.SetDragGhost(PlayerState.Character.Inventory.Get(Dragging), px);
+        if (Dragging != null) BookPages.SetDragGhost(BookPages.ItemAt(Dragging), px);
         if (input.Release && _pressed)
         {
             if (Dragging != null) LastAction = Dragging + " -> " + (key ?? "nothing") + ": " + BookPages.Drop(Dragging, key);
@@ -113,6 +113,7 @@ public sealed class BookFeature : IModFeature
         else if (input.Alt && key != null) LastAction = key + ": " + BookPages.Click(current, key, true);
         // COS-192: a number key over a weapon puts it on the weapon bar (the key's own weapon comes off it).
         if (input.Number >= 0 && key != null && IsItemSlot(key)) LastAction = key + ": " + BindToBar(input.Number, key);
+        else if (input.Number >= 0 && key != null && BookPages.SlotOf(key) is { } boundSlot && boundSlot != key) LastAction = key + ": " + BindToBar(input.Number, boundSlot);
 
         BookPages.Tick(current);
         UpdateCard(Dragging != null ? null : key);
@@ -122,7 +123,7 @@ public sealed class BookFeature : IModFeature
     {
         var pc = PlayerState.Character;
         if (!ActionBar.ActionBarConfig.WeaponHotkeys.Contains(index)) return $"key {Bridge.HotkeyBridge.KeyLabel(index)} is not a weapon bar key";
-        if (!pc.WeaponBar.Bind(index, key, pc.Inventory, ModContent.Db)) return "not a weapon";
+        if (!UI.InventoryActions.BindToKey(key, index)) return "not a weapon";
         BookPages.MarkDirty();
         return "bound to key " + Bridge.HotkeyBridge.KeyLabel(index);
     }
@@ -132,6 +133,8 @@ public sealed class BookFeature : IModFeature
     private static void UpdateCard(string? hover)
     {
         var inv = PlayerState.Character.Inventory;
+        // A quickbar cell shows its weapon's card (COS-212).
+        if (hover != null && BookPages.CellIndex(hover) >= 0) hover = BookPages.SlotOf(hover);
         bool hoverShows = hover != null && (hover.StartsWith("row.", StringComparison.Ordinal) || BookCard.ShowsText(hover) || inv.Get(hover) != null);
         if (hoverShows && hover != BookPages.Selected) BookCard.Show(hover!, pinned: false);
         else if (BookPages.Selected != null && inv.Get(BookPages.Selected) != null) BookCard.Show(BookPages.Selected, pinned: true);

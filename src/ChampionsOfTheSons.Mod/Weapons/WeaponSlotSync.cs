@@ -8,11 +8,11 @@ using TheForest.Utils;
 namespace ChampionsOfTheSons.Mod.Weapons;
 
 /// <summary>
-/// The weapon slot drives the game inventory (COS-186): the player owns exactly the real weapon item of the slot item's
-/// type, one of it, and none while the slot is empty. A wanted-state check a few times a second, so load, respawn and
-/// joining a co-op game need nothing of their own. Equipping never draws (COS-192): the weapon bar key does
-/// (<see cref="WeaponBarKeys"/>). A slot weapon on no key goes on the first weapon bar key (key 1), as equipping does
-/// (<see cref="UI.InventoryActions"/>); the game's hotkey of that key holds the real item so the game's own hotkey state matches.
+/// The selected weapon drives the game inventory (COS-186, COS-212): the player owns exactly the real weapon item of the
+/// selected bag weapon's type, one of it, and none while nothing is selected. A wanted-state check a few times a second, so
+/// load, respawn and joining a co-op game need nothing of their own. A quickbar key selects and draws (<see cref="WeaponBarKeys"/>);
+/// the game's hotkey of that key holds the real item so the game's own hotkey state matches. It also tells the character whether
+/// the weapon is in hand, which is when its stats count.
 /// </summary>
 internal static class WeaponSlotSync
 {
@@ -36,7 +36,7 @@ internal static class WeaponSlotSync
 
     private static RealWeapons.Weapon? Wanted()
     {
-        var type = WeaponTypes.Equipped(PlayerState.Character.Inventory, ModContent.Db);
+        var type = WeaponTypes.Selected(PlayerState.Character);
         var want = RealWeapons.ByType(type?.Id);
         return want?.Item == null ? null : want;
     }
@@ -48,8 +48,9 @@ internal static class WeaponSlotSync
         try
         {
             var pc = PlayerState.Character;
-            var slotItem = pc.Inventory.Get(WeaponTypes.WeaponSlot);
+            var slotItem = pc.SelectedWeapon;
             var want = Wanted();
+            pc.SetDrawn(want != null && WeaponBarKeys.WeaponInHand());
 
             foreach (var w in RealWeapons.All)
             {
@@ -72,10 +73,8 @@ internal static class WeaponSlotSync
             int have = inv.AmountOf(want.Id, true, false);
             if (have > 1) inv.RemoveItem(want.Id, have - 1, false, false, true, null, true);
             if (have == 0 && inv.AddItem(want.Id, 1, true, false, null)) Gives++;
-            // The slot weapon is on a weapon bar key (the first one if it was on none); the game's hotkey there holds the
-            // real item, and no other game hotkey does.
-            int key = pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot);
-            if (key < 0 && FirstWeaponKey is int first && pc.WeaponBar.Bind(first, WeaponTypes.WeaponSlot, pc.Inventory, ModContent.Db)) key = first;
+            // The game's hotkey of the selected weapon's key holds the real item, and no other game hotkey does.
+            int key = pc.SelectedSlot != null ? pc.WeaponBar.KeyOf(pc.SelectedSlot) : -1;
             for (int i = 0; i < HotkeyBridge.Count; i++)
                 if (i != key && HotkeyBridge.ItemIdAt(i) == want.Id) HotkeyBridge.Set(i, 0);
             if (key >= 0 && HotkeyBridge.ItemIdAt(key) != want.Id) HotkeyBridge.Set(key, want.Id);
@@ -108,13 +107,11 @@ internal static class WeaponSlotSync
         return -1;
     }
 
-    /// <summary>The weapon bar's first key (key 1 by default): where an equipped weapon goes. Null when the bar has no keys.</summary>
-    public static int? FirstWeaponKey => ActionBarConfig.WeaponHotkeys.Count > 0 ? ActionBarConfig.WeaponHotkeys[0] : null;
-
-    /// <summary>Puts the weapon slot's item on the weapon bar's first key (the weapon that was there loses its key).</summary>
-    public static void BindSlotToFirstKey()
+    /// <summary>Puts a picked-up bag weapon on the first free quickbar key (COS-212). The key, or -1 (not a weapon, or the bar is full).</summary>
+    public static int BindPickup(string bagSlot)
     {
         var pc = PlayerState.Character;
-        if (FirstWeaponKey is int first) pc.WeaponBar.Bind(first, WeaponTypes.WeaponSlot, pc.Inventory, ModContent.Db);
+        pc.WeaponBar.WeaponKeys = ActionBarConfig.WeaponHotkeys;
+        return pc.WeaponBar.BindFirstFree(bagSlot, pc.Inventory, ModContent.Db);
     }
 }

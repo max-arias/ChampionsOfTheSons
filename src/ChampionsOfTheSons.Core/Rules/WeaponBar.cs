@@ -3,9 +3,9 @@ using ChampionsOfTheSons.Core.Content;
 namespace ChampionsOfTheSons.Core.Rules;
 
 /// <summary>
-/// The weapon bar (COS-192): weapons bound to number keys. A binding points at the inventory slot that holds the weapon and
-/// follows it when slots swap (equipping one bound weapon over another swaps their slots, so both keys keep their weapon).
-/// A binding goes when its slot empties.
+/// The weapon bar, or quickbar (COS-192, COS-212): bag weapons bound to number keys. A binding points at the bag slot that holds
+/// the weapon and follows it when slots swap. A binding goes when its slot empties. Only <see cref="WeaponKeys"/> take weapons
+/// (keys 1-6 by default); the other number keys stay the game's item hotkeys.
 /// </summary>
 public sealed class WeaponBar
 {
@@ -13,6 +13,9 @@ public sealed class WeaponBar
     public const int Keys = 10;
 
     private readonly Dictionary<int, string> _slots = new();
+
+    /// <summary>The keys that take weapons, in order (the mod sets them from its config). Default: keys 1-6.</summary>
+    public IReadOnlyList<int> WeaponKeys { get; set; } = new[] { 0, 1, 2, 3, 4, 5 };
 
     public event Action? Changed;
 
@@ -28,18 +31,54 @@ public sealed class WeaponBar
         return -1;
     }
 
-    /// <summary>Whether the item in <paramref name="slot"/> can go on the bar: a weapon (it fits the weapon slot).</summary>
-    public static bool CanBind(Inventory inventory, string slot, ContentDb content)
+    /// <summary>Whether the item in <paramref name="slot"/> can go on the bar: a weapon in the bag.</summary>
+    public static bool CanBind(Inventory inventory, string slot, ContentDb content) =>
+        slot.StartsWith("bag.", StringComparison.Ordinal) && WeaponTypes.IsWeapon(inventory.Get(slot), content);
+
+    /// <summary>The first weapon key with nothing on it, or -1 when the bar is full.</summary>
+    public int FirstFreeKey()
     {
-        var item = inventory.Get(slot);
-        return item != null && Inventory.Fits(item, WeaponTypes.WeaponSlot, content);
+        foreach (int k in WeaponKeys)
+            if (!_slots.ContainsKey(k)) return k;
+        return -1;
+    }
+
+    /// <summary>Binds the weapon in <paramref name="slot"/> to the first free key (keeps its key if it has one). The key, or -1.</summary>
+    public int BindFirstFree(string slot, Inventory inventory, ContentDb content)
+    {
+        int had = KeyOf(slot);
+        if (had >= 0) return had;
+        int key = FirstFreeKey();
+        return key >= 0 && Bind(key, slot, inventory, content) ? key : -1;
+    }
+
+    /// <summary>Right-click on a bag weapon: unbinds it when bound, else binds it to the first free key. The key now (-1: unbound or full).</summary>
+    public int Toggle(string slot, Inventory inventory, ContentDb content)
+    {
+        int had = KeyOf(slot);
+        if (had >= 0) { Unbind(had); return -1; }
+        return BindFirstFree(slot, inventory, content);
+    }
+
+    /// <summary>Swaps what two keys hold (either may be empty). False when a key is not a weapon key.</summary>
+    public bool SwapKeys(int a, int b)
+    {
+        if (a == b || !WeaponKeys.Contains(a) || !WeaponKeys.Contains(b)) return false;
+        var sa = SlotOf(a);
+        var sb = SlotOf(b);
+        _slots.Remove(a);
+        _slots.Remove(b);
+        if (sa != null) _slots[b] = sa;
+        if (sb != null) _slots[a] = sb;
+        Changed?.Invoke();
+        return true;
     }
 
     /// <summary>Binds the weapon in <paramref name="slot"/> to <paramref name="key"/>, replacing that key's weapon and moving it
     /// off any other key. False when the key is out of range or the slot holds no weapon.</summary>
     public bool Bind(int key, string slot, Inventory inventory, ContentDb content)
     {
-        if (key < 0 || key >= Keys || !CanBind(inventory, slot, content)) return false;
+        if (!WeaponKeys.Contains(key) || !CanBind(inventory, slot, content)) return false;
         int old = KeyOf(slot);
         if (old == key) return true;
         if (old >= 0) _slots.Remove(old);
@@ -66,19 +105,28 @@ public sealed class WeaponBar
         if (changed) Changed?.Invoke();
     }
 
+    /// <summary>The bag was reordered (sort): every binding follows its item to its new slot (old slot -> new slot).</summary>
+    public void Remap(IReadOnlyDictionary<string, string> moved)
+    {
+        bool changed = false;
+        foreach (var k in _slots.Keys.ToList())
+            if (moved.TryGetValue(_slots[k], out var to) && to != _slots[k]) { _slots[k] = to; changed = true; }
+        if (changed) Changed?.Invoke();
+    }
+
     public void OnEmptied(string slot)
     {
         int k = KeyOf(slot);
         if (k >= 0) Unbind(k);
     }
 
-    /// <summary>Loads saved bindings, keeping only keys in range that point at a weapon.</summary>
+    /// <summary>Loads saved bindings, keeping only weapon keys that point at a bag weapon.</summary>
     public void Restore(IReadOnlyDictionary<int, string>? saved, Inventory inventory, ContentDb content)
     {
         _slots.Clear();
         if (saved != null)
             foreach (var (k, s) in saved)
-                if (k >= 0 && k < Keys && CanBind(inventory, s, content) && KeyOf(s) < 0) _slots[k] = s;
+                if (WeaponKeys.Contains(k) && CanBind(inventory, s, content) && KeyOf(s) < 0) _slots[k] = s;
         Changed?.Invoke();
     }
 }

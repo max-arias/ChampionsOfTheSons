@@ -41,7 +41,7 @@ internal static class ActionBarSelfTest
             HotkeyBridge.SetForTest(1, _spear);
             if (_food > 0) HotkeyBridge.SetForTest(ActionBarConfig.ConsumableHotkeys[0], _food);
             foreach (int k in PlayerState.Character.WeaponBar.Bindings.Keys.ToList()) PlayerState.Character.WeaponBar.Unbind(k);
-            PlayerState.Character.Inventory.Remove(Core.Rules.WeaponTypes.WeaponSlot); // the weapon bar shows only game hotkeys here
+            TestKit.Unwield(); // the weapon bar shows only game hotkeys here
             HotkeyBridge.Trigger(0);
             Bar.Dirty();
         });

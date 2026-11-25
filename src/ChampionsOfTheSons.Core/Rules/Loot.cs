@@ -219,7 +219,8 @@ public sealed class LootRoller
     /// <summary>Socket stats are gone with crafting (COS-145); old saves still carry them until the 4 → 5 migration strips them.</summary>
     public static bool IsSocketStat(string statId) => statId.StartsWith("stat.socket", StringComparison.Ordinal) || statId == EmptySocketStat;
 
-    public static bool IsEquippable(ItemBaseDef d) => SlotsFor(d.Type).Count > 0;
+    /// <summary>Gear: an item that goes in an equipment slot, or a weapon (which stays in the bag on the quickbar, COS-212).</summary>
+    public static bool IsEquippable(ItemBaseDef d) => SlotsFor(d.Type).Count > 0 || d.Type == WeaponTypes.WeaponType;
 
 
     /// <summary>Equipment slot names an item type can go in.</summary>
@@ -234,7 +235,6 @@ public sealed class LootRoller
         "amulet" => new[] { "equip.amulet" },
         "bracer" => new[] { "equip.bracer" },
         "ring" => new[] { "equip.ring1", "equip.ring2" },
-        "weapon" => new[] { "equip.weapon" },
         "shield" or "quiver" or "spell_scroll" => new[] { "equip.offhand" },
         _ => Array.Empty<string>(),
     };
@@ -242,7 +242,7 @@ public sealed class LootRoller
     public static readonly IReadOnlyList<string> EquipSlots = new[]
     {
         "equip.helmet", "equip.chest", "equip.pants", "equip.boots", "equip.shoulders", "equip.gloves",
-        "equip.amulet", "equip.bracer", "equip.ring1", "equip.ring2", "equip.weapon", "equip.offhand",
+        "equip.amulet", "equip.bracer", "equip.ring1", "equip.ring2", "equip.offhand",
     };
 
     public const int BagSlots = 120;

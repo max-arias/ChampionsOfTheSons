@@ -105,7 +105,7 @@ internal static class GlowSelfTest
         var plain = new[] { "item.dull_longsword", "item.dull_longsword", "item.dull_longsword", "item.relic_hammer", "item.dull_longsword", "item.relic_hammer", "item.axe_of_swiftness" };
         SelfTest.Add(t, "glow: plain drops", () =>
         {
-            PlayerState.Character.Inventory.Remove(WeaponTypes.WeaponSlot);
+            TestKit.Unwield();
             WeaponModels.Scan();
             for (int i = 0; i < plain.Length; i++) Drops.Add(DropAt(i, plain[i], Rarity.Common));
         });
@@ -160,7 +160,7 @@ internal static class GlowSelfTest
             VisualsFeature.SetReduceHeavyEffects(reducedBefore);
             foreach (var id in Drops) LootFeature.Ground.Remove(id);
             Drops.Clear();
-            PlayerState.Character.Inventory.Remove(WeaponTypes.WeaponSlot);
+            TestKit.Unwield();
             WeaponSlotSync.Tick();
         });
         // The game takes the held weapon away over a few frames.

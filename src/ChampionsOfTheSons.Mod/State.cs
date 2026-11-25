@@ -49,7 +49,15 @@ public static class PlayerState
         return save;
     }
 
-    public static void FromSave(PlayerSave save) => Character.Load(save);
+    public static void FromSave(PlayerSave save)
+    {
+        // The quickbar's weapon keys come from the config (keys 1-6 by default, COS-212); bindings load against them.
+        Character.WeaponBar.WeaponKeys = ActionBar.ActionBarConfig.WeaponHotkeys;
+        Character.Load(save);
+        // A legacy weapon-slot item that found no room in the bag goes to the ground at the player.
+        foreach (var item in Character.LoadOverflow) Loot.LootFeature.PendingGround.Add(item);
+        Character.LoadOverflow.Clear();
+    }
 }
 
 /// <summary>World rules owned by the host (the game's difficulty as read from the game, and the host's multipliers).</summary>

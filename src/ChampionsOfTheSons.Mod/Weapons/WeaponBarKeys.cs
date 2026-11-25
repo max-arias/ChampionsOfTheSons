@@ -11,8 +11,8 @@ using UnityEngine.InputSystem;
 namespace ChampionsOfTheSons.Mod.Weapons;
 
 /// <summary>
-/// The weapon bar's keys (COS-192). A number key with a bound mod weapon is the mod's, never the game's hotkey: pressed in the
-/// world it swaps that weapon into the weapon slot and draws it, or holsters it when it is in hand. While a mod page of the book
+/// The weapon bar's keys (COS-192, COS-212). A number key with a bound bag weapon is the mod's, never the game's hotkey: pressed in
+/// the world it selects that weapon and draws it, or holsters it when it is in hand. While a mod page of the book
 /// shows, every weapon bar key is the mod's (hovering a weapon and pressing one binds it, <see cref="BookFeature"/>), so the game
 /// never swaps the book out of the hand for a hotkey.
 /// </summary>
@@ -29,7 +29,7 @@ internal static class WeaponBarKeys
         var slot = Pc.WeaponBar.SlotOf(index);
         var item = slot != null ? Pc.Inventory.Get(slot) : null;
         if (slot == null || item == null) return null;
-        return (slot, item, slot == WeaponTypes.WeaponSlot && WeaponInHand());
+        return (slot, item, slot == Pc.SelectedSlot && WeaponInHand());
     }
 
     /// <summary>Whether one of the mod's weapon items is in the right hand.</summary>
@@ -87,8 +87,8 @@ internal static class WeaponBarKeys
     }
 
     /// <summary>
-    /// What pressing hotkey <paramref name="index"/> does when a weapon is bound to it: a weapon in the bag swaps into the weapon slot
-    /// and is drawn; the weapon in the slot is drawn, or holstered when in hand. False when nothing is bound (the game's hotkey).
+    /// What pressing hotkey <paramref name="index"/> does when a weapon is bound to it: another weapon is selected and drawn; the
+    /// selected one is drawn, or holstered when in hand. False when nothing is bound (the game's hotkey).
     /// </summary>
     public static bool Press(int index)
     {
@@ -97,14 +97,14 @@ internal static class WeaponBarKeys
         var (slot, item, held) = bound.Value;
         try
         {
-            if (slot != WeaponTypes.WeaponSlot)
+            if (slot != Pc.SelectedSlot)
             {
-                if (!Pc.Inventory.Move(slot, WeaponTypes.WeaponSlot, ModContent.Db))
+                if (!Pc.Select(slot))
                 {
-                    LastAction = $"key {index}: {item.BaseId} does not fit the weapon slot";
+                    LastAction = $"key {index}: {item.BaseId} is not a weapon";
                     return true;
                 }
-                LastAction = $"key {index}: {item.BaseId} into the weapon slot, drawn: {WeaponSlotSync.Draw()}";
+                LastAction = $"key {index}: {item.BaseId} selected, drawn: {WeaponSlotSync.Draw()}";
             }
             else if (held)
             {

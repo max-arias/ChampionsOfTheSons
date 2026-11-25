@@ -52,6 +52,8 @@ internal static class BookSelfTest
         SelfTest.Add(19.9f, "book: pad South selects, West equips and unequips", PadButtons);
         SelfTest.Add(20.2f, "book: pad shoulders page the bag", PadShoulders);
         SelfTest.Add(20.5f, "book: empty-slot labels fit", LabelsFit);
+        SelfTest.Add(20.6f, "book: quickbar strip (COS-212)", Quickbar);
+        SelfTest.Add(20.7f, "book: shot quickbar", () => TestKit.Screenshot("book-quickbar"));
         for (int f = 1; f <= 3; f++)
         {
             int filter = f;
@@ -309,6 +311,65 @@ internal static class BookSelfTest
         BookFeature.Handle(BookInput.MouseAt(Vector2.Lerp(from, to, 0.5f), held: true));
         BookFeature.Handle(BookInput.MouseAt(to, held: true));
         BookFeature.Handle(BookInput.MouseAt(to, up: true));
+        BookPages.Refresh(BookTab.Gear);
+    }
+
+    /// <summary>COS-212: weapons stay in the bag and go on the quickbar strip by drag, swap, right-click and pickup; a weapon's
+    /// stats count only while drawn.</summary>
+    private static void Quickbar()
+    {
+        foreach (int k in Pc.WeaponBar.Bindings.Keys.ToList()) Pc.WeaponBar.Unbind(k);
+        Pc.Select(null);
+        var def = ModContent.Db.Items["item.rusty_polearm"];
+        var weapon = new LootRoller(ModContent.Db).RollItem(def, 10, new Rng(7));
+        Pc.Inventory.AddToBag(weapon);
+        BookHost.ShowModPage(BookTab.Gear);
+        BookPages.Click(BookTab.Gear, "filter.1", false); // weapons first page
+        BookPages.Selected = null;
+        BookPages.Refresh(BookTab.Gear);
+        var cells = BookPages.QuickbarSlots.ToList();
+        var src = BookPages.Slots(BookTab.Bag).FirstOrDefault(s => ReferenceEquals(s.Shown, weapon));
+        SelfTest.Check("book: quickbar: no weapon slot on the doll", GearSlot(WeaponTypes.LegacyWeaponSlot) == null);
+        SelfTest.Check("book: quickbar: a cell per weapon key", cells.Count == Math.Min(6, ActionBar.ActionBarConfig.WeaponHotkeys.Count), $"{cells.Count} cells");
+        if (src == null || cells.Count < 2) { SelfTest.Check("book: quickbar: the weapon shows in the bag", false); return; }
+        string bag = src.Key;
+        int k0 = BookPages.CellIndex(cells[0].Key), k1 = BookPages.CellIndex(cells[1].Key);
+
+        Drag(ScreenOf(src), ScreenOf(cells[0]));
+        SelfTest.Check("book: quickbar: dragging a bag weapon onto a cell binds it", Pc.WeaponBar.SlotOf(k0) == bag, BookFeature.LastAction);
+        var badged = BookPages.Slots(BookTab.Bag).First(s => s.Key == bag);
+        SelfTest.Check("book: quickbar: the bound bag weapon shows its key", badged.Badge.enabled && badged.Badge.text == Bridge.HotkeyBridge.KeyLabel(k0), badged.Badge.text);
+
+        Drag(ScreenOf(cells[0]), ScreenOf(cells[1]));
+        SelfTest.Check("book: quickbar: cell onto cell swaps keys", Pc.WeaponBar.SlotOf(k1) == bag && Pc.WeaponBar.SlotOf(k0) == null, BookFeature.LastAction);
+
+        string r = BookPages.Click(BookTab.Gear, cells[1].Key, right: true);
+        SelfTest.Check("book: quickbar: right-click on a cell unbinds", Pc.WeaponBar.KeyOf(bag) < 0 && Pc.Inventory.Get(bag) != null, r);
+
+        BookPages.Refresh(BookTab.Gear);
+        BookFeature.Handle(BookInput.Pad(ScreenOf(BookPages.Slots(BookTab.Bag).First(s => s.Key == bag)), west: true));
+        SelfTest.Check("book: quickbar: pad West on a bag weapon binds it to the first free key", Pc.WeaponBar.KeyOf(bag) == k0, BookFeature.LastAction);
+
+        var text = ItemDescriber.Describe(weapon, Pc, bag).Body;
+        SelfTest.Check("book: quickbar: the card heads the weapon's stats 'While drawn'", weapon.Stats.Count == 0 || text.Contains(UiText.T("ui.quickbar.while_drawn", "While drawn")), text);
+
+        Pc.Select(bag);
+        Pc.SetDrawn(false);
+        bool holstered = !Pc.Stats.Sources.Contains("equip.drawn");
+        Pc.SetDrawn(true);
+        bool drawn = Pc.Stats.Sources.Contains("equip.drawn");
+        Pc.SetDrawn(false);
+        SelfTest.Check("book: quickbar: a weapon's stats count only while drawn", holstered && drawn, $"holstered {holstered}, drawn {drawn}");
+
+        // Picking a weapon up puts it on the first free key.
+        var second = new LootRoller(ModContent.Db).RollItem(def, 10, new Rng(8));
+        var drop = LootFeature.SpawnAt(second, LocalPlayer.Transform.position + LocalPlayer.Transform.forward * 1.5f);
+        var picked = LootFeature.Pickup(drop.Id);
+        var where = Pc.Inventory.Slots.FirstOrDefault(kv => ReferenceEquals(kv.Value, second)).Key;
+        SelfTest.Check("book: quickbar: a picked-up weapon goes on the first free key", picked == PickupResult.Ok && where != null && Pc.WeaponBar.KeyOf(where) == k1,
+            $"{picked}, in {where}, key {(where == null ? -1 : Pc.WeaponBar.KeyOf(where))}");
+
+        BookPages.Click(BookTab.Gear, "filter.0", false);
         BookPages.Refresh(BookTab.Gear);
     }
 

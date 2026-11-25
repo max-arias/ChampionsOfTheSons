@@ -36,23 +36,73 @@ public class WeaponTypeTests
         ["player_stats.json"] = Stats, ["item_stats.json"] = ItemStats, ["items.json"] = items ?? Items, ["weapon_types.json"] = Types,
     });
 
-    private static Inventory Wielding(ContentDb db, string baseId)
-    {
-        var inv = new Inventory();
-        inv.AddToBag(new ItemInstance { BaseId = baseId, Level = 1 });
-        Assert.True(inv.Equip(Inventory.Bag(0), db));
-        return inv;
-    }
+    private static ItemInstance Weapon(string baseId, float life = 0) =>
+        new() { BaseId = baseId, Level = 1, Stats = life > 0 ? new[] { new RolledStat("stat.max_life", life) } : Array.Empty<RolledStat>() };
 
     [Fact]
-    public void The_weapon_slot_item_names_the_type()
+    public void A_weapon_item_names_its_type()
     {
         var db = Db();
         Assert.Empty(db.Errors);
-        Assert.Equal("long_sword", WeaponTypes.Equipped(Wielding(db, "item.sword"), db)?.Id);
-        Assert.Equal("greatbow", WeaponTypes.Equipped(Wielding(db, "item.bow"), db)?.Id);
-        Assert.Null(WeaponTypes.Equipped(Wielding(db, "item.club"), db));
-        Assert.Null(WeaponTypes.Equipped(new Inventory(), db));
+        Assert.Equal("long_sword", WeaponTypes.TypeOf(Weapon("item.sword"), db)?.Id);
+        Assert.Equal("greatbow", WeaponTypes.TypeOf(Weapon("item.bow"), db)?.Id);
+        Assert.Null(WeaponTypes.TypeOf(Weapon("item.club"), db));
+        Assert.Null(WeaponTypes.TypeOf(null, db));
+    }
+
+    [Fact]
+    public void Weapons_have_no_equipment_slot_but_stay_gear()
+    {
+        var db = Db();
+        var inv = new Inventory();
+        inv.AddToBag(Weapon("item.sword"));
+        Assert.False(inv.Equip("bag.0", db));
+        Assert.False(inv.Move("bag.0", WeaponTypes.LegacyWeaponSlot, db));
+        Assert.True(LootRoller.IsEquippable(db.Items["item.sword"]));
+    }
+
+    [Fact]
+    public void A_weapon_counts_only_while_drawn()
+    {
+        var db = Db();
+        var pc = new PlayerCharacter(db);
+        double bare = pc.Stats.Get("max_health");
+        pc.Inventory.AddToBag(Weapon("item.sword", 50));
+        Assert.False(pc.Select("bag.1"));
+        Assert.True(pc.Select("bag.0"));
+        Assert.Equal(bare, pc.Stats.Get("max_health"));
+        pc.SetDrawn(true);
+        Assert.Equal(bare + 50, pc.Stats.Get("max_health"));
+        pc.SetDrawn(false);
+        Assert.Equal(bare, pc.Stats.Get("max_health"));
+
+        pc.SetDrawn(true);
+        pc.Inventory.AddToBag(Weapon("item.bow"));
+        Assert.True(pc.Inventory.Move("bag.0", "bag.5", db)); // the selection follows its item
+        Assert.Equal("bag.5", pc.SelectedSlot);
+        Assert.Equal(bare + 50, pc.Stats.Get("max_health"));
+        pc.Inventory.Remove("bag.5"); // dropped, sold, destroyed: nothing selected, nothing drawn
+        Assert.Null(pc.SelectedSlot);
+        Assert.False(pc.Drawn);
+        Assert.Equal(bare, pc.Stats.Get("max_health"));
+    }
+
+    [Fact]
+    public void A_weapon_in_the_old_weapon_slot_moves_into_the_bag_and_keeps_its_key()
+    {
+        var db = Db();
+        var save = new Saving.PlayerSave();
+        save.Slots["bag.0"] = Saving.SavedItem.From(Weapon("item.bow"));
+        save.Slots[WeaponTypes.LegacyWeaponSlot] = Saving.SavedItem.From(Weapon("item.sword"));
+        save.WeaponBar[2] = WeaponTypes.LegacyWeaponSlot;
+        save.WeaponBar[0] = "bag.0";
+        var pc = new PlayerCharacter(db);
+        pc.Load(Saving.SaveCodec.ReadPlayer(Saving.SaveCodec.Write(save)));
+        Assert.Null(pc.Inventory.Get(WeaponTypes.LegacyWeaponSlot));
+        Assert.Equal("bag.1", pc.WeaponBar.SlotOf(2));
+        Assert.Equal("item.sword", pc.Inventory.Get("bag.1")!.BaseId);
+        Assert.Equal("bag.0", pc.WeaponBar.SlotOf(0));
+        Assert.Empty(pc.LoadOverflow);
     }
 
     [Fact]
@@ -128,32 +178,40 @@ public class WeaponTypeTests
     }
 
     [Fact]
-    public void A_bound_weapon_keeps_its_key_when_equipping_swaps_slots()
+    public void Quickbar_keys_take_bag_weapons_and_follow_them()
     {
         var db = Db();
         var inv = new Inventory();
         var bar = new WeaponBar();
         inv.Swapped += bar.OnSwapped;
         inv.Emptied += bar.OnEmptied;
-        inv.AddToBag(new ItemInstance { BaseId = "item.sword", Level = 1 });
-        inv.AddToBag(new ItemInstance { BaseId = "item.bow", Level = 1 });
+        inv.AddToBag(Weapon("item.sword"));
+        inv.AddToBag(Weapon("item.bow"));
         inv.AddToBag(new ItemInstance { BaseId = "item.ring_like", Level = 1 });
         Assert.True(bar.Bind(1, "bag.0", inv, db));
-        Assert.True(bar.Bind(2, "bag.1", inv, db));
         Assert.False(bar.Bind(3, "bag.2", inv, db)); // not a weapon
-        Assert.False(bar.Bind(WeaponBar.Keys, "bag.0", inv, db));
+        Assert.False(bar.Bind(6, "bag.1", inv, db)); // key 7: the game's item hotkey, not a weapon key
+        Assert.Equal(0, bar.BindFirstFree("bag.1", inv, db));
+        Assert.Equal(0, bar.BindFirstFree("bag.1", inv, db)); // already bound: keeps its key
 
-        Assert.True(inv.Move("bag.0", WeaponTypes.WeaponSlot, db)); // sword equipped
-        Assert.Equal(WeaponTypes.WeaponSlot, bar.SlotOf(1));
-        Assert.True(inv.Move("bag.1", WeaponTypes.WeaponSlot, db)); // bow over sword: they swap
+        Assert.True(inv.Move("bag.0", "bag.9", db)); // the binding follows its item
+        Assert.Equal("bag.9", bar.SlotOf(1));
+        Assert.True(bar.SwapKeys(0, 1));
+        Assert.Equal("bag.9", bar.SlotOf(0));
         Assert.Equal("bag.1", bar.SlotOf(1));
-        Assert.Equal("item.sword", inv.Get(bar.SlotOf(1)!)!.BaseId);
-        Assert.Equal("item.bow", inv.Get(bar.SlotOf(2)!)!.BaseId);
+        bar.Remap(new Dictionary<string, string> { ["bag.9"] = "bag.0", ["bag.1"] = "bag.3" }); // sorted bag
+        Assert.Equal("bag.0", bar.SlotOf(0));
+        Assert.Equal("bag.3", bar.SlotOf(1));
+        bar.Remap(new Dictionary<string, string> { ["bag.0"] = "bag.9", ["bag.3"] = "bag.1" }); // back to where the items are
 
-        Assert.True(bar.Bind(2, "bag.1", inv, db)); // rebinding moves the weapon to the new key
-        Assert.Null(bar.SlotOf(1));
+        Assert.Equal(-1, bar.Toggle("bag.9", inv, db)); // right-click a bound weapon: off the bar
+        Assert.Null(bar.SlotOf(0));
         inv.Remove("bag.1");
-        Assert.Null(bar.SlotOf(2));
+        Assert.Null(bar.SlotOf(1));
+        bar.WeaponKeys = new[] { 0 };
+        Assert.Equal(0, bar.Toggle("bag.9", inv, db));
+        inv.AddToBag(Weapon("item.bow"));
+        Assert.Equal(-1, bar.BindFirstFree("bag.0", inv, db)); // bar full
     }
 
     [Fact]
@@ -162,7 +220,7 @@ public class WeaponTypeTests
         var db = Db();
         var inv = new Inventory();
         inv.AddToBag(new ItemInstance { BaseId = "item.sword", Level = 1 });
-        var save = new Saving.PlayerSave { WeaponBar = { [0] = "bag.0", [4] = "bag.7", [12] = "bag.0" } };
+        var save = new Saving.PlayerSave { WeaponBar = { [0] = "bag.0", [4] = "bag.7", [8] = "bag.0" } };
         var loaded = Saving.SaveCodec.ReadPlayer(Saving.SaveCodec.Write(save));
         var bar = new WeaponBar();
         bar.Restore(loaded.WeaponBar, inv, db);

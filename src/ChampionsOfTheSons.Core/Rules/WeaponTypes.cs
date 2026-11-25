@@ -19,15 +19,25 @@ public enum HeldKind
 /// </summary>
 public static class WeaponTypes
 {
-    public const string WeaponSlot = "equip.weapon";
+    /// <summary>The item type of weapons.</summary>
+    public const string WeaponType = "weapon";
 
-    /// <summary>The type of the weapon item in the weapon slot, or null (no item, or an item without a type).</summary>
-    public static WeaponTypeDef? Equipped(Inventory inventory, ContentDb content)
+    /// <summary>The old weapon equipment slot (before COS-212). Saves that still hold an item there move it into the bag on load.</summary>
+    public const string LegacyWeaponSlot = "equip.weapon";
+
+    /// <summary>Whether an item is a weapon (goes on the quickbar, COS-212).</summary>
+    public static bool IsWeapon(ItemInstance? item, ContentDb content) =>
+        item != null && content.Items.TryGetValue(item.BaseId, out var def) && def.Type == WeaponType;
+
+    /// <summary>The weapon type of an item, or null (no item, or an item without a type).</summary>
+    public static WeaponTypeDef? TypeOf(ItemInstance? item, ContentDb content)
     {
-        var item = inventory.Get(WeaponSlot);
         if (item == null || !content.Items.TryGetValue(item.BaseId, out var def) || def.WeaponModel == null) return null;
         return content.WeaponTypes.TryGetValue(def.WeaponModel, out var type) ? type : null;
     }
+
+    /// <summary>The type of the player's selected weapon (the last quickbar key pressed), or null.</summary>
+    public static WeaponTypeDef? Selected(PlayerCharacter pc) => TypeOf(pc.SelectedWeapon, pc.Content);
 
     public static bool Fits(WeaponTypeDef type, HeldKind held) => type.Base switch
     {

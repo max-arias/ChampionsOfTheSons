@@ -148,10 +148,10 @@ internal static class PolearmThrow
         if (was == null || !armed || inv.AmountOf(was.Id, true, false) > 0) return;
 
         var pc = PlayerState.Character;
-        var item = pc.Inventory.Get(WeaponTypes.WeaponSlot);
-        if (item == null || WeaponTypes.Equipped(pc.Inventory, ModContent.Db)?.Id != was.TypeId) return;
-        _key = pc.WeaponBar.KeyOf(WeaponTypes.WeaponSlot);
-        _item = pc.Inventory.Take(WeaponTypes.WeaponSlot, int.MaxValue);
+        var slot = pc.SelectedSlot;
+        if (slot == null || pc.SelectedWeapon == null || WeaponTypes.Selected(pc)?.Id != was.TypeId) return;
+        _key = pc.WeaponBar.KeyOf(slot);
+        _item = pc.Inventory.Take(slot, int.MaxValue);
         if (_item == null) return;
         _type = was.Type;
         _phase = Phase.Flying;
@@ -392,25 +392,26 @@ internal static class PolearmThrow
         if (dead || dist > RecallDistance) ReturnToBag(dead ? "its owner died" : "its owner went far away");
     }
 
-    /// <summary>A drop was picked up into the bag: our thrown weapon goes back into the weapon slot and onto its key.</summary>
+    /// <summary>A drop was picked up into the bag: our thrown weapon goes back onto its key and is selected again (COS-212).</summary>
     public static void OnPickedUp(int dropId, ItemInstance item)
     {
         if (_phase != Phase.Landed || dropId != _dropId) return;
+        Clear("picked up into " + Rebind(item));
+    }
+
+    /// <summary>The returned weapon's bag slot gets its old key back (else the first free one) and is selected. Says where it went.</summary>
+    private static string Rebind(ItemInstance item)
+    {
         var pc = PlayerState.Character;
-        string where = "the bag";
-        if (pc.Inventory.Get(WeaponTypes.WeaponSlot) == null)
-        {
-            var bag = pc.Inventory.Slots.FirstOrDefault(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && ReferenceEquals(kv.Value, item)).Key
-                ?? pc.Inventory.Slots.FirstOrDefault(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && kv.Value.BaseId == item.BaseId
-                    && kv.Value.Level == item.Level && kv.Value.Rarity == item.Rarity).Key;
-            if (bag != null && pc.Inventory.Move(bag, WeaponTypes.WeaponSlot, ModContent.Db))
-            {
-                where = "the weapon slot";
-                if (_key >= 0) pc.WeaponBar.Bind(_key, WeaponTypes.WeaponSlot, pc.Inventory, ModContent.Db);
-                else WeaponSlotSync.BindSlotToFirstKey();
-            }
-        }
-        Clear("picked up into " + where);
+        var bag = pc.Inventory.Slots.FirstOrDefault(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && ReferenceEquals(kv.Value, item)).Key
+            ?? pc.Inventory.Slots.FirstOrDefault(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && kv.Value.BaseId == item.BaseId
+                && kv.Value.Level == item.Level && kv.Value.Rarity == item.Rarity).Key;
+        if (bag == null) return "the ground";
+        bool keyed = _key >= 0 && pc.WeaponBar.SlotOf(_key) == null && pc.WeaponBar.Bind(_key, bag, pc.Inventory, ModContent.Db);
+        if (!keyed) WeaponSlotSync.BindPickup(bag);
+        if (pc.SelectedSlot == null) pc.Select(bag);
+        int key = pc.WeaponBar.KeyOf(bag);
+        return key >= 0 ? $"{bag}, key {Bridge.HotkeyBridge.KeyLabel(key)}" : bag;
     }
 
     /// <summary>Brings the weapon back without a pickup: removes the drop and puts the item in the bag (or at the feet).</summary>
@@ -429,6 +430,7 @@ internal static class PolearmThrow
         if (!had) return;
         var def = ModContent.Db.Items.TryGetValue(item!.BaseId, out var d) ? d : null;
         LootFeature.GiveOrDrop(item, def?.StackSize ?? 1);
+        Rebind(item);
         LootFeature.Message(string.Format(UI.UiText.T("ui.followups.picked_up", "Picked up {0}"), UI.UiText.ItemName(item)));
         Last = "returned to the bag: " + why;
         RLog.Msg("Champions of the Sons: polearm throw: " + Last);
@@ -444,16 +446,16 @@ internal static class PolearmThrow
         RLog.Msg("Champions of the Sons: polearm throw: " + why);
     }
 
-    /// <summary>A save made while the weapon is out holds it: in the weapon slot (on its key) when that is still empty, else in
-    /// the first free bag slot. Ground drops are not saved, so a loaded game has it back.</summary>
+    /// <summary>A save made while the weapon is out holds it in the first free bag slot, on its key when that is still free.
+    /// Ground drops are not saved, so a loaded game has it back.</summary>
     public static void AddToSave(PlayerSave save)
     {
         if (Out is not { } item) return;
-        string? slot = !save.Slots.ContainsKey(WeaponTypes.WeaponSlot) ? WeaponTypes.WeaponSlot : null;
+        string? slot = null;
         for (int i = 0; slot == null && i < LootRoller.BagSlots; i++)
             if (!save.Slots.ContainsKey(Inventory.Bag(i))) slot = Inventory.Bag(i);
         if (slot == null) return; // nowhere to put it: the bag was filled to the last slot while it lay there
         save.Slots[slot] = SavedItem.From(item);
-        if (slot == WeaponTypes.WeaponSlot && _key >= 0 && !save.WeaponBar.ContainsKey(_key)) save.WeaponBar[_key] = slot;
+        if (_key >= 0 && !save.WeaponBar.ContainsKey(_key)) save.WeaponBar[_key] = slot;
     }
 }

@@ -83,6 +83,18 @@ public sealed class LootFeature : IModFeature
 
     public void OnGameStart() => ClearAll();
 
+    /// <summary>Items a load could not put in the bag (COS-212: a weapon from the old weapon slot with the bag full). They go to the
+    /// bag or the ground once the player is in the world.</summary>
+    internal static readonly List<ItemInstance> PendingGround = new();
+
+    /// <summary>A weapon that just came into the bag goes on the first free quickbar key (COS-212).</summary>
+    public static void AutoBind(ItemInstance item)
+    {
+        var inv = PlayerState.Character.Inventory;
+        var slot = inv.Slots.FirstOrDefault(kv => kv.Key.StartsWith("bag.", StringComparison.Ordinal) && ReferenceEquals(kv.Value, item)).Key;
+        if (slot != null) Weapons.WeaponSlotSync.BindPickup(slot);
+    }
+
     public void RegisterSelfTests() => LootSelfTest.Register();
 
     public void Update(float dt, bool inWorld)
@@ -91,6 +103,12 @@ public sealed class LootFeature : IModFeature
         // found 2026-11-21 by the co-op test), and a host holding the guide book is not "in world" either.
         Ground.Tick(dt);
         if (!inWorld) return;
+        if (PendingGround.Count > 0)
+        {
+            var items = PendingGround.ToList();
+            PendingGround.Clear();
+            foreach (var item in items) GiveOrDrop(item, 1);
+        }
         LootVisuals.Animate(Ground);
         TryPickups();
     }
@@ -228,6 +246,7 @@ public sealed class LootFeature : IModFeature
         var result = Ground.TryPickup(id, PlayerState.Character.Inventory);
         if (result == PickupResult.Ok && item != null)
         {
+            AutoBind(item);
             Weapons.PolearmThrow.OnPickedUp(id, item);
             if (SelfTest.Enabled) SelfTest.Log($"loot: picked up {item.BaseId}");
             Message(string.Format(UI.UiText.T("ui.followups.picked_up", "Picked up {0}"), UI.UiText.ItemName(item)));

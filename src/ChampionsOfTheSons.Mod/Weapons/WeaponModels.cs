@@ -470,15 +470,15 @@ internal static class WeaponModels
     /// <summary>Raised when the local active type changes (co-op tells the others).</summary>
     public static event Action<WeaponTypeDef?>? Changed;
 
-    /// <summary>COS-191: the base damage of a hit with the held mod weapon (the weapon slot item's level and rarity), or null when
+    /// <summary>COS-191: the base damage of a hit with the held mod weapon (the selected weapon's level and rarity), or null when
     /// no mod weapon is in hand.</summary>
     public static double? ModWeaponDamage =>
-        Active != null && PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot) is { } item
+        Active != null && PlayerState.Character.SelectedWeapon is { } item
             ? WeaponTypes.WeaponDamage(Active, item.Level, item.Rarity) : null;
 
     /// <summary>COS-191: the held mod weapon's own armor pierce per hit (0 without one).</summary>
     public static double ModWeaponPierce =>
-        Active != null && PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot) is { } item
+        Active != null && PlayerState.Character.SelectedWeapon is { } item
             ? WeaponTypes.WeaponPierce(item.Level, item.Rarity) : 0;
 
     /// <summary>Melee damage multiplier for the local player's hits: the mod weapon's damage (COS-191) over the game weapon's
@@ -526,8 +526,8 @@ internal static class WeaponModels
         // The weapon in hand is its own type (COS-186); the game's own weapons carry none.
         var type = found is { } f ? RealWeapons.Get(f.ItemId)?.Type : null;
 
-        var look = type != null ? GlowLook.For(PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot)) : GlowLook.None;
-        string? gameTint = type != null ? WeaponSkin.GameLookFor(type, PlayerState.Character.Inventory.Get(WeaponTypes.WeaponSlot)?.BaseId) : null;
+        var look = type != null ? GlowLook.For(PlayerState.Character.SelectedWeapon) : GlowLook.None;
+        string? gameTint = type != null ? WeaponSkin.GameLookFor(type, PlayerState.Character.SelectedWeapon?.BaseId) : null;
         if (_local != null && (!_local.Alive || type != _local.Type || look.Key != _local.Look.Key || gameTint != _local.GameTint || held == null || held.Pointer != _localHolder
             || (type != null && Mathf.Abs(_local.Reach - WantReach(type)) > 1e-3f)))
         {
