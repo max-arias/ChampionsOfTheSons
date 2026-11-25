@@ -367,6 +367,34 @@ internal static class Spells2SelfTest
             SpellCaster.TeleportPlayer(origin);
         });
 
+        // ---- the world (COS-213)
+        Case("world damage", () =>
+        {
+            var eye = SpellWorld.Eye;
+            var deer = TestKit.Spawn(VailActorTypeId.Deer, 5);
+            if (deer != null)
+            {
+                float before = deer.GetHealth();
+                WorldDamage.Strike(deer, 5, LocalPlayer.Transform.position);
+                SelfTest.Check("spells2: a spell hit damages an animal", deer.GetHealth() < before || deer.IsDead(), $"{before:0.#} -> {deer.GetHealth():0.#}");
+                bool listed = WorldDamage.ActorsWithin(deer.transform.position, 2).Any(a => a.Pointer == deer.Pointer);
+                SelfTest.Log($"spells2: world damage: the deer is {(listed ? "" : "not ")}in the area list (headless keeps spawned actors dormant)");
+                WorldDamage.Strike(deer, 1e6, LocalPlayer.Transform.position);
+                SelfTest.Check("spells2: a lethal spell hit kills an animal", deer.IsDead() || deer.GetHealth() <= 0, $"hp {deer.GetHealth():0.#}");
+            }
+            WorldDamage.Area(LocalPlayer.Transform.position, 25, new OutgoingHit(1e5, DamageKind.Physical, false, 0));
+            var last = WorldDamage.Last;
+            SelfTest.Log($"spells2: world damage within 25 m: {last.Actors} actors, {last.Breakables} breakables, {last.Trees} trees ({last.Felled} felled), {last.Structures} structures");
+            SelfTest.Check("spells2: world damage on the area around the player runs", true);
+
+            // A bolt aimed at the ground ends there instead of flying through it.
+            var down = (eye.forward + Vector3.down * 3).normalized;
+            bool impacted = false;
+            var bolt = SpellWorld.AddBolt(new SpellBolt { Id = "test", Pos = eye.position, Dir = down, Speed = 40, Range = 60, OnImpact = (_, _) => impacted = true });
+            Advance(1f);
+            SelfTest.Check("spells2: a bolt stops at the ground", impacted && bolt.Travelled < 20, $"impact {impacted}, travelled {bolt.Travelled:0.#} m");
+        });
+
         // ---- bursts and melee
         Case("wide reach", () =>
         {
@@ -412,6 +440,13 @@ internal static class Spells2SelfTest
         });
 
         // ---- projectiles
+        // COS-213: bolts stop at the world now, so the shots need a clear line (the save's start faces a rock 4 m away).
+        // The headless camera looks down at the ground a few metres ahead: level it along the player's heading.
+        TestKit.FaceOpenGround(new[] { (10f, 0f), (25f, 0f), (45f, 0f) });
+        var cam = SpellWorld.Eye;
+        var camPitch = cam.rotation;
+        cam.rotation = Quaternion.LookRotation(Flat(LocalPlayer.Transform.forward));
+        SelfTest.Log($"spells2: camera levelled for the bolts, forward {cam.forward}");
         Case("firebolt", () =>
         {
             var foe = Put(Foe(), OnRay(10));
@@ -454,6 +489,8 @@ internal static class Spells2SelfTest
             Advance(0.6f);
             SelfTest.Check("spells2: the blood bolt hits hard", Hp(foe) < before - 50, $"{before:0.#} -> {Hp(foe):0.#}");
         });
+
+        cam.rotation = camPitch;
 
         // ---- toggles
         Case("black flame", () =>

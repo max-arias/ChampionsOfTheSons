@@ -75,15 +75,25 @@ internal sealed class BuffHud
                 cell.Shown = id;
                 IconView.Show(cell.Icon, icon);
             }
-            float blink = left < 3 ? 0.55f + 0.45f * Mathf.Abs(Mathf.Sin(_pulse * 5)) : 1f;
+            // COS-213: a short buff that something keeps renewing (standing in a Healing Dome or Sun Flare) shows no countdown
+            // and does not blink: its timer would jump between the same two values for as long as the player stays.
+            _seen.TryGetValue(id, out var seen);
+            if (left > seen.Left + 0.05 && left <= 2.5 && seen.Left > 0) seen.SteadyUntil = _pulse + 1.5f;
+            seen.Left = left;
+            _seen[id] = seen;
+            bool steady = _pulse < seen.SteadyUntil;
+            float blink = left < 3 && !steady ? 0.55f + 0.45f * Mathf.Abs(Mathf.Sin(_pulse * 5)) : 1f;
             var frame = HudKit.C(positive ? "#E8E2D0" : "#E05A4A");
             frame.a = blink;
             if (cell.Root.Root.GetComponent<UnityEngine.UI.Image>() is { } bg) bg.color = Color.Lerp(HudKit.C("#0A0D12C0"), frame, 0.35f);
             cell.Icon.ImageObject.color = new Color(1, 1, 1, blink);
-            cell.Time.Text(left >= 100 ? $"{left / 60:0}m" : left >= 10 ? $"{left:0}s" : $"{left:0.0}s");
+            cell.Time.Text(steady ? "" : left >= 100 ? $"{left / 60:0}m" : left >= 10 ? $"{left:0}s" : $"{left:0.0}s");
             cell.Amount.Text(amount);
         }
     }
+
+    /// <summary>Per shown buff: its time left at the last frame, and until when (on <see cref="_pulse"/>) it counts as kept renewed.</summary>
+    private readonly Dictionary<string, (double Left, float SteadyUntil)> _seen = new();
 
     /// <summary>Spell and perk buffs (positive), then the buff system's entries, positive first.</summary>
     private static IEnumerable<(string Id, string? Icon, string Amount, double Left, bool Positive)> Entries()

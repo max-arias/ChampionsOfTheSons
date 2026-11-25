@@ -97,7 +97,7 @@ public sealed class CoopFeature : IModFeature
             case WorldSettings ws when !IsHost:
                 if (!Accepted) CoopTest.Check("handshake: host accepted the client", true, $"game difficulty {ws.Mode} +{ws.LevelOffset}");
                 Accepted = true;
-                RLog.Msg($"{Tag} client: host accepted us; WorldSettings mode={ws.Mode} offset={ws.LevelOffset} extraLevels={ws.ExtraEnemyLevels} friendlyFire={ws.FriendlyFire}");
+                RLog.Msg($"{Tag} client: host accepted us; WorldSettings mode={ws.Mode} offset={ws.LevelOffset} extraLevels={ws.ExtraEnemyLevels} pvp={ws.Pvp}");
                 break;
             case HelloReject rej when !IsHost:
                 RejectReason = rej.Reason;

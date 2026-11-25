@@ -46,7 +46,7 @@ internal static class SpellPortals
         _pendingVisual = null;
         var pair = new Pair { A = first, B = at, Left = seconds };
         pair.VisualA = Gate(first);
-        pair.VisualB = Gate(at);
+        pair.VisualB = Gate(at, second: true);
         SpellNet.NoteMotion(pair.VisualA, seconds, Vector3.zero);
         SpellNet.NoteMotion(pair.VisualB, seconds, Vector3.zero);
         Pairs.Add(pair);
@@ -65,10 +65,13 @@ internal static class SpellPortals
     /// <summary>Teammates' portal pairs opened here (co-op test).</summary>
     public static int SharedOpened { get; private set; }
 
-    private static GameObject Gate(Vector3 at)
+    /// <summary>Gate colours (Max, 2026-11-24): the first gate of a pair is blue, the second orange.</summary>
+    public static readonly Color FirstGate = new(0.2f, 0.55f, 1f), SecondGate = new(1f, 0.5f, 0.08f);
+
+    private static GameObject Gate(Vector3 at, bool second = false)
     {
         // Face the caster, so the swirl is seen front-on when the pair opens.
-        var go = SpellFx.Portal(at, SpellWorld.PlayerPos - at, SpellFx.Arcane, 1e6f);
+        var go = SpellFx.Portal(at, SpellWorld.PlayerPos - at, second ? SecondGate : FirstGate, 1e6f);
         return go;
     }
 

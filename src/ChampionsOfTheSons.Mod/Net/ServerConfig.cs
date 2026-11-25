@@ -14,7 +14,6 @@ namespace ChampionsOfTheSons.Mod.Net;
 public sealed class ServerConfig : IModFeature
 {
     private static ConfigEntry<int>? _extraLevels;
-    private static ConfigEntry<bool>? _friendlyFire;
     private static ConfigEntry<string>? _lootLevel;
 
     /// <summary>True when this process is a dedicated server.</summary>
@@ -37,7 +36,7 @@ public sealed class ServerConfig : IModFeature
         var category = ConfigSystem.CreateFileCategory("ChampionsOfTheSonsServer", "Champions of the Sons (dedicated server)", "ChampionsOfTheSonsServer.cfg");
         _extraLevels = category.CreateEntry("extra_enemy_levels", 0, "Extra enemy levels",
             "Levels added to every enemy on top of the players' level and the game's difficulty (0-100).");
-        _friendlyFire = category.CreateEntry("friendly_fire", false, "Friendly fire", "Players can hurt each other.");
+        // No friendly-fire entry since COS-213: the server's own PvP damage setting decides (PvpRule reads it).
         _lootLevel = category.CreateEntry("loot_level_policy", LootLevelPolicy.Highest.ToString(), "Loot level",
             "Level of dropped items: " + string.Join(", ", Enum.GetNames<LootLevelPolicy>()));
         // COS-77: the host panel's multipliers and minimum loot rarity, for servers that have no host panel.
@@ -65,8 +64,7 @@ public sealed class ServerConfig : IModFeature
     {
         int extra = Math.Clamp(_extraLevels?.Value ?? 0, 0, 100);
         WorldState.Update(r => r with { ExtraEnemyLevels = extra });
-        WorldState.SetFriendlyFire(_friendlyFire?.Value ?? false);
-        HostRules.FriendlyFireRule.Apply(WorldState.FriendlyFire);
+        HostRules.PvpRule.Read();
         if (Enum.TryParse<LootLevelPolicy>(_lootLevel?.Value, true, out var policy))
             WorldState.Update(r => r with { LootLevel = policy });
         int minRarity = Math.Clamp(_minRarity?.Value ?? 0, 0, (int)Rarity.Legendary);
@@ -82,6 +80,6 @@ public sealed class ServerConfig : IModFeature
             EnemyArmor = M("enemy_armor", 0),
             EnemySpeed = M("enemy_speed", 0.25),
         });
-        RLog.Msg($"{CoopTestJoin.Tag} server config applied: extra enemy levels {extra}, game difficulty {WorldState.Rules.GameDifficulty.Mode}, friendly fire {WorldState.FriendlyFire}, loot level {WorldState.Rules.LootLevel}");
+        RLog.Msg($"{CoopTestJoin.Tag} server config applied: extra enemy levels {extra}, game difficulty {WorldState.Rules.GameDifficulty.Mode}, PvP {WorldState.Pvp}, loot level {WorldState.Rules.LootLevel}");
     }
 }

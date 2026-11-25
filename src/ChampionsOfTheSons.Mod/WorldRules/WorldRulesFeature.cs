@@ -53,6 +53,7 @@ public sealed class WorldRulesFeature : IModFeature
     {
         _syncTimer = 0;
         ReadGameDifficulty();
+        if (EnemyRegistry.IsAuthority) PvpRule.Read();
     }
 
     public void Update(float dt, bool inWorld)
@@ -69,7 +70,7 @@ public sealed class WorldRulesFeature : IModFeature
         if (_syncTimer > 0) return;
         _syncTimer = 10;
         ReadGameDifficulty();
-        FriendlyFireRule.Apply(WorldState.FriendlyFire); // a loaded world may bring its own PvP setting back (COS-78)
+        PvpRule.Read(); // the game's own PvP setting, which the host may change in its game settings (COS-213)
         Broadcast();
     }
 
@@ -83,11 +84,11 @@ public sealed class WorldRulesFeature : IModFeature
         RLog.Msg($"Champions of the Sons: game difficulty {game.Mode} (+{game.LevelOffset} enemy levels, {game.EliteChance:P0} elites)");
     }
 
-    /// <summary>What the host sends: the game's difficulty, its extra levels and friendly fire.</summary>
+    /// <summary>What the host sends: the game's difficulty, its extra levels and the game's PvP setting.</summary>
     public static WorldSettings CurrentSettings()
     {
         var r = WorldState.Rules;
-        return new WorldSettings(r.GameDifficulty.Mode, r.GameDifficulty.LevelOffset, r.ExtraEnemyLevels, WorldState.FriendlyFire);
+        return new WorldSettings(r.GameDifficulty.Mode, r.GameDifficulty.LevelOffset, r.ExtraEnemyLevels, WorldState.Pvp);
     }
 
     private static void OpenSettings()
@@ -114,8 +115,7 @@ public sealed class WorldRulesFeature : IModFeature
     public static void Apply(WorldSettings ws)
     {
         WorldState.SetGameDifficulty(new GameDifficulty(ws.Mode, ws.LevelOffset));
-        if (WorldState.FriendlyFire != ws.FriendlyFire) WorldState.SetFriendlyFire(ws.FriendlyFire);
-        FriendlyFireRule.Apply(ws.FriendlyFire); // the client follows the host's friendly fire (COS-78)
+        WorldState.SetPvp(ws.Pvp); // the host's game decides PvP; the client never writes its own game setting (COS-213)
         if (WorldState.Rules.ExtraEnemyLevels != ws.ExtraEnemyLevels)
         {
             WorldState.Update(r => r with { ExtraEnemyLevels = ws.ExtraEnemyLevels });

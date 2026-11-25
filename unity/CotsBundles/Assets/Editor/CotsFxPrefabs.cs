@@ -58,6 +58,9 @@ public static class CotsFxPrefabs
             float a = Mathf.Pow(s, 2) * (1 - CotsGen.Smooth(0.75f, 1f, r)) * CotsGen.Smooth(0.05f, 0.4f, r) * 1.8f;
             return White(Mathf.Clamp01(a));
         });
+        // The black hole's swirl is Kenney's hand-drawn twirl (CC0, COS-211) when the texture is there; ours otherwise.
+        var twirl = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/ThirdParty/Kenney/twirl_01.png");
+        if (twirl != null) _swirl = twirl;
         _chain = CotsGen.Tex("FxChain", 64, (u, v) =>
         {
             // One oval link per tile, seen from the side.
@@ -96,6 +99,7 @@ public static class CotsFxPrefabs
         Burst();
         Orb();
         BallLightning();
+        Bolt();
         Bubble();
         Dome();
         Column();
@@ -499,10 +503,10 @@ public static class CotsFxPrefabs
     private static void BallLightning()
     {
         var go = new GameObject("Fx_BallLightning");
-        var core = Particles(Sub(go, "core"), CotsGen.Fx("FxBallCore", SoftDot(), Color.white, 6f));
-        Steady(core, 30, 0.2f, 1.7f);
-        var halo = Particles(Sub(go, "halo"), CotsGen.Fx("FxBallHalo", SoftDot(), Color.white, 0.8f));
-        Steady(halo, 10, 0.35f, 5f);
+        var core = Particles(Sub(go, "core"), CotsGen.Fx("FxBallCore", SoftDot(), Color.white, 2.2f));
+        Steady(core, 30, 0.2f, 1.0f);
+        var halo = Particles(Sub(go, "halo"), CotsGen.Fx("FxBallHalo", SoftDot(), Color.white, 0.3f));
+        Steady(halo, 10, 0.35f, 2.6f);
 
         var boltMat = CotsGen.Fx("FxBallBolt", _bolt, Color.white, 5f);
         var arcs = Particles(Sub(go, "arcs"), boltMat);
@@ -515,25 +519,6 @@ public static class CotsFxPrefabs
         { var em = arcs.emission; em.rateOverTime = 26; }
         arcs.GetComponent<ParticleSystemRenderer>().flip = new Vector3(0.5f, 0, 0);
         FadeOut(arcs);
-
-        var strikes = Particles(Sub(go, "strikes"), boltMat, ParticleSystemRenderMode.VerticalBillboard);
-        strikes.transform.localPosition = new Vector3(0, -1.2f, 0);
-        var sm = strikes.main;
-        sm.startLifetime = new ParticleSystem.MinMaxCurve(0.07f, 0.16f);
-        sm.startSpeed = 0;
-        sm.startSize3D = true;
-        sm.startSizeX = new ParticleSystem.MinMaxCurve(1.2f, 2.2f);
-        sm.startSizeY = 2.4f;
-        sm.startSizeZ = 1;
-        sm.maxParticles = 6;
-        { var em = strikes.emission; em.rateOverTime = 7; }
-        var ssh = strikes.shape;
-        ssh.enabled = true;
-        ssh.shapeType = ParticleSystemShapeType.Circle;
-        ssh.radius = 0.35f;
-        ssh.rotation = new Vector3(90, 0, 0);
-        strikes.GetComponent<ParticleSystemRenderer>().flip = new Vector3(0.5f, 0, 0);
-        FadeOut(strikes);
 
         var sparks = Particles(Sub(go, "sparks"), CotsGen.Fx("FxBallSparks", SoftDot(), Color.white, 3f), ParticleSystemRenderMode.Stretch);
         var pm = sparks.main;
@@ -949,6 +934,35 @@ public static class CotsFxPrefabs
         m.SetNormals(v);
         m.SetTriangles(t, 0);
         return CotsGen.SaveMesh(m);
+    }
+
+    /// <summary>
+    /// Fx_Bolt, one lightning bolt from the origin (where it lands) up to y 1 (where it starts), 1 wide: a quad in the XY
+    /// plane. The mod stretches it from Ball Lightning to its target for a blink and turns its face to the camera (COS-211).
+    /// </summary>
+    private static void Bolt()
+    {
+        var go = new GameObject("Fx_Bolt");
+        var v = new List<Vector3>();
+        var uv = new List<Vector2>();
+        var n = new List<Vector3>();
+        var t = new List<int>();
+        foreach (var side in new[] { Vector3.right })
+        {
+            int b = v.Count;
+            v.AddRange(new[] { -side * 0.5f, side * 0.5f, -side * 0.5f + Vector3.up, side * 0.5f + Vector3.up });
+            uv.AddRange(new[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(0, 1), new Vector2(1, 1) });
+            var normal = Vector3.Cross(side, Vector3.up);
+            n.AddRange(new[] { normal, normal, normal, normal });
+            t.AddRange(new[] { b, b + 2, b + 1, b + 1, b + 2, b + 3 });
+        }
+        var m = new Mesh { name = "FxBoltMesh" };
+        m.SetVertices(v);
+        m.SetUVs(0, uv);
+        m.SetNormals(n);
+        m.SetTriangles(t, 0);
+        CotsGen.Child(go, "bolt", CotsGen.SaveMesh(m), CotsGen.Fx("FxBoltStrike", _bolt, Color.white, 3.5f));
+        CotsGen.SavePrefab(go);
     }
 
     /// <summary>An open cylinder, radius 1, from y 0 to 1; U around, V up (the scroll runs along V).</summary>

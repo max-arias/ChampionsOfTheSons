@@ -25,7 +25,7 @@ internal static class PlayerStateFx
 
     private static readonly List<State> States = new()
     {
-        new State { Id = "black_flame", IsOn = () => ToggleOn("spell.black_flame"), Make = () => AtHand(FxKit.Flame, 0.12f, Violet) },
+        // Black Flame has no hand flame (Max, 2026-11-24): its field of flames and the flame around the caster show it.
         new State { Id = "multishot", IsOn = () => ToggleOn("spell.multishot"), Make = () => HandGlyph() },
         // COS-181: self buffs glow on the body (plus a body tint, StateTints), no ring at the feet.
         new State { Id = "berserk", IsOn = () => SpellWorld.Buffs.Has("berserk"), Make = () => OnBody(SpellFx.Blood) },

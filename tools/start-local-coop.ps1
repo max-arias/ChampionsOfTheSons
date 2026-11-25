@@ -26,7 +26,7 @@ if (-not $NoBuild) {
 Copy-Item "$GameDir\Mods\ChampionsOfTheSons.dll" "$ServerDir\Mods" -Force
 New-Item -ItemType Directory -Force "$ServerDir\Mods\ChampionsOfTheSons", "$ServerDir\UserData" | Out-Null
 Copy-Item "$GameDir\Mods\ChampionsOfTheSons\manifest.json" "$ServerDir\Mods\ChampionsOfTheSons" -Force
-Set-Content "$ServerDir\UserData\ChampionsOfTheSonsServer.cfg" ("[ChampionsOfTheSonsServer]", "extra_enemy_levels = $ExtraEnemyLevels", "friendly_fire = false")
+Set-Content "$ServerDir\UserData\ChampionsOfTheSonsServer.cfg" ("[ChampionsOfTheSonsServer]", "extra_enemy_levels = $ExtraEnemyLevels")
 
 Get-Process SonsOfTheForest, SonsOfTheForestDS -ErrorAction SilentlyContinue | Stop-Process -Force
 Remove-Item $unityServerLog -ErrorAction SilentlyContinue

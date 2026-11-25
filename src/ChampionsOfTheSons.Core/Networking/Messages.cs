@@ -38,6 +38,8 @@ public enum MessageType : byte
     PlayerInfo = 54,
     Announce = 55,
     PlayerStateNet = 56,
+    WorldHit = 57,
+    PlayerSpellHit = 58,
 }
 
 public interface IMessage
@@ -59,7 +61,7 @@ public sealed record HelloReject(string Reason) : IMessage
 }
 
 /// <summary>Host → clients: world settings that the host owns (COS-130: the game's difficulty as the host reads it, and its extra levels).</summary>
-public sealed record WorldSettings(GameMode Mode, int LevelOffset, int ExtraEnemyLevels, bool FriendlyFire) : IMessage
+public sealed record WorldSettings(GameMode Mode, int LevelOffset, int ExtraEnemyLevels, PvpMode Pvp) : IMessage
 {
     public MessageType Type => MessageType.WorldSettings;
 }
@@ -173,6 +175,30 @@ public sealed record EnemyEffectNet(ulong EnemyNetId, EnemyEffectKind Kind, stri
 public sealed record EnemyPush(ulong EnemyNetId, Vec3 Delta) : IMessage
 {
     public MessageType Type => MessageType.EnemyPush;
+}
+
+public enum WorldHitKind : byte
+{
+    /// <summary>Spell damage in a sphere: animals, breakables, trees (falling away from the centre), structures.</summary>
+    Area = 0,
+    /// <summary>The same, with trees falling toward <see cref="WorldHit.Target"/> (Black Hole).</summary>
+    AreaToward = 1,
+    /// <summary>Black Hole's pull for <see cref="WorldHit.Seconds"/>: animals and loose bodies drift to the centre at Amount m/s.</summary>
+    Pull = 2,
+}
+
+/// <summary>Client → host: a client's spell on the world (COS-213). The world (animals, plants, trees, buildings) is the host's, so the
+/// host applies the client's hit there exactly as it applies its own.</summary>
+public sealed record WorldHit(WorldHitKind Kind, Vec3 Center, float Radius, float Amount, Vec3 Target, float Seconds) : IMessage
+{
+    public MessageType Type => MessageType.WorldHit;
+}
+
+/// <summary>Host → one client: another player's spell hit this player (COS-213; only while the game's PvP damage is on, the
+/// PvP factor already in <paramref name="Amount"/>). The client applies it through its own defenses.</summary>
+public sealed record PlayerSpellHit(uint CasterId, float Amount) : IMessage
+{
+    public MessageType Type => MessageType.PlayerSpellHit;
 }
 
 /// <summary>Client → host: an outgoing hit computed from the attacker's own stat sheet. The host applies defense.</summary>

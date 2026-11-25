@@ -8,6 +8,7 @@
 //   _Scroll    UV scroll speed (xy) for the main texture: fire columns, portals, beams
 //   _Pulse     brightness pulse per second (0 = steady)
 //   _FadeEnds  1 = fade out towards both ends of the mesh's V (unscrolled), so columns have no hard rims
+//   _Desaturate 1 = use the texture's brightness only, so a coloured third-party texture takes the mod's tint (COS-211)
 Shader "Cots/Fx"
 {
     Properties
@@ -20,6 +21,7 @@ Shader "Cots/Fx"
         _Scroll ("UV scroll (xy)", Vector) = (0, 0, 0, 0)
         _Pulse ("Pulse per second", Float) = 0
         _FadeEnds ("Fade the mesh's V ends (columns, beams)", Float) = 0
+        _Desaturate ("Desaturate the texture (0..1)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src blend", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst blend", Float) = 1
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 0
@@ -58,6 +60,7 @@ Shader "Cots/Fx"
                 float4 _Scroll;
                 float _Pulse;
                 float _FadeEnds;
+                float _Desaturate;
                 float _SrcBlend;
                 float _DstBlend;
                 float _Cull;
@@ -98,6 +101,7 @@ Shader "Cots/Fx"
             float4 Frag(Varyings i) : SV_Target
             {
                 float4 tex = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
+                tex.rgb = lerp(tex.rgb, max(tex.r, max(tex.g, tex.b)).xxx, _Desaturate);
                 float4 c = tex * i.color * _TintColor;
                 if (_Fresnel > 0)
                 {

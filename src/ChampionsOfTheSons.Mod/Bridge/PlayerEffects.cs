@@ -54,10 +54,25 @@ public static class PlayerEffects
 
     public static void Heal(double amount)
     {
-        var health = LocalPlayer.Vitals?.Health;
+        var vitals = LocalPlayer.Vitals;
+        var health = vitals?.Health;
         if (health == null || amount <= 0 || health._currentValue <= 0) return;
-        health.SetCurrentValue(Mathf.Min(health.GetMax(), health._currentValue + (float)amount));
+        float max = health.GetMax(), now = Mathf.Min(max, health._currentValue + (float)amount);
+        health.SetCurrentValue(now);
+        // COS-213: the game keeps a target health and moves health back to it every frame, so a heal that only writes the
+        // current value is undone at once in live play. Raise the target with it.
+        try
+        {
+            if (max > 0 && vitals!.GetTargetHealthFactor() * max < now) vitals.SetTargetHealth(now);
+        }
+        catch (Exception e)
+        {
+            if (!_targetWarned) RedLoader.RLog.Warning($"[COTS] heal: target health not set: {e.Message}");
+            _targetWarned = true;
+        }
     }
+
+    private static bool _targetWarned;
 
     public static void AddEnergy(double amount)
     {

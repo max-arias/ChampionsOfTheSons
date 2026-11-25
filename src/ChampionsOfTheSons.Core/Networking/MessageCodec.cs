@@ -19,7 +19,7 @@ public static class MessageCodec
     /// new <see cref="DropRequest"/>: a client's thrown items reach everyone (COS-14); <see cref="AuraPulse"/> carries two amounts (COS-23);
     /// <see cref="FxShape"/> carries a homing target and <see cref="PlayerInfo"/> the explosion stat (COS-114);
     /// new <see cref="EnemyAware"/> (COS-116).</remarks>
-    public const int ProtocolVersion = 9; // 9: Wave 8 (ping Clear, enemy state, player state, flat XP)
+    public const int ProtocolVersion = 10; // 9: Wave 8 (ping Clear, enemy state, player state, flat XP). 10: WorldHit, PlayerSpellHit, WorldSettings carries the game's PvP mode (COS-213)
 
     public static byte[] Encode(IMessage message)
     {
@@ -29,7 +29,7 @@ public static class MessageCodec
         {
             case Hello m: w.VarInt(m.ProtocolVersion).String(m.ModVersion); break;
             case HelloReject m: w.String(m.Reason); break;
-            case WorldSettings m: w.Byte((byte)m.Mode).VarInt(m.LevelOffset).VarInt(m.ExtraEnemyLevels).Bool(m.FriendlyFire); break;
+            case WorldSettings m: w.Byte((byte)m.Mode).VarInt(m.LevelOffset).VarInt(m.ExtraEnemyLevels).Byte((byte)m.Pvp); break;
             case EnemySync m:
                 w.UInt64(m.EnemyNetId).String(m.KindId).VarInt(m.Level).Byte(m.Tier)
                     .Float(m.MaxHealth).Float(m.Health).Float(m.Armor);
@@ -43,6 +43,8 @@ public static class MessageCodec
             case XpGranted m: WriteLong(w, m.Amount); break;
             case EnemyEffectNet m: w.UInt64(m.EnemyNetId).Byte((byte)m.Kind).String(m.Source).Float(m.Amount).Float(m.Seconds).Byte((byte)m.Dot); break;
             case EnemyPush m: w.UInt64(m.EnemyNetId); WriteVec(w, m.Delta); break;
+            case PlayerSpellHit m: w.VarUInt(m.CasterId).Float(m.Amount); break;
+            case WorldHit m: w.Byte((byte)m.Kind); WriteVec(w, m.Center); w.Float(m.Radius).Float(m.Amount); WriteVec(w, m.Target); w.Float(m.Seconds); break;
             case EnemyAware m: w.UInt64(m.EnemyNetId).Bool(m.Aware); break;
             case EnemyState m: w.UInt64(m.EnemyNetId).Byte((byte)m.Flags); break;
             case FlatXpGranted m: WriteLong(w, m.Amount); WriteVec(w, m.Source); break;
@@ -90,13 +92,15 @@ public static class MessageCodec
         {
             MessageType.Hello => new Hello(r.VarInt(), r.String() ?? ""),
             MessageType.HelloReject => new HelloReject(r.String() ?? ""),
-            MessageType.WorldSettings => new WorldSettings((GameMode)r.Byte(), r.VarInt(), r.VarInt(), r.Bool()),
+            MessageType.WorldSettings => new WorldSettings((GameMode)r.Byte(), r.VarInt(), r.VarInt(), (PvpMode)r.Byte()),
             MessageType.EnemySync => ReadEnemySync(r),
             MessageType.EnemyHealth => new EnemyHealth(r.UInt64(), r.Float(), r.Float()),
             MessageType.Hit => new Hit(r.UInt64(), r.Float(), (HitFlags)r.Byte(), r.Float()),
             MessageType.XpGranted => new XpGranted(ReadLong(r)),
             MessageType.EnemyEffectNet => new EnemyEffectNet(r.UInt64(), (EnemyEffectKind)r.Byte(), r.String() ?? "", r.Float(), r.Float(), (DotKind)r.Byte()),
             MessageType.EnemyPush => new EnemyPush(r.UInt64(), ReadVec(r)),
+            MessageType.PlayerSpellHit => new PlayerSpellHit(r.VarUInt(), r.Float()),
+            MessageType.WorldHit =>new WorldHit((WorldHitKind)r.Byte(), ReadVec(r), r.Float(), r.Float(), ReadVec(r), r.Float()),
             MessageType.EnemyAware => new EnemyAware(r.UInt64(), r.Bool()),
             MessageType.EnemyState => new EnemyState(r.UInt64(), (EnemyStateFlags)r.Byte()),
             MessageType.FlatXpGranted => new FlatXpGranted(ReadLong(r), ReadVec(r)),

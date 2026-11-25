@@ -156,6 +156,7 @@ internal static class SpellEffects
             Strike(e, Hit(S("spell_parry_damage"), S("spell_parry_damage_scaling")));
             if (Stats.IsOn("spell_parry_ignites")) { var (ps, sec) = FireRules.Burn(Stats, S("spell_parry_damage") * 0.25, 4); e.Combat.ApplyDot("player.parry", DotKind.Fire, ps, sec); }
         }
+        WorldDamage.Area(PlayerPos, radius, Hit(S("spell_parry_damage"), S("spell_parry_damage_scaling")));
         // A parry gives stun immunity, and (with the counter-strike perks) stores a bonus for the next melee hit.
         PlayerDebuffs.Buffs.Apply(PlayerDebuffs.StunImmune, "spell.parry", SpellTuning.ParryStunImmunitySeconds);
         if (S("spell_parry_dmg_bonus") > 0) SpellHits.ParryBonus.Store(SpellTuning.ParryStoredMult(Stats), SpellTuning.ParryStoredSeconds);
@@ -219,7 +220,7 @@ internal static class SpellEffects
     {
         var at = AimGround(30);
         float radius = S("spell_flare_radius");
-        foreach (var e in EnemiesWithin(at, radius)) Strike(e, Hit(S("spell_flare_damage"), S("spell_flare_damage_scaling")));
+        StrikeAll(at, radius, () => Hit(S("spell_flare_damage"), S("spell_flare_damage_scaling")));
         AddZone(new SpellZone
         {
             Id = "sun_flare", Center = at, Radius = radius, Left = S("spell_flare_duration"), Interval = (float)SpellTuning.SunFlareTick,
@@ -252,7 +253,10 @@ internal static class SpellEffects
             {
                 // The catch radius grows from 0 to the full radius; whatever it caught stays caught until the hole ends.
                 age += dt;
-                foreach (var e in EnemiesWithin(z.Center, (float)SpellTuning.BlackHoleCatchRadius(z.Radius, age))) caught.Add(e);
+                float reach = (float)SpellTuning.BlackHoleCatchRadius(z.Radius, age);
+                foreach (var e in EnemiesWithin(z.Center, reach)) caught.Add(e);
+                // COS-213: animals and loose things (break debris, felled trunks) inside the reach float in too.
+                WorldDamage.Pull(z.Center, reach, pull, dt);
                 caught.RemoveWhere(e => !e.IsActive);
                 foreach (var e in caught)
                 {
@@ -266,6 +270,8 @@ internal static class SpellEffects
             {
                 foreach (var e in caught.ToList())
                     if (e.IsActive) Strike(e, Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")));
+                // COS-213: whatever the growing reach covers breaks; trees fall toward the hole.
+                WorldDamage.Area(z.Center, (float)SpellTuning.BlackHoleCatchRadius(z.Radius, age), Hit(S("spell_blackhole_damage"), S("spell_blackhole_damage_scaling")), pullTo: z.Center);
             },
             // Last Engineer's Note: a black hole that caught enough enemies releases a Ball Lightning where it was.
             End = z =>
@@ -299,6 +305,8 @@ internal static class SpellEffects
                     Strike(e, arcane ? hit with { Amount = hit.Amount * PerkRules.ArcaneCataclysmDamage } : hit);
                     if (arcane && e.IsActive) e.Combat.ApplySlow("spell.cataclysm.arcane", PerkRules.ArcaneCataclysmSlow, 1);
                 }
+                var world = Hit(S("spell_cataclysm_damage"), S("spell_cataclysm_damage_scaling"));
+                WorldDamage.Area(z.Center, z.Radius, arcane ? world with { Amount = world.Amount * PerkRules.ArcaneCataclysmDamage } : world);
             },
         });
         return true;
@@ -323,6 +331,8 @@ internal static class SpellEffects
                     e.Combat.ApplySlow("spell.snow_storm", SpellTuning.SnowStormSlow, 1.5);
                     if (Stats.IsOn("spell_snowstorm_pull_enemies_in")) Push(e, (z.Center - Center(e)).normalized * 0.4f);
                 }
+                var world = Hit(SpellTuning.SnowStormDamage, S("spell_snowstorm_dmg_scaling"));
+                WorldDamage.Area(z.Center, z.Radius, world with { Amount = world.Amount * S("spell_snowstorm_damage_mult") });
             },
         });
         return true;
@@ -354,7 +364,8 @@ internal static class SpellEffects
             },
             Pulse = z =>
             {
-                foreach (var e in EnemiesWithin(z.Center, z.Radius)) Strike(e, SpellTuning.BallLightningZap(Stats, Rng.FromTime()));
+                var rng = Rng.FromTime();
+                StrikeAll(z.Center, z.Radius, () => SpellTuning.BallLightningZap(Stats, rng));
             },
         });
         // Teammates fly their copy along the same line for the same time, so it ends at the same place (COS-80).
@@ -393,7 +404,9 @@ internal static class SpellEffects
         }
         // Lucky Bashes (perk): a Bash that hit raises crit damage for a moment.
         if (struck > 0 && SpellTuning.LuckyBash(Stats) is StatModifier[] lucky) Buffs.Apply("lucky_bashes", SpellTuning.LuckyBashSeconds, lucky);
-        SpellFx.Sphere(PlayerPos + flat * 2.2f + Vector3.up, 1.2f, SpellFx.Steel, 0.2f);
+        // COS-213: the world in front of the player (a sphere filling most of the cone).
+        WorldDamage.Area(PlayerPos + flat * ((float)SpellTuning.BashRange * 0.55f) + Vector3.up, (float)SpellTuning.BashRange * 0.55f, Hit(SpellTuning.BashDamage, SpellTuning.BashScaling));
+        SpellFx.Sphere(PlayerPos + flat * 2.2f + Vector3.up, 1.2f, SpellFx.Steel, 0.2f, look: SpellFx.Look.HitStone);
         SpellFx.Disc(Feet(), (float)SpellTuning.BashRange, SpellFx.Steel, 0.4f, LocalPlayer.Transform, SpellFx.Look.Ring);
         return true;
     }
@@ -418,7 +431,8 @@ internal static class SpellEffects
             Strike(e, Hit(SpellTuning.SnapFreezeDamage, S("spell_snap_damage_scaling")));
             if (e.IsActive) e.Combat.ApplySlow("spell.snap_freeze", S("spell_snap_float_amount"), S("spell_snap_freeze_duration"));
         }
-        SpellFx.Disc(Feet(), dist, SpellFx.Ice, 1.2f);
+        WorldDamage.Area(PlayerPos, dist, Hit(SpellTuning.SnapFreezeDamage, S("spell_snap_damage_scaling")));
+        SpellFx.Disc(Feet(), dist, SpellFx.Ice, 1.2f, look: SpellFx.Look.HitIce);
         return true;
     }
 
@@ -434,6 +448,7 @@ internal static class SpellEffects
             away.y = 0;
             Knock(e, away.normalized * S("spell_fart_knockback") * (float)SpellTuning.RoarKnockbackScale);
         }
+        WorldDamage.Area(PlayerPos, radius, Hit(S("spell_fart_base_dmg"), S("spell_fart_damage_scaling")));
         SpellFx.Disc(Feet(), radius, SpellFx.Poison, 1f, look: SpellFx.Look.Gas);
         return true;
     }
@@ -449,19 +464,42 @@ internal static class SpellEffects
     private static bool Firebolt()
     {
         var eye = Eye;
+        OutgoingHit FireHit() => Hit(SpellTuning.FireboltDamage, S("spell_firebolt_damage_scaling"));
+        float blast = (float)SpellTuning.FireboltExplosionRadius;
         AddBolt(new SpellBolt
         {
             Id = "firebolt", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.ProjectileSpeed, Range = 60, Radius = 1f,
             Visual = SpellFx.Sphere(eye.position + eye.forward, 0.3f, SpellFx.Fire, 1e6f),
             OnHit = (b, e) =>
             {
-                var hit = Hit(SpellTuning.FireboltDamage, S("spell_firebolt_damage_scaling"));
+                var hit = FireHit();
                 Strike(e, hit);
-                if (e.IsActive) { var (ps, sec) = FireRules.Burn(Stats, hit.Amount * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds); e.Combat.ApplyDot("player.firebolt", DotKind.Fire, ps, sec); }
-                SpellFx.Sphere(b.Pos, 0.9f, SpellFx.Fire, 0.3f);
+                Ignite(e, hit.Amount);
+            },
+            // COS-213 (Max, 2026-11-24): it explodes where it ends, on an enemy, an animal or the world. Everything else in the blast
+            // takes half the bolt's hit and burns; the world damage there is the bolt's own (SpellWorld.End).
+            WorldHit = FireHit, ImpactRadius = blast,
+            OnImpact = (b, at) =>
+            {
+                foreach (var e in EnemiesWithin(at, blast))
+                {
+                    if (b.Hit.Contains(e)) continue;
+                    var hit = FireHit();
+                    hit = hit with { Amount = hit.Amount * SpellTuning.FireboltExplosionShare };
+                    Strike(e, hit);
+                    Ignite(e, hit.Amount);
+                }
+                SpellFx.Sphere(at, blast, SpellFx.Fire, 0.9f, look: SpellFx.Look.HitFire);
             },
         });
         return true;
+    }
+
+    private static void Ignite(EnemyRuntime e, double amount)
+    {
+        if (!e.IsActive) return;
+        var (ps, sec) = FireRules.Burn(Stats, amount * SpellTuning.FireboltBurnFraction, SpellTuning.FireboltBurnSeconds);
+        e.Combat.ApplyDot("player.firebolt", DotKind.Fire, ps, sec);
     }
 
     private static bool MagicArrow()
@@ -483,13 +521,15 @@ internal static class SpellEffects
             {
                 Id = "magic_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.MagicArrowSpeed, Range = (float)SpellTuning.MagicArrowRange, Radius = 1f, Pierces = true,
                 Visual = SpellFx.Sphere(from + dir, 0.25f, SpellFx.Arcane, 1e6f),
+                WorldHit = () => Hit(SpellTuning.MagicArrowDamage, S("spell_magic_arrow_damage_scaling")), ImpactRadius = 1f,
+                OnImpact = (b, at) => SpellFx.Sphere(at, 0.8f, SpellFx.Arcane, 0.3f, look: SpellFx.Look.HitArcane),
                 OnHit = (b, e) =>
                 {
                     Strike(e, Hit(SpellTuning.MagicArrowDamage, S("spell_magic_arrow_damage_scaling"), Stats.IsOn("spell_magic_arrow_crit")));
                     if (!e.IsActive) return;
                     if (Stats.IsOn("spell_magic_arrow_dmg_debuff")) e.Combat.ApplyWeaken("spell.magic_arrow", 1.25, S("spell_magic_arrow_duration"));
                     if (Stats.IsOn("spell_magic_arrow_double_slow")) e.Combat.ApplySlow("spell.magic_arrow", 0.5, S("spell_magic_arrow_duration"));
-                    SpellFx.Sphere(b.Pos, 0.8f, SpellFx.Arcane, 0.3f);
+                    SpellFx.Sphere(b.Pos, 0.8f, SpellFx.Arcane, 0.3f, look: SpellFx.Look.HitArcane);
                 },
             });
         }
@@ -535,6 +575,7 @@ internal static class SpellEffects
             Id = "seeking_arrow", Pos = eye.position + eye.forward, Dir = eye.forward, Speed = (float)SpellTuning.SeekingArrowSpeed,
             Range = 1000, Life = S("spell_seeking_arrow_duration"), Homing = true, Target = target, Radius = 1f,
             Visual = SpellFx.Sphere(eye.position + eye.forward, 0.25f, SpellFx.Steel, 1e6f),
+            WorldHit = () => SpellTuning.SeekingArrowHit(Hit(SpellTuning.SeekingArrowDamage, SpellTuning.SeekingArrowScaling), Stats), ImpactRadius = 1f,
             OnHit = (b, e) =>
             {
                 Strike(e, SpellTuning.SeekingArrowHit(Hit(SpellTuning.SeekingArrowDamage, SpellTuning.SeekingArrowScaling), Stats));
@@ -574,6 +615,7 @@ internal static class SpellEffects
         {
             Id = "blood_arrow", Pos = from + dir, Dir = dir, Speed = (float)SpellTuning.BloodArrowSpeed, Range = (float)SpellTuning.BloodArrowRange, Radius = 1f,
             Visual = SpellFx.Sphere(from + dir, 0.3f, SpellFx.Blood, 1e6f),
+            WorldHit = () => hit, ImpactRadius = 1f,
             OnHit = (b, e) =>
             {
                 Strike(e, hit);
@@ -631,6 +673,7 @@ internal static class SpellEffects
                 if (afterburn && e.IsActive && UnityEngine.Random.value < PerkTuning.AfterburnChance)
                     e.Combat.ApplyWeaken(PerkEffectIds.Afterburn, PerkTuning.AfterburnDamageTaken, PerkTuning.AfterburnSeconds);
             }
+            WorldDamage.Area(PlayerPos, (float)SpellTuning.BlackFlameRadius, Hit(SpellTuning.BlackFlameTickDamage(Has(PerkEffectIds.Netherflame)), S("spell_black_flame_damage_scaling")));
         }
     }
 

@@ -31,6 +31,13 @@ internal sealed class SpellBolt
     public bool Pierces;
     public EnemyRuntime? Target;
     public Action<SpellBolt, EnemyRuntime>? OnHit;
+    /// <summary>COS-213: the bolt's hit on everything that is not a tracked enemy (animals it touches, and the world where it ends).</summary>
+    public Func<OutgoingHit>? WorldHit;
+    /// <summary>Radius of the world damage where the bolt ends (COS-213).</summary>
+    public float ImpactRadius = 1.5f;
+    /// <summary>The bolt ended at a point: on an enemy it stopped at, an animal, or solid world (COS-213: Firebolt explodes here).</summary>
+    public Action<SpellBolt, Vector3>? OnImpact;
+    public readonly HashSet<IntPtr> HitActors = new();
     public GameObject? Visual;
     /// <summary>The cast that made it (COS-80).</summary>
     public uint? CastId;
@@ -145,6 +152,23 @@ internal static class SpellWorld
     }
 
     public static OutgoingHit Hit(double baseDamage, double scaling, bool canCrit = false) => SpellTuning.Hit(Stats, baseDamage, scaling, Rng, canCrit);
+
+    /// <summary>
+    /// COS-213: a spell's damage on everything in a sphere. Tracked enemies take <paramref name="hit"/> through <see cref="Strike"/>
+    /// (with <paramref name="onEnemy"/> after each, for slows and the like); animals, plants, trees and buildings through
+    /// <see cref="WorldDamage.Area"/>. Returns the enemies struck.
+    /// </summary>
+    public static List<EnemyRuntime> StrikeAll(Vector3 center, float radius, Func<OutgoingHit> hit, Action<EnemyRuntime>? onEnemy = null, Vector3? pullTo = null)
+    {
+        var struck = EnemiesWithin(center, radius);
+        foreach (var e in struck)
+        {
+            Strike(e, hit());
+            onEnemy?.Invoke(e);
+        }
+        WorldDamage.Area(center, radius, hit(), pullTo);
+        return struck;
+    }
 
     /// <summary>Moves an enemy (pull, knockback) by shifting its transform.</summary>
     public static void Push(EnemyRuntime e, Vector3 delta)
@@ -291,6 +315,11 @@ internal static class SpellWorld
         var from = b.Pos;
         var to = from + b.Dir * step;
 
+        // Solid world along this step (COS-213): the bolt ends there. Enemies and animals are caught by distance below.
+        float wall = float.MaxValue;
+        if (WorldBlock(from, to - from, step) is float w) wall = w;
+        if (wall < float.MaxValue) to = from + b.Dir * wall;
+
         // Enemies along this step, nearest first.
         foreach (var e in ActiveEnemies().OrderBy(e => Vector3.Distance(Center(e), from)))
         {
@@ -298,13 +327,57 @@ internal static class SpellWorld
             if (DistanceToSegment(Center(e), from, to) > b.Radius) continue;
             b.Hit.Add(e);
             b.OnHit?.Invoke(b, e);
-            if (!b.Pierces) { b.Done = true; break; } // a bolt stops at the first enemy unless it pierces
+            if (SelfTest.Enabled) LastBlock = $"enemy {e.Kind.Id}";
+            if (!b.Pierces) { End(b, Center(e)); return; } // a bolt stops at the first enemy unless it pierces
         }
+
+        // Animals and companions along the step (COS-213): hit like enemies, once each.
+        if (b.WorldHit != null)
+            foreach (var a in WorldDamage.ActorsWithin(Vector3.Lerp(from, to, 0.5f), step / 2 + b.Radius + 1))
+            {
+                var c = a.transform.position + Vector3.up * 0.6f;
+                if (DistanceToSegment(c, from, to) > b.Radius || !b.HitActors.Add(a.Pointer)) continue;
+                if (SelfTest.Enabled) LastBlock = $"actor {a.TypeId} ({a.name})";
+                WorldDamage.Strike(a, b.WorldHit().Amount, from);
+                if (!b.Pierces) { End(b, c); return; }
+            }
 
         b.Pos = to;
         b.Travelled += step;
         if (b.Visual != null) b.Visual.transform.position = to;
+        if (wall < float.MaxValue) { End(b, to); return; }
         if (b.Travelled >= b.Range) b.Done = true;
+    }
+
+    /// <summary>Self-tests: what the last world block was.</summary>
+    internal static string LastBlock = "";
+
+    /// <summary>A bolt ends at <paramref name="at"/>: its world damage there, then the spell's own impact.</summary>
+    private static void End(SpellBolt b, Vector3 at)
+    {
+        if (SelfTest.Enabled) SelfTest.Log($"bolt {b.Id} ended after {b.Travelled:0.#} m at {at}, last block {LastBlock}");
+        b.Done = true;
+        b.Pos = at;
+        if (b.Visual != null) b.Visual.transform.position = at;
+        if (b.WorldHit != null) WorldDamage.Area(at, b.ImpactRadius, b.WorldHit());
+        b.OnImpact?.Invoke(b, at);
+    }
+
+    /// <summary>Distance to the first solid, non-actor collider along a ray (the caster ignored), if any within <paramref name="length"/>.</summary>
+    public static float? WorldBlock(Vector3 from, Vector3 dir, float length)
+    {
+        if (length <= 0 || dir.sqrMagnitude < 1e-8f) return null;
+        var self = LocalPlayer.Transform != null ? LocalPlayer.Transform.root : null;
+        float best = float.MaxValue;
+        foreach (var h in Physics.RaycastAll(from, dir.normalized, length, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            if (h.distance >= best || h.collider == null) continue;
+            if (self != null && h.collider.transform.IsChildOf(self)) continue;
+            if (h.collider.GetComponentInParent<Sons.Ai.Vail.VailActor>() != null) continue;
+            best = h.distance;
+            if (SelfTest.Enabled) LastBlock = $"{h.collider.name} (layer {LayerMask.LayerToName(h.collider.gameObject.layer)}, root {h.collider.transform.root.name}) at {h.distance:0.##} m";
+        }
+        return best < float.MaxValue ? best : null;
     }
 
     public static float DistanceToSegment(Vector3 p, Vector3 a, Vector3 b)
@@ -332,6 +405,7 @@ internal static class SpellWorld
         Frenzy.Reset();
         SpellHits.Reset();
         SpellPortals.Reset();
+        WorldDamage.Reset();
         Slides.Clear();
         SpellEffects.ResetState();
         SpellNet.Reset();

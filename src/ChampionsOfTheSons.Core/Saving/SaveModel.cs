@@ -102,6 +102,7 @@ public sealed class WorldSave
 
     public int Version { get; set; } = CurrentVersion;
 
+    /// <summary>The old mod friendly-fire toggle. Unused since COS-213 (the game's own PvP setting decides); kept so saves stay at version 1.</summary>
     public bool FriendlyFire { get; set; }
 
     /// <summary>Which player's level drops roll at (<see cref="Rules.LootLevelPolicy"/> by name). Saved since version 4 (COS-77).</summary>

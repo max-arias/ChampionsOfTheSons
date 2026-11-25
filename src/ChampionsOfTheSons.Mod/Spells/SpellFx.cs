@@ -16,7 +16,9 @@ internal static class SpellFx
     /// Which effect a call draws. <see cref="Look.Auto"/> picks from the shape and lifetime: a short disc or sphere is a
     /// burst, a lasting disc an area ring, a lasting small sphere an orb, a lasting sphere that follows the player a bubble.
     /// </summary>
-    public enum Look { Auto, Burst, Ring, Dome, Orb, Bubble, BlackHole, Snow, Gas, Glyph, Flame, SunFlare, BallLightning }
+    public enum Look { Auto, Burst, Ring, Dome, Orb, Bubble, BlackHole, Snow, Gas, Glyph, Flame, SunFlare, BallLightning,
+        // Appended only: the value travels in the co-op cast message.
+        HitFire, HitIce, HitArcane, HitStone }
 
     private sealed class Item
     {
@@ -29,6 +31,10 @@ internal static class SpellFx
         /// <summary>Shrinks to nothing over its last seconds instead of popping out (0: no fade).</summary>
         public float Fade;
         public Vector3 FullScale;
+        /// <summary>Ball Lightning: bolts leap from the effect to enemies and to the ground within this radius (0: none).</summary>
+        public float StrikeRadius;
+        public float StrikeTimer;
+        public Color Color;
     }
 
     /// <summary>
@@ -154,6 +160,18 @@ internal static class SpellFx
                 if (go != null && radius >= 1.5f) FxKit.AddLight(go, color, radius + 4, 30, offset: Vector3.up);
                 seconds = Mathf.Max(seconds, 0.7f); // let the wave finish
                 break;
+            case Look.HitFire:
+            case Look.HitIce:
+            case Look.HitArcane:
+            case Look.HitStone:
+                string hit = look switch
+                {
+                    Look.HitFire => FxKit.HitFire, Look.HitIce => FxKit.HitIce, Look.HitArcane => FxKit.HitArcane, _ => FxKit.HitStone,
+                };
+                go = FxKit.Spawn(hit, pos, radius, color) ?? FxKit.Spawn(FxKit.Burst, pos, radius, color);
+                if (go != null) FxKit.AddLight(go, color, radius + 4, 30, offset: Vector3.up * 0.3f);
+                seconds = Mathf.Max(seconds, 1.1f); // the longest particles live a second
+                break;
             case Look.Ring:
                 go = FxKit.Spawn(FxKit.Ring, pos, radius, color);
                 break;
@@ -171,8 +189,10 @@ internal static class SpellFx
             case Look.BallLightning:
                 go = FxKit.Spawn(FxKit.BallLightning, pos, radius, color) ?? FxKit.Spawn(FxKit.Orb, pos, radius, color);
                 if (go == null) break;
-                FxKit.AddLight(go, color, 14, 120);
+                FxKit.AddLight(go, color, 14, 50);
                 Track(go, seconds, follow);
+                Items[^1].StrikeRadius = (float)Core.Rules.SpellTuning.BallLightningRadius;
+                Items[^1].Color = color;
                 SetLife(go, seconds, BallLightningFade);
                 return go;
             case Look.BlackHole:
@@ -266,6 +286,50 @@ internal static class SpellFx
         UnityEngine.Object.Destroy(go);
     }
 
+    /// <summary>
+    /// Ball Lightning's bolts (Max, 2026-11-24): several a second, each from the ball to an enemy in its radius or, when
+    /// none is picked, to a random spot on the ground there, with a flash where it lands. Drawn the same for the caster
+    /// and for teammates; the damage is the zone's own tick, not these.
+    /// </summary>
+    private static void Strikes(Item it, float dt)
+    {
+        it.StrikeTimer -= dt;
+        if (it.StrikeTimer > 0 || !FxKit.Available) return;
+        it.StrikeTimer = UnityEngine.Random.Range(0.05f, 0.16f) * (FxKit.Reduced ? 3f : 1f);
+        var from = it.Go.transform.position;
+        Vector3 to;
+        var enemies = SpellWorld.EnemiesWithin(from, it.StrikeRadius);
+        // COS-213: animals in range draw bolts too, since the zone's tick hits them as well.
+        var animals = UnityEngine.Random.value < 0.6f ? Spells.WorldDamage.ActorsWithin(from, it.StrikeRadius) : new List<Sons.Ai.Vail.VailActor>();
+        int targets = enemies.Count + animals.Count;
+        if (targets > 0 && UnityEngine.Random.value < 0.6f)
+        {
+            int pick = UnityEngine.Random.Range(0, targets);
+            to = pick < enemies.Count ? SpellWorld.Center(enemies[pick]) : animals[pick - enemies.Count].transform.position + Vector3.up * 0.5f;
+        }
+        else
+        {
+            var p = UnityEngine.Random.insideUnitCircle * it.StrikeRadius;
+            if (!Physics.Raycast(from + new Vector3(p.x, 0, p.y), Vector3.down, out var hit, 12f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)) return;
+            to = hit.point;
+        }
+        var d = from - to;
+        float len = d.magnitude;
+        if (len < 0.3f) return;
+        float width = Mathf.Clamp(len * 0.16f, 0.4f, 1.1f) * (UnityEngine.Random.value < 0.5f ? 1 : -1);   // mirrored at random
+        var bolt = FxKit.Spawn(FxKit.Bolt, to, new Vector3(width, len, 1), it.Color, essential: true);
+        if (bolt != null)
+        {
+            // The bolt is a flat quad along its own up axis: turn its face to the camera around that axis.
+            var eye = TheForest.Utils.LocalPlayer.MainCam != null ? TheForest.Utils.LocalPlayer.MainCam.transform.position : from + Vector3.forward;
+            var face = Vector3.ProjectOnPlane(eye - to, d / len);
+            bolt.transform.rotation = Quaternion.LookRotation(face.sqrMagnitude > 1e-4f ? face.normalized : Vector3.forward, d / len);
+            Track(bolt, UnityEngine.Random.Range(0.07f, 0.14f), null);
+        }
+        var flash = FxKit.Spawn(FxKit.HitLightning, to, 0.6f, it.Color);
+        if (flash != null) Track(flash, 0.6f, null);
+    }
+
     public static void Step(float dt)
     {
         for (int i = Items.Count - 1; i >= 0; i--)
@@ -286,6 +350,7 @@ internal static class SpellFx
                 }
                 it.Go.transform.position += it.Velocity * dt;
             }
+            if (it.StrikeRadius > 0) Strikes(it, dt);
             it.Left -= dt;
             if (it.Fade > 0 && it.Left < it.Fade) it.Go.transform.localScale = it.FullScale * Mathf.Max(0.01f, it.Left / it.Fade);
             if (it.Left > 0) continue;

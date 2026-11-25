@@ -222,6 +222,10 @@ internal static class SpellCaster
                 SpellWorld.Strike(e, SpellWorld.Hit(passDamage, stats.Get("spell_blink_damage_scaling")));
                 BlinkStruck++;
             }
+        if (passDamage > 0) // COS-213: animals passed through as well
+            foreach (var a in WorldDamage.ActorsWithin(Vector3.Lerp(from, to, 0.5f), Vector3.Distance(from, to) / 2 + 1.5f))
+                if (SpellWorld.DistanceToSegment(a.transform.position + Vector3.up * 0.6f, from + Vector3.up, to + Vector3.up) <= 1.5f)
+                    WorldDamage.Strike(a, SpellWorld.Hit(passDamage, stats.Get("spell_blink_damage_scaling")).Amount, from);
         if (!stats.IsOn(PerkStatIds.BlinkExplosion)) return;
         float radius = Mathf.Max((float)PerkRules.BlinkExplosionMinRadius, Vector3.Distance(from, to) * (float)PerkRules.BlinkExplosionRadiusShare);
         double damage = PerkRules.BlinkExplosionDamage * Math.Max(0.1, stats.Get(StatIds.MovementSpeed));
@@ -230,6 +234,7 @@ internal static class SpellCaster
             SpellWorld.Strike(e, SpellWorld.Hit(damage, PerkRules.BlinkExplosionScaling));
             BlinkStruck++;
         }
+        WorldDamage.Area(to, radius, SpellWorld.Hit(damage, PerkRules.BlinkExplosionScaling)); // COS-213
     }
 
     /// <summary>Moves the player's feet to a point without the character controller fighting it.</summary>

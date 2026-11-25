@@ -45,9 +45,11 @@ internal static class WorldRulesSelfTest
         SelfTest.Add(T0 + 3, "game difficulty: a client takes the host's settings", () =>
         {
             var saved = WorldState.Rules;
-            WorldRulesFeature.Apply(new WorldSettings(GameMode.HardSurvival, 10, 7, false));
+            WorldRulesFeature.Apply(new WorldSettings(GameMode.HardSurvival, 10, 7, PvpMode.Reduced));
             var r = WorldState.Rules;
             SelfTest.Check("mode, offset and extra levels arrive", r.GameDifficulty.Mode == GameMode.HardSurvival && r.GameDifficulty.LevelOffset == 10 && r.ExtraEnemyLevels == 7);
+            SelfTest.Check("the host's PvP setting arrives (COS-213)", WorldState.Pvp == PvpMode.Reduced, $"{WorldState.Pvp}");
+            PvpRule.Read();
             WorldState.SetRulesForTest(saved);
         });
 
@@ -77,17 +79,19 @@ internal static class WorldRulesSelfTest
             WorldState.FromSave(new WorldSave());
         });
 
-        SelfTest.Add(T0 + 8, "host settings: friendly fire drives the game's PvP damage (COS-78)", () =>
+        SelfTest.Add(T0 + 8, "host settings: PvP follows the game's own setting (COS-213)", () =>
         {
-            bool before = WorldState.FriendlyFire;
-            WorldState.SetFriendlyFire(false);
-            FriendlyFireRule.Apply(false);
-            SelfTest.Check("friendly fire off: the game's PvP damage is Off", FriendlyFireRule.Applied == "Off", FriendlyFireRule.Applied ?? "not applied");
-            WorldState.SetFriendlyFire(true);
-            FriendlyFireRule.Apply(true);
-            SelfTest.Check("friendly fire on: the game's PvP damage is on", FriendlyFireRule.Applied is "Normal" or "Reduced", FriendlyFireRule.Applied ?? "not applied");
-            WorldState.SetFriendlyFire(before);
-            FriendlyFireRule.Apply(before);
+            // The game's setting is changed here only to see the mod follow it, then put back.
+            string before = Sons.Gameplay.GameSetup.GameSetupManager.GetPvpDamageSetting();
+            foreach (var want in new[] { "Reduced", "Off", "Normal" })
+            {
+                Sons.Gameplay.GameSetup.GameSetupManager.SetPvpDamageSetting(want);
+                PvpRule.Read();
+                SelfTest.Check($"PvP: the game's '{want}' is the mod's PvP", WorldState.Pvp == PvpRules.Parse(want), $"{WorldState.Pvp}");
+            }
+            Sons.Gameplay.GameSetup.GameSetupManager.SetPvpDamageSetting(before);
+            PvpRule.Read();
+            SelfTest.Check("PvP: the host sends the game's PvP to clients", WorldRulesFeature.CurrentSettings().Pvp == PvpRules.Parse(before), $"{before}");
         });
 
         SelfTest.Add(T0 + 9, "host settings: reset to defaults (COS-77)", () =>
@@ -97,7 +101,7 @@ internal static class WorldRulesSelfTest
             WorldRulesFeature.Settings.ResetDefaults();
             var r = WorldState.Rules;
             SelfTest.Check("reset brings every host setting back to its default and keeps the game's difficulty",
-                r.Xp == 1 && r.LootLevel == LootLevelPolicy.Highest && r.AllowElites && !WorldState.FriendlyFire && r.GameDifficulty == game);
+                r.Xp == 1 && r.LootLevel == LootLevelPolicy.Highest && r.AllowElites && r.GameDifficulty == game);
         });
     }
 }

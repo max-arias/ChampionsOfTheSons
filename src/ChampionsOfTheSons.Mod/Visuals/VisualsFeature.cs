@@ -1,5 +1,6 @@
 using ChampionsOfTheSons.Mod.Bundles;
 using ChampionsOfTheSons.Mod.Spells;
+using System.Linq;
 using RedLoader;
 using TheForest.Utils;
 using UnityEngine;
@@ -90,6 +91,176 @@ public sealed class VisualsFeature : IModFeature
             Cleanup();
             if (_savedHour >= 0) SetHour(_savedHour, _savedMinute);
         });
+
+        // Close-ups, four effects a shot (COS-211): the grid above is too far away to judge one effect's look.
+        int pages = (FxKit.All.Length + 3) / 4;
+        SelfTest.Add(20.8f, "visuals: open ground for close-ups", MoveToOpenGround);
+        for (int p = 0; p < pages; p++)
+        {
+            int page = p;
+            SelfTest.Add(22f + p * 1.8f, "visuals: close-up " + (p + 1), () => CloseUp(page, false));
+            // One-shot effects are over within half a second: spawn them again just before the shot.
+            SelfTest.Add(23.05f + p * 1.8f, "visuals: close-up bursts " + (p + 1), () => CloseUp(page, true));
+            SelfTest.Add(23.3f + p * 1.8f, "visuals: shot close-up " + (p + 1), () => TestKit.Screenshot("visuals-1" + page + "-closeup"));
+        }
+        // The two effects the mod animates itself (COS-211): Ball Lightning's bolts and Black Flame's field of flames.
+        float live = 22f + pages * 1.8f;
+        FlameRing? field = null;
+        SelfTest.Add(live, "visuals: ball lightning", () =>
+        {
+            Cleanup();
+            if (ViewSpot(0.5f, 0.7f) is { } at) SpellFx.Sphere(at + Vector3.up * 2f, 0.8f, SpellFx.Lightning, 2.2f, look: SpellFx.Look.BallLightning);
+        });
+        SelfTest.Add(live + 1.2f, "visuals: shot ball lightning", () => TestKit.Screenshot("visuals-20-ball-lightning"));
+        SelfTest.Add(live + 2.6f, "visuals: flame field", () =>
+        {
+            if (ViewSpot(0.5f, 0.7f) is not { } at) return;
+            field = new FlameRing();
+            field.Update(at, (float)Core.Rules.SpellTuning.BlackFlameRadius);
+        });
+        SelfTest.Add(live + 3.6f, "visuals: shot flame field", () => TestKit.Screenshot("visuals-21-flame-field"));
+        SelfTest.Add(live + 3.8f, "visuals: close-ups done", () =>
+        {
+            field?.Destroy();
+            Cleanup();
+        });
+        // COS-213: a portal pair stands on the ground, blue then orange.
+        var gates = new List<GameObject>();
+        SelfTest.Add(live + 4f, "visuals: portal pair", () =>
+        {
+            if (ViewSpot(0.35f, 0.6f) is { } a) gates.Add(SpellFx.Portal(a, (Cam?.position ?? a) - a, Spells.SpellPortals.FirstGate, 3f));
+            if (ViewSpot(0.65f, 0.6f) is { } b) gates.Add(SpellFx.Portal(b, (Cam?.position ?? b) - b, Spells.SpellPortals.SecondGate, 3f));
+        });
+        SelfTest.Add(live + 5.1f, "visuals: portal parts", () =>
+        {
+            foreach (var g in gates.Where(g => g != null))
+                foreach (var ps in g.GetComponentsInChildren<ParticleSystem>(true))
+                {
+                    var r = ps.GetComponent<ParticleSystemRenderer>();
+                    var m = r != null ? r.sharedMaterial : null;
+                    SelfTest.Log($"visuals: portal part {ps.name}: {ps.particleCount} particles, renderer {(r != null && r.enabled)}, material {(m != null ? m.name : "none")}"
+                        + $" tint {(m != null && m.HasProperty("_TintColor") ? m.GetColor("_TintColor").ToString() : "-")}, start colour {ps.main.startColor.color}");
+                }
+        });
+        SelfTest.Add(live + 5.2f, "visuals: shot portals", () => TestKit.Screenshot("visuals-22-portals"));
+        SelfTest.Add(live + 5.4f, "visuals: portals done", () =>
+        {
+            foreach (var g in gates) SpellFx.Remove(g);
+            Cleanup();
+        });
+
+        // COS-213: a heal holds in live play (the game pulled health back to its own target health).
+        float healed = 0;
+        SelfTest.Add(live + 5.6f, "visuals: heal", () =>
+        {
+            var h = TheForest.Utils.LocalPlayer.Vitals?.Health;
+            if (h == null) return;
+            h.SetCurrentValue(h.GetMax() * 0.3f);
+            TheForest.Utils.LocalPlayer.Vitals!.SetTargetHealth(h.GetMax() * 0.3f);
+            Bridge.PlayerEffects.Heal(h.GetMax() * 0.2f);
+            healed = h._currentValue;
+        });
+        SelfTest.Add(live + 7.6f, "visuals: heal holds", () =>
+        {
+            var h = TheForest.Utils.LocalPlayer.Vitals?.Health;
+            if (h == null) return;
+            // Undone = back near the 30% it started from; other phases' enemies may still nick a little off meanwhile.
+            SelfTest.Check("visuals: a heal is not undone by the game (COS-213)", h._currentValue >= healed - 0.05f * h.GetMax(), $"{healed:0.#} -> {h._currentValue:0.#} of {h.GetMax():0}");
+            h.SetCurrentValue(h.GetMax());
+            TheForest.Utils.LocalPlayer.Vitals!.SetTargetHealth(h.GetMax());
+        });
+    }
+
+    /// <summary>Where a ray through a point of the screen (0..1) meets the world, at most 7 m away; null without a camera.</summary>
+    private static Vector3? ViewSpot(float x, float y)
+    {
+        var cam = Cam;
+        if (cam == null || cam.GetComponent<Camera>() is not { } lens) return null;
+        var ray = lens.ViewportPointToRay(new Vector3(x, y, 0));
+        foreach (var hit in Physics.RaycastAll(ray, 40f).OrderBy(h => h.distance))
+        {
+            if (hit.transform == null || hit.collider.isTrigger || (LocalPlayer.Transform != null && hit.transform.IsChildOf(LocalPlayer.Transform))) continue;
+            return hit.distance <= 7f ? hit.point : FlameRing.Ground(ray.GetPoint(7f));
+        }
+        return FlameRing.Ground(ray.GetPoint(7f));
+    }
+
+    private static readonly (float Forward, float Side)[] CloseUpSpots = { (6, -3.9f), (6, -1.3f), (6, 1.3f), (6, 3.9f) };
+
+    /// <summary>
+    /// Moves the player to a nearby place where the close-up spots are level and in plain view along the camera's own
+    /// heading (the camera does not follow a turned player, so the place is searched for, not the heading).
+    /// </summary>
+    private void MoveToOpenGround()
+    {
+        var cam = Cam;
+        var t = LocalPlayer.Transform;
+        if (cam == null || t == null) return;
+        var fwd = Flat(cam.forward);
+        var right = Vector3.Cross(Vector3.up, fwd);
+        foreach (float radius in new[] { 0f, 12f, 20f, 30f, 45f, 60f })
+            for (int a = 0; a < (radius == 0 ? 1 : 12); a++)
+            {
+                if (TestKit.GroundAt(t.position + Quaternion.Euler(0, a * 30, 0) * Vector3.forward * radius) is not { } g) continue;
+                var eye = g + Vector3.up * 1.7f;
+                bool ok = true;
+                foreach (var spot in CloseUpSpots)
+                {
+                    var at = TestKit.GroundAt(g + fwd * spot.Forward + right * spot.Side);
+                    if (at == null || Mathf.Abs(at.Value.y - g.y) > 1.2f) { ok = false; break; }
+                    foreach (float h in new[] { 0.1f, 2.5f })
+                    {
+                        var to = at.Value + Vector3.up * h;
+                        foreach (var hit in Physics.RaycastAll(eye, (to - eye).normalized, (to - eye).magnitude - 0.2f))
+                            if (hit.transform != null && !hit.collider.isTrigger && !hit.transform.IsChildOf(t)) ok = false;
+                    }
+                    if (!ok) break;
+                }
+                if (!ok) continue;
+                if (radius > 0) SpellCaster.TeleportPlayer(g + Vector3.up * 0.05f);
+                Physics.SyncTransforms();
+                SelfTest.Log($"visuals: close-ups at {g} ({radius} m away)");
+                return;
+            }
+        SelfTest.Log("visuals: no open ground found for the close-ups");
+    }
+
+    /// <summary>Four effects in a row a few metres ahead, standing on the ground under each spot.</summary>
+    private void CloseUp(int page, bool oneShots)
+    {
+        if (!oneShots) Cleanup();
+        var cam = Cam;
+        if (!CotsBundle.Loaded || cam == null) return;
+        var body = LocalPlayer.Transform != null ? LocalPlayer.Transform : cam;
+        var fwd = Flat(cam.forward);
+        var right = Vector3.Cross(Vector3.up, fwd);
+        Color[] tints = { SpellFx.Holy, SpellFx.Fire, SpellFx.Arcane, SpellFx.Ice, SpellFx.Heal, SpellFx.Lightning, SpellFx.Blood };
+        for (int i = page * 4; i < Math.Min(FxKit.All.Length, page * 4 + 4); i++)
+        {
+            string name = FxKit.All[i];
+            if (oneShots != (name is FxKit.Burst or FxKit.HitFire or FxKit.HitIce or FxKit.HitArcane or FxKit.HitStone)) continue;
+            var spot = CloseUpSpots[i - page * 4];
+            var pos = body.position + fwd * spot.Forward + right * spot.Side;
+            pos.y = TestKit.GroundAt(pos)?.y ?? body.position.y;
+            // The camera's pitch is whatever the save left it at: put each effect where a ray through its place on
+            // screen meets the world, so all four are in frame whatever the camera looks at.
+            if (cam.GetComponent<Camera>() is { } lens)
+            {
+                var ray = lens.ViewportPointToRay(new Vector3(0.14f + 0.24f * (i - page * 4), 0.66f, 0));
+                foreach (var hit in Physics.RaycastAll(ray, 40f).OrderBy(h => h.distance))
+                {
+                    if (hit.transform == null || hit.collider.isTrigger || hit.transform.IsChildOf(body)) continue;
+                    pos = hit.distance <= 7f ? hit.point : ray.GetPoint(7f);
+                    break;
+                }
+            }
+            bool ground = name is FxKit.Ring or FxKit.Dome or FxKit.Column or FxKit.Snow or FxKit.Glyph or FxKit.Gas or FxKit.Portal or FxKit.AuraBuff;
+            pos.y += ground ? 0.3f : 1.1f;   // clear of the grass
+            var scale = name is FxKit.Beam or FxKit.Chain ? new Vector3(0.25f, 3, 0.25f) : name is FxKit.Column or FxKit.Snow ? new Vector3(1, 3, 1)
+                : name is FxKit.Orb or FxKit.BallLightning ? Vector3.one * 0.5f : Vector3.one;
+            var go = FxKit.Spawn(name, pos, scale, tints[i % tints.Length], essential: true);
+            if (go != null) _shown.Add(go);
+        }
     }
 
     private static readonly string[] WeaponModels =

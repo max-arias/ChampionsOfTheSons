@@ -86,6 +86,16 @@ public sealed class WorldXpFeature : IModFeature
         }
     }
 
+    /// <summary>A spell felled a tree (COS-213): the same flat XP, once per tree (the game's fell hook may have paid it already).</summary>
+    public static void PaySpellFelledTree(Vector3 at)
+    {
+        // Also on a host applying a client's spell (a dedicated server has no player of its own to pay).
+        if (AlreadyPaid(at)) return;
+        if (LocalPlayer.IsInWorld) PayTree(at);
+        else TreesPaid.Add((at, Time.realtimeSinceStartup));
+        if (CoopSession.Active) CoopSession.Broadcast(new FlatXpGranted((long)WorldXp.TreeXp, CoopSession.ToVec(at)));
+    }
+
     private static void PayTree(Vector3 at)
     {
         TreesPaid.Add((at, Time.realtimeSinceStartup));

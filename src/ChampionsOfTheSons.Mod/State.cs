@@ -55,12 +55,16 @@ public static class WorldState
 {
     public static WorldRules Rules { get; private set; } = new();
 
-    public static bool FriendlyFire { get; private set; }
+    /// <summary>COS-213: the game world's own PvP damage setting (the host reads it from the game, clients get it from the host).</summary>
+    public static PvpMode Pvp { get; private set; }
 
-    /// <summary>Dedicated server config / host settings.</summary>
-    public static void SetFriendlyFire(bool on)
+    /// <summary>Players can hurt each other (the game's PvP damage is not Off).</summary>
+    public static bool FriendlyFire => Pvp != PvpMode.Off;
+
+    public static void SetPvp(PvpMode mode)
     {
-        FriendlyFire = on;
+        if (Pvp == mode) return;
+        Pvp = mode;
         Changed?.Invoke();
     }
 
@@ -85,7 +89,6 @@ public static class WorldState
 
     public static WorldSave ToSave() => new()
     {
-        FriendlyFire = FriendlyFire,
         DropQuantity = Rules.DropQuantity,
         DropChance = Rules.DropChance,
         Xp = Rules.Xp,
@@ -121,6 +124,6 @@ public static class WorldState
             MinLootRarity = save.MinLootRarity,
             LootLevel = Enum.TryParse<LootLevelPolicy>(save.LootLevel, true, out var policy) ? policy : LootLevelPolicy.Highest,
         };
-        FriendlyFire = save.FriendlyFire;
+        // WorldSave.FriendlyFire (the old mod toggle) is no longer read: the game's own PvP setting decides (COS-213).
     }
 }

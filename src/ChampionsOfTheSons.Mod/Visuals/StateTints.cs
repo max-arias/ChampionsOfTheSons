@@ -225,7 +225,7 @@ public sealed class StateTintsFeature : IModFeature
                 if (d < best) { best = d; hand = h.Holder; }
             }
             if (hand != null) r.Position = new Vector3(hand.position.x, r.Position.y, hand.position.z);
-            foreach (PlayerStateFlags f in new[] { PlayerStateFlags.BlackFlame, PlayerStateFlags.Multishot, PlayerStateFlags.Berserk, PlayerStateFlags.GoldenSkin })
+            foreach (PlayerStateFlags f in new[] { PlayerStateFlags.Multishot, PlayerStateFlags.Berserk, PlayerStateFlags.GoldenSkin })
             {
                 bool on = flags.HasFlag(f) && !(FxKit.Reduced && f is PlayerStateFlags.BlackFlame or PlayerStateFlags.Multishot);
                 r.Fx.TryGetValue(f, out var go);

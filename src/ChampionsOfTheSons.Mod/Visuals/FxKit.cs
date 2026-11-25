@@ -13,10 +13,14 @@ internal static class FxKit
 {
     public const string Ring = "Fx_Ring", Burst = "Fx_Burst", Orb = "Fx_Orb", Bubble = "Fx_Bubble", Dome = "Fx_Dome", Column = "Fx_Column",
         BlackHole = "Fx_BlackHole", Snow = "Fx_Snow", Portal = "Fx_Portal", Beam = "Fx_Beam", Chain = "Fx_Chain", Flame = "Fx_Flame",
-        Glyph = "Fx_Glyph", Gas = "Fx_Gas", BallLightning = "Fx_BallLightning";
+        Glyph = "Fx_Glyph", Gas = "Fx_Gas", BallLightning = "Fx_BallLightning",
+        // COS-211: hits by kind of magic and the self-buff aura (from the effect packs).
+        HitFire = "Fx_HitFire", HitIce = "Fx_HitIce", HitArcane = "Fx_HitArcane", HitStone = "Fx_HitStone", AuraBuff = "Fx_AuraBuff",
+        Bolt = "Fx_Bolt", HitLightning = "Fx_HitLightning";
 
     /// <summary>Every effect prefab name (self-tests, the frame-cost check).</summary>
-    public static readonly string[] All = { Ring, Burst, Orb, Bubble, Dome, Column, BlackHole, Snow, Portal, Beam, Chain, Flame, Glyph, Gas, BallLightning };
+    public static readonly string[] All = { Ring, Burst, Orb, Bubble, Dome, Column, BlackHole, Snow, Portal, Beam, Chain, Flame, Glyph, Gas, BallLightning,
+        HitFire, HitIce, HitArcane, HitStone, AuraBuff, Bolt, HitLightning };
 
     /// <summary>Effects that only decorate (hand flames, hand glyphs): hidden under "reduce heavy effects".</summary>
     private static readonly HashSet<string> Decorative = new() { Flame, Glyph };
@@ -87,6 +91,20 @@ internal static class FxKit
         if (m < 0.02f) return new Color(0.6f, 0.25f, 1f, c.a);
         float k = 0.8f / m;
         return new Color(c.r * k, c.g * k, c.b * k, c.a);
+    }
+
+    /// <summary>Makes a spawned effect more see-through: every material's opacity times <paramref name="alpha"/>.</summary>
+    public static void Fade(GameObject? go, float alpha)
+    {
+        if (go == null) return;
+        foreach (var r in go.GetComponentsInChildren<Renderer>(true))
+        {
+            var m = r.material;
+            if (m == null || !m.HasProperty("_TintColor")) continue;
+            var c = m.GetColor("_TintColor");
+            c.a *= alpha;
+            m.SetColor("_TintColor", c);
+        }
     }
 
     /// <summary>Halves particle emission (reduce heavy effects).</summary>

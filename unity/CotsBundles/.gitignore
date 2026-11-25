@@ -12,3 +12,7 @@ Assets/Settings/
 Assets/Settings.meta
 Assets/HDRPDefaultResources/
 Assets/HDRPDefaultResources.meta
+# Unity Asset Store packs (COS-211): licensed per seat under the Asset Store EULA, which allows shipping them inside the
+# built bundle but not publishing the source files. Import them here yourself; see docs/asset-bundles.md.
+Assets/ThirdParty/AssetStore/
+Assets/ThirdParty/AssetStore.meta

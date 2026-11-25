@@ -47,7 +47,7 @@ try {
     Start-Sleep -Seconds 2
     # The server takes its extra enemy levels from this file (COS-15, COS-130); the client test checks they arrive.
     New-Item -ItemType Directory -Force "$ServerDir\UserData" | Out-Null
-    Set-Content "$ServerDir\UserData\ChampionsOfTheSonsServer.cfg" ("[ChampionsOfTheSonsServer]", "extra_enemy_levels = $ServerExtraLevels", "friendly_fire = false")
+    Set-Content "$ServerDir\UserData\ChampionsOfTheSonsServer.cfg" ("[ChampionsOfTheSonsServer]", "extra_enemy_levels = $ServerExtraLevels")
     Remove-Item $serverLog -ErrorAction SilentlyContinue
     Remove-Item "$ServerDir\unity.log" -ErrorAction SilentlyContinue
     $started = Get-Date

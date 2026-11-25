@@ -30,9 +30,8 @@ internal static class ThrowEvents
     [HarmonyPostfix]
     private static void Thrown() => Note("ranged.SetItemThrown");
 
-    [HarmonyPatch(typeof(RangedWeaponController), nameof(RangedWeaponController.OnItemLeavesHandCallback))]
-    [HarmonyPostfix]
-    private static void LeavesHandCallback() => Note("ranged.OnItemLeavesHandCallback");
+    // No hook on RangedWeaponController.OnItemLeavesHandCallback: patching it crashes the dedicated server at load
+    // (access violation in the il2cpp -> managed trampoline, 2026-11-24, COS-213 co-op run). The other events give the order.
 
     [HarmonyPatch(typeof(RangedWeaponController), nameof(RangedWeaponController.CheckConsumeThrownItem))]
     [HarmonyPostfix]

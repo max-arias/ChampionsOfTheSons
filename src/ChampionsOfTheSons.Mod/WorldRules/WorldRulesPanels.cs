@@ -77,7 +77,8 @@ internal sealed class HostSettingsPanel : ModalPanel
 
     private readonly List<SLabelOptions> _values = new();
     private readonly Dictionary<EnemyAbility, SBgButtonOptions> _abilityButtons = new();
-    private SBgButtonOptions _elites = null!, _friendlyFire = null!, _lootLevel = null!, _minRarity = null!;
+    private SBgButtonOptions _elites = null!, _lootLevel = null!, _minRarity = null!;
+    private SLabelOptions _pvp = null!;
     private SLabelOptions _difficulty = null!;
 
     public void Build()
@@ -111,9 +112,11 @@ internal sealed class HostSettingsPanel : ModalPanel
                 "Enemy levels follow the level of the players near them. The game's difficulty adds levels and elites; extra levels add more on top."),
             17, UiTheme.TextDim, TextAlignmentOptions.TopLeft).TopLeft(28, elitesY + 56).Size(580, 90));
 
-        // COS-77: friendly fire, loot level, minimum loot rarity, reset
+        // COS-77: loot level, minimum loot rarity, reset. COS-213: player damage is the game's own PvP setting, shown, not set here.
         float y2 = elitesY + 150;
-        _friendlyFire = ToggleRow(y2, "ui.worldrules.row.friendly_fire", "Friendly fire", ToggleFriendlyFire);
+        Window.Add(Label(UiText.T("ui.pvp.row", "Player damage"), 20, UiTheme.Text, TextAlignmentOptions.MidlineLeft).TopLeft(28, y2).Size(300, 36));
+        _pvp = Label("", 18, UiTheme.Stat, TextAlignmentOptions.Midline);
+        Window.Add(_pvp.TopLeft(330, y2).Size(278, 36));
         _lootLevel = ToggleRow(y2 + 44, "ui.worldrules.row.loot_level", "Loot level", CycleLootLevel);
         _minRarity = ToggleRow(y2 + 88, "ui.worldrules.row.min_rarity", "Lowest drop rarity", CycleMinRarity);
         Window.Add(Button(UiText.T("ui.worldrules.reset", "Reset to defaults"), 18, ResetDefaults, "#3A2A20", "#4E382A").TopLeft(28, y2 + 140).Size(580, 36));
@@ -177,13 +180,6 @@ internal sealed class HostSettingsPanel : ModalPanel
         return btn;
     }
 
-    private void ToggleFriendlyFire()
-    {
-        WorldState.SetFriendlyFire(!WorldState.FriendlyFire);
-        FriendlyFireRule.Apply(WorldState.FriendlyFire);
-        Changed();
-    }
-
     private void CycleLootLevel()
     {
         var all = Enum.GetValues<LootLevelPolicy>();
@@ -201,10 +197,11 @@ internal sealed class HostSettingsPanel : ModalPanel
     public void ResetDefaults()
     {
         WorldState.Update(r => new WorldRules { GameDifficulty = r.GameDifficulty });
-        WorldState.SetFriendlyFire(false);
-        FriendlyFireRule.Apply(false);
         Changed();
     }
+
+    /// <summary>"Normal (game setting)".</summary>
+    public static string PvpText(PvpMode mode) => UiText.T("ui.pvp." + mode.ToString().ToLowerInvariant(), mode.ToString());
 
     public static string LootLevelName(LootLevelPolicy p) => UiText.T("ui.worldrules.loot_level." + p.ToString().ToLowerInvariant(), p.ToString());
 
@@ -242,9 +239,7 @@ internal sealed class HostSettingsPanel : ModalPanel
         }
         _elites.Text(rules.AllowElites ? UiText.T("ui.worldrules.on", "On") : UiText.T("ui.worldrules.off", "Off"));
         _elites.Color(C(rules.AllowElites ? "#2F5A3A" : "#5A2F36"), C(rules.AllowElites ? "#3C7048" : "#703A43"));
-        bool ff = WorldState.FriendlyFire;
-        _friendlyFire.Text(ff ? UiText.T("ui.worldrules.on", "On") : UiText.T("ui.worldrules.off", "Off"));
-        _friendlyFire.Color(C(ff ? "#5A2F36" : "#2B333E"), C(ff ? "#703A43" : "#3C4755"));
+        _pvp.Text(PvpText(WorldState.Pvp));
         _lootLevel.Text(LootLevelName(rules.LootLevel));
         _minRarity.Text(UiText.T("ui.rarity." + ((Rarity)rules.MinLootRarity).ToString().ToLowerInvariant(), ((Rarity)rules.MinLootRarity).ToString()));
         foreach (var (ability, btn) in _abilityButtons)

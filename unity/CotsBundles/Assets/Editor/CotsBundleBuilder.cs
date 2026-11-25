@@ -23,6 +23,7 @@ public static class CotsBundleBuilder
         CotsGen.Reset();
         CotsLootPrefabs.Generate();
         CotsFxPrefabs.Generate();
+        CotsPackPrefabs.Generate();   // after CotsFxPrefabs: its rows replace the prefabs of the same name
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
     }

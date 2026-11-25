@@ -22,7 +22,7 @@ public class MessageCodecTests
     {
         new Hello(MessageCodec.ProtocolVersion, "0.1.0"),
         new HelloReject("Mod version mismatch: host 0.2.0, you 0.1.0"),
-        new WorldSettings(GameMode.Hard, 5, 3, true),
+        new WorldSettings(GameMode.Hard, 5, 3, PvpMode.Reduced),
         new EnemySync(42UL, "enemy.cannibal_heavy", 250, 3, 1.5e6f, 1.2e6f, 4500f, new[] { "affix.meteor", "affix.steadfast" }, 9_000_000_000L),
         new EnemySync(43UL, "enemy.fingers", 1, 0, 100f, 100f, 0f, Array.Empty<string>(), 0),
         new EnemySync(44UL, "Carl", 77, 1, 9e5f, 4e5f, 1200f, new[] { "Meteor" }, 123_456L, 3.4e4f, "elite_name.ashjaw", "elite_name.unburied"),
@@ -33,6 +33,9 @@ public class MessageCodecTests
         new EnemyEffectNet(42UL, EnemyEffectKind.Dot, "player.bleed", 125.5f, 10f, DotKind.Bleed),
         new EnemyEffectNet(43UL, EnemyEffectKind.Stun, "", 0f, 1.5f, default),
         new EnemyPush(42UL, new Vec3(-1.5f, 0, 3)),
+        new WorldHit(WorldHitKind.AreaToward, new Vec3(1, 2, 3), 12f, 345.5f, new Vec3(4, 5, 6), 0f),
+        new PlayerSpellHit(3u, 812.5f),
+        new WorldHit(WorldHitKind.Pull, new Vec3(1, 2, 3), 8f, 4f, default, 0.3f),
         new EnemyAware(42UL, true),
         new EnemyState(42UL, EnemyStateFlags.ShieldUp | EnemyStateFlags.Revived),
         new FlatXpGranted(30L, new Vec3(5, 6, 7)),
@@ -61,7 +64,7 @@ public class MessageCodecTests
         new Ping(3u, PingKind.Enemy, new Vec3(10, 20, 30), 42UL),
         new Ping(uint.MaxValue, PingKind.Clear, new Vec3(1, 2, 3), 0UL),
         new HeldWeapon(2u, "long_sword", new Vec3(1, 2, 3), 7, "item.rage"),
-        new WorldSettings(GameMode.Custom, -4, 0, false),
+        new WorldSettings(GameMode.Custom, -4, 0, PvpMode.Off),
         new AdminGrant(AdminAction.GiveItem, 42, "item.test_ring"),
         new AdminGrant(AdminAction.AddXp, 1.5e15, ""),
     };

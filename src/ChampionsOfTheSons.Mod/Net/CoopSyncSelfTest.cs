@@ -96,6 +96,9 @@ public sealed class CoopSyncSelfTest : IModFeature
                 {
                     _enemy = ActorTools.Spawn(VailActorTypeId.Carl, at + new Vector3(10, 0, 0));
                     RLog.Msg($"{CoopTestJoin.Tag} server: spawned the ability enemy {(_enemy == null ? "FAILED" : "at " + _enemy.transform.position)}");
+                    // An animal for the client's world-damage check (COS-213).
+                    var deer = ActorTools.Spawn(VailActorTypeId.Deer, at + new Vector3(-6, 0, 2));
+                    RLog.Msg($"{CoopTestJoin.Tag} server: spawned a deer {(deer == null ? "FAILED" : "at " + deer.transform.position)}");
                 }
                 catch (Exception e)
                 {
@@ -174,6 +177,8 @@ public sealed class CoopSyncSelfTest : IModFeature
     private static Dictionary<int, double> _dropsBefore = new();
     private static float _joinWaitFrom = -1;
     private static int _shapesBefore;
+    private static VailActor? _deer;
+    private static float _deerHp;
 
     /// <summary>Called by <see cref="CoopSelfTest"/> before its last (version check) step.</summary>
     internal static void RegisterClientSteps()
@@ -280,6 +285,37 @@ public sealed class CoopSyncSelfTest : IModFeature
                 string.Join(", ", back.Select(d => $"{d.Id}: {d.Remaining:F0} s (was {(_dropsBefore.TryGetValue(d.Id, out var r) ? r : -1):F0})")));
             return true;
         }, 25);
+
+        CoopTest.Add("world: a client's spell hits the host's world (COS-213)", () =>
+        {
+            if (_wait < 0) _wait = Time.realtimeSinceStartup;
+            var me = LocalPlayer.Transform.position;
+            if (_deer == null)
+            {
+                // Deer run off: look wide. Any animal will do if the deer is gone.
+                var animals = Spells.WorldDamage.ActorsWithin(me, 200);
+                _deer = animals.FirstOrDefault(a => a.TypeId == VailActorTypeId.Deer) ?? animals.FirstOrDefault();
+                if (_deer == null)
+                {
+                    if (Time.realtimeSinceStartup - _wait < 20) return false;
+                    CoopTest.Check("world: the host's deer is seen on the client", false, $"no animal within 200 m; player alive {LocalPlayer.Vitals?.Health?._currentValue > 0}");
+                    _wait = -1;
+                    return true;
+                }
+                _deerHp = _deer.GetHealth();
+                RLog.Msg($"{CoopTestJoin.Tag} client: world check on {_deer.TypeId} at {Vector3.Distance(me, _deer.transform.position):0} m, hp {_deerHp:0.#}");
+                // The client's own spell damage, through the same call the spells use: it goes to the host as a WorldHit.
+                Spells.WorldDamage.Area(_deer.transform.position + Vector3.up * 0.5f, 2f, new OutgoingHit(1e6, DamageKind.Magic, false, 0));
+                _wait = Time.realtimeSinceStartup;
+                return false;
+            }
+            bool dead = _deer == null || _deer.IsDead() || _deer.GetHealth() <= 0;
+            if (!dead && Time.realtimeSinceStartup - _wait < 15) return false;
+            CoopTest.Check("world: the client's world hit went to the host", Spells.WorldDamage.Forwarded > 0, $"{Spells.WorldDamage.Forwarded} sent");
+            CoopTest.Check("world: a client's spell kills the host's animal", dead, $"hp {_deerHp:0.#} -> {(_deer == null ? 0 : _deer.GetHealth()):0.#}");
+            _wait = -1;
+            return true;
+        }, 40);
 
         CoopTest.Add("spells: casts carry their visuals and a teammate's copy is drawn", () =>
         {

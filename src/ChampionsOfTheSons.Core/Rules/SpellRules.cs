@@ -16,11 +16,14 @@ public static class SpellTuning
     public const double TauntDuration = 8, TauntArmor = 100, TauntRadius = 30;
     public const double PortalMaxRange = 40, PortalReenterLock = 1.5, PortalRadius = 1.5;
     public const double FireboltDamage = 30, FireboltBurnSeconds = 4, FireboltBurnFraction = 0.25, ProjectileSpeed = 40;
+    /// <summary>Firebolt explodes where it ends (COS-213): everything else within the radius takes this share of the bolt's hit.</summary>
+    public const double FireboltExplosionRadius = 3, FireboltExplosionShare = 0.5;
     public const double MagicArrowDamage = 60, MagicArrowRange = 70, MagicArrowSpeed = 70;
     public const double SeekingArrowDamage = 30, SeekingArrowScaling = 1, SeekingArrowSpeed = 30, SeekingArrowRange = 40;
     public const double BlackFlameRadius = 6, BlackFlameDamage = 8, BlackFlameTick = 1;
     public const double BlackHoleTick = 1, BlackHolePullDivisor = 5, BlackHoleCatchSeconds = 2;
-    public const double HealingDomeRadius = 8, HealingDomeHealFraction = 0.05, HealingDomeBuffSeconds = 1;
+    // Heal: 10% of max health per second, so the base 10 s dome fills the player from empty to full (Max, 2026-11-24, COS-213).
+    public const double HealingDomeRadius = 8, HealingDomeHealFraction = 0.1, HealingDomeBuffSeconds = 1;
     public const double SunFlareTick = 1;
     public const double SnapFreezeDamage = 40;
     public const double BallLightningRadius = 7, BallLightningSeconds = 10, BallLightningSpeed = 6, BallLightningTick = 1, BallLightningShare = 0.1;
