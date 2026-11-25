@@ -17,6 +17,8 @@
     <EmbeddedResource Include="..\..\content\**\*.json" LinkBase="content" LogicalName="content/%(RecursiveDir)%(Filename)%(Extension)" />
     <!-- Sound effects (COS-101): Ogg Vorbis built by tools/sounds/build_sounds.py, played through FMOD (SonsSdk SoundTools). -->
     <EmbeddedResource Include="..\..\content\sounds\*.ogg" LogicalName="sounds/%(Filename)%(Extension)" />
+    <!-- Title/loading-screen logo (tools/logo/compose_logo.py). -->
+    <EmbeddedResource Include="..\..\content\logo\*.png" LogicalName="logo/%(Filename)%(Extension)" />
     <!-- HDRP asset bundle built by tools/build-bundles.ps1 (COS-5, docs/asset-bundles.md); optional. -->
     <EmbeddedResource Include="..\..\content\bundles\cots" Condition="Exists('..\..\content\bundles\cots')" LogicalName="bundles/cots" />
   </ItemGroup>
