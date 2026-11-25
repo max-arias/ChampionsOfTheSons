@@ -2,6 +2,7 @@
 #   ./tools/run-selftest.ps1 -Headless       # -batchmode (no window; still uses the GPU) — the normal way
 #   ./tools/run-selftest.ps1                 # windowed 640x360
 #   ./tools/run-selftest.ps1 -Headless -NoGraphics   # -nographics crashes in UnityPlayer.dll after world activation (2026-11-18)
+#   -ExtraArgs --cots-dump-logo              # extra launch options for the game
 #   -NoBuild                                  # run whatever is deployed already
 #   -Only GamepadFeature                      # run just that feature's checks (type name of its IModFeature; comma list, plus "ui" and "bridge"): ~2 min
 #   -Only is required. The full suite (every feature in one run) is disabled (Max, 2026-11-20): it found test-setup
@@ -16,6 +17,7 @@ param(
     [switch]$NoBuild,
     [string[]]$Only = @(),
     [switch]$Full,
+    [string[]]$ExtraArgs = @(),
     [int]$TimeoutSeconds = 1200,
     [string]$GameDir = 'C:\Program Files (x86)\Steam\steamapps\common\Sons Of The Forest'
 )
@@ -43,8 +45,10 @@ try {
     Start-Sleep -Seconds 2
     $started = Get-Date
 
-    $gameArgs = @('--savegame', $SaveId, '--cots-selftest', '-logFile', $unityLog)
+    $gameArgs = @('--cots-selftest', '-logFile', $unityLog)
+    if ($SaveId) { $gameArgs = @('--savegame', $SaveId) + $gameArgs }  # -SaveId '' stays on the title screen until -TimeoutSeconds
     if ($Only) { $gameArgs += "--cots-selftest-only=$Only" }
+    $gameArgs += $ExtraArgs
     if ($Headless) { $gameArgs += @('-batchmode'); if ($NoGraphics) { $gameArgs += @('-nographics') } }
     else { $gameArgs += @('-screen-fullscreen', '0', '-screen-width', '640', '-screen-height', '360') }
 
